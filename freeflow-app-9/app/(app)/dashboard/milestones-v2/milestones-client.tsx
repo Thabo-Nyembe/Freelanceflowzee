@@ -1077,8 +1077,49 @@ export default function MilestonesClient() {
   }, [])
 
   // Export timeline handler
-  const handleExportTimeline = () => {
-    toast.success('Exporting timeline', { description: 'Timeline chart will be downloaded' })
+  const handleExportTimeline = async () => {
+    try {
+      const timelineData = {
+        milestones: hookMilestones.map(m => ({
+          id: m.id,
+          name: m.name,
+          status: m.status,
+          priority: m.priority,
+          progress: m.progress,
+          start_date: m.start_date,
+          due_date: m.due_date,
+          days_remaining: m.days_remaining,
+          budget: m.budget,
+          spent: m.spent,
+          team_name: m.team_name,
+          deliverables: m.deliverables,
+          completed_deliverables: m.completed_deliverables
+        })),
+        dependencies: allDependencies,
+        stats: {
+          total: stats.total,
+          completed: stats.completed,
+          inProgress: stats.inProgress,
+          atRisk: stats.atRisk,
+          onTrack: stats.onTrack,
+          avgProgress: stats.avgProgress,
+          completionRate: stats.completionRate
+        },
+        exportedAt: new Date().toISOString()
+      }
+      const blob = new Blob([JSON.stringify(timelineData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `timeline-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Exporting timeline', { description: 'Timeline data downloaded' })
+    } catch (err) {
+      toast.error('Export failed', { description: err instanceof Error ? err.message : 'Failed to export timeline' })
+    }
   }
 
   // Quick actions for the toolbar (functional, not mock data)

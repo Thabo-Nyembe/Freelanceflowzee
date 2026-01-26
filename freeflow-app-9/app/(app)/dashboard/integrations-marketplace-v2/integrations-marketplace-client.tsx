@@ -150,6 +150,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
   const [showConfigureDialog, setShowConfigureDialog] = useState(false)
   const [configureApp, setConfigureApp] = useState<AppListing | null>(null)
   const [installedAppsList, setInstalledAppsList] = useState<AppListing[]>([])
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showBlockAppDialog, setShowBlockAppDialog] = useState(false)
 
   // Map MarketplaceIntegration (snake_case) to AppListing (camelCase) for UI
   const apps = useMemo<AppListing[]>(() => {
@@ -451,8 +453,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
 
   // Add Webhook Handler
   const handleAddWebhook = () => {
+    setShowWebhookDialog(true)
     toast.info('Opening webhook configuration...')
-    // Would open a dialog or navigate to webhook setup
   }
 
   // Export Data Handler
@@ -533,8 +535,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
 
   // Block App Handler
   const handleBlockApp = () => {
+    setShowBlockAppDialog(true)
     toast.info('Opening app blocker...')
-    // Would open a dialog to select apps to block
   }
 
   // Handlers

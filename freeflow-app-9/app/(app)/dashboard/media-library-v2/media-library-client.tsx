@@ -551,6 +551,7 @@ export default function MediaLibraryClient({
   const [showViewsDialog, setShowViewsDialog] = useState(false)
   const [showDownloadsDialog, setShowDownloadsDialog] = useState(false)
   const [showStorageDialog, setShowStorageDialog] = useState(false)
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
 
   // File upload state
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -1615,9 +1616,8 @@ export default function MediaLibraryClient({
   }
 
   const handleUpgradeStorage = () => {
+    setShowUpgradeDialog(true)
     toast.info('Opening upgrade options...')
-    // In production, this would open a payment/upgrade dialog
-    window.open('/pricing', '_blank')
   }
 
   // Handler for adding a new tag
@@ -4415,6 +4415,63 @@ export default function MediaLibraryClient({
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowStorageDialog(false)}>Close</Button>
               <Button onClick={handleUpgradeStorage}>Upgrade Storage</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upgrade Storage Dialog */}
+        <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Upgrade Storage Plan</DialogTitle>
+              <DialogDescription>Choose a plan that fits your media storage needs</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors cursor-pointer">
+                <h4 className="font-semibold text-lg">Pro Plan</h4>
+                <p className="text-2xl font-bold text-indigo-600">$9.99<span className="text-sm font-normal text-gray-500">/month</span></p>
+                <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> 250 GB Storage</li>
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> 10 GB/month bandwidth</li>
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> Advanced sharing controls</li>
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> Priority support</li>
+                </ul>
+              </div>
+              <div className="p-4 border-2 border-indigo-500 rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
+                <Badge className="bg-indigo-500 text-white mb-2">Recommended</Badge>
+                <h4 className="font-semibold text-lg">Business Plan</h4>
+                <p className="text-2xl font-bold text-indigo-600">$24.99<span className="text-sm font-normal text-gray-500">/month</span></p>
+                <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> 1 TB Storage</li>
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> 50 GB/month bandwidth</li>
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> Team collaboration features</li>
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> Admin controls & analytics</li>
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> 24/7 priority support</li>
+                </ul>
+              </div>
+              <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors cursor-pointer">
+                <h4 className="font-semibold text-lg">Enterprise Plan</h4>
+                <p className="text-2xl font-bold text-indigo-600">Custom<span className="text-sm font-normal text-gray-500"> pricing</span></p>
+                <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> Unlimited Storage</li>
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> Unlimited bandwidth</li>
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> Custom integrations</li>
+                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-indigo-500" /> Dedicated account manager</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUpgradeDialog(false)}>Maybe Later</Button>
+              <Button
+                onClick={() => {
+                  toast.success('Redirecting to checkout...')
+                  setShowUpgradeDialog(false)
+                  window.open('/pricing', '_blank')
+                }}
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+              >
+                Upgrade Now
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

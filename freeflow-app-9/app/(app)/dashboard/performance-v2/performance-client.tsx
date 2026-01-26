@@ -278,6 +278,17 @@ export default function PerformanceClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [showAddBudgetDialog, setShowAddBudgetDialog] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const [showCompareDialog, setShowCompareDialog] = useState(false)
+  const [comparisonResults, setComparisonResults] = useState<Array<{
+    id: string
+    metric: string
+    testA: { value: number; date: string }
+    testB: { value: number; date: string }
+    change: number
+    changePercent: number
+    improved: boolean
+  }>>([])
+  const [selectedTestsForComparison, setSelectedTestsForComparison] = useState<string[]>([])
 
   // Form State for Add Budget Dialog
   const [budgetForm, setBudgetForm] = useState({
@@ -503,8 +514,50 @@ export default function PerformanceClient() {
 
   // Compare test results
   const handleCompareResults = () => {
-    toast.info('Comparison feature requires test data')
-    setActiveTab('history')
+    if (!performanceMetrics || performanceMetrics.length < 2) {
+      toast.info('Comparison feature requires test data', {
+        description: 'Run at least 2 tests to compare results'
+      })
+      return
+    }
+
+    // Generate comparison results from the two most recent metrics
+    const [testA, testB] = performanceMetrics.slice(0, 2)
+
+    const comparisons = [
+      {
+        id: 'efficiency',
+        metric: 'Efficiency Score',
+        testA: { value: testA.efficiency_score || 0, date: testA.created_at || new Date().toISOString() },
+        testB: { value: testB.efficiency_score || 0, date: testB.created_at || new Date().toISOString() },
+        change: (testA.efficiency_score || 0) - (testB.efficiency_score || 0),
+        changePercent: testB.efficiency_score ? (((testA.efficiency_score || 0) - testB.efficiency_score) / testB.efficiency_score) * 100 : 0,
+        improved: (testA.efficiency_score || 0) >= (testB.efficiency_score || 0)
+      },
+      {
+        id: 'productivity',
+        metric: 'Productivity Score',
+        testA: { value: testA.productivity_score || 0, date: testA.created_at || new Date().toISOString() },
+        testB: { value: testB.productivity_score || 0, date: testB.created_at || new Date().toISOString() },
+        change: (testA.productivity_score || 0) - (testB.productivity_score || 0),
+        changePercent: testB.productivity_score ? (((testA.productivity_score || 0) - testB.productivity_score) / testB.productivity_score) * 100 : 0,
+        improved: (testA.productivity_score || 0) >= (testB.productivity_score || 0)
+      },
+      {
+        id: 'quality',
+        metric: 'Quality Score',
+        testA: { value: testA.quality_score || 0, date: testA.created_at || new Date().toISOString() },
+        testB: { value: testB.quality_score || 0, date: testB.created_at || new Date().toISOString() },
+        change: (testA.quality_score || 0) - (testB.quality_score || 0),
+        changePercent: testB.quality_score ? (((testA.quality_score || 0) - testB.quality_score) / testB.quality_score) * 100 : 0,
+        improved: (testA.quality_score || 0) >= (testB.quality_score || 0)
+      }
+    ]
+
+    setComparisonResults(comparisons)
+    setSelectedTestsForComparison([testA.id, testB.id])
+    setShowCompareDialog(true)
+    toast.success('Opening comparison view')
   }
 
   // Add performance budget
@@ -2036,6 +2089,99 @@ export default function PerformanceClient() {
                 Add Budget
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Compare Results Dialog */}
+      <Dialog open={showCompareDialog} onOpenChange={setShowCompareDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              Compare Test Results
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {comparisonResults.length > 0 ? (
+              <>
+                <p className="text-sm text-gray-500">
+                  Comparing the two most recent performance tests
+                </p>
+                <div className="space-y-3">
+                  {comparisonResults.map((result) => (
+                    <div
+                      key={result.id}
+                      className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">{result.metric}</span>
+                        <Badge
+                          variant={result.improved ? 'default' : 'destructive'}
+                          className={result.improved ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' : ''}
+                        >
+                          {result.improved ? (
+                            <TrendingUp className="h-3 w-3 mr-1" />
+                          ) : (
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                          )}
+                          {result.changePercent >= 0 ? '+' : ''}{result.changePercent.toFixed(1)}%
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500 dark:text-gray-400">Latest Test</p>
+                          <p className="font-semibold text-lg">{result.testA.value.toFixed(1)}</p>
+                          <p className="text-xs text-gray-400">
+                            {new Date(result.testA.date).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 dark:text-gray-400">Previous Test</p>
+                          <p className="font-semibold text-lg">{result.testB.value.toFixed(1)}</p>
+                          <p className="text-xs text-gray-400">
+                            {new Date(result.testB.date).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-2">
+                        <Progress
+                          value={Math.min(100, Math.max(0, result.testA.value))}
+                          className="h-2"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCompareDialog(false)}
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setActiveTab('history')
+                      setShowCompareDialog(false)
+                      toast.success('Viewing full history')
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    View Full History
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <BarChart3 className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-500">No comparison data available</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Run at least 2 tests to compare results
+                </p>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
