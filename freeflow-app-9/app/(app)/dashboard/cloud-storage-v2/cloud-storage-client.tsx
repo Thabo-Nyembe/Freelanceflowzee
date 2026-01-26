@@ -950,15 +950,14 @@ export default function CloudStorageClient() {
     if (!confirm(`Cancel the transfer for "${fileName}"?`)) return
 
     try {
-      // Call API to cancel the transfer
-      const response = await fetch('/api/cloud-storage/transfers/cancel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileName })
-      })
+      // Find and update the file's processing status to mark transfer as cancelled
+      const dbFile = dbFiles?.find(f => f.file_name === fileName || f.original_name === fileName)
 
-      if (!response.ok) {
-        throw new Error('Failed to cancel transfer')
+      if (dbFile) {
+        await updateFile(dbFile.id, {
+          processing_status: 'cancelled',
+          processing_error: 'Transfer cancelled by user'
+        })
       }
 
       toast.success('Transfer Cancelled', { description: `Cancelled transfer for "${fileName}"` })
@@ -981,19 +980,26 @@ export default function CloudStorageClient() {
     try {
       toast.loading('Restoring all files...')
 
-      // Call API to restore all deleted files
-      const response = await fetch('/api/cloud-storage/trash/restore-all', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      toast.dismiss()
-
-      if (!response.ok) {
-        throw new Error('Failed to restore files')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.dismiss()
+        toast.error('Authentication Required', { description: 'Please sign in' })
+        return
       }
 
-      toast.success('Files Restored', { description: 'All deleted files have been restored to their original locations' })
+      // Find all deleted files and restore them by updating their status
+      const deletedFiles = dbFiles?.filter(f => f.status === 'deleted') || []
+
+      for (const file of deletedFiles) {
+        await updateFile(file.id, {
+          status: 'active',
+          is_deleted: false,
+          deleted_at: null
+        })
+      }
+
+      toast.dismiss()
+      toast.success('Files Restored', { description: `Restored ${deletedFiles.length} file(s) from trash` })
       refetch()
     } catch (error) {
       toast.dismiss()
@@ -1007,19 +1013,30 @@ export default function CloudStorageClient() {
     try {
       toast.loading('Emptying trash...')
 
-      // Call API to permanently delete all trash files
-      const response = await fetch('/api/cloud-storage/trash/empty', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      toast.dismiss()
-
-      if (!response.ok) {
-        throw new Error('Failed to empty trash')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.dismiss()
+        toast.error('Authentication Required', { description: 'Please sign in' })
+        return
       }
 
-      toast.success('Trash Emptied', { description: 'All files in trash have been permanently deleted' })
+      // Find all deleted files and permanently delete them
+      const deletedFiles = dbFiles?.filter(f => f.status === 'deleted') || []
+
+      for (const file of deletedFiles) {
+        // Delete from storage first if not a folder
+        if (!file.file_type?.includes('folder') && file.file_path) {
+          await supabase.storage
+            .from('cloud-storage')
+            .remove([file.file_path])
+        }
+
+        // Then delete from database
+        await deleteFile(file.id)
+      }
+
+      toast.dismiss()
+      toast.success('Trash Emptied', { description: `Permanently deleted ${deletedFiles.length} file(s)` })
       refetch()
     } catch (error) {
       toast.dismiss()
@@ -1061,24 +1078,42 @@ export default function CloudStorageClient() {
     try {
       toast.loading(syncPaused ? 'Resuming sync...' : 'Pausing sync...')
 
-      // Call API to toggle sync status
-      const response = await fetch('/api/cloud-storage/sync/toggle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paused: !syncPaused })
-      })
-
-      toast.dismiss()
-
-      if (!response.ok) {
-        throw new Error('Failed to toggle sync')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.dismiss()
+        toast.error('Authentication Required', { description: 'Please sign in' })
+        return
       }
 
-      setSyncPaused(!syncPaused)
+      // Store sync preference in local storage (could be saved to user preferences table later)
+      const newSyncState = !syncPaused
+      localStorage.setItem('cloud-storage-sync-paused', JSON.stringify(newSyncState))
+
+      // Update all in-progress files to paused status if pausing
+      if (newSyncState) {
+        const syncingFiles = dbFiles?.filter(f => f.processing_status === 'processing') || []
+        for (const file of syncingFiles) {
+          await updateFile(file.id, {
+            processing_status: 'paused'
+          })
+        }
+      } else {
+        // Resume paused files
+        const pausedFiles = dbFiles?.filter(f => f.processing_status === 'paused') || []
+        for (const file of pausedFiles) {
+          await updateFile(file.id, {
+            processing_status: 'processing'
+          })
+        }
+      }
+
+      toast.dismiss()
+      setSyncPaused(newSyncState)
       toast.success(
-        syncPaused ? 'Sync Resumed' : 'Sync Paused',
-        { description: syncPaused ? 'File synchronization has been resumed' : 'File synchronization has been paused' }
+        newSyncState ? 'Sync Paused' : 'Sync Resumed',
+        { description: newSyncState ? 'File synchronization has been paused' : 'File synchronization has been resumed' }
       )
+      refetch()
     } catch (error) {
       toast.dismiss()
       toast.error('Sync Toggle Failed', { description: 'Could not update sync status' })
@@ -1117,18 +1152,31 @@ export default function CloudStorageClient() {
     try {
       toast.loading('Deleting all files...')
 
-      const response = await fetch('/api/cloud-storage/files/delete-all', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      toast.dismiss()
-
-      if (!response.ok) {
-        throw new Error('Failed to delete files')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.dismiss()
+        toast.error('Authentication Required', { description: 'Please sign in' })
+        return
       }
 
-      toast.success('All Files Deleted', { description: 'All files have been permanently deleted' })
+      // Get all active files
+      const activeFiles = dbFiles?.filter(f => f.status === 'active') || []
+
+      // Delete from storage and database
+      for (const file of activeFiles) {
+        // Delete from storage first if not a folder
+        if (!file.file_type?.includes('folder') && file.file_path) {
+          await supabase.storage
+            .from('cloud-storage')
+            .remove([file.file_path])
+        }
+
+        // Then delete from database
+        await deleteFile(file.id)
+      }
+
+      toast.dismiss()
+      toast.success('All Files Deleted', { description: `Permanently deleted ${activeFiles.length} file(s)` })
       refetch()
     } catch (error) {
       toast.dismiss()
@@ -1145,24 +1193,30 @@ export default function CloudStorageClient() {
     try {
       toast.loading('Posting comment...')
 
-      // Call API to save the comment
-      const response = await fetch('/api/cloud-storage/comments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileId: selectedFile.id,
-          content: commentText
-        })
-      })
-
-      toast.dismiss()
-
-      if (!response.ok) {
-        throw new Error('Failed to post comment')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.dismiss()
+        toast.error('Authentication Required', { description: 'Please sign in' })
+        return
       }
 
+      // Find the database file
+      const dbFile = dbFiles?.find(f => f.file_name === selectedFile.name || f.original_name === selectedFile.name)
+
+      if (dbFile) {
+        // Save comment to file_activities table
+        await supabase.from('file_activities').insert({
+          file_id: dbFile.id,
+          user_id: user.id,
+          activity: 'comment',
+          description: commentText
+        })
+      }
+
+      toast.dismiss()
       setCommentText('')
       toast.success('Comment Posted', { description: 'Your comment has been added' })
+      refetch()
     } catch (error) {
       toast.dismiss()
       toast.error('Comment Failed', { description: 'Could not post comment. Please try again.' })

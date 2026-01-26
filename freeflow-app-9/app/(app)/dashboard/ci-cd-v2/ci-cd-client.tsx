@@ -653,23 +653,79 @@ export default function CiCdClient() {
     })
   }, [workflows, searchQuery, statusFilter])
 
-  // Mock workflow handlers (for demo workflows)
-  const handleTriggerWorkflow = (workflow: Workflow) => {
-    toast.info('Workflow triggered', {
-      description: `Starting ${workflow.name}...`
-    })
+  // Workflow handlers - wired to Supabase
+  const handleTriggerWorkflow = async (workflow: Workflow) => {
+    try {
+      const pipeline = pipelines.find(p => p.id === workflow.id)
+      if (!pipeline) {
+        toast.error('Pipeline not found')
+        return
+      }
+
+      await updatePipeline({
+        id: workflow.id,
+        is_running: true,
+        last_run_at: new Date().toISOString(),
+        run_count: (pipeline.run_count || 0) + 1,
+        last_status: 'running',
+      })
+
+      toast.success('Workflow Triggered', {
+        description: `Starting ${workflow.name}...`
+      })
+    } catch (err) {
+      console.error('Error triggering workflow:', err)
+      toast.error('Failed to trigger workflow')
+    }
   }
 
-  const handleCancelRun = (run: WorkflowRun) => {
-    toast.success('Run cancelled', {
-      description: `Workflow run #${run.runNumber} cancelled`
-    })
+  const handleCancelRun = async (run: WorkflowRun) => {
+    try {
+      const pipeline = pipelines.find(p => p.id === run.workflowId)
+      if (!pipeline) {
+        toast.error('Pipeline not found')
+        return
+      }
+
+      await updatePipeline({
+        id: run.workflowId,
+        is_running: false,
+        last_status: 'cancelled',
+      })
+
+      toast.success('Run Cancelled', {
+        description: `Workflow run #${run.runNumber} cancelled`
+      })
+    } catch (err) {
+      console.error('Error cancelling run:', err)
+      toast.error('Failed to cancel run')
+    }
   }
 
-  const handleRerunWorkflow = (run: WorkflowRun) => {
-    toast.info('Rerunning workflow', {
-      description: `Restarting run #${run.runNumber}`
-    })
+  const handleRerunWorkflow = async (run: WorkflowRun) => {
+    try {
+      const pipeline = pipelines.find(p => p.id === run.workflowId)
+      if (!pipeline) {
+        toast.error('Pipeline not found')
+        return
+      }
+
+      await updatePipeline({
+        id: run.workflowId,
+        is_running: true,
+        last_run_at: new Date().toISOString(),
+        run_count: (pipeline.run_count || 0) + 1,
+        last_status: 'running',
+        last_build_number: (pipeline.last_build_number || 0) + 1,
+      })
+
+      toast.success('Workflow Rerunning', {
+        description: `Restarting run #${run.runNumber}`
+      })
+    } catch (err) {
+      console.error('Error rerunning workflow:', err)
+      toast.error('Failed to rerun workflow')
+    }
   }
 
   // Quick actions for the QuickActionsToolbar component

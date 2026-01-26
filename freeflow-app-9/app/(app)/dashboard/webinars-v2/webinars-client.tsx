@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 
 // Supabase webinars hooks for real data
 import { useWebinars as useSupabaseWebinars, type Webinar as DbWebinar, type WebinarStatus as DbWebinarStatus } from '@/lib/hooks/use-webinars'
@@ -665,11 +666,23 @@ export default function WebinarsClient() {
       return
     }
     try {
-      // API call would go here
+      const supabase = createClient()
+      // Clear the recording URL from the webinar
+      const { error } = await supabase
+        .from('webinars')
+        .update({
+          recording_url: null,
+          recording_duration: null
+        })
+        .eq('id', recording.webinarId)
+
+      if (error) throw error
+
       setRecordings(prev => prev.filter(r => r.id !== recording.id))
       toast.success('Recording deleted successfully')
-    } catch {
+    } catch (error) {
       toast.error('Failed to delete recording')
+      console.error(error)
     }
   }
 
@@ -698,12 +711,21 @@ export default function WebinarsClient() {
 
   const approveRegistration = async (registration: Registration) => {
     try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('event_registrations')
+        .update({ status: 'confirmed' })
+        .eq('id', registration.id)
+
+      if (error) throw error
+
       setRegistrations(prev => prev.map(r =>
         r.id === registration.id ? { ...r, status: 'approved' as RegistrationStatus } : r
       ))
       toast.success(`${registration.name} has been approved`)
-    } catch {
+    } catch (error) {
       toast.error('Failed to approve registration')
+      console.error(error)
     }
   }
 
@@ -712,12 +734,21 @@ export default function WebinarsClient() {
       return
     }
     try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('event_registrations')
+        .update({ status: 'cancelled' })
+        .eq('id', registration.id)
+
+      if (error) throw error
+
       setRegistrations(prev => prev.map(r =>
         r.id === registration.id ? { ...r, status: 'declined' as RegistrationStatus } : r
       ))
       toast.success(`${registration.name}'s registration has been declined`)
-    } catch {
+    } catch (error) {
       toast.error('Failed to decline registration')
+      console.error(error)
     }
   }
 
@@ -775,23 +806,34 @@ export default function WebinarsClient() {
       return
     }
     try {
+      await deleteDbWebinar({ id: webinar.id })
       setWebinars(prev => prev.filter(w => w.id !== webinar.id))
       toast.success('Webinar deleted successfully')
-    } catch {
+    } catch (error) {
       toast.error('Failed to delete webinar')
+      console.error(error)
     }
   }
 
-  const duplicateWebinar = (webinar: Webinar) => {
-    const newWebinar: Webinar = {
-      ...webinar,
-      id: `w${Date.now()}`,
-      title: `${webinar.title} (Copy)`,
-      status: 'draft',
-      createdAt: new Date().toISOString().split('T')[0]
+  const duplicateWebinar = async (webinar: Webinar) => {
+    try {
+      await createDbWebinar({
+        title: `${webinar.title} (Copy)`,
+        description: webinar.description,
+        topic: 'other',
+        status: 'scheduled',
+        scheduled_date: new Date(Date.now() + 86400000).toISOString(),
+        duration_minutes: webinar.duration,
+        timezone: webinar.timezone,
+        max_participants: webinar.maxParticipants,
+        host_name: webinar.host?.name || 'Host',
+      })
+      toast.success('Webinar duplicated successfully!')
+      refetchWebinars()
+    } catch (error) {
+      toast.error('Failed to duplicate webinar')
+      console.error(error)
     }
-    setWebinars(prev => [...prev, newWebinar])
-    toast.success('Webinar duplicated successfully!')
   }
 
   const openEditWebinar = (webinar: Webinar) => {
@@ -799,21 +841,37 @@ export default function WebinarsClient() {
     setShowEditDialog(true)
   }
 
-  const saveWebinarEdits = () => {
+  const saveWebinarEdits = async () => {
     if (!editingWebinar) return
 
-    setWebinars(prev => prev.map(w =>
-      w.id === editingWebinar.id ? editingWebinar : w
-    ))
+    try {
+      await updateDbWebinar({
+        id: editingWebinar.id,
+        title: editingWebinar.title,
+        description: editingWebinar.description,
+        scheduled_date: editingWebinar.scheduledDate,
+        duration_minutes: editingWebinar.duration,
+        timezone: editingWebinar.timezone,
+        max_participants: editingWebinar.maxParticipants,
+        status: editingWebinar.status as DbWebinarStatus
+      })
 
-    // Update selectedWebinar if it's the same webinar being edited
-    if (selectedWebinar?.id === editingWebinar.id) {
-      setSelectedWebinar(editingWebinar)
+      setWebinars(prev => prev.map(w =>
+        w.id === editingWebinar.id ? editingWebinar : w
+      ))
+
+      // Update selectedWebinar if it's the same webinar being edited
+      if (selectedWebinar?.id === editingWebinar.id) {
+        setSelectedWebinar(editingWebinar)
+      }
+
+      setShowEditDialog(false)
+      setEditingWebinar(null)
+      toast.success('Webinar updated successfully')
+    } catch (error) {
+      toast.error('Failed to update webinar')
+      console.error(error)
     }
-
-    setShowEditDialog(false)
-    setEditingWebinar(null)
-    toast.success('Webinar updated successfully')
   }
 
   // Quick actions for the toolbar
@@ -864,28 +922,46 @@ export default function WebinarsClient() {
     toast.success('Opening webinar setup wizard...')
   }
 
-  const handleStartWebinar = (webinar: Webinar) => {
+  const handleStartWebinar = async (webinar: Webinar) => {
     // Open the webinar link in a new tab
     if (webinar.joinUrl) {
       window.open(webinar.joinUrl, '_blank', 'noopener,noreferrer')
-      // Update webinar status to live
-      setWebinars(prev => prev.map(w =>
-        w.id === webinar.id ? { ...w, status: 'live' as WebinarStatus } : w
-      ))
-      toast.success(`"${webinar.title}" is now live!`)
+      // Update webinar status to live in database
+      try {
+        await updateDbWebinar({
+          id: webinar.id,
+          status: 'live' as DbWebinarStatus
+        })
+        setWebinars(prev => prev.map(w =>
+          w.id === webinar.id ? { ...w, status: 'live' as WebinarStatus } : w
+        ))
+        toast.success(`"${webinar.title}" is now live!`)
+      } catch (error) {
+        toast.error('Failed to start webinar')
+        console.error(error)
+      }
     } else {
       toast.error('No webinar link available')
     }
   }
 
-  const handleEndWebinar = (webinar: Webinar) => {
+  const handleEndWebinar = async (webinar: Webinar) => {
     if (!confirm(`Are you sure you want to end "${webinar.title}"?`)) {
       return
     }
-    setWebinars(prev => prev.map(w =>
-      w.id === webinar.id ? { ...w, status: 'ended' as WebinarStatus } : w
-    ))
-    toast.success(`"${webinar.title}" has ended. Recording will be processed.`)
+    try {
+      await updateDbWebinar({
+        id: webinar.id,
+        status: 'ended' as DbWebinarStatus
+      })
+      setWebinars(prev => prev.map(w =>
+        w.id === webinar.id ? { ...w, status: 'ended' as WebinarStatus } : w
+      ))
+      toast.success(`"${webinar.title}" has ended. Recording will be processed.`)
+    } catch (error) {
+      toast.error('Failed to end webinar')
+      console.error(error)
+    }
   }
 
   const handleRegister = () => {

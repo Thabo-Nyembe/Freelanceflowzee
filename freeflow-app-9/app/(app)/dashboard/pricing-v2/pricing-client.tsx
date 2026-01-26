@@ -3,6 +3,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -352,6 +353,7 @@ export default function PricingClient({
   // Fetch plans from Supabase
   const fetchPlans = useCallback(async () => {
     try {
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -370,6 +372,7 @@ export default function PricingClient({
   // Fetch coupons from Supabase
   const fetchCoupons = useCallback(async () => {
     try {
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -443,6 +446,7 @@ export default function PricingClient({
     }
     setIsSubmitting(true)
     try {
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create plans')
@@ -478,6 +482,7 @@ export default function PricingClient({
   const handleUpdatePlan = async (planId: string) => {
     setIsSubmitting(true)
     try {
+      const supabase = createClient()
       const { error } = await supabase
         .from('pricing_plans')
         .update({
@@ -507,6 +512,7 @@ export default function PricingClient({
   // CRUD: Delete/Archive Plan
   const handleArchivePlan = async (planId: string, planName: string) => {
     try {
+      const supabase = createClient()
       const { error } = await supabase
         .from('pricing_plans')
         .update({ is_active: false, updated_at: new Date().toISOString() })
@@ -529,6 +535,7 @@ export default function PricingClient({
     }
     setIsSubmitting(true)
     try {
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create coupons')
@@ -564,6 +571,7 @@ export default function PricingClient({
   // CRUD: Toggle Coupon Active Status
   const handleToggleCoupon = async (couponId: string, isActive: boolean) => {
     try {
+      const supabase = createClient()
       const { error } = await supabase
         .from('booking_coupons')
         .update({ is_active: !isActive })
@@ -581,6 +589,7 @@ export default function PricingClient({
   // CRUD: Delete Coupon
   const handleDeleteCoupon = async (couponId: string) => {
     try {
+      const supabase = createClient()
       const { error } = await supabase
         .from('booking_coupons')
         .delete()
@@ -598,6 +607,7 @@ export default function PricingClient({
   // Export pricing data
   const handleExportPricing = async () => {
     try {
+      const supabase = createClient()
       const { data: plans } = await supabase.from('pricing_plans').select('*')
       const exportData = { plans: plans || dbPlans, exportedAt: new Date().toISOString() }
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
@@ -739,18 +749,40 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
     if (!confirm('Are you sure you want to regenerate your API key? This will invalidate the existing key.')) {
       return
     }
+    setIsSubmitting(true)
     try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to regenerate API key')
+        return
+      }
+
       // Generate a new random API key
       const newKey = 'sk_live_' + Array.from(crypto.getRandomValues(new Uint8Array(24)))
         .map(b => b.toString(16).padStart(2, '0'))
         .join('')
 
-      // In production, this would be saved to the backend
+      // Save to user_settings table
+      const { error } = await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: user.id,
+          api_key: newKey,
+          api_key_generated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id'
+        })
+
+      if (error) throw error
+
       await navigator.clipboard.writeText(newKey)
       toast.success('API key regenerated and copied to clipboard')
     } catch (error) {
       console.error('Error regenerating API key:', error)
       toast.error('Failed to regenerate API key')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -762,12 +794,33 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
     if (!confirm('Please confirm again - cancel ALL subscriptions?')) {
       return
     }
+    setIsSubmitting(true)
     try {
-      // In production, this would call the API
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to cancel subscriptions')
+        return
+      }
+
+      // Update all active subscriptions to cancelled status
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({
+          status: 'canceled',
+          cancel_at_period_end: true,
+          cancelled_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+
+      if (error) throw error
       toast.success('All subscriptions have been scheduled for cancellation')
     } catch (error) {
       console.error('Error cancelling subscriptions:', error)
       toast.error('Failed to cancel subscriptions')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -776,12 +829,36 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
     if (!confirm('This will reset all billing settings to defaults. Continue?')) {
       return
     }
+    setIsSubmitting(true)
     try {
-      // In production, this would call the API
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to reset billing configuration')
+        return
+      }
+
+      // Reset billing settings in user_settings table
+      const { error } = await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: user.id,
+          billing_email: user.email,
+          billing_currency: 'USD',
+          billing_interval: 'monthly',
+          auto_renew: true,
+          email_notifications: true,
+        }, {
+          onConflict: 'user_id'
+        })
+
+      if (error) throw error
       toast.success('Billing configuration has been reset to defaults')
     } catch (error) {
       console.error('Error resetting config:', error)
       toast.error('Failed to reset configuration')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -790,12 +867,34 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
     if (!confirm('WARNING: Disconnecting Stripe will disable all payment processing. Are you sure?')) {
       return
     }
+    setIsSubmitting(true)
     try {
-      // In production, this would call the API
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to disconnect Stripe')
+        return
+      }
+
+      // Remove Stripe integration from user_settings
+      const { error } = await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: user.id,
+          stripe_connected: false,
+          stripe_account_id: null,
+          stripe_disconnected_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id'
+        })
+
+      if (error) throw error
       toast.success('Stripe has been disconnected. Payment processing is now disabled.')
     } catch (error) {
       console.error('Error disconnecting Stripe:', error)
       toast.error('Failed to disconnect Stripe')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -804,19 +903,36 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
     if (!confirm(`Are you sure you want to cancel the subscription for ${subscription.customerName}?`)) {
       return
     }
+    setIsSubmitting(true)
     try {
-      // In production, this would call the API
+      const supabase = createClient()
+
+      // Update subscription status
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({
+          status: 'canceled',
+          cancel_at_period_end: true,
+          cancelled_at: new Date().toISOString(),
+          cancel_reason: 'Cancelled by admin',
+        })
+        .eq('id', subscription.id)
+
+      if (error) throw error
       toast.success(`Subscription for ${subscription.customerName} has been cancelled`)
       setSelectedSubscription(null)
     } catch (error) {
       console.error('Error cancelling subscription:', error)
       toast.error('Failed to cancel subscription')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   // Duplicate plan
   const handleDuplicatePlan = async (plan: PricingPlan) => {
     try {
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to duplicate plans')
@@ -849,10 +965,54 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'image/*'
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
-      if (file) {
-        toast.success(`Logo "${file.name}" selected. Upload functionality would save this to storage.`)
+      if (!file) return
+
+      setIsSubmitting(true)
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          toast.error('Please sign in to upload logo')
+          return
+        }
+
+        // Upload to Supabase Storage
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${user.id}/billing-logo-${Date.now()}.${fileExt}`
+        const { error: uploadError, data } = await supabase.storage
+          .from('assets')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: true
+          })
+
+        if (uploadError) throw uploadError
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('assets')
+          .getPublicUrl(fileName)
+
+        // Save logo URL to user settings
+        const { error: settingsError } = await supabase
+          .from('user_settings')
+          .upsert({
+            user_id: user.id,
+            billing_logo_url: publicUrl,
+          }, {
+            onConflict: 'user_id'
+          })
+
+        if (settingsError) throw settingsError
+
+        toast.success(`Logo "${file.name}" uploaded successfully`)
+      } catch (error) {
+        console.error('Error uploading logo:', error)
+        toast.error('Failed to upload logo')
+      } finally {
+        setIsSubmitting(false)
       }
     }
     input.click()

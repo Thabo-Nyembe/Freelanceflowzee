@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { useSecurityAudits, type SecurityAudit as DBSecurityAudit } from '@/lib/hooks/use-security-audits'
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
@@ -359,8 +360,35 @@ export default function SecurityAuditClient() {
     setIsScanning(true)
     toast.info('Scan started')
     try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Create a security audit in the database
+      const { data: audit, error: auditError } = await supabase
+        .from('security_audits')
+        .insert({
+          user_id: user.id,
+          name: 'Automated Security Scan',
+          audit_code: `SCAN-${Date.now()}`,
+          audit_type: 'vulnerability-scan',
+          status: 'in-progress',
+          severity: 'medium',
+          compliance_standards: ['SOC2', 'ISO27001'],
+          started_at: new Date().toISOString(),
+          tags: ['automated', 'security-scan']
+        })
+        .select()
+        .single()
+
+      if (auditError) throw auditError
+
       // Simulate scan or call actual API
       await new Promise(resolve => setTimeout(resolve, 2000))
+
       // Update scan results state
       const newScanResults = {
         timestamp: new Date().toISOString(),
@@ -369,7 +397,38 @@ export default function SecurityAuditClient() {
         status: 'complete' as const
       }
       setScanResults(newScanResults)
+
+      // Update audit status to completed
+      if (audit) {
+        await supabase
+          .from('security_audits')
+          .update({
+            status: 'passed',
+            completed_at: new Date().toISOString(),
+            security_score: newScanResults.score,
+            findings_critical: 0,
+            findings_high: 0,
+            findings_medium: 0,
+            findings_low: 0
+          })
+          .eq('id', audit.id)
+      }
+
       // Log the scan action
+      await supabase
+        .from('security_audit_logs')
+        .insert({
+          user_id: user.id,
+          event_type: 'scan_completed',
+          event_description: `Security scan completed with score: ${newScanResults.score}`,
+          additional_data: {
+            audit_id: audit?.id,
+            score: newScanResults.score,
+            timestamp: newScanResults.timestamp
+          }
+        })
+
+      // Update local audit log state
       setAuditLog(prev => [...prev, {
         id: crypto.randomUUID(),
         action: 'Security Scan Completed',
@@ -377,16 +436,52 @@ export default function SecurityAuditClient() {
         user: 'System',
         details: `Scan completed with score: ${newScanResults.score}`
       }])
+
       toast.success('Scan completed')
+      await refetch()
     } catch (err) {
+      console.error('Scan failed:', err)
       toast.error('Scan failed')
     } finally {
       setIsScanning(false)
     }
   }
 
-  const handleResolveVulnerability = (vuln: Vulnerability) => {
-    toast.success(`Marked as resolved: "${vuln.title}" has been marked as resolved`)
+  const handleResolveVulnerability = async (vuln: Vulnerability) => {
+    try {
+      // Find if this vulnerability exists in our database
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Log the resolution in security audit logs
+      const { error } = await supabase
+        .from('security_audit_logs')
+        .insert({
+          user_id: user.id,
+          event_type: 'vulnerability_resolved',
+          event_description: `Vulnerability resolved: ${vuln.title}`,
+          ip_address: null,
+          user_agent: null,
+          additional_data: {
+            vulnerability_id: vuln.id,
+            cve_id: vuln.cveId,
+            severity: vuln.severity,
+            cvss_score: vuln.cvssScore
+          }
+        })
+
+      if (error) throw error
+
+      toast.success(`Marked as resolved: "${vuln.title}" has been marked as resolved`)
+      await refetch()
+    } catch (error) {
+      console.error('Failed to resolve vulnerability:', error)
+      toast.error('Failed to mark vulnerability as resolved')
+    }
   }
 
   const handleExportAudit = async () => {
@@ -423,8 +518,55 @@ export default function SecurityAuditClient() {
     }
   }
 
-  const handleCreateTicket = (vuln: Vulnerability) => {
-    toast.success(`Ticket created for "${vuln.title}"`)
+  const handleCreateTicket = async (vuln: Vulnerability) => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Create a ticket/task in the database
+      const { error } = await supabase
+        .from('tasks')
+        .insert({
+          user_id: user.id,
+          title: `[SECURITY] ${vuln.title}`,
+          description: `${vuln.description}\n\nRemediation: ${vuln.remediation}\n\nCVE: ${vuln.cveId}\nCVSS Score: ${vuln.cvssScore}\nAffected Asset: ${vuln.affectedAsset}`,
+          status: 'todo',
+          priority: vuln.severity === 'critical' ? 'urgent' : vuln.severity === 'high' ? 'high' : vuln.severity === 'medium' ? 'medium' : 'low',
+          category: 'security',
+          tags: ['security-vulnerability', vuln.severity, vuln.category].filter(Boolean),
+          metadata: {
+            vulnerability_id: vuln.id,
+            cve_id: vuln.cveId,
+            cvss_score: vuln.cvssScore,
+            affected_asset: vuln.affectedAsset
+          }
+        })
+
+      if (error) throw error
+
+      // Log the ticket creation
+      await supabase
+        .from('security_audit_logs')
+        .insert({
+          user_id: user.id,
+          event_type: 'ticket_created',
+          event_description: `Ticket created for vulnerability: ${vuln.title}`,
+          additional_data: {
+            vulnerability_id: vuln.id,
+            cve_id: vuln.cveId,
+            severity: vuln.severity
+          }
+        })
+
+      toast.success(`Ticket created for "${vuln.title}"`)
+    } catch (error) {
+      console.error('Failed to create ticket:', error)
+      toast.error('Failed to create ticket')
+    }
   }
 
   // Loading state

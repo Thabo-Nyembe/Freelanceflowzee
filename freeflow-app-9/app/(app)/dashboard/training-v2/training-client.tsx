@@ -879,13 +879,42 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     setShowLearningPathDialog(true)
   }, [])
 
-  const handleConfirmStartPath = useCallback(() => {
-    if (selectedLearningPath) {
+  const handleConfirmStartPath = useCallback(async () => {
+    if (!selectedLearningPath) return
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Record learning path enrollment in activity log
+      const { error } = await supabase
+        .from('activity_log')
+        .insert({
+          user_id: user.id,
+          action: 'learning_path_started',
+          entity_type: 'learning_path',
+          entity_name: selectedLearningPath.name,
+          metadata: {
+            path_id: selectedLearningPath.id,
+            courses_count: selectedLearningPath.courses.length,
+            estimated_duration: selectedLearningPath.duration
+          },
+          created_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+
       toast.success(`Learning Path Started`)
       setShowLearningPathDialog(false)
       setSelectedLearningPath(null)
+    } catch (error) {
+      toast.error('Failed to start learning path')
+      console.error(error)
     }
-  }, [selectedLearningPath])
+  }, [selectedLearningPath, supabase])
 
   // Handler for View Requirements
   const handleViewRequirements = useCallback((cert: Certification) => {
@@ -898,10 +927,33 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     setShowConfigureChannelDialog(true)
   }, [])
 
-  const handleSaveChannelConfig = useCallback(() => {
-    toast.success('Channel Configured')
-    setShowConfigureChannelDialog(false)
-  }, [])
+  const handleSaveChannelConfig = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Save channel configuration to user preferences
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user.id,
+          preference_key: 'training_channel_config',
+          preference_value: { configured: true, timestamp: new Date().toISOString() },
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,preference_key' })
+
+      if (error) throw error
+
+      toast.success('Channel Configured')
+      setShowConfigureChannelDialog(false)
+    } catch (error) {
+      toast.error('Failed to save configuration')
+      console.error(error)
+    }
+  }, [supabase])
 
   // Handler for Configure Integration
   const handleConfigureIntegration = useCallback((integrationName: string) => {
@@ -909,11 +961,40 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     setShowConfigureIntegrationDialog(true)
   }, [])
 
-  const handleSaveIntegrationConfig = useCallback(() => {
-    toast.success(`Integration Updated settings have been saved`)
-    setShowConfigureIntegrationDialog(false)
-    setSelectedIntegration(null)
-  }, [selectedIntegration])
+  const handleSaveIntegrationConfig = useCallback(async () => {
+    if (!selectedIntegration) return
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Save integration configuration
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user.id,
+          preference_key: `training_integration_${selectedIntegration.toLowerCase()}`,
+          preference_value: {
+            integration: selectedIntegration,
+            configured: true,
+            timestamp: new Date().toISOString()
+          },
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,preference_key' })
+
+      if (error) throw error
+
+      toast.success(`Integration Updated settings have been saved`)
+      setShowConfigureIntegrationDialog(false)
+      setSelectedIntegration(null)
+    } catch (error) {
+      toast.error('Failed to save integration config')
+      console.error(error)
+    }
+  }, [selectedIntegration, supabase])
 
   // Handler for Connect Integration
   const handleConnectIntegration = useCallback((integrationName: string) => {
@@ -921,21 +1002,87 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     setShowConnectIntegrationDialog(true)
   }, [])
 
-  const handleConfirmConnect = useCallback(() => {
-    toast.success(`Integration Connected has been connected successfully`)
-    setShowConnectIntegrationDialog(false)
-    setSelectedIntegration(null)
-  }, [selectedIntegration])
+  const handleConfirmConnect = useCallback(async () => {
+    if (!selectedIntegration) return
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Record integration connection
+      const { error } = await supabase
+        .from('integrations')
+        .insert({
+          user_id: user.id,
+          integration_name: selectedIntegration,
+          integration_type: 'training',
+          status: 'active',
+          connected_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+
+      toast.success(`Integration Connected has been connected successfully`)
+      setShowConnectIntegrationDialog(false)
+      setSelectedIntegration(null)
+    } catch (error) {
+      toast.error('Failed to connect integration')
+      console.error(error)
+    }
+  }, [selectedIntegration, supabase])
 
   // Handler for Regenerate API Key
   const handleRegenerateApiKey = useCallback(() => {
     setShowRegenerateApiKeyDialog(true)
   }, [])
 
-  const handleConfirmRegenerateKey = useCallback(() => {
-    toast.success('API Key Regenerated')
-    setShowRegenerateApiKeyDialog(false)
-  }, [])
+  const handleConfirmRegenerateKey = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Generate new API key
+      const newKeyPrefix = 'lms_live_sk_'
+      const newKeyHash = `${newKeyPrefix}${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
+
+      // Deactivate old training API keys
+      await supabase
+        .from('api_keys')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+        .eq('name', 'Training LMS API Key')
+
+      // Create new API key
+      const { error } = await supabase
+        .from('api_keys')
+        .insert({
+          user_id: user.id,
+          name: 'Training LMS API Key',
+          key_prefix: newKeyPrefix,
+          key_hash: newKeyHash,
+          scopes: ['read', 'write', 'training:manage'],
+          rate_limit: 5000,
+          is_active: true,
+          created_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+
+      toast.success('API Key Regenerated')
+      setShowRegenerateApiKeyDialog(false)
+    } catch (error) {
+      toast.error('Failed to regenerate API key')
+      console.error(error)
+    }
+  }, [supabase])
 
   // Handler for Copy API Key
   const handleCopyApiKey = useCallback(() => {
@@ -955,16 +1102,54 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     setShowAddWebhookDialog(true)
   }, [])
 
-  const handleConfirmAddWebhook = useCallback(() => {
-    if (!webhookUrl) {
-      toast.error('Error')
+  const handleConfirmAddWebhook = useCallback(async () => {
+    if (!webhookUrl.trim()) {
+      toast.error('Webhook URL is required')
       return
     }
-    toast.success(`Webhook Added has been created`)
-    setShowAddWebhookDialog(false)
-    setWebhookUrl('')
-    setWebhookEvents('')
-  }, [webhookUrl])
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Parse webhook events
+      const eventsArray = webhookEvents
+        .split(',')
+        .map(e => e.trim())
+        .filter(e => e.length > 0)
+
+      if (eventsArray.length === 0) {
+        toast.error('At least one event is required')
+        return
+      }
+
+      // Create webhook
+      const { error } = await supabase
+        .from('webhooks')
+        .insert({
+          user_id: user.id,
+          name: `Training Webhook - ${new Date().toLocaleString()}`,
+          url: webhookUrl,
+          events: eventsArray,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+
+      toast.success(`Webhook Added has been created`)
+      setShowAddWebhookDialog(false)
+      setWebhookUrl('')
+      setWebhookEvents('')
+    } catch (error) {
+      toast.error('Failed to add webhook')
+      console.error(error)
+    }
+  }, [webhookUrl, webhookEvents, supabase])
 
   // Handler for Delete Webhook
   const handleDeleteWebhook = useCallback((webhook: {url: string, events: string[], status: string}) => {
@@ -972,11 +1157,33 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     setShowDeleteWebhookDialog(true)
   }, [])
 
-  const handleConfirmDeleteWebhook = useCallback(() => {
-    toast.success('Webhook Deleted')
-    setShowDeleteWebhookDialog(false)
-    setWebhookToDelete(null)
-  }, [])
+  const handleConfirmDeleteWebhook = useCallback(async () => {
+    if (!webhookToDelete) return
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Delete webhook by URL (since we don't have ID in the mock data structure)
+      const { error } = await supabase
+        .from('webhooks')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('url', webhookToDelete.url)
+
+      if (error) throw error
+
+      toast.success('Webhook Deleted')
+      setShowDeleteWebhookDialog(false)
+      setWebhookToDelete(null)
+    } catch (error) {
+      toast.error('Failed to delete webhook')
+      console.error(error)
+    }
+  }, [webhookToDelete, supabase])
 
   // Handler for Export Learning Data
   const handleExportData = useCallback(() => {
@@ -1079,40 +1286,131 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     setShowClearDownloadsDialog(true)
   }, [])
 
-  const handleConfirmClearDownloads = useCallback(() => {
-    toast.success('Downloads Cleared')
-    setShowClearDownloadsDialog(false)
-  }, [])
+  const handleConfirmClearDownloads = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Clear download history from activity log
+      const { error } = await supabase
+        .from('activity_log')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('action', 'course_material_download')
+
+      if (error) throw error
+
+      toast.success('Downloads Cleared')
+      setShowClearDownloadsDialog(false)
+    } catch (error) {
+      toast.error('Failed to clear downloads')
+      console.error(error)
+    }
+  }, [supabase])
 
   // Handler for Reset Progress
   const handleResetProgress = useCallback(() => {
     setShowResetProgressDialog(true)
   }, [])
 
-  const handleConfirmResetProgress = useCallback(() => {
-    toast.success('Progress Reset')
-    setShowResetProgressDialog(false)
-  }, [])
+  const handleConfirmResetProgress = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Reset all training progress for user
+      const { error } = await supabase
+        .from('training_progress')
+        .delete()
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('Progress Reset')
+      setShowResetProgressDialog(false)
+      refetch()
+    } catch (error) {
+      toast.error('Failed to reset progress')
+      console.error(error)
+    }
+  }, [supabase, refetch])
 
   // Handler for Delete Learning History
   const handleDeleteHistory = useCallback(() => {
     setShowDeleteHistoryDialog(true)
   }, [])
 
-  const handleConfirmDeleteHistory = useCallback(() => {
-    toast.success('History Deleted')
-    setShowDeleteHistoryDialog(false)
-  }, [])
+  const handleConfirmDeleteHistory = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Delete training-related activity history
+      const { error } = await supabase
+        .from('activity_log')
+        .delete()
+        .eq('user_id', user.id)
+        .in('action', [
+          'course_started',
+          'lesson_completed',
+          'course_completed',
+          'certificate_earned',
+          'learning_path_started'
+        ])
+
+      if (error) throw error
+
+      toast.success('History Deleted')
+      setShowDeleteHistoryDialog(false)
+    } catch (error) {
+      toast.error('Failed to delete history')
+      console.error(error)
+    }
+  }, [supabase])
 
   // Handler for Revoke All Certificates
   const handleRevokeAllCerts = useCallback(() => {
     setShowRevokeAllCertsDialog(true)
   }, [])
 
-  const handleConfirmRevokeAllCerts = useCallback(() => {
-    toast.success('Certificates Revoked')
-    setShowRevokeAllCertsDialog(false)
-  }, [])
+  const handleConfirmRevokeAllCerts = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Revoke all certificates by updating their status
+      const { error } = await supabase
+        .from('training_certificates')
+        .update({
+          status: 'revoked',
+          revoked_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+
+      if (error) throw error
+
+      toast.success('Certificates Revoked')
+      setShowRevokeAllCertsDialog(false)
+      refetch()
+    } catch (error) {
+      toast.error('Failed to revoke certificates')
+      console.error(error)
+    }
+  }, [supabase, refetch])
 
   // Handler for Continue/Review Learning
   const handleContinueLearning = useCallback((enrollment: Enrollment) => {
@@ -1120,13 +1418,46 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     setShowContinueLearningDialog(true)
   }, [])
 
-  const handleConfirmContinueLearning = useCallback(() => {
-    if (selectedEnrollment) {
+  const handleConfirmContinueLearning = useCallback(async () => {
+    if (!selectedEnrollment) return
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      // Update last accessed timestamp
+      const { error } = await supabase
+        .from('training_enrollments')
+        .update({
+          last_accessed: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedEnrollment.id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      // Log activity
+      await supabase.from('activity_log').insert({
+        user_id: user.id,
+        action: selectedEnrollment.status === 'completed' ? 'course_review_started' : 'course_continued',
+        entity_type: 'training_enrollment',
+        entity_id: selectedEnrollment.id,
+        entity_name: selectedEnrollment.courseName,
+        created_at: new Date().toISOString()
+      })
+
       toast.success(selectedEnrollment.status === 'completed' ? 'Reviewing Course' : 'Continuing Course')
       setShowContinueLearningDialog(false)
       setSelectedEnrollment(null)
+    } catch (error) {
+      toast.error('Failed to continue learning')
+      console.error(error)
     }
-  }, [selectedEnrollment])
+  }, [selectedEnrollment, supabase])
 
   // Loading state
   if (isLoading) {

@@ -333,6 +333,26 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
     setIsSaving(true)
     try {
+      // Update conversation metadata in database
+      const { error } = await supabase
+        .from('chats')
+        .update({
+          metadata: {
+            ...selectedConversation.metadata || {},
+            assignee: {
+              id: member.id,
+              name: member.name,
+              email: member.email,
+              avatar: member.avatar,
+              role: member.role
+            },
+            updated_at: new Date().toISOString()
+          }
+        })
+        .eq('id', selectedConversation.id)
+
+      if (error) throw error
+
       // Update conversation in local state
       setConversations(prev => prev.map(conv =>
         conv.id === selectedConversation.id
@@ -343,6 +363,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       toast.success(`Conversation Assigned: to ${member.name}`)
       setShowAssignDialog(false)
     } catch (err) {
+      console.error('Failed to assign conversation:', err)
       toast.error('Failed to assign conversation')
     } finally {
       setIsSaving(false)
@@ -354,6 +375,21 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
     setIsSaving(true)
     try {
+      // Update conversation status in database
+      const { error } = await supabase
+        .from('chats')
+        .update({
+          metadata: {
+            ...selectedConversation.metadata || {},
+            status: 'closed',
+            closed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        })
+        .eq('id', selectedConversation.id)
+
+      if (error) throw error
+
       // Update conversation status
       setConversations(prev => prev.map(conv =>
         conv.id === selectedConversation.id
@@ -363,6 +399,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       setSelectedConversation(prev => prev ? { ...prev, status: 'closed' } : null)
       toast.success('Conversation Closed')
     } catch (err) {
+      console.error('Failed to close conversation:', err)
       toast.error('Failed to close conversation')
     } finally {
       setIsSaving(false)
@@ -374,6 +411,22 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
     setIsSaving(true)
     try {
+      // Update conversation status in database
+      const { error } = await supabase
+        .from('chats')
+        .update({
+          metadata: {
+            ...selectedConversation.metadata || {},
+            status: 'snoozed',
+            snoozed_at: new Date().toISOString(),
+            snooze_until: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+            updated_at: new Date().toISOString()
+          }
+        })
+        .eq('id', selectedConversation.id)
+
+      if (error) throw error
+
       // Update conversation status
       setConversations(prev => prev.map(conv =>
         conv.id === selectedConversation.id
@@ -383,6 +436,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       setSelectedConversation(prev => prev ? { ...prev, status: 'snoozed' } : null)
       toast.success('Conversation Snoozed')
     } catch (err) {
+      console.error('Failed to snooze conversation:', err)
       toast.error('Failed to snooze conversation')
     } finally {
       setIsSaving(false)
@@ -394,8 +448,22 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
     setIsSaving(true)
     try {
+      // Update tags in database
+      const updatedTags = [...(selectedConversation.tags || []), newTag.trim()]
+      const { error } = await supabase
+        .from('chats')
+        .update({
+          metadata: {
+            ...selectedConversation.metadata || {},
+            tags: updatedTags,
+            updated_at: new Date().toISOString()
+          }
+        })
+        .eq('id', selectedConversation.id)
+
+      if (error) throw error
+
       // Update tags in local state
-      const updatedTags = [...selectedConversation.tags, newTag.trim()]
       setConversations(prev => prev.map(conv =>
         conv.id === selectedConversation.id
           ? { ...conv, tags: updatedTags }
@@ -406,6 +474,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       setNewTag('')
       setShowTagDialog(false)
     } catch (err) {
+      console.error('Failed to add tag:', err)
       toast.error('Failed to add tag')
     } finally {
       setIsSaving(false)
@@ -417,21 +486,45 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
     setIsSaving(true)
     try {
+      // Add note to database
+      const existingNotes = selectedConversation.customer?.notes || []
+      const updatedNotes = [
+        ...existingNotes,
+        {
+          content: newNote.trim(),
+          created_at: new Date().toISOString(),
+          created_by: 'current-user' // TODO: Get actual user ID
+        }
+      ]
+
+      const { error } = await supabase
+        .from('chats')
+        .update({
+          metadata: {
+            ...selectedConversation.metadata || {},
+            customer_notes: updatedNotes,
+            updated_at: new Date().toISOString()
+          }
+        })
+        .eq('id', selectedConversation.id)
+
+      if (error) throw error
+
       // Add note to customer notes
-      const updatedNotes = [...selectedConversation.customer.notes, newNote.trim()]
       setConversations(prev => prev.map(conv =>
         conv.id === selectedConversation.id
-          ? { ...conv, customer: { ...conv.customer, notes: updatedNotes } }
+          ? { ...conv, customer: { ...conv.customer, notes: updatedNotes.map(n => n.content) } }
           : conv
       ))
       setSelectedConversation(prev => prev ? {
         ...prev,
-        customer: { ...prev.customer, notes: updatedNotes }
+        customer: { ...prev.customer, notes: updatedNotes.map(n => n.content) }
       } : null)
       toast.success('Note Added')
       setNewNote('')
       setShowNoteDialog(false)
     } catch (err) {
+      console.error('Failed to add note:', err)
       toast.error('Failed to add note')
     } finally {
       setIsSaving(false)
@@ -444,6 +537,22 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
     setIsSaving(true)
     try {
       const newStarred = !selectedConversation.isStarred
+
+      // Update star status in database
+      const { error } = await supabase
+        .from('chats')
+        .update({
+          metadata: {
+            ...selectedConversation.metadata || {},
+            is_starred: newStarred,
+            starred_at: newStarred ? new Date().toISOString() : null,
+            updated_at: new Date().toISOString()
+          }
+        })
+        .eq('id', selectedConversation.id)
+
+      if (error) throw error
+
       setConversations(prev => prev.map(conv =>
         conv.id === selectedConversation.id
           ? { ...conv, isStarred: newStarred }
@@ -452,6 +561,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       setSelectedConversation(prev => prev ? { ...prev, isStarred: newStarred } : null)
       toast.success(newStarred ? 'Starred' : 'Unstarred')
     } catch (err) {
+      console.error('Failed to update star status:', err)
       toast.error('Failed to update star status')
     } finally {
       setIsSaving(false)
