@@ -2,7 +2,8 @@
 // Comprehensive client relationship management with pipeline, deals, and activities
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useClients } from '@/lib/hooks/use-clients'
@@ -74,6 +75,9 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Import mock data from centralized adapters
 
@@ -307,6 +311,9 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   // Deals module integration
   const { createDeal, deals: dbDeals, loading: dealsLoading } = useDeals()
 
+  // Pending tasks count state
+  const [pendingTasksCount, setPendingTasksCount] = useState(0)
+
   // State for deal creation dialog
   const [showDealDialog, setShowDealDialog] = useState(false)
   const [dealForm, setDealForm] = useState({
@@ -357,6 +364,26 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   useEffect(() => {
     fetchClients()
   }, [fetchClients])
+
+  // Fetch pending tasks count from database
+  const fetchPendingTasksCount = useCallback(async () => {
+    try {
+      const { count, error } = await supabase
+        .from('tasks')
+        .select('*', { count: 'exact', head: true })
+        .in('status', ['todo', 'in_progress'])
+
+      if (!error && count !== null) {
+        setPendingTasksCount(count)
+      }
+    } catch (err) {
+      console.error('Failed to fetch pending tasks count:', err)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchPendingTasksCount()
+  }, [fetchPendingTasksCount])
 
   // Handle creating a new client
   const handleCreateClient = async () => {
@@ -568,10 +595,10 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
       avgHealthScore: customers.length > 0 ? customers.reduce((sum, c) => sum + (c.health_score || 0), 0) / customers.length : 0,
       pipelineValue: openDealsList.reduce((sum, d) => sum + ((d.value || 0) * (d.probability || 0) / 100), 0),
       openDeals: openDealsList.length,
-      // Use only real deals from clients that have them
-      pendingTasks: 0 // TODO: Wire up real tasks
+      // Pending tasks count fetched from database
+      pendingTasks: pendingTasksCount
     }
-  }, [filteredClients])
+  }, [filteredClients, pendingTasksCount])
 
   // Pipeline stages for kanban
   const pipelineStages: { stage: DealStage; label: string; color: string }[] = [

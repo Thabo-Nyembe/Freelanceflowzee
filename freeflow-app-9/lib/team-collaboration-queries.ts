@@ -4,6 +4,7 @@
  */
 
 import { supabase } from './supabase'
+import { sendTeamInvite } from '@/lib/email/email-templates'
 
 // =====================================================
 // TYPES
@@ -532,7 +533,42 @@ export async function inviteToTeam(
 
     await logTeamActivity(teamId, invitedBy, 'invite_sent', 'invite', data.id, { email, role })
 
-    // TODO: Send invite email here
+    // Fetch team and inviter details for the email
+    const { data: team } = await supabase
+      .from('teams')
+      .select('name')
+      .eq('id', teamId)
+      .single()
+
+    const { data: inviter } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', invitedBy)
+      .single()
+
+    // Send invite email
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const inviteUrl = `${appUrl}/invite/team?token=${token}`
+
+    try {
+      await sendTeamInvite({
+        inviteeName: '', // Email only invite, name not known yet
+        inviteeEmail: email,
+        teamName: team?.name || 'Team',
+        inviterName: inviter?.full_name || 'A team member',
+        role: role,
+        inviteUrl: inviteUrl,
+        expiresAt: new Date(expiresAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      })
+      console.log(`Team invite email sent to ${email}`)
+    } catch (emailError) {
+      console.error('Failed to send team invite email:', emailError)
+      // Don't fail the invite if email fails - the invite is still valid
+    }
 
     return data
   } catch (error) {

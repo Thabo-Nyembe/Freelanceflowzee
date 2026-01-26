@@ -351,6 +351,42 @@ class ClientsApiClient extends BaseApiClient {
       }
     }
 
+    // Fetch recent activity logs related to clients
+    const clientIds = clients.map(c => c.id)
+    let recentActivity: ClientStats['recentActivity'] = []
+
+    if (clientIds.length > 0) {
+      const { data: activityData } = await supabase
+        .from('activity_logs')
+        .select('resource_id, resource_name, activity_type, created_at')
+        .eq('resource_type', 'client')
+        .in('resource_id', clientIds)
+        .order('created_at', { ascending: false })
+        .limit(20)
+
+      if (activityData) {
+        recentActivity = activityData.map(activity => {
+          // Map activity_type to our expected format
+          let activityType: 'project_created' | 'invoice_sent' | 'payment_received' | 'note_added' = 'note_added'
+          if (activity.activity_type === 'create' && activity.resource_name?.toLowerCase().includes('project')) {
+            activityType = 'project_created'
+          } else if (activity.activity_type === 'create' && activity.resource_name?.toLowerCase().includes('invoice')) {
+            activityType = 'invoice_sent'
+          } else if (activity.activity_type === 'update' && activity.resource_name?.toLowerCase().includes('payment')) {
+            activityType = 'payment_received'
+          }
+
+          const client = clients.find(c => c.id === activity.resource_id)
+          return {
+            client_id: activity.resource_id || '',
+            client_name: client?.name || activity.resource_name || 'Unknown Client',
+            activity_type: activityType,
+            timestamp: activity.created_at
+          }
+        })
+      }
+    }
+
     // Calculate statistics
     const stats: ClientStats = {
       total: clients.length,
@@ -378,7 +414,7 @@ class ClientsApiClient extends BaseApiClient {
           lifetime_value: c.lifetime_value || 0,
           total_projects: c.total_projects || 0
         })),
-      recentActivity: [] // TODO: Implement activity tracking
+      recentActivity
     }
 
     return {

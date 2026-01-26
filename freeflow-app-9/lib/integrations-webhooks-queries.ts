@@ -62,6 +62,13 @@ export interface IntegrationSettings {
   }
   field_mapping?: Record<string, string>
   filters?: Record<string, JsonValue>
+  // Webhook integration settings (e.g., Zapier)
+  webhook_url?: string
+  // Custom API settings
+  test_endpoint?: string
+  headers?: Record<string, string>
+  auth_type?: 'bearer' | 'basic' | 'api_key'
+  auth_header?: string
 }
 
 export interface Webhook {
@@ -349,13 +356,236 @@ export async function refreshIntegrationToken(integrationId: string): Promise<bo
     const integration = await getIntegrationById(integrationId)
     if (!integration || !integration.refresh_token) return false
 
-    // TODO: Implement actual token refresh logic based on integration type
-    // This would call the OAuth provider's token refresh endpoint
+    // Perform token refresh based on integration type
+    const refreshedTokens = await performOAuthTokenRefresh(integration)
+
+    if (!refreshedTokens) {
+      await updateIntegration(integrationId, {
+        status: 'error',
+        error_message: 'Token refresh failed'
+      })
+      return false
+    }
+
+    // Update integration with new tokens
+    await updateIntegration(integrationId, {
+      access_token: refreshedTokens.access_token,
+      refresh_token: refreshedTokens.refresh_token || integration.refresh_token,
+      token_expires_at: refreshedTokens.expires_at,
+      status: 'active',
+      error_message: undefined
+    })
 
     return true
   } catch (error) {
     console.error('Error refreshing integration token:', error)
+
+    // Mark integration as having an error
+    await updateIntegration(integrationId, {
+      status: 'error',
+      error_message: error instanceof Error ? error.message : 'Token refresh failed'
+    })
+
     return false
+  }
+}
+
+/**
+ * OAuth Token Refresh Configuration by Provider
+ */
+interface OAuthTokenConfig {
+  tokenUrl: string
+  clientIdEnvVar: string
+  clientSecretEnvVar: string
+  grantType: string
+  extraParams?: Record<string, string>
+  useBasicAuth?: boolean
+  responseHandler?: (data: Record<string, unknown>, integration: Integration) => TokenRefreshResult
+}
+
+interface TokenRefreshResult {
+  access_token: string
+  refresh_token?: string
+  expires_at: string
+}
+
+const OAUTH_TOKEN_CONFIGS: Partial<Record<IntegrationType, OAuthTokenConfig>> = {
+  google_calendar: {
+    tokenUrl: 'https://oauth2.googleapis.com/token',
+    clientIdEnvVar: 'GOOGLE_CLIENT_ID',
+    clientSecretEnvVar: 'GOOGLE_CLIENT_SECRET',
+    grantType: 'refresh_token'
+  },
+  google_drive: {
+    tokenUrl: 'https://oauth2.googleapis.com/token',
+    clientIdEnvVar: 'GOOGLE_CLIENT_ID',
+    clientSecretEnvVar: 'GOOGLE_CLIENT_SECRET',
+    grantType: 'refresh_token'
+  },
+  outlook: {
+    tokenUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
+    clientIdEnvVar: 'MICROSOFT_CLIENT_ID',
+    clientSecretEnvVar: 'MICROSOFT_CLIENT_SECRET',
+    grantType: 'refresh_token'
+  },
+  slack: {
+    tokenUrl: 'https://slack.com/api/oauth.v2.access',
+    clientIdEnvVar: 'SLACK_CLIENT_ID',
+    clientSecretEnvVar: 'SLACK_CLIENT_SECRET',
+    grantType: 'refresh_token',
+    responseHandler: (data, integration) => {
+      if (!(data as { ok?: boolean }).ok) {
+        throw new Error(`Slack token refresh failed: ${(data as { error?: string }).error}`)
+      }
+      return {
+        access_token: (data as { access_token: string }).access_token,
+        refresh_token: (data as { refresh_token?: string }).refresh_token,
+        expires_at: new Date(Date.now() + (((data as { expires_in?: number }).expires_in || 43200) * 1000)).toISOString()
+      }
+    }
+  },
+  discord: {
+    tokenUrl: 'https://discord.com/api/oauth2/token',
+    clientIdEnvVar: 'DISCORD_CLIENT_ID',
+    clientSecretEnvVar: 'DISCORD_CLIENT_SECRET',
+    grantType: 'refresh_token'
+  },
+  github: {
+    tokenUrl: 'https://github.com/login/oauth/access_token',
+    clientIdEnvVar: 'GITHUB_CLIENT_ID',
+    clientSecretEnvVar: 'GITHUB_CLIENT_SECRET',
+    grantType: 'refresh_token',
+    extraParams: { accept: 'application/json' }
+  },
+  gitlab: {
+    tokenUrl: 'https://gitlab.com/oauth/token',
+    clientIdEnvVar: 'GITLAB_CLIENT_ID',
+    clientSecretEnvVar: 'GITLAB_CLIENT_SECRET',
+    grantType: 'refresh_token'
+  },
+  dropbox: {
+    tokenUrl: 'https://api.dropboxapi.com/oauth2/token',
+    clientIdEnvVar: 'DROPBOX_CLIENT_ID',
+    clientSecretEnvVar: 'DROPBOX_CLIENT_SECRET',
+    grantType: 'refresh_token',
+    useBasicAuth: true
+  },
+  quickbooks: {
+    tokenUrl: 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer',
+    clientIdEnvVar: 'QUICKBOOKS_CLIENT_ID',
+    clientSecretEnvVar: 'QUICKBOOKS_CLIENT_SECRET',
+    grantType: 'refresh_token',
+    useBasicAuth: true
+  },
+  xero: {
+    tokenUrl: 'https://identity.xero.com/connect/token',
+    clientIdEnvVar: 'XERO_CLIENT_ID',
+    clientSecretEnvVar: 'XERO_CLIENT_SECRET',
+    grantType: 'refresh_token',
+    useBasicAuth: true
+  },
+  asana: {
+    tokenUrl: 'https://app.asana.com/-/oauth_token',
+    clientIdEnvVar: 'ASANA_CLIENT_ID',
+    clientSecretEnvVar: 'ASANA_CLIENT_SECRET',
+    grantType: 'refresh_token'
+  },
+  notion: {
+    // Notion uses long-lived tokens that don't need refresh
+    tokenUrl: '',
+    clientIdEnvVar: 'NOTION_CLIENT_ID',
+    clientSecretEnvVar: 'NOTION_CLIENT_SECRET',
+    grantType: 'refresh_token'
+  },
+  trello: {
+    // Trello uses non-expiring tokens
+    tokenUrl: '',
+    clientIdEnvVar: 'TRELLO_API_KEY',
+    clientSecretEnvVar: 'TRELLO_API_SECRET',
+    grantType: 'refresh_token'
+  }
+}
+
+/**
+ * Perform OAuth token refresh for the given integration
+ */
+async function performOAuthTokenRefresh(integration: Integration): Promise<TokenRefreshResult | null> {
+  const config = OAUTH_TOKEN_CONFIGS[integration.type]
+
+  // Handle integrations that don't support token refresh
+  if (!config || !config.tokenUrl) {
+    // Some integrations use API keys or long-lived tokens
+    if (integration.type === 'notion' || integration.type === 'trello' ||
+        integration.type === 'stripe' || integration.type === 'paypal' ||
+        integration.type === 'zapier' || integration.type === 'custom_api') {
+      console.log(`Integration type ${integration.type} uses long-lived tokens or API keys`)
+      return null
+    }
+    throw new Error(`Token refresh not supported for ${integration.type}`)
+  }
+
+  const clientId = process.env[config.clientIdEnvVar]
+  const clientSecret = process.env[config.clientSecretEnvVar]
+
+  if (!clientId || !clientSecret) {
+    throw new Error(`OAuth credentials not configured for ${integration.type}. Missing ${config.clientIdEnvVar} or ${config.clientSecretEnvVar}`)
+  }
+
+  // Build request headers
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  }
+
+  // Use Basic Auth if required (Dropbox, QuickBooks, Xero)
+  if (config.useBasicAuth) {
+    headers['Authorization'] = `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`
+  }
+
+  // Add accept header for GitHub
+  if (config.extraParams?.accept) {
+    headers['Accept'] = config.extraParams.accept
+  }
+
+  // Build request body
+  const body = new URLSearchParams({
+    grant_type: config.grantType,
+    refresh_token: integration.refresh_token!
+  })
+
+  // Add client credentials to body if not using Basic Auth
+  if (!config.useBasicAuth) {
+    body.append('client_id', clientId)
+    body.append('client_secret', clientSecret)
+  }
+
+  // Add scopes for Microsoft
+  if (integration.type === 'outlook' && integration.scopes?.length) {
+    body.append('scope', integration.scopes.join(' '))
+  }
+
+  const response = await fetch(config.tokenUrl, {
+    method: 'POST',
+    headers,
+    body
+  })
+
+  const data = await response.json()
+
+  // Use custom response handler if provided
+  if (config.responseHandler) {
+    return config.responseHandler(data, integration)
+  }
+
+  // Standard OAuth2 response handling
+  if (!response.ok) {
+    const errorMessage = data.error_description || data.error || response.statusText
+    throw new Error(`Token refresh failed for ${integration.type}: ${errorMessage}`)
+  }
+
+  return {
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    expires_at: new Date(Date.now() + ((data.expires_in || 3600) * 1000)).toISOString()
   }
 }
 
@@ -366,22 +596,398 @@ export async function testIntegration(integrationId: string): Promise<{ success:
       return { success: false, message: 'Integration not found' }
     }
 
-    // TODO: Implement actual integration testing based on type
-    // This would make a test API call to verify credentials
+    // Perform actual integration verification test
+    const testResult = await performIntegrationTest(integration)
+
+    if (testResult.success) {
+      await supabase
+        .from('integrations')
+        .update({
+          status: 'active',
+          error_message: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', integrationId)
+
+      return { success: true, message: testResult.message }
+    } else {
+      await supabase
+        .from('integrations')
+        .update({
+          status: 'error',
+          error_message: testResult.message,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', integrationId)
+
+      return { success: false, message: testResult.message }
+    }
+  } catch (error) {
+    console.error('Error testing integration:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Connection test failed'
 
     await supabase
       .from('integrations')
       .update({
-        status: 'active',
-        error_message: null,
+        status: 'error',
+        error_message: errorMessage,
         updated_at: new Date().toISOString()
       })
       .eq('id', integrationId)
 
-    return { success: true, message: 'Connection successful' }
+    return { success: false, message: errorMessage }
+  }
+}
+
+/**
+ * Integration Test Configurations by Provider
+ * Each provider has a specific endpoint to verify credentials
+ */
+interface IntegrationTestConfig {
+  testUrl: string
+  method: 'GET' | 'POST'
+  headers?: Record<string, string>
+  successValidator: (response: Response, data: unknown) => { success: boolean; message: string }
+  useApiKey?: boolean
+  apiKeyHeader?: string
+}
+
+const INTEGRATION_TEST_CONFIGS: Partial<Record<IntegrationType, IntegrationTestConfig>> = {
+  google_calendar: {
+    testUrl: 'https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1',
+    method: 'GET',
+    successValidator: (response, data) => {
+      if (response.ok) {
+        return { success: true, message: 'Google Calendar connected successfully' }
+      }
+      const errorData = data as { error?: { message?: string } }
+      return { success: false, message: errorData?.error?.message || 'Failed to connect to Google Calendar' }
+    }
+  },
+  google_drive: {
+    testUrl: 'https://www.googleapis.com/drive/v3/about?fields=user',
+    method: 'GET',
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const userData = data as { user?: { displayName?: string } }
+        return { success: true, message: `Google Drive connected as ${userData?.user?.displayName || 'user'}` }
+      }
+      const errorData = data as { error?: { message?: string } }
+      return { success: false, message: errorData?.error?.message || 'Failed to connect to Google Drive' }
+    }
+  },
+  outlook: {
+    testUrl: 'https://graph.microsoft.com/v1.0/me',
+    method: 'GET',
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const userData = data as { displayName?: string }
+        return { success: true, message: `Microsoft account connected as ${userData?.displayName || 'user'}` }
+      }
+      const errorData = data as { error?: { message?: string } }
+      return { success: false, message: errorData?.error?.message || 'Failed to connect to Microsoft' }
+    }
+  },
+  slack: {
+    testUrl: 'https://slack.com/api/auth.test',
+    method: 'POST',
+    successValidator: (response, data) => {
+      const slackData = data as { ok?: boolean; team?: string; user?: string; error?: string }
+      if (slackData.ok) {
+        return { success: true, message: `Slack connected to ${slackData.team || 'workspace'} as ${slackData.user || 'user'}` }
+      }
+      return { success: false, message: slackData.error || 'Failed to connect to Slack' }
+    }
+  },
+  discord: {
+    testUrl: 'https://discord.com/api/users/@me',
+    method: 'GET',
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const userData = data as { username?: string }
+        return { success: true, message: `Discord connected as ${userData?.username || 'user'}` }
+      }
+      const errorData = data as { message?: string }
+      return { success: false, message: errorData?.message || 'Failed to connect to Discord' }
+    }
+  },
+  github: {
+    testUrl: 'https://api.github.com/user',
+    method: 'GET',
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const userData = data as { login?: string }
+        return { success: true, message: `GitHub connected as ${userData?.login || 'user'}` }
+      }
+      const errorData = data as { message?: string }
+      return { success: false, message: errorData?.message || 'Failed to connect to GitHub' }
+    }
+  },
+  gitlab: {
+    testUrl: 'https://gitlab.com/api/v4/user',
+    method: 'GET',
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const userData = data as { username?: string }
+        return { success: true, message: `GitLab connected as ${userData?.username || 'user'}` }
+      }
+      const errorData = data as { message?: string }
+      return { success: false, message: errorData?.message || 'Failed to connect to GitLab' }
+    }
+  },
+  dropbox: {
+    testUrl: 'https://api.dropboxapi.com/2/users/get_current_account',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const userData = data as { name?: { display_name?: string } }
+        return { success: true, message: `Dropbox connected as ${userData?.name?.display_name || 'user'}` }
+      }
+      const errorData = data as { error_summary?: string }
+      return { success: false, message: errorData?.error_summary || 'Failed to connect to Dropbox' }
+    }
+  },
+  notion: {
+    testUrl: 'https://api.notion.com/v1/users/me',
+    method: 'GET',
+    headers: { 'Notion-Version': '2022-06-28' },
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const userData = data as { name?: string }
+        return { success: true, message: `Notion connected as ${userData?.name || 'user'}` }
+      }
+      const errorData = data as { message?: string }
+      return { success: false, message: errorData?.message || 'Failed to connect to Notion' }
+    }
+  },
+  asana: {
+    testUrl: 'https://app.asana.com/api/1.0/users/me',
+    method: 'GET',
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const asanaData = data as { data?: { name?: string } }
+        return { success: true, message: `Asana connected as ${asanaData?.data?.name || 'user'}` }
+      }
+      const errorData = data as { errors?: Array<{ message?: string }> }
+      return { success: false, message: errorData?.errors?.[0]?.message || 'Failed to connect to Asana' }
+    }
+  },
+  trello: {
+    testUrl: 'https://api.trello.com/1/members/me',
+    method: 'GET',
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const userData = data as { fullName?: string }
+        return { success: true, message: `Trello connected as ${userData?.fullName || 'user'}` }
+      }
+      return { success: false, message: 'Failed to connect to Trello' }
+    }
+  },
+  quickbooks: {
+    testUrl: 'https://sandbox-quickbooks.api.intuit.com/v3/company/{realmId}/companyinfo/{realmId}',
+    method: 'GET',
+    headers: { 'Accept': 'application/json' },
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const qbData = data as { CompanyInfo?: { CompanyName?: string } }
+        return { success: true, message: `QuickBooks connected to ${qbData?.CompanyInfo?.CompanyName || 'company'}` }
+      }
+      const errorData = data as { Fault?: { Error?: Array<{ Message?: string }> } }
+      return { success: false, message: errorData?.Fault?.Error?.[0]?.Message || 'Failed to connect to QuickBooks' }
+    }
+  },
+  xero: {
+    testUrl: 'https://api.xero.com/connections',
+    method: 'GET',
+    successValidator: (response, data) => {
+      if (response.ok && Array.isArray(data) && data.length > 0) {
+        const tenantName = (data[0] as { tenantName?: string })?.tenantName
+        return { success: true, message: `Xero connected to ${tenantName || 'organization'}` }
+      }
+      return { success: false, message: 'Failed to connect to Xero' }
+    }
+  },
+  stripe: {
+    testUrl: 'https://api.stripe.com/v1/account',
+    method: 'GET',
+    useApiKey: true,
+    apiKeyHeader: 'Authorization',
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const stripeData = data as { business_profile?: { name?: string } }
+        return { success: true, message: `Stripe connected to ${stripeData?.business_profile?.name || 'account'}` }
+      }
+      const errorData = data as { error?: { message?: string } }
+      return { success: false, message: errorData?.error?.message || 'Failed to connect to Stripe' }
+    }
+  },
+  paypal: {
+    testUrl: 'https://api-m.sandbox.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1',
+    method: 'GET',
+    successValidator: (response, data) => {
+      if (response.ok) {
+        const paypalData = data as { name?: string }
+        return { success: true, message: `PayPal connected as ${paypalData?.name || 'user'}` }
+      }
+      return { success: false, message: 'Failed to connect to PayPal' }
+    }
+  },
+  zapier: {
+    // Zapier uses webhook-based integration, verify the webhook URL is accessible
+    testUrl: '',
+    method: 'GET',
+    successValidator: () => ({ success: true, message: 'Zapier webhook integration configured' })
+  },
+  custom_api: {
+    // Custom API testing uses the integration's configured test endpoint
+    testUrl: '',
+    method: 'GET',
+    successValidator: (response) => {
+      if (response.ok) {
+        return { success: true, message: 'Custom API connection successful' }
+      }
+      return { success: false, message: 'Custom API connection failed' }
+    }
+  }
+}
+
+/**
+ * Perform integration verification test
+ */
+async function performIntegrationTest(integration: Integration): Promise<{ success: boolean; message: string }> {
+  const config = INTEGRATION_TEST_CONFIGS[integration.type]
+
+  // Handle special cases
+  if (integration.type === 'zapier') {
+    // Zapier doesn't have a test endpoint, just verify configuration
+    if (integration.settings?.webhook_url) {
+      return { success: true, message: 'Zapier webhook configured successfully' }
+    }
+    return { success: false, message: 'Zapier webhook URL not configured' }
+  }
+
+  if (integration.type === 'custom_api') {
+    // Use custom test endpoint from settings
+    const testEndpoint = integration.settings?.test_endpoint || integration.credentials?.base_url
+    if (!testEndpoint) {
+      return { success: false, message: 'Custom API test endpoint not configured' }
+    }
+    return await testCustomApiEndpoint(integration, testEndpoint as string)
+  }
+
+  if (!config || !config.testUrl) {
+    return { success: false, message: `Integration testing not supported for ${integration.type}` }
+  }
+
+  // Check for access token or API key
+  if (!integration.access_token && !integration.credentials?.api_key) {
+    return { success: false, message: 'No access token or API key available' }
+  }
+
+  // Build test URL (handle QuickBooks realm ID substitution)
+  let testUrl = config.testUrl
+  if (integration.type === 'quickbooks' && integration.credentials?.realm_id) {
+    testUrl = testUrl.replace(/{realmId}/g, integration.credentials.realm_id as string)
+  }
+
+  // Handle Trello which uses query params for auth
+  if (integration.type === 'trello') {
+    const apiKey = integration.credentials?.api_key || process.env.TRELLO_API_KEY
+    const apiToken = integration.access_token
+    testUrl = `${testUrl}?key=${apiKey}&token=${apiToken}`
+  }
+
+  // Build headers
+  const headers: Record<string, string> = {
+    ...config.headers
+  }
+
+  // Add authorization header
+  if (config.useApiKey && integration.credentials?.api_key) {
+    if (integration.type === 'stripe') {
+      headers['Authorization'] = `Bearer ${integration.credentials.api_key}`
+    } else {
+      headers[config.apiKeyHeader || 'Authorization'] = `Bearer ${integration.credentials.api_key}`
+    }
+  } else if (integration.access_token && integration.type !== 'trello') {
+    headers['Authorization'] = `Bearer ${integration.access_token}`
+  }
+
+  try {
+    const response = await fetch(testUrl, {
+      method: config.method,
+      headers,
+      body: config.method === 'POST' && !config.headers?.['Content-Type']?.includes('json')
+        ? undefined
+        : config.method === 'POST'
+        ? JSON.stringify({})
+        : undefined
+    })
+
+    let data: unknown = null
+    const contentType = response.headers.get('content-type')
+    if (contentType?.includes('application/json')) {
+      data = await response.json()
+    }
+
+    return config.successValidator(response, data)
   } catch (error) {
-    console.error('Error testing integration:', error)
-    return { success: false, message: 'Connection test failed' }
+    const errorMessage = error instanceof Error ? error.message : 'Network error during test'
+    return { success: false, message: `Connection test failed: ${errorMessage}` }
+  }
+}
+
+/**
+ * Test custom API endpoint
+ */
+async function testCustomApiEndpoint(
+  integration: Integration,
+  testEndpoint: string
+): Promise<{ success: boolean; message: string }> {
+  const headers: Record<string, string> = {}
+
+  // Apply custom headers from settings
+  if (integration.settings?.headers) {
+    Object.assign(headers, integration.settings.headers)
+  }
+
+  // Apply authentication
+  if (integration.credentials?.api_key) {
+    const authType = integration.settings?.auth_type || 'bearer'
+    const authHeader = integration.settings?.auth_header || 'Authorization'
+
+    switch (authType) {
+      case 'bearer':
+        headers[authHeader as string] = `Bearer ${integration.credentials.api_key}`
+        break
+      case 'basic':
+        const username = integration.credentials.username || ''
+        const password = integration.credentials.api_key
+        headers[authHeader as string] = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`
+        break
+      case 'api_key':
+        headers[authHeader as string] = integration.credentials.api_key as string
+        break
+    }
+  } else if (integration.access_token) {
+    headers['Authorization'] = `Bearer ${integration.access_token}`
+  }
+
+  try {
+    const response = await fetch(testEndpoint, {
+      method: 'GET',
+      headers
+    })
+
+    if (response.ok) {
+      return { success: true, message: 'Custom API connection successful' }
+    }
+
+    return { success: false, message: `Custom API returned status ${response.status}` }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Network error'
+    return { success: false, message: `Custom API test failed: ${errorMessage}` }
   }
 }
 

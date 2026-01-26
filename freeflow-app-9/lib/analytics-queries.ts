@@ -283,7 +283,21 @@ export async function getProjectCategories(
     const currentMonth = currentDate.getMonth() + 1
     const currentYear = currentDate.getFullYear()
 
-    const { data: currentMonthData } = await supabase
+    // Calculate previous month
+    const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1
+    const previousYear = currentMonth === 1 ? currentYear - 1 : currentYear
+
+    // Get first and last day of current month
+    const currentMonthStart = new Date(currentYear, currentMonth - 1, 1).toISOString()
+    const currentMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59).toISOString()
+
+    // Get first and last day of previous month
+    const previousMonthStart = new Date(previousYear, previousMonth - 1, 1).toISOString()
+    const previousMonthEnd = new Date(previousYear, previousMonth, 0, 23, 59, 59).toISOString()
+
+    // Note: category_breakdown from analytics_monthly_metrics could be used as fallback
+    // if real-time project data is not available
+    const { data: _currentMonthData } = await supabase
       .from('analytics_monthly_metrics')
       .select('category_breakdown')
       .eq('user_id', userId)
@@ -291,42 +305,98 @@ export async function getProjectCategories(
       .eq('month', currentMonth)
       .single()
 
-    // Also aggregate from projects table for real-time data
-    const { data: projects } = await supabase
+    // Get current month projects
+    const { data: currentProjects } = await supabase
+      .from('projects')
+      .select('category, budget, created_at')
+      .eq('user_id', userId)
+      .gte('created_at', currentMonthStart)
+      .lte('created_at', currentMonthEnd)
+
+    // Get previous month projects for growth calculation
+    const { data: previousProjects } = await supabase
+      .from('projects')
+      .select('category, budget, created_at')
+      .eq('user_id', userId)
+      .gte('created_at', previousMonthStart)
+      .lte('created_at', previousMonthEnd)
+
+    // Also get all projects for total counts
+    const { data: allProjects } = await supabase
       .from('projects')
       .select('category, budget')
       .eq('user_id', userId)
 
-    // Create category map
-    const categoryMap: Record<string, { count: number; revenue: number }> = {}
-
-    if (projects) {
-      projects.forEach(project => {
+    // Create category map for current month
+    const currentCategoryMap: Record<string, { count: number; revenue: number }> = {}
+    if (currentProjects) {
+      currentProjects.forEach(project => {
         const category = project.category || 'Other'
-        if (!categoryMap[category]) {
-          categoryMap[category] = { count: 0, revenue: 0 }
+        if (!currentCategoryMap[category]) {
+          currentCategoryMap[category] = { count: 0, revenue: 0 }
         }
-        categoryMap[category].count++
-        categoryMap[category].revenue += Number(project.budget || 0)
+        currentCategoryMap[category].count++
+        currentCategoryMap[category].revenue += Number(project.budget || 0)
       })
+    }
+
+    // Create category map for previous month
+    const previousCategoryMap: Record<string, { count: number; revenue: number }> = {}
+    if (previousProjects) {
+      previousProjects.forEach(project => {
+        const category = project.category || 'Other'
+        if (!previousCategoryMap[category]) {
+          previousCategoryMap[category] = { count: 0, revenue: 0 }
+        }
+        previousCategoryMap[category].count++
+        previousCategoryMap[category].revenue += Number(project.budget || 0)
+      })
+    }
+
+    // Create total category map for overall display
+    const totalCategoryMap: Record<string, { count: number; revenue: number }> = {}
+    if (allProjects) {
+      allProjects.forEach(project => {
+        const category = project.category || 'Other'
+        if (!totalCategoryMap[category]) {
+          totalCategoryMap[category] = { count: 0, revenue: 0 }
+        }
+        totalCategoryMap[category].count++
+        totalCategoryMap[category].revenue += Number(project.budget || 0)
+      })
+    }
+
+    // Calculate growth percentage for each category
+    const calculateGrowth = (current: number, previous: number): number => {
+      if (previous === 0) {
+        return current > 0 ? 100 : 0 // 100% growth if new category, 0 if no data
+      }
+      return Number((((current - previous) / previous) * 100).toFixed(2))
     }
 
     const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500', 'bg-indigo-500']
 
-    const categories: ProjectCategory[] = Object.entries(categoryMap).map(([category, data], index) => ({
-      category,
-      count: data.count,
-      revenue: data.revenue,
-      color: colors[index % colors.length],
-      growth: 0 // TODO: Calculate from previous month
-    }))
+    const categories: ProjectCategory[] = Object.entries(totalCategoryMap).map(([category, data], index) => {
+      const currentRevenue = currentCategoryMap[category]?.revenue || 0
+      const previousRevenue = previousCategoryMap[category]?.revenue || 0
+
+      return {
+        category,
+        count: data.count,
+        revenue: data.revenue,
+        color: colors[index % colors.length],
+        growth: calculateGrowth(currentRevenue, previousRevenue)
+      }
+    })
 
     // Sort by revenue descending
     categories.sort((a, b) => b.revenue - a.revenue)
 
     logger.info('Project categories fetched successfully', {
       userId,
-      count: categories.length
+      count: categories.length,
+      hasCurrentMonthData: !!currentProjects?.length,
+      hasPreviousMonthData: !!previousProjects?.length
     })
 
     return { data: categories, error: null }
@@ -366,15 +436,78 @@ export async function getTopClients(
       return { data: [], error: null }
     }
 
+    // Fetch feedback ratings for these clients
+    // Try to get feedback from the feedback table where it relates to clients
+    const { data: feedbackData } = await supabase
+      .from('feedback')
+      .select('submitted_by_user_id, rating, satisfaction_score')
+      .eq('user_id', userId)
+      .not('rating', 'is', null)
+
+    // Calculate general satisfaction from feedback data
+    let generalTotalRating = 0
+    let generalCount = 0
+
+    if (feedbackData) {
+      feedbackData.forEach((fb: { submitted_by_user_id?: string; rating?: number; satisfaction_score?: number }) => {
+        // Use rating (1-5 scale) or convert satisfaction_score (1-10) to 0-100 scale
+        const rating = fb.rating ? (fb.rating / 5) * 100 :
+                       fb.satisfaction_score ? (fb.satisfaction_score / 10) * 100 : null
+
+        if (rating !== null) {
+          generalTotalRating += rating
+          generalCount++
+        }
+      })
+    }
+
+    // Calculate default satisfaction from general feedback
+    const defaultSatisfaction = generalCount > 0
+      ? Math.round(generalTotalRating / generalCount)
+      : 85 // Default fallback if no feedback data
+
+    // Also try to get portal_clients satisfaction_rating if available
+    const { data: portalClients } = await supabase
+      .from('portal_clients')
+      .select('id, company_name, satisfaction_rating, nps_score')
+      .eq('user_id', userId)
+
+    // Create a map of portal client satisfaction ratings
+    const portalSatisfactionMap: Record<string, number> = {}
+    if (portalClients) {
+      portalClients.forEach((pc: { id: string; company_name: string; satisfaction_rating?: number; nps_score?: number }) => {
+        // Convert satisfaction_rating (0-5) to percentage, or use nps_score (0-10) to percentage
+        const satisfaction = pc.satisfaction_rating
+          ? Math.round((Number(pc.satisfaction_rating) / 5) * 100)
+          : pc.nps_score
+            ? Math.round((pc.nps_score / 10) * 100)
+            : null
+
+        if (satisfaction !== null) {
+          portalSatisfactionMap[pc.id] = satisfaction
+          // Also map by company name for matching
+          portalSatisfactionMap[pc.company_name.toLowerCase()] = satisfaction
+        }
+      })
+    }
+
     const topClients: TopClient[] = clients.map((client: { id: string; name: string; projects?: Array<{ id: string; budget?: number; status?: string }> }) => {
       const projects = client.projects || []
       const revenue = projects.reduce((sum: number, p: { budget?: number }) => sum + Number(p.budget || 0), 0)
+
+      // Try to find satisfaction from portal_clients first (by ID or name match)
+      let satisfaction = portalSatisfactionMap[client.id]
+        || portalSatisfactionMap[client.name.toLowerCase()]
+        || defaultSatisfaction
+
+      // Ensure satisfaction is within valid range
+      satisfaction = Math.min(100, Math.max(0, satisfaction))
 
       return {
         name: client.name,
         revenue,
         projects: projects.length,
-        satisfaction: 95 // TODO: Calculate from feedback/ratings
+        satisfaction
       }
     })
 
@@ -383,7 +516,9 @@ export async function getTopClients(
 
     logger.info('Top clients fetched successfully', {
       userId,
-      count: topClients.length
+      count: topClients.length,
+      hasFeedbackData: !!(feedbackData?.length),
+      hasPortalClients: !!(portalClients?.length)
     })
 
     return { data: topClients.slice(0, limit), error: null }

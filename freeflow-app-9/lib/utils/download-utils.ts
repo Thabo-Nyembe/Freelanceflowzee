@@ -432,7 +432,13 @@ export async function handleUniversalDownload(file: DownloadableFile | string, o
       // It's an ID or endpoint
       switch (type) {
         case 'invoice':
-          await downloadInvoice(file, {}) // TODO: fetch actual invoice data
+          // Fetch actual invoice data from the API before generating PDF
+          const invoiceResponse = await fetch(`/api/invoices/${file}`)
+          if (!invoiceResponse.ok) {
+            throw new Error('Failed to fetch invoice data')
+          }
+          const invoiceData = await invoiceResponse.json()
+          await downloadInvoice(file, invoiceData.data || invoiceData)
           break
         case 'report':
           await downloadReport('pdf', file, `${file}.pdf`)

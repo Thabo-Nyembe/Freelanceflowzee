@@ -367,6 +367,8 @@ export default function ProfileClient() {
   const [settings, setSettings] = useState<ProfileSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [recommendationsCount, setRecommendationsCount] = useState(0)
+  const [assessmentsPassedCount, setAssessmentsPassedCount] = useState(0)
 
   // Form State for Settings
   const [formData, setFormData] = useState({
@@ -388,12 +390,16 @@ export default function ProfileClient() {
 
     setLoading(true)
     try {
-      const [profileRes, skillsRes, expRes, eduRes, settingsRes] = await Promise.all([
+      const [profileRes, skillsRes, expRes, eduRes, settingsRes, recommendationsRes, assessmentsRes] = await Promise.all([
         supabase.from('user_profiles').select('*').eq('user_id', user.id).single(),
         supabase.from('skills').select('*').eq('user_id', user.id).order('endorsements', { ascending: false }),
         supabase.from('experience').select('*').eq('user_id', user.id).order('start_date', { ascending: false }),
         supabase.from('education').select('*').eq('user_id', user.id).order('start_date', { ascending: false }),
-        supabase.from('profile_settings').select('*').eq('user_id', user.id).single()
+        supabase.from('profile_settings').select('*').eq('user_id', user.id).single(),
+        // Fetch recommendations count for this user
+        supabase.from('recommendations').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'active'),
+        // Fetch skill assessments where user has passed
+        supabase.from('skill_assessments').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('result', 'passed')
       ])
 
       if (profileRes.data) {
@@ -415,13 +421,17 @@ export default function ProfileClient() {
       if (expRes.data) setExperiences(expRes.data)
       if (eduRes.data) setEducation(eduRes.data)
       if (settingsRes.data) setSettings(settingsRes.data)
+      // Set recommendations count (0 if no data or table doesn't exist)
+      setRecommendationsCount(recommendationsRes.count ?? 0)
+      // Set assessments passed count (0 if no data or table doesn't exist)
+      setAssessmentsPassedCount(assessmentsRes.count ?? 0)
     } catch (error) {
       console.error('Error fetching profile:', error)
       toast.error('Failed to load profile data')
     } finally {
       setLoading(false)
     }
-  }, [user?.id,])
+  }, [user?.id])
 
   useEffect(() => {
     fetchProfileData()
@@ -587,9 +597,9 @@ export default function ProfileClient() {
     followers: 0,
     skills: skills.length,
     endorsements: skills.reduce((sum, s) => sum + s.endorsements, 0),
-    recommendations: 0, // TODO: Wire real recommendations
-    assessmentsPassed: 0 // TODO: DB implementation
-  }), [skills])
+    recommendations: recommendationsCount,
+    assessmentsPassed: assessmentsPassedCount
+  }), [skills, recommendationsCount, assessmentsPassedCount])
 
   const statCards = [
     { label: 'Profile Views', value: formatNumber(stats.profileViews), change: stats.profileViewsChange, icon: Eye, gradient: 'from-blue-500 to-cyan-600' },

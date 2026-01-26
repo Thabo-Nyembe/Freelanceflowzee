@@ -252,31 +252,41 @@ export async function getRecentProjects(userId: string, limit: number = 3) {
   const supabase = createClient()
 
   try {
-    const { data, error } = await supabase
-      .from('projects')
-      .select(`
-        id,
-        name,
-        status,
-        budget,
-        deadline,
-        progress,
-        priority,
-        category,
-        client_id,
-        clients (
+    // Fetch projects, automation status, and collaboration count in parallel
+    const [projectsResult, automationResult, collaborationResult] = await Promise.all([
+      supabase
+        .from('projects')
+        .select(`
           id,
-          name
-        )
-      `)
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
-      .limit(limit)
+          name,
+          status,
+          budget,
+          deadline,
+          progress,
+          priority,
+          category,
+          client_id,
+          clients (
+            id,
+            name
+          )
+        `)
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false })
+        .limit(limit),
+      // Check if user has any active workflows/automations
+      getActiveAutomationStatus(userId, supabase),
+      // Get collaboration count (active team members)
+      getCollaborationCount(userId, supabase),
+    ])
 
-    if (error) throw error
+    if (projectsResult.error) throw projectsResult.error
+
+    const hasActiveAutomation = automationResult
+    const collaborationCount = collaborationResult
 
     // Transform to match the expected format
-    const projects = (data || []).map((project: ProjectWithClient) => ({
+    const projects = (projectsResult.data || []).map((project: ProjectWithClient) => ({
       id: project.id,
       name: project.name,
       client: project.clients?.[0]?.name || 'No Client',
@@ -286,8 +296,8 @@ export async function getRecentProjects(userId: string, limit: number = 3) {
       priority: project.priority || 'medium',
       deadline: project.deadline || new Date().toISOString(),
       category: project.category || 'general',
-      aiAutomation: false, // TODO: Implement AI automation tracking
-      collaboration: 0, // TODO: Implement collaboration count
+      aiAutomation: hasActiveAutomation,
+      collaboration: collaborationCount,
       estimatedCompletion: calculateEstimatedCompletion(project.progress || 0, project.deadline || '')
     }))
 
@@ -295,6 +305,75 @@ export async function getRecentProjects(userId: string, limit: number = 3) {
   } catch {
     // Silently return empty array when database is unavailable
     return []
+  }
+}
+
+/**
+ * Check if user has any active AI automations/workflows
+ */
+async function getActiveAutomationStatus(
+  userId: string,
+  supabase: ReturnType<typeof createClient>
+): Promise<boolean> {
+  try {
+    // Check workflows table for active automations
+    const { data, error } = await supabase
+      .from('workflows')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .limit(1)
+
+    if (error) {
+      // Fallback: try admin_workflows table
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_workflows')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .limit(1)
+
+      if (adminError) return false
+      return (adminData?.length || 0) > 0
+    }
+
+    return (data?.length || 0) > 0
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Get count of team collaborations for user
+ */
+async function getCollaborationCount(
+  userId: string,
+  supabase: ReturnType<typeof createClient>
+): Promise<number> {
+  try {
+    // Check team_members table for active collaborators
+    const { data, error } = await supabase
+      .from('team_members')
+      .select('id')
+      .eq('team_owner_id', userId)
+      .eq('status', 'active')
+
+    if (error) {
+      // Fallback: try collaboration_teams table
+      const { data: teamsData, error: teamsError } = await supabase
+        .from('collaboration_teams')
+        .select('member_count')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+
+      if (teamsError) return 0
+      // Sum all member counts from active teams
+      return teamsData?.reduce((sum, team) => sum + (team.member_count || 0), 0) || 0
+    }
+
+    return data?.length || 0
+  } catch {
+    return 0
   }
 }
 

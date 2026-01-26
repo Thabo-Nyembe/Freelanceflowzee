@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth.config'
 import { createFeatureLogger } from '@/lib/logger'
+import { createAdminClient } from '@/lib/supabase/server'
 import Stripe from 'stripe'
 
 const logger = createFeatureLogger('PaymentAPI')
@@ -202,7 +203,8 @@ async function handleWebhook(request: NextRequest) {
           amount: paymentIntent.amount / 100,
           metadata: paymentIntent.metadata,
         })
-        // TODO: Update database, grant access, notify user
+
+        await handlePaymentSucceeded(paymentIntent)
         break
       }
 
@@ -212,7 +214,8 @@ async function handleWebhook(request: NextRequest) {
           paymentIntentId: paymentIntent.id,
           error: paymentIntent.last_payment_error?.message,
         })
-        // TODO: Update database, notify user
+
+        await handlePaymentFailed(paymentIntent)
         break
       }
 
@@ -222,7 +225,8 @@ async function handleWebhook(request: NextRequest) {
           chargeId: charge.id,
           amount: charge.amount_refunded / 100,
         })
-        // TODO: Revoke access, update database
+
+        await handleChargeRefunded(charge)
         break
       }
 
@@ -233,7 +237,8 @@ async function handleWebhook(request: NextRequest) {
           amount: dispute.amount / 100,
           reason: dispute.reason,
         })
-        // TODO: Handle dispute, notify admin
+
+        await handleDisputeCreated(dispute)
         break
       }
 
@@ -248,6 +253,399 @@ async function handleWebhook(request: NextRequest) {
       { error: 'Webhook signature verification failed' },
       { status: 400 }
     )
+  }
+}
+
+// ============================================================================
+// WEBHOOK EVENT HANDLERS
+// ============================================================================
+
+/**
+ * Handle successful payment intent
+ * - Updates payment record status
+ * - Grants user access to purchased content
+ * - Creates user notification
+ * - Logs analytics event
+ */
+async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+  const supabase = createAdminClient()
+  const { itemId, itemType, tierId, userId, creatorId } = paymentIntent.metadata || {}
+
+  if (!userId) {
+    logger.warn('Payment succeeded but no userId in metadata', { paymentIntentId: paymentIntent.id })
+    return
+  }
+
+  try {
+    // Update payment record status
+    const { error: paymentError } = await supabase
+      .from('payments')
+      .update({
+        status: 'succeeded',
+        stripe_payment_intent_id: paymentIntent.id,
+        paid_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('stripe_payment_intent_id', paymentIntent.id)
+
+    if (paymentError) {
+      logger.error('Failed to update payment record', { error: paymentError.message, paymentIntentId: paymentIntent.id })
+    }
+
+    // Grant user access to the purchased content
+    if (itemId && itemType) {
+      const accessToken = `access_${crypto.randomUUID()}`
+      const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 year
+
+      const { error: accessError } = await supabase
+        .from('user_content_access')
+        .upsert({
+          user_id: userId,
+          item_id: itemId,
+          item_type: itemType,
+          tier_id: tierId || null,
+          access_token: accessToken,
+          transaction_id: `txn_${paymentIntent.id}`,
+          granted_at: new Date().toISOString(),
+          expires_at: expiresAt,
+          downloads_count: 0,
+          downloads_limit: null, // unlimited
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id,item_id',
+        })
+
+      if (accessError) {
+        logger.error('Failed to grant content access', { error: accessError.message, userId, itemId })
+      } else {
+        logger.info('Content access granted', { userId, itemId, itemType })
+      }
+    }
+
+    // Create user notification
+    await supabase.from('notifications').insert({
+      user_id: userId,
+      type: 'payment_success',
+      title: 'Payment Successful',
+      message: `Your payment of ${(paymentIntent.amount / 100).toFixed(2)} ${paymentIntent.currency.toUpperCase()} has been processed successfully.`,
+      metadata: {
+        payment_intent_id: paymentIntent.id,
+        amount: paymentIntent.amount / 100,
+        currency: paymentIntent.currency,
+        item_id: itemId,
+        item_type: itemType,
+      },
+      read: false,
+      created_at: new Date().toISOString(),
+    })
+
+    // Track analytics
+    await supabase.from('payment_analytics').insert({
+      payment_id: paymentIntent.id,
+      user_id: userId,
+      event_type: 'payment_succeeded',
+      amount: paymentIntent.amount,
+      currency: paymentIntent.currency,
+      item_id: itemId,
+      item_type: itemType,
+      creator_id: creatorId,
+      timestamp: new Date().toISOString(),
+    })
+
+    logger.info('Payment success handling completed', { paymentIntentId: paymentIntent.id, userId })
+  } catch (error: any) {
+    logger.error('Error handling payment success', { error: error.message, paymentIntentId: paymentIntent.id })
+  }
+}
+
+/**
+ * Handle failed payment intent
+ * - Updates payment record status with error details
+ * - Creates user notification about the failure
+ * - Logs analytics event for monitoring
+ */
+async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+  const supabase = createAdminClient()
+  const { userId, itemId, itemType } = paymentIntent.metadata || {}
+  const errorMessage = paymentIntent.last_payment_error?.message || 'Payment could not be processed'
+  const errorCode = paymentIntent.last_payment_error?.code || 'unknown'
+
+  try {
+    // Update payment record with failure details
+    const { error: paymentError } = await supabase
+      .from('payments')
+      .update({
+        status: 'failed',
+        error_message: errorMessage,
+        error_code: errorCode,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('stripe_payment_intent_id', paymentIntent.id)
+
+    if (paymentError) {
+      logger.error('Failed to update payment record', { error: paymentError.message, paymentIntentId: paymentIntent.id })
+    }
+
+    // Notify user about the failure
+    if (userId) {
+      await supabase.from('notifications').insert({
+        user_id: userId,
+        type: 'payment_failed',
+        title: 'Payment Failed',
+        message: `Your payment could not be processed. ${errorMessage}`,
+        metadata: {
+          payment_intent_id: paymentIntent.id,
+          error_code: errorCode,
+          error_message: errorMessage,
+          item_id: itemId,
+          item_type: itemType,
+        },
+        read: false,
+        priority: 'high',
+        created_at: new Date().toISOString(),
+      })
+
+      // Track failure analytics
+      await supabase.from('payment_analytics').insert({
+        payment_id: paymentIntent.id,
+        user_id: userId,
+        event_type: 'payment_failed',
+        error_code: errorCode,
+        error_message: errorMessage,
+        item_id: itemId,
+        item_type: itemType,
+        timestamp: new Date().toISOString(),
+      })
+    }
+
+    logger.info('Payment failure handling completed', { paymentIntentId: paymentIntent.id, userId, errorCode })
+  } catch (error: any) {
+    logger.error('Error handling payment failure', { error: error.message, paymentIntentId: paymentIntent.id })
+  }
+}
+
+/**
+ * Handle charge refund
+ * - Revokes user access to the content
+ * - Updates payment record status
+ * - Notifies user about the refund
+ */
+async function handleChargeRefunded(charge: Stripe.Charge): Promise<void> {
+  const supabase = createAdminClient()
+  const paymentIntentId = typeof charge.payment_intent === 'string'
+    ? charge.payment_intent
+    : charge.payment_intent?.id
+
+  try {
+    // Get payment record to find user and item details
+    const { data: payment } = await supabase
+      .from('payments')
+      .select('user_id, metadata')
+      .eq('stripe_payment_intent_id', paymentIntentId)
+      .single()
+
+    const userId = payment?.user_id
+    const itemId = payment?.metadata?.itemId
+
+    // Update payment status to refunded
+    const { error: paymentError } = await supabase
+      .from('payments')
+      .update({
+        status: 'refunded',
+        refunded_amount: charge.amount_refunded / 100,
+        refunded_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('stripe_payment_intent_id', paymentIntentId)
+
+    if (paymentError) {
+      logger.error('Failed to update payment record for refund', { error: paymentError.message, chargeId: charge.id })
+    }
+
+    // Revoke user access to the content
+    if (itemId && userId) {
+      const { error: accessError } = await supabase
+        .from('user_content_access')
+        .update({
+          is_active: false,
+          revoked_at: new Date().toISOString(),
+          revoked_reason: 'refund',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId)
+        .eq('item_id', itemId)
+
+      if (accessError) {
+        logger.error('Failed to revoke content access', { error: accessError.message, userId, itemId })
+      } else {
+        logger.info('Content access revoked due to refund', { userId, itemId })
+      }
+    }
+
+    // Notify user about the refund
+    if (userId) {
+      await supabase.from('notifications').insert({
+        user_id: userId,
+        type: 'refund_processed',
+        title: 'Refund Processed',
+        message: `Your refund of ${(charge.amount_refunded / 100).toFixed(2)} ${charge.currency.toUpperCase()} has been processed. Access to the purchased content has been revoked.`,
+        metadata: {
+          charge_id: charge.id,
+          payment_intent_id: paymentIntentId,
+          amount_refunded: charge.amount_refunded / 100,
+          currency: charge.currency,
+          item_id: itemId,
+        },
+        read: false,
+        created_at: new Date().toISOString(),
+      })
+
+      // Track refund analytics
+      await supabase.from('payment_analytics').insert({
+        payment_id: paymentIntentId,
+        user_id: userId,
+        event_type: 'charge_refunded',
+        amount: charge.amount_refunded,
+        currency: charge.currency,
+        item_id: itemId,
+        timestamp: new Date().toISOString(),
+      })
+    }
+
+    logger.info('Refund handling completed', { chargeId: charge.id, paymentIntentId, userId })
+  } catch (error: any) {
+    logger.error('Error handling refund', { error: error.message, chargeId: charge.id })
+  }
+}
+
+/**
+ * Handle dispute creation
+ * - Creates dispute record in database
+ * - Updates payment status to disputed
+ * - Notifies admins about the dispute
+ * - Notifies the user involved
+ */
+async function handleDisputeCreated(dispute: Stripe.Dispute): Promise<void> {
+  const supabase = createAdminClient()
+  const chargeId = typeof dispute.charge === 'string' ? dispute.charge : dispute.charge?.id
+  const paymentIntentId = typeof dispute.payment_intent === 'string'
+    ? dispute.payment_intent
+    : dispute.payment_intent?.id
+
+  try {
+    // Create dispute record
+    const { error: disputeError } = await supabase
+      .from('payment_disputes')
+      .insert({
+        stripe_dispute_id: dispute.id,
+        stripe_charge_id: chargeId,
+        stripe_payment_intent_id: paymentIntentId,
+        amount: dispute.amount / 100,
+        currency: dispute.currency,
+        reason: dispute.reason,
+        status: 'opened',
+        evidence_due_by: dispute.evidence_details?.due_by
+          ? new Date(dispute.evidence_details.due_by * 1000).toISOString()
+          : null,
+        opened_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+    if (disputeError) {
+      logger.error('Failed to create dispute record', { error: disputeError.message, disputeId: dispute.id })
+    }
+
+    // Update payment status to disputed
+    if (paymentIntentId) {
+      await supabase
+        .from('payments')
+        .update({
+          status: 'disputed',
+          disputed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('stripe_payment_intent_id', paymentIntentId)
+    }
+
+    // Get user details from payment
+    const { data: payment } = await supabase
+      .from('payments')
+      .select('user_id, metadata')
+      .eq('stripe_payment_intent_id', paymentIntentId)
+      .single()
+
+    const userId = payment?.user_id
+
+    // Notify the user about the dispute
+    if (userId) {
+      await supabase.from('notifications').insert({
+        user_id: userId,
+        type: 'dispute_opened',
+        title: 'Payment Disputed',
+        message: `A dispute has been opened for your payment of ${(dispute.amount / 100).toFixed(2)} ${dispute.currency.toUpperCase()}. Reason: ${dispute.reason || 'Not specified'}`,
+        metadata: {
+          dispute_id: dispute.id,
+          payment_intent_id: paymentIntentId,
+          amount: dispute.amount / 100,
+          currency: dispute.currency,
+          reason: dispute.reason,
+        },
+        read: false,
+        priority: 'high',
+        created_at: new Date().toISOString(),
+      })
+    }
+
+    // Notify all admin users about the dispute
+    const { data: admins } = await supabase
+      .from('users')
+      .select('id')
+      .eq('role', 'admin')
+
+    if (admins && admins.length > 0) {
+      const adminNotifications = admins.map(admin => ({
+        user_id: admin.id,
+        type: 'admin_dispute_alert',
+        title: 'New Payment Dispute',
+        message: `A new dispute has been opened. Amount: ${(dispute.amount / 100).toFixed(2)} ${dispute.currency.toUpperCase()}. Reason: ${dispute.reason || 'Not specified'}. Evidence due by: ${dispute.evidence_details?.due_by ? new Date(dispute.evidence_details.due_by * 1000).toLocaleDateString() : 'N/A'}`,
+        metadata: {
+          dispute_id: dispute.id,
+          payment_intent_id: paymentIntentId,
+          charge_id: chargeId,
+          amount: dispute.amount / 100,
+          currency: dispute.currency,
+          reason: dispute.reason,
+          evidence_due_by: dispute.evidence_details?.due_by,
+          user_id: userId,
+        },
+        read: false,
+        priority: 'urgent',
+        created_at: new Date().toISOString(),
+      }))
+
+      await supabase.from('notifications').insert(adminNotifications)
+    }
+
+    // Track dispute analytics
+    await supabase.from('payment_analytics').insert({
+      payment_id: paymentIntentId,
+      user_id: userId,
+      event_type: 'dispute_created',
+      amount: dispute.amount,
+      currency: dispute.currency,
+      metadata: {
+        reason: dispute.reason,
+        dispute_id: dispute.id,
+      },
+      timestamp: new Date().toISOString(),
+    })
+
+    logger.info('Dispute handling completed', { disputeId: dispute.id, paymentIntentId, reason: dispute.reason })
+  } catch (error: any) {
+    logger.error('Error handling dispute', { error: error.message, disputeId: dispute.id })
   }
 }
 

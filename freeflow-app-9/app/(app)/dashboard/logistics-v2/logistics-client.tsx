@@ -995,9 +995,22 @@ export default function LogisticsClient() {
   const handleConfirmResetHistory = async () => {
     setIsSaving(true)
     try {
-      // TODO: Wire to actual database operation to reset shipment history
-      console.warn('handleConfirmResetHistory: Not yet wired to database')
-      toast.success('History reset')
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Soft delete all shipments for the user (set deleted_at timestamp)
+      const { error } = await supabase
+        .from('logistics_shipments')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+
+      if (error) throw error
+
+      // Refresh the shipments list to reflect the changes
+      await refreshShipments()
+      toast.success('Shipment history has been reset')
     } catch (error) {
       console.error('Reset history error:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to reset history')
@@ -1014,9 +1027,22 @@ export default function LogisticsClient() {
   const handleConfirmDisconnectCarriers = async () => {
     setIsSaving(true)
     try {
-      // TODO: Wire to actual database operation to disconnect carriers
-      console.warn('handleConfirmDisconnectCarriers: Not yet wired to database')
-      toast.success('Carriers disconnected')
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Deactivate all carriers for the user (set is_active to false)
+      const { error } = await supabase
+        .from('logistics_carriers')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+
+      if (error) throw error
+
+      // Refresh the carriers list to reflect the changes
+      await refreshCarriers()
+      toast.success('All carriers have been disconnected')
     } catch (error) {
       console.error('Disconnect carriers error:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to disconnect carriers')

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createFeatureLogger } from '@/lib/logger'
+import { createAdminClient } from '@/lib/supabase/server'
 
 const logger = createFeatureLogger('API-GuestPayment')
 
@@ -76,8 +77,66 @@ export async function POST(request: NextRequest) {
       createdAt: new Date()
     }
 
-    // TODO: Store in your database
-    // await storeGuestSession(guestSession)
+    // Store payment and guest session in database
+    const supabase = createAdminClient()
+
+    // Store the payment record in payments table
+    const { error: paymentError } = await supabase
+      .from('payments')
+      .insert({
+        user_id: null, // Guest payment - no user_id
+        stripe_payment_intent_id: paymentIntent.id,
+        amount: amount,
+        currency: 'usd',
+        status: 'pending',
+        metadata: {
+          type: 'guest_payment',
+          guestSessionId,
+          feature,
+          duration,
+          email,
+          name,
+          stripeCustomerId: customer.id
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+
+    if (paymentError) {
+      logger.error('Failed to store payment record', { error: paymentError.message })
+      // Don't fail the payment flow - payment can still proceed
+    }
+
+    // Store the guest session record
+    const { error: sessionError } = await supabase
+      .from('guest_sessions')
+      .upsert({
+        id: guestSessionId,
+        email,
+        name,
+        feature,
+        payment_intent_id: paymentIntent.id,
+        stripe_customer_id: customer.id,
+        amount,
+        duration,
+        status: 'pending',
+        expires_at: guestSession.expiresAt.toISOString(),
+        created_at: guestSession.createdAt.toISOString()
+      }, {
+        onConflict: 'id'
+      })
+
+    if (sessionError) {
+      logger.error('Failed to store guest session', { error: sessionError.message })
+      // Don't fail the payment flow - payment can still proceed
+    }
+
+    logger.info('Guest payment initiated', {
+      guestSessionId,
+      paymentIntentId: paymentIntent.id,
+      feature,
+      amount
+    })
 
     return NextResponse.json({
       success: true,
@@ -168,18 +227,14 @@ async function grantGuestFeatureAccess(data: {
   email: string
   name: string
 }) {
-  // Create Supabase client for database operations
-  const { createClient } = await import('@supabase/supabase-js')
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  // Use admin client for database operations
+  const supabase = createAdminClient()
 
   // Calculate expiration based on duration
   const expiresAt = new Date(Date.now() + getExpirationTime(data.duration))
 
-  // Store/update guest session in database
-  await supabase
+  // Update guest session status to active
+  const { error: sessionError } = await supabase
     .from('guest_sessions')
     .upsert({
       id: data.guestSessionId,
@@ -192,6 +247,24 @@ async function grantGuestFeatureAccess(data: {
     }, {
       onConflict: 'id'
     })
+
+  if (sessionError) {
+    logger.error('Failed to update guest session status', { error: sessionError.message })
+  }
+
+  // Update payment status to succeeded
+  const { error: paymentError } = await supabase
+    .from('payments')
+    .update({
+      status: 'succeeded',
+      paid_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .eq('metadata->>guestSessionId', data.guestSessionId)
+
+  if (paymentError) {
+    logger.error('Failed to update payment status', { error: paymentError.message })
+  }
 
   logger.info('Granting guest feature access', { feature: data.feature, email: data.email, duration: data.duration })
 }

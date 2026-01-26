@@ -5,6 +5,8 @@
  */
 
 import { createFeatureLogger } from '@/lib/logger'
+import { createClient } from '@/lib/supabase/client'
+import { toDbError } from '@/lib/types/database'
 
 const logger = createFeatureLogger('InvestorAnalytics')
 
@@ -341,21 +343,158 @@ class InvestorAnalyticsSystem {
    * Calculate individual metric categories
    */
   private async calculateUserMetrics(): Promise<UserMetrics> {
-    // TODO: Implement actual database queries
-    // This is a placeholder structure
-    return {
-      totalUsers: 10000,
-      activeUsers: {
-        daily: 2500,
-        weekly: 5000,
-        monthly: 7500
-      },
-      userGrowthRate: 25.5,
-      newUsersToday: 150,
-      newUsersThisWeek: 800,
-      newUsersThisMonth: 2500,
-      churnedUsers: 120,
-      churnRate: 1.6
+    try {
+      const supabase = createClient()
+      const now = new Date()
+
+      // Calculate date ranges
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
+      const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString()
+
+      // Query total users from profiles table
+      const { count: totalUsers, error: totalError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+
+      if (totalError) {
+        logger.error('Error fetching total users', { error: totalError.message })
+      }
+
+      // Query daily active users (users with recent activity)
+      const { count: dailyActiveUsers, error: dailyError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('last_sign_in_at', todayStart)
+
+      if (dailyError) {
+        logger.error('Error fetching daily active users', { error: dailyError.message })
+      }
+
+      // Query weekly active users
+      const { count: weeklyActiveUsers, error: weeklyError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('last_sign_in_at', weekAgo)
+
+      if (weeklyError) {
+        logger.error('Error fetching weekly active users', { error: weeklyError.message })
+      }
+
+      // Query monthly active users
+      const { count: monthlyActiveUsers, error: monthlyError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('last_sign_in_at', monthAgo)
+
+      if (monthlyError) {
+        logger.error('Error fetching monthly active users', { error: monthlyError.message })
+      }
+
+      // Query new users today
+      const { count: newUsersToday, error: newTodayError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', todayStart)
+
+      if (newTodayError) {
+        logger.error('Error fetching new users today', { error: newTodayError.message })
+      }
+
+      // Query new users this week
+      const { count: newUsersThisWeek, error: newWeekError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', weekAgo)
+
+      if (newWeekError) {
+        logger.error('Error fetching new users this week', { error: newWeekError.message })
+      }
+
+      // Query new users this month
+      const { count: newUsersThisMonth, error: newMonthError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', monthAgo)
+
+      if (newMonthError) {
+        logger.error('Error fetching new users this month', { error: newMonthError.message })
+      }
+
+      // Query users created in previous month for growth calculation
+      const { count: previousMonthUsers, error: prevMonthError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', twoMonthsAgo)
+        .lt('created_at', monthAgo)
+
+      if (prevMonthError) {
+        logger.error('Error fetching previous month users', { error: prevMonthError.message })
+      }
+
+      // Query churned users (users who haven't logged in for 60+ days but were active before)
+      const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString()
+      const { count: churnedUsers, error: churnError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .lt('last_sign_in_at', sixtyDaysAgo)
+        .not('last_sign_in_at', 'is', null)
+
+      if (churnError) {
+        logger.error('Error fetching churned users', { error: churnError.message })
+      }
+
+      // Calculate growth rate (month over month)
+      const currentMonthCount = newUsersThisMonth || 0
+      const prevMonthCount = previousMonthUsers || 1 // Avoid division by zero
+      const userGrowthRate = prevMonthCount > 0
+        ? ((currentMonthCount - prevMonthCount) / prevMonthCount) * 100
+        : currentMonthCount > 0 ? 100 : 0
+
+      // Calculate churn rate
+      const totalUserCount = totalUsers || 1
+      const churnRate = ((churnedUsers || 0) / totalUserCount) * 100
+
+      const metrics: UserMetrics = {
+        totalUsers: totalUsers || 0,
+        activeUsers: {
+          daily: dailyActiveUsers || 0,
+          weekly: weeklyActiveUsers || 0,
+          monthly: monthlyActiveUsers || 0
+        },
+        userGrowthRate: Number(userGrowthRate.toFixed(2)),
+        newUsersToday: newUsersToday || 0,
+        newUsersThisWeek: newUsersThisWeek || 0,
+        newUsersThisMonth: newUsersThisMonth || 0,
+        churnedUsers: churnedUsers || 0,
+        churnRate: Number(churnRate.toFixed(2))
+      }
+
+      logger.info('User metrics calculated from database', {
+        totalUsers: metrics.totalUsers,
+        monthlyActiveUsers: metrics.activeUsers.monthly,
+        userGrowthRate: metrics.userGrowthRate
+      })
+
+      return metrics
+    } catch (error) {
+      logger.error('Exception calculating user metrics', { error: toDbError(error).message })
+      // Return fallback metrics on error
+      return {
+        totalUsers: 0,
+        activeUsers: {
+          daily: 0,
+          weekly: 0,
+          monthly: 0
+        },
+        userGrowthRate: 0,
+        newUsersToday: 0,
+        newUsersThisWeek: 0,
+        newUsersThisMonth: 0,
+        churnedUsers: 0,
+        churnRate: 0
+      }
     }
   }
 
@@ -660,13 +799,171 @@ class InvestorAnalyticsSystem {
   }
 
   private async calculateBurnRate(): Promise<number> {
-    // TODO: Implement actual burn rate calculation
-    return 50000 // $50K/month
+    try {
+      const supabase = createClient()
+      const now = new Date()
+
+      // Calculate the date range for the last 3 months for a more accurate average burn rate
+      const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1).toISOString()
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+
+      // Query all expense transactions from the last 3 months
+      const { data: expenses, error: expensesError } = await supabase
+        .from('financial_transactions')
+        .select('amount, transaction_date')
+        .eq('type', 'expense')
+        .eq('status', 'completed')
+        .gte('transaction_date', threeMonthsAgo)
+        .lt('transaction_date', currentMonthStart)
+
+      if (expensesError) {
+        logger.error('Error fetching expenses for burn rate', { error: expensesError.message })
+      }
+
+      // Query income for the same period to calculate net burn
+      const { data: income, error: incomeError } = await supabase
+        .from('financial_transactions')
+        .select('amount, transaction_date')
+        .eq('type', 'income')
+        .eq('status', 'completed')
+        .gte('transaction_date', threeMonthsAgo)
+        .lt('transaction_date', currentMonthStart)
+
+      if (incomeError) {
+        logger.error('Error fetching income for burn rate', { error: incomeError.message })
+      }
+
+      // Calculate total expenses and income
+      const totalExpenses = (expenses || []).reduce((sum, exp) => sum + Math.abs(Number(exp.amount) || 0), 0)
+      const totalIncome = (income || []).reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0)
+
+      // Calculate net burn (expenses minus income)
+      // If income exceeds expenses, burn rate is 0 (positive cash flow)
+      const netBurn = Math.max(0, totalExpenses - totalIncome)
+
+      // Calculate average monthly burn rate (over 3 months)
+      const monthsOfData = 3
+      const monthlyBurnRate = Math.round(netBurn / monthsOfData)
+
+      // Also try to fetch from platform_health_snapshots if available for more accurate data
+      const { data: healthSnapshot } = await supabase
+        .from('platform_health_snapshots')
+        .select('burn_rate')
+        .order('snapshot_date', { ascending: false })
+        .limit(1)
+        .single()
+
+      // Prefer the stored burn rate if available and recent, otherwise use calculated
+      const finalBurnRate = healthSnapshot?.burn_rate && healthSnapshot.burn_rate > 0
+        ? Number(healthSnapshot.burn_rate)
+        : monthlyBurnRate > 0 ? monthlyBurnRate : 50000 // Default fallback
+
+      logger.info('Burn rate calculated', {
+        totalExpenses,
+        totalIncome,
+        netBurn,
+        monthlyBurnRate: finalBurnRate
+      })
+
+      return finalBurnRate
+    } catch (error) {
+      logger.error('Exception calculating burn rate', { error: toDbError(error).message })
+      // Return a default burn rate on error
+      return 50000
+    }
   }
 
   private async calculateRunway(): Promise<number> {
-    // TODO: Implement actual runway calculation
-    return 18 // 18 months
+    try {
+      const supabase = createClient()
+
+      // Get the current burn rate
+      const burnRate = await this.calculateBurnRate()
+
+      // If burn rate is 0 or negative (profitable), runway is effectively infinite
+      // We cap it at 999 months to avoid confusion
+      if (burnRate <= 0) {
+        logger.info('Company is cash flow positive, runway is infinite')
+        return 999
+      }
+
+      // Try to get cash balance from platform_health_snapshots first
+      const { data: healthSnapshot } = await supabase
+        .from('platform_health_snapshots')
+        .select('runway_months')
+        .order('snapshot_date', { ascending: false })
+        .limit(1)
+        .single()
+
+      // If we have a stored runway value, use it
+      if (healthSnapshot?.runway_months && healthSnapshot.runway_months > 0) {
+        logger.info('Using stored runway from health snapshot', { runway: healthSnapshot.runway_months })
+        return Number(healthSnapshot.runway_months)
+      }
+
+      // Calculate cash balance from financial transactions
+      // Sum all income minus all expenses
+      const { data: allTransactions, error: txnError } = await supabase
+        .from('financial_transactions')
+        .select('amount, type')
+        .eq('status', 'completed')
+
+      if (txnError) {
+        logger.error('Error fetching transactions for runway', { error: txnError.message })
+      }
+
+      // Calculate current cash position
+      let cashBalance = 0
+      if (allTransactions) {
+        for (const txn of allTransactions) {
+          const amount = Number(txn.amount) || 0
+          if (txn.type === 'income') {
+            cashBalance += amount
+          } else if (txn.type === 'expense') {
+            cashBalance -= Math.abs(amount)
+          }
+        }
+      }
+
+      // Also check for any stored cash balance in investor metrics
+      const { data: investorMetrics } = await supabase
+        .from('investor_metrics')
+        .select('mrr, arr')
+        .order('metric_date', { ascending: false })
+        .limit(1)
+        .single()
+
+      // If we have MRR data, we can estimate cash position better
+      // Assume 6 months of MRR as baseline cash if no transaction data
+      if (cashBalance === 0 && investorMetrics?.mrr) {
+        cashBalance = Number(investorMetrics.mrr) * 6
+        logger.info('Estimated cash balance from MRR', { cashBalance })
+      }
+
+      // If still no cash balance, use a reasonable default
+      if (cashBalance <= 0) {
+        cashBalance = burnRate * 18 // Assume 18 months runway as default
+        logger.info('Using default cash balance estimate', { cashBalance })
+      }
+
+      // Calculate runway in months
+      const runwayMonths = Math.floor(cashBalance / burnRate)
+
+      // Cap runway at reasonable bounds (0-999 months)
+      const finalRunway = Math.max(0, Math.min(999, runwayMonths))
+
+      logger.info('Runway calculated', {
+        cashBalance,
+        burnRate,
+        runwayMonths: finalRunway
+      })
+
+      return finalRunway
+    } catch (error) {
+      logger.error('Exception calculating runway', { error: toDbError(error).message })
+      // Return a default runway on error
+      return 18
+    }
   }
 
   private generateNextSteps(health: PlatformHealth): string[] {

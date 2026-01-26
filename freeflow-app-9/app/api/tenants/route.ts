@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { createFeatureLogger } from '@/lib/logger';
+import { sendTeamInvite } from '@/lib/email/email-templates';
 
 const logger = createFeatureLogger('tenants-api');
 
@@ -518,7 +519,55 @@ export async function POST(request: NextRequest) {
 
         if (error) throw error;
 
-        // TODO: Send invite email
+        // Get tenant and inviter details for the email
+        const { data: tenant } = await supabase
+          .from('tenants')
+          .select('name, display_name')
+          .eq('id', tenantId)
+          .single();
+
+        const { data: inviter } = await supabase
+          .from('users')
+          .select('raw_user_meta_data')
+          .eq('id', user.id)
+          .single();
+
+        const tenantName = tenant?.display_name || tenant?.name || 'the organization';
+        const inviterName = inviter?.raw_user_meta_data?.name || inviter?.raw_user_meta_data?.full_name || user.email || 'A team member';
+
+        // Generate invite URL
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const inviteUrl = `${baseUrl}/invite/accept?token=${invite.id}`;
+        const expiresAt = new Date(invite.expires_at).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+
+        // Send invite email
+        try {
+          await sendTeamInvite({
+            inviteeName: '', // Will show as "Hi there" in the template
+            inviteeEmail: validated.email,
+            teamName: tenantName,
+            inviterName: inviterName,
+            role: validated.role,
+            inviteUrl: inviteUrl,
+            expiresAt: expiresAt,
+          });
+          logger.info('Tenant invite email sent', {
+            inviteId: invite.id,
+            email: validated.email,
+            tenantId
+          });
+        } catch (emailError) {
+          // Log the error but don't fail the invite creation
+          logger.error('Failed to send tenant invite email', {
+            error: emailError,
+            inviteId: invite.id,
+            email: validated.email
+          });
+        }
 
         return NextResponse.json({ invite }, { status: 201 });
       }

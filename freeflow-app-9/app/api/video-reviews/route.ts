@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createFeatureLogger } from '@/lib/logger';
+import { getEmailService } from '@/lib/email/email-service';
 
 const logger = createFeatureLogger('video-reviews');
 
@@ -216,7 +217,81 @@ export async function POST(request: NextRequest) {
             },
           });
         }
-        // TODO: Send email for external participants
+
+        // Send email for external participants (those with email but no user_id)
+        if (participant.email && !participant.user_id) {
+          try {
+            const emailService = getEmailService();
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+            const reviewUrl = `${baseUrl}/review/${session.id}${password ? `?token=${encodeURIComponent(password)}` : ''}`;
+
+            // Get inviter name
+            const { data: inviterData } = await supabase
+              .from('users')
+              .select('raw_user_meta_data')
+              .eq('id', user.id)
+              .single();
+            const inviterName = inviterData?.raw_user_meta_data?.name || inviterData?.raw_user_meta_data?.full_name || 'Someone';
+
+            await emailService.send({
+              to: participant.email,
+              subject: `You're invited to review "${title || 'a video'}"`,
+              text: `${inviterName} has invited you to review a video.\n\nProject: ${title || 'Video Review'}\n${description ? `Description: ${description}\n` : ''}${due_date ? `Due Date: ${new Date(due_date).toLocaleDateString()}\n` : ''}\nReview at: ${reviewUrl}`,
+              html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Video Review Invitation</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">Video Review Invitation</h1>
+  </div>
+  <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+    <p style="color: #4b5563;">Hi there,</p>
+    <p style="color: #4b5563;"><strong>${inviterName}</strong> has invited you to review a video.</p>
+
+    <div style="background: #f9fafb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+      <h3 style="margin: 0 0 10px 0; color: #1f2937;">${title || 'Video Review'}</h3>
+      ${description ? `<p style="color: #6b7280; margin: 5px 0;">${description}</p>` : ''}
+      ${due_date ? `<p style="color: #6b7280; margin: 5px 0;"><strong>Due:</strong> ${new Date(due_date).toLocaleDateString()}</p>` : ''}
+      <p style="color: #6b7280; margin: 5px 0;"><strong>Your Role:</strong> ${participant.role || 'Reviewer'}</p>
+    </div>
+
+    <p style="margin-top: 25px; text-align: center;">
+      <a href="${reviewUrl}" style="background-color: #4F46E5; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600;">
+        Start Review
+      </a>
+    </p>
+
+    <p style="color: #9ca3af; font-size: 12px; margin-top: 20px; text-align: center;">
+      If you have any questions, please contact the person who invited you.
+    </p>
+  </div>
+</body>
+</html>
+              `,
+              tags: ['video-review', 'invite', 'external'],
+              metadata: {
+                sessionId: session.id,
+                videoId: video_id,
+                participantEmail: participant.email,
+              },
+            });
+            logger.info('External participant video review invite sent', {
+              email: participant.email,
+              sessionId: session.id,
+            });
+          } catch (emailError) {
+            // Log error but don't fail the session creation
+            logger.error('Failed to send external participant invite email', {
+              error: emailError,
+              email: participant.email,
+              sessionId: session.id,
+            });
+          }
+        }
       }
     }
 

@@ -85,6 +85,7 @@ const DEFAULT_RENDER_CONFIG = {
 // ============================================================================
 
 const renderJobs = new Map<string, RenderJob>()
+const activeRenderControllers = new Map<string, AbortController>()
 
 // ============================================================================
 // Remotion Service Class
@@ -177,11 +178,20 @@ export class RemotionService {
       throw new Error('Bundle not ready')
     }
 
+    // Create abort controller for this render job
+    const abortController = new AbortController()
+    activeRenderControllers.set(jobId, abortController)
+
     try {
       job.status = 'bundling'
       job.startedAt = new Date()
       job.progress = 5
       onProgress?.({ jobId, stage: 'bundling', progress: 5 })
+
+      // Check if cancelled before starting
+      if (abortController.signal.aborted) {
+        throw new Error('Render cancelled by user')
+      }
 
       // Get composition
       const composition = await selectComposition({
@@ -207,7 +217,12 @@ export class RemotionService {
       const extension = job.config.outputFormat || 'mp4'
       const outputPath = `${OUTPUT_DIR}/${jobId}.${extension}`
 
-      // Render the video
+      // Check if cancelled before rendering
+      if (abortController.signal.aborted) {
+        throw new Error('Render cancelled by user')
+      }
+
+      // Render the video with cancellation support
       await renderMedia({
         composition: finalComposition,
         serveUrl: this.bundlePath,
@@ -217,7 +232,13 @@ export class RemotionService {
         crf: job.config.crf,
         audioBitrate: job.config.audioBitrate,
         videoBitrate: job.config.videoBitrate,
+        cancelSignal: abortController.signal,
         onProgress: ({ progress, renderedFrames, encodedFrames }) => {
+          // Check for cancellation during progress updates
+          if (abortController.signal.aborted) {
+            return
+          }
+
           const overallProgress = 10 + Math.round(progress * 85)
           job.progress = overallProgress
 
@@ -246,11 +267,18 @@ export class RemotionService {
 
       onProgress?.({ jobId, stage: 'encoding', progress: 100 })
 
+      // Clean up abort controller
+      activeRenderControllers.delete(jobId)
+
       return job
     } catch (error) {
       job.status = 'failed'
       job.error = error instanceof Error ? error.message : 'Unknown error'
       job.completedAt = new Date()
+
+      // Clean up abort controller
+      activeRenderControllers.delete(jobId)
+
       throw error
     }
   }
@@ -263,12 +291,26 @@ export class RemotionService {
     if (!job) return
 
     if (job.status === 'rendering' || job.status === 'bundling') {
+      // Abort the render process if it's running
+      const controller = activeRenderControllers.get(jobId)
+      if (controller) {
+        controller.abort()
+        activeRenderControllers.delete(jobId)
+      }
+
       job.status = 'failed'
       job.error = 'Cancelled by user'
       job.completedAt = new Date()
-    }
 
-    // TODO: Actually cancel the render process if running
+      // Clean up any partial output file
+      if (job.outputPath) {
+        try {
+          await fs.unlink(job.outputPath)
+        } catch {
+          // File might not exist yet or already deleted
+        }
+      }
+    }
   }
 
   /**

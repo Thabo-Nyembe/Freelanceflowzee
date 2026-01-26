@@ -1680,37 +1680,223 @@ Return as JSON with fields: subject, message`;
   // ==========================================================================
 
   private async getServiceDetails(serviceType: string): Promise<any> {
-    // TODO: Fetch from database
-    return {
-      name: serviceType,
-      defaultDuration: 60,
-      price: 100,
-      description: `${serviceType} service`,
-    };
+    try {
+      // First try to fetch from booking_services table (by name or slug)
+      const { data: bookingService, error: bookingError } = await this.supabase
+        .from('booking_services')
+        .select('*')
+        .or(`name.ilike.%${serviceType}%,slug.ilike.%${serviceType}%`)
+        .eq('is_active', true)
+        .limit(1)
+        .single();
+
+      if (bookingService && !bookingError) {
+        return {
+          id: bookingService.id,
+          name: bookingService.name,
+          defaultDuration: bookingService.duration || 60,
+          price: bookingService.price || 100,
+          description: bookingService.description || `${serviceType} service`,
+          currency: bookingService.currency || 'USD',
+          bufferBefore: bookingService.buffer_before || 0,
+          bufferAfter: bookingService.buffer_after || 15,
+          maxAttendees: bookingService.max_attendees || 1,
+          locationType: bookingService.location_type || 'in_person',
+          requiresApproval: bookingService.requires_approval || false,
+          allowCancellation: bookingService.allow_cancellation !== false,
+          cancellationHours: bookingService.cancellation_hours || 24,
+          depositAmount: bookingService.deposit_amount,
+          depositPercentage: bookingService.deposit_percentage,
+          metadata: bookingService.metadata || {},
+        };
+      }
+
+      // Fallback: try to fetch from service_listings table
+      const { data: serviceListing, error: listingError } = await this.supabase
+        .from('service_listings')
+        .select('*, packages')
+        .or(`title.ilike.%${serviceType}%,slug.ilike.%${serviceType}%`)
+        .eq('status', 'active')
+        .limit(1)
+        .single();
+
+      if (serviceListing && !listingError) {
+        // Extract first package pricing if available
+        const packages = serviceListing.packages || [];
+        const basicPackage = packages.find((p: any) => p.name === 'Basic') || packages[0];
+
+        return {
+          id: serviceListing.id,
+          name: serviceListing.title,
+          defaultDuration: basicPackage?.delivery_days ? basicPackage.delivery_days * 60 : 60,
+          price: basicPackage?.price || 100,
+          description: serviceListing.description || `${serviceType} service`,
+          currency: 'USD',
+          packages: packages,
+          metadata: {},
+        };
+      }
+
+      // Return default values if service not found in database
+      logger.warn('Service not found in database, using defaults', { serviceType });
+      return {
+        name: serviceType,
+        defaultDuration: 60,
+        price: 100,
+        description: `${serviceType} service`,
+        currency: 'USD',
+      };
+    } catch (error) {
+      logger.error('Error fetching service details', { serviceType, error });
+      // Return default values on error
+      return {
+        name: serviceType,
+        defaultDuration: 60,
+        price: 100,
+        description: `${serviceType} service`,
+        currency: 'USD',
+      };
+    }
   }
 
   private async getBookingRules(serviceType: string): Promise<BookingRules> {
-    // TODO: Fetch from database
-    return {
-      businessHours: {
-        monday: { start: '09:00', end: '17:00', breaks: [{ start: '12:00', end: '13:00' }] },
-        tuesday: { start: '09:00', end: '17:00', breaks: [{ start: '12:00', end: '13:00' }] },
-        wednesday: { start: '09:00', end: '17:00', breaks: [{ start: '12:00', end: '13:00' }] },
-        thursday: { start: '09:00', end: '17:00', breaks: [{ start: '12:00', end: '13:00' }] },
-        friday: { start: '09:00', end: '17:00', breaks: [{ start: '12:00', end: '13:00' }] },
+    try {
+      // First get the service to find the user_id (service provider)
+      const { data: service } = await this.supabase
+        .from('booking_services')
+        .select('user_id, buffer_after, allow_cancellation, cancellation_hours, deposit_amount, deposit_percentage')
+        .or(`name.ilike.%${serviceType}%,slug.ilike.%${serviceType}%`)
+        .eq('is_active', true)
+        .limit(1)
+        .single();
+
+      // Get booking settings for the service provider
+      let bookingSettings = null;
+      if (service?.user_id) {
+        const { data: settings } = await this.supabase
+          .from('booking_settings')
+          .select('*')
+          .eq('user_id', service.user_id)
+          .single();
+        bookingSettings = settings;
+      }
+
+      // Get availability schedules if available
+      let availabilityData: any[] = [];
+      if (service?.user_id) {
+        const { data: availability } = await this.supabase
+          .from('booking_availability')
+          .select('*')
+          .eq('user_id', service.user_id)
+          .eq('is_available', true)
+          .order('day_of_week');
+        availabilityData = availability || [];
+      }
+
+      // Build business hours from availability data or settings
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const businessHours: BookingRules['businessHours'] = {
+        monday: null,
+        tuesday: null,
+        wednesday: null,
+        thursday: null,
+        friday: null,
         saturday: null,
         sunday: null,
-      },
-      bufferTime: 15,
-      advanceBookingDays: 30,
-      minAdvanceHours: 24,
-      allowWaitlist: true,
-      cancellationPolicy: {
-        allowCancellation: true,
-        minHoursBeforeCancellation: 24,
-        cancellationFee: 0,
-      },
-    };
+      };
+
+      if (availabilityData.length > 0) {
+        // Build from booking_availability table
+        for (const slot of availabilityData) {
+          if (slot.day_of_week !== null && slot.day_of_week >= 0 && slot.day_of_week <= 6) {
+            const dayName = dayNames[slot.day_of_week];
+            businessHours[dayName] = {
+              start: slot.start_time?.substring(0, 5) || '09:00',
+              end: slot.end_time?.substring(0, 5) || '17:00',
+            };
+          }
+        }
+      } else if (bookingSettings) {
+        // Build from booking_settings table
+        const startTime = bookingSettings.business_hours_start?.substring(0, 5) || '09:00';
+        const endTime = bookingSettings.business_hours_end?.substring(0, 5) || '17:00';
+        const workingDays = bookingSettings.working_days || [1, 2, 3, 4, 5]; // Monday-Friday
+
+        for (const dayIndex of workingDays) {
+          if (dayIndex >= 0 && dayIndex <= 6) {
+            const dayName = dayNames[dayIndex];
+            businessHours[dayName] = {
+              start: startTime,
+              end: endTime,
+              breaks: [{ start: '12:00', end: '13:00' }], // Default lunch break
+            };
+          }
+        }
+      } else {
+        // Use default business hours (Monday-Friday, 9-5)
+        for (let i = 1; i <= 5; i++) {
+          const dayName = dayNames[i];
+          businessHours[dayName] = {
+            start: '09:00',
+            end: '17:00',
+            breaks: [{ start: '12:00', end: '13:00' }],
+          };
+        }
+      }
+
+      // Build the booking rules from fetched data
+      const bufferTime = service?.buffer_after || bookingSettings?.buffer_time || 15;
+      const advanceBookingDays = bookingSettings?.advance_booking_days || 30;
+      const allowCancellation = service?.allow_cancellation !== false;
+      const cancellationHours = service?.cancellation_hours || 24;
+
+      // Deposit policy
+      let depositPolicy: BookingRules['depositPolicy'] = undefined;
+      if (bookingSettings?.require_deposit || service?.deposit_amount || service?.deposit_percentage) {
+        depositPolicy = {
+          required: true,
+          percentage: service?.deposit_percentage || bookingSettings?.deposit_percentage,
+          flatAmount: service?.deposit_amount,
+        };
+      }
+
+      return {
+        businessHours,
+        bufferTime,
+        advanceBookingDays,
+        minAdvanceHours: cancellationHours, // Use cancellation hours as minimum advance notice
+        allowWaitlist: true,
+        cancellationPolicy: {
+          allowCancellation,
+          minHoursBeforeCancellation: cancellationHours,
+          cancellationFee: 0,
+        },
+        depositPolicy,
+      };
+    } catch (error) {
+      logger.error('Error fetching booking rules', { serviceType, error });
+      // Return default booking rules on error
+      return {
+        businessHours: {
+          monday: { start: '09:00', end: '17:00', breaks: [{ start: '12:00', end: '13:00' }] },
+          tuesday: { start: '09:00', end: '17:00', breaks: [{ start: '12:00', end: '13:00' }] },
+          wednesday: { start: '09:00', end: '17:00', breaks: [{ start: '12:00', end: '13:00' }] },
+          thursday: { start: '09:00', end: '17:00', breaks: [{ start: '12:00', end: '13:00' }] },
+          friday: { start: '09:00', end: '17:00', breaks: [{ start: '12:00', end: '13:00' }] },
+          saturday: null,
+          sunday: null,
+        },
+        bufferTime: 15,
+        advanceBookingDays: 30,
+        minAdvanceHours: 24,
+        allowWaitlist: true,
+        cancellationPolicy: {
+          allowCancellation: true,
+          minHoursBeforeCancellation: 24,
+          cancellationFee: 0,
+        },
+      };
+    }
   }
 
   private generateBookingNumber(): string {

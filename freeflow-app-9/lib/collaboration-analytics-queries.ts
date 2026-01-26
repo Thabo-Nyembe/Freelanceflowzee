@@ -412,12 +412,77 @@ export async function getCollaborationStats(
       currentPeriodData.reduce((sum, d) => sum + d.engagement, 0) / currentPeriodData.length
     )
 
-    // For now, use placeholder percentage changes
-    // TODO: Implement previous period comparison
-    const messagesChange = totalMessages > 0 ? Math.random() * 20 - 5 : 0
-    const meetingsChange = totalMeetings > 0 ? Math.random() * 15 - 3 : 0
-    const projectsChange = totalProjects > 0 ? Math.random() * 10 - 2 : 0
-    const engagementChange = avgEngagement > 0 ? Math.random() * 12 - 2 : 0
+    // Calculate previous period date range for comparison
+    const previousPeriodEnd = new Date(currentPeriodData[0]?.period ? new Date() : new Date())
+    const previousPeriodStart = new Date(previousPeriodEnd)
+
+    // Set previous period based on current date range
+    switch (dateRange) {
+      case '7days':
+        previousPeriodEnd.setDate(previousPeriodEnd.getDate() - 7)
+        previousPeriodStart.setDate(previousPeriodStart.getDate() - 14)
+        break
+      case '30days':
+        previousPeriodEnd.setDate(previousPeriodEnd.getDate() - 30)
+        previousPeriodStart.setDate(previousPeriodStart.getDate() - 60)
+        break
+      case '90days':
+        previousPeriodEnd.setDate(previousPeriodEnd.getDate() - 90)
+        previousPeriodStart.setDate(previousPeriodStart.getDate() - 180)
+        break
+      case 'year':
+        previousPeriodEnd.setFullYear(previousPeriodEnd.getFullYear() - 1)
+        previousPeriodStart.setFullYear(previousPeriodStart.getFullYear() - 2)
+        break
+    }
+
+    // Fetch previous period data for comparison
+    const supabase = createClient()
+    const prevStartStr = previousPeriodStart.toISOString()
+    const prevEndStr = previousPeriodEnd.toISOString()
+
+    // Get previous period message count
+    const { count: prevMessagesCount } = await supabase
+      .from('collaboration_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gte('created_at', prevStartStr)
+      .lte('created_at', prevEndStr)
+
+    // Get previous period meetings count
+    const { count: prevMeetingsCount } = await supabase
+      .from('collaboration_meetings')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('status', 'completed')
+      .gte('scheduled_at', prevStartStr)
+      .lte('scheduled_at', prevEndStr)
+
+    // Get previous period projects count
+    const { count: prevProjectsCount } = await supabase
+      .from('canvas_projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gte('created_at', prevStartStr)
+      .lte('created_at', prevEndStr)
+
+    // Calculate percentage changes (avoid division by zero)
+    const calculatePercentageChange = (current: number, previous: number | null): number => {
+      const prev = previous || 0
+      if (prev === 0) {
+        return current > 0 ? 100 : 0 // 100% increase if previous was 0
+      }
+      return ((current - prev) / prev) * 100
+    }
+
+    const messagesChange = calculatePercentageChange(totalMessages, prevMessagesCount)
+    const meetingsChange = calculatePercentageChange(totalMeetings, prevMeetingsCount)
+    const projectsChange = calculatePercentageChange(totalProjects, prevProjectsCount)
+
+    // For engagement change, we calculate based on the average activity difference
+    const prevTotalActivity = (prevMessagesCount || 0) + ((prevMeetingsCount || 0) * 5) + ((prevProjectsCount || 0) * 3)
+    const currentTotalActivity = totalMessages + (totalMeetings * 5) + (totalProjects * 3)
+    const engagementChange = calculatePercentageChange(currentTotalActivity, prevTotalActivity > 0 ? prevTotalActivity : null)
 
     const stats: CollaborationStats = {
       totalMessages,

@@ -13,6 +13,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { AIService } from './ai-service';
 import logger from '@/lib/logger';
+import { getEmailService, EmailMessage as ServiceEmailMessage } from '@/lib/email/email-service';
 
 // ============================================================================
 // TYPES AND INTERFACES
@@ -947,18 +948,49 @@ Return as JSON array with fields: name, description, quantity (hours), category`
         to: email.from,
       });
 
-      // TODO: Integrate with actual email service (Resend, SendGrid, etc.)
-      // For now, just update status
+      // Send email using the email service
+      const emailService = getEmailService();
+      const result = await emailService.send({
+        to: email.from_email || email.from,
+        subject: response.subject,
+        text: response.body,
+        html: response.bodyHtml,
+        headers: {
+          'In-Reply-To': email.id,
+          'References': email.id,
+        },
+        tags: ['email-agent', 'response'],
+        metadata: {
+          responseId: response.id,
+          originalEmailId: email.id,
+        },
+      });
+
+      if (!result.success) {
+        logger.error('Failed to send email response', {
+          responseId: response.id,
+          error: result.error,
+        });
+        throw new Error(result.error || 'Failed to send email');
+      }
+
+      // Update status to sent
       await this.supabase
         .from('email_responses')
         .update({
           status: 'sent',
           sentAt: new Date(),
+          metadata: {
+            ...response.metadata,
+            messageId: result.messageId,
+            provider: result.provider,
+          },
         })
         .eq('id', response.id);
 
       logger.info('Email response sent successfully', {
         responseId: response.id,
+        messageId: result.messageId,
       });
     } catch (error) {
       logger.error('Error sending email response', { responseId: response.id, error });
@@ -976,8 +1008,33 @@ Return as JSON array with fields: name, description, quantity (hours), category`
         to: quotation.clientEmail,
       });
 
-      // TODO: Generate PDF and send via email service
-      // For now, just update status
+      // Generate quotation HTML content
+      const quotationHtml = this.generateQuotationHtml(quotation);
+      const quotationText = this.generateQuotationText(quotation);
+
+      // Send email using the email service
+      const emailService = getEmailService();
+      const result = await emailService.send({
+        to: quotation.clientEmail,
+        subject: `Quotation ${quotation.quotationNumber} - ${quotation.currency} ${quotation.total.toFixed(2)}`,
+        text: quotationText,
+        html: quotationHtml,
+        tags: ['email-agent', 'quotation'],
+        metadata: {
+          quotationId: quotation.id,
+          quotationNumber: quotation.quotationNumber,
+        },
+      });
+
+      if (!result.success) {
+        logger.error('Failed to send quotation email', {
+          quotationId: quotation.id,
+          error: result.error,
+        });
+        throw new Error(result.error || 'Failed to send quotation');
+      }
+
+      // Update status to sent
       await this.supabase
         .from('quotations')
         .update({
@@ -988,11 +1045,133 @@ Return as JSON array with fields: name, description, quantity (hours), category`
 
       logger.info('Quotation sent successfully', {
         quotationId: quotation.id,
+        messageId: result.messageId,
       });
     } catch (error) {
       logger.error('Error sending quotation', { quotationId: quotation.id, error });
       throw error;
     }
+  }
+
+  /**
+   * Generate HTML content for quotation email
+   */
+  private generateQuotationHtml(quotation: GeneratedQuotation): string {
+    const servicesRows = quotation.services
+      .map(
+        (s) => `
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${s.name}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${s.description}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${s.quantity}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">${quotation.currency} ${s.unitPrice.toFixed(2)}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">${quotation.currency} ${s.total.toFixed(2)}</td>
+        </tr>
+      `
+      )
+      .join('');
+
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Quotation ${quotation.quotationNumber}</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0;">
+    <h1 style="color: white; margin: 0;">QUOTATION</h1>
+    <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0;">${quotation.quotationNumber}</p>
+  </div>
+
+  <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
+    <div style="margin-bottom: 30px;">
+      <p><strong>To:</strong> ${quotation.clientName}</p>
+      <p><strong>Email:</strong> ${quotation.clientEmail}</p>
+      <p><strong>Date:</strong> ${new Date(quotation.createdAt).toLocaleDateString()}</p>
+      <p><strong>Valid Until:</strong> ${new Date(quotation.validUntil).toLocaleDateString()}</p>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+      <thead>
+        <tr style="background: #f3f4f6;">
+          <th style="padding: 12px; text-align: left;">Service</th>
+          <th style="padding: 12px; text-align: left;">Description</th>
+          <th style="padding: 12px; text-align: center;">Qty</th>
+          <th style="padding: 12px; text-align: right;">Unit Price</th>
+          <th style="padding: 12px; text-align: right;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${servicesRows}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4" style="padding: 12px; text-align: right;"><strong>Subtotal:</strong></td>
+          <td style="padding: 12px; text-align: right;">${quotation.currency} ${quotation.subtotal.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="padding: 12px; text-align: right;"><strong>Tax (${(quotation.taxRate * 100).toFixed(0)}%):</strong></td>
+          <td style="padding: 12px; text-align: right;">${quotation.currency} ${quotation.taxAmount.toFixed(2)}</td>
+        </tr>
+        <tr style="font-size: 18px; font-weight: bold; background: #f3f4f6;">
+          <td colspan="4" style="padding: 12px; text-align: right;">Total:</td>
+          <td style="padding: 12px; text-align: right; color: #4F46E5;">${quotation.currency} ${quotation.total.toFixed(2)}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-top: 20px;">
+      <h3 style="margin-top: 0;">Terms & Conditions</h3>
+      <p>${quotation.terms}</p>
+      ${quotation.notes ? `<p><strong>Notes:</strong> ${quotation.notes}</p>` : ''}
+    </div>
+  </div>
+
+  <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px; border-radius: 0 0 10px 10px;">
+    <p>This quotation is valid until ${new Date(quotation.validUntil).toLocaleDateString()}.</p>
+    <p>Please reply to this email if you have any questions or would like to proceed.</p>
+  </div>
+</body>
+</html>
+    `;
+  }
+
+  /**
+   * Generate plain text content for quotation email
+   */
+  private generateQuotationText(quotation: GeneratedQuotation): string {
+    const servicesText = quotation.services
+      .map((s) => `- ${s.name}: ${s.quantity} x ${quotation.currency} ${s.unitPrice.toFixed(2)} = ${quotation.currency} ${s.total.toFixed(2)}`)
+      .join('\n');
+
+    return `
+QUOTATION ${quotation.quotationNumber}
+=====================================
+
+To: ${quotation.clientName}
+Email: ${quotation.clientEmail}
+Date: ${new Date(quotation.createdAt).toLocaleDateString()}
+Valid Until: ${new Date(quotation.validUntil).toLocaleDateString()}
+
+SERVICES
+--------
+${servicesText}
+
+SUMMARY
+-------
+Subtotal: ${quotation.currency} ${quotation.subtotal.toFixed(2)}
+Tax (${(quotation.taxRate * 100).toFixed(0)}%): ${quotation.currency} ${quotation.taxAmount.toFixed(2)}
+Total: ${quotation.currency} ${quotation.total.toFixed(2)}
+
+TERMS & CONDITIONS
+------------------
+${quotation.terms}
+${quotation.notes ? `\nNotes: ${quotation.notes}` : ''}
+
+This quotation is valid until ${new Date(quotation.validUntil).toLocaleDateString()}.
+Please reply to this email if you have any questions or would like to proceed.
+    `.trim();
   }
 
   // ==========================================================================
@@ -1115,15 +1294,106 @@ Return as JSON array with fields: name, description, quantity (hours), category`
     approvalsCompleted: number;
     avgResponseTime: number;
   }> {
-    // TODO: Implement statistics queries
-    return {
-      totalEmailsProcessed: 0,
-      responsesGenerated: 0,
-      quotationsGenerated: 0,
-      approvalsPending: 0,
-      approvalsCompleted: 0,
-      avgResponseTime: 0,
-    };
+    try {
+      const fromDate = dateRange?.from || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default: last 30 days
+      const toDate = dateRange?.to || new Date();
+
+      // Query for total emails processed
+      const { count: totalEmailsProcessed } = await this.supabase
+        .from('emails')
+        .select('*', { count: 'exact', head: true })
+        .gte('received_at', fromDate.toISOString())
+        .lte('received_at', toDate.toISOString());
+
+      // Query for responses generated
+      const { count: responsesGenerated } = await this.supabase
+        .from('email_responses')
+        .select('*', { count: 'exact', head: true })
+        .gte('generatedAt', fromDate.toISOString())
+        .lte('generatedAt', toDate.toISOString());
+
+      // Query for quotations generated
+      const { count: quotationsGenerated } = await this.supabase
+        .from('quotations')
+        .select('*', { count: 'exact', head: true })
+        .gte('createdAt', fromDate.toISOString())
+        .lte('createdAt', toDate.toISOString());
+
+      // Query for pending approvals
+      const { count: approvalsPending } = await this.supabase
+        .from('approval_workflows')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+
+      // Query for completed approvals
+      const { count: approvalsCompleted } = await this.supabase
+        .from('approval_workflows')
+        .select('*', { count: 'exact', head: true })
+        .in('status', ['approved', 'rejected'])
+        .gte('createdAt', fromDate.toISOString())
+        .lte('createdAt', toDate.toISOString());
+
+      // Calculate average response time (in minutes)
+      const { data: responseTimeData } = await this.supabase
+        .from('email_responses')
+        .select('generatedAt, emailId')
+        .eq('status', 'sent')
+        .gte('generatedAt', fromDate.toISOString())
+        .lte('generatedAt', toDate.toISOString())
+        .limit(100);
+
+      let avgResponseTime = 0;
+      if (responseTimeData && responseTimeData.length > 0) {
+        // Fetch corresponding email received_at times
+        const emailIds = responseTimeData.map(r => r.emailId);
+        const { data: emailData } = await this.supabase
+          .from('emails')
+          .select('id, received_at')
+          .in('id', emailIds);
+
+        if (emailData && emailData.length > 0) {
+          const emailMap = new Map(emailData.map(e => [e.id, new Date(e.received_at)]));
+          let totalTime = 0;
+          let count = 0;
+
+          for (const response of responseTimeData) {
+            const receivedAt = emailMap.get(response.emailId);
+            if (receivedAt) {
+              const generatedAt = new Date(response.generatedAt);
+              const diff = (generatedAt.getTime() - receivedAt.getTime()) / (1000 * 60); // Convert to minutes
+              if (diff > 0) {
+                totalTime += diff;
+                count++;
+              }
+            }
+          }
+
+          if (count > 0) {
+            avgResponseTime = Math.round(totalTime / count);
+          }
+        }
+      }
+
+      return {
+        totalEmailsProcessed: totalEmailsProcessed || 0,
+        responsesGenerated: responsesGenerated || 0,
+        quotationsGenerated: quotationsGenerated || 0,
+        approvalsPending: approvalsPending || 0,
+        approvalsCompleted: approvalsCompleted || 0,
+        avgResponseTime,
+      };
+    } catch (error) {
+      logger.error('Error fetching email agent statistics', { error });
+      // Return zeros on error instead of throwing
+      return {
+        totalEmailsProcessed: 0,
+        responsesGenerated: 0,
+        quotationsGenerated: 0,
+        approvalsPending: 0,
+        approvalsCompleted: 0,
+        avgResponseTime: 0,
+      };
+    }
   }
 }
 
