@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 import { useNotificationsV2, type NotificationStatusV2, type NotificationTypeV2, type NotificationPriorityV2, type NotificationChannelV2 } from '@/lib/hooks/use-notifications-v2'
 import { Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -299,11 +300,26 @@ export default function NotificationsClient() {
   const [showABTestDialog, setShowABTestDialog] = useState(false)
 
   // New state for functional handlers
-  const [segments, setSegments] = useState([])
-  const [templates, setTemplates] = useState([])
-  const [automations, setAutomations] = useState([])
-  const [abTests, setAbTests] = useState([])
-  const [webhooks, setWebhooks] = useState([])
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [segments, setSegments] = useState<Segment[]>([])
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [automations, setAutomations] = useState<Automation[]>([])
+  const [abTests, setAbTests] = useState<ABTest[]>([])
+  const [webhooks, setWebhooks] = useState<WebhookEndpoint[]>([])
+
+  // Notification preferences state
+  const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreference[]>([
+    { category: 'marketing', push: true, email: true, sms: false, inApp: true, frequency: 'instant' },
+    { category: 'transactional', push: true, email: true, sms: true, inApp: true, frequency: 'instant' },
+    { category: 'product_updates', push: true, email: true, sms: false, inApp: true, frequency: 'daily' },
+    { category: 'security', push: true, email: true, sms: true, inApp: true, frequency: 'instant' },
+    { category: 'community', push: false, email: false, sms: false, inApp: true, frequency: 'weekly' }
+  ])
+  const [mutedChannels, setMutedChannels] = useState<Set<string>>(new Set())
+  const [pushSubscription, setPushSubscription] = useState<PushSubscription | null>(null)
+
+  // Supabase client for direct operations
+  const supabase = createClient()
   const [showPreviewTemplateDialog, setShowPreviewTemplateDialog] = useState(false)
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
   const [showAutomationAnalyticsDialog, setShowAutomationAnalyticsDialog] = useState(false)
@@ -585,6 +601,265 @@ export default function NotificationsClient() {
       toast.error('Export failed')
     }
   }
+
+  // ============================================================================
+  // NEW HANDLERS - Wired to API/Supabase
+  // ============================================================================
+
+  /**
+   * Clear all notifications - calls the clearAll function from useNotificationsV2 hook
+   */
+  const handleClearAll = useCallback(async () => {
+    if (!confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const success = await clearAll()
+      if (success) {
+        toast.success('All notifications cleared')
+      }
+    } catch (err) {
+      toast.error('Failed to clear notifications')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [clearAll])
+
+  /**
+   * Update notification preferences - saves to Supabase via API
+   */
+  const handleUpdatePreferences = useCallback(async (
+    category: string,
+    preferences: Partial<NotificationPreference>
+  ) => {
+    setIsSubmitting(true)
+    try {
+      // Call the API to update preferences
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-preferences',
+          data: {
+            channelPreferences: {
+              [category]: [
+                preferences.push && 'push',
+                preferences.email && 'email',
+                preferences.sms && 'sms',
+                preferences.inApp && 'in_app'
+              ].filter(Boolean)
+            },
+            categories: notificationPreferences
+              .filter(p => !p.push && !p.email && !p.sms && !p.inApp)
+              .map(p => p.category)
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update preferences')
+      }
+
+      const result = await response.json()
+
+      // Update local state
+      setNotificationPreferences(prev =>
+        prev.map(p =>
+          p.category === category
+            ? { ...p, ...preferences }
+            : p
+        )
+      )
+
+      toast.success('Preferences updated', {
+        description: result.message || `${category} notification settings saved`
+      })
+    } catch (err) {
+      toast.error('Failed to update preferences', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [notificationPreferences])
+
+  /**
+   * Mute a notification channel - prevents notifications from that channel
+   */
+  const handleMuteChannel = useCallback(async (channel: NotificationChannelV2, mute: boolean) => {
+    setIsSubmitting(true)
+    try {
+      // Update local state first (optimistic update)
+      const newMutedChannels = new Set(mutedChannels)
+      if (mute) {
+        newMutedChannels.add(channel)
+      } else {
+        newMutedChannels.delete(channel)
+      }
+      setMutedChannels(newMutedChannels)
+
+      // Persist to Supabase via preferences
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-preferences',
+          data: {
+            channelPreferences: Object.fromEntries(
+              notificationPreferences.map(p => [
+                p.category,
+                [
+                  p.push && !newMutedChannels.has('push') && 'push',
+                  p.email && !newMutedChannels.has('email') && 'email',
+                  p.sms && !newMutedChannels.has('sms') && 'sms',
+                  p.inApp && !newMutedChannels.has('in_app') && 'in_app'
+                ].filter(Boolean)
+              ])
+            )
+          }
+        })
+      })
+
+      if (!response.ok) {
+        // Revert on failure
+        if (mute) {
+          newMutedChannels.delete(channel)
+        } else {
+          newMutedChannels.add(channel)
+        }
+        setMutedChannels(newMutedChannels)
+        throw new Error('Failed to update channel settings')
+      }
+
+      toast.success(mute ? `${channel} channel muted` : `${channel} channel unmuted`, {
+        description: mute
+          ? `You won't receive notifications via ${channel}`
+          : `You will now receive notifications via ${channel}`
+      })
+    } catch (err) {
+      toast.error('Failed to update channel settings', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [mutedChannels, notificationPreferences])
+
+  /**
+   * Subscribe to push notifications - registers the browser for push notifications
+   */
+  const handleSubscribe = useCallback(async () => {
+    setIsSubmitting(true)
+    try {
+      // Check if push notifications are supported
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        throw new Error('Push notifications are not supported in this browser')
+      }
+
+      // Request notification permission
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') {
+        throw new Error('Notification permission denied')
+      }
+
+      // Get the service worker registration
+      const registration = await navigator.serviceWorker.ready
+
+      // Subscribe to push notifications
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      })
+
+      // Send subscription to server
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'register_push',
+          data: {
+            endpoint: subscription.endpoint,
+            p256dhKey: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(subscription.getKey('p256dh') || new ArrayBuffer(0))))),
+            authKey: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(subscription.getKey('auth') || new ArrayBuffer(0))))),
+            deviceName: navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop',
+            deviceType: 'web',
+            browser: navigator.userAgent,
+            os: navigator.platform
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to register push subscription')
+      }
+
+      setPushSubscription(subscription)
+      toast.success('Push notifications enabled', {
+        description: 'You will now receive push notifications'
+      })
+    } catch (err) {
+      toast.error('Failed to enable push notifications', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [])
+
+  /**
+   * Unsubscribe from push notifications - removes the browser push subscription
+   */
+  const handleUnsubscribe = useCallback(async () => {
+    setIsSubmitting(true)
+    try {
+      if (pushSubscription) {
+        await pushSubscription.unsubscribe()
+      }
+
+      // Get any existing subscription and unsubscribe
+      const registration = await navigator.serviceWorker.ready
+      const existingSubscription = await registration.pushManager.getSubscription()
+      if (existingSubscription) {
+        await existingSubscription.unsubscribe()
+      }
+
+      // Update preferences on server
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-preferences',
+          data: {
+            pushEnabled: false
+          }
+        })
+      })
+
+      setPushSubscription(null)
+      toast.success('Push notifications disabled', {
+        description: 'You will no longer receive push notifications'
+      })
+    } catch (err) {
+      toast.error('Failed to disable push notifications', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [pushSubscription])
+
+  /**
+   * Toggle subscription status - convenience wrapper
+   */
+  const handleToggleSubscription = useCallback(async () => {
+    if (pushSubscription) {
+      await handleUnsubscribe()
+    } else {
+      await handleSubscribe()
+    }
+  }, [pushSubscription, handleSubscribe, handleUnsubscribe])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">

@@ -209,6 +209,21 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   const [showMemberOptionsDialog, setShowMemberOptionsDialog] = useState(false)
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
 
+  // New state for wired handlers
+  const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false)
+  const [newChannelName, setNewChannelName] = useState('')
+  const [newChannelDescription, setNewChannelDescription] = useState('')
+  const [newChannelType, setNewChannelType] = useState<'public' | 'private' | 'group'>('public')
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editingMessageContent, setEditingMessageContent] = useState('')
+  const [reactionTargetMessageId, setReactionTargetMessageId] = useState<string | null>(null)
+  const [showAddMemberDialog, setShowAddMemberDialog] = useState(false)
+  const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null)
+  const [memberToAdd, setMemberToAdd] = useState('')
+  const [showThreadPanel, setShowThreadPanel] = useState(false)
+  const [threadParentMessage, setThreadParentMessage] = useState<ChatMessage | null>(null)
+  const [threadReplyContent, setThreadReplyContent] = useState('')
+
   // Form state for conversations
   const [conversations, setConversations] = useState<Conversation[]>(CONVERSATIONS)
 
@@ -455,6 +470,328 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       setIsSaving(false)
     }
   }, [deleteMessage])
+
+  // Edit message handler
+  const handleEditMessage = useCallback(async (messageId: string, newContent: string) => {
+    if (!newContent.trim()) {
+      toast.error('Message cannot be empty')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      await updateMessage(messageId, {
+        message: newContent.trim(),
+        is_edited: true,
+        edited_at: new Date().toISOString(),
+        status: 'edited' as const
+      })
+      toast.success('Message Updated')
+    } catch (err) {
+      toast.error('Failed to edit message')
+    } finally {
+      setIsSaving(false)
+    }
+  }, [updateMessage])
+
+  // Create channel handler
+  const handleCreateChannel = useCallback(async (channelData: {
+    name: string
+    type?: 'group' | 'public' | 'private'
+    description?: string
+    memberIds?: string[]
+  }) => {
+    if (!channelData.name?.trim()) {
+      toast.error('Channel name is required')
+      return null
+    }
+
+    setIsSaving(true)
+    try {
+      const response = await fetch('/api/messaging/channels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          name: channelData.name.trim(),
+          type: channelData.type || 'public',
+          description: channelData.description,
+          memberIds: channelData.memberIds || []
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create channel')
+      }
+
+      const result = await response.json()
+      toast.success(`Channel "${channelData.name}" created successfully`)
+      return result.channel
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create channel'
+      toast.error(message)
+      return null
+    } finally {
+      setIsSaving(false)
+    }
+  }, [])
+
+  // Add member to channel handler
+  const handleAddMember = useCallback(async (channelId: string, userId: string, role?: 'admin' | 'moderator' | 'member') => {
+    if (!channelId || !userId) {
+      toast.error('Channel and user are required')
+      return false
+    }
+
+    setIsSaving(true)
+    try {
+      const response = await fetch('/api/messaging/channels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'invite',
+          channelId,
+          userId,
+          role: role || 'member'
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to add member')
+      }
+
+      toast.success('Member added to channel')
+      return true
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to add member'
+      toast.error(message)
+      return false
+    } finally {
+      setIsSaving(false)
+    }
+  }, [])
+
+  // Upload file/attachment handler
+  const handleUploadFile = useCallback(async (files: FileList | File[], roomId?: string) => {
+    if (!files || files.length === 0) {
+      toast.error('No files selected')
+      return []
+    }
+
+    const fileArray = Array.from(files)
+    const maxSize = 10 * 1024 * 1024 // 10MB limit
+    const uploadedUrls: string[] = []
+
+    setIsSaving(true)
+    try {
+      for (const file of fileArray) {
+        if (file.size > maxSize) {
+          toast.error(`File "${file.name}" exceeds 10MB limit`)
+          continue
+        }
+
+        // Generate unique filename
+        const fileExt = file.name.split('.').pop()
+        const fileName = `chat-attachments/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+          .from('uploads')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (error) {
+          console.error('Upload error:', error)
+          toast.error(`Failed to upload "${file.name}"`)
+          continue
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('uploads')
+          .getPublicUrl(data.path)
+
+        uploadedUrls.push(publicUrl)
+
+        // If roomId provided, send as message attachment
+        if (roomId && selectedConversation) {
+          const messageType = file.type.startsWith('image/') ? 'image' : 'file'
+          await sendMessage({
+            room_id: roomId,
+            room_name: selectedConversation.subject || 'Conversation',
+            room_type: 'support' as RoomType,
+            sender_id: 'current-user',
+            sender_name: 'Support Agent',
+            message: file.name,
+            message_type: messageType,
+            media_url: publicUrl,
+            media_type: file.type,
+            file_size: file.size,
+            status: 'sent',
+            attachments: [{ url: publicUrl, name: file.name, type: file.type, size: file.size }]
+          })
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        toast.success(`${uploadedUrls.length} file(s) uploaded successfully`)
+      }
+      return uploadedUrls
+    } catch (err) {
+      console.error('Upload error:', err)
+      toast.error('Failed to upload files')
+      return []
+    } finally {
+      setIsSaving(false)
+    }
+  }, [supabase, selectedConversation, sendMessage])
+
+  // Add reaction handler
+  const handleReaction = useCallback(async (messageId: string, emoji: string) => {
+    if (!messageId || !emoji) {
+      return false
+    }
+
+    setIsSaving(true)
+    try {
+      // Get current message to update reactions
+      const { data: message, error: fetchError } = await supabase
+        .from('chat')
+        .select('reactions, reaction_count')
+        .eq('id', messageId)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      const currentReactions = message?.reactions || {}
+      const userId = 'current-user' // In production, get from auth
+
+      // Toggle reaction
+      if (!currentReactions[emoji]) {
+        currentReactions[emoji] = []
+      }
+
+      const userIndex = currentReactions[emoji].indexOf(userId)
+      if (userIndex > -1) {
+        // Remove reaction
+        currentReactions[emoji].splice(userIndex, 1)
+        if (currentReactions[emoji].length === 0) {
+          delete currentReactions[emoji]
+        }
+      } else {
+        // Add reaction
+        currentReactions[emoji].push(userId)
+      }
+
+      // Calculate total reaction count
+      const reactionCount = Object.values(currentReactions).reduce(
+        (sum: number, users: string[]) => sum + users.length,
+        0
+      )
+
+      // Update message with new reactions
+      await updateMessage(messageId, {
+        reactions: currentReactions,
+        reaction_count: reactionCount
+      })
+
+      toast.success(userIndex > -1 ? 'Reaction removed' : 'Reaction added')
+      return true
+    } catch (err) {
+      console.error('Reaction error:', err)
+      toast.error('Failed to add reaction')
+      return false
+    } finally {
+      setIsSaving(false)
+    }
+  }, [supabase, updateMessage])
+
+  // Reply to thread handler
+  const handleThreadReply = useCallback(async (parentMessageId: string, replyContent: string) => {
+    if (!replyContent.trim() || !selectedConversation) {
+      toast.error('Reply content is required')
+      return null
+    }
+
+    setIsSaving(true)
+    try {
+      // Send reply as a new message with reply_to_message_id
+      const result = await sendMessage({
+        room_id: selectedConversation.id,
+        room_name: selectedConversation.subject || 'Conversation',
+        room_type: 'support' as RoomType,
+        sender_id: 'current-user',
+        sender_name: 'Support Agent',
+        message: replyContent.trim(),
+        message_type: 'text',
+        status: 'sent',
+        reply_to_message_id: parentMessageId,
+        is_reply: true
+      })
+
+      // Update parent message thread count
+      const { data: parentMessage } = await supabase
+        .from('chat')
+        .select('thread_message_count')
+        .eq('id', parentMessageId)
+        .single()
+
+      if (parentMessage) {
+        await updateMessage(parentMessageId, {
+          thread_message_count: (parentMessage.thread_message_count || 0) + 1
+        })
+      }
+
+      toast.success('Reply sent')
+      return result
+    } catch (err) {
+      toast.error('Failed to send reply')
+      return null
+    } finally {
+      setIsSaving(false)
+    }
+  }, [selectedConversation, sendMessage, supabase, updateMessage])
+
+  // Mention user handler
+  const handleMention = useCallback(async (messageContent: string, mentionedUserIds: string[]) => {
+    if (!messageContent.trim() || !selectedConversation) {
+      toast.error('Message content is required')
+      return null
+    }
+
+    setIsSaving(true)
+    try {
+      const result = await sendMessage({
+        room_id: selectedConversation.id,
+        room_name: selectedConversation.subject || 'Conversation',
+        room_type: 'support' as RoomType,
+        sender_id: 'current-user',
+        sender_name: 'Support Agent',
+        message: messageContent.trim(),
+        message_type: 'text',
+        status: 'sent',
+        mentioned_users: mentionedUserIds,
+        has_mentions: mentionedUserIds.length > 0
+      })
+
+      // Notify mentioned users (in production, trigger notifications)
+      if (mentionedUserIds.length > 0) {
+        toast.success(`Message sent with ${mentionedUserIds.length} mention(s)`)
+      }
+
+      setNewMessage('')
+      return result
+    } catch (err) {
+      toast.error('Failed to send message with mentions')
+      return null
+    } finally {
+      setIsSaving(false)
+    }
+  }, [selectedConversation, sendMessage])
 
   // Mark message as read
   const handleMarkAsRead = useCallback(async (messageId: string) => {
@@ -1660,30 +1997,30 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       className="resize-none pr-24"
                     />
                     <div className="absolute bottom-2 right-2 flex items-center gap-1">
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" disabled={isSaving} onClick={() => {
                         const input = document.createElement('input')
                         input.type = 'file'
                         input.multiple = true
-                        input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip'
-                        input.onchange = (e) => {
+                        input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.csv'
+                        input.onchange = async (e) => {
                           const files = (e.target as HTMLInputElement).files
-                          if (files && files.length > 0) {
-                            toast.success(`${files.length} file(s) selected`, { description: `Ready to attach: ${Array.from(files).map(f => f.name).join(', ')}` })
+                          if (files && files.length > 0 && selectedConversation) {
+                            await handleUploadFile(files, selectedConversation.id)
                           }
                         }
                         input.click()
                       }}>
                         <Paperclip className="h-4 w-4 text-gray-400" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" disabled={isSaving} onClick={() => {
                         const input = document.createElement('input')
                         input.type = 'file'
                         input.multiple = true
                         input.accept = 'image/*'
-                        input.onchange = (e) => {
+                        input.onchange = async (e) => {
                           const files = (e.target as HTMLInputElement).files
-                          if (files && files.length > 0) {
-                            toast.success(`${files.length} image(s) selected`, { description: `Ready to upload: ${Array.from(files).map(f => f.name).join(', ')}` })
+                          if (files && files.length > 0 && selectedConversation) {
+                            await handleUploadFile(files, selectedConversation.id)
                           }
                         }
                         input.click()
@@ -2380,6 +2717,284 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
               toast.success('Member profile updated')
               setShowMemberOptionsDialog(false)
             }}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Channel Dialog */}
+      <Dialog open={showCreateChannelDialog} onOpenChange={setShowCreateChannelDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Channel</DialogTitle>
+            <DialogDescription>Set up a new chat channel for your team</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Channel Name</Label>
+              <Input
+                placeholder="e.g., general, support, sales"
+                value={newChannelName}
+                onChange={(e) => setNewChannelName(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Description (optional)</Label>
+              <Textarea
+                placeholder="What's this channel for?"
+                value={newChannelDescription}
+                onChange={(e) => setNewChannelDescription(e.target.value)}
+                className="mt-1"
+                rows={2}
+              />
+            </div>
+            <div>
+              <Label>Channel Type</Label>
+              <Select value={newChannelType} onValueChange={(v: 'public' | 'private' | 'group') => setNewChannelType(v)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">Public - Anyone can join</SelectItem>
+                  <SelectItem value="private">Private - Invite only</SelectItem>
+                  <SelectItem value="group">Group - Small team discussions</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowCreateChannelDialog(false)
+              setNewChannelName('')
+              setNewChannelDescription('')
+              setNewChannelType('public')
+            }}>Cancel</Button>
+            <Button
+              className="bg-cyan-600 hover:bg-cyan-700"
+              disabled={isSaving || !newChannelName.trim()}
+              onClick={async () => {
+                const channel = await handleCreateChannel({
+                  name: newChannelName,
+                  type: newChannelType,
+                  description: newChannelDescription
+                })
+                if (channel) {
+                  setShowCreateChannelDialog(false)
+                  setNewChannelName('')
+                  setNewChannelDescription('')
+                  setNewChannelType('public')
+                }
+              }}
+            >
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {isSaving ? 'Creating...' : 'Create Channel'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Member to Channel Dialog */}
+      <Dialog open={showAddMemberDialog} onOpenChange={setShowAddMemberDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Member to Channel</DialogTitle>
+            <DialogDescription>Invite a team member to join this channel</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Member Email or ID</Label>
+              <Input
+                placeholder="Enter member email or user ID"
+                value={memberToAdd}
+                onChange={(e) => setMemberToAdd(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div className="text-sm text-gray-500">
+              Or select from team members:
+            </div>
+            <div className="max-h-48 overflow-y-auto space-y-2">
+              {TEAM_MEMBERS.map(member => (
+                <div
+                  key={member.id}
+                  className="flex items-center justify-between p-2 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                  onClick={() => setMemberToAdd(member.id)}
+                >
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={member.avatar} alt="User avatar" />
+                      <AvatarFallback>{member.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium">{member.name}</span>
+                  </div>
+                  {memberToAdd === member.id && <CheckCircle className="h-4 w-4 text-green-500" />}
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowAddMemberDialog(false)
+              setMemberToAdd('')
+              setSelectedChannelId(null)
+            }}>Cancel</Button>
+            <Button
+              className="bg-cyan-600 hover:bg-cyan-700"
+              disabled={isSaving || !memberToAdd.trim() || !selectedChannelId}
+              onClick={async () => {
+                if (selectedChannelId) {
+                  const success = await handleAddMember(selectedChannelId, memberToAdd)
+                  if (success) {
+                    setShowAddMemberDialog(false)
+                    setMemberToAdd('')
+                    setSelectedChannelId(null)
+                  }
+                }
+              }}
+            >
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {isSaving ? 'Adding...' : 'Add Member'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Message Dialog */}
+      <Dialog open={!!editingMessageId} onOpenChange={(open) => {
+        if (!open) {
+          setEditingMessageId(null)
+          setEditingMessageContent('')
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Message</DialogTitle>
+            <DialogDescription>Modify your message content</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Textarea
+              value={editingMessageContent}
+              onChange={(e) => setEditingMessageContent(e.target.value)}
+              placeholder="Edit your message..."
+              rows={4}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setEditingMessageId(null)
+              setEditingMessageContent('')
+            }}>Cancel</Button>
+            <Button
+              className="bg-cyan-600 hover:bg-cyan-700"
+              disabled={isSaving || !editingMessageContent.trim()}
+              onClick={async () => {
+                if (editingMessageId) {
+                  await handleEditMessage(editingMessageId, editingMessageContent)
+                  setEditingMessageId(null)
+                  setEditingMessageContent('')
+                }
+              }}
+            >
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reaction Picker Dialog */}
+      <Dialog open={!!reactionTargetMessageId} onOpenChange={(open) => {
+        if (!open) setReactionTargetMessageId(null)
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Reaction</DialogTitle>
+            <DialogDescription>Select an emoji to react</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-8 gap-2 py-4">
+            {['👍', '👎', '❤️', '😂', '😮', '😢', '😡', '🎉', '🔥', '👏', '🙏', '💯', '✅', '❌', '⭐', '💪', '🤔', '👀', '💡', '🚀', '⚡', '🎯', '💬', '📌'].map(emoji => (
+              <button
+                key={emoji}
+                className="text-2xl p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                onClick={async () => {
+                  if (reactionTargetMessageId) {
+                    await handleReaction(reactionTargetMessageId, emoji)
+                    setReactionTargetMessageId(null)
+                  }
+                }}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Thread Reply Panel */}
+      <Dialog open={showThreadPanel} onOpenChange={(open) => {
+        if (!open) {
+          setShowThreadPanel(false)
+          setThreadParentMessage(null)
+          setThreadReplyContent('')
+        }
+      }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Thread Reply</DialogTitle>
+            <DialogDescription>Reply to this message thread</DialogDescription>
+          </DialogHeader>
+          {threadParentMessage && (
+            <div className="py-4 space-y-4">
+              {/* Parent message */}
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-medium text-sm">{threadParentMessage.sender_name}</span>
+                  <span className="text-xs text-gray-500">
+                    {new Date(threadParentMessage.created_at).toLocaleString()}
+                  </span>
+                </div>
+                <p className="text-sm">{threadParentMessage.message}</p>
+                {threadParentMessage.thread_message_count > 0 && (
+                  <p className="text-xs text-cyan-600 mt-2">
+                    {threadParentMessage.thread_message_count} replies in thread
+                  </p>
+                )}
+              </div>
+
+              {/* Reply input */}
+              <div>
+                <Label>Your Reply</Label>
+                <Textarea
+                  value={threadReplyContent}
+                  onChange={(e) => setThreadReplyContent(e.target.value)}
+                  placeholder="Write your reply..."
+                  rows={3}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowThreadPanel(false)
+              setThreadParentMessage(null)
+              setThreadReplyContent('')
+            }}>Cancel</Button>
+            <Button
+              className="bg-cyan-600 hover:bg-cyan-700"
+              disabled={isSaving || !threadReplyContent.trim()}
+              onClick={async () => {
+                if (threadParentMessage) {
+                  await handleThreadReply(threadParentMessage.id, threadReplyContent)
+                  setShowThreadPanel(false)
+                  setThreadParentMessage(null)
+                  setThreadReplyContent('')
+                }
+              }}
+            >
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+              {isSaving ? 'Sending...' : 'Send Reply'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

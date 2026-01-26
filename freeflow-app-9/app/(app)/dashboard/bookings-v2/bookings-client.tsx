@@ -122,6 +122,41 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     requirePayment: false
   })
 
+  // Add Service dialog state
+  const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
+  const [newServiceForm, setNewServiceForm] = useState({
+    name: '',
+    duration: '60',
+    price: '0',
+    color: 'sky',
+    description: '',
+    buffer: '10',
+    maxCapacity: '1'
+  })
+  const [isCreatingService, setIsCreatingService] = useState(false)
+
+  // Availability settings state
+  const [availabilitySettings, setAvailabilitySettings] = useState({
+    workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    workingHours: { start: '09:00', end: '17:00' },
+    bufferBefore: '10',
+    bufferAfter: '10',
+    minimumNotice: '4',
+    bookingWindow: '60',
+    slotDuration: '30'
+  })
+  const [isSavingSettings, setIsSavingSettings] = useState(false)
+
+  // Payment dialog state
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
+  const [paymentForm, setPaymentForm] = useState({
+    amount: '',
+    method: 'card',
+    reference: ''
+  })
+  const [selectedBookingForPayment, setSelectedBookingForPayment] = useState<Booking | null>(null)
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+
   // Reschedule state
   const [rescheduleData, setRescheduleData] = useState<{ bookingId: string; newDate: string; newTime: string } | null>(null)
   const [showRescheduleDialog, setShowRescheduleDialog] = useState(false)
@@ -435,6 +470,182 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       toast.success('Meeting opened', { description: 'Video meeting link opened in new tab' })
     } else {
       toast.error('No meeting link', { description: 'This booking does not have a video meeting link' })
+    }
+  }
+
+  // Add Service handler
+  const handleAddService = async () => {
+    if (!newServiceForm.name || !newServiceForm.duration) {
+      toast.error('Validation Error', { description: 'Name and duration are required' })
+      return
+    }
+
+    setIsCreatingService(true)
+    try {
+      const response = await fetch('/api/bookings/services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newServiceForm.name,
+          duration: newServiceForm.duration,
+          price: newServiceForm.price,
+          color: newServiceForm.color,
+          description: newServiceForm.description,
+          buffer: newServiceForm.buffer,
+          maxCapacity: newServiceForm.maxCapacity
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create service')
+      }
+
+      toast.success('Service Created', {
+        description: `${newServiceForm.name} has been added to your services`
+      })
+      setShowAddServiceDialog(false)
+      setNewServiceForm({
+        name: '',
+        duration: '60',
+        price: '0',
+        color: 'sky',
+        description: '',
+        buffer: '10',
+        maxCapacity: '1'
+      })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create service'
+      toast.error('Error', { description: errorMessage })
+    } finally {
+      setIsCreatingService(false)
+    }
+  }
+
+  // Save Availability Settings handler
+  const handleSaveAvailabilitySettings = async () => {
+    setIsSavingSettings(true)
+    try {
+      const response = await fetch('/api/bookings/availability', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save-settings',
+          ...availabilitySettings
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save settings')
+      }
+
+      toast.success('Settings Saved', {
+        description: 'Your availability settings have been updated'
+      })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save settings'
+      toast.error('Error', { description: errorMessage })
+    } finally {
+      setIsSavingSettings(false)
+    }
+  }
+
+  // Record Payment handler
+  const handleRecordPayment = async () => {
+    if (!selectedBookingForPayment || !paymentForm.amount) {
+      toast.error('Validation Error', { description: 'Please enter a valid payment amount' })
+      return
+    }
+
+    setIsProcessingPayment(true)
+    try {
+      const response = await fetch('/api/bookings/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'record-payment',
+          bookingId: selectedBookingForPayment.id,
+          amount: paymentForm.amount,
+          method: paymentForm.method,
+          reference: paymentForm.reference
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to record payment')
+      }
+
+      toast.success('Payment Recorded', {
+        description: `Payment of $${paymentForm.amount} has been recorded`
+      })
+
+      // Update the booking in local state
+      await updateBooking(selectedBookingForPayment.id, {
+        paid_amount: result.booking.paidAmount,
+        balance_due: result.booking.balanceDue,
+        payment_status: result.booking.paymentStatus as PaymentStatus
+      })
+
+      setShowPaymentDialog(false)
+      setSelectedBookingForPayment(null)
+      setPaymentForm({ amount: '', method: 'card', reference: '' })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to record payment'
+      toast.error('Error', { description: errorMessage })
+    } finally {
+      setIsProcessingPayment(false)
+    }
+  }
+
+  // Process Payment handler (for Stripe integration)
+  const handleProcessPayment = async (booking: Booking) => {
+    setSelectedBookingForPayment(booking)
+    setPaymentForm({
+      amount: booking.balance_due.toString(),
+      method: 'card',
+      reference: ''
+    })
+    setShowPaymentDialog(true)
+  }
+
+  // Handle Mark as Paid (quick action)
+  const handleMarkAsPaid = async (booking: Booking) => {
+    try {
+      const response = await fetch('/api/bookings/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'record-payment',
+          bookingId: booking.id,
+          amount: booking.balance_due,
+          method: 'manual',
+          reference: 'Marked as paid'
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to mark as paid')
+      }
+
+      toast.success('Payment Recorded', {
+        description: `Booking marked as fully paid`
+      })
+
+      await updateBooking(booking.id, {
+        paid_amount: result.booking.paidAmount,
+        balance_due: result.booking.balanceDue,
+        payment_status: result.booking.paymentStatus as PaymentStatus
+      })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to mark as paid'
+      toast.error('Error', { description: errorMessage })
     }
   }
 
@@ -951,7 +1162,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                                 <p className="text-sm text-gray-500">Configure your booking services</p>
                               </div>
                             </div>
-                            <Button className="gap-2 bg-sky-600 hover:bg-sky-700">
+                            <Button className="gap-2 bg-sky-600 hover:bg-sky-700" onClick={() => setShowAddServiceDialog(true)}>
                               <Plus className="w-4 h-4" />
                               Add Service
                             </Button>
@@ -2249,6 +2460,24 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                     <Mail className="h-4 w-4" />
                     Send Reminder
                   </button>
+                  {selectedBooking.balance_due > 0 && (
+                    <>
+                      <button
+                        onClick={() => handleProcessPayment(selectedBooking)}
+                        className="w-full py-3 px-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center justify-center gap-2"
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        Record Payment (${selectedBooking.balance_due.toFixed(2)} due)
+                      </button>
+                      <button
+                        onClick={() => handleMarkAsPaid(selectedBooking)}
+                        className="w-full py-3 px-4 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 flex items-center justify-center gap-2"
+                      >
+                        <Check className="h-4 w-4" />
+                        Mark as Fully Paid
+                      </button>
+                    </>
+                  )}
                   <button
                     onClick={() => handleCancelBooking(selectedBooking)}
                     className="w-full py-3 px-4 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 flex items-center justify-center gap-2"
@@ -2550,6 +2779,247 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               >
                 <Timer className="h-4 w-4 mr-2" />
                 Block Time
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Service Dialog */}
+        <Dialog open={showAddServiceDialog} onOpenChange={setShowAddServiceDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-sky-600" />
+                Add New Service
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Service Name *</Label>
+                <Input
+                  placeholder="e.g., Strategy Session"
+                  value={newServiceForm.name}
+                  onChange={(e) => setNewServiceForm({ ...newServiceForm, name: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Duration (minutes) *</Label>
+                  <Select
+                    value={newServiceForm.duration}
+                    onValueChange={(value) => setNewServiceForm({ ...newServiceForm, duration: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15">15 minutes</SelectItem>
+                      <SelectItem value="30">30 minutes</SelectItem>
+                      <SelectItem value="45">45 minutes</SelectItem>
+                      <SelectItem value="60">60 minutes</SelectItem>
+                      <SelectItem value="90">90 minutes</SelectItem>
+                      <SelectItem value="120">2 hours</SelectItem>
+                      <SelectItem value="180">3 hours</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Price ($)</Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={newServiceForm.price}
+                    onChange={(e) => setNewServiceForm({ ...newServiceForm, price: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Color</Label>
+                  <Select
+                    value={newServiceForm.color}
+                    onValueChange={(value) => setNewServiceForm({ ...newServiceForm, color: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sky">Sky Blue</SelectItem>
+                      <SelectItem value="indigo">Indigo</SelectItem>
+                      <SelectItem value="purple">Purple</SelectItem>
+                      <SelectItem value="emerald">Emerald</SelectItem>
+                      <SelectItem value="amber">Amber</SelectItem>
+                      <SelectItem value="rose">Rose</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Buffer Time (minutes)</Label>
+                  <Select
+                    value={newServiceForm.buffer}
+                    onValueChange={(value) => setNewServiceForm({ ...newServiceForm, buffer: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">5 minutes</SelectItem>
+                      <SelectItem value="10">10 minutes</SelectItem>
+                      <SelectItem value="15">15 minutes</SelectItem>
+                      <SelectItem value="30">30 minutes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Max Capacity</Label>
+                <Select
+                  value={newServiceForm.maxCapacity}
+                  onValueChange={(value) => setNewServiceForm({ ...newServiceForm, maxCapacity: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1:1 (One person)</SelectItem>
+                    <SelectItem value="5">Up to 5 people</SelectItem>
+                    <SelectItem value="10">Up to 10 people</SelectItem>
+                    <SelectItem value="25">Up to 25 people</SelectItem>
+                    <SelectItem value="50">Up to 50 people</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input
+                  placeholder="Brief description of the service..."
+                  value={newServiceForm.description}
+                  onChange={(e) => setNewServiceForm({ ...newServiceForm, description: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddServiceDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-sky-600 hover:bg-sky-700"
+                onClick={handleAddService}
+                disabled={isCreatingService}
+              >
+                {isCreatingService ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Service
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Payment Dialog */}
+        <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-emerald-600" />
+                Record Payment
+              </DialogTitle>
+            </DialogHeader>
+            {selectedBookingForPayment && (
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Booking</p>
+                  <p className="font-medium">{selectedBookingForPayment.title}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {selectedBookingForPayment.customer_name} - {new Date(selectedBookingForPayment.start_time).toLocaleDateString()}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                  <div>
+                    <p className="text-sm text-gray-500">Total Price</p>
+                    <p className="text-lg font-bold">${selectedBookingForPayment.price.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Balance Due</p>
+                    <p className="text-lg font-bold text-emerald-600">${selectedBookingForPayment.balance_due.toFixed(2)}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Payment Amount ($) *</Label>
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    value={paymentForm.amount}
+                    onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Payment Method</Label>
+                  <Select
+                    value={paymentForm.method}
+                    onValueChange={(value) => setPaymentForm({ ...paymentForm, method: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="card">Credit/Debit Card</SelectItem>
+                      <SelectItem value="cash">Cash</SelectItem>
+                      <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                      <SelectItem value="check">Check</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Reference (optional)</Label>
+                  <Input
+                    placeholder="Transaction ID, check number, etc."
+                    value={paymentForm.reference}
+                    onChange={(e) => setPaymentForm({ ...paymentForm, reference: e.target.value })}
+                  />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowPaymentDialog(false)
+                setSelectedBookingForPayment(null)
+                setPaymentForm({ amount: '', method: 'card', reference: '' })
+              }}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={handleRecordPayment}
+                disabled={isProcessingPayment}
+              >
+                {isProcessingPayment ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Record Payment
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -37,18 +37,20 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 import { CardDescription } from '@/components/ui/card'
-import { useTimeTracking } from '@/lib/hooks/use-time-tracking'
+import { useTimeTracking, TimeEntry as DbTimeEntry } from '@/lib/hooks/use-time-tracking'
 import { useProjects } from '@/lib/hooks/use-projects'
 import { useTeam } from '@/lib/hooks/use-team'
 import { useInvoices } from '@/lib/hooks/use-invoices'
 import { useClients } from '@/lib/hooks/use-clients'
 import { useGoals } from '@/lib/hooks/use-goals'
+import { useTasks } from '@/lib/hooks/use-tasks'
 import { toast } from 'sonner'
 
 // Types
 type TimeEntryStatus = 'running' | 'stopped' | 'approved' | 'rejected'
 type ProjectStatus = 'active' | 'completed' | 'on_hold' | 'archived'
 
+// Local TimeEntry interface for UI rendering (mapped from database fields)
 interface TimeEntry {
   id: string
   title: string
@@ -346,6 +348,13 @@ export default function TimeTrackingClient() {
     error: goalsError
   } = useGoals()
 
+  // Tasks hook for task assignment
+  const {
+    tasks: dbTasks,
+    isLoading: tasksLoading,
+    fetchTasks
+  } = useTasks()
+
   // Track database connection status for UI feedback
   const [isDbConnected, setIsDbConnected] = useState<boolean | null>(null)
 
@@ -358,6 +367,7 @@ export default function TimeTrackingClient() {
   const [newEntryForm, setNewEntryForm] = useState({
     description: '',
     projectId: '',
+    taskId: '',
     date: new Date().toISOString().split('T')[0],
     duration: '',
     startTime: '',
@@ -370,7 +380,8 @@ export default function TimeTrackingClient() {
     fetchProjects()
     fetchTeam()
     fetchClients()
-  }, [fetchProjects, fetchTeam, fetchClients])
+    fetchTasks()
+  }, [fetchProjects, fetchTeam, fetchClients, fetchTasks])
 
   // Check database connection on mount
   useEffect(() => {
@@ -581,6 +592,7 @@ export default function TimeTrackingClient() {
         title: newEntryForm.description,
         description: newEntryForm.description,
         project_id: newEntryForm.projectId,
+        task_id: newEntryForm.taskId || undefined,
         start_time: `${newEntryForm.date}T${newEntryForm.startTime || '09:00'}:00`,
         end_time: newEntryForm.endTime ? `${newEntryForm.date}T${newEntryForm.endTime}:00` : undefined,
         duration_seconds: durationSeconds,
@@ -595,6 +607,7 @@ export default function TimeTrackingClient() {
       setNewEntryForm({
         description: '',
         projectId: '',
+        taskId: '',
         date: new Date().toISOString().split('T')[0],
         duration: '',
         startTime: '',
@@ -724,6 +737,132 @@ export default function TimeTrackingClient() {
     }
   }
 
+  // Handle updating an existing time entry - WIRED TO SUPABASE
+  const handleUpdateEntry = async (entryId: string, formData: typeof newEntryForm) => {
+    if (!formData.description) {
+      toast.error('Please enter a description')
+      return false
+    }
+
+    try {
+      // Parse duration (e.g., "1h 30m" or "1.5")
+      let durationSeconds = 0
+      const durationStr = formData.duration
+      if (durationStr) {
+        if (durationStr.includes('h') || durationStr.includes('m')) {
+          const hours = durationStr.match(/(\d+(?:\.\d+)?)h/)?.[1] || '0'
+          const mins = durationStr.match(/(\d+)m/)?.[1] || '0'
+          durationSeconds = (parseFloat(hours) * 3600) + (parseInt(mins) * 60)
+        } else {
+          durationSeconds = parseFloat(durationStr) * 3600
+        }
+      }
+
+      const project = projects.find(p => p.id === formData.projectId)
+      const billableAmount = formData.isBillable ? (durationSeconds / 3600) * (project?.hourlyRate || 0) : 0
+
+      await updateEntry(entryId, {
+        title: formData.description,
+        description: formData.description,
+        project_id: formData.projectId || undefined,
+        task_id: formData.taskId || undefined,
+        is_billable: formData.isBillable,
+        start_time: formData.startTime ? `${formData.date}T${formData.startTime}:00` : undefined,
+        end_time: formData.endTime ? `${formData.date}T${formData.endTime}:00` : undefined,
+        duration_seconds: durationSeconds || undefined,
+        duration_hours: durationSeconds ? durationSeconds / 3600 : undefined,
+        billable_amount: billableAmount || undefined,
+        hourly_rate: project?.hourlyRate
+      })
+
+      toast.success('Time entry updated successfully')
+      return true
+    } catch (error) {
+      console.error('Failed to update time entry:', error)
+      toast.error('Failed to update time entry')
+      return false
+    }
+  }
+
+  // Handle assigning a project to an entry - WIRED TO SUPABASE
+  const handleAssignProject = async (entryId: string, projectId: string) => {
+    try {
+      const project = projects.find(p => p.id === projectId)
+      await updateEntry(entryId, {
+        project_id: projectId,
+        hourly_rate: project?.hourlyRate
+      })
+      toast.success('Project assigned', { description: `Assigned to ${project?.name || 'project'}` })
+    } catch (error) {
+      console.error('Failed to assign project:', error)
+      toast.error('Failed to assign project')
+    }
+  }
+
+  // Handle assigning a task to an entry - WIRED TO SUPABASE
+  const handleAssignTask = async (entryId: string, taskId: string | undefined) => {
+    try {
+      const task = dbTasks?.find(t => t.id === taskId)
+      await updateEntry(entryId, { task_id: taskId || undefined })
+      toast.success(taskId ? `Task assigned: ${task?.title || 'Task'}` : 'Task removed')
+    } catch (error) {
+      console.error('Failed to assign task:', error)
+      toast.error('Failed to assign task')
+    }
+  }
+
+  // Handle toggling billable status - WIRED TO SUPABASE
+  const handleToggleBillable = async (entryId: string, isBillable: boolean) => {
+    try {
+      const entry = dbTimeEntries?.find((e: DbTimeEntry) => e.id === entryId)
+      const project = entry?.project_id ? projects.find(p => p.id === entry.project_id) : null
+      const billableAmount = isBillable && entry?.duration_hours
+        ? entry.duration_hours * (project?.hourlyRate || 0)
+        : 0
+
+      await updateEntry(entryId, {
+        is_billable: isBillable,
+        billable_amount: billableAmount
+      })
+      toast.success(isBillable ? 'Entry marked as billable' : 'Entry marked as non-billable')
+    } catch (error) {
+      console.error('Failed to toggle billable status:', error)
+      toast.error('Failed to update billable status')
+    }
+  }
+
+  // Handle duplicating a time entry - WIRED TO SUPABASE
+  const handleDuplicateEntry = async (entryId: string) => {
+    const entry = dbTimeEntries?.find((e: DbTimeEntry) => e.id === entryId)
+    if (!entry) {
+      toast.error('Entry not found')
+      return
+    }
+
+    try {
+      await createEntry({
+        title: entry.title,
+        description: entry.description,
+        project_id: entry.project_id,
+        task_id: entry.task_id,
+        client_id: entry.client_id,
+        is_billable: entry.is_billable,
+        hourly_rate: entry.hourly_rate,
+        entry_type: 'manual',
+        status: 'stopped',
+        start_time: new Date().toISOString(),
+        duration_seconds: entry.duration_seconds || 0,
+        duration_hours: entry.duration_hours || 0,
+        billable_amount: entry.billable_amount || 0,
+        tags: entry.tags
+      })
+      toast.success('Entry duplicated', { description: 'New entry created based on selected entry' })
+    } catch (error) {
+      console.error('Failed to duplicate entry:', error)
+      toast.error('Failed to duplicate entry')
+    }
+  }
+
   const statsCards = [
     { label: 'Total Hours', value: `${stats.totalHours}h`, icon: Clock, color: 'from-amber-500 to-amber-600', trend: '+2.5h' },
     { label: 'Billable', value: `${stats.billableHours}h`, icon: DollarSign, color: 'from-emerald-500 to-emerald-600', trend: '+1.8h' },
@@ -743,7 +882,8 @@ export default function TimeTrackingClient() {
   }
 
   const toggleTimer = () => setIsTimerRunning(!isTimerRunning)
-  const stopTimer = () => { setIsTimerRunning(false); setTimerSeconds(0); setTimerDescription(''); setTimerProject('') }
+  // Note: handleStopTimerDB handles the database-persisted stop timer operation
+  // The inline reset is handled in handleStopTimerDB
 
   const navigateDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate)
@@ -1240,7 +1380,30 @@ export default function TimeTrackingClient() {
                           </div>
                           <div className="flex items-center gap-3 text-sm">
                             <Badge className={getStatusColor(entry.is_billable ? 'paid' : 'draft')}>{entry.is_billable ? 'Billable' : 'Non-Billable'}</Badge>
-                            <span className="text-gray-500">{project?.name || 'No Project'}</span>
+                            <Select value={entry.project_id || ''} onValueChange={(value) => handleAssignProject(entry.id, value)}>
+                              <SelectTrigger className="h-6 w-auto min-w-[120px] max-w-[200px] text-xs border-none bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 px-2">
+                                <SelectValue placeholder="No Project">
+                                  <span className={project?.name ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}>{project?.name || 'No Project'}</span>
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">No Project</SelectItem>
+                                {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                            {dbTasks && dbTasks.length > 0 && (
+                              <Select value={entry.task_id || ''} onValueChange={(value) => handleAssignTask(entry.id, value || undefined)}>
+                                <SelectTrigger className="h-6 w-auto min-w-[100px] max-w-[150px] text-xs border-none bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 px-2">
+                                  <SelectValue placeholder="No Task">
+                                    <span className={entry.task_id ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}>{dbTasks.find(t => t.id === entry.task_id)?.title || 'No Task'}</span>
+                                  </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="">No Task</SelectItem>
+                                  {dbTasks.filter(t => !entry.project_id || t.project_id === entry.project_id).map(t => <SelectItem key={t.id} value={t.id}>{t.title}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                            )}
                             <span className="text-gray-400">
                               {new Date(entry.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               {entry.end_time && ` - ${new Date(entry.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
@@ -1254,8 +1417,14 @@ export default function TimeTrackingClient() {
                             {entry.status === 'stopped' && (
                               <Button variant="ghost" size="icon" onClick={() => handleApproveEntry(entry.id)} title="Approve entry" className="text-green-600"><Check className="h-4 w-4" /></Button>
                             )}
+                            {entry.status === 'submitted' && (
+                              <Button variant="ghost" size="icon" onClick={() => handleRejectEntry(entry.id, 'Entry needs revision')} title="Reject entry" className="text-red-600"><X className="h-4 w-4" /></Button>
+                            )}
                             {entry.status === 'stopped' && (
                               <Button variant="ghost" size="icon" onClick={() => handleSubmitEntry(entry.id)} title="Submit for approval" className="text-blue-600"><Send className="h-4 w-4" /></Button>
+                            )}
+                            {(entry.status === 'approved' || entry.status === 'stopped') && !entry.is_locked && (
+                              <Button variant="ghost" size="icon" onClick={() => handleLockEntry(entry.id)} title="Lock entry" className="text-amber-600"><Lock className="h-4 w-4" /></Button>
                             )}
                             <Button variant="ghost" size="icon" onClick={() => {
                               setEditingEntryId(entry.id)
@@ -1264,6 +1433,7 @@ export default function TimeTrackingClient() {
                               setNewEntryForm({
                                 description: entry.title || entry.description || '',
                                 projectId: entry.project_id || '',
+                                taskId: entry.task_id || '',
                                 date: startDate.toISOString().split('T')[0],
                                 duration: entry.duration_hours ? `${entry.duration_hours.toFixed(1)}h` : '',
                                 startTime: startDate.toTimeString().slice(0, 5),
@@ -1272,6 +1442,8 @@ export default function TimeTrackingClient() {
                               })
                               setShowEntryDialog(true)
                             }} title="Edit entry"><Edit2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDuplicateEntry(entry.id)} disabled={entriesLoading} title="Duplicate entry"><Copy className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleToggleBillable(entry.id, !entry.is_billable)} disabled={entriesLoading} title={entry.is_billable ? 'Mark non-billable' : 'Mark billable'} className={entry.is_billable ? 'text-emerald-600' : 'text-gray-400'}><DollarSign className="h-4 w-4" /></Button>
                             <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteEntry(entry.id)} disabled={entriesLoading} title="Delete entry"><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </div>
@@ -2705,49 +2877,21 @@ export default function TimeTrackingClient() {
           <DialogContent><DialogHeader><DialogTitle>{editingEntryId ? 'Edit Time Entry' : 'Add Time Entry'}</DialogTitle><DialogDescription>{editingEntryId ? 'Update this time entry' : 'Manually log a time entry'}</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Description</Label><Input placeholder="What did you work on?" className="mt-1" value={newEntryForm.description} onChange={(e) => setNewEntryForm(prev => ({ ...prev, description: e.target.value }))} /></div>
-              <div><Label>Project</Label><Select value={newEntryForm.projectId} onValueChange={(value) => setNewEntryForm(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.client}</SelectItem>)}</SelectContent></Select></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div><Label>Project</Label><Select value={newEntryForm.projectId} onValueChange={(value) => setNewEntryForm(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.client}</SelectItem>)}</SelectContent></Select></div>
+                <div><Label>Task (Optional)</Label><Select value={newEntryForm.taskId} onValueChange={(value) => setNewEntryForm(prev => ({ ...prev, taskId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select task" /></SelectTrigger><SelectContent><SelectItem value="">No Task</SelectItem>{(dbTasks || []).filter(t => !newEntryForm.projectId || t.project_id === newEntryForm.projectId).map(t => <SelectItem key={t.id} value={t.id}>{t.title}</SelectItem>)}</SelectContent></Select></div>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Date</Label><Input type="date" className="mt-1" value={newEntryForm.date} onChange={(e) => setNewEntryForm(prev => ({ ...prev, date: e.target.value }))} /></div><div><Label>Duration</Label><Input placeholder="1h 30m" className="mt-1" value={newEntryForm.duration} onChange={(e) => setNewEntryForm(prev => ({ ...prev, duration: e.target.value }))} /></div></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Start Time</Label><Input type="time" className="mt-1" value={newEntryForm.startTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, startTime: e.target.value }))} /></div><div><Label>End Time</Label><Input type="time" className="mt-1" value={newEntryForm.endTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, endTime: e.target.value }))} /></div></div>
               <div className="flex items-center gap-2"><Switch id="billable" checked={newEntryForm.isBillable} onCheckedChange={(checked) => setNewEntryForm(prev => ({ ...prev, isBillable: checked }))} /><Label htmlFor="billable">Billable</Label></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => { setShowEntryDialog(false); setEditingEntryId(null); setNewEntryForm({ description: '', projectId: '', date: new Date().toISOString().split('T')[0], duration: '', startTime: '', endTime: '', isBillable: true }) }}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={async () => {
+            <DialogFooter><Button variant="outline" onClick={() => { setShowEntryDialog(false); setEditingEntryId(null); setNewEntryForm({ description: '', projectId: '', taskId: '', date: new Date().toISOString().split('T')[0], duration: '', startTime: '', endTime: '', isBillable: true }) }}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={async () => {
               if (editingEntryId) {
-                try {
-                  // Parse duration from form
-                  let durationSeconds = 0
-                  const durationStr = newEntryForm.duration
-                  if (durationStr) {
-                    if (durationStr.includes('h') || durationStr.includes('m')) {
-                      const hours = durationStr.match(/(\d+(?:\.\d+)?)h/)?.[1] || '0'
-                      const mins = durationStr.match(/(\d+)m/)?.[1] || '0'
-                      durationSeconds = (parseFloat(hours) * 3600) + (parseInt(mins) * 60)
-                    } else {
-                      durationSeconds = parseFloat(durationStr) * 3600
-                    }
-                  }
-
-                  const project = projects.find(p => p.id === newEntryForm.projectId)
-                  const billableAmount = newEntryForm.isBillable ? (durationSeconds / 3600) * (project?.hourlyRate || 0) : 0
-
-                  await updateEntry(editingEntryId, {
-                    title: newEntryForm.description,
-                    description: newEntryForm.description,
-                    project_id: newEntryForm.projectId || undefined,
-                    is_billable: newEntryForm.isBillable,
-                    start_time: newEntryForm.startTime ? `${newEntryForm.date}T${newEntryForm.startTime}:00` : undefined,
-                    end_time: newEntryForm.endTime ? `${newEntryForm.date}T${newEntryForm.endTime}:00` : undefined,
-                    duration_seconds: durationSeconds || undefined,
-                    duration_hours: durationSeconds ? durationSeconds / 3600 : undefined,
-                    billable_amount: billableAmount || undefined,
-                    hourly_rate: project?.hourlyRate
-                  })
-                  toast.success('Time entry updated successfully')
+                const success = await handleUpdateEntry(editingEntryId, newEntryForm)
+                if (success) {
                   setShowEntryDialog(false)
                   setEditingEntryId(null)
-                  setNewEntryForm({ description: '', projectId: '', date: new Date().toISOString().split('T')[0], duration: '', startTime: '', endTime: '', isBillable: true })
-                } catch (error) {
-                  console.error('Update entry error:', error)
-                  toast.error('Failed to update entry')
+                  setNewEntryForm({ description: '', projectId: '', taskId: '', date: new Date().toISOString().split('T')[0], duration: '', startTime: '', endTime: '', isBillable: true })
                 }
               } else {
                 handleCreateManualEntry()

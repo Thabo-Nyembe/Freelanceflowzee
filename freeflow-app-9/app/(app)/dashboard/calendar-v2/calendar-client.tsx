@@ -1,12 +1,13 @@
 'use client'
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCalendarEvents, type CalendarEvent, type EventType, type EventStatus } from '@/lib/hooks/use-calendar-events'
+import { useCalendarEvents, type CalendarEvent, type EventType, type EventStatus, type CalendarAttendee } from '@/lib/hooks/use-calendar-events'
 import { useCalendars } from '@/lib/hooks/use-calendars-extended'
 import { useReminders } from '@/lib/hooks/use-reminders-extended'
 import { useSchedulingPreferences } from '@/lib/hooks/use-scheduling-extended'
 import { useBookingServices } from '@/lib/hooks/use-bookings-extended'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -226,6 +227,17 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const { preferences: schedulingPrefs } = useSchedulingPreferences(userId || undefined)
   const { services: bookingServices } = useBookingServices(userId || undefined)
 
+  // Mutation hooks for reminders
+  const { create: createReminderInDb, update: updateReminderInDb, remove: deleteReminderInDb } = useSupabaseMutation({
+    table: 'reminders',
+    onSuccess: () => {
+      // Reminders will be refreshed via the useReminders hook
+    },
+    onError: (err) => {
+      toast.error(`Reminder operation failed: ${err.message}`)
+    }
+  })
+
   // Local state for UI interactions (synced from backend)
   const [calendars, setCalendars] = useState<CalendarSource[]>([
     { id: 'default', name: 'Personal', color: 'bg-blue-500', enabled: true, type: 'personal', eventCount: 0 }
@@ -312,7 +324,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const [showInviteDialog, setShowInviteDialog] = useState(false)
   const [selectedEventForInvite, setSelectedEventForInvite] = useState<CalendarEvent | null>(null)
 
-  // Handle inviting attendees
+  // Handle inviting attendees (for new event form)
   const handleInviteAttendee = () => {
     if (!attendeeEmail || !attendeeEmail.includes('@')) {
       toast.error('Please enter a valid email address')
@@ -326,21 +338,181 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
     }
     setEventAttendees(prev => [...prev, newAttendee])
     setAttendeeEmail('')
-    toast.success(`Invitation sent to ${attendeeEmail}`)
+    toast.success(`Added ${attendeeEmail} to attendee list`)
   }
 
-  // Remove attendee
+  // Remove attendee from local state
   const handleRemoveAttendee = (attendeeId: string) => {
     setEventAttendees(prev => prev.filter(a => a.id !== attendeeId))
     toast.success('Attendee removed')
   }
 
-  // Handle creating a new event
+  // Add attendee to an existing event (persists to database)
+  const handleAddAttendee = async (eventId: string, email: string, name?: string) => {
+    if (!email || !email.includes('@')) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    const event = events?.find(e => e.id === eventId)
+    if (!event) {
+      toast.error('Event not found')
+      return
+    }
+
+    const newAttendee: CalendarAttendee = {
+      email,
+      name: name || email.split('@')[0],
+      status: 'pending',
+      required: true
+    }
+
+    const existingAttendees = event.attendees || []
+    if (existingAttendees.some(a => a.email === email)) {
+      toast.error('This attendee is already invited')
+      return
+    }
+
+    try {
+      await updateEvent({
+        id: eventId,
+        attendees: [...existingAttendees, newAttendee]
+      })
+      toast.success(`Invitation sent to ${email}`)
+    } catch (err) {
+      toast.error('Failed to add attendee')
+    }
+  }
+
+  // Handle RSVP response for an event
+  const handleRSVP = async (eventId: string, response: 'accepted' | 'declined' | 'tentative') => {
+    try {
+      const res = await fetch(`/api/calendar/events/${eventId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attendee_response: response })
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to update RSVP')
+      }
+
+      toast.success(`RSVP updated to ${response}`)
+      refetch()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to update RSVP')
+    }
+  }
+
+  // Set a reminder for an event (persists to database)
+  const handleSetReminder = async (eventId: string, title: string, remindAt: Date, type: 'email' | 'notification' | 'sms' = 'notification') => {
+    if (!userId) {
+      toast.error('Please sign in to set reminders')
+      return
+    }
+
+    try {
+      const reminderData = {
+        user_id: userId,
+        entity_type: 'calendar_event',
+        entity_id: eventId,
+        title,
+        message: `Reminder for: ${title}`,
+        remind_at: remindAt.toISOString(),
+        delivery_method: type,
+        status: 'pending',
+        priority: 'medium'
+      }
+
+      await createReminderInDb(reminderData)
+
+      // Update local state for immediate UI feedback
+      const newReminder: Reminder = {
+        id: Date.now().toString(),
+        title,
+        datetime: remindAt,
+        completed: false,
+        eventId,
+        type
+      }
+      setReminders(prev => [...prev, newReminder])
+      toast.success(`Reminder set for ${remindAt.toLocaleString()}`)
+    } catch (err) {
+      toast.error('Failed to set reminder')
+    }
+  }
+
+  // Create a recurring event
+  const handleRecurringEvent = async (eventData: {
+    title: string
+    startTime: string
+    endTime: string
+    eventType?: EventType
+    location?: string
+    description?: string
+    recurrenceFrequency: 'daily' | 'weekly' | 'monthly' | 'yearly'
+    recurrenceEndDate?: string
+    recurrenceCount?: number
+  }) => {
+    if (!eventData.title || !eventData.startTime || !eventData.endTime) {
+      toast.error('Please fill in title, start and end time')
+      return
+    }
+
+    // Build recurrence rule (iCalendar RRULE format)
+    let recurrenceRule = `FREQ=${eventData.recurrenceFrequency.toUpperCase()}`
+    if (eventData.recurrenceCount) {
+      recurrenceRule += `;COUNT=${eventData.recurrenceCount}`
+    }
+    if (eventData.recurrenceEndDate) {
+      const endDate = new Date(eventData.recurrenceEndDate).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+      recurrenceRule += `;UNTIL=${endDate}`
+    }
+
+    try {
+      const res = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-event',
+          title: eventData.title,
+          startTime: new Date(eventData.startTime).toISOString(),
+          endTime: new Date(eventData.endTime).toISOString(),
+          eventType: eventData.eventType || 'meeting',
+          location: eventData.location || null,
+          description: eventData.description || null,
+          recurrenceRule
+        })
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to create recurring event')
+      }
+
+      toast.success(`Recurring event "${eventData.title}" created`)
+      refetch()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to create recurring event')
+    }
+  }
+
+  // Handle creating a new event (with attendees support)
   const handleCreateEvent = async () => {
     if (!newEventForm.title || !newEventForm.startTime || !newEventForm.endTime) {
       toast.error('Please fill in title, start and end time')
       return
     }
+
+    // Convert local attendees to CalendarAttendee format for the API
+    const attendeesForApi: CalendarAttendee[] = eventAttendees.map(a => ({
+      email: a.email,
+      name: a.name,
+      status: 'pending',
+      required: true
+    }))
+
     toast.promise(
       createEvent({
         title: newEventForm.title,
@@ -351,7 +523,8 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
         description: newEventForm.description || null,
         status: 'confirmed',
         all_day: false,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        attendees: attendeesForApi.length > 0 ? attendeesForApi : undefined
       }),
       {
         loading: 'Creating event...',
@@ -359,7 +532,8 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
           setShowNewEvent(false)
           setNewEventForm({ title: '', startTime: '', endTime: '', eventType: 'meeting', location: '', description: '' })
           setEventAttendees([])
-          return `Event "${newEventForm.title}" created successfully`
+          setAttendeeEmail('')
+          return `Event "${newEventForm.title}" created${attendeesForApi.length > 0 ? ` with ${attendeesForApi.length} attendee(s)` : ''}`
         },
         error: 'Failed to create event'
       }
@@ -1665,11 +1839,23 @@ END:VCALENDAR`
                 {reminders.map(reminder => (
                   <div key={reminder.id} className={`flex items-center gap-4 p-4 rounded-lg ${reminder.completed ? 'bg-gray-100 dark:bg-gray-800 opacity-60' : 'bg-gray-50 dark:bg-gray-800'}`}>
                     <button
-                      onClick={() => {
+                      onClick={async () => {
+                        const newStatus = reminder.completed ? 'pending' : 'completed'
+                        // Update local state for immediate feedback
                         setReminders(prev => prev.map(r =>
                           r.id === reminder.id ? { ...r, completed: !r.completed } : r
                         ))
-                        toast.success(reminder.completed ? `"${reminder.title}" marked as incomplete` : `"${reminder.title}" completed`)
+                        // Persist to database
+                        try {
+                          await updateReminderInDb(reminder.id, { status: newStatus })
+                          toast.success(reminder.completed ? `"${reminder.title}" marked as incomplete` : `"${reminder.title}" completed`)
+                        } catch {
+                          // Revert on error
+                          setReminders(prev => prev.map(r =>
+                            r.id === reminder.id ? { ...r, completed: reminder.completed } : r
+                          ))
+                          toast.error('Failed to update reminder')
+                        }
                       }}
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${reminder.completed ? 'bg-teal-600 border-teal-600' : 'border-gray-300 hover:border-teal-400'}`}
                     >
@@ -1682,10 +1868,18 @@ END:VCALENDAR`
                       </p>
                     </div>
                     <Badge variant="outline">{reminder.type}</Badge>
-                    <Button variant="ghost" size="sm" onClick={() => {
+                    <Button variant="ghost" size="sm" onClick={async () => {
                       if (confirm(`Delete reminder "${reminder.title}"?`)) {
+                        // Update local state for immediate feedback
                         setReminders(prev => prev.filter(r => r.id !== reminder.id))
-                        toast.success(`"${reminder.title}" deleted`)
+                        // Persist to database
+                        try {
+                          await deleteReminderInDb(reminder.id, true)
+                          toast.success(`"${reminder.title}" deleted`)
+                        } catch {
+                          // Could refetch to restore if needed
+                          toast.error('Failed to delete reminder')
+                        }
                       }
                     }}><Trash2 className="h-4 w-4 text-gray-400" /></Button>
                   </div>
@@ -2634,7 +2828,7 @@ END:VCALENDAR`
               </div>
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowAddReminder(false)}>Cancel</Button>
-                <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
+                <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={async () => {
                   const titleInput = document.getElementById('new-reminder-title') as HTMLInputElement
                   const datetimeInput = document.getElementById('new-reminder-datetime') as HTMLInputElement
                   const typeSelect = document.getElementById('new-reminder-type') as HTMLSelectElement
@@ -2644,16 +2838,16 @@ END:VCALENDAR`
                     toast.error('Please fill in all fields')
                     return
                   }
-                  const newReminder: Reminder = {
-                    id: Date.now().toString(),
-                    title,
-                    datetime: new Date(datetime),
-                    completed: false,
-                    type: (typeSelect?.value || 'notification') as 'email' | 'notification' | 'sms'
-                  }
-                  setReminders(prev => [...prev, newReminder])
+                  const reminderType = (typeSelect?.value || 'notification') as 'email' | 'notification' | 'sms'
+
+                  // Use the handleSetReminder function to persist to database
+                  // Pass empty string for eventId since this is a standalone reminder
+                  await handleSetReminder('', title, new Date(datetime), reminderType)
                   setShowAddReminder(false)
-                  toast.success(`Reminder "${title}" added successfully`)
+
+                  // Clear form inputs
+                  if (titleInput) titleInput.value = ''
+                  if (datetimeInput) datetimeInput.value = ''
                 }}>
                   Add Reminder
                 </Button>
@@ -2688,15 +2882,54 @@ END:VCALENDAR`
                     type="email"
                     value={attendeeEmail}
                     onChange={(e) => setAttendeeEmail(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleInviteAttendee())}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        if (selectedEventForInvite) {
+                          handleAddAttendee(selectedEventForInvite.id, attendeeEmail)
+                          setAttendeeEmail('')
+                        } else {
+                          handleInviteAttendee()
+                        }
+                      }
+                    }}
                     className="flex-1"
                   />
-                  <Button onClick={handleInviteAttendee}>
+                  <Button onClick={() => {
+                    if (selectedEventForInvite) {
+                      handleAddAttendee(selectedEventForInvite.id, attendeeEmail)
+                      setAttendeeEmail('')
+                    } else {
+                      handleInviteAttendee()
+                    }
+                  }}>
                     Send
                   </Button>
                 </div>
               </div>
-              {eventAttendees.length > 0 && (
+              {/* Show existing attendees from the selected event */}
+              {selectedEventForInvite?.attendees && selectedEventForInvite.attendees.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">Current Attendees</label>
+                  <div className="space-y-2">
+                    {selectedEventForInvite.attendees.map((attendee, idx) => (
+                      <div key={attendee.id || idx} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-sm text-teal-700">
+                            {(attendee.name || attendee.email)?.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">{attendee.email}</p>
+                            <Badge variant="outline" className={getStatusColor(attendee.status || 'pending')}>{attendee.status || 'pending'}</Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Show locally added attendees (for new events) */}
+              {eventAttendees.length > 0 && !selectedEventForInvite && (
                 <div>
                   <label className="block text-sm font-medium mb-2">Pending Invitations</label>
                   <div className="space-y-2">
@@ -2720,17 +2953,15 @@ END:VCALENDAR`
                 </div>
               )}
               <div className="flex gap-2 pt-4">
-                <Button variant="outline" className="flex-1" onClick={() => { setShowInviteDialog(false); setEventAttendees([]); setAttendeeEmail('') }}>
+                <Button variant="outline" className="flex-1" onClick={() => { setShowInviteDialog(false); setSelectedEventForInvite(null); setEventAttendees([]); setAttendeeEmail('') }}>
                   Close
                 </Button>
-                {eventAttendees.length > 0 && (
+                {eventAttendees.length > 0 && !selectedEventForInvite && (
                   <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                    toast.success(`${eventAttendees.length} invitation(s) sent successfully`)
+                    toast.success(`${eventAttendees.length} invitation(s) will be sent when event is created`)
                     setShowInviteDialog(false)
-                    setEventAttendees([])
-                    setAttendeeEmail('')
                   }}>
-                    Send All Invitations
+                    Confirm Attendees
                   </Button>
                 )}
               </div>
