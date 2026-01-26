@@ -96,6 +96,8 @@ import {
 
 
 import { Switch } from '@/components/ui/switch'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
@@ -319,7 +321,9 @@ interface MotionGraphicsClientProps {
 export default function MotionGraphicsClient({
   initialAnimations = []
 }: MotionGraphicsClientProps) {
-
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   const [activeTab, setActiveTab] = useState('projects')
   const [searchQuery, setSearchQuery] = useState('')
@@ -2018,7 +2022,12 @@ export default function MotionGraphicsClient({
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2030,7 +2039,15 @@ export default function MotionGraphicsClient({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              description: log.resource_name || undefined,
+              user: { name: log.user_name || 'System', avatar: undefined },
+              timestamp: log.created_at,
+              isUnread: log.status === 'pending'
+            }))}
             title="Studio Activity"
             maxItems={5}
           />

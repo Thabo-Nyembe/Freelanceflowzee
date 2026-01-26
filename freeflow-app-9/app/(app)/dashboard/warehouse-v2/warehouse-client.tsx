@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useWarehouses, useWarehouseMutations, type Warehouse as DBWarehouse } from '@/lib/hooks/use-warehouse'
 import { useStockLevels, type StockLevel } from '@/lib/hooks/use-stock'
 import { useOrders, type Order as DBOrder } from '@/lib/hooks/use-orders'
@@ -52,7 +53,8 @@ import {
   Mail,
   Upload,
   Terminal,
-  Loader2
+  Loader2,
+  ShoppingBag
 } from 'lucide-react'
 
 // Lazy-loaded Enhanced & Competitive Upgrade Components for code splitting
@@ -263,6 +265,8 @@ const mockWarehouseActivities: Array<{ id: string; user: { id: string; name: str
 // Quick actions are now defined inside the component to use dialog state
 
 export default function WarehouseClient() {
+  const router = useRouter()
+
   // Supabase hooks for real warehouse data
   const { warehouses: dbWarehouses, stats: warehouseStats, isLoading: isLoadingWarehouses, refetch: refetchWarehouses } = useWarehouses()
   const { stockLevels: dbStockLevels, stats: stockStats, isLoading: isLoadingStock, refetch: refetchStock } = useStockLevels()
@@ -1465,6 +1469,30 @@ export default function WarehouseClient() {
                 Loading...
               </div>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/inventory-v2')}
+            >
+              <Box className="w-4 h-4 mr-2" />
+              Inventory
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/shipping-v2')}
+            >
+              <Truck className="w-4 h-4 mr-2" />
+              Shipping
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/products-v2')}
+            >
+              <ShoppingBag className="w-4 h-4 mr-2" />
+              Products
+            </Button>
             <Button variant="outline" size="icon" onClick={handleRefresh} disabled={isLoading}>
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>

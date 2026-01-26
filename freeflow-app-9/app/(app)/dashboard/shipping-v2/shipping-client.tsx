@@ -1,6 +1,7 @@
 "use client"
 
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 
 import React, { useState, useMemo } from 'react'
 
@@ -63,7 +64,9 @@ import {
   Copy,
   Upload,
   Archive,
-  AlertTriangle
+  AlertTriangle,
+  ShoppingCart,
+  ExternalLink
 } from 'lucide-react'
 
 // Lazy-loaded Enhanced & Competitive Upgrade Components for code splitting
@@ -436,6 +439,7 @@ const formatTime = (dateString: string) => {
 // ============================================================================
 
 export default function ShippingClient() {
+  const router = useRouter()
 
   // ============================================================================
   // SUPABASE HOOKS - Real data integration
@@ -862,6 +866,22 @@ export default function ShippingClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/orders-v2')}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Orders
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/logistics-v2')}
+            >
+              <Truck className="w-4 h-4 mr-2" />
+              Logistics
+            </Button>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
@@ -2674,7 +2694,19 @@ export default function ShippingClient() {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 pt-4 border-t">
+                  <div className="flex items-center gap-2 pt-4 border-t flex-wrap">
+                    {selectedShipment?.orderId && (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          router.push(`/dashboard/orders-v2?highlight=${selectedShipment.orderId}`)
+                          setSelectedShipment(null)
+                        }}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        View Order
+                      </Button>
+                    )}
                     <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={() => { if (selectedShipment) handleTrackShipment(selectedShipment); }}>
                       <MapPin className="w-4 h-4 mr-2" />
                       Track Package

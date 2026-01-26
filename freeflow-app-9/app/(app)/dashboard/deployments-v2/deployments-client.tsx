@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useDeployments, type DeploymentEnvironment as HookDeploymentEnvironment } from '@/lib/hooks/use-deployments'
 import { toast } from 'sonner'
@@ -24,7 +25,7 @@ import {
   GitCommit, FileCode, Zap, Shield, RefreshCw, AlertTriangle, Check, X,
   Box, Layers, Database, Lock, Plus, ChevronRight, ChevronDown,
   Search, Filter, Download, Upload, ArrowUpRight, Timer, Network, User, MessageSquare, FileText, BarChart3, AlertCircle, Webhook,
-  Folder, File, Package, Gauge, MonitorPlay, GitPullRequest, Bell, AlertOctagon, Globe2, Loader2
+  Folder, File, Package, Gauge, MonitorPlay, GitPullRequest, Bell, AlertOctagon, Globe2, Loader2, Tag
 } from 'lucide-react'
 
 // Lazy-loaded Enhanced & Competitive Upgrade Components for code splitting
@@ -317,6 +318,7 @@ const defaultDeploymentForm = {
 }
 
 export default function DeploymentsClient() {
+  const router = useRouter()
 
   // Use the deployments hook for data fetching and mutations
   const {
@@ -1165,6 +1167,8 @@ export default function DeploymentsClient() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input placeholder="Search deployments..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
+            <Button variant="outline" onClick={() => router.push('/dashboard/ci-cd-v2')}><GitBranch className="h-4 w-4 mr-2" />CI/CD Pipelines</Button>
+            <Button variant="outline" onClick={() => router.push('/dashboard/releases-v2')}><Tag className="h-4 w-4 mr-2" />Releases</Button>
             <Button variant="outline" onClick={() => setShowEnvDialog(true)}><Lock className="h-4 w-4 mr-2" />Environment</Button>
             <Button variant="outline" onClick={() => setShowDomainDialog(true)}><Globe className="h-4 w-4 mr-2" />Domains</Button>
             <Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={() => setShowCreateDialog(true)}><Rocket className="h-4 w-4 mr-2" />Deploy</Button>
@@ -2742,6 +2746,7 @@ export default function DeploymentsClient() {
                         {dep.status === 'success' && dep.can_rollback && (
                           <Button variant="ghost" size="sm" onClick={() => { setSelectedDbDeployment(dep); setShowRollbackDialog(true); }}><RotateCcw className="h-4 w-4 text-amber-600" /></Button>
                         )}
+                        <Button variant="ghost" size="sm" onClick={() => router.push(`/dashboard/logs-v2?deployment=${dep.id}`)} title="View Logs"><Terminal className="h-4 w-4 text-blue-500" /></Button>
                         <Button variant="ghost" size="sm" onClick={() => handleDeleteDeployment(dep.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                       </div>
                     </div>

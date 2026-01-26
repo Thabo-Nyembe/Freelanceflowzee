@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useCiCd, type CiCd, type PipelineType, type PipelineStatus } from '@/lib/hooks/use-ci-cd'
 import { toast } from 'sonner'
 import { downloadAsJson, copyToClipboard } from '@/lib/button-handlers'
@@ -471,6 +472,8 @@ const formatTimeAgo = (dateString: string) => {
 // Note: mockCiCdQuickActions is defined inside CiCdClient to access component state and handlers
 
 export default function CiCdClient() {
+  const router = useRouter()
+
   // Core state
   const [activeTab, setActiveTab] = useState('workflows')
   const [searchQuery, setSearchQuery] = useState('')
@@ -702,6 +705,18 @@ export default function CiCdClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" className="gap-2" onClick={() => router.push('/dashboard/deployments-v2')}>
+              <Rocket className="w-4 h-4" />
+              Deployments
+            </Button>
+            <Button variant="outline" className="gap-2" onClick={() => router.push('/dashboard/logs-v2')}>
+              <Terminal className="w-4 h-4" />
+              Logs
+            </Button>
+            <Button variant="outline" className="gap-2" onClick={() => router.push('/dashboard/testing-v2')}>
+              <FileText className="w-4 h-4" />
+              Testing
+            </Button>
             <Button variant="outline" className="gap-2" onClick={() => {
               const logsData = runs.map(run => ({
                 runNumber: run.runNumber,

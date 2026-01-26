@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useReleases, type ReleaseType as HookReleaseType, type Environment as HookEnvironment } from '@/lib/hooks/use-releases'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -51,7 +52,8 @@ import {
   Server,
   Activity,
   BarChart3,
-  Loader2
+  Loader2,
+  FileText
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -292,6 +294,7 @@ const initialFormData: ReleaseFormData = {
 }
 
 export default function ReleasesClient() {
+  const router = useRouter()
   const supabase = createClient()
 
   // Use the releases hook for data fetching and mutations
@@ -818,6 +821,18 @@ export default function ReleasesClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={() => router.push('/dashboard/ci-cd-v2')}>
+              <GitBranch className="w-4 h-4 mr-2" />
+              CI/CD
+            </Button>
+            <Button variant="outline" onClick={() => router.push('/dashboard/deployments-v2')}>
+              <Rocket className="w-4 h-4 mr-2" />
+              Deployments
+            </Button>
+            <Button variant="outline" onClick={() => router.push('/dashboard/release-notes-v2')}>
+              <FileText className="w-4 h-4 mr-2" />
+              Release Notes
+            </Button>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input

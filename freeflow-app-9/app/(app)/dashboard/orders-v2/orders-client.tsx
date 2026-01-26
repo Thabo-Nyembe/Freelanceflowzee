@@ -62,7 +62,9 @@ import {
   Terminal,
   Shield,
   List,
-  Table2
+  Table2,
+  Warehouse,
+  ExternalLink
 } from 'lucide-react'
 
 // World-class TanStack Table integration
@@ -595,6 +597,38 @@ export default function OrdersClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/products-v2')}
+            >
+              <Package className="w-4 h-4 mr-2" />
+              Products
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/inventory-v2')}
+            >
+              <Warehouse className="w-4 h-4 mr-2" />
+              Inventory
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/shipping-v2')}
+            >
+              <Truck className="w-4 h-4 mr-2" />
+              Shipping
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/customers-v2')}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Customers
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -2049,6 +2083,18 @@ export default function OrdersClient() {
                           {selectedOrder.customer_phone}
                         </p>
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-3"
+                        onClick={() => {
+                          router.push(`/dashboard/customers-v2?highlight=${selectedOrder.customer_id}`)
+                          setSelectedOrder(null)
+                        }}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        View Customer
+                      </Button>
                     </div>
 
                     <div>

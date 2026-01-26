@@ -3,11 +3,13 @@
 import { createClient } from '@/lib/supabase/client'
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { useAccessLogs } from '@/lib/hooks/use-access-logs'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+import { useTeam } from '@/lib/hooks/use-team'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -30,7 +32,7 @@ import {
   HardDrive, TrendingUp, TrendingDown, MoreHorizontal,
   Plus, Trash2, LineChart, Archive, Shield, Lock, Key, Workflow, Bell, Send,
   CloudUpload, CloudDownload, Sparkles, Wand2, Bug, Microscope,
-  Sliders, Webhook
+  Sliders, Webhook, GitBranch, Rocket
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -226,6 +228,7 @@ interface ServiceCatalogEntry {
 }
 
 export default function LogsClient() {
+  const router = useRouter()
 
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
@@ -316,6 +319,9 @@ export default function LogsClient() {
     isLoading: isLoadingActivityLogs,
     refetch: refetchActivityLogs
   } = useActivityLogs()
+
+  // Team data hook
+  const { members: teamMembers } = useTeam()
 
   // Combined loading state
   const isLoadingData = isLoadingSystemLogs || isLoadingAccessLogs || isLoadingActivityLogs
@@ -810,6 +816,22 @@ export default function LogsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={() => router.push('/dashboard/ci-cd-v2')}
+              >
+                <GitBranch className="w-4 h-4 mr-2" />
+                CI/CD
+              </Button>
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={() => router.push('/dashboard/deployments-v2')}
+              >
+                <Rocket className="w-4 h-4 mr-2" />
+                Deployments
+              </Button>
               <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5">
                 <Clock className="w-4 h-4" />
                 <select
@@ -2439,7 +2461,12 @@ export default function LogsClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2451,7 +2478,15 @@ export default function LogsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={dbActivityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              description: log.resource_name || undefined,
+              user: { name: log.user_name || 'System', avatar: undefined },
+              timestamp: log.created_at,
+              isUnread: log.status === 'pending'
+            }))}
             title="Log Activity"
             maxItems={5}
           />

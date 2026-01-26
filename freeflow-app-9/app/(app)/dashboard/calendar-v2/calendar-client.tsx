@@ -24,7 +24,7 @@ import {
   Globe, Link2, CheckCircle2, Edit2, Trash2,
   Copy, ExternalLink, Download, Share2,
   BarChart3, Timer, CalendarCheck, CalendarClock, Zap, MessageSquare, FileText,
-  AlertCircle, Loader2, RefreshCw
+  AlertCircle, Loader2, RefreshCw, CheckSquare, Folder, Sun
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -646,6 +646,36 @@ END:VCALENDAR`
                 <p className="text-white/80 max-w-xl">
                   Intelligent scheduling with AI suggestions, booking links, team availability, and seamless integrations
                 </p>
+                {/* Quick Links to Related Modules */}
+                <div className="flex items-center gap-2 mt-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white/90 hover:text-white hover:bg-white/20"
+                    onClick={() => router.push('/dashboard/tasks-v2')}
+                  >
+                    <CheckSquare className="h-4 w-4 mr-2" />
+                    Tasks
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white/90 hover:text-white hover:bg-white/20"
+                    onClick={() => router.push('/dashboard/projects-hub-v2')}
+                  >
+                    <Folder className="h-4 w-4 mr-2" />
+                    Projects
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white/90 hover:text-white hover:bg-white/20"
+                    onClick={() => router.push('/dashboard/my-day-v2')}
+                  >
+                    <Sun className="h-4 w-4 mr-2" />
+                    My Day
+                  </Button>
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <Dialog open={showNewEvent} onOpenChange={setShowNewEvent}>
@@ -2344,9 +2374,32 @@ END:VCALENDAR`
                     </div>
                   )}
                   {/* Related Item Navigation */}
-                  {(selectedEvent.metadata?.client_id || selectedEvent.metadata?.project_id || selectedEvent.event_type === 'meeting') && (
+                  {(selectedEvent.metadata?.client_id || selectedEvent.metadata?.project_id || selectedEvent.metadata?.task_id || selectedEvent.event_type === 'meeting' || selectedEvent.event_type === 'task') && (
                     <div className="flex flex-wrap items-center gap-2 pt-4 border-t dark:border-gray-700">
                       <span className="text-sm text-muted-foreground mr-1">Related:</span>
+                      {/* Task Event Navigation */}
+                      {(selectedEvent.event_type === 'task' || selectedEvent.metadata?.task_id) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/dashboard/tasks-v2?highlight=${selectedEvent.metadata?.task_id || selectedEvent.id}`)}
+                        >
+                          <CheckSquare className="h-4 w-4 mr-2" />
+                          View Task
+                        </Button>
+                      )}
+                      {/* Project Event Navigation */}
+                      {selectedEvent.metadata?.project_id && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/dashboard/projects-hub-v2?highlight=${selectedEvent.metadata?.project_id}`)}
+                        >
+                          <Folder className="h-4 w-4 mr-2" />
+                          View Project
+                        </Button>
+                      )}
+                      {/* Client Navigation */}
                       {selectedEvent.metadata?.client_id && (
                         <Button
                           variant="outline"
@@ -2357,25 +2410,48 @@ END:VCALENDAR`
                           View Client
                         </Button>
                       )}
-                      {selectedEvent.metadata?.project_id && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => router.push(`/dashboard/crm-v2?tab=projects&highlight=${selectedEvent.metadata?.project_id}`)}
-                        >
-                          <FileText className="h-4 w-4 mr-2" />
-                          View Project
-                        </Button>
-                      )}
-                      {selectedEvent.event_type === 'meeting' && selectedEvent.attendees && selectedEvent.attendees.length > 0 && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => router.push(`/dashboard/clients-v2?search=${encodeURIComponent(selectedEvent.attendees?.[0]?.email || '')}`)}
-                        >
-                          <Users className="h-4 w-4 mr-2" />
-                          Find Attendee
-                        </Button>
+                      {/* Meeting Event Navigation */}
+                      {selectedEvent.event_type === 'meeting' && (
+                        <>
+                          {(selectedEvent.meeting_url || selectedEvent.location?.includes('http') || selectedEvent.location_type === 'virtual') && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-green-600 border-green-200 hover:bg-green-50 dark:border-green-800 dark:hover:bg-green-900/20"
+                              onClick={() => {
+                                const meetLink = selectedEvent.meeting_url ||
+                                  (selectedEvent.location?.includes('http') ? selectedEvent.location : `https://meet.freeflow.com/${selectedEvent.id}`)
+                                window.open(meetLink, '_blank')
+                                toast.success('Opening meeting...')
+                              }}
+                            >
+                              <Video className="h-4 w-4 mr-2" />
+                              Join Meeting
+                            </Button>
+                          )}
+                          {selectedEvent.attendees && selectedEvent.attendees.length > 0 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => router.push(`/dashboard/clients-v2?search=${encodeURIComponent(selectedEvent.attendees?.[0]?.email || '')}`)}
+                            >
+                              <Users className="h-4 w-4 mr-2" />
+                              Find Attendee
+                            </Button>
+                          )}
+                          {!(selectedEvent.meeting_url || selectedEvent.location?.includes('http') || selectedEvent.location_type === 'virtual') && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                toast.info(`Meeting Details: ${selectedEvent.location || 'No location specified'}`)
+                              }}
+                            >
+                              <CalendarIcon className="h-4 w-4 mr-2" />
+                              View Details
+                            </Button>
+                          )}
+                        </>
                       )}
                     </div>
                   )}
