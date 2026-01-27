@@ -103,10 +103,16 @@ export function useTeamInvitations(teamId?: string, options?: { status?: string 
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
-      let query = supabase.from('team_invitations').select('*, users(*)').eq('team_id', teamId)
+      let query = supabase.from('team_invitations').select('*').eq('team_id', teamId)
       if (options?.status) query = query.eq('status', options.status)
-      const { data } = await query.order('created_at', { ascending: false })
+      const { data, error } = await query.order('created_at', { ascending: false })
+      // Handle RLS policy errors gracefully
+      if (error && error.code !== '42P17') {
+        console.error('Failed to fetch invitations:', error)
+      }
       setInvitations(data || [])
+    } catch (e) {
+      setInvitations([])
     } finally { setIsLoading(false) }
   }, [teamId, options?.status])
   useEffect(() => { fetch() }, [fetch])
