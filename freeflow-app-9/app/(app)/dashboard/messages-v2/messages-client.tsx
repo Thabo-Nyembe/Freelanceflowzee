@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { useMessages } from '@/lib/hooks/use-messages'
 import { useConversations } from '@/lib/hooks/use-conversations'
@@ -194,24 +195,51 @@ const createDefaultUser = (userId: string | null, userEmail: string | null): Use
 
 export default function MessagesClient() {
   // ==========================================================================
+  // DEMO MODE DETECTION - Check if user is demo account
+  // ==========================================================================
+  const { data: nextAuthSession } = useSession()
+  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'test@kazi.dev' ||
+                        nextAuthSession?.user?.email === 'demo@kazi.io'
+
+  // ==========================================================================
   // AUTH & USER HOOKS - Get current authenticated user
   // ==========================================================================
   const { user: authUser, loading: authLoading } = useAuth()
-  const userId = authUser?.id || null
+  const userId = isDemoAccount ? 'demo-user-id' : (authUser?.id || null)
 
-  // Current user derived from auth
-  const currentUser: User = useMemo(() =>
-    createDefaultUser(authUser?.id || null, authUser?.email || null),
-    [authUser]
-  )
+  // Current user derived from auth (use NextAuth session for demo accounts)
+  const currentUser: User = useMemo(() => {
+    if (isDemoAccount && nextAuthSession?.user) {
+      return {
+        id: 'demo-user-id',
+        name: nextAuthSession.user.name || 'Alex',
+        displayName: nextAuthSession.user.name || 'Alex Johnson',
+        email: nextAuthSession.user.email || 'alex@freeflow.io',
+        status: 'online' as UserStatus,
+        title: 'Product Manager'
+      }
+    }
+    return createDefaultUser(authUser?.id || null, authUser?.email || null)
+  }, [authUser, isDemoAccount, nextAuthSession])
 
   // ==========================================================================
   // TEAM MEMBERS HOOK - Replace mockUsers with real data
   // ==========================================================================
   const { members: teamMembers, loading: teamLoading, fetchMembers } = useTeam()
 
-  // Convert team members to User format for display
+  // Convert team members to User format for display (use demo data for demo accounts)
   const users: User[] = useMemo(() => {
+    // Demo users for investor demo
+    if (isDemoAccount) {
+      return [
+        { id: 'demo-1', name: 'sarah', displayName: 'Sarah Chen', email: 'sarah@techcorp.com', status: 'online' as UserStatus, title: 'Lead Designer', isBot: false },
+        { id: 'demo-2', name: 'mike', displayName: 'Mike Johnson', email: 'mike@techcorp.com', status: 'online' as UserStatus, title: 'Senior Developer', isBot: false },
+        { id: 'demo-3', name: 'emma', displayName: 'Emma Wilson', email: 'emma@techcorp.com', status: 'away' as UserStatus, title: 'Project Manager', isBot: false },
+        { id: 'demo-4', name: 'david', displayName: 'David Lee', email: 'david@techcorp.com', status: 'offline' as UserStatus, title: 'Marketing Lead', isBot: false },
+        { id: 'kazi-bot', name: 'kazi-bot', displayName: 'KAZI Bot', email: 'bot@kazi.app', status: 'online' as UserStatus, title: 'AI Assistant', isBot: true }
+      ]
+    }
     if (teamMembers.length === 0) return []
     return teamMembers.map(member => ({
       id: member.id,
@@ -223,7 +251,7 @@ export default function MessagesClient() {
       avatar: member.avatar_url || undefined,
       isBot: false
     }))
-  }, [teamMembers])
+  }, [teamMembers, isDemoAccount])
 
   // ==========================================================================
   // THREADS HOOK - Replace mockThreads with real data
@@ -231,8 +259,61 @@ export default function MessagesClient() {
   const { threads: userThreadsData, isLoading: threadsLoading, refresh: refreshThreads } = useUserThreads(userId || undefined)
   const { count: unreadThreadsCount } = useUnreadThreadsCount(userId || undefined)
 
-  // Convert threads to Thread format
+  // Convert threads to Thread format (use demo data for demo accounts)
   const threads: Thread[] = useMemo(() => {
+    // Demo threads for investor demo
+    if (isDemoAccount) {
+      return [
+        {
+          id: 'thread-1',
+          parentMessage: {
+            id: 'msg-thread-1',
+            channelId: 'general',
+            content: 'Quick question about the new design system updates',
+            author: { id: 'demo-1', name: 'sarah', displayName: 'Sarah Chen', email: 'sarah@techcorp.com', status: 'online' as UserStatus },
+            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            status: 'read' as MessageStatus,
+            reactions: [{ emoji: '👍', count: 3, users: ['demo-2', 'demo-3'] }],
+            threadCount: 5,
+            threadParticipants: [],
+            attachments: [],
+            mentions: [],
+            isPinned: false,
+            isBookmarked: false
+          },
+          channel: 'general',
+          replies: 5,
+          participants: [],
+          lastReply: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+          isFollowing: true,
+          isUnread: false
+        },
+        {
+          id: 'thread-2',
+          parentMessage: {
+            id: 'msg-thread-2',
+            channelId: 'development',
+            content: 'API integration discussion - need feedback on the new endpoints',
+            author: { id: 'demo-2', name: 'mike', displayName: 'Mike Johnson', email: 'mike@techcorp.com', status: 'online' as UserStatus },
+            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+            status: 'read' as MessageStatus,
+            reactions: [],
+            threadCount: 12,
+            threadParticipants: [],
+            attachments: [],
+            mentions: [],
+            isPinned: true,
+            isBookmarked: false
+          },
+          channel: 'development',
+          replies: 12,
+          participants: [],
+          lastReply: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+          isFollowing: true,
+          isUnread: true
+        }
+      ]
+    }
     if (!userThreadsData || userThreadsData.length === 0) return []
     return userThreadsData.map((thread: any) => ({
       id: thread.id,
@@ -258,15 +339,23 @@ export default function MessagesClient() {
       isFollowing: true,
       isUnread: false
     }))
-  }, [userThreadsData, currentUser])
+  }, [userThreadsData, currentUser, isDemoAccount])
 
   // ==========================================================================
   // FILES HOOK - Replace mockFiles with real data
   // ==========================================================================
   const { files: userFilesData, isLoading: filesLoading, refresh: refreshFiles } = useRecentFiles(userId || undefined, 50)
 
-  // Convert files to SharedFile format
+  // Convert files to SharedFile format (use demo data for demo accounts)
   const sharedFiles: SharedFile[] = useMemo(() => {
+    // Demo files for investor demo
+    if (isDemoAccount) {
+      return [
+        { id: 'file-1', name: 'Q4-Report.pdf', type: 'application/pdf', size: 2457600, uploadedBy: currentUser, uploadedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), channelId: 'general', channelName: '#general', downloads: 12 },
+        { id: 'file-2', name: 'Brand-Guidelines-v2.ai', type: 'application/illustrator', size: 15728640, uploadedBy: { id: 'demo-1', name: 'sarah', displayName: 'Sarah Chen', email: 'sarah@techcorp.com', status: 'online' as UserStatus }, uploadedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), channelId: 'design', channelName: '#design', downloads: 8 },
+        { id: 'file-3', name: 'Sprint-Planning.xlsx', type: 'application/vnd.ms-excel', size: 524288, uploadedBy: { id: 'demo-3', name: 'emma', displayName: 'Emma Wilson', email: 'emma@techcorp.com', status: 'away' as UserStatus }, uploadedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), channelId: 'development', channelName: '#development', downloads: 24 }
+      ]
+    }
     if (!userFilesData || userFilesData.length === 0) return []
     return userFilesData.map((file: any) => ({
       id: file.id,
@@ -279,7 +368,7 @@ export default function MessagesClient() {
       channelName: file.folder_name || 'Files',
       downloads: file.download_count || 0
     }))
-  }, [userFilesData, currentUser])
+  }, [userFilesData, currentUser, isDemoAccount])
 
   // ==========================================================================
   // MENTIONS HOOK - Replace mockMentions with real data
@@ -287,8 +376,55 @@ export default function MessagesClient() {
   const { mentions: userMentionsData, isLoading: mentionsLoading, refresh: refreshMentions } = useMentions(userId || undefined)
   const { count: unreadMentionsCount } = useUnreadMentionCount(userId || undefined)
 
-  // Convert mentions to Mention format
+  // Convert mentions to Mention format (use demo data for demo accounts)
   const mentions: Mention[] = useMemo(() => {
+    // Demo mentions for investor demo
+    if (isDemoAccount) {
+      return [
+        {
+          id: 'mention-1',
+          message: {
+            id: 'msg-mention-1',
+            channelId: 'general',
+            content: 'Hey @Alex, can you review the latest mockups when you get a chance?',
+            author: { id: 'demo-1', name: 'sarah', displayName: 'Sarah Chen', email: 'sarah@techcorp.com', status: 'online' as UserStatus },
+            createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+            status: 'delivered' as MessageStatus,
+            reactions: [],
+            threadCount: 0,
+            threadParticipants: [],
+            attachments: [],
+            mentions: [currentUser],
+            isPinned: false,
+            isBookmarked: false
+          },
+          channel: '#general',
+          isRead: false,
+          mentionedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'mention-2',
+          message: {
+            id: 'msg-mention-2',
+            channelId: 'development',
+            content: '@Alex The API changes are ready for your review. Let me know if you need any clarification.',
+            author: { id: 'demo-2', name: 'mike', displayName: 'Mike Johnson', email: 'mike@techcorp.com', status: 'online' as UserStatus },
+            createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+            status: 'read' as MessageStatus,
+            reactions: [{ emoji: '✅', count: 1, users: ['demo-user-id'] }],
+            threadCount: 2,
+            threadParticipants: [],
+            attachments: [],
+            mentions: [currentUser],
+            isPinned: false,
+            isBookmarked: false
+          },
+          channel: '#development',
+          isRead: true,
+          mentionedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+        }
+      ]
+    }
     if (!userMentionsData || userMentionsData.length === 0) return []
     return userMentionsData.map((mention: any) => ({
       id: mention.id,
@@ -311,15 +447,23 @@ export default function MessagesClient() {
       isRead: mention.status === 'read',
       mentionedAt: mention.created_at
     }))
-  }, [userMentionsData, currentUser])
+  }, [userMentionsData, currentUser, isDemoAccount])
 
   // ==========================================================================
   // CALLS HOOK - Replace mockCalls with real data
   // ==========================================================================
   const { calls: recentCallsData, isLoading: callsLoading, refresh: refreshCalls } = useRecentCalls(userId || undefined, { limit: 20 })
 
-  // Convert calls to Call format
+  // Convert calls to Call format (use demo data for demo accounts)
   const calls: Call[] = useMemo(() => {
+    // Demo calls for investor demo
+    if (isDemoAccount) {
+      return [
+        { id: 'call-1', type: 'video' as CallType, status: 'ended' as CallStatus, channelId: 'general', channelName: 'Team Standup', participants: [], startTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), endTime: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString(), duration: 1800, isRecorded: true },
+        { id: 'call-2', type: 'audio' as CallType, status: 'ended' as CallStatus, channelId: 'dm-sarah', channelName: 'Sarah Chen', participants: [], startTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), endTime: new Date(Date.now() - 23.5 * 60 * 60 * 1000).toISOString(), duration: 1200, isRecorded: false },
+        { id: 'call-3', type: 'video' as CallType, status: 'missed' as CallStatus, channelId: 'dm-david', channelName: 'David Lee', participants: [], startTime: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(), duration: 0, isRecorded: false }
+      ]
+    }
     if (!recentCallsData || recentCallsData.length === 0) return []
     return recentCallsData.map((call: any) => ({
       id: call.id,
@@ -333,7 +477,7 @@ export default function MessagesClient() {
       duration: call.duration,
       isRecorded: call.is_recorded || false
     }))
-  }, [recentCallsData])
+  }, [recentCallsData, isDemoAccount])
 
   // ==========================================================================
   // CHANNELS STATE - Initialized from conversations hook, not mock data
@@ -347,6 +491,16 @@ export default function MessagesClient() {
   const messagesActivities: any[] = []
   const messagesQuickActions: any[] = []
 
+  // Legacy mock data references (now using real data from hooks above)
+  // These are fallbacks used in some UI components
+  const mockThreads = threads
+  const mockChannels = channelsList
+  const mockFiles = sharedFiles
+  const mockMessages: Message[] = []
+  const mockUsers = users
+  const mockCalls = calls
+  const mockMentions = mentions
+
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [messageInput, setMessageInput] = useState('')
@@ -359,10 +513,28 @@ export default function MessagesClient() {
 
   // Fetch team members on mount
   useEffect(() => {
-    if (userId) {
+    if (userId && !isDemoAccount) {
       fetchMembers()
     }
-  }, [userId, fetchMembers])
+  }, [userId, fetchMembers, isDemoAccount])
+
+  // Initialize demo channels for demo accounts
+  useEffect(() => {
+    if (isDemoAccount) {
+      const demoChannels: Channel[] = [
+        { id: 'general', name: 'general', type: 'channel', description: 'General team discussions', members: 12, unread: 3, isPrivate: false, isPinned: true, isMuted: false, icon: 'hash' },
+        { id: 'development', name: 'development', type: 'channel', description: 'Development team channel', members: 8, unread: 1, isPrivate: false, isPinned: true, isMuted: false, icon: 'code' },
+        { id: 'design', name: 'design', type: 'channel', description: 'Design discussions and reviews', members: 5, unread: 0, isPrivate: false, isPinned: false, isMuted: false, icon: 'palette' },
+        { id: 'marketing', name: 'marketing', type: 'channel', description: 'Marketing campaigns and updates', members: 6, unread: 2, isPrivate: false, isPinned: false, isMuted: false, icon: 'megaphone' },
+        { id: 'dm-sarah', name: 'Sarah Chen', type: 'direct', members: 2, unread: 1, isPrivate: true, isPinned: false, isMuted: false },
+        { id: 'dm-mike', name: 'Mike Johnson', type: 'direct', members: 2, unread: 0, isPrivate: true, isPinned: false, isMuted: false }
+      ]
+      setChannelsList(demoChannels)
+      if (!selectedChannel) {
+        setSelectedChannel(demoChannels[0])
+      }
+    }
+  }, [isDemoAccount, selectedChannel])
 
   // Real Supabase hook for messages (legacy)
   const {
@@ -1272,16 +1444,16 @@ export default function MessagesClient() {
     }
   }
 
-  // Combined loading state for all hooks
-  const isLoading = authLoading || teamLoading || threadsLoading || filesLoading || mentionsLoading || callsLoading || messagesLoading || chatsLoading
+  // Combined loading state for all hooks (skip for demo accounts)
+  const isLoading = !isDemoAccount && (authLoading || teamLoading || threadsLoading || filesLoading || mentionsLoading || callsLoading || messagesLoading || chatsLoading)
 
-  // Combined error state for all hooks
-  const hasError = messagesError || chatsError || chatMessagesError
+  // Combined error state for all hooks (skip for demo accounts)
+  const hasError = !isDemoAccount && (messagesError || chatsError || chatMessagesError)
 
-  // Loading state
+  // Loading state (demo accounts skip this)
   if (isLoading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
 
-  // Error state
+  // Error state (demo accounts skip this)
   if (hasError) return <div className="flex flex-col items-center justify-center h-full gap-4"><p className="text-red-500">Error loading data</p><Button onClick={() => { refetchMessages(); fetchChats(); }}>Retry</Button></div>
 
   return (
