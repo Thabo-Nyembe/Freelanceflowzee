@@ -25,17 +25,16 @@ export function useAuthUserId() {
   }, [])
 
   const getUserId = useCallback(async (): Promise<string | null> => {
-    // First try Supabase auth (this gives us auth.users ID directly)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user?.id) {
-      return user.id
-    }
-
-    // Try authId from NextAuth session (set by auth.config.ts from profiles table)
-    // This is the auth.users-compatible ID for Supabase FK constraints
+    // First try authId from NextAuth session (auth.users-compatible ID for Supabase FK constraints)
     const authId = (session?.user as any)?.authId
     if (authId) {
       return authId
+    }
+
+    // Then try Supabase auth (this gives us auth.users ID directly)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user?.id) {
+      return user.id
     }
 
     // Fallback to session user.id (may fail FK constraints)
@@ -47,5 +46,6 @@ export function useAuthUserId() {
     return null
   }, [supabase, session])
 
-  return { getUserId, session }
+  const isSessionLoaded = session !== null
+  return { getUserId, session, isSessionLoaded }
 }

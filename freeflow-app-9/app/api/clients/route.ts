@@ -137,7 +137,8 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const userId = session.user.id
+    // Use authId for database queries (auth.users FK constraints)
+    const userId = (session.user as any).authId || session.user.id
 
     // Single client fetch
     if (clientId) {
@@ -152,10 +153,7 @@ export async function GET(request: NextRequest) {
 
       const { data: client, error } = await supabase
         .from('clients')
-        .select(`
-          *,
-          assigned_user:users!clients_assigned_to_fkey(id, name, email, avatar_url)
-        `)
+        .select('*')
         .eq('id', clientId)
         .single()
 
@@ -213,10 +211,7 @@ export async function GET(request: NextRequest) {
     // Build query for client list
     let query = supabase
       .from('clients')
-      .select(`
-        *,
-        assigned_user:users!clients_assigned_to_fkey(id, name, avatar_url)
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
 
     // Filter by user access
     query = query.eq('user_id', userId)
@@ -310,7 +305,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const body = await request.json()
     const { action = 'create' } = body
 
@@ -365,7 +360,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const body = await request.json()
     const { id, ...updates } = body
 
@@ -461,7 +456,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const { searchParams } = new URL(request.url)
     const clientId = searchParams.get('id')
     const permanent = searchParams.get('permanent') === 'true'

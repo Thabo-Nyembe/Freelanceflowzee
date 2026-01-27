@@ -91,20 +91,29 @@ export function useProjects(initialProjects: Project[] = []) {
   const fetchProjects = useCallback(async () => {
     setIsLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('updated_at', { ascending: false })
+      // Fetch via API (uses service role key, bypasses RLS)
+      const response = await fetch('/api/projects', { credentials: 'include' })
+      const result = await response.json()
 
-      if (error) throw error
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch projects')
+      }
+
+      // Handle demo mode
+      if (result.demo) {
+        setProjects([])
+        return
+      }
+
+      const data = result.projects || []
 
       // Map DB fields to Project interface
-      const mappedProjects = (data || []).map(p => ({
+      const mappedProjects = data.map((p: any) => ({
         ...p,
-        name: p.title, // Map title -> name
+        name: p.title || p.name, // Map title -> name
         project_code: p.metadata?.project_code || '',
         team_members: p.metadata?.team_members || [],
-        tags: p.metadata?.tags || [],
+        tags: p.metadata?.tags || p.tags || [],
         color: p.metadata?.color || '#3b82f6',
         is_template: p.metadata?.is_template || false,
         cover_image: p.metadata?.cover_image || null,

@@ -181,7 +181,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
 
-    const userId = session.user.id;
+    const userId = (session.user as any).authId || session.user.id;
 
     // Get chats
     if (type === 'chats' || !chatId) {
@@ -406,7 +406,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return handleDemoAction(action, data);
     }
 
-    const userId = session.user.id;
+    const userId = (session.user as any).authId || session.user.id;
 
     switch (action) {
       case 'send':

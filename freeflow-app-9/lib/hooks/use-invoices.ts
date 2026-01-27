@@ -1,7 +1,7 @@
 // Hook for Invoices management
 // Created: December 14, 2024
 
-import { useSupabaseQuery } from './use-supabase-query'
+import { useState, useEffect, useCallback } from 'react'
 import { useSupabaseMutation } from './use-supabase-mutation'
 
 export type InvoiceStatus = 'draft' | 'pending' | 'sent' | 'viewed' | 'paid' | 'partial' | 'overdue' | 'cancelled' | 'refunded'
@@ -66,34 +66,61 @@ interface UseInvoicesOptions {
 
 export function useInvoices(options: UseInvoicesOptions = {}) {
   const { status, limit } = options
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  const filters: Record<string, any> = {}
-  if (status && status !== 'all') filters.status = status
+  const fetchInvoices = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      // Build query params
+      const params = new URLSearchParams()
+      if (status && status !== 'all') params.set('status', status)
+      if (limit) params.set('limit', String(limit))
 
-  const queryOptions: any = {
-    table: 'invoices',
-    filters,
-    orderBy: { column: 'created_at', ascending: false },
-    realtime: true,
-    softDelete: false // invoices table doesn't have deleted_at column
-  }
-  if (limit !== undefined) queryOptions.limit = limit
+      // Fetch via API (uses service role key, bypasses RLS)
+      const response = await fetch(`/api/invoices?${params.toString()}`, {
+        credentials: 'include'
+      })
+      const result = await response.json()
 
-  const { data, loading, error, refetch } = useSupabaseQuery<Invoice>(queryOptions)
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch invoices')
+      }
+
+      // Handle demo mode
+      if (result.demo) {
+        setInvoices([])
+        return
+      }
+
+      setInvoices(result.data?.invoices || [])
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+      console.error('Failed to fetch invoices:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [status, limit])
+
+  useEffect(() => {
+    fetchInvoices()
+  }, [fetchInvoices])
 
   const { create, update, remove, loading: mutating } = useSupabaseMutation({
     table: 'invoices',
-    onSuccess: refetch
+    onSuccess: fetchInvoices
   })
 
   return {
-    invoices: data,
+    invoices,
     loading,
     error,
     mutating,
     createInvoice: create,
     updateInvoice: update,
     deleteInvoice: remove,
-    refetch
+    refetch: fetchInvoices
   }
 }

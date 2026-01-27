@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
 
     // Single milestone fetch
     if (milestoneId) {
@@ -237,7 +237,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const body = await request.json()
     const { action = 'create', project_id } = body
 
@@ -319,7 +319,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const body = await request.json()
     const { id, ...updates } = body
 
@@ -420,7 +420,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const { searchParams } = new URL(request.url)
     const milestoneId = searchParams.get('id')
     const permanent = searchParams.get('permanent') === 'true'

@@ -111,83 +111,87 @@ export interface ClientStats {
 class ClientsApiClient extends BaseApiClient {
   /**
    * Get all clients with pagination and filters
+   * Fetches via API to bypass RLS (uses service role key on server)
    */
   async getClients(
     page: number = 1,
     pageSize: number = 10,
     filters?: ClientFilters
   ) {
-    const supabase = createClient()
+    try {
+      // Build query params
+      const params = new URLSearchParams()
+      params.set('page', String(page))
+      params.set('limit', String(pageSize))
 
-    let query = supabase
-      .from('clients')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-
-    // Apply filters
-    if (filters) {
-      if (filters.status && filters.status.length > 0) {
-        query = query.in('status', filters.status)
+      if (filters) {
+        if (filters.status && filters.status.length > 0) {
+          params.set('status', filters.status.join(','))
+        }
+        if (filters.type && filters.type.length > 0) {
+          params.set('type', filters.type.join(','))
+        }
+        if (filters.industry && filters.industry.length > 0) {
+          params.set('industry', filters.industry.join(','))
+        }
+        if (filters.search) {
+          params.set('search', filters.search)
+        }
       }
 
-      if (filters.type && filters.type.length > 0) {
-        query = query.in('type', filters.type)
+      // Fetch via API (uses service role key, bypasses RLS)
+      const response = await fetch(`/api/clients?${params.toString()}`, {
+        credentials: 'include'
+      })
+      const result = await response.json()
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || 'Failed to fetch clients',
+          data: null
+        }
       }
 
-      if (filters.industry && filters.industry.length > 0) {
-        query = query.in('industry', filters.industry)
+      // Handle demo mode
+      if (result.demo) {
+        return {
+          success: true,
+          data: {
+            data: [] as Client[],
+            pagination: {
+              page: 1,
+              pageSize,
+              total: 0,
+              totalPages: 0
+            }
+          },
+          error: null
+        }
       }
 
-      if (filters.tags && filters.tags.length > 0) {
-        query = query.contains('tags', filters.tags)
+      const clients = result.clients || []
+      const pagination = result.pagination || { page, limit: pageSize, total: clients.length, totalPages: 1 }
+
+      return {
+        success: true,
+        data: {
+          data: clients as Client[],
+          pagination: {
+            page: pagination.page,
+            pageSize: pagination.limit || pageSize,
+            total: pagination.total || clients.length,
+            totalPages: pagination.totalPages || Math.ceil((pagination.total || clients.length) / pageSize)
+          }
+        },
+        error: null
       }
-
-      if (filters.search) {
-        query = query.or(
-          `name.ilike.%${filters.search}%,email.ilike.%${filters.search}%,company.ilike.%${filters.search}%`
-        )
-      }
-
-      if (filters.minLifetimeValue !== undefined) {
-        query = query.gte('lifetime_value', filters.minLifetimeValue)
-      }
-
-      if (filters.maxLifetimeValue !== undefined) {
-        query = query.lte('lifetime_value', filters.maxLifetimeValue)
-      }
-
-      if (filters.hasOutstandingBalance) {
-        query = query.gt('outstanding_balance', 0)
-      }
-    }
-
-    // Pagination
-    const from = (page - 1) * pageSize
-    const to = from + pageSize - 1
-    query = query.range(from, to)
-
-    const { data, error, count } = await query
-
-    if (error) {
+    } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         data: null
       }
-    }
-
-    return {
-      success: true,
-      data: {
-        data: data as Client[],
-        pagination: {
-          page,
-          pageSize,
-          total: count || 0,
-          totalPages: Math.ceil((count || 0) / pageSize)
-        }
-      },
-      error: null
     }
   }
 

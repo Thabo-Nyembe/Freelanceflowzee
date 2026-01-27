@@ -229,9 +229,9 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
     const overdue = displayInvoices.filter(i => i.status === 'overdue')
     const draft = displayInvoices.filter(i => i.status === 'draft')
 
-    const totalRevenue = paid.reduce((sum, i) => sum + i.total_amount, 0)
-    const pendingRevenue = pending.reduce((sum, i) => sum + i.total_amount, 0)
-    const overdueAmount = overdue.reduce((sum, i) => sum + i.total_amount, 0)
+    const totalRevenue = paid.reduce((sum, i) => sum + (i.total_amount || 0), 0)
+    const pendingRevenue = pending.reduce((sum, i) => sum + (i.total_amount || 0), 0)
+    const overdueAmount = overdue.reduce((sum, i) => sum + (i.total_amount || 0), 0)
 
     // Calculate trends (mock data for demo)
     const lastMonthRevenue = totalRevenue * 0.85
@@ -1208,7 +1208,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                             {/* Amount */}
                             <div className="text-right">
                               <p className="text-2xl font-bold text-emerald-600">
-                                {getCurrencySymbol(invoice.currency)}{invoice.total_amount.toLocaleString()}
+                                {getCurrencySymbol(invoice.currency)}{(invoice.total_amount || 0).toLocaleString()}
                               </p>
                               <p className="text-xs text-muted-foreground">{invoice.currency}</p>
                             </div>
@@ -3113,7 +3113,7 @@ Terms: ${newInvoice.terms || 'Standard terms apply'}
                 <p className="text-sm text-muted-foreground">{deletingInvoice.title}</p>
                 <p className="text-sm text-muted-foreground">Client: {deletingInvoice.client_name}</p>
                 <p className="text-sm font-medium mt-2">
-                  Amount: {getCurrencySymbol(deletingInvoice.currency)}{deletingInvoice.total_amount.toLocaleString()}
+                  Amount: {getCurrencySymbol(deletingInvoice.currency)}{(deletingInvoice.total_amount || 0).toLocaleString()}
                 </p>
               </div>
             </div>

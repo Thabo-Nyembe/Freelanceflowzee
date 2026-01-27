@@ -125,10 +125,10 @@ export function useTasks(options: UseTasksOptions = {}) {
 
   const channelRef = useRef<RealtimeChannel | null>(null)
   const supabase = useMemo(() => createClient(), [])
-  const { getUserId } = useAuthUserId()
+  const { getUserId, isSessionLoaded } = useAuthUserId()
 
   // ============================================================================
-  // FETCH TASKS (Direct Supabase)
+  // FETCH TASKS (via API to bypass RLS)
   // ============================================================================
 
   const fetchTasks = useCallback(async (filters?: {
@@ -145,75 +145,42 @@ export function useTasks(options: UseTasksOptions = {}) {
     setError(null)
 
     try {
-      const userId = await getUserId()
-      if (!userId) {
-        // Return demo data for unauthenticated users
-        const demoTasks = getDemoTasks()
+      // Build query parameters
+      const params = new URLSearchParams()
+      const statusValue = filters?.status || (Array.isArray(status) ? status.join(',') : status)
+      if (statusValue && statusValue !== 'all') params.set('status', statusValue)
+      if (filters?.priority || priority) params.set('priority', filters?.priority || priority || '')
+      if (filters?.projectId || projectId) params.set('project_id', filters?.projectId || projectId || '')
+      if (filters?.assigneeId || assigneeId) params.set('assignee_id', filters?.assigneeId || assigneeId || '')
+      if (filters?.search) params.set('search', filters.search)
+      if (filters?.sortBy) params.set('sort_by', filters.sortBy)
+      if (filters?.sortOrder) params.set('sort_order', filters.sortOrder)
+      if (filters?.limit) params.set('limit', String(filters.limit))
+
+      // Fetch via API (uses service role key, bypasses RLS)
+      const response = await fetch(`/api/tasks?${params.toString()}`, {
+        credentials: 'include'
+      })
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch tasks')
+      }
+
+      // Handle demo mode
+      if (result.demo) {
+        const demoTasks = result.tasks || getDemoTasks()
         setTasks(demoTasks as Task[])
-        setStats(getDemoStats())
+        setStats(result.stats || getDemoStats())
         setIsLoading(false)
         return { success: true, tasks: demoTasks, demo: true }
       }
 
-      let query = supabase
-        .from('tasks')
-        .select(`
-          *,
-          project:projects(id, name),
-          assignee:profiles!tasks_assignee_id_fkey(id, name, avatar_url)
-        `)
-        .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
-
-      // Apply filters
-      const statusValue = filters?.status || (Array.isArray(status) ? status.join(',') : status)
-      if (statusValue && statusValue !== 'all') {
-        if (statusValue.includes(',')) {
-          query = query.in('status', statusValue.split(','))
-        } else {
-          query = query.eq('status', statusValue)
-        }
-      }
-
-      if (filters?.priority || priority) {
-        query = query.eq('priority', filters?.priority || priority)
-      }
-
-      if (filters?.projectId || projectId) {
-        query = query.eq('project_id', filters?.projectId || projectId)
-      }
-
-      if (filters?.assigneeId || assigneeId) {
-        query = query.eq('assignee_id', filters?.assigneeId || assigneeId)
-      }
-
-      if (filters?.search) {
-        query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
-      }
-
-      // Exclude subtasks from main list
-      query = query.is('parent_id', null)
-
-      // Apply sorting
-      const sortBy = filters?.sortBy || 'position'
-      const ascending = (filters?.sortOrder || 'asc') === 'asc'
-      query = query.order(sortBy, { ascending })
-
-      // Apply limit
-      if (filters?.limit) {
-        query = query.limit(filters.limit)
-      }
-
-      const { data, error: fetchError } = await query
-
-      if (fetchError) {
-        throw fetchError
-      }
-
-      const fetchedTasks = (data || []) as Task[]
+      const fetchedTasks = (result.tasks || []) as Task[]
       setTasks(fetchedTasks)
 
-      // Calculate stats
-      const calculatedStats = calculateStats(fetchedTasks)
+      // Use stats from API or calculate locally
+      const calculatedStats = result.stats || calculateStats(fetchedTasks)
       setStats(calculatedStats)
 
       return { success: true, tasks: fetchedTasks, stats: calculatedStats }
@@ -815,8 +782,11 @@ export function useTasks(options: UseTasksOptions = {}) {
   // ============================================================================
 
   useEffect(() => {
-    fetchTasks()
-  }, [fetchTasks])
+    // Refetch when session loads to ensure we have the correct user ID
+    if (isSessionLoaded) {
+      fetchTasks()
+    }
+  }, [fetchTasks, isSessionLoaded])
 
   // ============================================================================
   // COMPUTED VALUES

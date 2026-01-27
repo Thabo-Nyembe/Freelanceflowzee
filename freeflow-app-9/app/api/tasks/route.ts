@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
     const dueDate = searchParams.get('due_date')
     const overdue = searchParams.get('overdue')
     const today = searchParams.get('today')
-    const sortBy = searchParams.get('sort_by') || 'position'
+    const sortBy = searchParams.get('sort_by') || 'created_at'
     const sortOrder = searchParams.get('sort_order') || 'asc'
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '50')
@@ -125,7 +125,9 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const userId = session.user.id
+    // Use authId for database queries (auth.users FK constraints)
+    // Fall back to session.user.id if authId is not available
+    const userId = (session.user as any).authId || session.user.id
 
     // Single task fetch
     if (taskId) {
@@ -140,13 +142,7 @@ export async function GET(request: NextRequest) {
 
       const { data: task, error } = await supabase
         .from('tasks')
-        .select(`
-          *,
-          project:projects(id, name, status),
-          assignee:users!tasks_assignee_id_fkey(id, name, email, avatar_url),
-          reviewer:users!tasks_reviewer_id_fkey(id, name, avatar_url),
-          creator:users!tasks_user_id_fkey(id, name, avatar_url)
-        `)
+        .select('*')
         .eq('id', taskId)
         .single()
 
@@ -204,11 +200,7 @@ export async function GET(request: NextRequest) {
     // Build query for task list
     let query = supabase
       .from('tasks')
-      .select(`
-        *,
-        project:projects(id, name),
-        assignee:users!tasks_assignee_id_fkey(id, name, avatar_url)
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
 
     // Filter by user access (own tasks, assigned tasks, or project member)
     query = query.or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
@@ -264,11 +256,6 @@ export async function GET(request: NextRequest) {
         .lte('due_date', todayEnd.toISOString())
     }
 
-    // Exclude subtasks from main list unless specifically requested
-    if (!searchParams.get('include_subtasks_in_list')) {
-      query = query.is('parent_id', null)
-    }
-
     // Apply sorting
     const ascending = sortOrder === 'asc'
     query = query.order(sortBy, { ascending })
@@ -281,8 +268,9 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       logger.error('Tasks query error', { error })
+      console.error('Tasks query error details:', JSON.stringify(error, null, 2))
       return NextResponse.json(
-        { error: 'Failed to fetch tasks' },
+        { error: 'Failed to fetch tasks', details: error.message, code: error.code },
         { status: 500 }
       )
     }
@@ -325,7 +313,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const body = await request.json()
     const { action = 'create' } = body
 
@@ -390,7 +378,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const body = await request.json()
     const { id, ...updates } = body
 
@@ -509,7 +497,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const { searchParams } = new URL(request.url)
     const taskId = searchParams.get('id')
     const permanent = searchParams.get('permanent') === 'true'

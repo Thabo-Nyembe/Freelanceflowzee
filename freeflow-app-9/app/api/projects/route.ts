@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
 
     // Single project fetch
     if (projectId) {
@@ -109,12 +109,7 @@ export async function GET(request: NextRequest) {
 
       const { data: project, error } = await supabase
         .from('projects')
-        .select(`
-          *,
-          client:clients(id, name, email, company),
-          team:teams(id, name),
-          owner:users!projects_user_id_fkey(id, name, email, avatar_url)
-        `)
+        .select('*')
         .eq('id', projectId)
         .single()
 
@@ -171,11 +166,7 @@ export async function GET(request: NextRequest) {
     // Build query for project list
     let query = supabase
       .from('projects')
-      .select(`
-        *,
-        client:clients(id, name, company),
-        team:teams(id, name)
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
 
     // Filter by user access (owner, team member, or project member)
     query = query.or(`user_id.eq.${userId},visibility.eq.public`)
@@ -264,7 +255,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
 
     // Check permission
     const canCreate = await checkPermission(userId, 'projects', 'create')
@@ -446,7 +437,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const body = await request.json()
     const { id, ...updates } = body
 
@@ -570,7 +561,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const { searchParams } = new URL(request.url)
     const projectId = searchParams.get('id')
     const permanent = searchParams.get('permanent') === 'true'

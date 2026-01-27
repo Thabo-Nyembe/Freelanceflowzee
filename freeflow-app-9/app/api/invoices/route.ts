@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from '@/lib/auth'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('API-Invoices')
 
-// Helper function to get invoice stats
-async function getInvoiceStats(supabase: any) {
-  const { data: allInvoices } = await supabase
-    .from('invoices')
-    .select('status, total_amount')
+// Helper function to get invoice stats for a user
+async function getInvoiceStats(supabase: any, userId?: string) {
+  let query = supabase.from('invoices').select('status, total_amount')
+  if (userId) {
+    query = query.eq('user_id', userId)
+  }
+  const { data: allInvoices } = await query
 
   return {
     totalInvoiced: allInvoices?.reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0) || 0,
@@ -23,16 +26,33 @@ async function getInvoiceStats(supabase: any) {
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
+    const session = await getServerSession()
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const clientId = searchParams.get('client_id')
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
 
+    // Demo mode for unauthenticated users
+    if (!session?.user) {
+      return NextResponse.json({
+        success: true,
+        demo: true,
+        data: {
+          invoices: [],
+          stats: { totalInvoiced: 0, totalPaid: 0, totalPending: 0, totalOverdue: 0, totalInvoices: 0 }
+        }
+      })
+    }
+
+    // Use authId for database queries (auth.users FK constraints)
+    const userId = (session.user as any).authId || session.user.id
+
     // Build query
     let query = supabase
       .from('invoices')
       .select('*')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
     // Apply filters
@@ -62,8 +82,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Calculate stats
-    const stats = await getInvoiceStats(supabase)
+    // Calculate stats for this user
+    const stats = await getInvoiceStats(supabase, userId)
 
     return NextResponse.json({
       success: true,
@@ -73,7 +93,7 @@ export async function GET(request: NextRequest) {
       }
     }, {
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        'Cache-Control': 'private, s-maxage=60, stale-while-revalidate=300',
       },
     })
   } catch (error) {
@@ -89,11 +109,20 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
+    const session = await getServerSession()
     const body = await request.json().catch(() => ({}))
     const { action } = body
 
-    // Get authenticated user
-    const { data: { user } } = await supabase.auth.getUser()
+    // Require authentication
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // Use authId for database queries (auth.users FK constraints)
+    const userId = (session.user as any).authId || session.user.id
 
     switch (action) {
       case 'create': {
@@ -116,7 +145,7 @@ export async function POST(request: NextRequest) {
         const { data: newInvoice, error } = await supabase
           .from('invoices')
           .insert({
-            user_id: user?.id,
+            user_id: userId,
             invoice_number: invoiceNumber,
             title: title || description || project || 'Invoice',
             description: description || '',

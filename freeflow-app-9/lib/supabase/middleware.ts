@@ -127,7 +127,10 @@ export async function updateSession(request: NextRequest) {
     }
 
     // If no session and user is trying to access protected route, redirect to login
-    if (!session && !user && isProtectedRoute(request.nextUrl.pathname)) {
+    // BUT also check for NextAuth session (app uses both Supabase and NextAuth)
+    const hasNextAuthSession = request.cookies.get('next-auth.session-token')?.value
+
+    if (!session && !user && !hasNextAuthSession && isProtectedRoute(request.nextUrl.pathname)) {
       const loginUrl = request.nextUrl.clone()
       loginUrl.pathname = '/login'
       loginUrl.searchParams.set('redirect', request.nextUrl.pathname)

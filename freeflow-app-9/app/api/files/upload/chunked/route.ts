@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
 
     const { data: uploadSession, error } = await supabase
       .from('upload_sessions')
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const contentType = request.headers.get('content-type') || ''
 
     // Check if this is a chunk upload (multipart) or JSON request
@@ -230,7 +230,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get('session_id')
 

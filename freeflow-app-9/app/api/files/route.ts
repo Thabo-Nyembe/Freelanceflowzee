@@ -247,7 +247,7 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const userId = session.user.id;
+    const userId = (session.user as any).authId || session.user.id;
 
     // Build files query
     let filesQuery = supabase
@@ -371,7 +371,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const userId = session.user.id;
+    const userId = (session.user as any).authId || session.user.id;
 
     switch (action) {
       case 'create-folder':

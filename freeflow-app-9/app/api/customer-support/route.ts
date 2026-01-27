@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
 
     // Single ticket fetch
     if (ticketId) {
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const body = await request.json()
     const { action = 'create' } = body
 

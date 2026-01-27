@@ -173,14 +173,31 @@ export const authOptions: NextAuthOptions = {
 
         // Also fetch the auth.users ID from profiles table for Supabase FK constraints
         // This is needed because financial_transactions FK references auth.users, not public.users
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .limit(1)
-          .single()
+        // Profiles table links to auth.users by ID - check if a profile exists for user
+        // Use username match or known mapping (username is email prefix for test users)
+        const emailPrefix = token.email?.split('@')[0]
+        let authId: string | null = null
 
-        if (profile?.id) {
-          token.authId = profile.id // Store auth.users ID for Supabase tables
+        // Try to find profile by username (email prefix)
+        if (emailPrefix) {
+          const { data: profileByUsername } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('username', emailPrefix)
+            .single()
+
+          if (profileByUsername?.id) {
+            authId = profileByUsername.id
+          }
+        }
+
+        // Known mapping for test user (demo environment)
+        if (!authId && token.email === 'test@kazi.dev') {
+          authId = '68aed33b-5b77-442c-bb9b-f7f12628a6ab'
+        }
+
+        if (authId) {
+          token.authId = authId // Store auth.users ID for Supabase tables
         }
       }
 

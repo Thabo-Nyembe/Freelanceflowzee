@@ -474,7 +474,7 @@ export default function TimeTrackingClient() {
     color: '#3b82f6'
   })), [dbClients])
 
-  const goals = useMemo(() => (dbGoals || []).map(g => ({
+  const goals = useMemo(() => (Array.isArray(dbGoals) ? dbGoals : []).map(g => ({
     id: g.id,
     label: g.title,
     target: g.target_value || 100,

@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
 
     // Check permission
     const canRead = await checkPermission(userId, 'projects', 'read', projectId)
@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = session.user.id
+    const userId = (session.user as any).authId || session.user.id
     const body = await request.json()
     const { action, project_id } = body
 

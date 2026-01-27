@@ -61,21 +61,28 @@ export function useClients(initialClients: Client[] = []) {
   const fetchClients = useCallback(async () => {
     setIsLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .neq('status', 'churned')
-        .order('name', { ascending: true })
+      // Fetch via API (uses service role key, bypasses RLS)
+      const response = await fetch('/api/clients', { credentials: 'include' })
+      const result = await response.json()
 
-      if (error) throw error
-      setClients(data || [])
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch clients')
+      }
+
+      // Handle demo mode
+      if (result.demo) {
+        setClients([])
+        return
+      }
+
+      setClients(result.clients || [])
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Unknown error')
       console.error('Failed to fetch clients:', err)
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   const addClient = async (client: Partial<Client>) => {
     try {

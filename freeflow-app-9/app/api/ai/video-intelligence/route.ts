@@ -760,7 +760,7 @@ async function handlePostRequest(req: NextRequest): Promise<NextResponse> {
     }
     
     // Apply rate limiting
-    const userId = session.user.id;
+    const userId = (session.user as any).authId || session.user.id;
     const identifier = `video_intelligence_${userId}`;
     const { success, limit, remaining, reset } = await rateLimit(identifier, RATE_LIMIT);
     
@@ -860,7 +860,7 @@ async function handleGetRequest(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    const userId = session.user.id;
+    const userId = (session.user as any).authId || session.user.id;
     const url = new URL(req.url);
     const jobId = url.searchParams.get('jobId');
     const videoId = url.searchParams.get('videoId');
@@ -969,7 +969,7 @@ async function handleDeleteRequest(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    const userId = session.user.id;
+    const userId = (session.user as any).authId || session.user.id;
     const url = new URL(req.url);
     const jobId = url.searchParams.get('jobId');
     
