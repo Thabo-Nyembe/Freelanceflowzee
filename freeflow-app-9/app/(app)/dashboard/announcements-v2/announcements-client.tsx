@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -213,6 +214,13 @@ const typeColors: Record<AnnouncementType, string> = {
 }
 
 export default function AnnouncementsClient() {
+  // Demo mode detection for investor demos
+  const { data: nextAuthSession, status: sessionStatus } = useSession()
+  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const isSessionLoading = sessionStatus === 'loading'
+
   // Define adapter variables locally (removed mock data imports)
   const announcementsAIInsights: any[] = []
   const announcementsCollaborators: any[] = []
@@ -222,15 +230,92 @@ export default function AnnouncementsClient() {
 
   // Supabase hook for real database operations
   const {
-    announcements: dbAnnouncements,
-    loading: dbLoading,
-    error: dbError,
+    announcements: hookAnnouncements,
+    loading: hookLoading,
+    error: hookError,
     mutating,
     createAnnouncement,
     updateAnnouncement,
     deleteAnnouncement,
     refetch
   } = useAnnouncements()
+
+  // Demo announcements data for investor demos
+  const demoAnnouncements = useMemo(() => [
+    {
+      id: 'demo-ann-1',
+      title: 'Platform V2.0 Launch - Major Features Released',
+      content: 'We are excited to announce the launch of KAZI Platform V2.0 with AI-powered content creation, enhanced video studio, and improved collaboration tools.',
+      announcement_type: 'product' as DBAnnouncementTypeEnum,
+      status: 'published' as DBAnnouncementStatusEnum,
+      priority: 'high' as DBAnnouncementPriorityEnum,
+      created_at: '2026-01-15T10:00:00Z',
+      updated_at: '2026-01-15T10:00:00Z',
+      published_at: '2026-01-15T10:00:00Z',
+      scheduled_for: null,
+      expires_at: null,
+      is_pinned: true,
+      is_featured: true,
+      views_count: 1250,
+      tags: ['product', 'launch', 'v2.0']
+    },
+    {
+      id: 'demo-ann-2',
+      title: 'Scheduled Maintenance - January 30th',
+      content: 'We will be performing scheduled maintenance on January 30th from 2:00 AM to 4:00 AM UTC. The platform may be temporarily unavailable during this time.',
+      announcement_type: 'maintenance' as DBAnnouncementTypeEnum,
+      status: 'scheduled' as DBAnnouncementStatusEnum,
+      priority: 'medium' as DBAnnouncementPriorityEnum,
+      created_at: '2026-01-20T14:00:00Z',
+      updated_at: '2026-01-20T14:00:00Z',
+      published_at: null,
+      scheduled_for: '2026-01-28T08:00:00Z',
+      expires_at: '2026-01-31T00:00:00Z',
+      is_pinned: false,
+      is_featured: false,
+      views_count: 0,
+      tags: ['maintenance', 'scheduled']
+    },
+    {
+      id: 'demo-ann-3',
+      title: 'New Integration: Slack & Microsoft Teams',
+      content: 'Connect your KAZI workspace with Slack and Microsoft Teams for seamless notifications and collaboration.',
+      announcement_type: 'feature' as DBAnnouncementTypeEnum,
+      status: 'published' as DBAnnouncementStatusEnum,
+      priority: 'medium' as DBAnnouncementPriorityEnum,
+      created_at: '2026-01-10T09:00:00Z',
+      updated_at: '2026-01-10T09:00:00Z',
+      published_at: '2026-01-10T09:00:00Z',
+      scheduled_for: null,
+      expires_at: null,
+      is_pinned: false,
+      is_featured: true,
+      views_count: 890,
+      tags: ['integration', 'slack', 'teams']
+    },
+    {
+      id: 'demo-ann-4',
+      title: 'Security Update: Enhanced 2FA',
+      content: 'We have enhanced our two-factor authentication system with support for hardware security keys and biometric authentication.',
+      announcement_type: 'security' as DBAnnouncementTypeEnum,
+      status: 'published' as DBAnnouncementStatusEnum,
+      priority: 'critical' as DBAnnouncementPriorityEnum,
+      created_at: '2026-01-05T16:00:00Z',
+      updated_at: '2026-01-05T16:00:00Z',
+      published_at: '2026-01-05T16:00:00Z',
+      scheduled_for: null,
+      expires_at: null,
+      is_pinned: true,
+      is_featured: false,
+      views_count: 2100,
+      tags: ['security', '2fa', 'authentication']
+    }
+  ], [])
+
+  // Use demo data for demo accounts
+  const dbAnnouncements = isDemoAccount ? demoAnnouncements : (hookAnnouncements || [])
+  const dbLoading = isSessionLoading || (isDemoAccount ? false : hookLoading)
+  const dbError = !isSessionLoading && !isDemoAccount && hookError
 
   // Webhooks hook for real webhook operations
   const {
