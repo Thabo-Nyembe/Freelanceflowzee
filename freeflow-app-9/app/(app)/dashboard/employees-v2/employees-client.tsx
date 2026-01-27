@@ -894,7 +894,22 @@ export default function EmployeesClient() {
 
           {/* Org Chart Tab */}
           <TabsContent value="org-chart" className="mt-6">
-            <Card className="border-gray-200 dark:border-gray-700"><CardHeader><CardTitle>Organization Structure</CardTitle></CardHeader><CardContent>{renderOrgNode(null)}</CardContent></Card>
+            <Card className="border-gray-200 dark:border-gray-700"><CardHeader><CardTitle>Organization Structure</CardTitle></CardHeader><CardContent>{renderOrgNode({
+              id: 'ceo',
+              name: 'Alex Johnson',
+              position: 'CEO',
+              department: 'Executive',
+              children: [
+                { id: 'cto', name: 'Sarah Chen', position: 'CTO', department: 'Engineering', children: [
+                  { id: 'dev1', name: 'Mike Johnson', position: 'Senior Developer', department: 'Engineering' },
+                  { id: 'dev2', name: 'Emma Wilson', position: 'Developer', department: 'Engineering' }
+                ]},
+                { id: 'cmo', name: 'David Lee', position: 'CMO', department: 'Marketing', children: [
+                  { id: 'mkt1', name: 'Lisa Park', position: 'Marketing Manager', department: 'Marketing' }
+                ]},
+                { id: 'cfo', name: 'Jennifer Smith', position: 'CFO', department: 'Finance' }
+              ]
+            })}</CardContent></Card>
           </TabsContent>
 
           {/* Time Off Tab */}

@@ -272,6 +272,13 @@ interface DeliverabilityReport {
 
 // ============== MAIN COMPONENT ==============
 
+// Helper function to format large numbers
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+  return num.toString()
+}
+
 export default function CampaignsClient() {
   const [activeTab, setActiveTab] = useState('campaigns')
   const [searchQuery, setSearchQuery] = useState('')
@@ -384,6 +391,13 @@ export default function CampaignsClient() {
     totalRevenue: dbCampaigns.reduce((sum, c) => sum + (c.revenue_generated || 0), 0),
     totalSent: dbCampaigns.reduce((sum, c) => sum + (c.emails_sent || 0), 0)
   }), [dbCampaigns])
+
+  // Demo audience lists for display
+  const audienceLists = useMemo(() => [
+    { id: '1', name: 'All Subscribers', description: 'Complete subscriber list', segments: [{ id: 's1', name: 'Active', memberCount: 15000 }, { id: 's2', name: 'Engaged', memberCount: 8500 }], stats: { subscribed: 28450, growth: 12.5 } },
+    { id: '2', name: 'VIP Customers', description: 'High-value customers', segments: [{ id: 's3', name: 'Premium', memberCount: 2500 }], stats: { subscribed: 2500, growth: 8.2 } },
+    { id: '3', name: 'New Leads', description: 'Recent signups', segments: [{ id: 's4', name: 'This Month', memberCount: 1200 }], stats: { subscribed: 1200, growth: 25.3 } }
+  ], [])
 
   const filteredCampaigns = useMemo(() => {
     return dbCampaigns.filter(campaign => {

@@ -546,6 +546,13 @@ export default function ReportsClient() {
     }))
   }, [reports])
 
+  // Format number helper (moved before stats that uses it)
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+    return num.toString()
+  }
+
   // Stats computed from real data including financial metrics
   const stats = useMemo(() => [
     { label: 'Total Reports', value: String(reports.length), change: '+' + Math.min(reports.length, 12), icon: FileText, color: 'from-blue-500 to-blue-600' },
@@ -596,12 +603,6 @@ export default function ReportsClient() {
       'spreadsheet': Table2
     }
     return iconMap[type] || Database
-  }
-
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
-    return num.toString()
   }
 
   // Create new report handler
