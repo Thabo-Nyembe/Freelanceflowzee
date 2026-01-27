@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 
 import React, { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/lib/hooks/use-expenses'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
 import { toast } from 'sonner'
@@ -251,6 +252,13 @@ const getExpensesQuickActions = (
 ]
 
 export default function ExpensesClient({ initialExpenses }: ExpensesClientProps) {
+  // Demo mode detection for investor demos
+  const { data: nextAuthSession, status: sessionStatus } = useSession()
+  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const isSessionLoading = sessionStatus === 'loading'
+
   const supabase = createClient()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('reports')
@@ -301,10 +309,204 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const { createKey: createApiKey } = useApiKeys()
 
   // Database integration - use real expenses hooks
-  const { data: dbExpenses, isLoading: expensesLoading, error: expensesError, refetch } = useExpenses({ status: statusFilter as any })
+  const { data: hookExpenses, isLoading: hookLoading, error: hookError, refetch } = useExpenses({ status: statusFilter as any })
   const { mutate: createExpense, isLoading: creating } = useCreateExpense()
   const { mutate: updateExpense, isLoading: updating } = useUpdateExpense()
   const { mutate: deleteExpense, isLoading: deleting } = useDeleteExpense()
+
+  // Demo expense data for investor demos
+  const demoExpenses = useMemo(() => [
+    {
+      id: 'demo-exp-1',
+      user_id: 'demo-user',
+      expense_title: 'Q4 Conference Travel - San Francisco',
+      description: 'Flight, hotel, and meals for TechCrunch Disrupt conference',
+      expense_category: 'travel' as const,
+      amount: 2450.00,
+      currency: 'USD',
+      tax_amount: 196.00,
+      total_amount: 2646.00,
+      status: 'approved' as const,
+      submitted_by: 'Alex Johnson',
+      submitted_at: '2026-01-20T10:00:00Z',
+      expense_date: '2026-01-15',
+      approved_by: 'Sarah Chen',
+      approved_at: '2026-01-22T14:30:00Z',
+      payment_method: 'corporate_card',
+      merchant_name: 'United Airlines / Marriott Hotels',
+      has_receipt: true,
+      attachment_count: 4,
+      is_policy_compliant: true,
+      created_at: '2026-01-15T00:00:00Z',
+      updated_at: '2026-01-22T14:30:00Z'
+    },
+    {
+      id: 'demo-exp-2',
+      user_id: 'demo-user',
+      expense_title: 'Client Lunch - Acme Corp Partnership',
+      description: 'Business lunch with Acme Corp executives to discuss partnership',
+      expense_category: 'meals' as const,
+      amount: 285.50,
+      currency: 'USD',
+      tax_amount: 22.84,
+      total_amount: 308.34,
+      status: 'pending' as const,
+      submitted_by: 'Mike Rodriguez',
+      submitted_at: '2026-01-25T09:00:00Z',
+      expense_date: '2026-01-24',
+      payment_method: 'corporate_card',
+      merchant_name: 'The Capital Grille',
+      has_receipt: true,
+      attachment_count: 1,
+      is_policy_compliant: true,
+      created_at: '2026-01-24T00:00:00Z',
+      updated_at: '2026-01-25T09:00:00Z'
+    },
+    {
+      id: 'demo-exp-3',
+      user_id: 'demo-user',
+      expense_title: 'Software Licenses - Annual Renewal',
+      description: 'Annual renewal for Figma, Notion, and Linear subscriptions',
+      expense_category: 'software' as const,
+      amount: 1850.00,
+      currency: 'USD',
+      tax_amount: 0,
+      total_amount: 1850.00,
+      status: 'reimbursed' as const,
+      submitted_by: 'Sarah Chen',
+      submitted_at: '2026-01-10T11:00:00Z',
+      expense_date: '2026-01-08',
+      approved_by: 'Alex Johnson',
+      approved_at: '2026-01-11T09:00:00Z',
+      payment_method: 'personal_card',
+      merchant_name: 'Various SaaS Vendors',
+      has_receipt: true,
+      attachment_count: 3,
+      is_policy_compliant: true,
+      reimbursed: true,
+      reimbursed_at: '2026-01-15T00:00:00Z',
+      created_at: '2026-01-08T00:00:00Z',
+      updated_at: '2026-01-15T00:00:00Z'
+    },
+    {
+      id: 'demo-exp-4',
+      user_id: 'demo-user',
+      expense_title: 'Office Supplies - Q1 Stock',
+      description: 'Printer paper, ink cartridges, and general office supplies',
+      expense_category: 'supplies' as const,
+      amount: 425.75,
+      currency: 'USD',
+      tax_amount: 34.06,
+      total_amount: 459.81,
+      status: 'approved' as const,
+      submitted_by: 'Alex Johnson',
+      submitted_at: '2026-01-18T14:00:00Z',
+      expense_date: '2026-01-17',
+      approved_by: 'Mike Rodriguez',
+      approved_at: '2026-01-19T10:00:00Z',
+      payment_method: 'corporate_card',
+      merchant_name: 'Staples',
+      has_receipt: true,
+      attachment_count: 1,
+      is_policy_compliant: true,
+      created_at: '2026-01-17T00:00:00Z',
+      updated_at: '2026-01-19T10:00:00Z'
+    },
+    {
+      id: 'demo-exp-5',
+      user_id: 'demo-user',
+      expense_title: 'Team Building Event - Bowling Night',
+      description: 'Team outing for engineering department',
+      expense_category: 'entertainment' as const,
+      amount: 520.00,
+      currency: 'USD',
+      tax_amount: 41.60,
+      total_amount: 561.60,
+      status: 'pending' as const,
+      submitted_by: 'Mike Rodriguez',
+      submitted_at: '2026-01-26T16:00:00Z',
+      expense_date: '2026-01-25',
+      payment_method: 'personal_card',
+      merchant_name: 'Lucky Strike Lanes',
+      has_receipt: true,
+      attachment_count: 2,
+      is_policy_compliant: true,
+      created_at: '2026-01-25T00:00:00Z',
+      updated_at: '2026-01-26T16:00:00Z'
+    },
+    {
+      id: 'demo-exp-6',
+      user_id: 'demo-user',
+      expense_title: 'Airport Parking - JFK',
+      description: 'Long-term parking for business trip to NYC',
+      expense_category: 'transport' as const,
+      amount: 185.00,
+      currency: 'USD',
+      tax_amount: 14.80,
+      total_amount: 199.80,
+      status: 'draft' as const,
+      submitted_by: 'Sarah Chen',
+      expense_date: '2026-01-23',
+      payment_method: 'personal_card',
+      merchant_name: 'JFK Long Term Parking',
+      has_receipt: true,
+      attachment_count: 1,
+      is_policy_compliant: true,
+      created_at: '2026-01-23T00:00:00Z',
+      updated_at: '2026-01-23T00:00:00Z'
+    },
+    {
+      id: 'demo-exp-7',
+      user_id: 'demo-user',
+      expense_title: 'Hotel - NYC Client Visit',
+      description: '3 nights at Manhattan hotel for client meetings',
+      expense_category: 'lodging' as const,
+      amount: 1125.00,
+      currency: 'USD',
+      tax_amount: 157.50,
+      total_amount: 1282.50,
+      status: 'approved' as const,
+      submitted_by: 'Alex Johnson',
+      submitted_at: '2026-01-12T08:00:00Z',
+      expense_date: '2026-01-09',
+      approved_by: 'Sarah Chen',
+      approved_at: '2026-01-13T11:00:00Z',
+      payment_method: 'corporate_card',
+      merchant_name: 'The Standard Hotel',
+      has_receipt: true,
+      attachment_count: 1,
+      is_policy_compliant: true,
+      created_at: '2026-01-09T00:00:00Z',
+      updated_at: '2026-01-13T11:00:00Z'
+    },
+    {
+      id: 'demo-exp-8',
+      user_id: 'demo-user',
+      expense_title: 'Uber Rides - January',
+      description: 'Monthly transportation expenses for client visits',
+      expense_category: 'transport' as const,
+      amount: 342.50,
+      currency: 'USD',
+      tax_amount: 0,
+      total_amount: 342.50,
+      status: 'pending' as const,
+      submitted_by: 'Mike Rodriguez',
+      submitted_at: '2026-01-27T10:00:00Z',
+      expense_date: '2026-01-26',
+      payment_method: 'personal_card',
+      merchant_name: 'Uber',
+      has_receipt: true,
+      attachment_count: 8,
+      is_policy_compliant: true,
+      created_at: '2026-01-26T00:00:00Z',
+      updated_at: '2026-01-27T10:00:00Z'
+    }
+  ], [])
+
+  // Use demo data for demo accounts, otherwise use hook data
+  const dbExpenses = isDemoAccount ? demoExpenses : (hookExpenses || [])
+  const expensesLoading = isSessionLoading || (isDemoAccount ? false : hookLoading)
+  const expensesError = isDemoAccount ? null : hookError
 
   // Form state for new expense
   const [newExpenseForm, setNewExpenseForm] = useState({

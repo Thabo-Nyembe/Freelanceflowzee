@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useMemo, useRef, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { Loader2 } from 'lucide-react'
 import { useDocuments, useDocumentMutations, type Document, type DocumentType, type DocumentFolder as DBFolder, type DocumentShare, type DocumentVersion, type PermissionLevel } from '@/lib/hooks/use-documents'
 import { useTeam } from '@/lib/hooks/use-team'
@@ -271,6 +272,13 @@ const documentsActivities: { id: string; user: string; action: string; target: s
 // Quick actions initialized inside component to access state setters
 
 export default function DocumentsClient({ initialDocuments }: { initialDocuments: Document[] }) {
+  // Demo mode detection for investor demos
+  const { data: nextAuthSession, status: sessionStatus } = useSession()
+  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const isSessionLoading = sessionStatus === 'loading'
+
   // Team and activity data hooks
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
@@ -313,7 +321,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     { id: '3', label: 'Create Folder', icon: 'folder', action: () => handleCreateDocument('folder'), variant: 'outline' as const },
   ]
 
-  const { data: documents, isLoading: loading, error, refetch } = useDocuments({ status: statusFilter as any, type: typeFilter as any })
+  const { data: hookDocuments, isLoading: hookLoading, error: hookError, refetch } = useDocuments({ status: statusFilter as any, type: typeFilter as any })
   const {
     createDocument,
     updateDocument,
@@ -339,6 +347,215 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     restoreVersion,
     loading: mutating
   } = useDocumentMutations()
+
+  // Demo documents data for investor demos
+  const demoDocuments: Document[] = useMemo(() => [
+    {
+      id: 'demo-doc-1',
+      user_id: 'demo-user-1',
+      document_title: 'Q1 2026 Financial Report',
+      document_type: 'report',
+      status: 'approved',
+      access_level: 'internal',
+      version: '2.1',
+      version_number: 3,
+      file_extension: 'pdf',
+      file_size_bytes: 2450000,
+      is_latest_version: true,
+      is_encrypted: false,
+      is_archived: false,
+      owner: 'Alex Johnson',
+      created_by: 'alex@freeflow.io',
+      tags: ['finance', 'quarterly', '2026'],
+      shared_with: ['sarah@freeflow.io', 'mike@freeflow.io'],
+      parent_folder_id: null,
+      permissions: [],
+      comment_count: 5,
+      created_at: '2026-01-15T10:00:00Z',
+      updated_at: '2026-01-25T14:30:00Z',
+      last_accessed_at: '2026-01-27T09:00:00Z'
+    },
+    {
+      id: 'demo-doc-2',
+      user_id: 'demo-user-1',
+      document_title: 'Product Roadmap 2026',
+      document_type: 'presentation',
+      status: 'published',
+      access_level: 'internal',
+      version: '1.0',
+      version_number: 1,
+      file_extension: 'pptx',
+      file_size_bytes: 8750000,
+      is_latest_version: true,
+      is_encrypted: false,
+      is_archived: false,
+      owner: 'Sarah Chen',
+      created_by: 'sarah@freeflow.io',
+      tags: ['product', 'roadmap', 'strategy'],
+      shared_with: ['alex@freeflow.io'],
+      parent_folder_id: null,
+      permissions: [],
+      comment_count: 12,
+      created_at: '2026-01-10T08:00:00Z',
+      updated_at: '2026-01-20T16:45:00Z',
+      last_accessed_at: '2026-01-26T11:30:00Z'
+    },
+    {
+      id: 'demo-doc-3',
+      user_id: 'demo-user-1',
+      document_title: 'Employee Handbook v3',
+      document_type: 'policy',
+      status: 'approved',
+      access_level: 'public',
+      version: '3.0',
+      version_number: 5,
+      file_extension: 'docx',
+      file_size_bytes: 1250000,
+      is_latest_version: true,
+      is_encrypted: false,
+      is_archived: false,
+      owner: 'Mike Rodriguez',
+      created_by: 'mike@freeflow.io',
+      tags: ['hr', 'policy', 'handbook'],
+      shared_with: [],
+      parent_folder_id: null,
+      permissions: [],
+      comment_count: 8,
+      created_at: '2025-12-01T09:00:00Z',
+      updated_at: '2026-01-18T10:00:00Z',
+      last_accessed_at: '2026-01-25T14:00:00Z'
+    },
+    {
+      id: 'demo-doc-4',
+      user_id: 'demo-user-1',
+      document_title: 'Client Contract - Acme Corp',
+      document_type: 'contract',
+      status: 'review',
+      access_level: 'confidential',
+      version: '1.2',
+      version_number: 2,
+      file_extension: 'pdf',
+      file_size_bytes: 980000,
+      is_latest_version: true,
+      is_encrypted: true,
+      is_archived: false,
+      owner: 'Alex Johnson',
+      created_by: 'alex@freeflow.io',
+      tags: ['contract', 'client', 'legal'],
+      shared_with: ['legal@freeflow.io'],
+      parent_folder_id: null,
+      permissions: [],
+      comment_count: 3,
+      created_at: '2026-01-22T11:00:00Z',
+      updated_at: '2026-01-26T09:30:00Z',
+      last_accessed_at: '2026-01-27T08:00:00Z'
+    },
+    {
+      id: 'demo-doc-5',
+      user_id: 'demo-user-1',
+      document_title: 'Marketing Budget Spreadsheet',
+      document_type: 'spreadsheet',
+      status: 'draft',
+      access_level: 'internal',
+      version: '1.0',
+      version_number: 1,
+      file_extension: 'xlsx',
+      file_size_bytes: 450000,
+      is_latest_version: true,
+      is_encrypted: false,
+      is_archived: false,
+      owner: 'Sarah Chen',
+      created_by: 'sarah@freeflow.io',
+      tags: ['marketing', 'budget', 'finance'],
+      shared_with: ['alex@freeflow.io'],
+      parent_folder_id: null,
+      permissions: [],
+      comment_count: 2,
+      created_at: '2026-01-24T13:00:00Z',
+      updated_at: '2026-01-26T17:00:00Z',
+      last_accessed_at: '2026-01-27T10:00:00Z'
+    },
+    {
+      id: 'demo-doc-6',
+      user_id: 'demo-user-1',
+      document_title: 'Technical Architecture Doc',
+      document_type: 'report',
+      status: 'approved',
+      access_level: 'internal',
+      version: '2.0',
+      version_number: 4,
+      file_extension: 'md',
+      file_size_bytes: 125000,
+      is_latest_version: true,
+      is_encrypted: false,
+      is_archived: false,
+      owner: 'Mike Rodriguez',
+      created_by: 'mike@freeflow.io',
+      tags: ['technical', 'architecture', 'engineering'],
+      shared_with: ['alex@freeflow.io', 'sarah@freeflow.io'],
+      parent_folder_id: null,
+      permissions: [],
+      comment_count: 15,
+      created_at: '2025-11-15T10:00:00Z',
+      updated_at: '2026-01-20T11:00:00Z',
+      last_accessed_at: '2026-01-26T16:00:00Z'
+    },
+    {
+      id: 'demo-doc-7',
+      user_id: 'demo-user-1',
+      document_title: 'Investor Pitch Deck',
+      document_type: 'presentation',
+      status: 'published',
+      access_level: 'confidential',
+      version: '4.0',
+      version_number: 8,
+      file_extension: 'pptx',
+      file_size_bytes: 15600000,
+      is_latest_version: true,
+      is_encrypted: true,
+      is_archived: false,
+      owner: 'Alex Johnson',
+      created_by: 'alex@freeflow.io',
+      tags: ['investor', 'pitch', 'fundraising'],
+      shared_with: [],
+      parent_folder_id: null,
+      permissions: [],
+      comment_count: 25,
+      created_at: '2025-10-01T09:00:00Z',
+      updated_at: '2026-01-25T18:00:00Z',
+      last_accessed_at: '2026-01-27T07:30:00Z'
+    },
+    {
+      id: 'demo-doc-8',
+      user_id: 'demo-user-1',
+      document_title: 'Monthly Invoice - Jan 2026',
+      document_type: 'invoice',
+      status: 'approved',
+      access_level: 'internal',
+      version: '1.0',
+      version_number: 1,
+      file_extension: 'pdf',
+      file_size_bytes: 85000,
+      is_latest_version: true,
+      is_encrypted: false,
+      is_archived: false,
+      owner: 'Sarah Chen',
+      created_by: 'sarah@freeflow.io',
+      tags: ['invoice', 'billing', 'january'],
+      shared_with: ['accounting@freeflow.io'],
+      parent_folder_id: null,
+      permissions: [],
+      comment_count: 0,
+      created_at: '2026-01-01T08:00:00Z',
+      updated_at: '2026-01-05T10:00:00Z',
+      last_accessed_at: '2026-01-20T09:00:00Z'
+    }
+  ], [])
+
+  // Use demo data for demo accounts, otherwise use hook data
+  const documents = isDemoAccount ? demoDocuments : hookDocuments
+  const loading = isSessionLoading || (isDemoAccount ? false : hookLoading)
+  const error = !isSessionLoading && !isDemoAccount && hookError
 
   // Show error toast if there's an error loading documents
   useEffect(() => {

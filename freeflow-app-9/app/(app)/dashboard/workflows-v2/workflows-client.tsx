@@ -4,6 +4,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { useWorkflows } from '@/lib/hooks/use-workflows'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -244,6 +245,13 @@ const getStepIcon = (type: WorkflowStep['type']) => {
 // ============================================================================
 
 export default function WorkflowsClient() {
+  // Demo mode detection for investor demos
+  const { data: nextAuthSession, status: sessionStatus } = useSession()
+  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const isSessionLoading = sessionStatus === 'loading'
+
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('workflows')
   const [searchQuery, setSearchQuery] = useState('')
@@ -268,9 +276,9 @@ export default function WorkflowsClient() {
 
   // Real Supabase hook
   const {
-    workflows: dbWorkflows,
-    loading: dbLoading,
-    error: dbError,
+    workflows: hookWorkflows,
+    loading: hookLoading,
+    error: hookError,
     stats: dbStats,
     fetchWorkflows,
     createWorkflow,
@@ -283,10 +291,130 @@ export default function WorkflowsClient() {
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
 
-  // Fetch workflows on mount
+  // Demo workflows data for investor demos
+  const demoWorkflows = useMemo(() => [
+    {
+      id: 'demo-wf-1',
+      workflow_code: 'WF-2026-LEAD',
+      name: 'Lead Qualification Pipeline',
+      description: 'Automatically qualify and route incoming leads based on scoring criteria',
+      status: 'active' as const,
+      type: 'processing',
+      total_steps: 5,
+      current_step: 0,
+      completion_rate: 94.5,
+      steps_config: [
+        { type: 'trigger', app: 'Webhook', icon: '🔗', name: 'New Lead Received', description: 'Triggered on new lead submission' },
+        { type: 'action', app: 'AI', icon: '🤖', name: 'Score Lead', description: 'AI-powered lead scoring' },
+        { type: 'filter', app: 'Logic', icon: '⚡', name: 'Check Score', description: 'Route based on score threshold' },
+        { type: 'action', app: 'CRM', icon: '📊', name: 'Update CRM', description: 'Update lead status in CRM' },
+        { type: 'action', app: 'Slack', icon: '💬', name: 'Notify Sales', description: 'Send notification to sales team' }
+      ],
+      tags: ['Sales', 'Automation'],
+      started_at: '2026-01-27T09:15:00Z',
+      created_at: '2026-01-10T08:00:00Z',
+      updated_at: '2026-01-27T09:15:00Z'
+    },
+    {
+      id: 'demo-wf-2',
+      workflow_code: 'WF-2026-INVOICE',
+      name: 'Invoice Processing Automation',
+      description: 'Extract data from invoices, validate, and sync with accounting system',
+      status: 'active' as const,
+      type: 'processing',
+      total_steps: 4,
+      current_step: 0,
+      completion_rate: 98.2,
+      steps_config: [
+        { type: 'trigger', app: 'Email', icon: '📧', name: 'Invoice Email Received', description: 'Triggered on invoice email' },
+        { type: 'action', app: 'AI', icon: '🤖', name: 'Extract Invoice Data', description: 'OCR and data extraction' },
+        { type: 'action', app: 'Validation', icon: '✅', name: 'Validate Data', description: 'Verify extracted information' },
+        { type: 'action', app: 'Accounting', icon: '💰', name: 'Sync to QuickBooks', description: 'Create entry in accounting system' }
+      ],
+      tags: ['Finance', 'Processing'],
+      started_at: '2026-01-27T08:30:00Z',
+      created_at: '2026-01-05T10:00:00Z',
+      updated_at: '2026-01-27T08:30:00Z'
+    },
+    {
+      id: 'demo-wf-3',
+      workflow_code: 'WF-2026-ONBOARD',
+      name: 'Employee Onboarding Workflow',
+      description: 'Streamlined onboarding process for new hires with automated provisioning',
+      status: 'active' as const,
+      type: 'processing',
+      total_steps: 6,
+      current_step: 0,
+      completion_rate: 100,
+      steps_config: [
+        { type: 'trigger', app: 'HR', icon: '👤', name: 'New Hire Added', description: 'Triggered on new employee creation' },
+        { type: 'action', app: 'Google', icon: '📧', name: 'Create Email Account', description: 'Provision Google Workspace account' },
+        { type: 'action', app: 'Slack', icon: '💬', name: 'Add to Slack', description: 'Invite to Slack workspace' },
+        { type: 'action', app: 'IT', icon: '💻', name: 'Request Equipment', description: 'Create IT equipment request' },
+        { type: 'action', app: 'Training', icon: '📚', name: 'Assign Training', description: 'Enroll in onboarding training' },
+        { type: 'action', app: 'Calendar', icon: '📅', name: 'Schedule Welcome Meeting', description: 'Book intro meeting with manager' }
+      ],
+      tags: ['HR', 'Onboarding'],
+      started_at: '2026-01-26T14:00:00Z',
+      created_at: '2025-12-15T09:00:00Z',
+      updated_at: '2026-01-26T14:00:00Z'
+    },
+    {
+      id: 'demo-wf-4',
+      workflow_code: 'WF-2026-SUPPORT',
+      name: 'Customer Support Ticket Routing',
+      description: 'Intelligent ticket classification and assignment based on content and priority',
+      status: 'paused' as const,
+      type: 'processing',
+      total_steps: 4,
+      current_step: 0,
+      completion_rate: 87.3,
+      steps_config: [
+        { type: 'trigger', app: 'Zendesk', icon: '🎫', name: 'New Ticket Created', description: 'Triggered on new support ticket' },
+        { type: 'action', app: 'AI', icon: '🤖', name: 'Classify Ticket', description: 'AI classification of ticket type' },
+        { type: 'filter', app: 'Logic', icon: '⚡', name: 'Priority Check', description: 'Route based on urgency' },
+        { type: 'action', app: 'Assignment', icon: '👥', name: 'Assign to Agent', description: 'Auto-assign to available agent' }
+      ],
+      tags: ['Support', 'Customer Service'],
+      started_at: '2026-01-25T11:00:00Z',
+      created_at: '2026-01-08T13:00:00Z',
+      updated_at: '2026-01-25T11:00:00Z'
+    },
+    {
+      id: 'demo-wf-5',
+      workflow_code: 'WF-2026-SOCIAL',
+      name: 'Social Media Content Pipeline',
+      description: 'Automate content scheduling and cross-posting across social platforms',
+      status: 'draft' as const,
+      type: 'processing',
+      total_steps: 5,
+      current_step: 0,
+      completion_rate: 0,
+      steps_config: [
+        { type: 'trigger', app: 'Schedule', icon: '⏰', name: 'Scheduled Time', description: 'Triggered at scheduled time' },
+        { type: 'action', app: 'CMS', icon: '📝', name: 'Fetch Content', description: 'Get content from CMS queue' },
+        { type: 'action', app: 'AI', icon: '🤖', name: 'Optimize for Platform', description: 'Adapt content for each platform' },
+        { type: 'action', app: 'Social', icon: '📱', name: 'Post to Platforms', description: 'Publish to social media' },
+        { type: 'action', app: 'Analytics', icon: '📊', name: 'Track Performance', description: 'Monitor engagement metrics' }
+      ],
+      tags: ['Marketing', 'Social Media'],
+      started_at: null,
+      created_at: '2026-01-20T16:00:00Z',
+      updated_at: '2026-01-20T16:00:00Z'
+    }
+  ], [])
+
+  // Use demo data for demo accounts
+  const dbWorkflows = isDemoAccount ? demoWorkflows : (hookWorkflows || [])
+  const dbLoading = isSessionLoading || (isDemoAccount ? false : hookLoading)
+  const dbError = !isSessionLoading && !isDemoAccount && hookError
+
+  // Fetch workflows on mount (only for non-demo accounts)
   useEffect(() => {
-    fetchWorkflows()
-  }, [fetchWorkflows])
+    if (!isDemoAccount) {
+      fetchWorkflows()
+    }
+  }, [fetchWorkflows, isDemoAccount])
 
   // Stats calculations from database
   const stats = useMemo(() => {
