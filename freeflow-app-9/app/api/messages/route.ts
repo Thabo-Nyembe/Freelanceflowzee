@@ -148,8 +148,32 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const before = searchParams.get('before'); // For pagination - get messages before this ID
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
 
-    // Demo mode for unauthenticated users
+    // Unauthenticated users get empty data
     if (!session?.user?.id) {
+      if (type === 'chats' || !chatId) {
+        return NextResponse.json({
+          success: true,
+          chats: [],
+          total: 0,
+          unreadCount: 0,
+        });
+      } else {
+        return NextResponse.json({
+          success: true,
+          messages: [],
+          total: 0,
+          unreadCount: 0,
+        });
+      }
+    }
+
+    const userId = (session.user as any).authId || session.user.id;
+    const userEmail = session.user.email;
+
+    // Demo mode ONLY for demo account (test@kazi.dev)
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io';
+
+    if (isDemoAccount) {
       if (type === 'chats' || !chatId) {
         let demoChats = getDemoChats();
         if (search) {
@@ -180,8 +204,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
       }
     }
-
-    const userId = (session.user as any).authId || session.user.id;
 
     // Get chats
     if (type === 'chats' || !chatId) {

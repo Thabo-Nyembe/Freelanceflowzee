@@ -96,12 +96,24 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Demo mode for unauthenticated users
+    // Unauthenticated users get empty data
     if (!session?.user) {
-      return handleDemoResponse(action)
+      return NextResponse.json({
+        success: true,
+        data: [],
+        pagination: { page: 1, limit: 20, total: 0, totalPages: 0 }
+      })
     }
 
     const userId = (session.user as any).authId || session.user.id
+    const userEmail = session.user.email
+
+    // Demo mode ONLY for demo account (test@kazi.dev)
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io'
+
+    if (isDemoAccount) {
+      return handleDemoResponse(action)
+    }
 
     // Handle different actions
     switch (action) {

@@ -122,8 +122,28 @@ export async function GET(request: NextRequest) {
     const includeContacts = searchParams.get('include_contacts') === 'true'
     const includeInteractions = searchParams.get('include_interactions') === 'true'
 
-    // Demo mode for unauthenticated users
+    // Demo mode for unauthenticated users - return empty
     if (!session?.user) {
+      return NextResponse.json({
+        success: true,
+        clients: [],
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: 0,
+          totalPages: 0
+        }
+      })
+    }
+
+    // Use authId for database queries (auth.users FK constraints)
+    const userId = (session.user as any).authId || session.user.id
+    const userEmail = session.user.email
+
+    // Demo mode ONLY for demo account (test@kazi.dev)
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io'
+
+    if (isDemoAccount && !clientId) {
       return NextResponse.json({
         success: true,
         demo: true,
@@ -131,14 +151,11 @@ export async function GET(request: NextRequest) {
         pagination: {
           page: 1,
           limit: 20,
-          total: 6,
+          total: 8,
           totalPages: 1
         }
       })
     }
-
-    // Use authId for database queries (auth.users FK constraints)
-    const userId = (session.user as any).authId || session.user.id
 
     // Single client fetch
     if (clientId) {

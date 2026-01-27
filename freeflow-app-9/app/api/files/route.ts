@@ -208,8 +208,34 @@ export async function GET(request: NextRequest) {
     const starred = searchParams.get('starred');
     const shared = searchParams.get('shared');
 
-    // Demo mode for unauthenticated users
+    // Unauthenticated users get empty data
     if (!session?.user?.id) {
+      return NextResponse.json({
+        success: true,
+        files: [],
+        folders: [],
+        storage: {
+          used: 0,
+          total: 100 * 1024 * 1024 * 1024,
+          percentage: 0,
+        },
+        pagination: {
+          page: 1,
+          limit: 50,
+          total: 0,
+          totalPages: 0,
+        },
+      });
+    }
+
+    const supabase = await createClient();
+    const userId = (session.user as any).authId || session.user.id;
+    const userEmail = session.user.email;
+
+    // Demo mode ONLY for demo account (test@kazi.dev)
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io';
+
+    if (isDemoAccount) {
       let demoFiles = getDemoFiles();
       const demoFolders = getDemoFolders();
 
@@ -233,8 +259,8 @@ export async function GET(request: NextRequest) {
         files: demoFiles,
         folders: demoFolders,
         storage: {
-          used: 45.7 * 1024 * 1024 * 1024, // 45.7 GB in bytes
-          total: 100 * 1024 * 1024 * 1024, // 100 GB in bytes
+          used: 45.7 * 1024 * 1024 * 1024,
+          total: 100 * 1024 * 1024 * 1024,
           percentage: 45.7,
         },
         pagination: {
@@ -245,9 +271,6 @@ export async function GET(request: NextRequest) {
         },
       });
     }
-
-    const supabase = await createClient();
-    const userId = (session.user as any).authId || session.user.id;
 
     // Build files query
     let filesQuery = supabase

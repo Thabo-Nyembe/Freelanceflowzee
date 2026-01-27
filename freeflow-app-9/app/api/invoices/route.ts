@@ -5,6 +5,115 @@ import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('API-Invoices')
 
+// Demo invoices for demo account
+function getDemoInvoices() {
+  const now = new Date()
+  return [
+    {
+      id: 'demo-inv-1',
+      invoice_number: 'INV-2026-001',
+      title: 'Website Redesign Project',
+      client_name: 'TechCorp Industries',
+      client_email: 'billing@techcorp.com',
+      status: 'paid',
+      total_amount: 12500,
+      amount_paid: 12500,
+      amount_due: 0,
+      currency: 'USD',
+      issue_date: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      due_date: new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      paid_date: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      created_at: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-inv-2',
+      invoice_number: 'INV-2026-002',
+      title: 'Brand Identity Package',
+      client_name: 'StartupX Ventures',
+      client_email: 'finance@startupx.io',
+      status: 'sent',
+      total_amount: 8750,
+      amount_paid: 0,
+      amount_due: 8750,
+      currency: 'USD',
+      issue_date: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      due_date: new Date(now.getTime() + 23 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      created_at: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-inv-3',
+      invoice_number: 'INV-2026-003',
+      title: 'Social Media Campaign',
+      client_name: 'Creative Design Studio',
+      client_email: 'ap@creativedesign.studio',
+      status: 'overdue',
+      total_amount: 4200,
+      amount_paid: 0,
+      amount_due: 4200,
+      currency: 'USD',
+      issue_date: new Date(now.getTime() - 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      due_date: new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      created_at: new Date(now.getTime() - 45 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-inv-4',
+      invoice_number: 'INV-2026-004',
+      title: 'App UI/UX Design',
+      client_name: 'Mobile First Inc',
+      client_email: 'billing@mobilefirst.co',
+      status: 'paid',
+      total_amount: 15000,
+      amount_paid: 15000,
+      amount_due: 0,
+      currency: 'USD',
+      issue_date: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      due_date: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      paid_date: new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000).toISOString(),
+      created_at: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-inv-5',
+      invoice_number: 'INV-2026-005',
+      title: 'Monthly Retainer - January',
+      client_name: 'Global Marketing Agency',
+      client_email: 'accounts@globalmarketing.com',
+      status: 'pending',
+      total_amount: 5500,
+      amount_paid: 0,
+      amount_due: 5500,
+      currency: 'USD',
+      issue_date: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      due_date: new Date(now.getTime() + 27 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      created_at: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-inv-6',
+      invoice_number: 'INV-2026-006',
+      title: 'E-commerce Platform Development',
+      client_name: 'Retail Solutions Ltd',
+      client_email: 'finance@retailsolutions.net',
+      status: 'partial',
+      total_amount: 25000,
+      amount_paid: 12500,
+      amount_due: 12500,
+      currency: 'USD',
+      issue_date: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      due_date: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      created_at: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ]
+}
+
+function getDemoInvoiceStats() {
+  return {
+    totalInvoiced: 70950,
+    totalPaid: 40000,
+    totalPending: 14250,
+    totalOverdue: 4200,
+    totalInvoices: 6
+  }
+}
+
 // Helper function to get invoice stats for a user
 async function getInvoiceStats(supabase: any, userId?: string) {
   let query = supabase.from('invoices').select('status, total_amount')
@@ -33,11 +142,10 @@ export async function GET(request: NextRequest) {
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
 
-    // Demo mode for unauthenticated users
+    // Unauthenticated users get empty data
     if (!session?.user) {
       return NextResponse.json({
         success: true,
-        demo: true,
         data: {
           invoices: [],
           stats: { totalInvoiced: 0, totalPaid: 0, totalPending: 0, totalOverdue: 0, totalInvoices: 0 }
@@ -47,6 +155,28 @@ export async function GET(request: NextRequest) {
 
     // Use authId for database queries (auth.users FK constraints)
     const userId = (session.user as any).authId || session.user.id
+    const userEmail = session.user.email
+
+    // Demo mode ONLY for demo account (test@kazi.dev)
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io'
+
+    if (isDemoAccount) {
+      let demoInvoices = getDemoInvoices()
+
+      // Apply filters
+      if (status && status !== 'all') {
+        demoInvoices = demoInvoices.filter(inv => inv.status === status)
+      }
+
+      return NextResponse.json({
+        success: true,
+        demo: true,
+        data: {
+          invoices: demoInvoices,
+          stats: getDemoInvoiceStats()
+        }
+      })
+    }
 
     // Build query
     let query = supabase

@@ -79,8 +79,27 @@ export async function GET(request: NextRequest) {
     const includeMembers = searchParams.get('include_members') === 'true'
     const includeTasks = searchParams.get('include_tasks') === 'true'
 
-    // Demo mode for unauthenticated users
+    // Unauthenticated users get empty data
     if (!session?.user) {
+      return NextResponse.json({
+        success: true,
+        projects: [],
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: 0,
+          totalPages: 0
+        }
+      })
+    }
+
+    const userId = (session.user as any).authId || session.user.id
+    const userEmail = session.user.email
+
+    // Demo mode ONLY for demo account (test@kazi.dev)
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io'
+
+    if (isDemoAccount && !projectId) {
       return NextResponse.json({
         success: true,
         demo: true,
@@ -93,8 +112,6 @@ export async function GET(request: NextRequest) {
         }
       })
     }
-
-    const userId = (session.user as any).authId || session.user.id
 
     // Single project fetch
     if (projectId) {

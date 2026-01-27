@@ -109,8 +109,40 @@ export async function GET(request: NextRequest) {
     const includeSubtasks = searchParams.get('include_subtasks') === 'true'
     const includeTimeEntries = searchParams.get('include_time_entries') === 'true'
 
-    // Demo mode for unauthenticated users
+    // Unauthenticated users get empty data
     if (!session?.user) {
+      return NextResponse.json({
+        success: true,
+        tasks: [],
+        stats: {
+          total: 0,
+          completed: 0,
+          in_progress: 0,
+          todo: 0,
+          overdue: 0,
+          urgent: 0,
+          total_estimated_minutes: 0,
+          total_actual_minutes: 0,
+          completion_rate: 0
+        },
+        pagination: {
+          page: 1,
+          limit: 50,
+          total: 0,
+          totalPages: 0
+        }
+      })
+    }
+
+    // Use authId for database queries (auth.users FK constraints)
+    // Fall back to session.user.id if authId is not available
+    const userId = (session.user as any).authId || session.user.id
+    const userEmail = session.user.email
+
+    // Demo mode ONLY for demo account (test@kazi.dev)
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io'
+
+    if (isDemoAccount && !taskId) {
       return NextResponse.json({
         success: true,
         demo: true,
@@ -124,10 +156,6 @@ export async function GET(request: NextRequest) {
         }
       })
     }
-
-    // Use authId for database queries (auth.users FK constraints)
-    // Fall back to session.user.id if authId is not available
-    const userId = (session.user as any).authId || session.user.id
 
     // Single task fetch
     if (taskId) {

@@ -35,8 +35,22 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Demo mode for unauthenticated users
+    // Unauthenticated users get empty data
     if (!session?.user) {
+      return NextResponse.json({
+        success: true,
+        tickets: [],
+        pagination: { page: 1, limit: 20, total: 0, totalPages: 0 }
+      })
+    }
+
+    const userId = (session.user as any).authId || session.user.id
+    const userEmail = session.user.email
+
+    // Demo mode ONLY for demo account (test@kazi.dev)
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io'
+
+    if (isDemoAccount && !ticketId) {
       return NextResponse.json({
         success: true,
         demo: true,
@@ -44,8 +58,6 @@ export async function GET(request: NextRequest) {
         pagination: { page: 1, limit: 20, total: 3, totalPages: 1 }
       })
     }
-
-    const userId = (session.user as any).authId || session.user.id
 
     // Single ticket fetch
     if (ticketId) {

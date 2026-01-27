@@ -202,7 +202,6 @@ function calculateGoalProgress(keyResults: KeyResult[]): number {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('user_id') || DEMO_USER_ID
     const status = searchParams.get('status')
     const priority = searchParams.get('priority')
     const categoryId = searchParams.get('category_id')
@@ -211,19 +210,33 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Check if tables exist by trying a query
-    let useDemo = false
-    const { error: checkError } = await supabase
-      .from('goals')
-      .select('id')
-      .limit(1)
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser()
 
-    if (checkError?.code === '42P01') {
-      // Table doesn't exist, use demo data
-      useDemo = true
+    // Unauthenticated users get empty data
+    if (!user) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          goals: [],
+          stats: {
+            total: 0,
+            completed: 0,
+            in_progress: 0,
+            at_risk: 0,
+            avg_progress: 0
+          }
+        }
+      })
     }
 
-    if (useDemo) {
+    const userId = user.id
+    const userEmail = user.email
+
+    // Demo mode ONLY for demo account (test@kazi.dev)
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io'
+
+    if (isDemoAccount) {
       let filteredGoals = [...demoGoals]
       if (status) filteredGoals = filteredGoals.filter(g => g.status === status)
       if (priority) filteredGoals = filteredGoals.filter(g => g.priority === priority)
