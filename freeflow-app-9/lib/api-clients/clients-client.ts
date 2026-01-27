@@ -153,17 +153,19 @@ class ClientsApiClient extends BaseApiClient {
         }
       }
 
-      // Handle demo mode
+      // Handle demo mode - pass through the demo data
       if (result.demo) {
+        const demoClients = result.clients || []
+        const demoPagination = result.pagination || { page: 1, limit: pageSize, total: demoClients.length, totalPages: 1 }
         return {
           success: true,
           data: {
-            data: [] as Client[],
+            data: demoClients as Client[],
             pagination: {
-              page: 1,
-              pageSize,
-              total: 0,
-              totalPages: 0
+              page: demoPagination.page,
+              pageSize: demoPagination.limit || pageSize,
+              total: demoPagination.total || demoClients.length,
+              totalPages: demoPagination.totalPages || Math.ceil((demoPagination.total || demoClients.length) / pageSize)
             }
           },
           error: null

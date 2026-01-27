@@ -177,6 +177,14 @@ export default withAuth(
     }
 
     // Main dashboard routes without -v2 suffix → v2 versions
+    // Special aliases for pages with different v2 names
+    const V2_ALIASES: Record<string, string> = {
+      'projects': 'projects-hub-v2',
+      'files': 'files-hub-v2',
+      'team': 'team-hub-v2',
+      'goals': 'goals-v2'
+    }
+
     // Complete list of all dashboard pages that have v2 versions
     const V2_PAGES = new Set([
       '3d-modeling', 'access-logs', 'accounting', 'activity-logs', 'add-ons', 'admin',
@@ -203,15 +211,23 @@ export default withAuth(
       'resources', 'roadmap', 'roles', 'sales', 'screen-recording', 'security', 'security-audit',
       'security-monitoring', 'seo', 'settings', 'shipping', 'social-media', 'sprints', 'stock',
       'subscriptions', 'support', 'support-tickets', 'surveys', 'system-insights', 'tasks',
-      'tax-intelligence', 'team', 'team-hub', 'team-management', 'templates', 'testing',
+      'tax-intelligence', 'team-hub', 'team-management', 'templates', 'testing',
       'theme-store', 'third-party-integrations', 'tickets', 'time-tracking', 'training',
       'transactions', 'tutorials', 'user-management', 'vendors', 'video-review', 'video-studio',
       'voice-ai', 'vulnerability-scan', 'warehouse', 'webhooks', 'webinars', 'white-label',
-      'widget-library', 'workflow-builder', 'workflows', 'projects', 'files', 'goals'
+      'widget-library', 'workflow-builder', 'workflows'
     ])
 
     if (pathname.startsWith('/dashboard/') && !pathname.includes('-v2')) {
       const slug = pathname.replace('/dashboard/', '').replace(/\/$/, '').split('/')[0]
+
+      // Check for special aliases first
+      if (V2_ALIASES[slug]) {
+        const newUrl = new URL(pathname.replace(`/dashboard/${slug}`, `/dashboard/${V2_ALIASES[slug]}`), req.url)
+        return NextResponse.redirect(newUrl)
+      }
+
+      // Standard v2 redirect
       if (V2_PAGES.has(slug)) {
         const newUrl = new URL(pathname.replace(`/dashboard/${slug}`, `/dashboard/${slug}-v2`), req.url)
         return NextResponse.redirect(newUrl)

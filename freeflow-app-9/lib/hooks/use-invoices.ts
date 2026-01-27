@@ -89,9 +89,9 @@ export function useInvoices(options: UseInvoicesOptions = {}) {
         throw new Error(result.error || 'Failed to fetch invoices')
       }
 
-      // Handle demo mode
+      // Handle demo mode - use demo invoices from API
       if (result.demo) {
-        setInvoices([])
+        setInvoices(result.data?.invoices || [])
         return
       }
 
