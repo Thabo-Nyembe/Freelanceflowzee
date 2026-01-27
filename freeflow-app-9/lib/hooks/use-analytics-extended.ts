@@ -53,7 +53,8 @@ export function useAnalyticsConversionFunnels(userId?: string) {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
-    try { const { data: result } = await supabase.from('analytics_conversion_funnels').select('*').eq('user_id', userId); setData(result || []) } finally { setIsLoading(false) }
+    // Note: analytics_conversion_funnels is aggregate data without user_id column
+    try { const { data: result } = await supabase.from('analytics_conversion_funnels').select('*').order('date', { ascending: false }).limit(50); setData(result || []) } finally { setIsLoading(false) }
   }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }

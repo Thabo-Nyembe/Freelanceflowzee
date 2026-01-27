@@ -490,11 +490,12 @@ export default function AnalyticsClient() {
   const fetchFunnels = useCallback(async () => {
     if (!userId) return
     try {
+      // Note: analytics_conversion_funnels is aggregate data without user_id
       const { data, error } = await supabase
         .from('analytics_conversion_funnels')
         .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
+        .order('date', { ascending: false })
+        .limit(50)
       if (error) throw error
       setDbFunnels(data || [])
     } catch (err) {
@@ -598,13 +599,25 @@ export default function AnalyticsClient() {
   const fetchFilterPresets = useCallback(async () => {
     if (!userId) return
     try {
-      const { data, error } = await supabase
-        .from('analytics_dashboard_filters')
-        .select('*')
+      // Note: analytics_dashboard_filters links through dashboard_id, not user_id
+      // Query filters for dashboards owned by this user
+      const { data: dashboards } = await supabase
+        .from('analytics_dashboards')
+        .select('id')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      setDbFilterPresets(data || [])
+
+      if (dashboards && dashboards.length > 0) {
+        const dashboardIds = dashboards.map(d => d.id)
+        const { data, error } = await supabase
+          .from('analytics_dashboard_filters')
+          .select('*')
+          .in('dashboard_id', dashboardIds)
+          .order('created_at', { ascending: false })
+        if (error) throw error
+        setDbFilterPresets(data || [])
+      } else {
+        setDbFilterPresets([])
+      }
     } catch (err) {
       console.error('Error fetching filter presets:', err)
     }

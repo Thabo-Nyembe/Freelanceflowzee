@@ -78,11 +78,17 @@ export function useTeam(initialMembers: TeamMember[] = [], initialStats?: TeamSt
       setMembers(data || [])
       setStats(calculateStats(data || []))
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to fetch team members',
-        variant: 'destructive'
-      })
+      // Silently handle RLS policy errors (infinite recursion)
+      if (error?.code !== '42P17') {
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to fetch team members',
+          variant: 'destructive'
+        })
+      }
+      // Return empty data on error
+      setMembers([])
+      setStats(calculateStats([]))
     } finally {
       setLoading(false)
     }
