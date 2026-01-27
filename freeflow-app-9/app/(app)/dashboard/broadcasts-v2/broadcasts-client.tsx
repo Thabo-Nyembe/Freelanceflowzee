@@ -2052,7 +2052,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               </div>
 
               <div className="space-y-4">
-                {mockCampaigns.map(c => c.audience).filter((a, i, arr) => arr.findIndex(x => x.id === a.id) === i).map(segment => (
+                {campaigns.map(c => c.audience).filter((a, i, arr) => arr.findIndex(x => x.id === a.id) === i).map(segment => (
                   <div key={segment.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg flex items-center justify-between">
                     <div>
                       <div className="font-medium text-gray-900 dark:text-white">{segment.name}</div>
@@ -2120,7 +2120,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     </tr>
                   </thead>
                   <tbody>
-                    {mockEvents.map(event => (
+                    {events.map(event => (
                       <tr key={event.name} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
                         <td className="py-3 px-4">
                           <code className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm font-mono text-gray-900 dark:text-white">{event.name}</code>
@@ -2195,7 +2195,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Performing Campaigns</h3>
               <div className="space-y-4">
-                {mockCampaigns.filter(c => c.status === 'sent').sort((a, b) => b.metrics.openRate - a.metrics.openRate).slice(0, 3).map((campaign, idx) => (
+                {campaigns.filter(c => c.status === 'sent').sort((a, b) => b.metrics.openRate - a.metrics.openRate).slice(0, 3).map((campaign, idx) => (
                   <div key={campaign.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <div className="flex items-center gap-4">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${idx === 0 ? 'bg-amber-500' : idx === 1 ? 'bg-gray-400' : 'bg-amber-700'}`}>

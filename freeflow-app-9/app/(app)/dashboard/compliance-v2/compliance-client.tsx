@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { useCompliance, type Compliance as HookCompliance } from '@/lib/hooks/use-compliance'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
@@ -202,16 +203,122 @@ const copyToClipboard = async (text: string) => {
 }
 
 export default function ComplianceClient() {
+  // Demo mode detection for investor demos
+  const { data: nextAuthSession, status: sessionStatus } = useSession()
+  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const isSessionLoading = sessionStatus === 'loading'
+
   // Use the compliance hook for Supabase data
   const {
-    compliance: dbCompliance,
-    loading: isLoading,
-    error,
+    compliance: hookCompliance,
+    loading: hookLoading,
+    error: hookError,
     createCompliance,
     updateCompliance,
     deleteCompliance,
     refetch
   } = useCompliance()
+
+  // Demo compliance data for investor demos
+  const demoCompliance: HookCompliance[] = useMemo(() => [
+    {
+      id: 'demo-comp-1',
+      requirement: 'SOC 2 Type II Certification',
+      status: 'compliant' as const,
+      framework: 'SOC 2',
+      category: 'Security',
+      priority: 'high' as const,
+      owner: 'Alex Johnson',
+      due_date: '2026-03-15',
+      notes: 'Annual certification renewal',
+      evidence_links: ['https://example.com/soc2-cert.pdf'],
+      last_audit_date: '2025-12-15',
+      next_audit_date: '2026-03-15',
+      audit_count: 3,
+      risk_score: 15,
+      created_at: '2025-01-01T00:00:00Z',
+      updated_at: '2026-01-15T00:00:00Z'
+    },
+    {
+      id: 'demo-comp-2',
+      requirement: 'GDPR Data Protection',
+      status: 'compliant' as const,
+      framework: 'GDPR',
+      category: 'Privacy',
+      priority: 'critical' as const,
+      owner: 'Sarah Chen',
+      due_date: '2026-05-25',
+      notes: 'EU data processing compliance',
+      evidence_links: ['https://example.com/gdpr-assessment.pdf'],
+      last_audit_date: '2025-11-20',
+      next_audit_date: '2026-05-25',
+      audit_count: 2,
+      risk_score: 20,
+      created_at: '2025-01-01T00:00:00Z',
+      updated_at: '2026-01-10T00:00:00Z'
+    },
+    {
+      id: 'demo-comp-3',
+      requirement: 'ISO 27001 Information Security',
+      status: 'in_progress' as const,
+      framework: 'ISO 27001',
+      category: 'Security',
+      priority: 'high' as const,
+      owner: 'Mike Rodriguez',
+      due_date: '2026-06-30',
+      notes: 'Working towards certification',
+      evidence_links: [],
+      last_audit_date: '2025-09-01',
+      next_audit_date: '2026-06-30',
+      audit_count: 1,
+      risk_score: 35,
+      created_at: '2025-01-01T00:00:00Z',
+      updated_at: '2026-01-20T00:00:00Z'
+    },
+    {
+      id: 'demo-comp-4',
+      requirement: 'PCI DSS Payment Security',
+      status: 'compliant' as const,
+      framework: 'PCI DSS',
+      category: 'Payment',
+      priority: 'critical' as const,
+      owner: 'Alex Johnson',
+      due_date: '2026-04-01',
+      notes: 'Level 1 merchant compliance',
+      evidence_links: ['https://example.com/pci-cert.pdf'],
+      last_audit_date: '2025-10-15',
+      next_audit_date: '2026-04-01',
+      audit_count: 4,
+      risk_score: 10,
+      created_at: '2025-01-01T00:00:00Z',
+      updated_at: '2026-01-05T00:00:00Z'
+    },
+    {
+      id: 'demo-comp-5',
+      requirement: 'HIPAA Healthcare Data',
+      status: 'not_started' as const,
+      framework: 'HIPAA',
+      category: 'Healthcare',
+      priority: 'medium' as const,
+      owner: 'Sarah Chen',
+      due_date: '2026-09-01',
+      notes: 'Planned for Q3 2026',
+      evidence_links: [],
+      last_audit_date: null,
+      next_audit_date: '2026-09-01',
+      audit_count: 0,
+      risk_score: 50,
+      created_at: '2025-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:00:00Z'
+    }
+  ], [])
+
+  // Use demo data for demo accounts
+  const dbCompliance = isDemoAccount ? demoCompliance : (hookCompliance || [])
+  const isLoading = isSessionLoading || (isDemoAccount ? false : hookLoading)
+  const error = !isSessionLoading && !isDemoAccount && hookError
 
   // Use the API keys hook for token management
   const { createKey: createApiKey, deleteKey: deleteApiKey, keys: apiKeys } = useApiKeys()

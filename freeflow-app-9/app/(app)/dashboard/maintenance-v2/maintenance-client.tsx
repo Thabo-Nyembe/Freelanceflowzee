@@ -4,6 +4,7 @@ import { useMaintenance, type MaintenanceWindow } from '@/lib/hooks/use-maintena
 import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import {
   Wrench, CheckCircle, AlertCircle, Server,
@@ -355,6 +356,12 @@ const initialFormState: MaintenanceFormState = {
 }
 
 export default function MaintenanceClient() {
+  // Demo mode detection for investor demos
+  const { data: nextAuthSession, status: sessionStatus } = useSession()
+  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const isSessionLoading = sessionStatus === 'loading'
 
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
@@ -472,9 +479,9 @@ export default function MaintenanceClient() {
 
   // Use the maintenance hook for data fetching and mutations
   const {
-    windows: dbMaintenanceWindows,
-    loading,
-    error,
+    windows: hookMaintenanceWindows,
+    loading: hookLoading,
+    error: hookError,
     fetchWindows,
     createWindow,
     updateWindow,
@@ -482,8 +489,108 @@ export default function MaintenanceClient() {
     startMaintenance,
     completeMaintenance,
     cancelMaintenance,
-    getStats
+    getStats: hookGetStats
   } = useMaintenance()
+
+  // Demo maintenance data for investor demos
+  const demoMaintenanceWindows: MaintenanceWindow[] = useMemo(() => [
+    {
+      id: 'demo-maint-1',
+      window_code: 'MW-2026-001',
+      title: 'Database Server Maintenance',
+      description: 'Scheduled database optimization and backup verification',
+      start_time: '2026-01-28T02:00:00Z',
+      end_time: '2026-01-28T06:00:00Z',
+      status: 'scheduled' as const,
+      type: 'preventive' as const,
+      impact: 'medium' as const,
+      affected_systems: ['Production Database', 'Reporting Server'],
+      assigned_team: ['Alex Johnson', 'Mike Rodriguez'],
+      created_by: 'alex@freeflow.io',
+      duration_minutes: 240,
+      downtime_expected: true,
+      notification_sent: true,
+      created_at: '2026-01-20T00:00:00Z',
+      updated_at: '2026-01-25T00:00:00Z'
+    },
+    {
+      id: 'demo-maint-2',
+      window_code: 'MW-2026-002',
+      title: 'Network Switch Upgrade',
+      description: 'Core network switch firmware update',
+      start_time: '2026-01-30T00:00:00Z',
+      end_time: '2026-01-30T02:00:00Z',
+      status: 'scheduled' as const,
+      type: 'upgrade' as const,
+      impact: 'high' as const,
+      affected_systems: ['All Network Services'],
+      assigned_team: ['Sarah Chen'],
+      created_by: 'sarah@freeflow.io',
+      duration_minutes: 120,
+      downtime_expected: true,
+      notification_sent: false,
+      created_at: '2026-01-22T00:00:00Z',
+      updated_at: '2026-01-22T00:00:00Z'
+    },
+    {
+      id: 'demo-maint-3',
+      window_code: 'MW-2026-003',
+      title: 'SSL Certificate Renewal',
+      description: 'Annual SSL certificate renewal for all domains',
+      start_time: '2026-01-25T10:00:00Z',
+      end_time: '2026-01-25T11:00:00Z',
+      status: 'completed' as const,
+      type: 'preventive' as const,
+      impact: 'low' as const,
+      affected_systems: ['Web Servers'],
+      assigned_team: ['Alex Johnson'],
+      created_by: 'alex@freeflow.io',
+      duration_minutes: 60,
+      downtime_expected: false,
+      notification_sent: true,
+      created_at: '2026-01-15T00:00:00Z',
+      updated_at: '2026-01-25T11:00:00Z'
+    },
+    {
+      id: 'demo-maint-4',
+      window_code: 'MW-2026-004',
+      title: 'Storage Array Expansion',
+      description: 'Adding new storage capacity to SAN',
+      start_time: '2026-02-01T03:00:00Z',
+      end_time: '2026-02-01T07:00:00Z',
+      status: 'scheduled' as const,
+      type: 'upgrade' as const,
+      impact: 'critical' as const,
+      affected_systems: ['Storage Array', 'Backup Systems'],
+      assigned_team: ['Mike Rodriguez', 'Sarah Chen'],
+      created_by: 'mike@freeflow.io',
+      duration_minutes: 240,
+      downtime_expected: true,
+      notification_sent: false,
+      created_at: '2026-01-24T00:00:00Z',
+      updated_at: '2026-01-24T00:00:00Z'
+    }
+  ], [])
+
+  // Use demo data for demo accounts
+  const dbMaintenanceWindows = isDemoAccount ? demoMaintenanceWindows : (hookMaintenanceWindows || [])
+  const loading = isSessionLoading || (isDemoAccount ? false : hookLoading)
+  const error = !isSessionLoading && !isDemoAccount && hookError
+
+  // Wrap getStats to use demo data
+  const getStats = () => {
+    if (isDemoAccount) {
+      return {
+        total: demoMaintenanceWindows.length,
+        scheduled: demoMaintenanceWindows.filter(w => w.status === 'scheduled').length,
+        inProgress: demoMaintenanceWindows.filter(w => w.status === 'in-progress').length,
+        completed: demoMaintenanceWindows.filter(w => w.status === 'completed').length,
+        delayed: 0,
+        avgCompletionRate: 95
+      }
+    }
+    return hookGetStats()
+  }
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -1413,7 +1520,7 @@ export default function MaintenanceClient() {
                                     </div>
                                   )}
                                   <p className="text-sm text-gray-500">Due: {formatDateTime(order.scheduledEnd)}</p>
-                                  {order.sla.breached && <Badge className="bg-red-100 text-red-700 mt-1">SLA Breached</Badge>}
+                                  {order.sla?.breached && <Badge className="bg-red-100 text-red-700 mt-1">SLA Breached</Badge>}
                                 </div>
                               </div>
                             </div>
@@ -3290,14 +3397,14 @@ export default function MaintenanceClient() {
           </DialogHeader>
           <ScrollArea className="h-[400px] pr-4">
             <div className="space-y-4">
-              {([] as WorkOrder[]).filter(w => w.priority === 'critical' || w.sla.breached).map((order) => (
+              {([] as WorkOrder[]).filter(w => w.priority === 'critical' || w.sla?.breached).map((order) => (
                 <div key={order.id} className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <Badge className="bg-red-100 text-red-700">{order.priority}</Badge>
                         <Badge className={getStatusColor(order.status)}>{order.status.replace('_', ' ')}</Badge>
-                        {order.sla.breached && <Badge className="bg-red-600 text-white">SLA Breached</Badge>}
+                        {order.sla?.breached && <Badge className="bg-red-600 text-white">SLA Breached</Badge>}
                       </div>
                       <p className="font-semibold text-gray-900 dark:text-white">{order.title}</p>
                       <p className="text-sm text-gray-500">{order.orderNumber} | {order.asset}</p>

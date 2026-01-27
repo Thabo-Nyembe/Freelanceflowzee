@@ -2450,7 +2450,7 @@ export default function DeploymentsClient() {
             </ScrollArea>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLogsDialog(false)}>Close</Button>
-              <Button onClick={() => { const logsText = mockBuildLogs.map(l => `[${l.timestamp}] [${l.level.toUpperCase()}] [${l.step}] ${l.message}`).join('\n'); const blob = new Blob([logsText], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `build-logs-${selectedDeployment?.commit || 'latest'}.txt`; link.click(); URL.revokeObjectURL(url); toast.success('Download Started'); }}><Download className="h-4 w-4 mr-2" />Download Logs</Button>
+              <Button onClick={() => { const logsText = realTimeLogs.map(l => `[${l.timestamp}] [${l.level.toUpperCase()}] [${l.step}] ${l.message}`).join('\n'); const blob = new Blob([logsText], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `build-logs-${selectedDeployment?.commit || 'latest'}.txt`; link.click(); URL.revokeObjectURL(url); toast.success('Download Started'); }}><Download className="h-4 w-4 mr-2" />Download Logs</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
