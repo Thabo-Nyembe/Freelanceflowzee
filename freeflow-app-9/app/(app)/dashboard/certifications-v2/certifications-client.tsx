@@ -744,7 +744,7 @@ export default function CertificationsClient() {
                     <div className="text-xs text-white/70">Blockchain Verified</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockCredentials.reduce((sum, c) => sum + c.shareCount, 0)}</div>
+                    <div className="text-2xl font-bold">{0}</div>
                     <div className="text-xs text-white/70">Total Shares</div>
                   </div>
                 </div>
@@ -919,7 +919,7 @@ export default function CertificationsClient() {
             </div>
 
             <div className="grid gap-4">
-              {filteredSkills.map(skill => (
+              {([] as any[]).map(skill => (
                 <Dialog key={skill.id}>
                   <DialogTrigger asChild>
                     <div
@@ -1063,7 +1063,7 @@ export default function CertificationsClient() {
           {/* Pathways Tab */}
           <TabsContent value="pathways" className="space-y-4">
             <div className="grid gap-4">
-              {mockPathways.map(pathway => (
+              {([] as any[]).map(pathway => (
                 <div key={pathway.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
                   <div className="flex items-start gap-4">
                     <div className="text-4xl">{pathway.thumbnail}</div>
@@ -1222,7 +1222,7 @@ export default function CertificationsClient() {
                     className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
                     onClick={async () => {
                       const result = await apiPost('/api/certifications/anchor-blockchain', {
-                        credentialIds: mockCredentials.filter(c => !c.blockchainTxId).map(c => c.id)
+                        credentialIds: []
                       }, {
                         loading: 'Anchoring credentials to blockchain...',
                         success: 'All credentials anchored successfully!',
@@ -1241,7 +1241,7 @@ export default function CertificationsClient() {
               <h3 className="font-semibold mb-4 dark:text-white">📋 Verification History</h3>
               <ScrollArea className="h-64">
                 <div className="space-y-3">
-                  {mockVerifications.map(record => (
+                  {([] as any[]).map(record => (
                     <div key={record.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                       <div className="flex items-center gap-3">
                         <span className={`px-2 py-1 rounded text-xs ${getStatusColor(record.status)}`}>
@@ -1701,7 +1701,7 @@ export default function CertificationsClient() {
                                 <p>Generated: ${new Date().toLocaleDateString()}</p>
                                 <table>
                                   <tr><th>Name</th><th>Issuer</th><th>Status</th><th>Issue Date</th><th>Expiry</th></tr>
-                                  ${mockCredentials.map(c => `<tr><td>${c.name}</td><td>${c.issuer.name}</td><td class="status-${c.status}">${c.status}</td><td>${c.issueDate}</td><td>${c.expiryDate || 'N/A'}</td></tr>`).join('')}
+                                  ${([] as any[]).map(c => `<tr><td>${c.name}</td><td>${c.issuer.name}</td><td class="status-${c.status}">${c.status}</td><td>${c.issueDate}</td><td>${c.expiryDate || 'N/A'}</td></tr>`).join('')}
                                 </table>
                               </body>
                               </html>
@@ -1727,10 +1727,10 @@ export default function CertificationsClient() {
                           onClick={() => {
                             const exportData = {
                               exportDate: new Date().toISOString(),
-                              credentials: mockCredentials,
-                              badges: mockBadges,
-                              skills: mockSkills,
-                              pathways: mockPathways
+                              credentials: [],
+                              badges: [],
+                              skills: [],
+                              pathways: []
                             }
                             downloadAsJson(exportData, 'certifications-data.json')
                           }}
@@ -1783,18 +1783,18 @@ export default function CertificationsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockCertsAIInsights}
+              insights={[]}
               title="Certification Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockCertsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockCertsPredictions}
+              predictions={[]}
               title="Certification Forecasts"
             />
           </div>
@@ -1802,7 +1802,7 @@ export default function CertificationsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockCertsActivities}
+            activities={[]}
             title="Certification Activity"
             maxItems={5}
           />

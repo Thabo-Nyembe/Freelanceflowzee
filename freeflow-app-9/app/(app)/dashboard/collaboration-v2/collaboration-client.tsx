@@ -92,7 +92,8 @@ import {
   Copy,
   Eye,
   Flag,
-  Loader2
+  Loader2,
+  Mail
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

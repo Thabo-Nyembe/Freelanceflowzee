@@ -3281,7 +3281,7 @@ export default function CrmClient() {
         {/* Activity Feed */}
         <div className="mt-6">
           <ActivityFeed
-            activities={mockCrmActivitiesFeed}
+            activities={[]}
             maxItems={5}
             showFilters={true}
           />
