@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
     const userEmail = session.user.email
 
     // Demo mode ONLY for demo account (test@kazi.dev)
-    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io'
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
 
     if (isDemoAccount) {
       return handleDemoResponse(action)

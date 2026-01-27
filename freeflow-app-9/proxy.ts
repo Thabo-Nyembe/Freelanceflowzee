@@ -159,6 +159,66 @@ export default withAuth(
     }
 
     // ----------------------------------------------------------
+    // 1.5. Version route redirects (v1, v2 → main v2 dashboards)
+    // ----------------------------------------------------------
+
+    // v1 dashboard routes → main dashboard v2
+    if (pathname.startsWith('/v1/dashboard/')) {
+      const slug = pathname.replace('/v1/dashboard/', '').replace(/\/$/, '')
+      const newUrl = new URL(`/dashboard/${slug}-v2`, req.url)
+      return NextResponse.redirect(newUrl)
+    }
+
+    // v2 dashboard routes → main dashboard v2
+    if (pathname.startsWith('/v2/dashboard/')) {
+      const slug = pathname.replace('/v2/dashboard/', '').replace(/\/$/, '')
+      const newUrl = new URL(`/dashboard/${slug}-v2`, req.url)
+      return NextResponse.redirect(newUrl)
+    }
+
+    // Main dashboard routes without -v2 suffix → v2 versions
+    // Complete list of all dashboard pages that have v2 versions
+    const V2_PAGES = new Set([
+      '3d-modeling', 'access-logs', 'accounting', 'activity-logs', 'add-ons', 'admin',
+      'ai-agents', 'ai-assistant', 'ai-code-builder', 'ai-create', 'ai-design', 'ai-settings',
+      'ai-video', 'ai-voice', 'alerts', 'allocation', 'analytics', 'announcements', 'api',
+      'api-keys', 'app-store', 'assets', 'audio-studio', 'audit', 'audit-logs', 'automation',
+      'automation-recipes', 'automations', 'backups', 'badges', 'billing', 'bookings',
+      'broadcasts', 'budgets', 'bugs', 'builds', 'business-intelligence', 'calendar',
+      'campaigns', 'canvas', 'capacity', 'certifications', 'changelog', 'chat', 'ci-cd',
+      'clients', 'cloud-storage', 'collaboration', 'community', 'compliance', 'component-library',
+      'connectors', 'content', 'content-studio', 'contracts', 'courses', 'crm', 'customer-success',
+      'customer-support', 'customers', 'data-export', 'dependencies', 'deployments', 'desktop-app',
+      'directory-sync', 'docs', 'documentation', 'documents', 'email-marketing', 'employees',
+      'escrow', 'events', 'expenses', 'extensions', 'faq', 'features', 'feedback', 'files-hub',
+      'financial', 'forms', 'gallery', 'growth-hub', 'health-score', 'help-center', 'help-docs',
+      'integrations', 'integrations-marketplace', 'inventory', 'investor-metrics', 'invoices',
+      'invoicing', 'kazi-automations', 'kazi-workflows', 'knowledge-articles', 'knowledge-base',
+      'lead-generation', 'leads', 'learning', 'logistics', 'logs', 'maintenance', 'marketing',
+      'marketplace', 'media-library', 'meeting-summaries', 'messages', 'messaging', 'milestones',
+      'mobile-app', 'monitoring', 'motion-graphics', 'my-day', 'notifications', 'onboarding',
+      'orders', 'overview', 'payroll', 'performance', 'performance-analytics', 'permissions',
+      'plugins', 'polls', 'pricing', 'products', 'profile', 'projects-hub', 'qa', 'recruitment',
+      'registrations', 'release-notes', 'releases', 'renewals', 'reporting', 'reports',
+      'resources', 'roadmap', 'roles', 'sales', 'screen-recording', 'security', 'security-audit',
+      'security-monitoring', 'seo', 'settings', 'shipping', 'social-media', 'sprints', 'stock',
+      'subscriptions', 'support', 'support-tickets', 'surveys', 'system-insights', 'tasks',
+      'tax-intelligence', 'team', 'team-hub', 'team-management', 'templates', 'testing',
+      'theme-store', 'third-party-integrations', 'tickets', 'time-tracking', 'training',
+      'transactions', 'tutorials', 'user-management', 'vendors', 'video-review', 'video-studio',
+      'voice-ai', 'vulnerability-scan', 'warehouse', 'webhooks', 'webinars', 'white-label',
+      'widget-library', 'workflow-builder', 'workflows', 'projects', 'files', 'goals'
+    ])
+
+    if (pathname.startsWith('/dashboard/') && !pathname.includes('-v2')) {
+      const slug = pathname.replace('/dashboard/', '').replace(/\/$/, '').split('/')[0]
+      if (V2_PAGES.has(slug)) {
+        const newUrl = new URL(pathname.replace(`/dashboard/${slug}`, `/dashboard/${slug}-v2`), req.url)
+        return NextResponse.redirect(newUrl)
+      }
+    }
+
+    // ----------------------------------------------------------
     // 2. Rate limiting for API routes
     // ----------------------------------------------------------
     if (pathname.startsWith('/api/')) {
