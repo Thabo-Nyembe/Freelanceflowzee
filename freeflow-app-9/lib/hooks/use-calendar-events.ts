@@ -2,7 +2,7 @@
 
 import { useSupabaseQuery } from './use-supabase-query'
 import { useSupabaseMutation } from './use-supabase-mutation'
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import type { JsonValue } from '@/lib/types/database'
 
 export type EventType = 'meeting' | 'appointment' | 'task' | 'reminder' | 'deadline' | 'milestone' | 'holiday' | 'birthday' | 'custom'
@@ -153,22 +153,45 @@ interface CalendarEventQueryOptions {
 
 export function useCalendarEvents(options: UseCalendarEventsOptions = {}) {
   const { status, limit } = options
+  const [data, setData] = useState<CalendarEvent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
   const [mutationLoading, setMutationLoading] = useState(false)
   const [mutationError, setMutationError] = useState<Error | null>(null)
 
-  const filters: CalendarEventFilters = {}
-  if (status && status !== 'all') filters.status = status
+  // Fetch events from API (supports demo mode)
+  const fetchEvents = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const params = new URLSearchParams()
+      if (status && status !== 'all') params.set('status', status)
+      if (limit) params.set('limit', String(limit))
 
-  const queryOptions: CalendarEventQueryOptions = {
-    table: 'calendar_events',
-    filters,
-    orderBy: { column: 'start_time', ascending: true },
-    limit: limit || 50,
-    realtime: true,
-    softDelete: false
-  }
+      const response = await fetch(`/api/calendar?${params.toString()}`, {
+        credentials: 'include'
+      })
+      const result = await response.json()
 
-  const { data, loading, error, refetch } = useSupabaseQuery<CalendarEvent>(queryOptions)
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch calendar events')
+      }
+
+      setData(result.events || [])
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+      setData([])
+    } finally {
+      setLoading(false)
+    }
+  }, [status, limit])
+
+  // Initial fetch
+  useEffect(() => {
+    fetchEvents()
+  }, [fetchEvents])
+
+  const refetch = fetchEvents
 
   const { create, update, remove } = useSupabaseMutation({
     table: 'calendar_events',

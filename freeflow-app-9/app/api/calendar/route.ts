@@ -7,14 +7,177 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { calendarService } from '@/lib/calendar/calendar-service';
 import { createFeatureLogger } from '@/lib/logger';
+import { getServerSession } from '@/lib/auth';
 
 const logger = createFeatureLogger('calendar');
+
+// Demo calendar events for investor demo
+function getDemoEvents() {
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+
+  return [
+    {
+      id: 'demo-event-1',
+      title: 'Team Standup',
+      description: 'Daily team sync meeting',
+      event_type: 'meeting',
+      start_time: `${today}T09:00:00Z`,
+      end_time: `${today}T09:30:00Z`,
+      all_day: false,
+      timezone: 'UTC',
+      location: 'Google Meet',
+      location_type: 'virtual',
+      meeting_url: 'https://meet.google.com/abc-defg-hij',
+      status: 'confirmed',
+      availability: 'busy',
+      visibility: 'default',
+      is_recurring: true,
+      recurrence_frequency: 'daily',
+      attendees: [
+        { email: 'sarah@techcorp.com', name: 'Sarah Chen', status: 'accepted' },
+        { email: 'mike@techcorp.com', name: 'Mike Johnson', status: 'accepted' }
+      ],
+      total_attendees: 2,
+      rsvp_required: false,
+      accepted_count: 2,
+      declined_count: 0,
+      tentative_count: 0,
+      color: '#4285F4',
+      priority: 'medium',
+      reminders: [{ type: 'push', minutes_before: 10 }],
+      reminder_sent: false,
+      created_at: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-event-2',
+      title: 'Client Review: TechCorp Website',
+      description: 'Review website redesign progress with TechCorp team',
+      event_type: 'meeting',
+      start_time: `${today}T14:00:00Z`,
+      end_time: `${today}T15:00:00Z`,
+      all_day: false,
+      timezone: 'UTC',
+      location: 'Zoom',
+      location_type: 'virtual',
+      meeting_url: 'https://zoom.us/j/123456789',
+      status: 'confirmed',
+      availability: 'busy',
+      visibility: 'default',
+      is_recurring: false,
+      attendees: [
+        { email: 'client@techcorp.com', name: 'David Lee', status: 'accepted' }
+      ],
+      total_attendees: 1,
+      rsvp_required: true,
+      accepted_count: 1,
+      declined_count: 0,
+      tentative_count: 0,
+      color: '#0F9D58',
+      priority: 'high',
+      reminders: [{ type: 'email', minutes_before: 60 }, { type: 'push', minutes_before: 15 }],
+      reminder_sent: false,
+      created_at: new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-event-3',
+      title: 'Project Deadline: Brand Identity',
+      description: 'Final delivery of brand identity package to StartupX',
+      event_type: 'deadline',
+      start_time: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      end_time: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      all_day: true,
+      timezone: 'UTC',
+      status: 'confirmed',
+      availability: 'busy',
+      visibility: 'default',
+      is_recurring: false,
+      total_attendees: 0,
+      rsvp_required: false,
+      accepted_count: 0,
+      declined_count: 0,
+      tentative_count: 0,
+      color: '#DB4437',
+      priority: 'urgent',
+      reminders: [{ type: 'email', minutes_before: 1440 }],
+      reminder_sent: false,
+      created_at: new Date(now.getTime() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(now.getTime() - 21 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-event-4',
+      title: 'Sprint Planning',
+      description: 'Plan next sprint tasks and priorities',
+      event_type: 'meeting',
+      start_time: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T10:00:00Z',
+      end_time: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T11:30:00Z',
+      all_day: false,
+      timezone: 'UTC',
+      location: 'Conference Room A',
+      location_type: 'in_person',
+      status: 'confirmed',
+      availability: 'busy',
+      visibility: 'default',
+      is_recurring: true,
+      recurrence_frequency: 'weekly',
+      attendees: [
+        { email: 'team@kazi.app', name: 'Development Team', status: 'accepted' }
+      ],
+      total_attendees: 5,
+      rsvp_required: false,
+      accepted_count: 5,
+      declined_count: 0,
+      tentative_count: 0,
+      color: '#F4B400',
+      priority: 'high',
+      reminders: [{ type: 'push', minutes_before: 30 }],
+      reminder_sent: false,
+      created_at: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ];
+}
 
 // =====================================================
 // GET - List events and calendar data
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
+    // Try NextAuth session first
+    const session = await getServerSession();
+    const userEmail = session?.user?.email;
+
+    // Check for demo account
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io';
+
+    if (isDemoAccount) {
+      const { searchParams } = new URL(request.url);
+      const action = searchParams.get('action');
+
+      // Return demo data for all calendar queries
+      const demoEvents = getDemoEvents();
+
+      switch (action) {
+        case 'upcoming-events':
+          return NextResponse.json({ events: demoEvents, demo: true });
+        case 'upcoming-bookings':
+          return NextResponse.json({ bookings: [], demo: true });
+        case 'booking-types':
+          return NextResponse.json({ booking_types: [], demo: true });
+        case 'availability':
+          return NextResponse.json({ availabilities: [], demo: true });
+        case 'available-slots':
+          return NextResponse.json({ slots: [], demo: true });
+        case 'calendar-syncs':
+          return NextResponse.json({ syncs: [], demo: true });
+        default:
+          return NextResponse.json({ events: demoEvents, demo: true });
+      }
+    }
+
+    // Fall back to Supabase auth for non-demo users
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
