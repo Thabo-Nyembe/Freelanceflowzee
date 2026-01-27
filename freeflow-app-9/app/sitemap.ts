@@ -1,4 +1,6 @@
-import { MetadataRoute } from 'next'
+import { alternatives } from '@/data/alternatives'
+import { useCases } from '@/data/use-cases'
+import { blogPosts } from '@/data/blog-posts'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://kazi.app'
@@ -31,8 +33,42 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/privacy`, priority: 0.5, changeFrequency: 'monthly' as const },
   ]
 
+  // Alternative Pages (SEO Strategy)
+  const alternativePages = Object.keys(alternatives).map(slug => ({
+    url: `${baseUrl}/alternatives/${slug}`,
+    priority: 0.8,
+    changeFrequency: 'weekly' as const
+  }))
+
+  // Use Case Pages (Targeted Competitor Traffic)
+  const useCasePages = Object.keys(useCases).map(slug => ({
+    url: `${baseUrl}/for/${slug}`,
+    priority: 0.8,
+    changeFrequency: 'weekly' as const
+  }))
+
+  // Blog Posts (Dynamic Content)
+  const blogPages = blogPosts.map(post => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    priority: 0.7,
+    changeFrequency: 'monthly' as const
+  }))
+
+  // Comparison Pages (Head-to-Head)
+  const comparisonPages = [
+    'kazi-vs-upwork',
+    'kazi-vs-fiverr',
+    'kazi-vs-monday',
+    'kazi-vs-clickup',
+    'kazi-vs-jasper'
+  ].map(slug => ({
+    url: `${baseUrl}/compare/${slug}`,
+    priority: 0.8,
+    changeFrequency: 'weekly' as const
+  }))
+
   // Combine all pages
-  const allPages = [...marketingPages, ...contentPages, ...legalPages]
+  const allPages = [...marketingPages, ...contentPages, ...legalPages, ...alternativePages, ...useCasePages, ...blogPages, ...comparisonPages]
 
   return allPages.map(page => ({
     url: page.url,

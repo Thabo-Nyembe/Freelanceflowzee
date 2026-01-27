@@ -317,7 +317,7 @@ export default function ProjectsHubClient() {
   const projectsStatusColumns: any[] = []
 
   // Database integration - use real projects hook
-  const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading } = useProjects()
+  const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading, error } = useProjects()
 
   // New project form state
   const [newProjectForm, setNewProjectForm] = useState({
@@ -331,8 +331,17 @@ export default function ProjectsHubClient() {
 
   // Fetch projects on mount
   useEffect(() => {
-    fetchProjects()
-  }, [fetchProjects])
+    const loadProjects = async () => {
+      try {
+        await fetchProjects()
+      } catch (err) {
+        console.error('Failed to load projects:', err)
+        // Error is already handled by the hook
+      }
+    }
+
+    loadProjects()
+  }, []) // Empty array - only run on mount
 
   // Combine database projects with mock data for display (fallback to mock if DB is empty)
   const allProjects = useMemo(() => {
@@ -389,7 +398,7 @@ export default function ProjectsHubClient() {
   const filteredProjects = useMemo(() => {
     return allProjects.filter(project => {
       const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           project.projectCode.toLowerCase().includes(searchQuery.toLowerCase())
+        project.projectCode.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesFilter = selectedFilter === 'all' || project.status === selectedFilter || project.priority === selectedFilter
       return matchesSearch && matchesFilter
     })
@@ -724,6 +733,47 @@ export default function ProjectsHubClient() {
       toast.success('Issue moved')
       setShowIssueDialog(false)
     }
+  }
+
+  // Loading state
+  if (projectsLoading && dbProjects.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-gray-900 flex items-center justify-center p-6">
+        <Card className="max-w-md w-full">
+          <CardContent className="p-8 text-center">
+            <RefreshCw className="h-12 w-12 mx-auto mb-4 text-blue-600 animate-spin" />
+            <h3 className="text-lg font-semibold mb-2">Loading Projects...</h3>
+            <p className="text-gray-500">Please wait while we fetch your projects</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error && dbProjects.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-gray-900 flex items-center justify-center p-6">
+        <Card className="max-w-md w-full border-red-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-800">
+              <AlertTriangle className="h-5 w-5" />
+              Unable to Load Projects
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gray-600">{error}</p>
+            <Button
+              onClick={() => fetchProjects()}
+              className="w-full"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -1152,11 +1202,10 @@ export default function ProjectsHubClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                            settingsTab === item.id
-                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                          }`}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${settingsTab === item.id
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                            }`}
                         >
                           <item.icon className="h-4 w-4" />
                           {item.label}
@@ -1538,13 +1587,13 @@ export default function ProjectsHubClient() {
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
                                 <Button variant="ghost" size="sm" onClick={async () => {
-                                    if (confirm('Are you sure you want to delete this webhook?')) {
-                                      toast.promise(
-                                        fetch('/api/projects/webhooks/' + webhook.id, { method: 'DELETE' }),
-                                        { loading: 'Deleting webhook...', success: 'Webhook removed successfully', error: 'Failed to delete webhook' }
-                                      )
-                                    }
-                                  }}>
+                                  if (confirm('Are you sure you want to delete this webhook?')) {
+                                    toast.promise(
+                                      fetch('/api/projects/webhooks/' + webhook.id, { method: 'DELETE' }),
+                                      { loading: 'Deleting webhook...', success: 'Webhook removed successfully', error: 'Failed to delete webhook' }
+                                    )
+                                  }
+                                }}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>

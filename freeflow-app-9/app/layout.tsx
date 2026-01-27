@@ -18,6 +18,7 @@ import { Analytics } from '@vercel/analytics/react'
 
 import { Context7Provider } from '@/components/providers/context7-provider'
 import { Providers } from '@/components/providers'
+import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { SessionProvider } from '@/components/providers/session-provider'
 import { RouteProgress } from '@/components/ui/route-progress'
 import { WebVitals } from '@/components/performance/web-vitals'
@@ -32,6 +33,14 @@ const inter = Inter({
 
 export const metadata = {
   metadataBase: new URL('https://kazi.app'),
+  alternates: {
+    canonical: '/',
+    languages: {
+      'en-US': '/en-US',
+    },
+  },
+  applicationName: 'KAZI Platform',
+  generator: 'Next.js',
   title: {
     default: 'KAZI - All-in-One Freelance & Agency Management Platform',
     template: '%s | KAZI'
@@ -104,15 +113,25 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: 'white' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+  ],
 }
+
+import { OrganizationJsonLd } from '@/components/seo/json-ld'
+import { ExitIntentPopup } from '@/components/marketing/exit-intent-popup'
+import { LiveChatWidget } from '@/components/marketing/live-chat-widget'
+import { NoiseTexture } from '@/components/ui/noise-texture'
 
 export default function RootLayout({
   children, }: {
-  children: React.ReactNode
-}) {
+    children: React.ReactNode
+  }) {
   return (
     <html lang="en" suppressHydrationWarning className="scroll-smooth">
       <body className={inter.className}>
+        <OrganizationJsonLd />
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
           {/* Skip to main content link for accessibility */}
           <a href="#main-content" className="skip-to-content">
@@ -127,13 +146,18 @@ export default function RootLayout({
           >
             {/* Premium Route Progress Bar */}
             <RouteProgress height={3} showSpinner={false} />
+            <NoiseTexture />
 
             <SessionProvider>
               <Providers>
-                <Context7Provider>
-                  <Toaster />
-                  {children}
-                </Context7Provider>
+                <AnalyticsProvider>
+                  <Context7Provider>
+                    <Toaster />
+                    <ExitIntentPopup />
+                    <LiveChatWidget />
+                    {children}
+                  </Context7Provider>
+                </AnalyticsProvider>
               </Providers>
             </SessionProvider>
             <Analytics />

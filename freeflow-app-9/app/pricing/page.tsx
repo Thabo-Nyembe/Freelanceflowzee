@@ -5,8 +5,11 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { SiteFooter } from '@/components/marketing/site-footer'
 import { Separator } from '@/components/ui/separator'
+import { SpotlightCard } from '@/components/ui/spotlight-card'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { ROICalculator } from '@/components/marketing/roi-calculator'
 import { CheckCircle, Sparkles, Zap, Crown, Shield, Lock, Award, ArrowRight, Menu } from 'lucide-react'
 
 const plans = [
@@ -242,6 +245,8 @@ export default function PricingPage() {
         </div>
       </nav>
 
+
+
       {/* Hero Section */}
       <section className="py-20" aria-labelledby="pricing-hero-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -258,16 +263,16 @@ export default function PricingPage() {
               id="pricing-hero-heading"
               className="text-5xl sm:text-6xl font-bold tracking-tight mb-6"
             >
-              Pricing That Grows
+              One Platform. One Price.
               <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                With Your Business
+                Unlimited Possibilities.
               </span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
               Start free, upgrade when you're ready. No contracts, no hidden fees, and cancel anytime. Join 25,000+ professionals who've streamlined their workflow.
             </p>
 
-            {/* Billing Toggle */}
+            {/* ... Billing Toggle ... */}
             <div
               className="inline-flex items-center p-1 bg-gray-100 rounded-full"
               role="group"
@@ -275,11 +280,10 @@ export default function PricingPage() {
             >
               <button
                 onClick={() => setBillingPeriod('monthly')}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  billingPeriod === 'monthly'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${billingPeriod === 'monthly'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
                 aria-pressed={billingPeriod === 'monthly'}
                 aria-label="Switch to monthly billing"
               >
@@ -287,11 +291,10 @@ export default function PricingPage() {
               </button>
               <button
                 onClick={() => setBillingPeriod('annual')}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  billingPeriod === 'annual'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${billingPeriod === 'annual'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
                 aria-pressed={billingPeriod === 'annual'}
                 aria-label="Switch to annual billing - Save 20%"
               >
@@ -314,19 +317,17 @@ export default function PricingPage() {
             aria-label="Pricing plans"
           >
             {plans.map((plan, index) => (
-              <Card
+              <SpotlightCard
                 key={plan.name}
-                className={`relative focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 ${
-                  plan.popular
-                    ? 'border-2 border-blue-600 shadow-2xl scale-105'
-                    : 'border-2 border-gray-200 hover:border-blue-600 hover:shadow-xl transition-all'
-                }`}
-                role="listitem"
+                className={`relative focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 transition-all duration-200 ${plan.popular
+                  ? 'border-blue-500/50 shadow-2xl shadow-blue-500/10 scale-105 z-10'
+                  : 'hover:shadow-xl'
+                  }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
                     <Badge
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1"
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 shadow-lg"
                       role="status"
                       aria-label="Most popular plan"
                     >
@@ -335,9 +336,9 @@ export default function PricingPage() {
                   </div>
                 )}
 
-                <CardHeader className="text-center pb-8 pt-8">
+                <CardHeader className="text-center pb-8 pt-8 relative z-10">
                   <div
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${plan.gradient} flex items-center justify-center mx-auto mb-4`}
+                    className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${plan.gradient} flex items-center justify-center mx-auto mb-4 shadow-lg`}
                     aria-hidden="true"
                   >
                     <plan.icon className="w-8 h-8 text-white" aria-hidden="true" />
@@ -352,7 +353,7 @@ export default function PricingPage() {
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 relative z-10">
                   <Separator aria-hidden="true" />
                   <ul className="space-y-3" role="list" aria-label={`${plan.name} plan features`}>
                     {plan.features.map((feature, idx) => (
@@ -364,14 +365,13 @@ export default function PricingPage() {
                   </ul>
                 </CardContent>
 
-                <CardFooter>
+                <CardFooter className="relative z-10">
                   <Link href={plan.href} className="w-full">
                     <Button
-                      className={`w-full focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                        plan.popular
-                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
-                          : ''
-                      }`}
+                      className={`w-full focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${plan.popular
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
+                        : ''
+                        }`}
                       variant={plan.popular ? 'default' : 'outline'}
                       size="lg"
                       aria-label={`${plan.cta} - ${plan.name} plan for ${plan.price}${plan.period || ''}`}
@@ -381,8 +381,17 @@ export default function PricingPage() {
                     </Button>
                   </Link>
                 </CardFooter>
-              </Card>
+              </SpotlightCard>
             ))}
+          </div>
+
+          {/* ROI Calculator Section */}
+          <div className="mb-20">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">See Your ROI in Real Numbers</h2>
+              <p className="text-gray-600">Calculate how much you're wasting on multiple subscriptions.</p>
+            </div>
+            <ROICalculator />
           </div>
 
           {/* Trust Badges */}
@@ -496,58 +505,21 @@ export default function PricingPage() {
           <p className="text-white/80 mt-6 text-sm" role="status">
             30-day money-back guarantee • Cancel anytime • No hidden fees
           </p>
+          <div className="mt-8 pt-8 border-t border-white/20 text-xs text-white/60 text-center max-w-2xl mx-auto space-y-2">
+            <p>
+              *Payment Services are provided by Stripe Connect. Funds are held in secure escrow accounts by our payment partner until milestones are approved.
+              KAZI is not a bank and does not provide banking services.
+            </p>
+            <p>
+              **Tax calculations are estimates provided for informational purposes only. KAZI does not provide professional tax or legal advice.
+              Please consult with a qualified accountant for your specific tax obligations.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12" role="contentinfo" aria-label="Site footer">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-6 h-6 text-blue-400" aria-hidden="true" />
-                <span className="text-xl font-bold">KAZI</span>
-              </div>
-              <p className="text-gray-400">
-                All-in-one workspace for freelancers and agencies
-              </p>
-            </div>
-
-            <nav aria-label="Product links">
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2" role="list">
-                <li><Link href="/features" className="block text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1">Features</Link></li>
-                <li><Link href="/pricing" className="block text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1">Pricing</Link></li>
-                <li><Link href="/demo-features" className="block text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1">Demo</Link></li>
-              </ul>
-            </nav>
-
-            <nav aria-label="Resource links">
-              <h3 className="font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2" role="list">
-                <li><Link href="/blog" className="block text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1">Blog</Link></li>
-                <li><Link href="/docs" className="block text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1">Docs</Link></li>
-                <li><Link href="/tutorials" className="block text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1">Tutorials</Link></li>
-              </ul>
-            </nav>
-
-            <nav aria-label="Company links">
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2" role="list">
-                <li><Link href="/contact" className="block text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1">Contact</Link></li>
-                <li><Link href="/signup" className="block text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1">Sign Up</Link></li>
-                <li><Link href="/login" className="block text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1">Login</Link></li>
-              </ul>
-            </nav>
-          </div>
-
-          <Separator className="bg-gray-800 mb-8" aria-hidden="true" />
-
-          <div className="text-center text-gray-400" role="contentinfo">
-            <p>© 2025 KAZI. Built in South Africa 🇿🇦 • Serving 40+ Countries Worldwide</p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

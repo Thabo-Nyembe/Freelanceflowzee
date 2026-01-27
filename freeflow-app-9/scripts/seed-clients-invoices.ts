@@ -301,21 +301,23 @@ interface Invoice {
   user_id: string
   invoice_number: string
   client_id: string
-  client_name: string
-  client_email: string
-  items: Array<{ description: string; quantity: number; rate: number; amount: number }>
-  subtotal: number
-  tax_rate: number
-  tax_amount: number
-  discount: number
-  total: number
-  currency: string
+  // Store additional data in metadata for the simplified schema
+  amount: number // Total amount (simplified schema uses 'amount' instead of subtotal/tax/total)
   status: 'draft' | 'sent' | 'viewed' | 'paid' | 'overdue' | 'cancelled' | 'refunded'
-  issue_date: string
   due_date: string
   paid_date: string | null
   notes: string
-  terms: string
+  metadata: {
+    items: Array<{ description: string; quantity: number; rate: number; amount: number }>
+    subtotal: number
+    tax_rate: number
+    tax_amount: number
+    discount: number
+    currency: string
+    terms: string
+    client_name: string
+    client_email: string
+  }
 }
 
 function generateInvoices(): Invoice[] {
@@ -333,21 +335,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(0),
     client_id: sampleClients[0].id,
-    client_name: sampleClients[0].name,
-    client_email: sampleClients[0].email,
-    items: items1,
-    subtotal: totals1.subtotal,
-    tax_rate: 8.5,
-    tax_amount: totals1.taxAmount,
-    discount: 500,
-    total: totals1.total,
-    currency: 'USD',
+    amount: totals1.total,
     status: 'paid',
-    issue_date: issueDate1.toISOString().split('T')[0],
     due_date: getDueDate(issueDate1, 30).toISOString().split('T')[0],
     paid_date: getDueDate(issueDate1, 25).toISOString().split('T')[0],
     notes: 'Thank you for your business!',
-    terms: 'Net 30. Late payments subject to 1.5% monthly interest.'
+    metadata: {
+      items: items1,
+      subtotal: totals1.subtotal,
+      tax_rate: 8.5,
+      tax_amount: totals1.taxAmount,
+      discount: 500,
+      currency: 'USD',
+      terms: 'Net 30. Late payments subject to 1.5% monthly interest.',
+      client_name: sampleClients[0].name,
+      client_email: sampleClients[0].email
+    }
   })
 
   // Invoice 2: Paid - Development for TechStartup
@@ -362,21 +365,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(1),
     client_id: sampleClients[0].id,
-    client_name: sampleClients[0].name,
-    client_email: sampleClients[0].email,
-    items: items2,
-    subtotal: totals2.subtotal,
-    tax_rate: 8.5,
-    tax_amount: totals2.taxAmount,
-    discount: 0,
-    total: totals2.total,
-    currency: 'USD',
+    amount: totals2.total,
     status: 'paid',
-    issue_date: issueDate2.toISOString().split('T')[0],
     due_date: getDueDate(issueDate2, 30).toISOString().split('T')[0],
     paid_date: getDueDate(issueDate2, 20).toISOString().split('T')[0],
     notes: 'Phase 2 development complete.',
-    terms: 'Net 30. Late payments subject to 1.5% monthly interest.'
+    metadata: {
+      items: items2,
+      subtotal: totals2.subtotal,
+      tax_rate: 8.5,
+      tax_amount: totals2.taxAmount,
+      discount: 0,
+      currency: 'USD',
+      terms: 'Net 30. Late payments subject to 1.5% monthly interest.',
+      client_name: sampleClients[0].name,
+      client_email: sampleClients[0].email
+    }
   })
 
   // Invoice 3: Sent - Branding for Creative Design Agency
@@ -391,21 +395,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(2),
     client_id: sampleClients[1].id,
-    client_name: sampleClients[1].name,
-    client_email: sampleClients[1].email,
-    items: items3,
-    subtotal: totals3.subtotal,
-    tax_rate: 8.875,
-    tax_amount: totals3.taxAmount,
-    discount: 0,
-    total: totals3.total,
-    currency: 'USD',
+    amount: totals3.total,
     status: 'sent',
-    issue_date: issueDate3.toISOString().split('T')[0],
     due_date: getDueDate(issueDate3, 30).toISOString().split('T')[0],
     paid_date: null,
     notes: 'Branding package as discussed.',
-    terms: 'Net 30. Late payments subject to 1.5% monthly interest.'
+    metadata: {
+      items: items3,
+      subtotal: totals3.subtotal,
+      tax_rate: 8.875,
+      tax_amount: totals3.taxAmount,
+      discount: 0,
+      currency: 'USD',
+      terms: 'Net 30. Late payments subject to 1.5% monthly interest.',
+      client_name: sampleClients[1].name,
+      client_email: sampleClients[1].email
+    }
   })
 
   // Invoice 4: Overdue - Consulting for Global Corporation
@@ -420,21 +425,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(3),
     client_id: sampleClients[2].id,
-    client_name: sampleClients[2].name,
-    client_email: sampleClients[2].email,
-    items: items4,
-    subtotal: totals4.subtotal,
-    tax_rate: 20,
-    tax_amount: totals4.taxAmount,
-    discount: 0,
-    total: totals4.total,
-    currency: 'GBP',
+    amount: totals4.total,
     status: 'overdue',
-    issue_date: issueDate4.toISOString().split('T')[0],
     due_date: getDueDate(issueDate4, 60).toISOString().split('T')[0],
     paid_date: null,
     notes: 'Strategic consulting engagement - Q4 2024',
-    terms: 'Net 60. Payment via bank transfer.'
+    metadata: {
+      items: items4,
+      subtotal: totals4.subtotal,
+      tax_rate: 20,
+      tax_amount: totals4.taxAmount,
+      discount: 0,
+      currency: 'GBP',
+      terms: 'Net 60. Payment via bank transfer.',
+      client_name: sampleClients[2].name,
+      client_email: sampleClients[2].email
+    }
   })
 
   // Invoice 5: Paid - Website for Local Cafe
@@ -451,21 +457,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(4),
     client_id: sampleClients[3].id,
-    client_name: sampleClients[3].name,
-    client_email: sampleClients[3].email,
-    items: items5,
-    subtotal: totals5.subtotal,
-    tax_rate: 7,
-    tax_amount: totals5.taxAmount,
-    discount: 0,
-    total: totals5.total,
-    currency: 'USD',
+    amount: totals5.total,
     status: 'paid',
-    issue_date: issueDate5.toISOString().split('T')[0],
     due_date: getDueDate(issueDate5, 14).toISOString().split('T')[0],
     paid_date: getDueDate(issueDate5, 10).toISOString().split('T')[0],
     notes: 'Small business special rate applied.',
-    terms: 'Net 14. Thank you for supporting local businesses!'
+    metadata: {
+      items: items5,
+      subtotal: totals5.subtotal,
+      tax_rate: 7,
+      tax_amount: totals5.taxAmount,
+      discount: 0,
+      currency: 'USD',
+      terms: 'Net 14. Thank you for supporting local businesses!',
+      client_name: sampleClients[3].name,
+      client_email: sampleClients[3].email
+    }
   })
 
   // Invoice 6: Draft - New project for HealthTech
@@ -482,21 +489,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(5),
     client_id: sampleClients[4].id,
-    client_name: sampleClients[4].name,
-    client_email: sampleClients[4].email,
-    items: items6,
-    subtotal: totals6.subtotal,
-    tax_rate: 6.25,
-    tax_amount: totals6.taxAmount,
-    discount: 1500,
-    total: totals6.total,
-    currency: 'USD',
+    amount: totals6.total,
     status: 'draft',
-    issue_date: issueDate6.toISOString().split('T')[0],
     due_date: getDueDate(issueDate6, 45).toISOString().split('T')[0],
     paid_date: null,
     notes: 'Healthcare platform development - Phase 1',
-    terms: 'Net 45. Milestone payments accepted.'
+    metadata: {
+      items: items6,
+      subtotal: totals6.subtotal,
+      tax_rate: 6.25,
+      tax_amount: totals6.taxAmount,
+      discount: 1500,
+      currency: 'USD',
+      terms: 'Net 45. Milestone payments accepted.',
+      client_name: sampleClients[4].name,
+      client_email: sampleClients[4].email
+    }
   })
 
   // Invoice 7: Paid - Nonprofit discount
@@ -513,21 +521,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(6),
     client_id: sampleClients[5].id,
-    client_name: sampleClients[5].name,
-    client_email: sampleClients[5].email,
-    items: items7,
-    subtotal: totals7.subtotal,
-    tax_rate: 0,
-    tax_amount: totals7.taxAmount,
-    discount: 500,
-    total: totals7.total,
-    currency: 'USD',
+    amount: totals7.total,
     status: 'paid',
-    issue_date: issueDate7.toISOString().split('T')[0],
     due_date: getDueDate(issueDate7, 30).toISOString().split('T')[0],
     paid_date: getDueDate(issueDate7, 28).toISOString().split('T')[0],
     notes: '25% nonprofit discount applied. Tax exempt organization.',
-    terms: 'Net 30. Tax exempt - EIN provided.'
+    metadata: {
+      items: items7,
+      subtotal: totals7.subtotal,
+      tax_rate: 0,
+      tax_amount: totals7.taxAmount,
+      discount: 500,
+      currency: 'USD',
+      terms: 'Net 30. Tax exempt - EIN provided.',
+      client_name: sampleClients[5].name,
+      client_email: sampleClients[5].email
+    }
   })
 
   // Invoice 8: Sent - Monthly maintenance
@@ -542,21 +551,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(7),
     client_id: sampleClients[4].id,
-    client_name: sampleClients[4].name,
-    client_email: sampleClients[4].email,
-    items: items8,
-    subtotal: totals8.subtotal,
-    tax_rate: 6.25,
-    tax_amount: totals8.taxAmount,
-    discount: 0,
-    total: totals8.total,
-    currency: 'USD',
+    amount: totals8.total,
     status: 'sent',
-    issue_date: issueDate8.toISOString().split('T')[0],
     due_date: getDueDate(issueDate8, 15).toISOString().split('T')[0],
     paid_date: null,
     notes: 'January 2025 maintenance',
-    terms: 'Net 15. Recurring monthly invoice.'
+    metadata: {
+      items: items8,
+      subtotal: totals8.subtotal,
+      tax_rate: 6.25,
+      tax_amount: totals8.taxAmount,
+      discount: 0,
+      currency: 'USD',
+      terms: 'Net 15. Recurring monthly invoice.',
+      client_name: sampleClients[4].name,
+      client_email: sampleClients[4].email
+    }
   })
 
   // Invoice 9: Viewed - Large enterprise project
@@ -573,21 +583,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(8),
     client_id: sampleClients[2].id,
-    client_name: sampleClients[2].name,
-    client_email: sampleClients[2].email,
-    items: items9,
-    subtotal: totals9.subtotal,
-    tax_rate: 20,
-    tax_amount: totals9.taxAmount,
-    discount: 2000,
-    total: totals9.total,
-    currency: 'GBP',
+    amount: totals9.total,
     status: 'viewed',
-    issue_date: issueDate9.toISOString().split('T')[0],
     due_date: getDueDate(issueDate9, 60).toISOString().split('T')[0],
     paid_date: null,
     notes: 'Enterprise portal project - Milestone 1',
-    terms: 'Net 60. Purchase order required.'
+    metadata: {
+      items: items9,
+      subtotal: totals9.subtotal,
+      tax_rate: 20,
+      tax_amount: totals9.taxAmount,
+      discount: 2000,
+      currency: 'GBP',
+      terms: 'Net 60. Purchase order required.',
+      client_name: sampleClients[2].name,
+      client_email: sampleClients[2].email
+    }
   })
 
   // Invoice 10: Paid - Retainer for Design Agency
@@ -602,21 +613,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(9),
     client_id: sampleClients[1].id,
-    client_name: sampleClients[1].name,
-    client_email: sampleClients[1].email,
-    items: items10,
-    subtotal: totals10.subtotal,
-    tax_rate: 8.875,
-    tax_amount: totals10.taxAmount,
-    discount: 0,
-    total: totals10.total,
-    currency: 'USD',
+    amount: totals10.total,
     status: 'paid',
-    issue_date: issueDate10.toISOString().split('T')[0],
     due_date: getDueDate(issueDate10, 15).toISOString().split('T')[0],
     paid_date: getDueDate(issueDate10, 12).toISOString().split('T')[0],
     notes: 'December 2024 retainer + overage hours',
-    terms: 'Net 15. Monthly retainer agreement.'
+    metadata: {
+      items: items10,
+      subtotal: totals10.subtotal,
+      tax_rate: 8.875,
+      tax_amount: totals10.taxAmount,
+      discount: 0,
+      currency: 'USD',
+      terms: 'Net 15. Monthly retainer agreement.',
+      client_name: sampleClients[1].name,
+      client_email: sampleClients[1].email
+    }
   })
 
   // Invoice 11: Cancelled
@@ -631,21 +643,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(10),
     client_id: sampleClients[6].id,
-    client_name: sampleClients[6].name,
-    client_email: sampleClients[6].email,
-    items: items11,
-    subtotal: totals11.subtotal,
-    tax_rate: 19,
-    tax_amount: totals11.taxAmount,
-    discount: 0,
-    total: totals11.total,
-    currency: 'EUR',
+    amount: totals11.total,
     status: 'cancelled',
-    issue_date: issueDate11.toISOString().split('T')[0],
     due_date: getDueDate(issueDate11, 30).toISOString().split('T')[0],
     paid_date: null,
     notes: 'Project cancelled - scope change. See credit memo.',
-    terms: 'Net 30.'
+    metadata: {
+      items: items11,
+      subtotal: totals11.subtotal,
+      tax_rate: 19,
+      tax_amount: totals11.taxAmount,
+      discount: 0,
+      currency: 'EUR',
+      terms: 'Net 30.',
+      client_name: sampleClients[6].name,
+      client_email: sampleClients[6].email
+    }
   })
 
   // Invoice 12: Sent - Annual maintenance
@@ -661,21 +674,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(11),
     client_id: sampleClients[5].id,
-    client_name: sampleClients[5].name,
-    client_email: sampleClients[5].email,
-    items: items12,
-    subtotal: totals12.subtotal,
-    tax_rate: 0,
-    tax_amount: totals12.taxAmount,
-    discount: 0,
-    total: totals12.total,
-    currency: 'USD',
+    amount: totals12.total,
     status: 'sent',
-    issue_date: issueDate12.toISOString().split('T')[0],
     due_date: getDueDate(issueDate12, 30).toISOString().split('T')[0],
     paid_date: null,
     notes: '2025 Annual Maintenance - Nonprofit rate',
-    terms: 'Net 30. Annual payment preferred.'
+    metadata: {
+      items: items12,
+      subtotal: totals12.subtotal,
+      tax_rate: 0,
+      tax_amount: totals12.taxAmount,
+      discount: 0,
+      currency: 'USD',
+      terms: 'Net 30. Annual payment preferred.',
+      client_name: sampleClients[5].name,
+      client_email: sampleClients[5].email
+    }
   })
 
   // Invoice 13: Paid - Past project for churned client
@@ -691,21 +705,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(12),
     client_id: sampleClients[7].id,
-    client_name: sampleClients[7].name,
-    client_email: sampleClients[7].email,
-    items: items13,
-    subtotal: totals13.subtotal,
-    tax_rate: 10.25,
-    tax_amount: totals13.taxAmount,
-    discount: 0,
-    total: totals13.total,
-    currency: 'USD',
+    amount: totals13.total,
     status: 'paid',
-    issue_date: issueDate13.toISOString().split('T')[0],
     due_date: getDueDate(issueDate13, 30).toISOString().split('T')[0],
     paid_date: getDueDate(issueDate13, 35).toISOString().split('T')[0],
     notes: 'Legal website project complete.',
-    terms: 'Net 30.'
+    metadata: {
+      items: items13,
+      subtotal: totals13.subtotal,
+      tax_rate: 10.25,
+      tax_amount: totals13.taxAmount,
+      discount: 0,
+      currency: 'USD',
+      terms: 'Net 30.',
+      client_name: sampleClients[7].name,
+      client_email: sampleClients[7].email
+    }
   })
 
   // Invoice 14: Overdue - Follow up needed
@@ -720,21 +735,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(13),
     client_id: sampleClients[0].id,
-    client_name: sampleClients[0].name,
-    client_email: sampleClients[0].email,
-    items: items14,
-    subtotal: totals14.subtotal,
-    tax_rate: 8.5,
-    tax_amount: totals14.taxAmount,
-    discount: 0,
-    total: totals14.total,
-    currency: 'USD',
+    amount: totals14.total,
     status: 'overdue',
-    issue_date: issueDate14.toISOString().split('T')[0],
     due_date: getDueDate(issueDate14, 30).toISOString().split('T')[0],
     paid_date: null,
     notes: 'Additional work per change request #CR-2024-015',
-    terms: 'Net 30. OVERDUE - Please remit payment.'
+    metadata: {
+      items: items14,
+      subtotal: totals14.subtotal,
+      tax_rate: 8.5,
+      tax_amount: totals14.taxAmount,
+      discount: 0,
+      currency: 'USD',
+      terms: 'Net 30. OVERDUE - Please remit payment.',
+      client_name: sampleClients[0].name,
+      client_email: sampleClients[0].email
+    }
   })
 
   // Invoice 15: Draft - New quote
@@ -751,21 +767,22 @@ function generateInvoices(): Invoice[] {
     user_id: DEMO_USER_ID,
     invoice_number: generateInvoiceNumber(14),
     client_id: sampleClients[0].id,
-    client_name: sampleClients[0].name,
-    client_email: sampleClients[0].email,
-    items: items15,
-    subtotal: totals15.subtotal,
-    tax_rate: 8.5,
-    tax_amount: totals15.taxAmount,
-    discount: 0,
-    total: totals15.total,
-    currency: 'USD',
+    amount: totals15.total,
     status: 'draft',
-    issue_date: issueDate15.toISOString().split('T')[0],
     due_date: getDueDate(issueDate15, 30).toISOString().split('T')[0],
     paid_date: null,
     notes: 'E-commerce platform proposal - awaiting approval',
-    terms: 'Net 30. 50% deposit required to begin.'
+    metadata: {
+      items: items15,
+      subtotal: totals15.subtotal,
+      tax_rate: 8.5,
+      tax_amount: totals15.taxAmount,
+      discount: 0,
+      currency: 'USD',
+      terms: 'Net 30. 50% deposit required to begin.',
+      client_name: sampleClients[0].name,
+      client_email: sampleClients[0].email
+    }
   })
 
   return invoices
@@ -796,19 +813,19 @@ function generatePayments(invoices: Invoice[]): Payment[] {
 
     let processingFee = 0
     if (method === 'credit_card' || method === 'stripe') {
-      processingFee = Math.round(invoice.total * 0.029 * 100) / 100 + 0.30
+      processingFee = Math.round(invoice.amount * 0.029 * 100) / 100 + 0.30
     } else if (method === 'paypal') {
-      processingFee = Math.round(invoice.total * 0.0349 * 100) / 100 + 0.49
+      processingFee = Math.round(invoice.amount * 0.0349 * 100) / 100 + 0.49
     }
 
-    const netAmount = Math.round((invoice.total - processingFee) * 100) / 100
+    const netAmount = Math.round((invoice.amount - processingFee) * 100) / 100
 
     payments.push({
       id: `30000000-0000-0000-0000-00000000000${index + 1}`,
       invoice_id: invoice.id,
       user_id: DEMO_USER_ID,
-      amount: invoice.total,
-      currency: invoice.currency,
+      amount: invoice.amount,
+      currency: invoice.metadata.currency,
       method: method,
       status: 'completed',
       transaction_id: `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
@@ -892,9 +909,11 @@ async function seedData() {
       console.log('')
     }
 
-    // Insert Clients
+    // Insert Clients - try full schema first, then fall back to minimal
     console.log('Inserting clients...')
-    const clientsToInsert = sampleClients.map(client => ({
+
+    // First try with full schema (as defined in 20251126_clients_system.sql)
+    const fullClientData = sampleClients.map(client => ({
       id: client.id,
       user_id: client.user_id,
       name: client.name,
@@ -917,56 +936,143 @@ async function seedData() {
       notes: client.notes
     }))
 
-    const { data: insertedClients, error: clientError } = await supabase
+    // Try full schema insert first
+    let clientsInserted = false
+    const { data: fullInsertResult, error: fullInsertError } = await supabase
       .from('clients')
-      .insert(clientsToInsert)
+      .insert(fullClientData)
       .select()
 
-    if (clientError) {
-      console.error('Error inserting clients:', clientError)
-      throw clientError
+    if (!fullInsertError && fullInsertResult) {
+      console.log(`Inserted ${fullInsertResult.length} clients (full schema)`)
+      clientsInserted = true
+    } else {
+      console.log('Full schema insert failed, trying minimal schema...')
+      console.log('Error:', fullInsertError?.message)
+
+      // Fall back to minimal schema (id, user_id, name, email, phone, company, address, notes)
+      const minimalClientData = sampleClients.map(client => ({
+        id: client.id,
+        user_id: client.user_id,
+        name: client.name,
+        email: client.email,
+        phone: client.phone,
+        company: client.company,
+        address: `${client.address}, ${client.city}, ${client.state} ${client.postal_code}, ${client.country}`,
+        notes: `${client.notes}\n\nPosition: ${client.position}\nStatus: ${client.status}\nType: ${client.type}\nPriority: ${client.priority}\nIndustry: ${client.industry}\nWebsite: ${client.website}\nTimezone: ${client.timezone}\nTags: ${client.tags.join(', ')}`
+      }))
+
+      const { data: minimalInsertResult, error: minimalInsertError } = await supabase
+        .from('clients')
+        .insert(minimalClientData)
+        .select()
+
+      if (minimalInsertError) {
+        console.error('Error inserting clients (minimal):', minimalInsertError)
+        throw minimalInsertError
+      }
+
+      console.log(`Inserted ${minimalInsertResult?.length || 0} clients (minimal schema)`)
+      clientsInserted = true
     }
 
-    console.log(`Inserted ${insertedClients?.length || 0} clients`)
+    if (!clientsInserted) {
+      throw new Error('Failed to insert clients with both schema versions')
+    }
 
     // Generate and Insert Invoices
     console.log('')
     console.log('Generating invoices...')
     const invoices = generateInvoices()
 
-    const invoicesToInsert = invoices.map(invoice => ({
+    // Try multiple schema versions for invoices
+    let invoicesInserted = false
+
+    // Version 1: Full schema from invoicing_minimal.sql (with user_id, client_email, items, etc.)
+    const fullInvoiceData = invoices.map(invoice => ({
       id: invoice.id,
       user_id: invoice.user_id,
       invoice_number: invoice.invoice_number,
       client_id: invoice.client_id,
-      client_name: invoice.client_name,
-      client_email: invoice.client_email,
-      items: invoice.items,
-      subtotal: invoice.subtotal,
-      tax_rate: invoice.tax_rate,
-      tax_amount: invoice.tax_amount,
-      discount: invoice.discount,
-      total: invoice.total,
-      currency: invoice.currency,
+      client_name: invoice.metadata.client_name,
+      client_email: invoice.metadata.client_email,
+      items: invoice.metadata.items,
+      subtotal: invoice.metadata.subtotal,
+      tax_rate: invoice.metadata.tax_rate,
+      tax_amount: invoice.metadata.tax_amount,
+      discount: invoice.metadata.discount,
+      total: invoice.amount,
+      currency: invoice.metadata.currency,
       status: invoice.status,
-      issue_date: invoice.issue_date,
       due_date: invoice.due_date,
       paid_date: invoice.paid_date,
       notes: invoice.notes,
-      terms: invoice.terms
+      terms: invoice.metadata.terms
     }))
 
-    const { data: insertedInvoices, error: invoiceError } = await supabase
+    const { data: fullInvoiceResult, error: fullInvoiceError } = await supabase
       .from('invoices')
-      .insert(invoicesToInsert)
+      .insert(fullInvoiceData)
       .select()
 
-    if (invoiceError) {
-      console.error('Error inserting invoices:', invoiceError)
-      throw invoiceError
-    }
+    if (!fullInvoiceError && fullInvoiceResult) {
+      console.log(`Inserted ${fullInvoiceResult.length} invoices (full schema)`)
+      invoicesInserted = true
+    } else {
+      console.log('Full schema insert failed, trying minimal schema...')
+      console.log('Error:', fullInvoiceError?.message)
 
-    console.log(`Inserted ${insertedInvoices?.length || 0} invoices`)
+      // Version 2: Minimal schema from init_schema.sql
+      const minimalInvoiceData = invoices.map(invoice => ({
+        id: invoice.id,
+        user_id: invoice.user_id,
+        invoice_number: invoice.invoice_number,
+        client_id: invoice.client_id,
+        amount: invoice.amount,
+        status: invoice.status,
+        due_date: invoice.due_date,
+        paid_date: invoice.paid_date,
+        notes: `${invoice.notes}\n\nCurrency: ${invoice.metadata.currency}\nSubtotal: ${invoice.metadata.subtotal}\nTax: ${invoice.metadata.tax_amount} (${invoice.metadata.tax_rate}%)\nDiscount: ${invoice.metadata.discount}\n\n${invoice.metadata.terms}`
+      }))
+
+      const { data: minimalInvoiceResult, error: minimalInvoiceError } = await supabase
+        .from('invoices')
+        .insert(minimalInvoiceData)
+        .select()
+
+      if (!minimalInvoiceError && minimalInvoiceResult) {
+        console.log(`Inserted ${minimalInvoiceResult.length} invoices (minimal schema)`)
+        invoicesInserted = true
+      } else {
+        console.log('Minimal schema also failed, trying without user_id...')
+        console.log('Error:', minimalInvoiceError?.message)
+
+        // Version 3: Without user_id (in case table doesn't have it)
+        const noUserIdData = invoices.map(invoice => ({
+          id: invoice.id,
+          invoice_number: invoice.invoice_number,
+          client_id: invoice.client_id,
+          amount: invoice.amount,
+          status: invoice.status,
+          due_date: invoice.due_date,
+          paid_date: invoice.paid_date,
+          notes: invoice.notes
+        }))
+
+        const { data: noUserIdResult, error: noUserIdError } = await supabase
+          .from('invoices')
+          .insert(noUserIdData)
+          .select()
+
+        if (!noUserIdError && noUserIdResult) {
+          console.log(`Inserted ${noUserIdResult.length} invoices (no user_id schema)`)
+          invoicesInserted = true
+        } else {
+          console.error('Error inserting invoices (all schemas failed):', noUserIdError)
+          console.log('Warning: Could not insert invoices. Continuing with other data...')
+        }
+      }
+    }
 
     // Generate and Insert Payments
     console.log('')
@@ -1027,13 +1133,13 @@ async function seedData() {
 
     const totalRevenue = invoices
       .filter(i => i.status === 'paid')
-      .reduce((sum, i) => sum + i.total, 0)
+      .reduce((sum, i) => sum + i.amount, 0)
     const pendingAmount = invoices
       .filter(i => ['sent', 'viewed'].includes(i.status))
-      .reduce((sum, i) => sum + i.total, 0)
+      .reduce((sum, i) => sum + i.amount, 0)
     const overdueAmount = invoices
       .filter(i => i.status === 'overdue')
-      .reduce((sum, i) => sum + i.total, 0)
+      .reduce((sum, i) => sum + i.amount, 0)
 
     console.log('Financial Summary:')
     console.log(`  - Total Revenue (Paid): $${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`)

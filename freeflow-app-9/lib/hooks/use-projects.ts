@@ -122,13 +122,15 @@ export function useProjects(initialProjects: Project[] = []) {
       }))
 
       setProjects(mappedProjects)
+      setError(null)
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error'
       setError(message)
+      console.error('Failed to fetch projects:', err)
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, []) // Removed supabase dependency to prevent re-render loops
 
   const createProject = async (project: Partial<Project>) => {
     try {
