@@ -138,9 +138,9 @@ interface Policy {
 // MIGRATED: Batch #7 - Main compliance data now comes from Supabase via useCompliance hook
 // Quick actions config for toolbar
 const complianceQuickActionsBase = [
-  { icon: Plus, label: 'New Control', color: 'bg-emerald-100 text-emerald-600' },
-  { icon: ClipboardCheck, label: 'Assess', color: 'bg-blue-100 text-blue-600' },
-  { icon: FileText, label: 'Report', color: 'bg-purple-100 text-purple-600' },
+  { icon: <Plus className="h-4 w-4" />, label: 'New Control', color: 'bg-emerald-100 text-emerald-600' },
+  { icon: <ClipboardCheck className="h-4 w-4" />, label: 'Assess', color: 'bg-blue-100 text-blue-600' },
+  { icon: <FileText className="h-4 w-4" />, label: 'Report', color: 'bg-purple-100 text-purple-600' },
 ]
 // Placeholder arrays for competitive upgrade components (empty until AI/collaboration features are implemented)
 const complianceAIInsights: any[] = []

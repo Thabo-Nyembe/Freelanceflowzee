@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { useSession } from 'next-auth/react'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -322,10 +323,93 @@ const defaultDeploymentForm = {
 export default function DeploymentsClient() {
   const router = useRouter()
 
+  // Demo mode detection
+  const { data: nextAuthSession, status: sessionStatus } = useSession()
+  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const isSessionLoading = sessionStatus === 'loading'
+
+  // Demo deployments data
+  const demoDeployments: DbDeployment[] = useMemo(() => [
+    {
+      id: 'demo-deploy-1',
+      user_id: 'demo-user',
+      deployment_name: 'Production Release v2.4.1',
+      version: 'v2.4.1',
+      environment: 'production',
+      status: 'success',
+      branch: 'main',
+      commit_hash: 'a1b2c3d',
+      commit_message: 'Release v2.4.1 - Performance improvements',
+      commit_author: 'Alex Johnson',
+      deploy_type: 'full',
+      started_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+      completed_at: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+      duration_seconds: 300,
+      can_rollback: true,
+      tags: ['release', 'production']
+    },
+    {
+      id: 'demo-deploy-2',
+      user_id: 'demo-user',
+      deployment_name: 'Staging Hotfix',
+      version: 'v2.4.0-hotfix.1',
+      environment: 'staging',
+      status: 'in_progress',
+      branch: 'hotfix/auth-fix',
+      commit_hash: 'e5f6g7h',
+      commit_message: 'Fix authentication timeout issue',
+      commit_author: 'Sarah Chen',
+      deploy_type: 'hotfix',
+      started_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+      duration_seconds: 0,
+      can_rollback: false,
+      tags: ['hotfix', 'staging']
+    },
+    {
+      id: 'demo-deploy-3',
+      user_id: 'demo-user',
+      deployment_name: 'Dev Environment Update',
+      version: 'v2.5.0-dev',
+      environment: 'development',
+      status: 'success',
+      branch: 'develop',
+      commit_hash: 'i8j9k0l',
+      commit_message: 'Add new dashboard features',
+      commit_author: 'Mike Johnson',
+      deploy_type: 'incremental',
+      started_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+      completed_at: new Date(Date.now() - 1000 * 60 * 60 * 2 + 180000).toISOString(),
+      duration_seconds: 180,
+      can_rollback: true,
+      tags: ['development', 'features']
+    },
+    {
+      id: 'demo-deploy-4',
+      user_id: 'demo-user',
+      deployment_name: 'Production Rollback',
+      version: 'v2.3.9',
+      environment: 'production',
+      status: 'rolled_back',
+      branch: 'main',
+      commit_hash: 'm1n2o3p',
+      commit_message: 'Emergency rollback due to API issues',
+      commit_author: 'Alex Johnson',
+      deploy_type: 'rollback',
+      started_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+      completed_at: new Date(Date.now() - 1000 * 60 * 60 * 24 + 120000).toISOString(),
+      duration_seconds: 120,
+      can_rollback: false,
+      error_message: 'API rate limiting issues detected',
+      tags: ['rollback', 'emergency']
+    }
+  ], [])
+
   // Use the deployments hook for data fetching and mutations
   const {
-    deployments: dbDeployments,
-    loading,
+    deployments: hookDeployments,
+    loading: hookLoading,
     error: deploymentsError,
     refetch: fetchDeployments,
     mutationLoading: isSubmitting,
@@ -340,16 +424,20 @@ export default function DeploymentsClient() {
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
 
+  // Use demo data for demo accounts
+  const dbDeployments = isDemoAccount ? demoDeployments : (hookDeployments || [])
+  const loading = isSessionLoading || (isDemoAccount ? false : hookLoading)
+
   const [deploymentForm, setDeploymentForm] = useState(defaultDeploymentForm)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [selectedDbDeployment, setSelectedDbDeployment] = useState<DbDeployment | null>(null)
 
-  // Show error toast if there's an error loading deployments
+  // Show error toast if there's an error loading deployments (skip for demo)
   useEffect(() => {
-    if (deploymentsError) {
+    if (deploymentsError && !isDemoAccount) {
       toast.error('Failed to load deployments')
     }
-  }, [deploymentsError])
+  }, [deploymentsError, isDemoAccount])
 
   // Create deployment
   const handleCreateDeployment = async () => {
@@ -1078,10 +1166,11 @@ export default function DeploymentsClient() {
 
   const groupedLogs = useMemo(() => {
     const groups: Record<string, BuildLog[]> = {}
-    (realTimeLogs || []).forEach(log => {
+    const logsArray = Array.isArray(realTimeLogs) ? realTimeLogs : []
+    for (const log of logsArray) {
       if (!groups[log.step]) groups[log.step] = []
       groups[log.step].push(log)
-    })
+    }
     return groups
   }, [realTimeLogs])
 
@@ -1090,7 +1179,7 @@ export default function DeploymentsClient() {
     {
       id: '1',
       label: 'Deploy Now',
-      icon: 'rocket',
+      icon: <Rocket className="h-4 w-4" />,
       action: async () => {
         setShowCreateDialog(true)
         toast.success('Ready to Deploy')
@@ -1100,7 +1189,7 @@ export default function DeploymentsClient() {
     {
       id: '2',
       label: 'Rollback',
-      icon: 'undo',
+      icon: <RotateCcw className="h-4 w-4" />,
       action: async () => {
         const lastDeployment = dbDeployments.find(d => d.status === 'success' && d.can_rollback)
         if (lastDeployment) {
@@ -1115,7 +1204,7 @@ export default function DeploymentsClient() {
     {
       id: '3',
       label: 'View Logs',
-      icon: 'file-text',
+      icon: <FileText className="h-4 w-4" />,
       action: () => {
         setActiveTab('logs')
         toast.success('Logs Opened')

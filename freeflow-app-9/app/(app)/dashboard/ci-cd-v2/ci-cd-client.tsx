@@ -730,11 +730,11 @@ export default function CiCdClient() {
 
   // Quick actions for the QuickActionsToolbar component
   const quickActions = [
-    { id: '1', label: 'Run Pipeline', icon: Play, onClick: () => setShowCreateDialog(true), variant: 'default' as const },
-    { id: '2', label: 'View Runs', icon: Activity, onClick: () => setActiveTab('runs'), variant: 'outline' as const },
-    { id: '3', label: 'Environments', icon: Globe, onClick: () => setActiveTab('environments'), variant: 'outline' as const },
-    { id: '4', label: 'Settings', icon: Settings, onClick: () => setActiveTab('settings'), variant: 'outline' as const },
-    { id: '5', label: 'Export Logs', icon: Download, onClick: () => {
+    { id: '1', label: 'Run Pipeline', icon: <Play className="h-4 w-4" />, action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'View Runs', icon: <Activity className="h-4 w-4" />, action: () => setActiveTab('runs'), variant: 'outline' as const },
+    { id: '3', label: 'Environments', icon: <Globe className="h-4 w-4" />, action: () => setActiveTab('environments'), variant: 'outline' as const },
+    { id: '4', label: 'Settings', icon: <Settings className="h-4 w-4" />, action: () => setActiveTab('settings'), variant: 'outline' as const },
+    { id: '5', label: 'Export Logs', icon: <Download className="h-4 w-4" />, action: () => {
       const logsData = runs.map(run => ({
         runNumber: run.runNumber,
         workflow: workflows.find(w => w.id === run.workflowId)?.name || 'Unknown',
@@ -743,7 +743,7 @@ export default function CiCdClient() {
       }))
       downloadAsJson(logsData, `ci-cd-logs-${new Date().toISOString().split('T')[0]}.json`)
     }, variant: 'outline' as const },
-    { id: '6', label: 'Refresh', icon: RefreshCw, onClick: () => { refetch(); toast.success('Data refreshed') }, variant: 'outline' as const },
+    { id: '6', label: 'Refresh', icon: <RefreshCw className="h-4 w-4" />, action: () => { refetch(); toast.success('Data refreshed') }, variant: 'outline' as const },
   ]
 
   return (

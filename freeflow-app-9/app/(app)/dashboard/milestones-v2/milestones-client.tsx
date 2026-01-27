@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useMilestones, useMilestoneMutations, type Milestone as HookMilestone, type MilestoneFilters } from '@/lib/hooks/use-milestones'
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+import { useSession } from 'next-auth/react'
 
 const supabase = createClient()
 
@@ -338,6 +339,190 @@ const initialFormState: MilestoneFormState = {
 }
 
 export default function MilestonesClient() {
+  // Demo mode detection
+  const { data: nextAuthSession, status: sessionStatus } = useSession()
+  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+
+  // Demo team members for milestones (memoized to prevent infinite re-renders)
+  const demoTeamMembers: TeamMember[] = useMemo(() => [
+    { id: 'tm-1', name: 'Alex Johnson', avatar: '', role: 'Lead', email: 'alex@example.com', workload: 80, tasks_assigned: 12, tasks_completed: 9 },
+    { id: 'tm-2', name: 'Sarah Chen', avatar: '', role: 'Developer', email: 'sarah@example.com', workload: 70, tasks_assigned: 8, tasks_completed: 6 },
+    { id: 'tm-3', name: 'Mike Rodriguez', avatar: '', role: 'Designer', email: 'mike@example.com', workload: 60, tasks_assigned: 6, tasks_completed: 5 },
+    { id: 'tm-4', name: 'David Lee', avatar: '', role: 'Developer', email: 'david@example.com', workload: 75, tasks_assigned: 10, tasks_completed: 7 },
+    { id: 'tm-5', name: 'Jennifer Smith', avatar: '', role: 'QA', email: 'jennifer@example.com', workload: 65, tasks_assigned: 8, tasks_completed: 8 },
+  ], [])
+
+  // Demo milestones data (includes both HookMilestone and local Milestone properties for compatibility)
+  const demoMilestones = useMemo(() => [
+    {
+      id: 'demo-milestone-1',
+      user_id: 'demo-user',
+      title: 'Platform V2.0 Launch',
+      name: 'Platform V2.0 Launch',
+      description: 'Complete redesign and launch of the platform with new features',
+      status: 'in_progress',
+      priority: 'critical',
+      milestone_type: 'release',
+      type: 'release',
+      start_date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(),
+      target_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString(),
+      due_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString(),
+      progress_percentage: 75,
+      progress: 75,
+      health_status: 'on_track',
+      health: 'on_track',
+      dependencies: [],
+      dependencies_in: [],
+      dependencies_out: [],
+      deliverables_count: 12,
+      deliverables: [],
+      completed_deliverables: 9,
+      budget_allocated: 150000,
+      budget_spent: 98000,
+      budget: { total: 150000, spent: 98000, forecast: 145000, currency: 'USD', items: [] },
+      spent: 98000,
+      team_members: ['Alex Johnson', 'Sarah Chen', 'Mike Rodriguez'],
+      team: demoTeamMembers.slice(0, 3),
+      team_name: 'Platform Team',
+      owner: demoTeamMembers[0],
+      tags: ['release', 'major', 'q1'],
+      notes: 'On track for Q1 release',
+      days_remaining: 14,
+      status_updates: [],
+      risks: [],
+      watchers: 12,
+      comments: 8,
+      created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 45).toISOString(),
+      updated_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString()
+    },
+    {
+      id: 'demo-milestone-2',
+      user_id: 'demo-user',
+      title: 'Mobile App Beta',
+      name: 'Mobile App Beta',
+      description: 'Beta release of iOS and Android mobile applications',
+      status: 'at_risk',
+      priority: 'high',
+      milestone_type: 'release',
+      type: 'release',
+      start_date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 20).toISOString(),
+      target_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
+      due_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
+      progress_percentage: 45,
+      progress: 45,
+      health_status: 'at_risk',
+      health: 'at_risk',
+      dependencies: ['demo-milestone-1'],
+      dependencies_in: [],
+      dependencies_out: [],
+      deliverables_count: 8,
+      deliverables: [],
+      completed_deliverables: 3,
+      budget_allocated: 80000,
+      budget_spent: 42000,
+      budget: { total: 80000, spent: 42000, forecast: 85000, currency: 'USD', items: [] },
+      spent: 42000,
+      team_members: ['David Lee', 'Jennifer Smith'],
+      team: demoTeamMembers.slice(3, 5),
+      team_name: 'Mobile Team',
+      owner: demoTeamMembers[3],
+      tags: ['mobile', 'beta', 'ios', 'android'],
+      notes: 'Waiting on API completion from Platform V2.0',
+      days_remaining: 30,
+      status_updates: [],
+      risks: [{ id: 'r1', title: 'API dependency', severity: 'high', probability: 'medium', impact: 'Schedule delay', mitigation: 'Prioritize API development', status: 'active', owner: demoTeamMembers[3], created_at: '', updated_at: '' }],
+      watchers: 8,
+      comments: 5,
+      created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 25).toISOString(),
+      updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString()
+    },
+    {
+      id: 'demo-milestone-3',
+      user_id: 'demo-user',
+      title: 'Security Compliance Audit',
+      name: 'Security Compliance Audit',
+      description: 'SOC2 Type II compliance certification',
+      status: 'completed',
+      priority: 'critical',
+      milestone_type: 'compliance',
+      type: 'checkpoint',
+      start_date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 90).toISOString(),
+      target_date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
+      due_date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
+      completed_date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString(),
+      progress_percentage: 100,
+      progress: 100,
+      health_status: 'on_track',
+      health: 'on_track',
+      dependencies: [],
+      dependencies_in: [],
+      dependencies_out: [],
+      deliverables_count: 15,
+      deliverables: [],
+      completed_deliverables: 15,
+      budget_allocated: 50000,
+      budget_spent: 47500,
+      budget: { total: 50000, spent: 47500, forecast: 47500, currency: 'USD', items: [] },
+      spent: 47500,
+      team_members: ['Alex Johnson'],
+      team: [demoTeamMembers[0]],
+      team_name: 'Security Team',
+      owner: demoTeamMembers[0],
+      tags: ['security', 'compliance', 'soc2'],
+      notes: 'Successfully completed SOC2 certification',
+      days_remaining: 0,
+      status_updates: [],
+      risks: [],
+      watchers: 15,
+      comments: 12,
+      created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 95).toISOString(),
+      updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString()
+    },
+    {
+      id: 'demo-milestone-4',
+      user_id: 'demo-user',
+      title: 'Data Analytics Platform',
+      name: 'Data Analytics Platform',
+      description: 'Build comprehensive analytics and reporting dashboard',
+      status: 'not_started',
+      priority: 'medium',
+      milestone_type: 'feature',
+      type: 'project',
+      start_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
+      target_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60).toISOString(),
+      due_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60).toISOString(),
+      progress_percentage: 0,
+      progress: 0,
+      health_status: 'on_track',
+      health: 'on_track',
+      dependencies: ['demo-milestone-1'],
+      dependencies_in: [],
+      dependencies_out: [],
+      deliverables_count: 10,
+      deliverables: [],
+      completed_deliverables: 0,
+      budget_allocated: 120000,
+      budget_spent: 0,
+      budget: { total: 120000, spent: 0, forecast: 120000, currency: 'USD', items: [] },
+      spent: 0,
+      team_members: ['Sarah Chen'],
+      team: [demoTeamMembers[1]],
+      team_name: 'Data Team',
+      owner: demoTeamMembers[1],
+      tags: ['analytics', 'reporting', 'q2'],
+      notes: 'Scheduled to start after Platform V2.0 launch',
+      days_remaining: 60,
+      status_updates: [],
+      risks: [],
+      watchers: 6,
+      comments: 3,
+      created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+      updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString()
+    }
+  ] as any[], [demoTeamMembers])
+
   // Team and activity data hooks
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
@@ -358,8 +543,12 @@ export default function MilestonesClient() {
   }), [statusFilter, priorityFilter])
 
   // Use Supabase hook for milestones data
-  const { milestones: hookMilestones, stats: hookStats, isLoading, error: hookError, refetch } = useMilestones([], hookFilters)
+  const { milestones: hookMilestones, stats: hookStats, isLoading: hookLoading, error: hookError, refetch } = useMilestones([], hookFilters)
   const { createMilestone, updateMilestone, deleteMilestone, isCreating, isUpdating, isDeleting } = useMilestoneMutations()
+
+  // Use demo data for demo accounts
+  const milestones = isDemoAccount ? demoMilestones : (hookMilestones || [])
+  const isLoading = sessionStatus === 'loading' || (!isDemoAccount && hookLoading)
 
   // Supabase data state (kept for backward compatibility)
   const [dbMilestones, setDbMilestones] = useState<DbMilestone[]>([])
@@ -441,10 +630,10 @@ export default function MilestonesClient() {
 
   // Sync dbMilestones with hook data for backward compatibility
   useEffect(() => {
-    if (hookMilestones) {
-      setDbMilestones(hookMilestones as unknown as DbMilestone[])
+    if (milestones) {
+      setDbMilestones(milestones as unknown as DbMilestone[])
     }
-  }, [hookMilestones])
+  }, [milestones])
 
   // Fetch milestones using hook refetch
   const fetchMilestones = useCallback(async () => {
@@ -1031,21 +1220,21 @@ export default function MilestonesClient() {
   // Calculate stats from hook data
   const stats = useMemo(() => {
     // Use hook stats as primary source
-    const total = hookStats?.total || hookMilestones.length
-    const completed = hookStats?.completed || hookMilestones.filter(m => m.status === 'completed').length
-    const inProgress = hookStats?.inProgress || hookMilestones.filter(m => m.status === 'in-progress').length
-    const atRisk = hookStats?.atRisk || hookMilestones.filter(m => m.status === 'at-risk').length
+    const total = hookStats?.total || milestones.length
+    const completed = hookStats?.completed || milestones.filter(m => m.status === 'completed').length
+    const inProgress = hookStats?.inProgress || milestones.filter(m => m.status === 'in-progress').length
+    const atRisk = hookStats?.atRisk || milestones.filter(m => m.status === 'at-risk').length
 
     // Extended stats calculated from real data
-    const onTrack = hookMilestones.filter(m => m.status === 'in-progress' && m.days_remaining > 7).length
-    const criticalPath = hookMilestones.filter(m => m.priority === 'critical').length
-    const totalBudget = hookMilestones.reduce((sum, m) => sum + (m.budget || 0), 0)
-    const spentBudget = hookMilestones.reduce((sum, m) => sum + (m.spent || 0), 0)
-    const avgProgress = hookStats?.avgProgress || (total > 0 ? hookMilestones.reduce((sum, m) => sum + m.progress, 0) / total : 0)
-    const totalDeliverables = hookMilestones.reduce((sum, m) => sum + (m.deliverables || 0), 0)
-    const completedDeliverables = hookMilestones.reduce((sum, m) => sum + (m.completed_deliverables || 0), 0)
-    const totalRisks = hookMilestones.filter(m => m.status === 'at-risk').length
-    const upcomingDeadlines = hookMilestones.filter(m => {
+    const onTrack = milestones.filter(m => m.status === 'in-progress' && m.days_remaining > 7).length
+    const criticalPath = milestones.filter(m => m.priority === 'critical').length
+    const totalBudget = milestones.reduce((sum, m) => sum + (m.budget || 0), 0)
+    const spentBudget = milestones.reduce((sum, m) => sum + (m.spent || 0), 0)
+    const avgProgress = hookStats?.avgProgress || (total > 0 ? milestones.reduce((sum, m) => sum + m.progress, 0) / total : 0)
+    const totalDeliverables = milestones.reduce((sum, m) => sum + (m.deliverables || 0), 0)
+    const completedDeliverables = milestones.reduce((sum, m) => sum + (m.completed_deliverables || 0), 0)
+    const totalRisks = milestones.filter(m => m.status === 'at-risk').length
+    const upcomingDeadlines = milestones.filter(m => {
       if (!m.due_date) return false
       const days = getDaysRemaining(m.due_date)
       return days > 0 && days <= 14
@@ -1059,19 +1248,19 @@ export default function MilestonesClient() {
       budgetUtilization: totalBudget > 0 ? Math.round((spentBudget / totalBudget) * 100) : 0,
       deliverableRate: totalDeliverables > 0 ? Math.round((completedDeliverables / totalDeliverables) * 100) : 0,
     }
-  }, [hookStats, hookMilestones])
+  }, [hookStats, milestones])
 
   // Filter milestones - use hook data with search filter (status/priority already applied via hook)
   const filteredMilestones = useMemo(() => {
     // Filter hook data by search only (status/priority already filtered by hook)
-    return hookMilestones.filter(milestone => {
+    return milestones.filter(milestone => {
       const matchesSearch = searchQuery === '' ||
         (milestone.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (milestone.team_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (milestone.description || '').toLowerCase().includes(searchQuery.toLowerCase())
       return matchesSearch
     })
-  }, [searchQuery, hookMilestones])
+  }, [searchQuery, milestones])
 
   // Get all dependencies for visualization (empty array until DB supports dependencies)
   const allDependencies = useMemo(() => {
@@ -1084,7 +1273,7 @@ export default function MilestonesClient() {
   const handleExportTimeline = async () => {
     try {
       const timelineData = {
-        milestones: hookMilestones.map(m => ({
+        milestones: milestones.map(m => ({
           id: m.id,
           name: m.name,
           status: m.status,
@@ -1128,18 +1317,18 @@ export default function MilestonesClient() {
 
   // Quick actions for the toolbar (functional, not mock data)
   const milestonesQuickActions = [
-    { id: '1', label: 'New Milestone', icon: Plus, action: () => setShowCreateDialog(true), variant: 'primary' as const },
-    { id: '2', label: 'Add Deliverable', icon: Package, action: () => setShowDeliverableDialog(true), variant: 'secondary' as const },
-    { id: '3', label: 'Add Dependency', icon: Link2, action: () => setShowDependencyDialog(true), variant: 'secondary' as const },
-    { id: '4', label: 'Risk Analysis', icon: AlertTriangle, action: () => setShowRiskAnalysisDialog(true), variant: 'secondary' as const },
-    { id: '5', label: 'Export Data', icon: Download, action: () => setShowExportDialog(true), variant: 'secondary' as const },
-    { id: '6', label: 'Filters', icon: Sliders, action: () => setShowFilterDialog(true), variant: 'secondary' as const },
-    { id: '7', label: 'Settings', icon: Settings, action: () => setShowSettingsDialog(true), variant: 'secondary' as const },
-    { id: '8', label: 'Refresh', icon: RefreshCw, action: handleSync, variant: 'secondary' as const },
+    { id: '1', label: 'New Milestone', icon: <Plus className="h-4 w-4" />, action: () => setShowCreateDialog(true), variant: 'primary' as const },
+    { id: '2', label: 'Add Deliverable', icon: <Package className="h-4 w-4" />, action: () => setShowDeliverableDialog(true), variant: 'secondary' as const },
+    { id: '3', label: 'Add Dependency', icon: <Link2 className="h-4 w-4" />, action: () => setShowDependencyDialog(true), variant: 'secondary' as const },
+    { id: '4', label: 'Risk Analysis', icon: <AlertTriangle className="h-4 w-4" />, action: () => setShowRiskAnalysisDialog(true), variant: 'secondary' as const },
+    { id: '5', label: 'Export Data', icon: <Download className="h-4 w-4" />, action: () => setShowExportDialog(true), variant: 'secondary' as const },
+    { id: '6', label: 'Filters', icon: <Sliders className="h-4 w-4" />, action: () => setShowFilterDialog(true), variant: 'secondary' as const },
+    { id: '7', label: 'Settings', icon: <Settings className="h-4 w-4" />, action: () => setShowSettingsDialog(true), variant: 'secondary' as const },
+    { id: '8', label: 'Refresh', icon: <RefreshCw className="h-4 w-4" />, action: handleSync, variant: 'secondary' as const },
   ]
 
-  // Show error state
-  if (hookError) {
+  // Show error state (skip for demo accounts)
+  if (hookError && !isDemoAccount) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
         <Card className="max-w-md mx-auto">
@@ -1555,7 +1744,7 @@ export default function MilestonesClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{hookMilestones.length}</p>
+                    <p className="text-3xl font-bold">{milestones.length}</p>
                     <p className="text-rose-200 text-sm">Milestones</p>
                   </div>
                   <div className="text-center">
@@ -1587,7 +1776,7 @@ export default function MilestonesClient() {
 
                   {/* Timeline rows */}
                   <div className="space-y-4">
-                    {hookMilestones.map((milestone) => {
+                    {milestones.map((milestone) => {
                       const TypeIcon = getTypeIcon(milestone.type as MilestoneType) || Milestone
                       const startDate = milestone.due_date ? new Date(milestone.due_date) : new Date()
                       startDate.setMonth(startDate.getMonth() - 1) // Approximate start as 1 month before due
@@ -1660,7 +1849,7 @@ export default function MilestonesClient() {
           {/* Deliverables Tab */}
           <TabsContent value="deliverables" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {hookMilestones.filter(m => (m.deliverables || 0) > 0).map((milestone) => (
+              {milestones.filter(m => (m.deliverables || 0) > 0).map((milestone) => (
                 <Card key={milestone.id} className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center justify-between">
@@ -1700,7 +1889,7 @@ export default function MilestonesClient() {
                   </CardContent>
                 </Card>
               ))}
-              {hookMilestones.filter(m => (m.deliverables || 0) > 0).length === 0 && (
+              {milestones.filter(m => (m.deliverables || 0) > 0).length === 0 && (
                 <Card className="col-span-full border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
                   <CardContent className="py-12 text-center">
                     <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
@@ -2579,25 +2768,25 @@ export default function MilestonesClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                 <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
                   <div className="text-2xl font-bold text-red-600">
-                    {hookMilestones.filter(m => m.priority === 'critical' && m.status === 'at-risk').length}
+                    {milestones.filter(m => m.priority === 'critical' && m.status === 'at-risk').length}
                   </div>
                   <div className="text-xs text-red-600">Critical Risks</div>
                 </div>
                 <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
                   <div className="text-2xl font-bold text-amber-600">
-                    {hookMilestones.filter(m => m.priority === 'high' && m.status === 'at-risk').length}
+                    {milestones.filter(m => m.priority === 'high' && m.status === 'at-risk').length}
                   </div>
                   <div className="text-xs text-amber-600">High Impact</div>
                 </div>
                 <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                   <div className="text-2xl font-bold text-blue-600">
-                    {hookMilestones.filter(m => m.status === 'in-progress').length}
+                    {milestones.filter(m => m.status === 'in-progress').length}
                   </div>
                   <div className="text-xs text-blue-600">Being Mitigated</div>
                 </div>
                 <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                   <div className="text-2xl font-bold text-green-600">
-                    {hookMilestones.filter(m => m.status === 'completed').length}
+                    {milestones.filter(m => m.status === 'completed').length}
                   </div>
                   <div className="text-xs text-green-600">Mitigated</div>
                 </div>
@@ -3255,7 +3444,7 @@ export default function MilestonesClient() {
                 <Label>Source Milestone</Label>
                 <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
                   <option value="">Select source milestone...</option>
-                  {hookMilestones.map(m => (
+                  {milestones.map(m => (
                     <option key={m.id} value={m.id}>{m.name}</option>
                   ))}
                 </select>
@@ -3273,7 +3462,7 @@ export default function MilestonesClient() {
                 <Label>Target Milestone</Label>
                 <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
                   <option value="">Select target milestone...</option>
-                  {hookMilestones.map(m => (
+                  {milestones.map(m => (
                     <option key={m.id} value={m.id}>{m.name}</option>
                   ))}
                 </select>

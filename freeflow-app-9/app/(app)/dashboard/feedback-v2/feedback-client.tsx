@@ -251,6 +251,141 @@ const mockFeedbackPredictions: { id: string; label: string; current: number; tar
 
 const mockFeedbackActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
+// Demo ideas data for investor demo
+const mockIdeas: Idea[] = [
+  {
+    id: 'idea-1',
+    title: 'Dark mode support',
+    description: 'Add dark mode theme option for better nighttime usage and reduced eye strain',
+    category: 'feature',
+    status: 'in_progress',
+    priority: 'important',
+    votes: 156,
+    voters: [],
+    comments: 23,
+    author: { id: 'user-1', name: 'Sarah Chen', email: 'sarah@example.com', plan: 'pro', totalVotes: 45, ideasSubmitted: 12, joinedAt: '2024-01-15' },
+    createdAt: '2024-12-01T10:00:00Z',
+    updatedAt: '2024-12-15T14:30:00Z',
+    linkedIdeas: [],
+    tags: ['ui', 'accessibility', 'theme'],
+    impactScore: 85,
+    effortScore: 40,
+    subscribers: 89,
+    views: 1240
+  },
+  {
+    id: 'idea-2',
+    title: 'Mobile app development',
+    description: 'Native mobile apps for iOS and Android with offline support and push notifications',
+    category: 'feature',
+    status: 'planned',
+    priority: 'critical',
+    votes: 234,
+    voters: [],
+    comments: 45,
+    author: { id: 'user-2', name: 'Mike Johnson', email: 'mike@example.com', plan: 'enterprise', totalVotes: 78, ideasSubmitted: 8, joinedAt: '2024-02-20' },
+    createdAt: '2024-11-15T09:00:00Z',
+    updatedAt: '2024-12-10T11:00:00Z',
+    plannedRelease: 'Q2 2025',
+    linkedIdeas: [],
+    tags: ['mobile', 'ios', 'android'],
+    impactScore: 95,
+    effortScore: 85,
+    subscribers: 156,
+    views: 2340
+  },
+  {
+    id: 'idea-3',
+    title: 'API rate limiting improvements',
+    description: 'More granular rate limiting controls and better error messages for developers',
+    category: 'improvement',
+    status: 'shipped',
+    priority: 'important',
+    votes: 89,
+    voters: [],
+    comments: 12,
+    author: { id: 'user-3', name: 'Alex Rivera', email: 'alex@example.com', plan: 'pro', totalVotes: 32, ideasSubmitted: 5, joinedAt: '2024-03-10' },
+    createdAt: '2024-10-20T15:00:00Z',
+    updatedAt: '2024-12-01T09:00:00Z',
+    linkedIdeas: [],
+    tags: ['api', 'performance', 'developer-experience'],
+    impactScore: 70,
+    effortScore: 30,
+    subscribers: 45,
+    views: 890
+  },
+  {
+    id: 'idea-4',
+    title: 'Slack integration',
+    description: 'Deep integration with Slack for notifications, commands, and workflow automation',
+    category: 'integration',
+    status: 'under_review',
+    priority: 'nice_to_have',
+    votes: 67,
+    voters: [],
+    comments: 8,
+    author: { id: 'user-4', name: 'Emma Wilson', email: 'emma@example.com', plan: 'free', totalVotes: 15, ideasSubmitted: 3, joinedAt: '2024-05-01' },
+    createdAt: '2024-12-05T12:00:00Z',
+    updatedAt: '2024-12-12T16:00:00Z',
+    linkedIdeas: [],
+    tags: ['slack', 'integration', 'notifications'],
+    impactScore: 60,
+    effortScore: 50,
+    subscribers: 34,
+    views: 560
+  },
+  {
+    id: 'idea-5',
+    title: 'Keyboard shortcuts',
+    description: 'Comprehensive keyboard shortcuts for power users to navigate and perform actions quickly',
+    category: 'ux',
+    status: 'new',
+    priority: 'nice_to_have',
+    votes: 45,
+    voters: [],
+    comments: 6,
+    author: { id: 'user-5', name: 'David Lee', email: 'david@example.com', plan: 'pro', totalVotes: 28, ideasSubmitted: 7, joinedAt: '2024-04-15' },
+    createdAt: '2024-12-10T08:00:00Z',
+    updatedAt: '2024-12-10T08:00:00Z',
+    linkedIdeas: [],
+    tags: ['ux', 'productivity', 'shortcuts'],
+    impactScore: 55,
+    effortScore: 25,
+    subscribers: 23,
+    views: 340
+  }
+]
+
+// Demo analytics data
+const mockAnalytics: FeedbackAnalytics = {
+  totalIdeas: mockIdeas.length,
+  totalVotes: mockIdeas.reduce((sum, idea) => sum + idea.votes, 0),
+  avgResponseTime: '4.2 hours',
+  implementationRate: 68,
+  topTrends: [
+    { term: 'mobile', count: 45, change: 12 },
+    { term: 'dark mode', count: 38, change: 8 },
+    { term: 'api', count: 32, change: -3 },
+    { term: 'performance', count: 28, change: 15 },
+    { term: 'integrations', count: 24, change: 5 }
+  ],
+  sentimentBreakdown: {
+    positive: 65,
+    neutral: 25,
+    negative: 8,
+    mixed: 2
+  },
+  categoryBreakdown: {
+    feature: 42,
+    improvement: 28,
+    bug: 15,
+    integration: 8,
+    ux: 5,
+    performance: 2,
+    other: 0
+  }
+}
+
 // Quick actions will be defined inside component to access handlers
 
 // Database Types

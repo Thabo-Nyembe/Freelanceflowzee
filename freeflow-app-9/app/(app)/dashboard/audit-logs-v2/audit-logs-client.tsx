@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { useAuditLogs, useAuditAlertRules, useAuditLogMutations, useAuditAlertRuleMutations, type AuditLog as HookAuditLog, type AuditAlertRule } from '@/lib/hooks/use-audit-logs'
+import { useSession } from 'next-auth/react'
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -297,6 +298,155 @@ const formatDuration = (ms: number): string => {
 
 export default function AuditLogsClient() {
 
+  // Demo mode detection
+  const { data: nextAuthSession, status: sessionStatus } = useSession()
+  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
+                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const isSessionLoading = sessionStatus === 'loading'
+
+  // Demo audit logs data
+  const demoAuditLogs: HookAuditLog[] = useMemo(() => [
+    {
+      id: 'demo-log-1',
+      user_id: 'demo-user',
+      log_type: 'authentication',
+      severity: 'info',
+      action: 'user.login',
+      description: 'User logged in successfully',
+      resource: '/api/auth/login',
+      user_email: 'alex@freeflow.io',
+      ip_address: '192.168.1.100',
+      location: 'San Francisco, CA',
+      device: 'desktop',
+      status: 'success',
+      request_method: 'POST',
+      request_path: '/api/auth/login',
+      request_body: {},
+      response_status: 200,
+      duration_ms: 245,
+      metadata: { browser: 'Chrome 120', os: 'macOS' },
+      created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString()
+    },
+    {
+      id: 'demo-log-2',
+      user_id: 'demo-user',
+      log_type: 'data_access',
+      severity: 'info',
+      action: 'clients.list',
+      description: 'Retrieved client list',
+      resource: '/api/clients',
+      user_email: 'alex@freeflow.io',
+      ip_address: '192.168.1.100',
+      location: 'San Francisco, CA',
+      device: 'desktop',
+      status: 'success',
+      request_method: 'GET',
+      request_path: '/api/clients',
+      request_body: {},
+      response_status: 200,
+      duration_ms: 123,
+      metadata: { count: 15 },
+      created_at: new Date(Date.now() - 1000 * 60 * 10).toISOString()
+    },
+    {
+      id: 'demo-log-3',
+      user_id: 'demo-user',
+      log_type: 'data_modification',
+      severity: 'warning',
+      action: 'invoice.create',
+      description: 'Created new invoice',
+      resource: '/api/invoices',
+      user_email: 'sarah@freeflow.io',
+      ip_address: '192.168.1.101',
+      location: 'New York, NY',
+      device: 'desktop',
+      status: 'success',
+      request_method: 'POST',
+      request_path: '/api/invoices',
+      request_body: {},
+      response_status: 201,
+      duration_ms: 456,
+      metadata: { invoice_id: 'INV-2024-001', amount: 5000 },
+      created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString()
+    },
+    {
+      id: 'demo-log-4',
+      user_id: 'demo-user',
+      log_type: 'security',
+      severity: 'error',
+      action: 'auth.failed_login',
+      description: 'Failed login attempt',
+      resource: '/api/auth/login',
+      user_email: 'unknown@attacker.com',
+      ip_address: '45.33.22.11',
+      location: 'Unknown',
+      device: 'mobile',
+      status: 'failed',
+      request_method: 'POST',
+      request_path: '/api/auth/login',
+      request_body: {},
+      response_status: 401,
+      duration_ms: 89,
+      metadata: { reason: 'invalid_credentials', attempts: 3 },
+      created_at: new Date(Date.now() - 1000 * 60 * 60).toISOString()
+    },
+    {
+      id: 'demo-log-5',
+      user_id: 'demo-user',
+      log_type: 'admin',
+      severity: 'critical',
+      action: 'settings.update',
+      description: 'Security settings updated',
+      resource: '/api/settings/security',
+      user_email: 'alex@freeflow.io',
+      ip_address: '192.168.1.100',
+      location: 'San Francisco, CA',
+      device: 'desktop',
+      status: 'success',
+      request_method: 'PUT',
+      request_path: '/api/settings/security',
+      request_body: {},
+      response_status: 200,
+      duration_ms: 312,
+      metadata: { changed: ['mfa_enabled', 'session_timeout'] },
+      created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString()
+    }
+  ], [])
+
+  const demoAlertRules: AuditAlertRule[] = useMemo(() => [
+    {
+      id: 'demo-rule-1',
+      user_id: 'demo-user',
+      rule_name: 'Failed Login Alert',
+      description: 'Alert on multiple failed login attempts',
+      log_type: 'security',
+      severity: 'error',
+      action_pattern: 'auth.failed_login',
+      conditions: { threshold: 3, window: '5m' },
+      notification_channels: ['email', 'slack'],
+      is_active: true,
+      created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
+      updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+      deleted_at: null
+    },
+    {
+      id: 'demo-rule-2',
+      user_id: 'demo-user',
+      rule_name: 'Admin Action Alert',
+      description: 'Notify on admin-level changes',
+      log_type: 'admin',
+      severity: 'critical',
+      action_pattern: 'settings.*',
+      conditions: {},
+      notification_channels: ['email'],
+      is_active: true,
+      created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString(),
+      updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
+      deleted_at: null
+    }
+  ], [])
+
   // ---- Supabase Hooks ----
   const [severityFilter, setSeverityFilter] = useState<LogSeverity | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<LogType | 'all'>('all')
@@ -307,10 +457,17 @@ export default function AuditLogsClient() {
     logType: typeFilter === 'all' ? undefined : typeFilter
   }), [severityFilter, typeFilter])
 
-  const { logs: hookLogs, data: rawLogs, isLoading, error: logsError, refetch: refetchLogs, stats: hookStats } = useAuditLogs(undefined, hookFilters)
+  const { logs: hookLogs, data: rawLogs, isLoading: hookLoading, error: logsError, refetch: refetchLogs, stats: hookStats } = useAuditLogs(undefined, hookFilters)
   const { rules: hookAlertRules, error: rulesError, refetch: refetchRules } = useAuditAlertRules()
   const { createLog } = useAuditLogMutations()
   const { createRule, updateRule, deleteRule, toggleRule, isCreating: isCreatingRule, isUpdating: isUpdatingRule, isDeleting: isDeletingRule } = useAuditAlertRuleMutations()
+
+  // Use demo data for demo accounts, skip errors
+  // While session is loading, don't show error state (might be demo account)
+  const logs = isDemoAccount ? demoAuditLogs : (hookLogs || [])
+  const alertRules = isDemoAccount ? demoAlertRules : (hookAlertRules || [])
+  const isLoading = isSessionLoading || (isDemoAccount ? false : hookLoading)
+  const hasError = !isSessionLoading && !isDemoAccount && (logsError || rulesError)
 
   // UI State
   const [activeTab, setActiveTab] = useState('events')
@@ -461,7 +618,7 @@ export default function AuditLogsClient() {
   // Export audit logs using hook data
   const handleExportAuditLogs = async () => {
     try {
-      const exportData = rawLogs || []
+      const exportData = logs || []
 
       // Create CSV
       const headers = ['ID', 'Type', 'Severity', 'Action', 'Description', 'Status', 'IP Address', 'Created At']
@@ -504,8 +661,8 @@ export default function AuditLogsClient() {
 
   // Convert hook logs (HookAuditLog from Supabase) to display format
   const allLogs: AuditLog[] = useMemo(() => {
-    if (!hookLogs || hookLogs.length === 0) return []
-    return hookLogs.map(log => ({
+    if (!logs || logs.length === 0) return []
+    return logs.map(log => ({
       id: log.id,
       timestamp: log.created_at,
       log_type: (log.log_type || 'system') as LogType,
@@ -534,7 +691,7 @@ export default function AuditLogsClient() {
       is_anomaly: log.severity === 'critical' || log.severity === 'error',
       risk_score: log.severity === 'critical' ? 90 : log.severity === 'error' ? 60 : log.severity === 'warning' ? 40 : 10
     }))
-  }, [hookLogs])
+  }, [logs])
 
   // Filtered logs (search only; severity/type already handled by hook filters)
   const filteredLogs = useMemo(() => {
@@ -551,8 +708,8 @@ export default function AuditLogsClient() {
 
   // Convert hook alert rules to display format
   const allAlertRules = useMemo(() => {
-    if (!hookAlertRules || hookAlertRules.length === 0) return []
-    return hookAlertRules.map((rule: AuditAlertRule) => ({
+    if (!alertRules || alertRules.length === 0) return []
+    return alertRules.map((rule: AuditAlertRule) => ({
       id: rule.id,
       name: rule.rule_name,
       description: rule.description || '',
@@ -567,7 +724,7 @@ export default function AuditLogsClient() {
       created_at: rule.created_at,
       updated_at: rule.updated_at
     })) as AlertRule[]
-  }, [hookAlertRules])
+  }, [alertRules])
 
   // Stats calculations from hook
   const stats = useMemo(() => {
@@ -836,8 +993,8 @@ export default function AuditLogsClient() {
     )
   }
 
-  // Show error state
-  if (logsError || rulesError) {
+  // Show error state (skip for demo accounts)
+  if (hasError) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="max-w-[1800px] mx-auto">
@@ -1305,8 +1462,8 @@ export default function AuditLogsClient() {
                                 size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  const hookRule = hookAlertRules.find(r => r.id === rule.id)
-                                  if (hookRule) openEditRuleDialog(hookRule)
+                                  const foundRule = alertRules.find(r => r.id === rule.id)
+                                  if (foundRule) openEditRuleDialog(foundRule)
                                 }}
                               >
                                 <Edit className="w-3 h-3" />
