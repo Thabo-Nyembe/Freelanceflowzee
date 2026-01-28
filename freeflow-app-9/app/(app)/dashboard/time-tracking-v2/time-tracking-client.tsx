@@ -216,7 +216,7 @@ export default function TimeTrackingClient() {
   const [timerDescription, setTimerDescription] = useState('')
   const [timerProject, setTimerProject] = useState('')
   const [timerBillable, setTimerBillable] = useState(true)
-  const [currentDate, setCurrentDate] = useState(new Date())
+  const [currentDate, setCurrentDate] = useState(() => new Date('2026-01-28T12:00:00Z'))
   const [showEntryDialog, setShowEntryDialog] = useState(false)
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false)
   const [showClientDialog, setShowClientDialog] = useState(false)

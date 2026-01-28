@@ -206,7 +206,8 @@ export default function MessagesClient() {
   // AUTH & USER HOOKS - Get current authenticated user
   // ==========================================================================
   const { user: authUser, loading: authLoading } = useAuth()
-  const userId = isDemoAccount ? 'demo-user-id' : (authUser?.id || null)
+  // For demo accounts, use undefined to skip API calls (hooks will return demo data)
+  const userId = isDemoAccount ? undefined : (authUser?.id || null)
 
   // Current user derived from auth (use NextAuth session for demo accounts)
   const currentUser: User = useMemo(() => {
