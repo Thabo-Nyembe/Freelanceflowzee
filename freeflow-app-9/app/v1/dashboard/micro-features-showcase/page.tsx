@@ -140,7 +140,7 @@ export default function MicroFeaturesShowcase() {
   const breadcrumbItems = useMemo(() => [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Features', href: '/dashboard' },
-    { title: 'Micro Features Showcase', href: '/dashboard/micro-features-showcase' }
+    { title: 'Micro Features Showcase', href: '/v1/dashboard/micro-features-showcase' }
   ], [])
 
   // A+++ LOAD MICRO FEATURES DATA

@@ -14,43 +14,43 @@ interface BookingsLayoutProps {
 const tabs = [
   {
     name: 'Upcoming',
-    href: '/dashboard/bookings',
+    href: '/v1/dashboard/bookings',
     icon: Calendar,
     exact: true
   },
   {
     name: 'Calendar',
-    href: '/dashboard/bookings/calendar',
+    href: '/v1/dashboard/bookings/calendar',
     icon: Calendar,
     exact: false
   },
   {
     name: 'Availability',
-    href: '/dashboard/bookings/availability',
+    href: '/v1/dashboard/bookings/availability',
     icon: Clock,
     exact: false
   },
   {
     name: 'Services',
-    href: '/dashboard/bookings/services',
+    href: '/v1/dashboard/bookings/services',
     icon: Target,
     exact: false
   },
   {
     name: 'Clients',
-    href: '/dashboard/bookings/clients',
+    href: '/v1/dashboard/bookings/clients',
     icon: Users,
     exact: false
   },
   {
     name: 'History',
-    href: '/dashboard/bookings/history',
+    href: '/v1/dashboard/bookings/history',
     icon: Clock,
     exact: false
   },
   {
     name: 'Analytics',
-    href: '/dashboard/bookings/analytics',
+    href: '/v1/dashboard/bookings/analytics',
     icon: BarChart3,
     exact: false
   }

@@ -171,17 +171,18 @@ export default withAuth(
     // 1.5. Version route redirects (v1, v2 → main v2 dashboards)
     // ----------------------------------------------------------
 
-    // v1 dashboard routes → main dashboard v2
-    if (pathname.startsWith('/v1/dashboard/')) {
-      const slug = pathname.replace('/v1/dashboard/', '').replace(/\/$/, '')
-      const newUrl = new URL(`/dashboard/${slug}-v2`, req.url)
-      return NextResponse.redirect(newUrl)
+    // V1 dashboard routes - DON'T redirect, let them render as V1 pages
+    // V1 is a separate version that should work independently
+    if (pathname.startsWith('/v1/')) {
+      return NextResponse.next()
     }
 
-    // v2 dashboard routes → main dashboard v2
+    // v2 dashboard routes → main dashboard v2 (without adding duplicate -v2)
     if (pathname.startsWith('/v2/dashboard/')) {
       const slug = pathname.replace('/v2/dashboard/', '').replace(/\/$/, '')
-      const newUrl = new URL(`/dashboard/${slug}-v2`, req.url)
+      // Don't add -v2 if it already has it
+      const targetSlug = slug.endsWith('-v2') ? slug : `${slug}-v2`
+      const newUrl = new URL(`/dashboard/${targetSlug}`, req.url)
       return NextResponse.redirect(newUrl)
     }
 
@@ -227,8 +228,15 @@ export default withAuth(
       'widget-library', 'workflow-builder', 'workflows'
     ])
 
+    // Only redirect non-v2 dashboard routes to v2 versions
+    // Skip if URL already contains -v2 anywhere to prevent loops
     if (pathname.startsWith('/dashboard/') && !pathname.includes('-v2')) {
       const slug = pathname.replace('/dashboard/', '').replace(/\/$/, '').split('/')[0]
+
+      // Skip empty slugs
+      if (!slug) {
+        return NextResponse.next()
+      }
 
       // Check for special aliases first
       if (V2_ALIASES[slug]) {

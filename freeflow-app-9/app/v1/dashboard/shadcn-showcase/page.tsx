@@ -151,7 +151,7 @@ export default function ShadcnShowcasePage() {
 
   const breadcrumbItems = [
     { label: 'Dashboard', href: '/dashboard', title: 'Main Dashboard' },
-    { label: 'Shadcn Showcase', href: '/dashboard/shadcn-showcase', title: 'Component Library Showcase' }
+    { label: 'Shadcn Showcase', href: '/v1/dashboard/shadcn-showcase', title: 'Component Library Showcase' }
   ]
 
   const handleFormSubmit = (data: any) => {

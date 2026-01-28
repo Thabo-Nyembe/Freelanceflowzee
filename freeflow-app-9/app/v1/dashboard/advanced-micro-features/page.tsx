@@ -339,7 +339,7 @@ export default function AdvancedMicroFeaturesPage() {
 
   const breadcrumbItems = useMemo(() => [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Advanced Features', href: '/dashboard/advanced-micro-features', isActive: true }
+    { title: 'Advanced Features', href: '/v1/dashboard/advanced-micro-features', isActive: true }
   ], [])
 
   if (isLoading) {

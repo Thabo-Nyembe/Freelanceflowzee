@@ -29,42 +29,42 @@ const logger = createFeatureLogger('AI-Create')
 const subPages = [
   {
     name: 'Studio',
-    href: '/dashboard/ai-create/studio',
+    href: '/v1/dashboard/ai-create/studio',
     icon: Palette,
     description: 'Advanced creation studio with multi-model support',
     color: 'from-purple-500 to-pink-500'
   },
   {
     name: 'History',
-    href: '/dashboard/ai-create/history',
+    href: '/v1/dashboard/ai-create/history',
     icon: History,
     description: 'View and manage your creation history',
     color: 'from-blue-500 to-cyan-500'
   },
   {
     name: 'Templates',
-    href: '/dashboard/ai-create/templates',
+    href: '/v1/dashboard/ai-create/templates',
     icon: LayoutTemplate,
     description: 'Pre-built templates for quick creation',
     color: 'from-green-500 to-emerald-500'
   },
   {
     name: 'Analytics',
-    href: '/dashboard/ai-create/analytics',
+    href: '/v1/dashboard/ai-create/analytics',
     icon: BarChart3,
     description: 'Track usage, costs, and performance',
     color: 'from-orange-500 to-amber-500'
   },
   {
     name: 'Compare',
-    href: '/dashboard/ai-create/compare',
+    href: '/v1/dashboard/ai-create/compare',
     icon: GitCompare,
     description: 'Compare outputs from different models',
     color: 'from-indigo-500 to-violet-500'
   },
   {
     name: 'Settings',
-    href: '/dashboard/ai-create/settings',
+    href: '/v1/dashboard/ai-create/settings',
     icon: Settings,
     description: 'Configure AI preferences and defaults',
     color: 'from-gray-500 to-slate-500'

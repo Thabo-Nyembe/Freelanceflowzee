@@ -482,7 +482,7 @@ export default function BookingsPageMigrated() {
 
         {/* Quick Navigation */}
         <div className="grid gap-4 md:grid-cols-4">
-          <Link href="/dashboard/bookings/calendar">
+          <Link href="/v1/dashboard/bookings/calendar">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
@@ -498,7 +498,7 @@ export default function BookingsPageMigrated() {
             </Card>
           </Link>
 
-          <Link href="/dashboard/bookings/analytics">
+          <Link href="/v1/dashboard/bookings/analytics">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
@@ -514,7 +514,7 @@ export default function BookingsPageMigrated() {
             </Card>
           </Link>
 
-          <Link href="/dashboard/bookings/services">
+          <Link href="/v1/dashboard/bookings/services">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
@@ -530,7 +530,7 @@ export default function BookingsPageMigrated() {
             </Card>
           </Link>
 
-          <Link href="/dashboard/bookings/clients">
+          <Link href="/v1/dashboard/bookings/clients">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">

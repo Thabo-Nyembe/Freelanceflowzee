@@ -771,7 +771,7 @@ export default function ProjectsOverviewPage() {
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <Link href="/dashboard/projects-hub/create">
+            <Link href="/v1/dashboard/projects-hub/create">
               <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300 dark:bg-gray-800/70 dark:border-gray-700 dark:hover:border-blue-500">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -782,7 +782,7 @@ export default function ProjectsOverviewPage() {
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/dashboard/projects-hub/active">
+            <Link href="/v1/dashboard/projects-hub/active">
               <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300 dark:bg-gray-800/70 dark:border-gray-700 dark:hover:border-blue-500">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -793,7 +793,7 @@ export default function ProjectsOverviewPage() {
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/dashboard/projects-hub/templates">
+            <Link href="/v1/dashboard/projects-hub/templates">
               <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300 dark:bg-gray-800/70 dark:border-gray-700 dark:hover:border-blue-500">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -804,7 +804,7 @@ export default function ProjectsOverviewPage() {
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/dashboard/projects-hub/import">
+            <Link href="/v1/dashboard/projects-hub/import">
               <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300 dark:bg-gray-800/70 dark:border-gray-700 dark:hover:border-blue-500">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -815,7 +815,7 @@ export default function ProjectsOverviewPage() {
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/dashboard/projects-hub/analytics">
+            <Link href="/v1/dashboard/projects-hub/analytics">
               <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300 dark:bg-gray-800/70 dark:border-gray-700 dark:hover:border-blue-500">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center group-hover:scale-110 transition-transform">

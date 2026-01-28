@@ -810,6 +810,22 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
   }
 ]
 
+// Helper to transform hrefs for V1 context
+function getVersionedHref(href: string, pathname: string | null): string {
+  // If we're in V1 context, transform dashboard hrefs to V1 paths
+  if (pathname?.startsWith('/v1/')) {
+    if (href.startsWith('/dashboard/')) {
+      // Remove -v2 suffix and add /v1 prefix
+      const v1Href = href.replace(/-v2$/, '').replace('/dashboard/', '/v1/dashboard/')
+      return v1Href
+    }
+    if (href === '/dashboard') {
+      return '/v1/dashboard'
+    }
+  }
+  return href
+}
+
 // Sortable subcategory component
 function SortableSubcategory({
   subcategory,
@@ -843,7 +859,7 @@ function SortableSubcategory({
     opacity: isDragging ? 0.5 : 1
   }
 
-  const hasActiveItem = subcategory.items.some(item => isActive(item.href))
+  const hasActiveItem = subcategory.items.some(item => isActive(getVersionedHref(item.href, pathname)))
 
   if (!subcategory.visible && !isCustomizing) return null
 
@@ -887,12 +903,13 @@ function SortableSubcategory({
           >
             {subcategory.items.map((item) => {
               const ItemIcon = item.icon
-              const itemIsActive = isActive(item.href)
+              const versionedHref = getVersionedHref(item.href, pathname)
+              const itemIsActive = isActive(versionedHref)
 
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={versionedHref}
                   data-tour={`nav-${item.id}`}
                   className={cn(
                     'flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-all duration-200 group',
@@ -1283,10 +1300,10 @@ export function SidebarEnhanced() {
         {/* Coming Soon */}
         <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
           <Link
-            href="/dashboard/coming-soon"
+            href={getVersionedHref('/dashboard/coming-soon', pathname)}
             className={cn(
               'flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-all duration-200',
-              isActive('/dashboard/coming-soon')
+              isActive(getVersionedHref('/dashboard/coming-soon', pathname))
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
             )}

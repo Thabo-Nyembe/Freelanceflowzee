@@ -361,7 +361,7 @@ export default function MyDayTodayPage() {
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <Link href="/dashboard/my-day/goals">
+            <Link href="/v1/dashboard/my-day/goals">
               <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-orange-300 dark:hover:border-orange-700 dark:bg-gray-800/50 dark:border-gray-700">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -372,7 +372,7 @@ export default function MyDayTodayPage() {
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/dashboard/my-day/schedule">
+            <Link href="/v1/dashboard/my-day/schedule">
               <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-orange-300 dark:hover:border-orange-700 dark:bg-gray-800/50 dark:border-gray-700">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -383,7 +383,7 @@ export default function MyDayTodayPage() {
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/dashboard/my-day/projects">
+            <Link href="/v1/dashboard/my-day/projects">
               <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-orange-300 dark:hover:border-orange-700 dark:bg-gray-800/50 dark:border-gray-700">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -394,7 +394,7 @@ export default function MyDayTodayPage() {
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/dashboard/my-day/insights">
+            <Link href="/v1/dashboard/my-day/insights">
               <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-orange-300 dark:hover:border-orange-700 dark:bg-gray-800/50 dark:border-gray-700">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -405,7 +405,7 @@ export default function MyDayTodayPage() {
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/dashboard/my-day/analytics">
+            <Link href="/v1/dashboard/my-day/analytics">
               <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-orange-300 dark:hover:border-orange-700 dark:bg-gray-800/50 dark:border-gray-700">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center group-hover:scale-110 transition-transform">

@@ -7,12 +7,25 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { ADMIN_NAVIGATION, getFavorites } from '@/lib/admin-navigation-config'
 
+// Helper to transform hrefs for V1 context
+function getVersionedHref(href: string, pathname: string | null): string {
+  if (pathname?.startsWith('/v1/')) {
+    if (href.startsWith('/dashboard/')) {
+      return href.replace(/-v2$/, '').replace('/dashboard/', '/v1/dashboard/')
+    }
+    if (href === '/dashboard') {
+      return '/v1/dashboard'
+    }
+  }
+  return href
+}
+
 export function MobileAdminNav() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
   const favorites = getFavorites()
 
-  const isActive = (href: string) => pathname === href
+  const isActive = (href: string) => pathname === getVersionedHref(href, pathname)
 
   return (
     <>
@@ -79,10 +92,12 @@ export function MobileAdminNav() {
                     Quick Access
                   </div>
                   <div className="space-y-1">
-                    {favorites.slice(0, 5).map((item) => (
+                    {favorites.slice(0, 5).map((item) => {
+                      const versionedHref = getVersionedHref(item.href, pathname)
+                      return (
                       <Link
                         key={item.href}
-                        href={item.href}
+                        href={versionedHref}
                         onClick={() => setIsOpen(false)}
                         className={cn(
                           'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
@@ -99,7 +114,8 @@ export function MobileAdminNav() {
                           </span>
                         )}
                       </Link>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
 
@@ -111,10 +127,12 @@ export function MobileAdminNav() {
                       <span>{group.label}</span>
                     </div>
                     <div className="space-y-1">
-                      {group.items.slice(0, 4).map((item) => (
+                      {group.items.slice(0, 4).map((item) => {
+                        const vHref = getVersionedHref(item.href, pathname)
+                        return (
                         <Link
                           key={item.href}
-                          href={item.href}
+                          href={vHref}
                           onClick={() => setIsOpen(false)}
                           className={cn(
                             'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
@@ -138,7 +156,8 @@ export function MobileAdminNav() {
                             </span>
                           )}
                         </Link>
-                      ))}
+                        )
+                      })}
                       {group.items.length > 4 && (
                         <button
                           onClick={() => setIsOpen(false)}
@@ -173,23 +192,26 @@ export function MobileAdminNav() {
       {/* Bottom Navigation Bar for Mobile */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-2 py-2">
         <div className="grid grid-cols-5 gap-1">
-          {favorites.slice(0, 5).map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors',
-                isActive(item.href)
-                  ? 'bg-blue-500 text-white'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-              )}
-            >
-              <span className="text-xl mb-0.5">{item.icon}</span>
-              <span className="text-[10px] font-medium truncate w-full text-center">
-                {item.label.split(' ')[0]}
-              </span>
-            </Link>
-          ))}
+          {favorites.slice(0, 5).map((item) => {
+            const vHref = getVersionedHref(item.href, pathname)
+            return (
+              <Link
+                key={item.href}
+                href={vHref}
+                className={cn(
+                  'flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors',
+                  isActive(item.href)
+                    ? 'bg-blue-500 text-white'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                )}
+              >
+                <span className="text-xl mb-0.5">{item.icon}</span>
+                <span className="text-[10px] font-medium truncate w-full text-center">
+                  {item.label.split(' ')[0]}
+                </span>
+              </Link>
+            )
+          })}
         </div>
       </div>
     </>
