@@ -145,15 +145,21 @@ function getDemoEvents() {
 // =====================================================
 export async function GET(request: NextRequest) {
   try {
+    // Check for demo mode via query param, cookie, or header
+    const { searchParams } = new URL(request.url);
+    const isDemoMode =
+      searchParams.get('demo') === 'true' ||
+      request.cookies.get('demo_mode')?.value === 'true' ||
+      request.headers.get('X-Demo-Mode') === 'true';
+
     // Try NextAuth session first
     const session = await getServerSession();
     const userEmail = session?.user?.email;
 
-    // Check for demo account
+    // Check for demo account or demo mode
     const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io';
 
-    if (isDemoAccount) {
-      const { searchParams } = new URL(request.url);
+    if (isDemoAccount || isDemoMode) {
       const action = searchParams.get('action');
 
       // Return demo data for all calendar queries

@@ -34,15 +34,38 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Check for demo mode - allow access without authentication
+  const isDemoMode =
+    request.nextUrl.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+
   if (
     !user &&
+    !isDemoMode &&
     !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
+    !request.nextUrl.pathname.startsWith('/auth') &&
+    !request.nextUrl.pathname.startsWith('/api/') &&
+    !request.nextUrl.pathname.startsWith('/_next/')
   ) {
-    // no user, potentially respond by redirecting the user to the login page
+    // no user and not demo mode, redirect to login
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    // Preserve demo param if present for redirect
+    if (request.nextUrl.searchParams.get('demo')) {
+      url.searchParams.set('demo', 'true')
+    }
+    url.searchParams.set('redirect', request.nextUrl.pathname)
     return NextResponse.redirect(url)
+  }
+
+  // Set demo mode cookie if accessing with demo=true query param
+  if (isDemoMode && request.nextUrl.searchParams.get('demo') === 'true') {
+    supabaseResponse.cookies.set('demo_mode', 'true', {
+      path: '/',
+      maxAge: 60 * 60 * 24, // 24 hours
+      sameSite: 'lax'
+    })
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're

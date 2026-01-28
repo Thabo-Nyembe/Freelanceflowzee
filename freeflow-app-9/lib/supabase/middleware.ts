@@ -25,6 +25,25 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
+  // Check for demo mode - allow access without authentication
+  const isDemoMode =
+    request.nextUrl.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+
+  if (isDemoMode) {
+    console.log('🎭 Demo mode detected - allowing unauthenticated access')
+    // Set demo mode cookie if accessing with demo=true query param
+    if (request.nextUrl.searchParams.get('demo') === 'true') {
+      supabaseResponse.cookies.set('demo_mode', 'true', {
+        path: '/',
+        maxAge: 60 * 60 * 24, // 24 hours
+        sameSite: 'lax'
+      })
+    }
+    return supabaseResponse
+  }
+
   // Check if Supabase environment variables are configured
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY

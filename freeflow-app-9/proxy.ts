@@ -130,6 +130,15 @@ function isPublicRoute(pathname: string): boolean {
   return publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
 }
 
+// Check if demo mode is enabled
+function isDemoMode(req: NextRequest): boolean {
+  return (
+    req.nextUrl.searchParams.get('demo') === 'true' ||
+    req.cookies.get('demo_mode')?.value === 'true' ||
+    req.headers.get('X-Demo-Mode') === 'true'
+  )
+}
+
 // Check if API route is public
 function isPublicApiRoute(pathname: string): boolean {
   return publicApiRoutes.some(route => pathname.startsWith(route))
@@ -235,6 +244,27 @@ export default withAuth(
     }
 
     // ----------------------------------------------------------
+    // 1.6. Demo mode handling - set cookie and allow access
+    // ----------------------------------------------------------
+    if (isDemoMode(req)) {
+      // If demo=true query param, set cookie for session persistence
+      if (req.nextUrl.searchParams.get('demo') === 'true') {
+        const response = NextResponse.next()
+        response.cookies.set('demo_mode', 'true', {
+          path: '/',
+          maxAge: 60 * 60 * 24, // 24 hours
+          sameSite: 'lax'
+        })
+        // Apply security headers
+        response.headers.set('X-Content-Type-Options', 'nosniff')
+        response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
+        response.headers.set('X-Frame-Options', 'DENY')
+        response.headers.set('X-XSS-Protection', '1; mode=block')
+        return response
+      }
+    }
+
+    // ----------------------------------------------------------
     // 2. Rate limiting for API routes
     // ----------------------------------------------------------
     if (pathname.startsWith('/api/')) {
@@ -327,6 +357,11 @@ export default withAuth(
       // Only check authentication for protected routes
       authorized: ({ req, token }) => {
         const { pathname } = req.nextUrl
+
+        // Allow demo mode for all routes
+        if (isDemoMode(req)) {
+          return true
+        }
 
         // Allow public routes
         if (isPublicRoute(pathname)) {

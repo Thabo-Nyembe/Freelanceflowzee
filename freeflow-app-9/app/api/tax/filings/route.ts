@@ -8,12 +8,30 @@ const logger = createFeatureLogger('tax-filings')
  * GET /api/tax/filings
  * Get all tax filings for the current user
  */
+// Demo user ID for demo mode
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+// Check if demo mode is enabled
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url)
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  )
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
+    const demoMode = isDemoMode(request)
+
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (authError || !user) {
+    // Allow demo mode access
+    const effectiveUserId = user?.id || (demoMode ? DEMO_USER_ID : null)
+
+    if (!effectiveUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -24,7 +42,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('tax_filings')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', effectiveUserId)
       .order('due_date', { ascending: true })
 
     if (year) {
