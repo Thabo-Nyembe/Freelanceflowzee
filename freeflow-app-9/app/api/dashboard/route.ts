@@ -11,9 +11,19 @@ import { createFeatureLogger } from '@/lib/logger';
 
 const logger = createFeatureLogger('dashboard');
 
-// Demo user for unauthenticated access (development only)
+// Demo user for unauthenticated access
+// Demo mode can be enabled via ?demo=true query parameter
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
+
+// Check if demo mode is enabled via query param, cookie, or header
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url);
+  if (url.searchParams.get('demo') === 'true') return true;
+  if (request.cookies.get('demo_mode')?.value === 'true') return true;
+  if (request.headers.get('X-Demo-Mode') === 'true') return true;
+  return false;
+}
 
 // =====================================================
 // GET - Dashboard stats, recent activity, quick actions
@@ -23,13 +33,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Use admin client to avoid cookie issues
     const supabase = createAdminClient();
 
+    // Check for demo mode first
+    const demoMode = isDemoMode(request);
+
     // Try to get NextAuth session
     let userId: string;
     try {
       const session = await getServerSession(authOptions);
       if (session?.user?.id) {
         userId = session.user.id;
-      } else if (IS_DEVELOPMENT) {
+      } else if (demoMode || IS_DEVELOPMENT) {
+        // Use demo user for demo mode or development
         userId = DEMO_USER_ID;
       } else {
         return NextResponse.json(
@@ -38,7 +52,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         );
       }
     } catch (error) {
-      if (IS_DEVELOPMENT) {
+      if (demoMode || IS_DEVELOPMENT) {
         userId = DEMO_USER_ID;
       } else {
         return NextResponse.json(
@@ -164,20 +178,51 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = createAdminClient();
 
+    // Check for demo mode
+    const demoMode = isDemoMode(request);
+
     // Try to get NextAuth session
     let userId: string;
     try {
       const session = await getServerSession(authOptions);
-      userId = session?.user?.id || DEMO_USER_ID;
+      if (session?.user?.id) {
+        userId = session.user.id;
+      } else if (demoMode || IS_DEVELOPMENT) {
+        userId = DEMO_USER_ID;
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Authentication required' },
+          { status: 401 }
+        );
+      }
     } catch {
-      userId = DEMO_USER_ID;
+      if (demoMode || IS_DEVELOPMENT) {
+        userId = DEMO_USER_ID;
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Authentication required' },
+          { status: 401 }
+        );
+      }
     }
 
     const body = await request.json();
     const { action, ...data } = body;
 
-    // Allow override via body for testing
-    if (data.userId) {
+    // Demo mode is read-only for write operations
+    if (demoMode && !IS_DEVELOPMENT) {
+      const writeActions = ['quick-create-project', 'quick-create-task', 'quick-create-invoice'];
+      if (writeActions.includes(action)) {
+        return NextResponse.json({
+          success: false,
+          error: 'Demo mode is read-only. Sign up for a free account to create your own data.',
+          isDemoMode: true
+        }, { status: 403 });
+      }
+    }
+
+    // Allow override via body for testing (development only)
+    if (data.userId && IS_DEVELOPMENT) {
       userId = data.userId;
     }
 

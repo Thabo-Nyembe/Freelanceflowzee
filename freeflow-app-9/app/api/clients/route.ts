@@ -122,8 +122,43 @@ export async function GET(request: NextRequest) {
     const includeContacts = searchParams.get('include_contacts') === 'true'
     const includeInteractions = searchParams.get('include_interactions') === 'true'
 
-    // Demo mode for unauthenticated users - return empty
+    // Check for demo mode via query param, cookie, or header
+    const demoModeRequested = searchParams.get('demo') === 'true' ||
+      request.cookies.get('demo_mode')?.value === 'true' ||
+      request.headers.get('X-Demo-Mode') === 'true'
+
+    // Demo user ID for demo mode
+    const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+    // Demo mode for unauthenticated users
     if (!session?.user) {
+      if (demoModeRequested) {
+        // Fetch real demo data from database
+        const { data: demoClients, error: demoError } = await supabase
+          .from('clients')
+          .select('*')
+          .eq('user_id', DEMO_USER_ID)
+          .order('updated_at', { ascending: false })
+          .limit(limit)
+
+        if (demoError) {
+          logger.warn('Demo clients query error', { error: demoError })
+        }
+
+        return NextResponse.json({
+          success: true,
+          demo: true,
+          clients: demoClients || [],
+          pagination: {
+            page: 1,
+            limit,
+            total: demoClients?.length || 0,
+            totalPages: 1
+          }
+        })
+      }
+
+      // No demo mode, return empty for unauthenticated
       return NextResponse.json({
         success: true,
         clients: [],
@@ -140,18 +175,30 @@ export async function GET(request: NextRequest) {
     const userId = (session.user as any).authId || session.user.id
     const userEmail = session.user.email
 
-    // Demo mode ONLY for demo account (test@kazi.dev)
+    // Demo mode for demo accounts or when demo is requested
     const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
 
-    if (isDemoAccount && !clientId) {
+    if ((isDemoAccount || demoModeRequested) && !clientId) {
+      // Fetch real demo data from database for demo user
+      const { data: demoClients, error: demoError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_id', DEMO_USER_ID)
+        .order('updated_at', { ascending: false })
+        .limit(limit)
+
+      if (demoError) {
+        logger.warn('Demo clients query error', { error: demoError })
+      }
+
       return NextResponse.json({
         success: true,
         demo: true,
-        clients: getDemoClients(),
+        clients: demoClients || [],
         pagination: {
           page: 1,
-          limit: 20,
-          total: 8,
+          limit,
+          total: demoClients?.length || 0,
           totalPages: 1
         }
       })

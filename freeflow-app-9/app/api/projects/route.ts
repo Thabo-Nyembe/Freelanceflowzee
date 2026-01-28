@@ -79,8 +79,43 @@ export async function GET(request: NextRequest) {
     const includeMembers = searchParams.get('include_members') === 'true'
     const includeTasks = searchParams.get('include_tasks') === 'true'
 
-    // Unauthenticated users get empty data
+    // Check for demo mode via query param, cookie, or header
+    const demoModeRequested = searchParams.get('demo') === 'true' ||
+      request.cookies.get('demo_mode')?.value === 'true' ||
+      request.headers.get('X-Demo-Mode') === 'true'
+
+    // Demo user ID for demo mode
+    const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+    // Unauthenticated users
     if (!session?.user) {
+      if (demoModeRequested) {
+        // Fetch real demo data from database
+        const { data: demoProjects, error: demoError } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('user_id', DEMO_USER_ID)
+          .order('updated_at', { ascending: false })
+          .limit(limit)
+
+        if (demoError) {
+          logger.warn('Demo projects query error', { error: demoError })
+        }
+
+        return NextResponse.json({
+          success: true,
+          demo: true,
+          projects: demoProjects || [],
+          pagination: {
+            page: 1,
+            limit,
+            total: demoProjects?.length || 0,
+            totalPages: 1
+          }
+        })
+      }
+
+      // No demo mode, return empty
       return NextResponse.json({
         success: true,
         projects: [],
@@ -96,18 +131,30 @@ export async function GET(request: NextRequest) {
     const userId = (session.user as any).authId || session.user.id
     const userEmail = session.user.email
 
-    // Demo mode ONLY for demo account (test@kazi.dev)
+    // Demo mode for demo accounts or when demo is requested
     const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
 
-    if (isDemoAccount && !projectId) {
+    if ((isDemoAccount || demoModeRequested) && !projectId) {
+      // Fetch real demo data from database
+      const { data: demoProjects, error: demoError } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', DEMO_USER_ID)
+        .order('updated_at', { ascending: false })
+        .limit(limit)
+
+      if (demoError) {
+        logger.warn('Demo projects query error', { error: demoError })
+      }
+
       return NextResponse.json({
         success: true,
         demo: true,
-        projects: getDemoProjects(),
+        projects: demoProjects || [],
         pagination: {
           page: 1,
-          limit: 20,
-          total: 5,
+          limit,
+          total: demoProjects?.length || 0,
           totalPages: 1
         }
       })
