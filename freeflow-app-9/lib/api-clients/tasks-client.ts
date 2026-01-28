@@ -8,6 +8,19 @@
 import { BaseApiClient } from './base-client'
 import { createClient } from '@/lib/supabase/client'
 
+// Demo mode detection - return empty data in demo mode to avoid 400 errors
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 // Type for tasks with completion dates (used in helper functions)
 interface TaskWithDates {
   id: string
@@ -151,6 +164,10 @@ class TasksApiClient extends BaseApiClient {
     pageSize: number = 10,
     filters?: TaskFilters
   ) {
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    if (isDemoModeEnabled()) {
+      return { data: [], count: 0, error: null }
+    }
     const supabase = createClient()
 
     let query = supabase
@@ -247,6 +264,10 @@ class TasksApiClient extends BaseApiClient {
    * Get single task by ID
    */
   async getTask(id: string) {
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    if (isDemoModeEnabled()) {
+      return { success: true, data: null, error: null }
+    }
     const supabase = createClient()
 
     const { data, error } = await supabase
@@ -438,6 +459,20 @@ class TasksApiClient extends BaseApiClient {
    * Get task statistics
    */
   async getTaskStats() {
+    // In demo mode, return default stats to avoid unauthenticated Supabase queries
+    if (isDemoModeEnabled()) {
+      return {
+        success: true,
+        error: null,
+        data: {
+          total: 0, todo: 0, in_progress: 0, in_review: 0, completed: 0,
+          cancelled: 0, overdue: 0, completionRate: 0, averageCompletionTime: 0,
+          totalEstimatedHours: 0, totalActualHours: 0,
+          tasksByPriority: { low: 0, medium: 0, high: 0, urgent: 0 },
+          tasksByProject: [], upcomingDeadlines: []
+        }
+      }
+    }
     const supabase = createClient()
 
     // Get current user

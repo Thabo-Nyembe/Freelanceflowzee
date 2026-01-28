@@ -5,6 +5,19 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from './use-auth-user-id'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -141,6 +154,12 @@ export function useTasks(options: UseTasksOptions = {}) {
     sortOrder?: 'asc' | 'desc'
     limit?: number
   }) => {
+    // Skip fetching in demo mode
+    if (isDemoModeEnabled()) {
+      setIsLoading(false)
+      return
+    }
+
     setIsLoading(true)
     setError(null)
 

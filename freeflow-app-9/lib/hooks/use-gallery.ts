@@ -3,6 +3,19 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export interface GalleryItem {
   id: string
   user_id: string
@@ -54,6 +67,7 @@ export function useGalleryItems(collectionId?: string | null, initialItems: Gall
   const supabase = createClient()
 
   const fetchItems = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       let query = supabase
@@ -127,6 +141,7 @@ export function useGalleryItems(collectionId?: string | null, initialItems: Gall
   }
 
   useEffect(() => {
+    if (isDemoModeEnabled()) return
     const channel = supabase
       .channel('gallery_items_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery_items' },
@@ -166,6 +181,7 @@ export function useGalleryCollections(initialCollections: GalleryCollection[] = 
   const supabase = createClient()
 
   const fetchCollections = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     setIsLoading(true)
     const { data, error } = await supabase
       .from('gallery_collections')

@@ -7,6 +7,19 @@ import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('Employees')
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -160,6 +173,7 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
 
   // Fetch employees from database
   const fetchEmployees = useCallback(async () => {
+    if (isDemoModeEnabled()) { setLoading(false); return }
     try {
       setLoading(true)
       setError(null)
@@ -322,6 +336,7 @@ export function useCreateEmployee() {
   const supabase = useMemo(() => createClient(), [])
 
   const mutate = useCallback(async (input: CreateEmployeeInput): Promise<Employee | null> => {
+    if (isDemoModeEnabled()) { setLoading(false); return null }
     setLoading(true)
     setError(null)
 
@@ -408,6 +423,7 @@ export function useUpdateEmployee() {
     updates: UpdateEmployeeInput,
     employeeId: string
   ): Promise<Employee | null> => {
+    if (isDemoModeEnabled()) { setLoading(false); return null }
     setLoading(true)
     setError(null)
 
@@ -456,6 +472,7 @@ export function useDeleteEmployee() {
   const supabase = useMemo(() => createClient(), [])
 
   const mutate = useCallback(async (employeeId: string): Promise<boolean> => {
+    if (isDemoModeEnabled()) { setLoading(false); return false }
     setLoading(true)
     setError(null)
 
@@ -503,6 +520,7 @@ export function useToggleEmployeeStatus() {
     employeeId: string,
     newStatus: EmployeeStatus
   ): Promise<Employee | null> => {
+    if (isDemoModeEnabled()) { setLoading(false); return null }
     setLoading(true)
     setError(null)
 
@@ -559,6 +577,7 @@ export function useEmployee(employeeId?: string) {
   const supabase = useMemo(() => createClient(), [])
 
   const fetchEmployee = useCallback(async () => {
+    if (isDemoModeEnabled()) { setLoading(false); return }
     if (!employeeId) {
       setLoading(false)
       return

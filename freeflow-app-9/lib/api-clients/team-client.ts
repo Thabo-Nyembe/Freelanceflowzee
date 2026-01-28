@@ -15,6 +15,19 @@
 import { createClient } from '@/lib/supabase/client'
 import { BaseApiClient, type ApiResponse, type PaginatedResponse } from './base-client'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -220,6 +233,20 @@ class TeamClient extends BaseApiClient {
     pageSize: number = 20,
     filters?: TeamFilters
   ): Promise<ApiResponse<PaginatedResponse<TeamMember>>> {
+    // Demo mode - return empty data
+    if (isDemoModeEnabled()) {
+      return {
+        success: true,
+        data: {
+          data: [],
+          total: 0,
+          page,
+          pageSize,
+          hasMore: false
+        }
+      }
+    }
+
     try {
       const from = (page - 1) * pageSize
       const to = from + pageSize - 1
@@ -533,6 +560,11 @@ class TeamClient extends BaseApiClient {
   async getInvitations(
     status?: ('pending' | 'accepted' | 'declined' | 'expired')[]
   ): Promise<ApiResponse<TeamInvitation[]>> {
+    // Demo mode - return empty data
+    if (isDemoModeEnabled()) {
+      return { success: true, data: [] }
+    }
+
     try {
       let query = this.supabase
         .from('team_invitations')
@@ -638,6 +670,27 @@ class TeamClient extends BaseApiClient {
    * Get team statistics
    */
   async getTeamStats(): Promise<ApiResponse<TeamStats>> {
+    // Demo mode - return default stats
+    if (isDemoModeEnabled()) {
+      const defaultStats: TeamStats = {
+        total_members: 0,
+        active_members: 0,
+        inactive_members: 0,
+        pending_invitations: 0,
+        on_leave: 0,
+        total_leads: 0,
+        total_admins: 0,
+        departments: [],
+        roles: [],
+        avg_performance_score: 0,
+        avg_tasks_completed: 0,
+        total_hourly_rate: 0,
+        recent_joins: 0,
+        recent_departures: 0
+      }
+      return { success: true, data: defaultStats }
+    }
+
     try {
       const { data: members, error } = await this.supabase
         .from('team_members')

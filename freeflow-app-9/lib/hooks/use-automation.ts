@@ -1,6 +1,19 @@
 import { useSupabaseQuery } from './use-supabase-query'
 import { useSupabaseMutation } from './use-supabase-mutation'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export type AutomationType = 'trigger' | 'scheduled' | 'conditional' | 'event' | 'webhook' | 'api' | 'manual' | 'batch' | 'realtime'
 export type AutomationStatus = 'active' | 'inactive' | 'paused' | 'running' | 'failed' | 'completed' | 'disabled'
 

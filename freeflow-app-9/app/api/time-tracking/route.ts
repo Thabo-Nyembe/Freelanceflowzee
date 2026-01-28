@@ -11,6 +11,18 @@ import { createClient } from '@/lib/supabase/server'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('time-tracking')
+
+// Demo mode support
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url)
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  )
+}
 import {
   getTimeEntries,
   getRunningTimeEntry,
@@ -26,8 +38,29 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
+    // Check for demo mode
+    const demoMode = isDemoMode(request)
+
+    // Determine user ID - use demo user if in demo mode and not authenticated
+    let userId: string
+
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      if (demoMode) {
+        // Use demo user ID for unauthenticated demo mode
+        userId = DEMO_USER_ID
+      } else {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+    } else {
+      // Check if authenticated user is a demo account
+      const userEmail = user.email
+      const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
+
+      if (isDemoAccount || demoMode) {
+        userId = DEMO_USER_ID
+      } else {
+        userId = user.id
+      }
     }
 
     const { searchParams } = new URL(request.url)
@@ -42,7 +75,7 @@ export async function GET(request: NextRequest) {
 
     switch (type) {
       case 'entries': {
-        const { data, error } = await getTimeEntries(user.id, {
+        const { data, error } = await getTimeEntries(userId, {
           startDate,
           endDate,
           projectId,
@@ -50,35 +83,35 @@ export async function GET(request: NextRequest) {
           isBillable: isBillable ? isBillable === 'true' : undefined
         })
         if (error) throw error
-        return NextResponse.json({ data })
+        return NextResponse.json({ data, demo: demoMode || userId === DEMO_USER_ID })
       }
 
       case 'running': {
-        const { data, error } = await getRunningTimeEntry(user.id)
+        const { data, error } = await getRunningTimeEntry(userId)
         if (error) throw error
-        return NextResponse.json({ data })
+        return NextResponse.json({ data, demo: demoMode || userId === DEMO_USER_ID })
       }
 
       case 'summary': {
-        const { data, error } = await getTimeTrackingSummary(user.id, startDate, endDate)
+        const { data, error } = await getTimeTrackingSummary(userId, startDate, endDate)
         if (error) throw error
-        return NextResponse.json({ data })
+        return NextResponse.json({ data, demo: demoMode || userId === DEMO_USER_ID })
       }
 
       case 'daily': {
-        const { data, error } = await getDailyTimeEntries(user.id, date)
+        const { data, error } = await getDailyTimeEntries(userId, date)
         if (error) throw error
-        return NextResponse.json({ data })
+        return NextResponse.json({ data, demo: demoMode || userId === DEMO_USER_ID })
       }
 
       case 'weekly': {
-        const { data, error } = await getWeeklyTimeReport(user.id, weekStart)
+        const { data, error } = await getWeeklyTimeReport(userId, weekStart)
         if (error) throw error
-        return NextResponse.json({ data })
+        return NextResponse.json({ data, demo: demoMode || userId === DEMO_USER_ID })
       }
 
       case 'export': {
-        const { data, error } = await exportTimeEntries(user.id, {
+        const { data, error } = await exportTimeEntries(userId, {
           startDate,
           endDate,
           projectId

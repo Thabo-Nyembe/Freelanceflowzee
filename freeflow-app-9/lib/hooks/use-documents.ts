@@ -5,6 +5,19 @@ import { useSupabaseQuery } from './use-supabase-helpers'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export type DocumentType = 'contract' | 'proposal' | 'report' | 'policy' | 'invoice' | 'presentation' | 'spreadsheet' | 'other'
 export type DocumentStatus = 'draft' | 'review' | 'approved' | 'archived' | 'rejected' | 'published'
 export type AccessLevel = 'public' | 'internal' | 'confidential' | 'restricted' | 'secret'
@@ -123,6 +136,7 @@ interface UseDocumentsOptions {
 
 export function useDocuments(options: UseDocumentsOptions = {}) {
   const { type, status, department } = options
+  const isDemo = isDemoModeEnabled()
 
   const filters: Record<string, unknown> = {}
   if (type && type !== 'all') {
@@ -138,7 +152,8 @@ export function useDocuments(options: UseDocumentsOptions = {}) {
   return useSupabaseQuery<Document>({
     table: 'documents',
     filters,
-    orderBy: { column: 'created_at', ascending: false }
+    orderBy: { column: 'created_at', ascending: false },
+    enabled: !isDemo
   })
 }
 
@@ -147,9 +162,11 @@ export function useDocumentMutations() {
     table: 'documents'
   })
   const supabase = createClient()
+  const isDemo = isDemoModeEnabled()
 
   // Get user ID helper
   const getUserId = async (): Promise<string | null> => {
+    if (isDemo) return '00000000-0000-0000-0000-000000000001'
     const { data: { user } } = await supabase.auth.getUser()
     return user?.id || null
   }
@@ -217,6 +234,10 @@ export function useDocumentMutations() {
   // ============================================
 
   const uploadDocument = async (file: File, folderId?: string): Promise<Document> => {
+    if (isDemo) {
+      toast.info('Demo mode: Upload simulated')
+      return {} as Document
+    }
     const userId = await getUserId()
     if (!userId) {
       throw new Error('User not authenticated')
@@ -288,6 +309,10 @@ export function useDocumentMutations() {
     parentId?: string,
     options?: { description?: string; color?: string; icon?: string }
   ): Promise<DocumentFolder> => {
+    if (isDemo) {
+      toast.info('Demo mode: Folder creation simulated')
+      return {} as DocumentFolder
+    }
     const userId = await getUserId()
     if (!userId) {
       throw new Error('User not authenticated')
@@ -343,6 +368,10 @@ export function useDocumentMutations() {
     folderId: string,
     updates: Partial<Pick<DocumentFolder, 'name' | 'description' | 'color' | 'icon'>>
   ): Promise<DocumentFolder> => {
+    if (isDemo) {
+      toast.info('Demo mode: Folder update simulated')
+      return {} as DocumentFolder
+    }
     const { data, error } = await supabase
       .from('folders')
       .update({
@@ -362,6 +391,10 @@ export function useDocumentMutations() {
   }
 
   const deleteFolder = async (folderId: string): Promise<void> => {
+    if (isDemo) {
+      toast.info('Demo mode: Folder deletion simulated')
+      return
+    }
     // Check if folder has documents
     const { count } = await supabase
       .from('documents')
@@ -395,6 +428,7 @@ export function useDocumentMutations() {
   }
 
   const getFolders = async (parentId?: string | null): Promise<DocumentFolder[]> => {
+    if (isDemo) return []
     const userId = await getUserId()
     if (!userId) return []
 
@@ -436,6 +470,10 @@ export function useDocumentMutations() {
       password?: string
     }
   ): Promise<DocumentShare> => {
+    if (isDemo) {
+      toast.info('Demo mode: Share simulated')
+      return {} as DocumentShare
+    }
     const currentUserId = await getUserId()
     if (!currentUserId) {
       throw new Error('User not authenticated')
@@ -514,6 +552,10 @@ export function useDocumentMutations() {
       expiresAt?: string
     }
   ): Promise<DocumentShare> => {
+    if (isDemo) {
+      toast.info('Demo mode: Permission update simulated')
+      return {} as DocumentShare
+    }
     const { data, error } = await supabase
       .from('document_shares')
       .update({
@@ -534,6 +576,10 @@ export function useDocumentMutations() {
   }
 
   const revokeShare = async (shareId: string): Promise<void> => {
+    if (isDemo) {
+      toast.info('Demo mode: Revoke simulated')
+      return
+    }
     const { error } = await supabase
       .from('document_shares')
       .update({ is_active: false })
@@ -547,6 +593,7 @@ export function useDocumentMutations() {
   }
 
   const getDocumentShares = async (documentId: string): Promise<DocumentShare[]> => {
+    if (isDemo) return []
     const { data, error } = await supabase
       .from('document_shares')
       .select('*')
@@ -570,6 +617,10 @@ export function useDocumentMutations() {
     file: File,
     changeSummary?: string
   ): Promise<DocumentVersion> => {
+    if (isDemo) {
+      toast.info('Demo mode: Version upload simulated')
+      return {} as DocumentVersion
+    }
     const userId = await getUserId()
     if (!userId) {
       throw new Error('User not authenticated')
@@ -648,6 +699,7 @@ export function useDocumentMutations() {
   }
 
   const getDocumentVersions = async (documentId: string): Promise<DocumentVersion[]> => {
+    if (isDemo) return []
     const { data, error } = await supabase
       .from('document_versions')
       .select('*')
@@ -666,6 +718,10 @@ export function useDocumentMutations() {
     documentId: string,
     versionId: string
   ): Promise<Document> => {
+    if (isDemo) {
+      toast.info('Demo mode: Version restore simulated')
+      return {} as Document
+    }
     const userId = await getUserId()
     if (!userId) {
       throw new Error('User not authenticated')
@@ -766,6 +822,10 @@ export function useDocumentMutations() {
   }
 
   const downloadDocument = async (id: string) => {
+    if (isDemo) {
+      toast.info('Demo mode: Download simulated')
+      return
+    }
     // Get document details
     const { data: doc, error } = await supabase
       .from('documents')

@@ -8,11 +8,25 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export function useTeam(teamId?: string) {
   const [team, setTeam] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('teams').select('*, team_members(*, users(*)), team_roles(*), team_settings(*)').eq('id', teamId).single(); setTeam(data) } finally { setIsLoading(false) }
@@ -25,7 +39,8 @@ export function useTeams(options?: { team_type?: string; owner_id?: string; is_p
   const [teams, setTeams] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('teams').select('*, team_members(count)')
@@ -45,7 +60,8 @@ export function useTeamMembers(teamId?: string, options?: { role?: string; is_ac
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -64,7 +80,8 @@ export function useUserTeams(userId?: string, options?: { role?: string; is_acti
   const [teams, setTeams] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -83,7 +100,8 @@ export function useTeamMembership(teamId?: string, userId?: string) {
   const [membership, setMembership] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -99,7 +117,8 @@ export function useTeamInvitations(teamId?: string, options?: { status?: string 
   const [invitations, setInvitations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -123,7 +142,8 @@ export function useTeamSettings(teamId?: string) {
   const [settings, setSettings] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -141,7 +161,8 @@ export function useTeamActivities(teamId?: string, options?: { activity_type?: s
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -160,7 +181,8 @@ export function useTeamRoles(teamId?: string) {
   const [roles, setRoles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('team_roles').select('*').eq('team_id', teamId).order('name', { ascending: true }); setRoles(data || []) } finally { setIsLoading(false) }
@@ -173,7 +195,8 @@ export function useMyPendingInvitations(email?: string) {
   const [invitations, setInvitations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!email) { setIsLoading(false); return }
     setIsLoading(true)
     try {

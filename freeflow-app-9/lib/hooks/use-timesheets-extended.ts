@@ -8,10 +8,24 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export function useTimesheet(timesheetId?: string) {
   const [timesheet, setTimesheet] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -25,6 +39,7 @@ export function useTimesheets(options?: { user_id?: string; status?: string; per
   const [timesheets, setTimesheets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -46,6 +61,7 @@ export function useMyTimesheets(userId?: string, options?: { status?: string; li
   const [timesheets, setTimesheets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -65,6 +81,7 @@ export function useTimesheetEntries(timesheetId?: string, options?: { date?: str
   const [totals, setTotals] = useState<{ total: number; billable: number; nonBillable: number }>({ total: 0, billable: 0, nonBillable: 0 })
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -88,6 +105,7 @@ export function useTimesheetApprovals(timesheetId?: string) {
   const [approvals, setApprovals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -101,6 +119,7 @@ export function usePendingApprovals(approverId?: string, options?: { limit?: num
   const [timesheets, setTimesheets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!approverId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -117,6 +136,7 @@ export function useTimesheetProjects(options?: { is_active?: boolean; search?: s
   const [projects, setProjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -135,6 +155,7 @@ export function useTimesheetCategories(options?: { is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -152,6 +173,7 @@ export function useTimesheetStats(userId?: string, options?: { from_date?: strin
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -184,6 +206,7 @@ export function useCurrentTimesheet(userId?: string, periodType: string = 'weekl
   const [timesheet, setTimesheet] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -210,6 +233,7 @@ export function useDailyHours(timesheetId?: string) {
   const [dailyHours, setDailyHours] = useState<Record<string, { total: number; billable: number }>>({})
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
     setIsLoading(true)

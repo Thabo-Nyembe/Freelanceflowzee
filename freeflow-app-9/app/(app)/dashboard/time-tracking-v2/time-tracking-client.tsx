@@ -1336,10 +1336,10 @@ export default function TimeTrackingClient() {
                 <div className="flex items-center gap-4">
                   {/* Filter Controls */}
                   <div className="flex items-center gap-2">
-                    <Select value={filters.projectId} onValueChange={(value) => setFilters(prev => ({ ...prev, projectId: value }))}>
+                    <Select value={filters.projectId || 'all'} onValueChange={(value) => setFilters(prev => ({ ...prev, projectId: value === 'all' ? '' : value }))}>
                       <SelectTrigger className="w-40 h-8 text-xs"><SelectValue placeholder="All Projects" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Projects</SelectItem>
+                        <SelectItem value="all">All Projects</SelectItem>
                         {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
@@ -1380,26 +1380,26 @@ export default function TimeTrackingClient() {
                           </div>
                           <div className="flex items-center gap-3 text-sm">
                             <Badge className={getStatusColor(entry.is_billable ? 'paid' : 'draft')}>{entry.is_billable ? 'Billable' : 'Non-Billable'}</Badge>
-                            <Select value={entry.project_id || ''} onValueChange={(value) => handleAssignProject(entry.id, value)}>
+                            <Select value={entry.project_id || 'none'} onValueChange={(value) => handleAssignProject(entry.id, value === 'none' ? '' : value)}>
                               <SelectTrigger className="h-6 w-auto min-w-[120px] max-w-[200px] text-xs border-none bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 px-2">
                                 <SelectValue placeholder="No Project">
                                   <span className={project?.name ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}>{project?.name || 'No Project'}</span>
                                 </SelectValue>
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">No Project</SelectItem>
+                                <SelectItem value="none">No Project</SelectItem>
                                 {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                               </SelectContent>
                             </Select>
                             {dbTasks && dbTasks.length > 0 && (
-                              <Select value={entry.task_id || ''} onValueChange={(value) => handleAssignTask(entry.id, value || undefined)}>
+                              <Select value={entry.task_id || 'none'} onValueChange={(value) => handleAssignTask(entry.id, value === 'none' ? undefined : value)}>
                                 <SelectTrigger className="h-6 w-auto min-w-[100px] max-w-[150px] text-xs border-none bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 px-2">
                                   <SelectValue placeholder="No Task">
                                     <span className={entry.task_id ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}>{dbTasks.find(t => t.id === entry.task_id)?.title || 'No Task'}</span>
                                   </SelectValue>
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="">No Task</SelectItem>
+                                  <SelectItem value="none">No Task</SelectItem>
                                   {dbTasks.filter(t => !entry.project_id || t.project_id === entry.project_id).map(t => <SelectItem key={t.id} value={t.id}>{t.title}</SelectItem>)}
                                 </SelectContent>
                               </Select>

@@ -5,6 +5,19 @@ import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
 import { useTeam } from '@/lib/hooks/use-team'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -262,7 +275,7 @@ export default function AnalyticsClient() {
     'Amplitude': false,
     'Hotjar': true,
   })
-  const [apiKey, setApiKey] = useState('ak_live_' + Math.random().toString(36).substring(2, 14))
+  const [apiKey, setApiKey] = useState('ak_live_demo_key_2024')
 
   // New state for enhanced features
   const [showSaveReportDialog, setShowSaveReportDialog] = useState(false)
@@ -637,6 +650,7 @@ export default function AnalyticsClient() {
 
   // Fetch real analytics data from Supabase tables
   const fetchUserAnalytics = useCallback(async () => {
+    if (isDemoModeEnabled()) return // Skip in demo mode
     if (!userId) return
     try {
       const { data, error } = await supabase
@@ -3559,11 +3573,20 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                 <CardContent>
                   <ScrollArea className="h-64">
                     <div className="space-y-2">
-                      {Array.from({ length: 12 }, (_, i) => ({
-                        event: ['Page View', 'Button Click', 'Form Submit', 'Sign Up', 'Purchase'][Math.floor(Math.random() * 5)],
-                        time: `${Math.floor(Math.random() * 60)}s ago`,
-                        location: ['US', 'UK', 'DE', 'CA', 'AU'][Math.floor(Math.random() * 5)]
-                      })).map((event, idx) => (
+                      {[
+                        { event: 'Page View', time: '5s ago', location: 'US' },
+                        { event: 'Button Click', time: '12s ago', location: 'UK' },
+                        { event: 'Form Submit', time: '18s ago', location: 'DE' },
+                        { event: 'Sign Up', time: '25s ago', location: 'CA' },
+                        { event: 'Purchase', time: '32s ago', location: 'AU' },
+                        { event: 'Page View', time: '38s ago', location: 'US' },
+                        { event: 'Button Click', time: '42s ago', location: 'UK' },
+                        { event: 'Form Submit', time: '48s ago', location: 'DE' },
+                        { event: 'Sign Up', time: '52s ago', location: 'CA' },
+                        { event: 'Purchase', time: '55s ago', location: 'AU' },
+                        { event: 'Page View', time: '58s ago', location: 'US' },
+                        { event: 'Button Click', time: '60s ago', location: 'UK' }
+                      ].map((event, idx) => (
                         <div key={idx} className="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-2">
                             <div className={`h-2 w-2 rounded-full ${
@@ -4676,10 +4699,10 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                 </TabsContent>
                 <TabsContent value="history" className="mt-4">
                   <div className="space-y-2">
-                    {Array.from({ length: 7 }, (_, i) => (
+                    {['Jan 28', 'Jan 27', 'Jan 26', 'Jan 25', 'Jan 24', 'Jan 23', 'Jan 22'].map((date, i) => (
                       <div key={i} className="flex items-center justify-between py-3 px-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <span className="text-sm">{new Date(Date.now() - i * 24 * 60 * 60 * 1000).toLocaleDateString()}</span>
-                        <span className="font-medium">{formatValue(selectedMetric.value * (1 + (Math.random() - 0.5) * 0.2), selectedMetric.type)}</span>
+                        <span className="text-sm">{date}</span>
+                        <span className="font-medium">{formatValue(selectedMetric.value * [1.0, 0.95, 1.05, 0.98, 1.02, 0.97, 1.03][i], selectedMetric.type)}</span>
                       </div>
                     ))}
                   </div>
@@ -4695,12 +4718,12 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                 </TabsContent>
                 <TabsContent value="correlations" className="mt-4">
                   <div className="space-y-3">
-                    {filteredMetrics.slice(0, 4).filter(m => m.id !== selectedMetric.id).map((metric) => (
+                    {filteredMetrics.slice(0, 4).filter(m => m.id !== selectedMetric.id).map((metric, i) => (
                       <div key={metric.id} className="flex items-center justify-between py-3 px-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <span className="font-medium">{metric.name}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-gray-500">Correlation:</span>
-                          <Badge variant="outline">{(0.3 + Math.random() * 0.6).toFixed(2)}</Badge>
+                          <Badge variant="outline">{['0.72', '0.58', '0.84', '0.45'][i % 4]}</Badge>
                         </div>
                       </div>
                     ))}

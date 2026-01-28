@@ -10,6 +10,60 @@ import { createFeatureLogger } from '@/lib/logger';
 
 const logger = createFeatureLogger('api-keys');
 
+// Demo mode constants
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
+
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url);
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  );
+}
+
+// Demo API keys data
+function getDemoApiKeys() {
+  return [
+    {
+      id: 'demo-key-1',
+      name: 'Production API Key',
+      key_preview: 'kazi_live_xxx...xxx',
+      scopes: ['read', 'write'],
+      last_used_at: new Date(Date.now() - 86400000).toISOString(),
+      usage_count: 1247,
+      rate_limit: 1000,
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      is_active: true,
+      created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'demo-key-2',
+      name: 'Development API Key',
+      key_preview: 'kazi_test_xxx...xxx',
+      scopes: ['read', 'write', 'delete'],
+      last_used_at: new Date(Date.now() - 3600000).toISOString(),
+      usage_count: 523,
+      rate_limit: 500,
+      expires_at: null,
+      is_active: true,
+      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'demo-key-3',
+      name: 'Webhook Integration Key',
+      key_preview: 'kazi_live_yyy...yyy',
+      scopes: ['read'],
+      last_used_at: new Date(Date.now() - 7200000).toISOString(),
+      usage_count: 89,
+      rate_limit: 100,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      is_active: true,
+      created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+  ];
+}
+
 // =====================================================
 // GET - List API keys
 // =====================================================
@@ -18,8 +72,56 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    // Check for demo mode
+    const demoMode = isDemoMode(request);
+
+    // If not authenticated
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      if (demoMode) {
+        // Use demo user ID and try to fetch from database
+        const userId = DEMO_USER_ID;
+
+        try {
+          const apiKeys = await integrationService.getApiKeys(userId);
+
+          if (apiKeys && apiKeys.length > 0) {
+            // Don't return the actual key hash for security
+            const sanitizedKeys = apiKeys.map(key => ({
+              id: key.id,
+              name: key.name,
+              key_preview: `${key.key_prefix}...`,
+              scopes: key.scopes,
+              last_used_at: key.last_used_at,
+              usage_count: key.usage_count,
+              rate_limit: key.rate_limit,
+              expires_at: key.expires_at,
+              is_active: key.is_active,
+              created_at: key.created_at,
+            }));
+
+            return NextResponse.json({
+              success: true,
+              demo: true,
+              api_keys: sanitizedKeys,
+              total: sanitizedKeys.length,
+            });
+          }
+        } catch (dbError) {
+          // Database fetch failed, fall back to mock data
+          logger.info('Demo mode: falling back to mock data');
+        }
+
+        // Return demo data
+        const demoKeys = getDemoApiKeys();
+        return NextResponse.json({
+          success: true,
+          demo: true,
+          api_keys: demoKeys,
+          total: demoKeys.length,
+        });
+      } else {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     }
 
     const apiKeys = await integrationService.getApiKeys(user.id);

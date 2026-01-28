@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createFeatureLogger } from '@/lib/logger';
+import { createClient } from '@/lib/supabase/server';
 
 const logger = createFeatureLogger('API-Gallery');
+
+// Demo mode constants
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
+
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url);
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  );
+}
 
 /**
  * Gallery API Route
@@ -64,12 +77,129 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category') || 'all';
     const search = searchParams.get('search') || '';
     const featured = searchParams.get('featured') === 'true';
 
-    // Mock gallery retrieval
+    // Check for demo mode
+    const demoMode = isDemoMode(request);
+
+    // If not authenticated
+    if (!user) {
+      if (demoMode) {
+        // Use demo user ID and fetch from database
+        const userId = DEMO_USER_ID;
+
+        // Try to fetch from database first
+        let query = supabase
+          .from('portfolio_items')
+          .select('*')
+          .eq('user_id', userId);
+
+        if (category !== 'all') {
+          query = query.eq('category', category);
+        }
+        if (search) {
+          query = query.or(`title.ilike.%${search}%,tags.cs.{${search}}`);
+        }
+        if (featured) {
+          query = query.eq('featured', true);
+        }
+
+        const { data: portfolioItems, error } = await query;
+
+        if (!error && portfolioItems && portfolioItems.length > 0) {
+          // Return database items
+          const items = portfolioItems.map(item => ({
+            id: item.id,
+            title: item.title,
+            type: item.media_type || 'image',
+            category: item.category || 'branding',
+            url: item.media_url,
+            thumbnail: item.thumbnail_url || item.media_url,
+            dateCreated: item.created_at,
+            likes: item.likes_count || 0,
+            comments: item.comments_count || 0,
+            client: item.client_name,
+            project: item.project_name,
+            tags: item.tags || [],
+            featured: item.featured || false,
+          }));
+
+          return NextResponse.json({
+            success: true,
+            demo: true,
+            items,
+            total: items.length,
+            categories: getCategories(items as GalleryItem[]),
+          });
+        }
+
+        // Fall back to mock data if no database items
+        const mockItems = getMockGalleryItems();
+        return NextResponse.json({
+          success: true,
+          demo: true,
+          items: mockItems,
+          total: mockItems.length,
+          categories: getCategories(mockItems),
+        });
+      } else {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
+    // Authenticated user - use their ID
+    const userId = user.id;
+
+    // Try to fetch from database
+    let query = supabase
+      .from('portfolio_items')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (category !== 'all') {
+      query = query.eq('category', category);
+    }
+    if (search) {
+      query = query.or(`title.ilike.%${search}%,tags.cs.{${search}}`);
+    }
+    if (featured) {
+      query = query.eq('featured', true);
+    }
+
+    const { data: portfolioItems, error } = await query;
+
+    if (!error && portfolioItems && portfolioItems.length > 0) {
+      const items = portfolioItems.map(item => ({
+        id: item.id,
+        title: item.title,
+        type: item.media_type || 'image',
+        category: item.category || 'branding',
+        url: item.media_url,
+        thumbnail: item.thumbnail_url || item.media_url,
+        dateCreated: item.created_at,
+        likes: item.likes_count || 0,
+        comments: item.comments_count || 0,
+        client: item.client_name,
+        project: item.project_name,
+        tags: item.tags || [],
+        featured: item.featured || false,
+      }));
+
+      return NextResponse.json({
+        success: true,
+        items,
+        total: items.length,
+        categories: getCategories(items as GalleryItem[]),
+      });
+    }
+
+    // Fall back to mock gallery retrieval if no database items
     const items = getMockGalleryItems();
 
     let filtered = items;

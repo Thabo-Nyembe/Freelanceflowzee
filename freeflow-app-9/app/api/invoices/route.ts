@@ -5,6 +5,18 @@ import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('API-Invoices')
 
+// Demo mode support
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url)
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  )
+}
+
 // Demo invoices for demo account
 function getDemoInvoices() {
   const now = new Date()
@@ -142,8 +154,64 @@ export async function GET(request: NextRequest) {
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
 
-    // Unauthenticated users get empty data
+    // Check for demo mode
+    const demoMode = isDemoMode(request)
+
+    // Unauthenticated users
     if (!session?.user) {
+      if (demoMode) {
+        // Use demo user ID and fetch from database
+        const userId = DEMO_USER_ID
+
+        // Build query for demo user
+        let query = supabase
+          .from('invoices')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+
+        // Apply filters
+        if (status && status !== 'all') {
+          query = query.eq('status', status)
+        }
+        if (clientId) {
+          query = query.eq('client_id', clientId)
+        }
+        if (dateFrom) {
+          query = query.gte('issue_date', dateFrom)
+        }
+        if (dateTo) {
+          query = query.lte('issue_date', dateTo)
+        }
+
+        const { data: invoices, error } = await query
+
+        if (error) {
+          logger.error('Demo invoices query error', { error })
+          // Fall back to demo data on error
+          return NextResponse.json({
+            success: true,
+            demo: true,
+            data: {
+              invoices: getDemoInvoices(),
+              stats: getDemoInvoiceStats()
+            }
+          })
+        }
+
+        // Calculate stats for demo user
+        const stats = await getInvoiceStats(supabase, userId)
+
+        return NextResponse.json({
+          success: true,
+          demo: true,
+          data: {
+            invoices: invoices || [],
+            stats
+          }
+        })
+      }
+
       return NextResponse.json({
         success: true,
         data: {
@@ -160,20 +228,50 @@ export async function GET(request: NextRequest) {
     // Demo mode ONLY for demo account (test@kazi.dev)
     const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
 
-    if (isDemoAccount) {
-      let demoInvoices = getDemoInvoices()
+    if (isDemoAccount || demoMode) {
+      // For demo mode with authenticated user, fetch real data for demo user
+      const demoUserId = DEMO_USER_ID
 
-      // Apply filters
+      let query = supabase
+        .from('invoices')
+        .select('*')
+        .eq('user_id', demoUserId)
+        .order('created_at', { ascending: false })
+
       if (status && status !== 'all') {
-        demoInvoices = demoInvoices.filter(inv => inv.status === status)
+        query = query.eq('status', status)
       }
+      if (clientId) {
+        query = query.eq('client_id', clientId)
+      }
+
+      const { data: invoices, error } = await query
+
+      if (error || !invoices?.length) {
+        // Fall back to static demo data
+        let demoInvoices = getDemoInvoices()
+        if (status && status !== 'all') {
+          demoInvoices = demoInvoices.filter(inv => inv.status === status)
+        }
+
+        return NextResponse.json({
+          success: true,
+          demo: true,
+          data: {
+            invoices: demoInvoices,
+            stats: getDemoInvoiceStats()
+          }
+        })
+      }
+
+      const stats = await getInvoiceStats(supabase, demoUserId)
 
       return NextResponse.json({
         success: true,
         demo: true,
         data: {
-          invoices: demoInvoices,
-          stats: getDemoInvoiceStats()
+          invoices: invoices || [],
+          stats
         }
       })
     }

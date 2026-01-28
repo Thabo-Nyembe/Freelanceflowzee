@@ -3,6 +3,19 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 // Generic query hook for fetching data from Supabase
 export interface UseSupabaseQueryOptions<T> {
   table: string
@@ -42,6 +55,7 @@ export function useSupabaseQuery<T = unknown>(
 
   const fetchData = useCallback(async () => {
     if (!enabled) return
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
 
     setIsLoading(true)
     setError(null)
@@ -217,6 +231,7 @@ export function useRealtimeSubscription(options: UseRealtimeOptions): void {
 
   useEffect(() => {
     if (!enabled || !onUpdate) return
+    if (isDemoModeEnabled()) return
 
     const channel = supabase
       .channel(`realtime:${table}`)

@@ -524,7 +524,7 @@ export default function CollaborationClient() {
         avatar: member.avatar_url || '',
         role: member.role || 'member',
         presence: member.status === 'active' ? 'online' : 'offline',
-        cursorColor: `#${Math.floor(Math.random()*16777215).toString(16)}`
+        cursorColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'][member.id?.charCodeAt(0) % 6 || 0]
       }))
     }
     // No fallback - use real data only
@@ -627,7 +627,7 @@ export default function CollaborationClient() {
             email: p.email || '',
             role: p.role || 'member',
             presence: 'online' as PresenceStatus,
-            cursorColor: `#${Math.floor(Math.random()*16777215).toString(16)}`,
+            cursorColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'][(p.id || p.user_id)?.charCodeAt(0) % 6 || 0],
             lastActive: session.last_activity_at || session.updated_at
           })) || [defaultMember],
           isStarred: false,

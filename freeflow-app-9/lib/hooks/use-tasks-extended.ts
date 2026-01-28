@@ -9,6 +9,19 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { JsonValue } from '@/lib/types/database'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -99,6 +112,9 @@ export function useTask(taskId?: string) {
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    // Demo data is fetched via API routes instead
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tasks').select('*, task_assignments(*), task_dependencies(*), task_checklists(*), users(*), projects(*)').eq('id', taskId).single(); setTask(data as ExtendedTask | null) } finally { setIsLoading(false) }
@@ -112,6 +128,9 @@ export function useTasks(options?: { project_id?: string; status?: string; prior
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    // Demo data is fetched via API routes instead
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       let query = supabase.from('tasks').select('*, task_assignments(*), users(*), projects(*)')
@@ -143,6 +162,9 @@ export function useMyTasks(userId?: string, options?: { status?: string; priorit
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    // Demo data is fetched via API routes instead
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -165,6 +187,9 @@ export function useSubtasks(taskId?: string) {
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    // Demo data is fetched via API routes instead
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tasks').select('*, task_assignments(*)').eq('parent_id', taskId).order('created_at', { ascending: true }); setSubtasks((data || []) as ExtendedTask[]) } finally { setIsLoading(false) }
@@ -179,6 +204,9 @@ export function useTaskDependencies(taskId?: string) {
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    // Demo data is fetched via API routes instead
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -199,6 +227,9 @@ export function useTaskComments(taskId?: string, options?: { limit?: number }) {
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    // Demo data is fetched via API routes instead
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('task_comments').select('*, users(*)').eq('task_id', taskId).is('parent_id', null).order('created_at', { ascending: true }).limit(options?.limit || 100); setComments((data || []) as TaskComment[]) } finally { setIsLoading(false) }
@@ -213,6 +244,9 @@ export function useTaskTimeLogs(taskId?: string, options?: { user_id?: string; f
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    // Demo data is fetched via API routes instead
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -236,6 +270,9 @@ export function useTaskChecklist(taskId?: string) {
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    // Demo data is fetched via API routes instead
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -256,6 +293,9 @@ export function useOverdueTasks(options?: { project_id?: string; assignee_id?: s
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    // Demo data is fetched via API routes instead
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       let query = supabase.from('tasks').select('*, task_assignments(*), projects(*)').lt('due_date', new Date().toISOString()).neq('status', 'done')
@@ -279,6 +319,9 @@ export function useTaskStats(projectId?: string) {
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    // Demo data is fetched via API routes instead
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       let query = supabase.from('tasks').select('status, due_date')

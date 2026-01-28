@@ -15,6 +15,21 @@ import { createFeatureLogger } from '@/lib/logger'
 const logger = createFeatureLogger('payroll')
 
 // ============================================================================
+// DEMO MODE CONFIGURATION
+// ============================================================================
+
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url)
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  )
+}
+
+// ============================================================================
 // TYPES
 // ============================================================================
 
@@ -96,32 +111,64 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Unauthenticated users get empty data
+    // Check for demo mode
+    const demoMode = isDemoMode(request)
+
+    // If not authenticated
     if (!session?.user) {
-      return NextResponse.json({
-        success: true,
-        data: [],
-        pagination: { page: 1, limit: 20, total: 0, totalPages: 0 }
-      })
+      if (demoMode) {
+        // Use demo user ID and fetch from database
+        const userId = DEMO_USER_ID
+
+        // Handle different actions for demo mode
+        switch (action) {
+          case 'approval-queue':
+            return handleGetApprovalQueue(supabase, userId, true)
+
+          case 'analytics':
+            return handleGetAnalytics(supabase, userId, true)
+
+          case 'single':
+            if (!runId) {
+              return NextResponse.json(
+                { error: 'Pay run ID is required' },
+                { status: 400 }
+              )
+            }
+            return handleGetSinglePayRun(supabase, userId, runId, true)
+
+          case 'list':
+          default:
+            return handleListPayRuns(supabase, userId, {
+              status,
+              department,
+              search,
+              sortBy,
+              sortOrder,
+              page,
+              limit
+            }, true)
+        }
+      } else {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
     }
 
     const userId = (session.user as any).authId || session.user.id
     const userEmail = session.user.email
 
-    // Demo mode ONLY for demo account (test@kazi.dev)
+    // Also check for demo account emails
     const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
-
-    if (isDemoAccount) {
-      return handleDemoResponse(action)
-    }
+    const effectiveUserId = isDemoAccount ? DEMO_USER_ID : userId
+    const isDemo = isDemoAccount || demoMode
 
     // Handle different actions
     switch (action) {
       case 'approval-queue':
-        return handleGetApprovalQueue(supabase, userId)
+        return handleGetApprovalQueue(supabase, effectiveUserId, isDemo)
 
       case 'analytics':
-        return handleGetAnalytics(supabase, userId)
+        return handleGetAnalytics(supabase, effectiveUserId, isDemo)
 
       case 'single':
         if (!runId) {
@@ -130,11 +177,11 @@ export async function GET(request: NextRequest) {
             { status: 400 }
           )
         }
-        return handleGetSinglePayRun(supabase, userId, runId)
+        return handleGetSinglePayRun(supabase, effectiveUserId, runId, isDemo)
 
       case 'list':
       default:
-        return handleListPayRuns(supabase, userId, {
+        return handleListPayRuns(supabase, effectiveUserId, {
           status,
           department,
           search,
@@ -142,7 +189,7 @@ export async function GET(request: NextRequest) {
           sortOrder,
           page,
           limit
-        })
+        }, isDemo)
     }
   } catch (error) {
     logger.error('Payroll GET error', { error })
@@ -408,7 +455,8 @@ export async function DELETE(request: NextRequest) {
 
 async function handleGetApprovalQueue(
   supabase: any,
-  userId: string
+  userId: string,
+  isDemo: boolean = false
 ) {
   try {
     const { data: pendingRuns, error } = await supabase
@@ -434,6 +482,7 @@ async function handleGetApprovalQueue(
 
     return NextResponse.json({
       success: true,
+      demo: isDemo,
       approval_queue: queue,
       total_pending: queue.length,
       total_amount_pending: queue.reduce((sum, item) => sum + (item.total_amount || 0), 0),
@@ -452,7 +501,8 @@ async function handleGetApprovalQueue(
 
 async function handleGetAnalytics(
   supabase: any,
-  userId: string
+  userId: string,
+  isDemo: boolean = false
 ) {
   try {
     // Get all pay runs for the user
@@ -525,8 +575,9 @@ async function handleGetAnalytics(
 
     return NextResponse.json({
       success: true,
+      demo: isDemo,
       analytics,
-      message: 'Payroll analytics loaded successfully'
+      message: isDemo ? 'Demo analytics data - sign in for real data' : 'Payroll analytics loaded successfully'
     })
   } catch (error) {
     logger.error('Analytics error', { error })
@@ -540,7 +591,8 @@ async function handleGetAnalytics(
 async function handleGetSinglePayRun(
   supabase: any,
   userId: string,
-  runId: string
+  runId: string,
+  isDemo: boolean = false
 ) {
   const { data: payRun, error } = await supabase
     .from('payroll_runs')
@@ -558,6 +610,7 @@ async function handleGetSinglePayRun(
 
   return NextResponse.json({
     success: true,
+    demo: isDemo,
     payroll_run: payRun
   })
 }
@@ -573,7 +626,8 @@ async function handleListPayRuns(
     sortOrder: string
     page: number
     limit: number
-  }
+  },
+  isDemo: boolean = false
 ) {
   const { status, department, search, sortBy, sortOrder, page, limit } = options
 
@@ -613,6 +667,7 @@ async function handleListPayRuns(
 
   return NextResponse.json({
     success: true,
+    demo: isDemo,
     payroll_runs: payRuns || [],
     pagination: {
       page,

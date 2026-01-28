@@ -3870,7 +3870,7 @@ export default function ProjectsHubClient() {
               </div>
               <div className="space-y-2">
                 <Label>Date</Label>
-                <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} />
+                <Input type="date" defaultValue="2026-01-28" />
               </div>
             </div>
             <DialogFooter>

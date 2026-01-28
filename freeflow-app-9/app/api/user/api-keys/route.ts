@@ -7,6 +7,66 @@ import logger from '@/lib/logger';
  * Allows users to store and manage their own API keys (BYOK - Bring Your Own Key)
  */
 
+// Demo mode constants
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
+
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url);
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  );
+}
+
+// Demo API keys for unauthenticated demo users
+function getDemoUserApiKeys(): UserAPIKey[] {
+  return [
+    {
+      id: 'demo-byok-1',
+      userId: DEMO_USER_ID,
+      configId: 'openai',
+      keyValue: 'sk-...xxxx',
+      nickname: 'OpenAI Production',
+      environment: 'production',
+      isActive: true,
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      lastUsed: new Date(Date.now() - 3600000).toISOString(),
+      usageCount: 1542,
+      estimatedCost: 45.23,
+      status: 'active'
+    },
+    {
+      id: 'demo-byok-2',
+      userId: DEMO_USER_ID,
+      configId: 'stripe',
+      keyValue: 'sk_live_...xxxx',
+      nickname: 'Stripe Live Key',
+      environment: 'production',
+      isActive: true,
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      lastUsed: new Date(Date.now() - 7200000).toISOString(),
+      usageCount: 892,
+      estimatedCost: 0,
+      status: 'active'
+    },
+    {
+      id: 'demo-byok-3',
+      userId: DEMO_USER_ID,
+      configId: 'anthropic',
+      keyValue: 'sk-ant-...xxxx',
+      nickname: 'Claude API',
+      environment: 'production',
+      isActive: true,
+      createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      lastUsed: new Date(Date.now() - 86400000).toISOString(),
+      usageCount: 256,
+      estimatedCost: 12.87,
+      status: 'active'
+    }
+  ];
+}
+
 interface UserAPIKey {
   id: string
   userId: string
@@ -27,16 +87,26 @@ const userAPIKeys: UserAPIKey[] = []
 
 export async function GET(request: NextRequest) {
   try {
-    // In production, get userId from session/auth
-    const userId = 'user_123'
+    // Check for demo mode
+    const demoMode = isDemoMode(request);
 
-    logger.info('Fetching user API keys', { userId })
+    // In production, get userId from session/auth
+    // For demo mode, use the demo user ID
+    const userId = demoMode ? DEMO_USER_ID : 'user_123';
+
+    logger.info('Fetching user API keys', { userId, demoMode })
 
     // Filter keys for this user
-    const keys = userAPIKeys.filter(k => k.userId === userId)
+    let keys = userAPIKeys.filter(k => k.userId === userId)
+
+    // If demo mode and no keys found, return demo data
+    if (demoMode && keys.length === 0) {
+      keys = getDemoUserApiKeys();
+    }
 
     return NextResponse.json({
       success: true,
+      demo: demoMode,
       data: keys,
       count: keys.length
     })

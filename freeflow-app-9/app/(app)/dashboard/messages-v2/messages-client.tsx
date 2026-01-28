@@ -271,7 +271,7 @@ export default function MessagesClient() {
             channelId: 'general',
             content: 'Quick question about the new design system updates',
             author: { id: 'demo-1', name: 'sarah', displayName: 'Sarah Chen', email: 'sarah@techcorp.com', status: 'online' as UserStatus },
-            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            createdAt: '2026-01-28T10:00:00.000Z',
             status: 'read' as MessageStatus,
             reactions: [{ emoji: '👍', count: 3, users: ['demo-2', 'demo-3'] }],
             threadCount: 5,
@@ -284,7 +284,7 @@ export default function MessagesClient() {
           channel: 'general',
           replies: 5,
           participants: [],
-          lastReply: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+          lastReply: '2026-01-28T11:30:00.000Z',
           isFollowing: true,
           isUnread: false
         },
@@ -295,7 +295,7 @@ export default function MessagesClient() {
             channelId: 'development',
             content: 'API integration discussion - need feedback on the new endpoints',
             author: { id: 'demo-2', name: 'mike', displayName: 'Mike Johnson', email: 'mike@techcorp.com', status: 'online' as UserStatus },
-            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+            createdAt: '2026-01-27T12:00:00.000Z',
             status: 'read' as MessageStatus,
             reactions: [],
             threadCount: 12,
@@ -308,7 +308,7 @@ export default function MessagesClient() {
           channel: 'development',
           replies: 12,
           participants: [],
-          lastReply: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+          lastReply: '2026-01-28T08:00:00.000Z',
           isFollowing: true,
           isUnread: true
         }
@@ -351,9 +351,9 @@ export default function MessagesClient() {
     // Demo files for investor demo
     if (isDemoAccount) {
       return [
-        { id: 'file-1', name: 'Q4-Report.pdf', type: 'application/pdf', size: 2457600, uploadedBy: currentUser, uploadedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), channelId: 'general', channelName: '#general', downloads: 12 },
-        { id: 'file-2', name: 'Brand-Guidelines-v2.ai', type: 'application/illustrator', size: 15728640, uploadedBy: { id: 'demo-1', name: 'sarah', displayName: 'Sarah Chen', email: 'sarah@techcorp.com', status: 'online' as UserStatus }, uploadedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), channelId: 'design', channelName: '#design', downloads: 8 },
-        { id: 'file-3', name: 'Sprint-Planning.xlsx', type: 'application/vnd.ms-excel', size: 524288, uploadedBy: { id: 'demo-3', name: 'emma', displayName: 'Emma Wilson', email: 'emma@techcorp.com', status: 'away' as UserStatus }, uploadedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), channelId: 'development', channelName: '#development', downloads: 24 }
+        { id: 'file-1', name: 'Q4-Report.pdf', type: 'application/pdf', size: 2457600, uploadedBy: currentUser, uploadedAt: '2026-01-26T12:00:00.000Z', channelId: 'general', channelName: '#general', downloads: 12 },
+        { id: 'file-2', name: 'Brand-Guidelines-v2.ai', type: 'application/illustrator', size: 15728640, uploadedBy: { id: 'demo-1', name: 'sarah', displayName: 'Sarah Chen', email: 'sarah@techcorp.com', status: 'online' as UserStatus }, uploadedAt: '2026-01-23T12:00:00.000Z', channelId: 'design', channelName: '#design', downloads: 8 },
+        { id: 'file-3', name: 'Sprint-Planning.xlsx', type: 'application/vnd.ms-excel', size: 524288, uploadedBy: { id: 'demo-3', name: 'emma', displayName: 'Emma Wilson', email: 'emma@techcorp.com', status: 'away' as UserStatus }, uploadedAt: '2026-01-21T12:00:00.000Z', channelId: 'development', channelName: '#development', downloads: 24 }
       ]
     }
     if (!userFilesData || userFilesData.length === 0) return []
@@ -388,7 +388,7 @@ export default function MessagesClient() {
             channelId: 'general',
             content: 'Hey @Alex, can you review the latest mockups when you get a chance?',
             author: { id: 'demo-1', name: 'sarah', displayName: 'Sarah Chen', email: 'sarah@techcorp.com', status: 'online' as UserStatus },
-            createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+            createdAt: '2026-01-28T11:00:00.000Z',
             status: 'delivered' as MessageStatus,
             reactions: [],
             threadCount: 0,
@@ -400,7 +400,7 @@ export default function MessagesClient() {
           },
           channel: '#general',
           isRead: false,
-          mentionedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+          mentionedAt: '2026-01-28T11:00:00.000Z'
         },
         {
           id: 'mention-2',
@@ -409,7 +409,7 @@ export default function MessagesClient() {
             channelId: 'development',
             content: '@Alex The API changes are ready for your review. Let me know if you need any clarification.',
             author: { id: 'demo-2', name: 'mike', displayName: 'Mike Johnson', email: 'mike@techcorp.com', status: 'online' as UserStatus },
-            createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+            createdAt: '2026-01-28T09:00:00.000Z',
             status: 'read' as MessageStatus,
             reactions: [{ emoji: '✅', count: 1, users: ['demo-user-id'] }],
             threadCount: 2,
@@ -421,7 +421,7 @@ export default function MessagesClient() {
           },
           channel: '#development',
           isRead: true,
-          mentionedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+          mentionedAt: '2026-01-28T09:00:00.000Z'
         }
       ]
     }
@@ -459,9 +459,9 @@ export default function MessagesClient() {
     // Demo calls for investor demo
     if (isDemoAccount) {
       return [
-        { id: 'call-1', type: 'video' as CallType, status: 'ended' as CallStatus, channelId: 'general', channelName: 'Team Standup', participants: [], startTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), endTime: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString(), duration: 1800, isRecorded: true },
-        { id: 'call-2', type: 'audio' as CallType, status: 'ended' as CallStatus, channelId: 'dm-sarah', channelName: 'Sarah Chen', participants: [], startTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), endTime: new Date(Date.now() - 23.5 * 60 * 60 * 1000).toISOString(), duration: 1200, isRecorded: false },
-        { id: 'call-3', type: 'video' as CallType, status: 'missed' as CallStatus, channelId: 'dm-david', channelName: 'David Lee', participants: [], startTime: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(), duration: 0, isRecorded: false }
+        { id: 'call-1', type: 'video' as CallType, status: 'ended' as CallStatus, channelId: 'general', channelName: 'Team Standup', participants: [], startTime: '2026-01-28T10:00:00.000Z', endTime: '2026-01-28T10:30:00.000Z', duration: 1800, isRecorded: true },
+        { id: 'call-2', type: 'audio' as CallType, status: 'ended' as CallStatus, channelId: 'dm-sarah', channelName: 'Sarah Chen', participants: [], startTime: '2026-01-27T12:00:00.000Z', endTime: '2026-01-27T12:20:00.000Z', duration: 1200, isRecorded: false },
+        { id: 'call-3', type: 'video' as CallType, status: 'missed' as CallStatus, channelId: 'dm-david', channelName: 'David Lee', participants: [], startTime: '2026-01-26T12:00:00.000Z', duration: 0, isRecorded: false }
       ]
     }
     if (!recentCallsData || recentCallsData.length === 0) return []

@@ -8,10 +8,24 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export function useReminder(reminderId?: string) {
   const [reminder, setReminder] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!reminderId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -25,6 +39,7 @@ export function useReminders(options?: { user_id?: string; entity_type?: string;
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -48,6 +63,7 @@ export function useUpcomingReminders(userId?: string, options?: { hours?: number
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -66,6 +82,7 @@ export function useOverdueReminders(userId?: string, options?: { limit?: number 
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -83,6 +100,7 @@ export function useTodayReminders(userId?: string) {
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -102,6 +120,7 @@ export function useReminderRecipients(reminderId?: string) {
   const [recipients, setRecipients] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!reminderId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -115,6 +134,7 @@ export function useReminderTemplates(options?: { category?: string; is_active?: 
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -133,6 +153,7 @@ export function useReminderHistory(reminderId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!reminderId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -146,6 +167,7 @@ export function useMyPendingReminders(userId?: string, options?: { limit?: numbe
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -162,6 +184,7 @@ export function useSnoozedReminders(userId?: string, options?: { limit?: number 
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -178,6 +201,7 @@ export function useHighPriorityReminders(userId?: string, options?: { limit?: nu
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)

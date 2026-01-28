@@ -16,6 +16,18 @@ import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('tasks-api')
 
+// Demo mode support
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url)
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  )
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -109,8 +121,78 @@ export async function GET(request: NextRequest) {
     const includeSubtasks = searchParams.get('include_subtasks') === 'true'
     const includeTimeEntries = searchParams.get('include_time_entries') === 'true'
 
-    // Unauthenticated users get empty data
+    // Check for demo mode
+    const demoMode = isDemoMode(request)
+
+    // Unauthenticated users
     if (!session?.user) {
+      if (demoMode) {
+        // Use demo user ID and fetch from database
+        const userId = DEMO_USER_ID
+
+        // For demo mode, fetch real data for demo user
+        let query = supabase
+          .from('tasks')
+          .select('*', { count: 'exact' })
+          .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
+
+        // Apply filters
+        if (projectId) {
+          query = query.eq('project_id', projectId)
+        }
+        if (status && status !== 'all') {
+          if (status.includes(',')) {
+            query = query.in('status', status.split(','))
+          } else {
+            query = query.eq('status', status)
+          }
+        }
+        if (priority) {
+          query = query.eq('priority', priority)
+        }
+
+        const ascending = sortOrder === 'asc'
+        query = query.order(sortBy, { ascending })
+
+        const offset = (page - 1) * limit
+        query = query.range(offset, offset + limit - 1)
+
+        const { data: tasks, error, count } = await query
+
+        if (error) {
+          logger.error('Demo tasks query error', { error })
+          // Fall back to demo data on error
+          return NextResponse.json({
+            success: true,
+            demo: true,
+            tasks: getDemoTasks(),
+            stats: getDemoStats(),
+            pagination: {
+              page: 1,
+              limit: 50,
+              total: 6,
+              totalPages: 1
+            }
+          })
+        }
+
+        // Get stats for demo user
+        const stats = await getTaskStats(supabase, userId, projectId || undefined)
+
+        return NextResponse.json({
+          success: true,
+          demo: true,
+          tasks: tasks || [],
+          stats,
+          pagination: {
+            page,
+            limit,
+            total: count || 0,
+            totalPages: Math.ceil((count || 0) / limit)
+          }
+        })
+      }
+
       return NextResponse.json({
         success: true,
         tasks: [],
@@ -142,17 +224,62 @@ export async function GET(request: NextRequest) {
     // Demo mode ONLY for demo account (test@kazi.dev)
     const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
 
-    if (isDemoAccount && !taskId) {
+    if ((isDemoAccount || demoMode) && !taskId) {
+      // For demo mode with authenticated user, fetch real data for demo user
+      const demoUserId = DEMO_USER_ID
+
+      let query = supabase
+        .from('tasks')
+        .select('*', { count: 'exact' })
+        .or(`user_id.eq.${demoUserId},assignee_id.eq.${demoUserId}`)
+
+      if (projectId) {
+        query = query.eq('project_id', projectId)
+      }
+      if (status && status !== 'all') {
+        if (status.includes(',')) {
+          query = query.in('status', status.split(','))
+        } else {
+          query = query.eq('status', status)
+        }
+      }
+
+      const ascending = sortOrder === 'asc'
+      query = query.order(sortBy, { ascending })
+
+      const offset = (page - 1) * limit
+      query = query.range(offset, offset + limit - 1)
+
+      const { data: tasks, error, count } = await query
+
+      if (error || !tasks?.length) {
+        // Fall back to static demo data
+        return NextResponse.json({
+          success: true,
+          demo: true,
+          tasks: getDemoTasks(),
+          stats: getDemoStats(),
+          pagination: {
+            page: 1,
+            limit: 50,
+            total: 6,
+            totalPages: 1
+          }
+        })
+      }
+
+      const stats = await getTaskStats(supabase, demoUserId, projectId || undefined)
+
       return NextResponse.json({
         success: true,
         demo: true,
-        tasks: getDemoTasks(),
-        stats: getDemoStats(),
+        tasks: tasks || [],
+        stats,
         pagination: {
-          page: 1,
-          limit: 50,
-          total: 6,
-          totalPages: 1
+          page,
+          limit,
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limit)
         }
       })
     }

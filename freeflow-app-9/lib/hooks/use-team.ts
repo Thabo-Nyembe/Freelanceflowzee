@@ -4,6 +4,19 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export interface TeamMember {
   id: string
   user_id: string
@@ -67,6 +80,11 @@ export function useTeam(initialMembers: TeamMember[] = [], initialStats?: TeamSt
   }, [])
 
   const fetchMembers = useCallback(async () => {
+    // In demo mode, return empty data to avoid unauthenticated Supabase queries
+    if (isDemoModeEnabled()) {
+      setLoading(false)
+      return
+    }
     setLoading(true)
     try {
       const { data, error } = await supabase

@@ -9,6 +9,19 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { JsonValue } from '@/lib/types/database'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 /** Base event record */
 export interface ExtendedEventRecord {
   id: string
@@ -86,7 +99,8 @@ export function useEvent(eventId?: string) {
   const [event, setEvent] = useState<ExtendedEventRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -102,7 +116,8 @@ export function useEvents(options?: { organizerId?: string; calendarId?: string;
   const [data, setData] = useState<ExtendedEventRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('events').select('*')
@@ -123,7 +138,8 @@ export function useEventAttendees(eventId?: string, options?: { status?: string 
   const [data, setData] = useState<EventAttendeeRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -141,7 +157,8 @@ export function useEventAttachments(eventId?: string) {
   const [data, setData] = useState<EventAttachmentRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -157,7 +174,8 @@ export function useEventRecurrence(eventId?: string) {
   const [recurrence, setRecurrence] = useState<EventRecurrenceRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -173,7 +191,8 @@ export function useEventRegistrations(eventId?: string, options?: { status?: str
   const [data, setData] = useState<ExtendedEventRegistrationRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -191,7 +210,8 @@ export function useUserEvents(userId?: string, options?: { upcoming?: boolean; l
   const [data, setData] = useState<ExtendedEventRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -209,7 +229,8 @@ export function useEventViewCount(eventId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -228,7 +249,8 @@ export function useEventWithDetails(eventId?: string) {
   const [recurrence, setRecurrence] = useState<EventRecurrenceRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -252,6 +274,7 @@ export function useEventsRealtime(organizerId?: string) {
   const [events, setEvents] = useState<ExtendedEventRecord[]>([])
   const supabase = createClient()
   useEffect(() => {
+    if (isDemoModeEnabled()) return
     if (!organizerId) return
     supabase.from('events').select('*').eq('organizer_id', organizerId).order('start_date', { ascending: true }).limit(100).then(({ data }) => setEvents((data as ExtendedEventRecord[]) || []))
     const channel = supabase.channel(`events_${organizerId}`)

@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('API-Escrow')
+
+// Demo user ID for demo mode
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
+
+// Check if demo mode is enabled
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url);
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  );
+}
 
 /**
  * Escrow API Route
@@ -76,11 +90,54 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const demoMode = isDemoMode(request);
+
+    // Allow demo mode access
+    const effectiveUserId = user?.id || (demoMode ? DEMO_USER_ID : null);
+
+    if (!effectiveUserId) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
-    const userId = searchParams.get('userId') || 'user-1';
 
-    // Mock escrow retrieval
+    // Try to fetch escrow deposits from database first
+    let query = supabase
+      .from('escrow_deposits')
+      .select('*')
+      .eq('user_id', effectiveUserId)
+      .order('created_at', { ascending: false });
+
+    if (status && status !== 'all') {
+      query = query.eq('status', status);
+    }
+
+    const { data: dbDeposits, error } = await query;
+
+    // If we have database data, use it
+    if (dbDeposits && dbDeposits.length > 0) {
+      const stats = {
+        total: dbDeposits.reduce((sum, d) => sum + (d.amount || 0), 0),
+        active: dbDeposits.filter(d => d.status === 'active').length,
+        completed: dbDeposits.filter(d => d.status === 'completed').length,
+        pending: dbDeposits.filter(d => d.status === 'pending').length,
+        disputed: dbDeposits.filter(d => d.status === 'disputed').length,
+      };
+
+      return NextResponse.json({
+        success: true,
+        deposits: dbDeposits,
+        stats,
+      });
+    }
+
+    // Fall back to mock data if no database records (for demo purposes)
     let deposits = getMockDeposits();
 
     if (status && status !== 'all') {

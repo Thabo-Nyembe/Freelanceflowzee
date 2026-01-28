@@ -8,10 +8,24 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export function useModerationQueue(options?: { status?: string; content_type?: string; priority?: string; assigned_to?: string; limit?: number }) {
   const [queue, setQueue] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -32,6 +46,7 @@ export function useQueueItem(itemId?: string) {
   const [item, setItem] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -45,6 +60,7 @@ export function usePendingQueue(moderatorId?: string) {
   const [queue, setQueue] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -62,6 +78,7 @@ export function useModerationActions(itemId?: string) {
   const [actions, setActions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -75,6 +92,7 @@ export function useModerationRules(options?: { rule_type?: string; is_active?: b
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -93,6 +111,7 @@ export function useModerationAppeals(options?: { status?: string; user_id?: stri
   const [appeals, setAppeals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -111,6 +130,7 @@ export function useModerationLogs(options?: { moderator_id?: string; action_type
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -131,6 +151,7 @@ export function useModerationReports(options?: { status?: string; report_type?: 
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -149,6 +170,7 @@ export function useModerationStats() {
   const [stats, setStats] = useState<{ pending: number; inReview: number; resolved: number; appeals: number; todayActions: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -173,6 +195,7 @@ export function useUserModerationHistory(userId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)

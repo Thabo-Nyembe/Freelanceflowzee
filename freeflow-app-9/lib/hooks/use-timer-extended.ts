@@ -8,11 +8,25 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export function useTimer(timerId?: string) {
   const [timer, setTimer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!timerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timers').select('*').eq('id', timerId).single(); setTimer(data) } finally { setIsLoading(false) }
@@ -25,7 +39,8 @@ export function useTimers(options?: { user_id?: string; project_id?: string; sta
   const [timers, setTimers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('timers').select('*')
@@ -44,7 +59,8 @@ export function useActiveTimer(userId?: string) {
   const [timer, setTimer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timers').select('*').eq('user_id', userId).eq('status', 'running').order('started_at', { ascending: false }).limit(1).single(); setTimer(data) } finally { setIsLoading(false) }
@@ -57,7 +73,8 @@ export function useTimerEntries(options?: { user_id?: string; project_id?: strin
   const [entries, setEntries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('timer_entries').select('*')
@@ -76,7 +93,8 @@ export function useTimerSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timer_settings').select('*').eq('user_id', userId).single(); setSettings(data) } finally { setIsLoading(false) }
@@ -89,7 +107,8 @@ export function useTodayTimers(userId?: string) {
   const [timers, setTimers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const today = new Date().toISOString().split('T')[0]; const { data } = await supabase.from('timers').select('*').eq('user_id', userId).gte('created_at', today).order('created_at', { ascending: false }); setTimers(data || []) } finally { setIsLoading(false) }

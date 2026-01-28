@@ -3,6 +3,19 @@
 import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-query'
 import { useCallback, useMemo } from 'react'
 
+// Demo mode detection - return empty data in demo mode to avoid 400 errors
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export interface Milestone {
   id: string
   user_id: string
@@ -72,6 +85,10 @@ export function useMilestones(initialMilestones: Milestone[] = [], filters: Mile
   const queryKey = ['milestones', JSON.stringify(filters)]
 
   const queryFn = useCallback(async (supabase: any) => {
+    // In demo mode, return empty array to avoid unauthenticated Supabase queries
+    if (isDemoModeEnabled()) {
+      return []
+    }
     let query = supabase
       .from('milestones')
       .select('*')

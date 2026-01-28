@@ -8,10 +8,24 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export function useOrganization(organizationId?: string) {
   const [organization, setOrganization] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -25,6 +39,7 @@ export function useOrganizations(options?: { owner_id?: string; status?: string;
   const [organizations, setOrganizations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -45,6 +60,7 @@ export function useUserOrganizations(userId?: string) {
   const [organizations, setOrganizations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -65,6 +81,7 @@ export function useOrganizationMembers(organizationId?: string, options?: { role
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -85,6 +102,7 @@ export function useOrganizationRoles(organizationId?: string) {
   const [roles, setRoles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -98,6 +116,7 @@ export function useOrganizationInvitations(organizationId?: string, options?: { 
   const [invitations, setInvitations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -116,6 +135,7 @@ export function useOrganizationSettings(organizationId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -129,6 +149,7 @@ export function useOrganizationDepartments(organizationId?: string, options?: { 
   const [departments, setDepartments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -147,6 +168,7 @@ export function usePendingInvitations(email?: string) {
   const [invitations, setInvitations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!email) { setIsLoading(false); return }
     setIsLoading(true)
@@ -160,6 +182,7 @@ export function useOrganizationStats(organizationId?: string) {
   const [stats, setStats] = useState<{ memberCount: number; departmentCount: number; pendingInvitations: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)

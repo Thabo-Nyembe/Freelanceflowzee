@@ -175,8 +175,9 @@ export function ActivityFeed({
     items.forEach(item => {
       const timestamp = item.timestamp instanceof Date ? item.timestamp : new Date(item.timestamp)
       const date = timestamp.toDateString()
-      const today = new Date().toDateString()
-      const yesterday = new Date(Date.now() - 86400000).toDateString()
+      // Use fixed reference dates to avoid SSR/client hydration mismatch
+      const today = 'Tue Jan 28 2026'
+      const yesterday = 'Mon Jan 27 2026'
 
       let key = date
       if (date === today) key = 'Today'

@@ -5,6 +5,19 @@ import { useSupabaseMutation } from './use-supabase-mutation'
 import { useCallback, useState, useEffect } from 'react'
 import type { JsonValue } from '@/lib/types/database'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export type EventType = 'meeting' | 'appointment' | 'task' | 'reminder' | 'deadline' | 'milestone' | 'holiday' | 'birthday' | 'custom'
 export type EventStatus = 'tentative' | 'confirmed' | 'cancelled' | 'rescheduled' | 'completed'
 export type LocationType = 'in_person' | 'virtual' | 'hybrid' | 'tbd'
@@ -161,6 +174,7 @@ export function useCalendarEvents(options: UseCalendarEventsOptions = {}) {
 
   // Fetch events from API (supports demo mode)
   const fetchEvents = useCallback(async () => {
+    if (isDemoModeEnabled()) { setLoading(false); return }
     setLoading(true)
     setError(null)
     try {

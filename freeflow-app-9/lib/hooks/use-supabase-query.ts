@@ -5,6 +5,19 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { SupabaseClient } from '@supabase/supabase-js'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 // TanStack Query-style interface for custom query functions
 interface UseSupabaseQueryWithFnOptions<T> {
   initialData?: T
@@ -63,6 +76,11 @@ function useSupabaseQueryWithFn<T>(
 
   const fetchData = useCallback(async () => {
     if (options?.enabled === false) return
+    // Demo mode - return empty data without Supabase call
+    if (isDemoModeEnabled()) {
+      setIsLoading(false)
+      return
+    }
 
     setIsLoading(true)
     setError(null)
@@ -100,6 +118,12 @@ function useSupabaseQueryWithOptions<T>({
   const supabase = createClient()
 
   useEffect(() => {
+    // Demo mode - return empty data without Supabase call
+    if (isDemoModeEnabled()) {
+      setLoading(false)
+      return
+    }
+
     async function fetchData() {
       try {
         setLoading(true)
@@ -169,6 +193,12 @@ function useSupabaseQueryWithOptions<T>({
   }, [table, JSON.stringify(filters), orderBy?.column, orderBy?.ascending, limit, realtime])
 
   const refetch = async () => {
+    // Demo mode - skip Supabase calls
+    if (isDemoModeEnabled()) {
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       let query = supabase.from(table).select(select)

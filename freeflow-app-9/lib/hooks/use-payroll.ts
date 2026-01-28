@@ -3,6 +3,19 @@
 import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-query'
 import { useCallback, useMemo } from 'react'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export interface PayrollRun {
   id: string
   user_id: string
@@ -68,7 +81,8 @@ export interface PayrollStats {
 export function usePayrollRuns(initialRuns: PayrollRun[] = [], filters: PayrollFilters = {}) {
   const queryKey = ['payroll-runs', JSON.stringify(filters)]
 
-  const queryFn = useCallback(async (supabase: any) => {
+  const queryFn = useCallback(async (supabase: any, setIsLoading: (loading: boolean) => void) => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     let query = supabase
       .from('payroll_runs')
       .select('*')
@@ -116,7 +130,8 @@ export function usePayrollRuns(initialRuns: PayrollRun[] = [], filters: PayrollF
 export function useEmployeePayroll(runId: string, initialPayroll: EmployeePayroll[] = []) {
   const queryKey = ['employee-payroll', runId]
 
-  const queryFn = useCallback(async (supabase: any) => {
+  const queryFn = useCallback(async (supabase: any, setIsLoading: (loading: boolean) => void) => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
     const { data, error } = await supabase
       .from('employee_payroll')
       .select('*')

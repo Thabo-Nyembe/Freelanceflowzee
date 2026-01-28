@@ -6,6 +6,19 @@ import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('Bookings')
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export type BookingType = 'appointment' | 'reservation' | 'session' | 'class' | 'event' | 'rental' | 'service' | 'consultation' | 'custom'
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show' | 'rescheduled' | 'waitlisted'
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid' | 'refunded' | 'cancelled'
@@ -103,6 +116,7 @@ export function useBookings(options: UseBookingsOptions = {}) {
 
   // Fetch bookings from API (to bypass RLS issues with auth.users table)
   const fetchBookings = useCallback(async () => {
+    if (isDemoModeEnabled()) { setLoading(false); return }
     try {
       setLoading(true)
       setError(null)

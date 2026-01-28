@@ -2636,10 +2636,15 @@ console.log(user);`}</code>
               </div>
               <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
                 <p className="font-medium mb-3">Top Endpoints</p>
-                {['/api/v1/users', '/api/v1/data', '/api/v1/auth/token', '/api/v1/webhooks'].map((endpoint, i) => (
+                {[
+                  { endpoint: '/api/v1/users', calls: '8,542' },
+                  { endpoint: '/api/v1/data', calls: '6,128' },
+                  { endpoint: '/api/v1/auth/token', calls: '4,891' },
+                  { endpoint: '/api/v1/webhooks', calls: '2,347' }
+                ].map((item, i) => (
                   <div key={i} className="flex items-center justify-between py-2">
-                    <code className="text-sm">{endpoint}</code>
-                    <span className="text-sm text-gray-500">{Math.floor(Math.random() * 10000)} calls</span>
+                    <code className="text-sm">{item.endpoint}</code>
+                    <span className="text-sm text-gray-500">{item.calls} calls</span>
                   </div>
                 ))}
               </div>

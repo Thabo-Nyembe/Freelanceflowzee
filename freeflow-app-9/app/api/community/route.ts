@@ -1,7 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from '@/lib/auth'
 
 // Community Hub API
 // Supports: Posts, Connections, Likes, Comments, Shares, Bookmarks
+
+// ============================================================================
+// DEMO MODE CONFIGURATION
+// ============================================================================
+
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url)
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  )
+}
 
 interface CommunityRequest {
   action: 'like' | 'unlike' | 'bookmark' | 'unbookmark' | 'share' | 'comment' |
@@ -378,21 +395,175 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url)
-    const type = searchParams.get('type')  // posts, members, events, groups
+    const type = searchParams.get('type') || 'posts'  // posts, members, events, groups
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '20')
 
-    // Mock data for demonstration
-    const mockData = {
-      posts: [],
-      members: [],
-      events: [],
-      groups: []
+    const supabase = await createClient()
+    const session = await getServerSession()
+
+    // Check for demo mode
+    const demoMode = isDemoMode(request)
+
+    // Determine user ID
+    let userId: string | null = null
+    let isDemo = false
+
+    if (!session?.user) {
+      if (demoMode) {
+        // Use demo user ID
+        userId = DEMO_USER_ID
+        isDemo = true
+      } else {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+    } else {
+      const userEmail = session.user.email
+      const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
+      userId = isDemoAccount ? DEMO_USER_ID : ((session.user as any).authId || session.user.id)
+      isDemo = isDemoAccount || demoMode
     }
 
-    return NextResponse.json({
-      success: true,
-      data: mockData[type] || [],
-      message: `Fetched ${type}`
-    })
+    // Fetch data based on type
+    switch (type) {
+      case 'posts': {
+        const { data: posts, error, count } = await supabase
+          .from('community_posts')
+          .select('*', { count: 'exact' })
+          .eq('user_id', userId)
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .range((page - 1) * limit, page * limit - 1)
+
+        if (error) {
+          // If table doesn't exist, return empty data
+          return NextResponse.json({
+            success: true,
+            demo: isDemo,
+            data: [],
+            pagination: { page, limit, total: 0, totalPages: 0 },
+            message: 'No posts found'
+          })
+        }
+
+        return NextResponse.json({
+          success: true,
+          demo: isDemo,
+          data: posts || [],
+          pagination: {
+            page,
+            limit,
+            total: count || 0,
+            totalPages: Math.ceil((count || 0) / limit)
+          },
+          message: `Fetched ${posts?.length || 0} posts`
+        })
+      }
+
+      case 'members': {
+        const { data: members, error, count } = await supabase
+          .from('community_members')
+          .select('*', { count: 'exact' })
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .range((page - 1) * limit, page * limit - 1)
+
+        if (error) {
+          return NextResponse.json({
+            success: true,
+            demo: isDemo,
+            data: [],
+            pagination: { page, limit, total: 0, totalPages: 0 },
+            message: 'No members found'
+          })
+        }
+
+        return NextResponse.json({
+          success: true,
+          demo: isDemo,
+          data: members || [],
+          pagination: {
+            page,
+            limit,
+            total: count || 0,
+            totalPages: Math.ceil((count || 0) / limit)
+          },
+          message: `Fetched ${members?.length || 0} members`
+        })
+      }
+
+      case 'events': {
+        const { data: events, error, count } = await supabase
+          .from('community_events')
+          .select('*', { count: 'exact' })
+          .is('deleted_at', null)
+          .order('event_date', { ascending: true })
+          .range((page - 1) * limit, page * limit - 1)
+
+        if (error) {
+          return NextResponse.json({
+            success: true,
+            demo: isDemo,
+            data: [],
+            pagination: { page, limit, total: 0, totalPages: 0 },
+            message: 'No events found'
+          })
+        }
+
+        return NextResponse.json({
+          success: true,
+          demo: isDemo,
+          data: events || [],
+          pagination: {
+            page,
+            limit,
+            total: count || 0,
+            totalPages: Math.ceil((count || 0) / limit)
+          },
+          message: `Fetched ${events?.length || 0} events`
+        })
+      }
+
+      case 'groups': {
+        const { data: groups, error, count } = await supabase
+          .from('community_groups')
+          .select('*', { count: 'exact' })
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .range((page - 1) * limit, page * limit - 1)
+
+        if (error) {
+          return NextResponse.json({
+            success: true,
+            demo: isDemo,
+            data: [],
+            pagination: { page, limit, total: 0, totalPages: 0 },
+            message: 'No groups found'
+          })
+        }
+
+        return NextResponse.json({
+          success: true,
+          demo: isDemo,
+          data: groups || [],
+          pagination: {
+            page,
+            limit,
+            total: count || 0,
+            totalPages: Math.ceil((count || 0) / limit)
+          },
+          message: `Fetched ${groups?.length || 0} groups`
+        })
+      }
+
+      default:
+        return NextResponse.json({
+          success: true,
+          demo: isDemo,
+          data: [],
+          message: `Unknown type: ${type}`
+        })
+    }
   } catch (error: any) {
     return NextResponse.json({
       success: false,

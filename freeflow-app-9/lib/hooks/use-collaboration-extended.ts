@@ -7,12 +7,25 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export function useCollaborationAnalytics(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -29,8 +42,8 @@ export function useCollaborationCanvasBoards(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -47,8 +60,8 @@ export function useCollaborationCanvasCollaborators(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -65,8 +78,8 @@ export function useCollaborationCanvasExports(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -83,8 +96,8 @@ export function useCollaborationChannelMembers(channelId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!channelId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -101,8 +114,8 @@ export function useCollaborationChannels(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -119,8 +132,8 @@ export function useCollaborationEvents(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -137,8 +150,8 @@ export function useCollaborationFeedback(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -155,8 +168,8 @@ export function useCollaborationFeedbackReplies(feedbackId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -173,8 +186,8 @@ export function useCollaborationFeedbackVotes(feedbackId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -191,8 +204,8 @@ export function useCollaborationFileShares(fileId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!fileId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -209,8 +222,8 @@ export function useCollaborationInvites(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -227,8 +240,8 @@ export function useCollaborationMedia(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -245,8 +258,8 @@ export function useCollaborationMediaShares(mediaId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!mediaId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -263,8 +276,8 @@ export function useCollaborationMeetingParticipants(meetingId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -281,8 +294,8 @@ export function useCollaborationMeetingRecordings(meetingId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -299,8 +312,8 @@ export function useCollaborationMeetings(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -317,8 +330,8 @@ export function useCollaborationMessages(channelId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!channelId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -335,8 +348,8 @@ export function useCollaborationSessions(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -353,8 +366,8 @@ export function useCollaborationTeamMembers(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -371,8 +384,8 @@ export function useCollaborationTeamMetrics(teamId?: string) {
   const [data, setData] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -389,8 +402,8 @@ export function useCollaborationTeams(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -407,8 +420,8 @@ export function useCollaborationWorkspaceFiles(workspaceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!workspaceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -425,8 +438,8 @@ export function useCollaborationWorkspaceFolders(workspaceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-
-  const supabase = createClient()
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    const supabase = createClient()
     if (!workspaceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

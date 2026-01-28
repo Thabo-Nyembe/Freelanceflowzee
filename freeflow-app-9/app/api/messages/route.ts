@@ -6,6 +6,18 @@ import { createFeatureLogger } from '@/lib/logger';
 
 const logger = createFeatureLogger('API-Messages');
 
+// Demo mode constants
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
+
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url);
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  );
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -148,30 +160,151 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const before = searchParams.get('before'); // For pagination - get messages before this ID
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
 
-    // Unauthenticated users get empty data
+    // Check for demo mode
+    const demoMode = isDemoMode(request);
+
+    // Unauthenticated users
     if (!session?.user?.id) {
-      if (type === 'chats' || !chatId) {
-        return NextResponse.json({
-          success: true,
-          chats: [],
-          total: 0,
-          unreadCount: 0,
-        });
+      if (demoMode) {
+        // Use demo user ID and try to fetch from database
+        const userId = DEMO_USER_ID;
+
+        // Try to fetch from database first
+        if (type === 'chats' || !chatId) {
+          const { data: dbChats, error } = await supabase
+            .from('chat_members')
+            .select(`
+              chat_id,
+              role,
+              last_read_at,
+              is_muted,
+              chats (
+                id,
+                name,
+                description,
+                avatar_url,
+                type,
+                creator_id,
+                is_archived,
+                last_message_at,
+                created_at,
+                metadata
+              )
+            `)
+            .eq('user_id', userId)
+            .is('left_at', null)
+            .order('last_read_at', { ascending: false, nullsFirst: false })
+            .limit(limit);
+
+          if (!error && dbChats && dbChats.length > 0) {
+            let chats = dbChats.map(m => ({
+              ...m.chats,
+              role: m.role,
+              lastReadAt: m.last_read_at,
+              isMuted: m.is_muted,
+            })).filter(c => c.id);
+
+            if (search) {
+              chats = chats.filter(c =>
+                c.name?.toLowerCase().includes(search.toLowerCase())
+              );
+            }
+
+            return NextResponse.json({
+              success: true,
+              demo: true,
+              chats,
+              total: chats.length,
+              unreadCount: 3,
+            });
+          }
+
+          // Fall back to mock data
+          let demoChats = getDemoChats();
+          if (search) {
+            demoChats = demoChats.filter(c =>
+              c.name?.toLowerCase().includes(search.toLowerCase())
+            );
+          }
+          return NextResponse.json({
+            success: true,
+            demo: true,
+            chats: demoChats,
+            total: demoChats.length,
+            unreadCount: 3,
+          });
+        } else {
+          // Get messages for a specific chat
+          const { data: dbMessages, error } = await supabase
+            .from('messages')
+            .select(`
+              *,
+              message_reactions (id, emoji, user_id),
+              message_attachments (id, name, url, type, mime_type, size_bytes, thumbnail_url),
+              message_mentions (id, mentioned_user_id)
+            `)
+            .eq('chat_id', chatId)
+            .eq('is_deleted', false)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+          if (!error && dbMessages && dbMessages.length > 0) {
+            let messages = dbMessages;
+            if (search) {
+              messages = messages.filter(m =>
+                m.text?.toLowerCase().includes(search.toLowerCase())
+              );
+            }
+            return NextResponse.json({
+              success: true,
+              demo: true,
+              messages: messages.reverse(),
+              total: messages.length,
+              unreadCount: 1,
+              hasMore: messages.length === limit,
+            });
+          }
+
+          // Fall back to mock data
+          let demoMessages = getDemoMessages();
+          if (search) {
+            demoMessages = demoMessages.filter(m =>
+              m.text?.toLowerCase().includes(search.toLowerCase())
+            );
+          }
+          return NextResponse.json({
+            success: true,
+            demo: true,
+            messages: demoMessages,
+            total: demoMessages.length,
+            unreadCount: 1,
+          });
+        }
       } else {
-        return NextResponse.json({
-          success: true,
-          messages: [],
-          total: 0,
-          unreadCount: 0,
-        });
+        // Not demo mode and not authenticated - return empty data
+        if (type === 'chats' || !chatId) {
+          return NextResponse.json({
+            success: true,
+            chats: [],
+            total: 0,
+            unreadCount: 0,
+          });
+        } else {
+          return NextResponse.json({
+            success: true,
+            messages: [],
+            total: 0,
+            unreadCount: 0,
+          });
+        }
       }
     }
 
     const userId = (session.user as any).authId || session.user.id;
     const userEmail = session.user.email;
 
-    // Demo mode ONLY for demo account (test@kazi.dev)
-    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io';
+    // Demo mode ONLY for demo account (test@kazi.dev) or when demo mode is enabled
+    const isDemoAccount = demoMode || userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io';
 
     if (isDemoAccount) {
       if (type === 'chats' || !chatId) {

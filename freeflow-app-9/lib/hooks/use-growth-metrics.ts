@@ -3,6 +3,19 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export interface GrowthMetric {
   id: string
   user_id: string
@@ -71,6 +84,8 @@ export function useGrowthMetrics(initialMetrics: GrowthMetric[] = [], initialSta
 
   // Real-time subscription
   useEffect(() => {
+    if (isDemoModeEnabled()) { setLoading(false); return }
+
     const channel = supabase
       .channel('growth-metrics-changes')
       .on(
@@ -106,6 +121,8 @@ export function useGrowthMetrics(initialMetrics: GrowthMetric[] = [], initialSta
   }, [supabase, calculateStats])
 
   const createMetric = useCallback(async (input: GrowthMetricInput) => {
+    if (isDemoModeEnabled()) { setLoading(false); return }
+
     setLoading(true)
     setError(null)
     try {
@@ -148,6 +165,8 @@ export function useGrowthMetrics(initialMetrics: GrowthMetric[] = [], initialSta
   }, [supabase])
 
   const updateMetric = useCallback(async (id: string, updates: Partial<GrowthMetricInput>) => {
+    if (isDemoModeEnabled()) { setLoading(false); return }
+
     setLoading(true)
     setError(null)
     try {
@@ -182,6 +201,8 @@ export function useGrowthMetrics(initialMetrics: GrowthMetric[] = [], initialSta
   }, [supabase, metrics])
 
   const deleteMetric = useCallback(async (id: string) => {
+    if (isDemoModeEnabled()) { setLoading(false); return }
+
     setLoading(true)
     setError(null)
     try {

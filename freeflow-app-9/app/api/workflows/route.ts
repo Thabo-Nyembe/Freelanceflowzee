@@ -12,17 +12,78 @@ import { createFeatureLogger } from '@/lib/logger'
 const logger = createFeatureLogger('workflows')
 import { workflowEngine } from '@/lib/workflow/workflow-engine'
 
+// Demo user ID for demo mode
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url)
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  )
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const { searchParams } = new URL(request.url)
     const action = searchParams.get('action') || 'list'
+
+    // Check for demo mode
+    const demoMode = isDemoMode(request)
+
+    // If not authenticated
+    if (authError || !user) {
+      if (demoMode) {
+        // Use demo user ID and fetch from database
+        const userId = DEMO_USER_ID
+
+        switch (action) {
+          case 'list': {
+            const triggerType = searchParams.get('triggerType') as any
+            const isActive = searchParams.get('isActive')
+            const tags = searchParams.get('tags')?.split(',').filter(Boolean)
+            const limit = parseInt(searchParams.get('limit') || '50')
+            const offset = parseInt(searchParams.get('offset') || '0')
+
+            const { workflows, total } = await workflowEngine.listWorkflows(userId, {
+              triggerType,
+              isActive: isActive ? isActive === 'true' : undefined,
+              tags,
+              limit,
+              offset
+            })
+
+            return NextResponse.json({ workflows, total, limit, offset, demo: true })
+          }
+
+          case 'templates': {
+            const category = searchParams.get('category')
+            const templates = getWorkflowTemplates(category || undefined)
+            return NextResponse.json({ templates, demo: true })
+          }
+
+          case 'action_types': {
+            const actionTypes = getActionTypes()
+            return NextResponse.json({ actionTypes, demo: true })
+          }
+
+          default:
+            return NextResponse.json({
+              workflows: [],
+              total: 0,
+              limit: 50,
+              offset: 0,
+              demo: true
+            })
+        }
+      } else {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+    }
 
     switch (action) {
       case 'list': {

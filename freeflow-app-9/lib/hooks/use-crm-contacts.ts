@@ -1,4 +1,20 @@
-import { useSupabaseQuery, useSupabaseMutation } from './base-hooks'
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
+
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
 
 export type ContactType = 'lead' | 'prospect' | 'customer' | 'partner' | 'vendor' | 'competitor' | 'other'
 export type ContactStatus = 'active' | 'inactive' | 'vip' | 'churned' | 'new' | 'qualified' | 'unqualified' | 'blocked'
@@ -119,31 +135,155 @@ export function useCrmContacts(filters?: {
   status?: ContactStatus | 'all'
   dealStage?: DealStage | 'all'
 }) {
-  let query = useSupabaseQuery<CrmContact>('crm_contacts')
+  const [data, setData] = useState<CrmContact[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const supabase = createClient()
 
-  if (filters?.contactType && filters.contactType !== 'all') {
-    query = query.eq('contact_type', filters.contactType)
-  }
+  const fetchData = useCallback(async () => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return }
 
-  if (filters?.status && filters.status !== 'all') {
-    query = query.eq('status', filters.status)
-  }
+    setIsLoading(true)
+    setError(null)
 
-  if (filters?.dealStage && filters.dealStage !== 'all') {
-    query = query.eq('deal_stage', filters.dealStage)
-  }
+    try {
+      let query = supabase.from('crm_contacts').select('*')
 
-  return query.order('created_at', { ascending: false })
+      if (filters?.contactType && filters.contactType !== 'all') {
+        query = query.eq('contact_type', filters.contactType)
+      }
+
+      if (filters?.status && filters.status !== 'all') {
+        query = query.eq('status', filters.status)
+      }
+
+      if (filters?.dealStage && filters.dealStage !== 'all') {
+        query = query.eq('deal_stage', filters.dealStage)
+      }
+
+      query = query.order('created_at', { ascending: false })
+
+      const { data: result, error: queryError } = await query
+
+      if (queryError) throw new Error(queryError.message)
+      setData((result as CrmContact[]) || [])
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase, filters?.contactType, filters?.status, filters?.dealStage])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  return { data, isLoading, error, refetch: fetchData }
 }
 
 export function useCreateCrmContact() {
-  return useSupabaseMutation<CrmContact>('crm_contacts', 'insert')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+  const supabase = createClient()
+
+  const mutate = useCallback(async (data: Partial<CrmContact>): Promise<CrmContact | null> => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return null }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data: result, error: insertError } = await supabase
+        .from('crm_contacts')
+        .insert({ ...data, user_id: user.id })
+        .select()
+        .single()
+
+      if (insertError) throw new Error(insertError.message)
+      return result as CrmContact
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error)
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  return { mutate, isLoading, error }
 }
 
 export function useUpdateCrmContact() {
-  return useSupabaseMutation<CrmContact>('crm_contacts', 'update')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+  const supabase = createClient()
+
+  const mutate = useCallback(async (id: string, data: Partial<CrmContact>): Promise<CrmContact | null> => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return null }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data: result, error: updateError } = await supabase
+        .from('crm_contacts')
+        .update({ ...data, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single()
+
+      if (updateError) throw new Error(updateError.message)
+      return result as CrmContact
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error)
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  return { mutate, isLoading, error }
 }
 
 export function useDeleteCrmContact() {
-  return useSupabaseMutation<CrmContact>('crm_contacts', 'delete')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+  const supabase = createClient()
+
+  const mutate = useCallback(async (id: string): Promise<boolean> => {
+    if (isDemoModeEnabled()) { setIsLoading(false); return false }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error: deleteError } = await supabase
+        .from('crm_contacts')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('user_id', user.id)
+
+      if (deleteError) throw new Error(deleteError.message)
+      return true
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error)
+      return false
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  return { mutate, isLoading, error }
 }
