@@ -151,6 +151,31 @@ export default function TimeTrackingPage() {
 
   useEffect(() => {
     const loadTimeTrackingData = async () => {
+      // Check for demo mode - use mock data for faster loading
+      const urlParams = new URLSearchParams(window.location.search)
+      const isDemo = urlParams.get('demo') === 'true' || document.cookie.includes('demo_mode=true')
+
+      if (isDemo) {
+        // In demo mode, use mock data for instant loading
+        setProjects([
+          { id: 'demo-proj-1', name: 'Website Redesign', tasks: [
+            { id: 'demo-task-1', name: 'UI Design', projectId: 'demo-proj-1' },
+            { id: 'demo-task-2', name: 'Development', projectId: 'demo-proj-1' },
+          ]},
+          { id: 'demo-proj-2', name: 'Mobile App', tasks: [
+            { id: 'demo-task-3', name: 'Frontend', projectId: 'demo-proj-2' },
+            { id: 'demo-task-4', name: 'Backend API', projectId: 'demo-proj-2' },
+          ]},
+        ])
+        setTimeEntries([
+          { id: 'demo-entry-1', projectId: 'demo-proj-1', taskId: 'demo-task-1', description: 'Homepage mockup', startTime: new Date(Date.now() - 3600000), endTime: new Date(), duration: 3600, isRunning: false },
+          { id: 'demo-entry-2', projectId: 'demo-proj-2', taskId: 'demo-task-3', description: 'Login screen', startTime: new Date(Date.now() - 7200000), endTime: new Date(Date.now() - 3600000), duration: 3600, isRunning: false },
+        ])
+        setIsLoading(false)
+        announce('Time tracking loaded with demo data', 'polite')
+        return
+      }
+
       if (userLoading || !userId) {
         setIsLoading(false)
         return

@@ -392,11 +392,24 @@ export default function AIVideoGenerationPage() {
   // Initialize data from Supabase
   useEffect(() => {
     const loadAIVideoData = async () => {
-      if (!userId) {        dispatch({ type: 'SET_LOADING', isLoading: false })
+      // Check for demo mode - skip heavy loading in demo mode
+      const urlParams = new URLSearchParams(window.location.search)
+      const isDemo = urlParams.get('demo') === 'true' || document.cookie.includes('demo_mode=true')
+
+      if (isDemo) {
+        // In demo mode, load immediately with defaults
+        dispatch({ type: 'SET_LOADING', isLoading: false })
+        announce('AI Video generation studio loaded', 'polite')
         return
       }
 
-      try {        // Load videos, templates, and settings
+      if (!userId) {
+        dispatch({ type: 'SET_LOADING', isLoading: false })
+        return
+      }
+
+      try {
+        // Load videos, templates, and settings
         const [videosResult, templatesResult, settingsResult] = await Promise.all([
           getGeneratedVideos(userId),
           getVideoTemplates(),

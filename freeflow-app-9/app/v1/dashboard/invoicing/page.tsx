@@ -135,6 +135,33 @@ export default function InvoicingPage() {
   // Load invoicing data
   useEffect(() => {
     const loadInvoicing = async () => {
+      // Check for demo mode - use mock data for faster loading
+      const urlParams = new URLSearchParams(window.location.search)
+      const isDemo = urlParams.get('demo') === 'true' || document.cookie.includes('demo_mode=true')
+
+      if (isDemo) {
+        // In demo mode, use mock data for instant loading
+        setInvoices([
+          {
+            id: 'demo-inv-1', number: 'INV-001', clientId: 'demo-client', clientName: 'Demo Client',
+            clientEmail: 'demo@example.com', status: 'paid' as InvoiceStatus, issueDate: new Date().toISOString(),
+            dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), total: 2500, subtotal: 2500,
+            taxRate: 0, taxAmount: 0, amountPaid: 2500, amountDue: 0, currency: 'USD', items: [],
+            createdAt: new Date().toISOString(), remindersSent: 0
+          },
+          {
+            id: 'demo-inv-2', number: 'INV-002', clientId: 'demo-client', clientName: 'Another Client',
+            clientEmail: 'another@example.com', status: 'sent' as InvoiceStatus, issueDate: new Date().toISOString(),
+            dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), total: 1800, subtotal: 1800,
+            taxRate: 0, taxAmount: 0, amountPaid: 0, amountDue: 1800, currency: 'USD', items: [],
+            createdAt: new Date().toISOString(), remindersSent: 0
+          },
+        ])
+        setIsLoading(false)
+        announce('Invoicing data loaded successfully', 'polite')
+        return
+      }
+
       if (!userId) {
         setIsLoading(false)
         return

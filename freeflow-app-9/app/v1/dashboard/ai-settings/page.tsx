@@ -199,6 +199,11 @@ export default function AISettingsPage() {
   // Load API Keys from Database
   useEffect(() => {
     const loadAPIKeysFromDB = async () => {
+      // Check for demo mode - skip API key loading in demo mode
+      const urlParams = new URLSearchParams(window.location.search)
+      const isDemo = urlParams.get('demo') === 'true' || document.cookie.includes('demo_mode=true')
+      if (isDemo) return
+
       if (!userId || userLoading) return
 
       try {
@@ -709,13 +714,26 @@ export default function AISettingsPage() {
 
   useEffect(() => {
     const loadAISettingsData = async () => {
-      if (!userId) {        setIsPageLoading(false)
+      // Check for demo mode - skip heavy loading in demo mode
+      const urlParams = new URLSearchParams(window.location.search)
+      const isDemo = urlParams.get('demo') === 'true' || document.cookie.includes('demo_mode=true')
+
+      if (isDemo) {
+        // In demo mode, load immediately with defaults
+        setIsPageLoading(false)
+        announce('AI settings loaded successfully', 'polite')
+        return
+      }
+
+      if (!userId) {
+        setIsPageLoading(false)
         return
       }
 
       try {
         setIsPageLoading(true)
-        setError(null)        // Dynamic import for code splitting
+        setError(null)
+        // Dynamic import for code splitting
         const { getProviders, getFeatures, getProviderStats } = await import('@/lib/ai-settings-queries')
 
         // Load AI settings data in parallel

@@ -26,7 +26,19 @@ export default function CommunityPage() {
 
   useEffect(() => {
     const loadUserData = async () => {
-      if (!userId) {        setIsLoading(false)
+      // Check for demo mode - skip heavy loading in demo mode
+      const urlParams = new URLSearchParams(window.location.search)
+      const isDemo = urlParams.get('demo') === 'true' || document.cookie.includes('demo_mode=true')
+
+      if (isDemo) {
+        // In demo mode, load immediately
+        setIsLoading(false)
+        announce('Community hub loaded successfully', 'polite')
+        return
+      }
+
+      if (!userId) {
+        setIsLoading(false)
         return
       }
 

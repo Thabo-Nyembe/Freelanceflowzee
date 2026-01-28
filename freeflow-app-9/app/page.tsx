@@ -7,7 +7,6 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { SiteFooter } from '@/components/marketing/site-footer'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { LiquidGlassCard, LiquidGlassCardHeader, LiquidGlassCardTitle, LiquidGlassCardContent } from '@/components/ui/liquid-glass-card'
@@ -33,7 +32,6 @@ import {
   Menu,
   X
 } from 'lucide-react'
-import { PricingComparisonTable } from '@/components/marketing/pricing-comparison-table'
 
 const features = [
   {
@@ -118,20 +116,20 @@ const testimonials = [
     metric: "15 hrs/week saved"
   },
   {
-    quote: "I was spending $1,100/mo on Upwork fees and tools. KAZI replaced ClickUp, Jasper, and my escrow service for just $29. It's a no-brainer for any serious freelancer.",
+    quote: "The escrow system gives us peace of mind. Clients fund projects upfront, and we deliver knowing we're protected. The AI daily planner keeps our team on track.",
     author: "Marcus Rodriguez",
     role: "Agency Owner",
     company: "Digital Collective",
     rating: 5,
-    metric: "Saved $12k/year"
+    metric: "$300/mo saved"
   },
   {
-    quote: "The AI Video Studio is magic. I can shoot, transcribe, and edit client feedback videos in minutes. My agency revenue grew 60% because I spend less time on admin.",
+    quote: "Switched from juggling 6 different apps to just KAZI. The video studio with AI transcription and the multi-model AI content generator are game-changers for our workflow.",
     author: "Priya Sharma",
     role: "Freelance Videographer",
     company: "Sharma Productions",
     rating: 5,
-    metric: "+60% Revenue"
+    metric: "+60% revenue"
   }
 ]
 
@@ -142,21 +140,40 @@ const trustBadges = [
   { icon: CheckCircle, label: '30-Day Guarantee' }
 ]
 
-import { AuroraBackground } from '@/components/ui/aurora-background';
-import { HeroBeam } from '@/components/marketing/hero-beam';
-import { HeroTextReveal } from '@/components/ui/hero-text-reveal'
-import { Hero3DCard } from '@/components/marketing/hero-3d-card'
-import { BentoGrid, BentoGridItem } from '@/components/ui/bento-grid'
-import { MagneticButton } from '@/components/ui/magnetic-button'
-import { InfiniteMovingCards } from '@/components/ui/infinite-moving-cards'
-
 export default function HomePage() {
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white dark:bg-none dark:bg-gray-900 relative overflow-hidden">
-      {/* Animated Background Blobs Removed - Replaced by AuroraBackground in Hero */}
+      {/* Animated Background Blobs */}
+      <motion.div
+        className="absolute top-0 -left-40 w-96 h-96 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 rounded-full blur-3xl pointer-events-none"
+        animate={{
+          x: [0, 50, 0],
+          y: [0, -50, 0],
+          scale: [1, 1.2, 1]
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: 'easeInOut'
+        }}
+      />
+      <motion.div
+        className="absolute top-1/2 -right-40 w-96 h-96 bg-gradient-to-r from-purple-400/20 via-pink-400/20 to-orange-400/20 rounded-full blur-3xl pointer-events-none"
+        animate={{
+          x: [0, -50, 0],
+          y: [0, 50, 0],
+          scale: [1.2, 1, 1.2]
+        }}
+        transition={{
+          duration: 25,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          delay: 5
+        }}
+      />
 
       {/* Navigation */}
       <motion.nav
@@ -204,7 +221,6 @@ export default function HomePage() {
               >
                 Blog
               </Link>
-
               <Link
                 href="/contact"
                 className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
@@ -263,7 +279,6 @@ export default function HomePage() {
                     >
                       Blog
                     </Link>
-
                     <Link
                       href="/contact"
                       className="text-lg font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 py-2"
@@ -290,108 +305,103 @@ export default function HomePage() {
         </div>
       </motion.nav>
 
-
-
       {/* Hero Section */}
-      <HeroBeam className="w-full min-h-[50rem]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-20">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-            {/* Left Content */}
-            <div className="text-left">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
+      <section className="relative py-20 overflow-hidden" aria-labelledby="hero-heading">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <Badge
+                variant="secondary"
+                className="mb-6 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm px-4 py-2"
+                role="status"
+                aria-label="Trusted by over 25,000 professionals"
               >
-                <Badge
-                  variant="secondary"
-                  className="mb-6 bg-blue-50/50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 backdrop-blur-sm px-4 py-2"
-                  role="status"
+                <Sparkles className="w-4 h-4 inline mr-2" aria-hidden="true" />
+                Trusted by 25,000+ Professionals
+              </Badge>
+            </motion.div>
+
+            <motion.h1
+              id="hero-heading"
+              className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              Run Your Entire Business
+              <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                From One Platform
+              </span>
+            </motion.h1>
+
+            <motion.p
+              className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-12"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              Stop juggling 6+ apps. KAZI combines project management, AI content creation, secure payments,
+              client collaboration, and professional file delivery in one beautiful workspace.
+            </motion.p>
+
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              role="group"
+              aria-label="Primary actions"
+            >
+              <Link href="/signup">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Start your free trial - No credit card required"
                 >
-                  <Sparkles className="w-4 h-4 inline mr-2 text-blue-500" />
-                  Trusted by 25,000+ Professionals
-                </Badge>
-              </motion.div>
+                  Start Free Trial
+                  <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
+                </Button>
+              </Link>
+              <Link href="/demo-features">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="text-lg px-8 py-6 border-2 hover:border-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Watch interactive demo of KAZI platform"
+                >
+                  <Play className="mr-2 w-5 h-5" aria-hidden="true" />
+                  Watch Demo
+                </Button>
+              </Link>
+            </motion.div>
 
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-slate-900 dark:text-white leading-tight">
-                <HeroTextReveal text="More Features. Less Cost." className="justify-start text-slate-900 dark:text-white" />
-                <span className="block mt-2 bg-gradient-to-r from-blue-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">
-                  Zero Compromises.
-                </span>
-              </h1>
-
-              <motion.p
-                className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-xl leading-relaxed"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.8 }}
-              >
-                Why pay for Monday, Jasper, and Loom separately? KAZI gives you AI content creation,
-                video studio, escrow payments, and project management in one unified workspace for just $29/mo.
-              </motion.p>
-
-              <motion.div
-                className="flex flex-col sm:flex-row gap-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
-              >
-                <Link href="/signup">
-                  <MagneticButton>
-                    <Button
-                      size="lg"
-                      className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-lg px-8 py-6 h-auto shadow-2xl shadow-blue-900/20 transition-all hover:scale-105"
-                    >
-                      Start Free Trial
-                      <ArrowRight className="ml-2 w-5 h-5" />
-                    </Button>
-                  </MagneticButton>
-                </Link>
-                <Link href="/demo-features">
-                  <MagneticButton>
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="text-lg px-8 py-6 h-auto border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:bg-slate-800/50 backdrop-blur-sm"
-                    >
-                      <Play className="mr-2 w-5 h-5" />
-                      Watch Demo
-                    </Button>
-                  </MagneticButton>
-                </Link>
-              </motion.div>
-
-              <motion.div
-                className="mt-10 flex items-center gap-6 text-sm text-slate-500 font-medium"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-              >
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-slate-200" />
-                  ))}
+            <motion.div
+              className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-gray-600 dark:text-gray-400"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              role="region"
+              aria-label="Security and trust badges"
+            >
+              {trustBadges.map((badge, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2"
+                  role="status"
+                  aria-label={badge.label}
+                >
+                  <badge.icon className="w-4 h-4 text-green-600" aria-hidden="true" />
+                  <span>{badge.label}</span>
                 </div>
-                <div className="flex gap-1">
-                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                </div>
-                <span>from 500+ reviews</span>
-              </motion.div>
-            </div>
-
-            {/* Right Visual - 3D Card */}
-            <div className="relative h-[400px] lg:h-[600px] w-full hidden lg:block perspective-1000">
-              <Hero3DCard />
-              {/* Decorative Gradient Behind Card */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-500/20 blur-[100px] -z-10 rounded-full mix-blend-multiply dark:mix-blend-screen pointer-events-none" />
-            </div>
+              ))}
+            </motion.div>
           </div>
         </div>
-      </HeroBeam>
+      </section>
 
       {/* Stats Section */}
       <section
@@ -427,42 +437,54 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Comparison Section (Replaces generic Problem Statement) */}
-      <section className="py-24 bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-950">
+      {/* Problem Statement */}
+      <section
+        className="py-20"
+        aria-labelledby="problem-heading"
+        role="region"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-              Stop Paying the "subscription tax"
+          <div className="text-center mb-12">
+            <h2 id="problem-heading" className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              Tired of Context Switching Between 6+ Apps?
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              You could spend $117+ a month piecing together tools, or just $29 with KAZI.
-              See exactly what you're paying for.
+              Freelancers and agencies waste hours every day switching between project management, file storage,
+              invoicing, communication, and payment platforms.
             </p>
           </div>
 
-          <PricingComparisonTable />
-        </div>
-      </section>
-
-      {/* Social Proof Marquee */}
-      <section className="py-10 bg-white dark:bg-gray-900 border-y border-gray-100 dark:border-gray-800">
-        <div className="text-center mb-8">
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Trusted by 25,000+ Freelancers & Agencies</p>
-        </div>
-        <div className="flex flex-col antialiased bg-white dark:bg-gray-900 dark:bg-grid-white/[0.05] items-center justify-center relative overflow-hidden">
-          <InfiniteMovingCards
-            items={[
-              { name: "Acme Corp" },
-              { name: "Global Design" },
-              { name: "TechFlow" },
-              { name: "Creative Studios" },
-              { name: "Indie Hackers" },
-              { name: "Freelance Union" },
-              { name: "Digital Nomads" },
-            ]}
-            direction="right"
-            speed="slow"
-          />
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto" role="list">
+            {[
+              { title: 'One Workspace', description: 'Everything in one place—no more tab chaos or lost files across platforms.' },
+              { title: 'Save 15+ Hours/Week', description: 'Automate repetitive tasks with AI and streamline your entire workflow.' },
+              { title: 'Get Paid Faster', description: 'Secure escrow payments mean you get paid on time, every time.' }
+            ].map((benefit, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                role="listitem"
+              >
+                <LiquidGlassCard
+                  variant="tinted"
+                  hoverEffect
+                  role="article"
+                  aria-label={`${benefit.title}: ${benefit.description}`}
+                >
+                  <LiquidGlassCardHeader>
+                    <CheckCircle className="w-12 h-12 text-green-600 mb-4" aria-hidden="true" />
+                    <LiquidGlassCardTitle>{benefit.title}</LiquidGlassCardTitle>
+                  </LiquidGlassCardHeader>
+                  <LiquidGlassCardContent>
+                    <p className="text-gray-700 dark:text-gray-300">{benefit.description}</p>
+                  </LiquidGlassCardContent>
+                </LiquidGlassCard>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -490,24 +512,48 @@ export default function HomePage() {
             </p>
           </div>
 
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8" role="list">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                role="listitem"
+              >
+                <Card
+                  className="group h-full border-2 hover:border-blue-600 transition-all hover:shadow-xl focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+                  role="article"
+                  aria-label={`${feature.title}: ${feature.description}`}
+                >
+                  <CardHeader>
+                    <div
+                      className={`w-12 h-12 rounded-lg bg-gradient-to-r ${feature.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
+                      aria-hidden="true"
+                    >
+                      <feature.icon className="w-6 h-6 text-white" aria-hidden="true" />
+                    </div>
+                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                    <CardDescription className="text-base">{feature.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Link href={feature.href}>
+                      <Button
+                        variant="ghost"
+                        className="w-full group-hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        aria-label={`Learn more about ${feature.title}`}
+                      >
+                        Learn More
+                        <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
-
-        <BentoGrid className="max-w-4xl mx-auto">
-          {features.map((feature, index) => (
-            <BentoGridItem
-              key={index}
-              title={feature.title}
-              description={feature.description}
-              header={
-                <div className={`flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br ${feature.gradient} opacity-10 flex items-center justify-center`}>
-                  <feature.icon className={`h-12 w-12 opacity-50 text-gray-500`} />
-                </div>
-              }
-              icon={<feature.icon className="h-4 w-4 text-neutral-500" />}
-              className={index === 3 || index === 6 ? "md:col-span-2" : ""}
-            />
-          ))}
-        </BentoGrid>
       </section>
 
       {/* Testimonials */}
@@ -586,7 +632,7 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section >
+      </section>
 
       {/* Final CTA */}
       <section
@@ -651,9 +697,57 @@ export default function HomePage() {
             </p>
           </motion.div>
         </div>
-      </section >
+      </section>
 
-      <SiteFooter />
-    </div >
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-6 h-6 text-blue-400" />
+                <span className="text-xl font-bold">KAZI</span>
+              </div>
+              <p className="text-gray-400">
+                All-in-one workspace for freelancers and agencies
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4">Product</h3>
+              <div className="space-y-2">
+                <Link href="/features" className="block text-gray-400 hover:text-white transition-colors">Features</Link>
+                <Link href="/pricing" className="block text-gray-400 hover:text-white transition-colors">Pricing</Link>
+                <Link href="/demo-features" className="block text-gray-400 hover:text-white transition-colors">Demo</Link>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4">Resources</h3>
+              <div className="space-y-2">
+                <Link href="/blog" className="block text-gray-400 hover:text-white transition-colors">Blog</Link>
+                <Link href="/docs" className="block text-gray-400 hover:text-white transition-colors">Docs</Link>
+                <Link href="/tutorials" className="block text-gray-400 hover:text-white transition-colors">Tutorials</Link>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4">Company</h3>
+              <div className="space-y-2">
+                <Link href="/contact" className="block text-gray-400 hover:text-white transition-colors">Contact</Link>
+                <Link href="/signup" className="block text-gray-400 hover:text-white transition-colors">Sign Up</Link>
+                <Link href="/login" className="block text-gray-400 hover:text-white transition-colors">Login</Link>
+              </div>
+            </div>
+          </div>
+
+          <Separator className="bg-gray-800 mb-8" />
+
+          <div className="text-center text-gray-400">
+            <p>© 2025 KAZI. Built in South Africa 🇿🇦 • Serving 40+ Countries Worldwide</p>
+          </div>
+        </div>
+      </footer>
+    </div>
   )
 }
