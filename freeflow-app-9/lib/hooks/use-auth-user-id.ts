@@ -1,7 +1,23 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+
+// Demo user ID for demo mode
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+// Check if demo mode is enabled
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
 
 /**
  * Hook to get the auth.users compatible ID for Supabase FK constraints
@@ -9,22 +25,42 @@ import { createClient } from '@/lib/supabase/client'
  * Background: The app uses NextAuth for authentication against public.users table,
  * but many Supabase tables have FK constraints to auth.users table.
  * This hook bridges that gap by:
- * 1. First trying Supabase auth (direct auth.users ID)
- * 2. Then using authId from NextAuth session (fetched from profiles table)
- * 3. Falling back to session user.id as last resort
+ * 1. First checking for demo mode (returns demo user ID)
+ * 2. Then trying Supabase auth (direct auth.users ID)
+ * 3. Then using authId from NextAuth session (fetched from profiles table)
+ * 4. Falling back to session user.id as last resort
  */
 export function useAuthUserId() {
   const supabase = createClient()
   const [session, setSession] = useState<any>(null)
+  const isDemo = useMemo(() => isDemoModeEnabled(), [])
 
   useEffect(() => {
+    // In demo mode, create a mock session
+    if (isDemo) {
+      setSession({
+        user: {
+          id: DEMO_USER_ID,
+          authId: DEMO_USER_ID,
+          email: 'alex@freeflow.io',
+          name: 'Alexandra Chen'
+        }
+      })
+      return
+    }
+
     fetch('/api/auth/session')
       .then(res => res.json())
       .then(data => setSession(data))
-      .catch(() => {})
-  }, [])
+      .catch(() => setSession({}))
+  }, [isDemo])
 
   const getUserId = useCallback(async (): Promise<string | null> => {
+    // In demo mode, always return demo user ID
+    if (isDemo) {
+      return DEMO_USER_ID
+    }
+
     // First try authId from NextAuth session (auth.users-compatible ID for Supabase FK constraints)
     const authId = (session?.user as any)?.authId
     if (authId) {
@@ -44,8 +80,8 @@ export function useAuthUserId() {
     }
 
     return null
-  }, [supabase, session])
+  }, [supabase, session, isDemo])
 
-  const isSessionLoaded = session !== null
-  return { getUserId, session, isSessionLoaded }
+  const isSessionLoaded = session !== null || isDemo
+  return { getUserId, session, isSessionLoaded, isDemo }
 }

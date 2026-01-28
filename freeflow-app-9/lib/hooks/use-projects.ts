@@ -1,8 +1,22 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+
+// Demo mode detection
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
 
 export interface Project {
   id: string
@@ -58,16 +72,25 @@ export function useProjects(initialProjects: Project[] = []) {
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
   const [session, setSession] = useState<any>(null)
+  const isDemo = useMemo(() => isDemoModeEnabled(), [])
 
   useEffect(() => {
+    // In demo mode, create mock session
+    if (isDemo) {
+      setSession({ user: { id: DEMO_USER_ID, authId: DEMO_USER_ID } })
+      return
+    }
     fetch('/api/auth/session')
       .then(res => res.json())
       .then(data => setSession(data))
-      .catch(() => { })
-  }, [])
+      .catch(() => setSession({}))
+  }, [isDemo])
 
   // Get auth.users compatible ID (same pattern as useSupabaseMutation)
   const getUserId = useCallback(async (): Promise<string | null> => {
+    // Demo mode - return demo user ID
+    if (isDemo) return DEMO_USER_ID
+
     // First try Supabase auth - this is the most reliable method
     const { data: { user }, error } = await supabase.auth.getUser()
     if (user?.id) return user.id
@@ -86,13 +109,14 @@ export function useProjects(initialProjects: Project[] = []) {
     if (session?.user?.id) return session.user.id
 
     return null
-  }, [supabase, session])
+  }, [supabase, session, isDemo])
 
   const fetchProjects = useCallback(async () => {
     setIsLoading(true)
     try {
       // Fetch via API (uses service role key, bypasses RLS)
-      const response = await fetch('/api/projects', { credentials: 'include' })
+      const url = isDemo ? '/api/projects?demo=true' : '/api/projects'
+      const response = await fetch(url, { credentials: 'include' })
       const result = await response.json()
 
       if (!response.ok) {

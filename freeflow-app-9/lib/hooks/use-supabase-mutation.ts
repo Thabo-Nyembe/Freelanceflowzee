@@ -3,9 +3,23 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+
+// Demo mode detection
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
 
 interface UseSupabaseMutationOptions {
   table: string
@@ -26,18 +40,27 @@ export function useSupabaseMutation({
   const [lastMutation, setLastMutation] = useState<{ type: string; id?: string; timestamp: number } | null>(null)
   const supabase = createClient()
   const [session, setSession] = useState<any>(null)
+  const isDemo = useMemo(() => isDemoModeEnabled(), [])
 
   useEffect(() => {
+    // In demo mode, create mock session
+    if (isDemo) {
+      setSession({ user: { id: DEMO_USER_ID, authId: DEMO_USER_ID } })
+      return
+    }
     fetch('/api/auth/session')
       .then(res => res.json())
       .then(data => setSession(data))
-      .catch(() => {})
-  }, [])
+      .catch(() => setSession({}))
+  }, [isDemo])
 
   // Get user ID from NextAuth session or Supabase auth
   // IMPORTANT: financial_transactions has FK to auth.users, not public.users
   // So we need to get the auth.users ID from the session's authId field
   const getUserId = async (): Promise<string | null> => {
+    // Demo mode - return demo user ID
+    if (isDemo) return DEMO_USER_ID
+
     // First try Supabase auth (this gives us auth.users ID directly)
     const { data: { user } } = await supabase.auth.getUser()
     if (user?.id) {
