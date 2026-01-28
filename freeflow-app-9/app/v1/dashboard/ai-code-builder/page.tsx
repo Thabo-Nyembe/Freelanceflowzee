@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import AICodeBuilderV2Client from './ai-code-builder-v2-client';
+import AICodeBuilderV2Client from './ai-code-builder-client';
 
 export const metadata = {
   title: 'AI Code Builder V2 | FreeFlow Kazi',
