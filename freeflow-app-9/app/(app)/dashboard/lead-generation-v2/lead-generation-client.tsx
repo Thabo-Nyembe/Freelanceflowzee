@@ -417,6 +417,25 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   // New segment state
   const [newSegmentName, setNewSegmentName] = useState('')
 
+  // Activity logging dialogs
+  const [isLogEmailDialogOpen, setIsLogEmailDialogOpen] = useState(false)
+  const [isLogCallDialogOpen, setIsLogCallDialogOpen] = useState(false)
+  const [isLogMeetingDialogOpen, setIsLogMeetingDialogOpen] = useState(false)
+  const [isAddNoteDialogOpen, setIsAddNoteDialogOpen] = useState(false)
+  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false)
+  const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false)
+
+  // Activity form states
+  const [activityForm, setActivityForm] = useState({
+    leadId: '',
+    subject: '',
+    description: '',
+    outcome: 'positive' as 'positive' | 'neutral' | 'negative',
+    duration: 0,
+    scheduledDate: '',
+    scheduledTime: ''
+  })
+
   // Form state for new lead
   const [newLeadForm, setNewLeadForm] = useState<LeadInput>({
     name: '',
@@ -1114,19 +1133,23 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Quick Actions Handlers - Activities Tab
   const handleLogEmail = () => {
-    toast.success('Email activity log form opened')
+    setActivityForm(prev => ({ ...prev, leadId: selectedLead?.id || '' }))
+    setIsLogEmailDialogOpen(true)
   }
 
   const handleLogCallActivity = () => {
-    toast.success('Call activity log form opened')
+    setActivityForm(prev => ({ ...prev, leadId: selectedLead?.id || '' }))
+    setIsLogCallDialogOpen(true)
   }
 
   const handleLogMeeting = () => {
-    toast.success('Meeting activity log form opened')
+    setActivityForm(prev => ({ ...prev, leadId: selectedLead?.id || '' }))
+    setIsLogMeetingDialogOpen(true)
   }
 
   const handleAddNote = () => {
-    toast.success('Note creation form opened')
+    setActivityForm(prev => ({ ...prev, leadId: selectedLead?.id || '' }))
+    setIsAddNoteDialogOpen(true)
   }
 
   const handleCreateTask = () => {
@@ -1134,11 +1157,75 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleSchedule = () => {
-    toast.success('Scheduling calendar opened')
+    setActivityForm(prev => ({ ...prev, leadId: selectedLead?.id || '' }))
+    setIsScheduleDialogOpen(true)
   }
 
   const handleSendMessage = () => {
-    toast.success('Message composer opened')
+    setActivityForm(prev => ({ ...prev, leadId: selectedLead?.id || '' }))
+    setIsMessageDialogOpen(true)
+  }
+
+  // Activity submission handler
+  const handleSubmitActivity = async (type: 'email' | 'call' | 'meeting' | 'note' | 'schedule' | 'message') => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/crm/activity-timeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'log-activity',
+          contactId: activityForm.leadId || selectedLead?.id,
+          type: type === 'schedule' ? 'meeting' : type,
+          title: activityForm.subject || `${type.charAt(0).toUpperCase() + type.slice(1)} Activity`,
+          description: activityForm.description,
+          metadata: {
+            outcome: activityForm.outcome,
+            duration: activityForm.duration,
+            scheduledDate: activityForm.scheduledDate,
+            scheduledTime: activityForm.scheduledTime
+          },
+          engagement: {
+            score: activityForm.outcome === 'positive' ? 85 : activityForm.outcome === 'negative' ? 35 : 50,
+            quality: activityForm.outcome === 'positive' ? 'high' : activityForm.outcome === 'negative' ? 'low' : 'medium'
+          }
+        })
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} activity logged`, {
+          description: `Activity recorded for ${selectedLead?.firstName || 'lead'}`
+        })
+        // Update lead's last contact date
+        if (selectedLead) {
+          await contactLead(selectedLead.id)
+        }
+      } else {
+        throw new Error(result.error || 'Failed to log activity')
+      }
+    } catch (error) {
+      toast.error('Failed to log activity', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+      setIsLogEmailDialogOpen(false)
+      setIsLogCallDialogOpen(false)
+      setIsLogMeetingDialogOpen(false)
+      setIsAddNoteDialogOpen(false)
+      setIsScheduleDialogOpen(false)
+      setIsMessageDialogOpen(false)
+      setActivityForm({
+        leadId: '',
+        subject: '',
+        description: '',
+        outcome: 'positive',
+        duration: 0,
+        scheduledDate: '',
+        scheduledTime: ''
+      })
+    }
   }
 
   const handleExportLog = () => {
@@ -1201,15 +1288,18 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleAnnouncement = () => {
-    toast.success('Announcement composer opened')
+    router.push('/dashboard/announcements-v2')
+    toast.success('Opening announcements', { description: 'Create broadcast messages for your leads' })
   }
 
   const handleSequences = () => {
-    toast.success('Email sequence builder opened')
+    router.push('/dashboard/email-marketing-v2?tab=sequences')
+    toast.success('Opening email sequences', { description: 'Build automated email drip campaigns' })
   }
 
   const handleWorkflows = () => {
-    toast.success('Workflow automation builder opened')
+    router.push('/dashboard/workflows-v2')
+    toast.success('Opening workflow automation', { description: 'Create automated lead nurturing workflows' })
   }
 
   const handleAnalytics = () => {
@@ -4198,6 +4288,342 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                     Launch Campaign
                   </>
                 )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Log Email Activity Dialog */}
+        <Dialog open={isLogEmailDialogOpen} onOpenChange={setIsLogEmailDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-blue-500" />
+                Log Email Activity
+              </DialogTitle>
+              <DialogDescription>
+                Record an email interaction with {selectedLead ? `${selectedLead.firstName} ${selectedLead.lastName}` : 'a lead'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Subject</Label>
+                <Input
+                  placeholder="Email subject..."
+                  value={activityForm.subject}
+                  onChange={(e) => setActivityForm({ ...activityForm, subject: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Notes / Description</Label>
+                <Textarea
+                  placeholder="Add notes about this email..."
+                  rows={3}
+                  value={activityForm.description}
+                  onChange={(e) => setActivityForm({ ...activityForm, description: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Outcome</Label>
+                <select
+                  className="w-full p-2 border rounded-md bg-background"
+                  value={activityForm.outcome}
+                  onChange={(e) => setActivityForm({ ...activityForm, outcome: e.target.value as 'positive' | 'neutral' | 'negative' })}
+                >
+                  <option value="positive">Positive - Good response</option>
+                  <option value="neutral">Neutral - No response yet</option>
+                  <option value="negative">Negative - Bad response</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsLogEmailDialogOpen(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+                disabled={isSubmitting}
+                onClick={() => handleSubmitActivity('email')}
+              >
+                {isSubmitting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Mail className="w-4 h-4 mr-2" />Log Email</>}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Log Call Activity Dialog */}
+        <Dialog open={isLogCallDialogOpen} onOpenChange={setIsLogCallDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Phone className="w-5 h-5 text-green-500" />
+                Log Call Activity
+              </DialogTitle>
+              <DialogDescription>
+                Record a phone call with {selectedLead ? `${selectedLead.firstName} ${selectedLead.lastName}` : 'a lead'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Call Subject</Label>
+                <Input
+                  placeholder="What was the call about..."
+                  value={activityForm.subject}
+                  onChange={(e) => setActivityForm({ ...activityForm, subject: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Duration (minutes)</Label>
+                <Input
+                  type="number"
+                  placeholder="15"
+                  value={activityForm.duration || ''}
+                  onChange={(e) => setActivityForm({ ...activityForm, duration: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Call Notes</Label>
+                <Textarea
+                  placeholder="Key points from the call..."
+                  rows={3}
+                  value={activityForm.description}
+                  onChange={(e) => setActivityForm({ ...activityForm, description: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Outcome</Label>
+                <select
+                  className="w-full p-2 border rounded-md bg-background"
+                  value={activityForm.outcome}
+                  onChange={(e) => setActivityForm({ ...activityForm, outcome: e.target.value as 'positive' | 'neutral' | 'negative' })}
+                >
+                  <option value="positive">Positive - Interested</option>
+                  <option value="neutral">Neutral - Need follow-up</option>
+                  <option value="negative">Negative - Not interested</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsLogCallDialogOpen(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                disabled={isSubmitting}
+                onClick={() => handleSubmitActivity('call')}
+              >
+                {isSubmitting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Phone className="w-4 h-4 mr-2" />Log Call</>}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Log Meeting Activity Dialog */}
+        <Dialog open={isLogMeetingDialogOpen} onOpenChange={setIsLogMeetingDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-purple-500" />
+                Log Meeting Activity
+              </DialogTitle>
+              <DialogDescription>
+                Record a meeting with {selectedLead ? `${selectedLead.firstName} ${selectedLead.lastName}` : 'a lead'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Meeting Title</Label>
+                <Input
+                  placeholder="Meeting title..."
+                  value={activityForm.subject}
+                  onChange={(e) => setActivityForm({ ...activityForm, subject: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Duration (minutes)</Label>
+                <Input
+                  type="number"
+                  placeholder="30"
+                  value={activityForm.duration || ''}
+                  onChange={(e) => setActivityForm({ ...activityForm, duration: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Meeting Notes</Label>
+                <Textarea
+                  placeholder="Meeting summary and key takeaways..."
+                  rows={4}
+                  value={activityForm.description}
+                  onChange={(e) => setActivityForm({ ...activityForm, description: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Outcome</Label>
+                <select
+                  className="w-full p-2 border rounded-md bg-background"
+                  value={activityForm.outcome}
+                  onChange={(e) => setActivityForm({ ...activityForm, outcome: e.target.value as 'positive' | 'neutral' | 'negative' })}
+                >
+                  <option value="positive">Positive - Great meeting</option>
+                  <option value="neutral">Neutral - Standard meeting</option>
+                  <option value="negative">Negative - Issues raised</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsLogMeetingDialogOpen(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-purple-500 to-violet-600 text-white"
+                disabled={isSubmitting}
+                onClick={() => handleSubmitActivity('meeting')}
+              >
+                {isSubmitting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Users className="w-4 h-4 mr-2" />Log Meeting</>}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Note Dialog */}
+        <Dialog open={isAddNoteDialogOpen} onOpenChange={setIsAddNoteDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-amber-500" />
+                Add Note
+              </DialogTitle>
+              <DialogDescription>
+                Add a note for {selectedLead ? `${selectedLead.firstName} ${selectedLead.lastName}` : 'a lead'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Note Title</Label>
+                <Input
+                  placeholder="Note title..."
+                  value={activityForm.subject}
+                  onChange={(e) => setActivityForm({ ...activityForm, subject: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Note Content</Label>
+                <Textarea
+                  placeholder="Write your note here..."
+                  rows={5}
+                  value={activityForm.description}
+                  onChange={(e) => setActivityForm({ ...activityForm, description: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddNoteDialogOpen(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+                disabled={isSubmitting || !activityForm.description.trim()}
+                onClick={() => handleSubmitActivity('note')}
+              >
+                {isSubmitting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><FileText className="w-4 h-4 mr-2" />Add Note</>}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Dialog */}
+        <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-indigo-500" />
+                Schedule Activity
+              </DialogTitle>
+              <DialogDescription>
+                Schedule an activity with {selectedLead ? `${selectedLead.firstName} ${selectedLead.lastName}` : 'a lead'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Activity Title</Label>
+                <Input
+                  placeholder="What's being scheduled..."
+                  value={activityForm.subject}
+                  onChange={(e) => setActivityForm({ ...activityForm, subject: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date</Label>
+                  <Input
+                    type="date"
+                    value={activityForm.scheduledDate}
+                    onChange={(e) => setActivityForm({ ...activityForm, scheduledDate: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Time</Label>
+                  <Input
+                    type="time"
+                    value={activityForm.scheduledTime}
+                    onChange={(e) => setActivityForm({ ...activityForm, scheduledTime: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <Textarea
+                  placeholder="Additional details..."
+                  rows={3}
+                  value={activityForm.description}
+                  onChange={(e) => setActivityForm({ ...activityForm, description: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsScheduleDialogOpen(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white"
+                disabled={isSubmitting || !activityForm.scheduledDate}
+                onClick={() => handleSubmitActivity('schedule')}
+              >
+                {isSubmitting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Scheduling...</> : <><Calendar className="w-4 h-4 mr-2" />Schedule</>}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Send Message Dialog */}
+        <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-cyan-500" />
+                Send Message
+              </DialogTitle>
+              <DialogDescription>
+                Send a message to {selectedLead ? `${selectedLead.firstName} ${selectedLead.lastName}` : 'a lead'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Subject</Label>
+                <Input
+                  placeholder="Message subject..."
+                  value={activityForm.subject}
+                  onChange={(e) => setActivityForm({ ...activityForm, subject: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Message</Label>
+                <Textarea
+                  placeholder="Write your message..."
+                  rows={5}
+                  value={activityForm.description}
+                  onChange={(e) => setActivityForm({ ...activityForm, description: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsMessageDialogOpen(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white"
+                disabled={isSubmitting || !activityForm.description.trim()}
+                onClick={() => handleSubmitActivity('message')}
+              >
+                {isSubmitting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Sending...</> : <><Send className="w-4 h-4 mr-2" />Send</>}
               </Button>
             </DialogFooter>
           </DialogContent>
