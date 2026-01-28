@@ -2044,6 +2044,98 @@ async function seedApiKeys() {
 }
 
 // ============================================================================
+// CHATS & MESSAGES - Collaboration
+// ============================================================================
+
+const CHAT_IDS = {
+  cloudsync: uuid(),
+  datapulse: uuid(),
+  general: uuid(),
+}
+
+async function seedChats() {
+  console.log('\n💬 Chats...')
+  await deleteExisting('chats')
+
+  await seed('chats', [
+    {
+      id: CHAT_IDS.cloudsync,
+      user_id: DEMO_USER_ID,
+      name: 'CloudSync Project',
+      description: 'Discussion for CloudSync Mobile App development',
+      type: 'group',
+      is_pinned: true,
+      last_message_at: hoursAgo(2),
+      created_at: daysAgo(90),
+      updated_at: hoursAgo(2),
+    },
+    {
+      id: CHAT_IDS.datapulse,
+      user_id: DEMO_USER_ID,
+      name: 'DataPulse Team',
+      description: 'Analytics dashboard project communication',
+      type: 'group',
+      is_pinned: false,
+      last_message_at: hoursAgo(6),
+      created_at: daysAgo(60),
+      updated_at: hoursAgo(6),
+    },
+    {
+      id: CHAT_IDS.general,
+      user_id: DEMO_USER_ID,
+      name: 'General Updates',
+      description: 'Business announcements and updates',
+      type: 'channel',
+      is_pinned: true,
+      last_message_at: daysAgo(1),
+      created_at: daysAgo(365),
+      updated_at: daysAgo(1),
+    },
+  ])
+}
+
+async function seedMessages() {
+  console.log('\n📨 Messages...')
+  await deleteExisting('messages')
+
+  const messages = [
+    // CloudSync project messages
+    { chat_id: CHAT_IDS.cloudsync, text: 'The UI mockups are looking great! Jennifer approved the designs.', hours: 48 },
+    { chat_id: CHAT_IDS.cloudsync, text: 'Starting work on the real-time sync feature today.', hours: 36 },
+    { chat_id: CHAT_IDS.cloudsync, text: 'Push notifications are now working on both iOS and Android.', hours: 24 },
+    { chat_id: CHAT_IDS.cloudsync, text: 'Client meeting scheduled for tomorrow at 2 PM to review progress.', hours: 12 },
+    { chat_id: CHAT_IDS.cloudsync, text: 'Milestone 2 completed - 40% of project done! 🎉', hours: 2 },
+    // DataPulse messages
+    { chat_id: CHAT_IDS.datapulse, text: 'Dashboard wireframes are ready for review.', hours: 72 },
+    { chat_id: CHAT_IDS.datapulse, text: 'API integration with their data warehouse is complete.', hours: 48 },
+    { chat_id: CHAT_IDS.datapulse, text: 'Rachel asked for custom export functionality - adding to scope.', hours: 24 },
+    { chat_id: CHAT_IDS.datapulse, text: 'Performance optimizations reduced load time by 60%!', hours: 6 },
+    // General messages
+    { chat_id: CHAT_IDS.general, text: 'Q1 revenue exceeded projections by 15%! Great work team.', hours: 168 },
+    { chat_id: CHAT_IDS.general, text: 'New client onboarding: Urban Fitness Studio signed yesterday.', hours: 120 },
+    { chat_id: CHAT_IDS.general, text: 'Reminder: Tax filing deadline is next month - documents ready.', hours: 24 },
+  ]
+
+  // Schema uses sender_id, minimal columns
+  await seed('messages', messages.map((m, i) => ({
+    id: uuid(),
+    chat_id: m.chat_id,
+    sender_id: DEMO_USER_ID,
+    text: m.text,
+    is_edited: false,
+    is_pinned: i === 4 || i === 8, // Pin milestone messages
+    is_deleted: false,
+    created_at: hoursAgo(m.hours),
+  })))
+}
+
+async function seedComments() {
+  console.log('\n💭 Comments...')
+  // Comments table may not exist in DB - skip
+  console.log('   ⏭️  Skipping comments (table may not exist)')
+}
+
+// ============================================================================
 // MAIN
 // ============================================================================
 
@@ -2084,6 +2176,9 @@ async function main() {
   await seedTeamMembers()
   await seedNotifications()
   await seedLeads()
+  await seedChats()
+  await seedMessages()
+  await seedComments()
 
   // ============ PHASE 5: Escrow System ============
   console.log('\n🔒 PHASE 5: Escrow System')
