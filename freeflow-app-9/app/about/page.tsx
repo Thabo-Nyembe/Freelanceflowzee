@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollProgress } from '@/components/ui/scroll-progress'
+import { HeroBeam } from '@/components/marketing/hero-beam'
+import { SiteFooter } from '@/components/marketing/site-footer'
 
 export default function AboutPage() {
   const [isLoading, setIsLoading] = useState(true)
@@ -68,7 +70,7 @@ export default function AboutPage() {
       <EnhancedNavigation />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
+      <HeroBeam containerClassName="pt-32 pb-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium mb-6">
             <Award className="w-4 h-4" />
@@ -97,7 +99,7 @@ export default function AboutPage() {
             </Link>
           </div>
         </div>
-      </section>
+      </HeroBeam>
 
       {/* Stats Section */}
       <section className="py-16 px-4 bg-white/50 dark:bg-gray-900/50">
@@ -199,12 +201,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 px-4 bg-gray-900 text-gray-400">
-        <div className="max-w-6xl mx-auto text-center">
-          <p>&copy; 2024 KAZI. Built in South Africa. Serving 120+ Countries Worldwide.</p>
-        </div>
-      </footer>
+      {/* Architectural Footer */}
+      <SiteFooter />
     </div>
   )
 }

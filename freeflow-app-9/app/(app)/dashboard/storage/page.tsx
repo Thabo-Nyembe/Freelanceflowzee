@@ -320,8 +320,27 @@ export default function StoragePage() {
         const result = await response.json()
 
         if (result.success && result.files) {
-          dispatch({ type: 'SET_FILES', files: result.files })
-          logger.info('Files loaded successfully from API', { count: result.files.length })
+          // Transform API data to match StorageFile interface
+          const transformedFiles: StorageFile[] = result.files.map((f: any) => ({
+            id: f.id,
+            name: f.name || f.original_name || 'Unnamed',
+            type: f.type || f.file_type || 'other',
+            size: f.size || 0,
+            provider: f.storage_provider || 'local',
+            status: f.status === 'active' ? 'synced' : (f.status || 'synced'),
+            path: f.storage_path || f.url || '',
+            extension: f.extension || f.name?.split('.').pop() || '',
+            uploadedAt: f.uploaded_at || f.created_at || new Date().toISOString(),
+            modifiedAt: f.modified_at || f.updated_at || new Date().toISOString(),
+            sharedWith: f.sharedWith || [],
+            isPublic: f.access_level === 'public' || f.is_public || false,
+            downloadCount: f.downloads || f.downloadCount || 0,
+            thumbnail: f.thumbnail_url,
+            tags: f.tags || [],
+            version: f.version || 1,
+          }))
+          dispatch({ type: 'SET_FILES', files: transformedFiles })
+          logger.info('Files loaded successfully from API', { count: transformedFiles.length })
           announce('Storage dashboard loaded', 'polite')
         } else {
           throw new Error(result.error || 'Failed to load files')
@@ -389,7 +408,7 @@ export default function StoragePage() {
     if (state.searchTerm) {
       filtered = filtered.filter(f =>
         f.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-        f.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
+        (f.tags || []).some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
       )
     }
 

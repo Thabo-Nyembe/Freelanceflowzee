@@ -142,7 +142,8 @@ const trustBadges = [
   { icon: CheckCircle, label: '30-Day Guarantee' }
 ]
 
-import { AuroraBackground } from '@/components/ui/aurora-background'
+import { AuroraBackground } from '@/components/ui/aurora-background';
+import { HeroBeam } from '@/components/marketing/hero-beam';
 import { HeroTextReveal } from '@/components/ui/hero-text-reveal'
 import { Hero3DCard } from '@/components/marketing/hero-3d-card'
 import { BentoGrid, BentoGridItem } from '@/components/ui/bento-grid'
@@ -292,8 +293,8 @@ export default function HomePage() {
 
 
       {/* Hero Section */}
-      <AuroraBackground className="py-20 lg:py-32 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+      <HeroBeam className="w-full min-h-[50rem]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-20">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             {/* Left Content */}
             <div className="text-left">
@@ -390,7 +391,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </AuroraBackground>
+      </HeroBeam>
 
       {/* Stats Section */}
       <section

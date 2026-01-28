@@ -33,7 +33,15 @@ export async function GET(request: NextRequest) {
           .order('created_at', { ascending: false })
           .limit(50)
 
-        if (error && error.code !== '42P01') throw error
+        // Handle errors gracefully - return empty array instead of failing
+        if (error) {
+          logger.warn('Bookings query error', { error: error.message, code: error.code })
+          // Return empty array for RLS errors or table not found
+          return NextResponse.json({
+            success: true,
+            data: []
+          })
+        }
 
         return NextResponse.json({
           success: true,

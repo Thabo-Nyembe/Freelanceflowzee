@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { SpotlightCard } from '@/components/ui/spotlight-card'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { ROICalculator } from '@/components/marketing/roi-calculator'
+import { HeroBeam } from '@/components/marketing/hero-beam'
 import { CheckCircle, Sparkles, Zap, Crown, Shield, Lock, Award, ArrowRight, Menu } from 'lucide-react'
 
 const plans = [
@@ -247,13 +248,13 @@ export default function PricingPage() {
 
 
 
-      {/* Hero Section */}
-      <section className="py-20" aria-labelledby="pricing-hero-heading">
+      {/* Hero Section with HeroBeam */}
+      <HeroBeam containerClassName="py-20" aria-labelledby="pricing-hero-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge
               variant="secondary"
-              className="mb-4 bg-purple-50 text-purple-700"
+              className="mb-4 bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
               role="status"
               aria-label="Simple, Transparent Pricing"
             >
@@ -261,14 +262,14 @@ export default function PricingPage() {
             </Badge>
             <h1
               id="pricing-hero-heading"
-              className="text-5xl sm:text-6xl font-bold tracking-tight mb-6"
+              className="text-5xl sm:text-6xl font-bold tracking-tight mb-6 dark:text-white"
             >
               One Platform. One Price.
               <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Unlimited Possibilities.
               </span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-12">
               Start free, upgrade when you're ready. No contracts, no hidden fees, and cancel anytime. Join 25,000+ professionals who've streamlined their workflow.
             </p>
 
@@ -413,7 +414,7 @@ export default function PricingPage() {
             ))}
           </div>
         </div>
-      </section>
+      </HeroBeam>
 
       {/* FAQ Section */}
       <section className="py-20 bg-white" aria-labelledby="faq-heading">
