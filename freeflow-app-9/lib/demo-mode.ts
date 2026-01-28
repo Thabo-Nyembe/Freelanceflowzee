@@ -13,12 +13,72 @@ export const DEMO_MODE = {
 
 // Demo user for showcase
 export const DEMO_USER = {
-  id: 'demo-user-001',
-  email: 'demo@kazi.io',
-  name: 'Alex Thompson',
+  id: '00000000-0000-0000-0000-000000000001',
+  email: 'alex@freeflow.io',
+  name: 'Alexandra Chen',
   avatar: '/avatars/demo-user.png',
   role: 'Product Manager',
   company: 'KAZI Technologies'
+}
+
+/**
+ * Check if demo mode is enabled on the client side
+ * Checks for demo=true in URL, demo_mode cookie, or localStorage
+ */
+export function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+
+  // Check URL parameter
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+
+  // Check cookie
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+
+  // Check localStorage
+  try {
+    if (localStorage.getItem('demo_mode') === 'true') return true
+  } catch {
+    // localStorage not available
+  }
+
+  return false
+}
+
+/**
+ * Demo-aware fetch utility
+ * Automatically appends demo=true to API requests when in demo mode
+ */
+export async function demoFetch(url: string, options?: RequestInit): Promise<Response> {
+  const isDemo = isDemoModeEnabled()
+
+  if (isDemo) {
+    // Add demo=true to URL
+    const separator = url.includes('?') ? '&' : '?'
+    url = `${url}${separator}demo=true`
+
+    // Add demo header
+    options = {
+      ...options,
+      headers: {
+        ...options?.headers,
+        'X-Demo-Mode': 'true'
+      }
+    }
+  }
+
+  return fetch(url, options)
+}
+
+/**
+ * Get demo user ID for API calls
+ */
+export function getDemoUserId(): string {
+  return DEMO_USER.id
 }
 
 // Generate rich mock projects
