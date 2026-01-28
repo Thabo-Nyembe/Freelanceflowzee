@@ -101,7 +101,7 @@ export function useSchedulingPreferences(userId?: string) {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
-    try { const { data } = await supabase.from('scheduling_preferences').select('*').eq('user_id', userId).single(); setPreferences(data) } finally { setIsLoading(false) }
+    try { const { data } = await supabase.from('scheduling_preferences').select('*').eq('user_id', userId).maybeSingle(); setPreferences(data) } finally { setIsLoading(false) }
   }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { preferences, isLoading, refresh: fetch }

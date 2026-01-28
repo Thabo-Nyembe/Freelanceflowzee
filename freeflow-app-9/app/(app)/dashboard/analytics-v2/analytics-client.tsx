@@ -657,7 +657,7 @@ export default function AnalyticsClient() {
         .from('user_analytics')
         .select('*')
         .eq('user_id', userId)
-        .single()
+        .maybeSingle()
       if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows found
       setUserAnalyticsData(data || null)
     } catch (err) {

@@ -42,7 +42,7 @@ export function useUserAnalytics(userId?: string) {
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
-    try { const { data: result } = await supabase.from('user_analytics').select('*').eq('user_id', userId).single(); setData(result) } finally { setIsLoading(false) }
+    try { const { data: result } = await supabase.from('user_analytics').select('*').eq('user_id', userId).maybeSingle(); setData(result) } finally { setIsLoading(false) }
   }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }

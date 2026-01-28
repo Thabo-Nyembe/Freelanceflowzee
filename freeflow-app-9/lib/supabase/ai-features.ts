@@ -361,7 +361,7 @@ export async function getGrowthPlaybook(userId: string): Promise<GrowthPlaybook 
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (error && error.code !== 'PGRST116') throw error
   if (!data) return null
@@ -580,7 +580,7 @@ export async function getUserMetrics(userId: string) {
     .from('user_metrics_aggregate')
     .select('*')
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
 
   if (error && error.code !== 'PGRST116') throw error
   return data
