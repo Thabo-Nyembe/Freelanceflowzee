@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createFeatureLogger } from '@/lib/logger';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 const logger = createFeatureLogger('API-CVPortfolio');
 
@@ -98,8 +99,8 @@ export async function GET(request: NextRequest) {
     const cvData = getMockCVData(userId);
 
     if (format === 'pdf') {
-      // Generate PDF (in production, use a library like puppeteer or pdfkit)
-      const pdfContent = generatePDFContent(cvData);
+      // Generate professional PDF using pdf-lib
+      const pdfContent = await generatePDFContent(cvData);
       return new NextResponse(pdfContent, {
         headers: {
           'Content-Type': 'application/pdf',
@@ -125,9 +126,8 @@ export async function GET(request: NextRequest) {
  * Export CV as PDF
  */
 async function handleExportPDF(data: CVData): Promise<NextResponse> {
-  // Generate PDF content (mock implementation)
-  // In production, use puppeteer, pdfkit, or jsPDF
-  const pdfContent = generatePDFContent(data);
+  // Generate professional PDF using pdf-lib
+  const pdfContent = await generatePDFContent(data);
 
   return new NextResponse(pdfContent, {
     headers: {
@@ -373,23 +373,204 @@ ${data.cvData.profile.name}`;
 }
 
 /**
- * Generate PDF content (mock implementation)
- * In production, use puppeteer, pdfkit, or similar
+ * Generate professional PDF CV using pdf-lib
  */
-function generatePDFContent(data: CVData | string): string {
-  // Mock PDF generation
-  // In production, this would generate actual PDF binary data
-  const pdfHeader = '%PDF-1.4\n';
-  const mockContent = typeof data === 'string' ? data : JSON.stringify(data);
+async function generatePDFContent(data: CVData): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.create();
+  const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-  // This is a simplified mock - real PDF generation would use proper libraries
-  return pdfHeader +
-    '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n' +
-    '2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n' +
-    '3 0 obj\n<< /Type /Page /Parent 2 0 R /Contents 4 0 R >>\nendobj\n' +
-    '4 0 obj\n<< /Length ' + mockContent.length + ' >>\nstream\n' +
-    mockContent + '\nendstream\nendobj\n' +
-    'xref\n0 5\ntrailer\n<< /Size 5 /Root 1 0 R >>\nstartxref\n%%EOF';
+  // Colors
+  const primaryColor = rgb(0.13, 0.59, 0.95); // Blue
+  const darkGray = rgb(0.2, 0.2, 0.2);
+  const lightGray = rgb(0.5, 0.5, 0.5);
+
+  let page = pdfDoc.addPage([612, 792]); // Letter size
+  const { width, height } = page.getSize();
+  let y = height - 50;
+
+  // Helper functions
+  const drawText = (text: string, x: number, yPos: number, options: { font?: any; size?: number; color?: any } = {}) => {
+    const { font = helvetica, size = 10, color = darkGray } = options;
+    page.drawText(text, { x, y: yPos, size, font, color });
+  };
+
+  const wrapText = (text: string, maxWidth: number, font: any, fontSize: number): string[] => {
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+      if (testWidth > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+    return lines;
+  };
+
+  const checkNewPage = (neededSpace: number) => {
+    if (y - neededSpace < 50) {
+      page = pdfDoc.addPage([612, 792]);
+      y = height - 50;
+    }
+  };
+
+  // Header - Name and Title
+  drawText(data.profile.name, 50, y, { font: helveticaBold, size: 24, color: primaryColor });
+  y -= 25;
+  drawText(data.profile.title, 50, y, { font: helvetica, size: 14, color: lightGray });
+  y -= 20;
+
+  // Contact info
+  const contactLine = `${data.profile.email} | ${data.profile.phone} | ${data.profile.location}`;
+  drawText(contactLine, 50, y, { size: 9, color: lightGray });
+  y -= 15;
+  if (data.profile.website) {
+    drawText(data.profile.website, 50, y, { size: 9, color: primaryColor });
+    y -= 20;
+  }
+
+  // Divider line
+  page.drawLine({ start: { x: 50, y }, end: { x: width - 50, y }, thickness: 1, color: rgb(0.85, 0.85, 0.85) });
+  y -= 25;
+
+  // Bio/Summary
+  if (data.profile.bio) {
+    drawText('PROFESSIONAL SUMMARY', 50, y, { font: helveticaBold, size: 12, color: primaryColor });
+    y -= 18;
+    const bioLines = wrapText(data.profile.bio, width - 100, helvetica, 10);
+    for (const line of bioLines) {
+      checkNewPage(15);
+      drawText(line, 50, y);
+      y -= 14;
+    }
+    y -= 10;
+  }
+
+  // Experience
+  if (data.experience && data.experience.length > 0) {
+    checkNewPage(50);
+    drawText('EXPERIENCE', 50, y, { font: helveticaBold, size: 12, color: primaryColor });
+    y -= 20;
+
+    for (const exp of data.experience) {
+      checkNewPage(80);
+      drawText(exp.position, 50, y, { font: helveticaBold, size: 11 });
+      y -= 14;
+      drawText(`${exp.company} | ${exp.location}`, 50, y, { size: 10, color: lightGray });
+      drawText(exp.period, width - 50 - helvetica.widthOfTextAtSize(exp.period, 10), y, { size: 10, color: lightGray });
+      y -= 14;
+
+      if (exp.description) {
+        const descLines = wrapText(exp.description, width - 100, helvetica, 9);
+        for (const line of descLines) {
+          checkNewPage(12);
+          drawText(line, 50, y, { size: 9 });
+          y -= 12;
+        }
+      }
+
+      if (exp.achievements && exp.achievements.length > 0) {
+        for (const achievement of exp.achievements.slice(0, 3)) {
+          checkNewPage(12);
+          const achLines = wrapText(`• ${achievement}`, width - 110, helvetica, 9);
+          for (const line of achLines) {
+            drawText(line, 60, y, { size: 9 });
+            y -= 12;
+          }
+        }
+      }
+      y -= 10;
+    }
+  }
+
+  // Skills
+  if (data.skills && data.skills.length > 0) {
+    checkNewPage(50);
+    drawText('SKILLS', 50, y, { font: helveticaBold, size: 12, color: primaryColor });
+    y -= 18;
+
+    for (const skill of data.skills) {
+      checkNewPage(20);
+      drawText(`${skill.category}:`, 50, y, { font: helveticaBold, size: 10 });
+      const skillItems = skill.items.join(', ');
+      const skillLines = wrapText(skillItems, width - 150, helvetica, 9);
+      let xOffset = 50 + helveticaBold.widthOfTextAtSize(`${skill.category}: `, 10);
+
+      for (let i = 0; i < skillLines.length; i++) {
+        if (i === 0) {
+          drawText(skillLines[i], xOffset, y, { size: 9 });
+        } else {
+          y -= 12;
+          drawText(skillLines[i], 50, y, { size: 9 });
+        }
+      }
+      y -= 16;
+    }
+  }
+
+  // Projects
+  if (data.projects && data.projects.length > 0) {
+    checkNewPage(50);
+    drawText('PROJECTS', 50, y, { font: helveticaBold, size: 12, color: primaryColor });
+    y -= 18;
+
+    for (const project of data.projects.slice(0, 4)) {
+      checkNewPage(40);
+      drawText(project.title, 50, y, { font: helveticaBold, size: 10 });
+      if (project.status) {
+        drawText(`[${project.status}]`, width - 50 - helvetica.widthOfTextAtSize(`[${project.status}]`, 9), y, { size: 9, color: lightGray });
+      }
+      y -= 14;
+
+      if (project.description) {
+        const projLines = wrapText(project.description, width - 100, helvetica, 9);
+        for (const line of projLines.slice(0, 2)) {
+          checkNewPage(12);
+          drawText(line, 50, y, { size: 9 });
+          y -= 12;
+        }
+      }
+
+      if (project.technologies && project.technologies.length > 0) {
+        const techStr = project.technologies.join(', ');
+        drawText(`Tech: ${techStr}`, 50, y, { size: 8, color: lightGray });
+        y -= 14;
+      }
+      y -= 5;
+    }
+  }
+
+  // Education
+  if (data.education && data.education.length > 0) {
+    checkNewPage(40);
+    drawText('EDUCATION', 50, y, { font: helveticaBold, size: 12, color: primaryColor });
+    y -= 18;
+
+    for (const edu of data.education) {
+      checkNewPage(30);
+      drawText(edu.degree || edu.title || 'Degree', 50, y, { font: helveticaBold, size: 10 });
+      y -= 14;
+      drawText(`${edu.institution || edu.school || 'Institution'} | ${edu.year || edu.period || ''}`, 50, y, { size: 9, color: lightGray });
+      y -= 18;
+    }
+  }
+
+  // Footer
+  page.drawText(`Generated by KAZI | ${new Date().toLocaleDateString()}`, 50, 30, {
+    size: 8,
+    font: helvetica,
+    color: lightGray
+  });
+
+  return pdfDoc.save();
 }
 
 /**
