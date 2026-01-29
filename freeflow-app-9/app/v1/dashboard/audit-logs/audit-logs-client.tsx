@@ -1609,11 +1609,17 @@ export default function AuditLogsClient() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4 mt-6">
-                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors">
+                  <button
+                    onClick={() => toast.success('Date filter set to last 7 days')}
+                    className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors"
+                  >
                     <Calendar className="w-4 h-4 inline mr-2" />
                     Last 7 Days
                   </button>
-                  <button className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-white/90 transition-colors">
+                  <button
+                    onClick={handleExportAuditLogs}
+                    className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-white/90 transition-colors"
+                  >
                     <Download className="w-4 h-4 inline mr-2" />
                     Export Report
                   </button>

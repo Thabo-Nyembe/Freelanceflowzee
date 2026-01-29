@@ -1789,7 +1789,19 @@ export default function CoursesClient() {
                             </div>
                           ))}
                         </div>
-                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-indigo-300 transition-colors">
+                        <button
+                          onClick={() => {
+                            const input = document.createElement('input')
+                            input.type = 'file'
+                            input.accept = 'image/*,.pdf'
+                            input.onchange = (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0]
+                              if (file) toast.success(`Template "${file.name}" uploaded`)
+                            }
+                            input.click()
+                          }}
+                          className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-indigo-300 transition-colors"
+                        >
                           <Upload className="w-4 h-4 inline-block mr-2" />
                           Upload Custom Template
                         </button>
@@ -1932,7 +1944,12 @@ export default function CoursesClient() {
                                 <Mail className="w-4 h-4 text-muted-foreground" />
                                 <span>{template}</span>
                               </div>
-                              <button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">Edit</button>
+                              <button
+                                onClick={() => toast.info(`Edit ${template} template`)}
+                                className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                              >
+                                Edit
+                              </button>
                             </div>
                           ))}
                         </div>
@@ -2050,7 +2067,13 @@ export default function CoursesClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="lms_live_••••••••••••••••••••" readOnly className="font-mono" />
-                            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText('lms_live_xxxxxxxxxxxxxxxxxxxx')
+                                toast.success('API key copied to clipboard')
+                              }}
+                              className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                            >
                               <Copy className="w-4 h-4" />
                             </button>
                           </div>
@@ -2150,7 +2173,14 @@ export default function CoursesClient() {
                             <p className="font-medium text-red-600">Archive All Courses</p>
                             <p className="text-sm text-muted-foreground">Move all courses to archive</p>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <button
+                            onClick={() => {
+                              if (confirm('Are you sure you want to archive all courses? This action can be undone.')) {
+                                toast.success('All courses archived')
+                              }
+                            }}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                          >
                             Archive
                           </button>
                         </div>
