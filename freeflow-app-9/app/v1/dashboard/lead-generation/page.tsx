@@ -20,6 +20,14 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import {
+  createLeadGenLead,
+  createLeadGenForm,
+  updateLeadGenForm,
+  createLeadGenLandingPage,
+  updateLeadGenLandingPage,
+  createLeadGenCampaign
+} from '@/lib/lead-generation-queries'
 
 const logger = createFeatureLogger('LeadGenerationPage')
 
@@ -39,6 +47,26 @@ export default function LeadGenerationPage() {
   const [leadStats, setLeadStats] = useState<any>(null)
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
+
+  // Modal states
+  const [showAddLeadModal, setShowAddLeadModal] = useState(false)
+  const [showNewFormModal, setShowNewFormModal] = useState(false)
+  const [showEditFormModal, setShowEditFormModal] = useState(false)
+  const [showEmbedModal, setShowEmbedModal] = useState(false)
+  const [showNewPageModal, setShowNewPageModal] = useState(false)
+  const [showEditPageModal, setShowEditPageModal] = useState(false)
+  const [showNewCampaignModal, setShowNewCampaignModal] = useState(false)
+
+  // Selected items for editing
+  const [selectedForm, setSelectedForm] = useState<any>(null)
+  const [selectedPage, setSelectedPage] = useState<any>(null)
+
+  // Form data states
+  const [newLead, setNewLead] = useState({ firstName: '', lastName: '', email: '', phone: '', company: '', source: 'website' as const })
+  const [newForm, setNewForm] = useState({ name: '', description: '' })
+  const [newPage, setNewPage] = useState({ name: '', slug: '', title: '', description: '' })
+  const [newCampaign, setNewCampaign] = useState({ name: '', description: '', budget: 0 })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     const loadLeadGenerationData = async () => {
@@ -86,6 +114,246 @@ export default function LeadGenerationPage() {
 
     loadLeadGenerationData()
   }, [userId, announce])
+
+  // Reload data helper
+  const reloadData = async () => {
+    if (!userId) return
+    try {
+      const {
+        getLeads,
+        getLeadForms,
+        getLandingPages,
+        getLeadCampaigns,
+        getLeadStats
+      } = await import('@/lib/lead-generation-queries')
+
+      const [leadsResult, formsResult, pagesResult, campaignsResult, statsResult] = await Promise.all([
+        getLeads(userId),
+        getLeadForms(userId),
+        getLandingPages(userId),
+        getLeadCampaigns(userId),
+        getLeadStats(userId)
+      ])
+
+      setLeads(leadsResult.data || [])
+      setForms(formsResult.data || [])
+      setLandingPages(pagesResult.data || [])
+      setCampaigns(campaignsResult.data || [])
+      setLeadStats(statsResult.data || null)
+    } catch (err) {
+      logger.error('Failed to reload data', { error: err })
+    }
+  }
+
+  // Handler functions
+  const handleAddLead = async () => {
+    if (!userId || !newLead.email.trim()) {
+      toast.error('Email is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await createLeadGenLead(userId, {
+        first_name: newLead.firstName,
+        last_name: newLead.lastName,
+        email: newLead.email,
+        phone: newLead.phone || undefined,
+        company: newLead.company || undefined,
+        source: newLead.source,
+        status: 'new',
+        score: 50,
+        score_label: 'warm',
+        tags: [],
+        custom_fields: {},
+        page_views: 0,
+        form_submissions: 0,
+        email_opens: 0,
+        email_clicks: 0,
+        time_on_site: 0,
+        location: {}
+      })
+      if (result.error) throw result.error
+      toast.success('Lead added successfully')
+      setShowAddLeadModal(false)
+      setNewLead({ firstName: '', lastName: '', email: '', phone: '', company: '', source: 'website' })
+      reloadData()
+    } catch (err) {
+      toast.error('Failed to add lead')
+      logger.error('Failed to add lead', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCreateForm = async () => {
+    if (!userId || !newForm.name.trim()) {
+      toast.error('Form name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await createLeadGenForm(userId, {
+        name: newForm.name,
+        description: newForm.description || undefined,
+        settings: {},
+        submissions: 0,
+        conversion_rate: 0,
+        is_active: true
+      })
+      if (result.error) throw result.error
+      toast.success('Form created successfully')
+      setShowNewFormModal(false)
+      setNewForm({ name: '', description: '' })
+      reloadData()
+    } catch (err) {
+      toast.error('Failed to create form')
+      logger.error('Failed to create form', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEditForm = (form: any) => {
+    setSelectedForm(form)
+    setShowEditFormModal(true)
+  }
+
+  const handleSaveForm = async () => {
+    if (!selectedForm) return
+
+    setIsSubmitting(true)
+    try {
+      const result = await updateLeadGenForm(selectedForm.id, {
+        name: selectedForm.name,
+        description: selectedForm.description
+      })
+      if (result.error) throw result.error
+      toast.success('Form updated successfully')
+      setShowEditFormModal(false)
+      setSelectedForm(null)
+      reloadData()
+    } catch (err) {
+      toast.error('Failed to update form')
+      logger.error('Failed to update form', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEmbedForm = (form: any) => {
+    setSelectedForm(form)
+    setShowEmbedModal(true)
+  }
+
+  const handleCopyEmbed = () => {
+    const embedCode = `<script src="${window.location.origin}/embed/form/${selectedForm?.id}"></script>\n<div id="leadgen-form-${selectedForm?.id}"></div>`
+    navigator.clipboard.writeText(embedCode)
+    toast.success('Embed code copied to clipboard')
+    setShowEmbedModal(false)
+  }
+
+  const handleCreateLandingPage = async () => {
+    if (!userId || !newPage.name.trim() || !newPage.slug.trim()) {
+      toast.error('Page name and URL slug are required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await createLeadGenLandingPage(userId, {
+        name: newPage.name,
+        slug: newPage.slug.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+        title: newPage.title || newPage.name,
+        description: newPage.description || undefined,
+        status: 'draft',
+        template: 'default',
+        sections: [],
+        seo: {},
+        views: 0,
+        unique_visitors: 0,
+        submissions: 0,
+        conversion_rate: 0,
+        bounce_rate: 0
+      })
+      if (result.error) throw result.error
+      toast.success('Landing page created successfully')
+      setShowNewPageModal(false)
+      setNewPage({ name: '', slug: '', title: '', description: '' })
+      reloadData()
+    } catch (err) {
+      toast.error('Failed to create landing page')
+      logger.error('Failed to create landing page', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEditLandingPage = (page: any) => {
+    setSelectedPage(page)
+    setShowEditPageModal(true)
+  }
+
+  const handleSaveLandingPage = async () => {
+    if (!selectedPage) return
+
+    setIsSubmitting(true)
+    try {
+      const result = await updateLeadGenLandingPage(selectedPage.id, {
+        name: selectedPage.name,
+        title: selectedPage.title,
+        description: selectedPage.description
+      })
+      if (result.error) throw result.error
+      toast.success('Landing page updated successfully')
+      setShowEditPageModal(false)
+      setSelectedPage(null)
+      reloadData()
+    } catch (err) {
+      toast.error('Failed to update landing page')
+      logger.error('Failed to update landing page', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleViewLandingPage = (page: any) => {
+    window.open(`/landing/${page.slug}`, '_blank')
+  }
+
+  const handleCreateCampaign = async () => {
+    if (!userId || !newCampaign.name.trim()) {
+      toast.error('Campaign name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await createLeadGenCampaign(userId, {
+        name: newCampaign.name,
+        description: newCampaign.description || undefined,
+        type: 'general',
+        status: 'draft',
+        budget: newCampaign.budget,
+        spent: 0,
+        leads_generated: 0,
+        conversions: 0,
+        roi: 0,
+        tags: []
+      })
+      if (result.error) throw result.error
+      toast.success('Campaign created successfully')
+      setShowNewCampaignModal(false)
+      setNewCampaign({ name: '', description: '', budget: 0 })
+      reloadData()
+    } catch (err) {
+      toast.error('Failed to create campaign')
+      logger.error('Failed to create campaign', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const viewModes = [
     { id: 'overview', label: 'Overview', icon: '📊' },
@@ -221,7 +489,10 @@ export default function LeadGenerationPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Leads</h2>
-        <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+        <button
+          onClick={() => setShowAddLeadModal(true)}
+          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+        >
           + Add Lead
         </button>
       </div>
@@ -268,7 +539,10 @@ export default function LeadGenerationPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Lead Capture Forms</h2>
-        <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+        <button
+          onClick={() => setShowNewFormModal(true)}
+          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+        >
           + New Form
         </button>
       </div>
@@ -297,12 +571,18 @@ export default function LeadGenerationPage() {
               </div>
 
               <div className="border-t pt-4">
-                <div className="text-sm text-muted-foreground mb-2">Fields: {form.fields.length}</div>
+                <div className="text-sm text-muted-foreground mb-2">Fields: {form.fields?.length || 0}</div>
                 <div className="flex items-center gap-2">
-                  <button className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
+                  <button
+                    onClick={() => handleEditForm(form)}
+                    className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
                     Edit Form
                   </button>
-                  <button className="px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors">
+                  <button
+                    onClick={() => handleEmbedForm(form)}
+                    className="px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+                  >
                     Embed
                   </button>
                 </div>
@@ -318,7 +598,10 @@ export default function LeadGenerationPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Landing Pages</h2>
-        <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+        <button
+          onClick={() => setShowNewPageModal(true)}
+          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+        >
           + New Page
         </button>
       </div>
@@ -352,10 +635,16 @@ export default function LeadGenerationPage() {
 
               <div className="border-t pt-4">
                 <div className="flex items-center gap-2">
-                  <button className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
+                  <button
+                    onClick={() => handleEditLandingPage(page)}
+                    className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
                     Edit Page
                   </button>
-                  <button className="px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors">
+                  <button
+                    onClick={() => handleViewLandingPage(page)}
+                    className="px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+                  >
                     View
                   </button>
                 </div>
@@ -371,7 +660,10 @@ export default function LeadGenerationPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Lead Campaigns</h2>
-        <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+        <button
+          onClick={() => setShowNewCampaignModal(true)}
+          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+        >
           + New Campaign
         </button>
       </div>
@@ -524,6 +816,272 @@ export default function LeadGenerationPage() {
           {viewMode === 'campaigns' && renderCampaigns()}
         </ScrollReveal>
       </div>
+
+      {/* Add Lead Modal */}
+      {showAddLeadModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <h3 className="text-xl font-semibold mb-4">Add New Lead</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  value={newLead.firstName}
+                  onChange={(e) => setNewLead({ ...newLead, firstName: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                />
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  value={newLead.lastName}
+                  onChange={(e) => setNewLead({ ...newLead, lastName: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                />
+              </div>
+              <input
+                type="email"
+                placeholder="Email *"
+                value={newLead.email}
+                onChange={(e) => setNewLead({ ...newLead, email: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+              />
+              <input
+                type="tel"
+                placeholder="Phone"
+                value={newLead.phone}
+                onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+              />
+              <input
+                type="text"
+                placeholder="Company"
+                value={newLead.company}
+                onChange={(e) => setNewLead({ ...newLead, company: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+              />
+              <select
+                value={newLead.source}
+                onChange={(e) => setNewLead({ ...newLead, source: e.target.value as any })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+              >
+                <option value="website">Website</option>
+                <option value="landing-page">Landing Page</option>
+                <option value="social-media">Social Media</option>
+                <option value="email">Email</option>
+                <option value="referral">Referral</option>
+                <option value="paid-ads">Paid Ads</option>
+              </select>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setShowAddLeadModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+              <button onClick={handleAddLead} disabled={isSubmitting} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
+                {isSubmitting ? 'Adding...' : 'Add Lead'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Form Modal */}
+      {showNewFormModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <h3 className="text-xl font-semibold mb-4">Create New Form</h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Form Name *"
+                value={newForm.name}
+                onChange={(e) => setNewForm({ ...newForm, name: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+              />
+              <textarea
+                placeholder="Description"
+                value={newForm.description}
+                onChange={(e) => setNewForm({ ...newForm, description: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 h-24"
+              />
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setShowNewFormModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+              <button onClick={handleCreateForm} disabled={isSubmitting} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
+                {isSubmitting ? 'Creating...' : 'Create Form'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Form Modal */}
+      {showEditFormModal && selectedForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <h3 className="text-xl font-semibold mb-4">Edit Form</h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Form Name"
+                value={selectedForm.name}
+                onChange={(e) => setSelectedForm({ ...selectedForm, name: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+              />
+              <textarea
+                placeholder="Description"
+                value={selectedForm.description || ''}
+                onChange={(e) => setSelectedForm({ ...selectedForm, description: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 h-24"
+              />
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => { setShowEditFormModal(false); setSelectedForm(null); }} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+              <button onClick={handleSaveForm} disabled={isSubmitting} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Embed Form Modal */}
+      {showEmbedModal && selectedForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-lg mx-4 shadow-2xl">
+            <h3 className="text-xl font-semibold mb-4">Embed Form: {selectedForm.name}</h3>
+            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+              <pre>{`<script src="${typeof window !== 'undefined' ? window.location.origin : ''}/embed/form/${selectedForm.id}"></script>\n<div id="leadgen-form-${selectedForm.id}"></div>`}</pre>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => { setShowEmbedModal(false); setSelectedForm(null); }} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Close</button>
+              <button onClick={handleCopyEmbed} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Copy Code</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Landing Page Modal */}
+      {showNewPageModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <h3 className="text-xl font-semibold mb-4">Create Landing Page</h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Page Name *"
+                value={newPage.name}
+                onChange={(e) => setNewPage({ ...newPage, name: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+              />
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">/landing/</span>
+                <input
+                  type="text"
+                  placeholder="url-slug *"
+                  value={newPage.slug}
+                  onChange={(e) => setNewPage({ ...newPage, slug: e.target.value })}
+                  className="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                />
+              </div>
+              <input
+                type="text"
+                placeholder="Page Title"
+                value={newPage.title}
+                onChange={(e) => setNewPage({ ...newPage, title: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+              />
+              <textarea
+                placeholder="Description"
+                value={newPage.description}
+                onChange={(e) => setNewPage({ ...newPage, description: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 h-24"
+              />
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setShowNewPageModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+              <button onClick={handleCreateLandingPage} disabled={isSubmitting} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
+                {isSubmitting ? 'Creating...' : 'Create Page'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Landing Page Modal */}
+      {showEditPageModal && selectedPage && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <h3 className="text-xl font-semibold mb-4">Edit Landing Page</h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Page Name"
+                value={selectedPage.name}
+                onChange={(e) => setSelectedPage({ ...selectedPage, name: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+              />
+              <input
+                type="text"
+                placeholder="Page Title"
+                value={selectedPage.title || ''}
+                onChange={(e) => setSelectedPage({ ...selectedPage, title: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+              />
+              <textarea
+                placeholder="Description"
+                value={selectedPage.description || ''}
+                onChange={(e) => setSelectedPage({ ...selectedPage, description: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 h-24"
+              />
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => { setShowEditPageModal(false); setSelectedPage(null); }} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+              <button onClick={handleSaveLandingPage} disabled={isSubmitting} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Campaign Modal */}
+      {showNewCampaignModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <h3 className="text-xl font-semibold mb-4">Create New Campaign</h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Campaign Name *"
+                value={newCampaign.name}
+                onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+              />
+              <textarea
+                placeholder="Description"
+                value={newCampaign.description}
+                onChange={(e) => setNewCampaign({ ...newCampaign, description: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 h-24"
+              />
+              <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Budget ($)</label>
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={newCampaign.budget}
+                  onChange={(e) => setNewCampaign({ ...newCampaign, budget: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setShowNewCampaignModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+              <button onClick={handleCreateCampaign} disabled={isSubmitting} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
+                {isSubmitting ? 'Creating...' : 'Create Campaign'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
