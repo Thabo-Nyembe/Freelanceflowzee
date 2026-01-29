@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('CommunitySearchAPI')
+
+// Flag to track if we should use database or mock
+let useDatabaseQueries = true
 
 // ============================================================================
 // TYPES
@@ -216,7 +220,153 @@ const mockPosts = [
 ]
 
 // ============================================================================
-// SEARCH LOGIC
+// DATABASE SEARCH FUNCTIONS
+// ============================================================================
+
+async function searchMembersFromDatabase(filters: SearchFilters, supabase: Awaited<ReturnType<typeof createClient>>) {
+  try {
+    let query = supabase
+      .from('profiles')
+      .select('*')
+      .limit(filters.limit || 20)
+      .order('created_at', { ascending: false })
+
+    if (filters.query) {
+      query = query.or(`full_name.ilike.%${filters.query}%,title.ilike.%${filters.query}%,bio.ilike.%${filters.query}%`)
+    }
+
+    if (filters.verified !== undefined) {
+      query = query.eq('is_verified', filters.verified)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      logger.warn('Database search failed, using mock data', { error: error.message })
+      return null
+    }
+
+    // Transform to expected format
+    return data?.map(profile => ({
+      id: profile.id,
+      name: profile.full_name || profile.username || 'User',
+      title: profile.title || 'Freelancer',
+      avatar: profile.avatar_url || '/avatars/default.jpg',
+      skills: profile.skills || [],
+      location: profile.location || 'Remote',
+      rating: profile.rating || 4.5,
+      isOnline: false,
+      isVerified: profile.is_verified || false,
+      isPremium: profile.is_premium || false,
+      category: profile.category || 'freelancer',
+      availability: profile.availability || 'available',
+      hourlyRate: profile.hourly_rate || 50,
+      currency: 'USD',
+      totalProjects: profile.total_projects || 0,
+      completionRate: profile.completion_rate || 95,
+      bio: profile.bio || '',
+      tags: profile.tags || []
+    })) || []
+  } catch (error) {
+    logger.warn('Database query error', { error })
+    return null
+  }
+}
+
+async function searchJobsFromDatabase(filters: SearchFilters, supabase: Awaited<ReturnType<typeof createClient>>) {
+  try {
+    let query = supabase
+      .from('jobs')
+      .select('*')
+      .eq('status', 'open')
+      .limit(filters.limit || 20)
+      .order('created_at', { ascending: false })
+
+    if (filters.query) {
+      query = query.or(`title.ilike.%${filters.query}%,description.ilike.%${filters.query}%`)
+    }
+
+    if (filters.category) {
+      query = query.eq('category', filters.category)
+    }
+
+    if (filters.minBudget) {
+      query = query.gte('budget_min', filters.minBudget)
+    }
+
+    if (filters.maxBudget) {
+      query = query.lte('budget_max', filters.maxBudget)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      logger.warn('Jobs database search failed', { error: error.message })
+      return null
+    }
+
+    return data?.map(job => ({
+      id: job.id,
+      title: job.title,
+      description: job.description,
+      budget: { min: job.budget_min, max: job.budget_max },
+      currency: job.currency || 'USD',
+      budgetType: job.budget_type || 'fixed',
+      skills: job.required_skills || [],
+      category: job.category,
+      experience: job.experience_level || 'intermediate',
+      deadline: job.deadline,
+      status: job.status,
+      applicants: job.applicant_count || 0,
+      postedBy: job.user_id,
+      location: job.location || 'Remote',
+      tags: job.tags || []
+    })) || []
+  } catch (error) {
+    logger.warn('Jobs query error', { error })
+    return null
+  }
+}
+
+async function searchPostsFromDatabase(filters: SearchFilters, supabase: Awaited<ReturnType<typeof createClient>>) {
+  try {
+    let query = supabase
+      .from('posts')
+      .select('*')
+      .limit(filters.limit || 20)
+      .order('created_at', { ascending: false })
+
+    if (filters.query) {
+      query = query.or(`content.ilike.%${filters.query}%,title.ilike.%${filters.query}%`)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      logger.warn('Posts database search failed', { error: error.message })
+      return null
+    }
+
+    return data?.map(post => ({
+      id: post.id,
+      authorId: post.user_id,
+      type: post.type || 'text',
+      content: post.content,
+      tags: post.tags || [],
+      createdAt: post.created_at,
+      likes: post.like_count || 0,
+      comments: post.comment_count || 0,
+      shares: post.share_count || 0,
+      views: post.view_count || 0
+    })) || []
+  } catch (error) {
+    logger.warn('Posts query error', { error })
+    return null
+  }
+}
+
+// ============================================================================
+// MOCK SEARCH LOGIC (FALLBACK)
 // ============================================================================
 
 function searchMembers(filters: SearchFilters) {
@@ -526,6 +676,7 @@ function generateSuggestions(query: string): string[] {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const filters: SearchFilters = await request.json()
 
     logger.info('Community search requested', {
@@ -540,10 +691,28 @@ export async function POST(request: NextRequest) {
     const limit = filters.limit || 20
     const type = filters.type || 'all'
 
-    // Perform search
-    const members = type === 'members' || type === 'all' ? searchMembers(filters) : []
-    const jobs = type === 'jobs' || type === 'all' ? searchJobs(filters) : []
-    const posts = type === 'posts' || type === 'all' ? searchPosts(filters) : []
+    // Try database queries first, fall back to mock data
+    let members: any[] = []
+    let jobs: any[] = []
+    let posts: any[] = []
+
+    if (type === 'members' || type === 'all') {
+      const dbMembers = useDatabaseQueries ? await searchMembersFromDatabase(filters, supabase) : null
+      members = dbMembers || searchMembers(filters)
+      if (!dbMembers && useDatabaseQueries) {
+        useDatabaseQueries = false // Disable for subsequent requests if tables don't exist
+      }
+    }
+
+    if (type === 'jobs' || type === 'all') {
+      const dbJobs = useDatabaseQueries ? await searchJobsFromDatabase(filters, supabase) : null
+      jobs = dbJobs || searchJobs(filters)
+    }
+
+    if (type === 'posts' || type === 'all') {
+      const dbPosts = useDatabaseQueries ? await searchPostsFromDatabase(filters, supabase) : null
+      posts = dbPosts || searchPosts(filters)
+    }
 
     // Pagination
     const startIndex = (page - 1) * limit
