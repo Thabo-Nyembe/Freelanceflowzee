@@ -667,8 +667,27 @@ async function handleDownloadFile(
     name: file.name,
   });
 
-  // Generate signed URL if using Wasabi/S3
-  const downloadUrl = file.url; // In production, generate signed URL
+  let downloadUrl = file.url;
+
+  // Generate signed URL from Supabase Storage if file is stored there
+  if (file.storage_provider === 'supabase' && file.storage_path) {
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from('files')
+      .createSignedUrl(file.storage_path, 3600); // 1 hour expiry
+
+    if (!signedUrlError && signedUrlData?.signedUrl) {
+      downloadUrl = signedUrlData.signedUrl;
+    }
+  } else if (file.storage_path && !file.url) {
+    // Try to generate signed URL from default bucket
+    const { data: signedUrlData } = await supabase.storage
+      .from('files')
+      .createSignedUrl(file.storage_path, 3600);
+
+    if (signedUrlData?.signedUrl) {
+      downloadUrl = signedUrlData.signedUrl;
+    }
+  }
 
   return NextResponse.json({
     success: true,
