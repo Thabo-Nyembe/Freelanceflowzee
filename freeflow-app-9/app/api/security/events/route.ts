@@ -213,8 +213,28 @@ async function getGeoLocation(ipAddress: string): Promise<{
     }
   }
 
-  // In production, would call external geolocation API
-  // For now, return placeholder
+  // Try to get geolocation from ip-api (free tier)
+  try {
+    const response = await fetch(`http://ip-api.com/json/${ipAddress}?fields=status,country,countryCode,city,timezone`, {
+      next: { revalidate: 86400 } // Cache for 24 hours
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      if (data.status === 'success') {
+        return {
+          country: data.country,
+          country_code: data.countryCode,
+          city: data.city,
+          timezone: data.timezone
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn('IP geolocation failed', { ipAddress, error })
+  }
+
+  // Fallback if geolocation fails
   return {
     country: 'Unknown',
     country_code: 'XX'
