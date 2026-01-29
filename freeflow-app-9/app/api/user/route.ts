@@ -737,12 +737,16 @@ async function handleExportData(
     { data: userData },
     { data: projects },
     { data: invoices },
-    { data: clients }
+    { data: clients },
+    { data: tasks },
+    { data: files }
   ] = await Promise.all([
     supabase.from('users').select('*').eq('id', userId).single(),
     supabase.from('projects').select('*').eq('user_id', userId),
     supabase.from('invoices').select('*').eq('user_id', userId),
-    supabase.from('clients').select('*').eq('user_id', userId)
+    supabase.from('clients').select('*').eq('user_id', userId),
+    supabase.from('tasks').select('*').eq('user_id', userId).catch(() => ({ data: [] })),
+    supabase.from('files').select('id, name, type, size, created_at').eq('user_id', userId).catch(() => ({ data: [] }))
   ])
 
   const exportData = {
@@ -750,17 +754,61 @@ async function handleExportData(
     projects: projects || [],
     invoices: invoices || [],
     clients: clients || [],
-    exportedAt: new Date().toISOString()
+    tasks: tasks || [],
+    files: files || [],
+    exportedAt: new Date().toISOString(),
+    version: '1.0'
   }
 
-  // In production, this would upload to storage and return a download URL
-  // For now, return the data directly
-  logger.info('User data exported', { userId })
+  // Upload to Supabase Storage
+  const fileName = `data-export-${userId}-${Date.now()}.json`
+  const jsonBlob = JSON.stringify(exportData, null, 2)
+
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from('exports')
+    .upload(`user-data/${userId}/${fileName}`, jsonBlob, {
+      contentType: 'application/json',
+      cacheControl: '3600'
+    })
+
+  if (uploadError) {
+    logger.warn('Failed to upload export to storage, returning data directly', { error: uploadError.message })
+    // Fall back to returning data directly if storage fails
+    return NextResponse.json({
+      success: true,
+      data: exportData,
+      message: 'Data exported successfully'
+    })
+  }
+
+  // Generate signed download URL (valid for 1 hour)
+  const { data: signedUrlData } = await supabase.storage
+    .from('exports')
+    .createSignedUrl(`user-data/${userId}/${fileName}`, 3600)
+
+  // Log export event
+  await supabase.from('audit_logs').insert({
+    user_id: userId,
+    action: 'data_export',
+    resource_type: 'user_data',
+    resource_id: userId,
+    details: { fileName, size: jsonBlob.length },
+    created_at: new Date().toISOString()
+  }).catch(() => {
+    // Audit log table may not exist
+  })
+
+  logger.info('User data exported to storage', { userId, fileName })
 
   return NextResponse.json({
     success: true,
-    data: exportData,
-    message: 'Data exported successfully'
+    data: {
+      exportUrl: signedUrlData?.signedUrl || null,
+      fileName,
+      size: jsonBlob.length,
+      expiresIn: '1 hour'
+    },
+    message: 'Data exported successfully. Download link is valid for 1 hour.'
   })
 }
 
