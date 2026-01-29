@@ -365,7 +365,33 @@ async function handleInviteMember(
       throw invitationError
     }
 
-    // TODO: Send invitation email via /api/send-invoice or dedicated email service
+    // Send invitation email
+    const invitationLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://kazi.app'}/invite/${invitationToken}`
+
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/notifications/email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'team_invitation',
+          data: {
+            recipientEmail: data.email,
+            recipientName: data.name || data.email.split('@')[0],
+            teamName: 'Your Team',
+            role: data.role || 'member',
+            inviterName: 'Team Admin',
+            actionUrl: invitationLink,
+            actionText: 'Accept Invitation',
+            expiresAt: expiresAt.toISOString(),
+            personalMessage: data.message
+          }
+        })
+      })
+      logger.info('Team invitation email sent', { invitationId: invitation.id, email: data.email })
+    } catch (emailError) {
+      logger.warn('Failed to send invitation email', { error: emailError, email: data.email })
+    }
+
     logger.info('Invitation created', {
       invitationId: invitation.id,
       email: data.email,
@@ -1201,7 +1227,34 @@ async function handleResendInvitation(
     )
   }
 
-  // TODO: Resend email notification
+  // Resend invitation email
+  if (invitation?.email) {
+    const invitationLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://kazi.app'}/invite/${newToken}`
+
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/notifications/email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'team_invitation',
+          data: {
+            recipientEmail: invitation.email,
+            recipientName: invitation.name || invitation.email.split('@')[0],
+            teamName: 'Your Team',
+            role: invitation.role || 'member',
+            inviterName: 'Team Admin',
+            actionUrl: invitationLink,
+            actionText: 'Accept Invitation',
+            expiresAt: newExpires.toISOString(),
+            personalMessage: 'This is a reminder to join our team.'
+          }
+        })
+      })
+      logger.info('Invitation email resent', { invitationId: invitation.id, email: invitation.email })
+    } catch (emailError) {
+      logger.warn('Failed to resend invitation email', { error: emailError, email: invitation.email })
+    }
+  }
 
   logger.info('Invitation resent', { invitationId: invitation.id })
 

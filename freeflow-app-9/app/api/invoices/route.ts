@@ -480,13 +480,42 @@ export async function POST(request: NextRequest) {
           logger.error('Send invoice error', { error: updateError })
         }
 
-        // In production, integrate with email service here
-        logger.info('Sending invoice', { invoiceNumber: invoice.invoice_number, email: email || invoice.client_email })
+        // Send invoice email notification
+        const recipientEmail = email || invoice.client_email
+        const invoiceViewLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://kazi.app'}/invoices/view/${invoiceId}`
+
+        if (recipientEmail) {
+          try {
+            await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/notifications/email`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: 'payment',
+                data: {
+                  recipientEmail,
+                  recipientName: invoice.client_name || 'Client',
+                  eventType: 'invoice_sent',
+                  invoiceNumber: invoice.invoice_number,
+                  amount: invoice.total_amount,
+                  currency: invoice.currency || 'USD',
+                  dueDate: invoice.due_date,
+                  actionUrl: invoiceViewLink,
+                  actionText: 'View & Pay Invoice'
+                }
+              })
+            })
+            logger.info('Invoice email sent', { invoiceNumber: invoice.invoice_number, email: recipientEmail })
+          } catch (emailError) {
+            logger.warn('Failed to send invoice email', { error: emailError, invoiceId })
+          }
+        }
+
+        logger.info('Sending invoice', { invoiceNumber: invoice.invoice_number, email: recipientEmail })
 
         return NextResponse.json({
           success: true,
-          data: { invoiceId, email: email || invoice.client_email, sentAt: new Date().toISOString() },
-          message: `Invoice sent to ${email || invoice.client_email}`
+          data: { invoiceId, email: recipientEmail, sentAt: new Date().toISOString() },
+          message: `Invoice sent to ${recipientEmail}`
         })
       }
 
@@ -676,7 +705,36 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        // In production, integrate with email service here
+        // Send reminder email notification
+        const invoiceViewLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://kazi.app'}/invoices/view/${invoiceId}`
+
+        if (invoice.client_email) {
+          try {
+            await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/notifications/email`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: 'payment',
+                data: {
+                  recipientEmail: invoice.client_email,
+                  recipientName: invoice.client_name || 'Client',
+                  eventType: 'reminder',
+                  invoiceNumber: invoice.invoice_number,
+                  amount: invoice.amount_due || invoice.total_amount,
+                  currency: invoice.currency || 'USD',
+                  dueDate: invoice.due_date,
+                  actionUrl: invoiceViewLink,
+                  actionText: 'Pay Now',
+                  reminderNumber: (invoice.reminder_sent_count || 0) + 1
+                }
+              })
+            })
+            logger.info('Invoice reminder email sent', { invoiceNumber: invoice.invoice_number, email: invoice.client_email })
+          } catch (emailError) {
+            logger.warn('Failed to send reminder email', { error: emailError, invoiceId })
+          }
+        }
+
         logger.info('Sending reminder', { invoiceNumber: invoice.invoice_number, email: invoice.client_email })
 
         return NextResponse.json({

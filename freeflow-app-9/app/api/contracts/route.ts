@@ -563,7 +563,34 @@ async function handleSendContract(
     )
   }
 
-  // TODO: Send email notification to client
+  // Send email notification to client
+  if (contract?.client_email) {
+    try {
+      const signatureLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://kazi.app'}/contracts/sign/${data.contractId}`
+
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/notifications/email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'contract',
+          data: {
+            recipientEmail: contract.client_email,
+            recipientName: contract.client_name || 'Client',
+            contractTitle: contract.title,
+            eventType: 'signature_required',
+            senderName: 'Your Freelancer',
+            message: data.message || 'Please review and sign this contract at your earliest convenience.',
+            actionUrl: signatureLink,
+            actionText: 'Review & Sign Contract',
+            expiresAt: contract.expiration_date
+          }
+        })
+      })
+      logger.info('Contract notification email sent', { contractId: data.contractId, clientEmail: contract.client_email })
+    } catch (emailError) {
+      logger.warn('Failed to send contract notification email', { error: emailError, contractId: data.contractId })
+    }
+  }
 
   logger.info('Contract sent', { contractId: data.contractId, userId })
 

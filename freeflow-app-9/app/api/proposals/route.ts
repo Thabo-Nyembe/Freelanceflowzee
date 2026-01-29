@@ -589,8 +589,36 @@ async function handleSendProposal(
     )
   }
 
-  // TODO: Send email notification via /api/send-invoice route
-  // For now, log the send action
+  // Send email notification to client
+  const viewLink = `${process.env.NEXT_PUBLIC_APP_URL}/proposals/view/${proposalId}`
+
+  if (proposal.client_email) {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/notifications/email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'proposal',
+          data: {
+            recipientEmail: proposal.client_email,
+            recipientName: proposal.client_name || 'Client',
+            proposalTitle: proposal.title,
+            eventType: 'submitted',
+            totalAmount: proposal.total,
+            currency: proposal.currency || 'USD',
+            validUntil: proposal.valid_until,
+            actionUrl: viewLink,
+            actionText: 'View Proposal',
+            summary: proposal.description
+          }
+        })
+      })
+      logger.info('Proposal notification email sent', { proposalId, clientEmail: proposal.client_email })
+    } catch (emailError) {
+      logger.warn('Failed to send proposal notification email', { error: emailError, proposalId })
+    }
+  }
+
   logger.info('Proposal sent', {
     proposalId,
     clientEmail: proposal.client_email,

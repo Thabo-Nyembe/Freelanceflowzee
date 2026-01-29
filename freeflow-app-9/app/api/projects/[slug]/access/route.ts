@@ -355,7 +355,30 @@ export async function POST(
 
             if (error) throw error
 
-            // TODO: Send invitation email
+            // Send project invitation email
+            const invitationLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://kazi.app'}/projects/${project.slug}/join`
+
+            try {
+              await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/notifications/email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  type: 'project_update',
+                  data: {
+                    recipientEmail: validated.email,
+                    recipientName: validated.email.split('@')[0],
+                    projectName: project.name || project.title || 'Project',
+                    updateType: 'invitation',
+                    message: `You've been invited to join this project as a ${validated.role}.`,
+                    actionUrl: invitationLink,
+                    actionText: 'View Project'
+                  }
+                })
+              })
+              logger.info('Project invitation email sent', { email: validated.email, projectId: project.id })
+            } catch (emailError) {
+              logger.warn('Failed to send project invitation email', { error: emailError, email: validated.email })
+            }
 
             return NextResponse.json({
               success: true,
