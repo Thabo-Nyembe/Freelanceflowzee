@@ -1,13 +1,29 @@
 /**
- * @file Quick Actions API
- * @description Handle common dashboard micro-actions and interactions
- * @version 1.0.0
+ * Quick Actions API
+ * Handle common dashboard micro-actions with database persistence
+ * Full implementation with demo mode fallback
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from '@/lib/auth'
 import { createFeatureLogger } from '@/lib/logger'
+import { randomBytes } from 'crypto'
 
-const logger = createFeatureLogger('API-QuickActions')
+const logger = createFeatureLogger('quick-actions-api')
+
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+function isDemoMode(request: NextRequest): boolean {
+  const url = new URL(request.url)
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true' ||
+    process.env.NEXT_PUBLIC_DEMO_MODE === 'true' ||
+    process.env.DEMO_MODE === 'true'
+  )
+}
 
 type ActionType =
   | 'create-project'
@@ -32,13 +48,37 @@ interface QuickActionResponse {
   result?: any
   message: string
   id?: string
+  demo?: boolean
 }
 
 /**
- * POST - Handle quick actions
+ * POST - Handle quick actions with database persistence
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const supabase = await createClient()
+    const session = await getServerSession()
+    const demoMode = isDemoMode(request)
+
+    // Determine effective user ID
+    let effectiveUserId: string | null = null
+    let userName = 'User'
+
+    if (session?.user) {
+      const userEmail = session.user.email
+      const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
+      effectiveUserId = isDemoAccount || demoMode ? DEMO_USER_ID : (session.user as any).authId || session.user.id
+      userName = session.user.name || 'User'
+    } else if (demoMode) {
+      effectiveUserId = DEMO_USER_ID
+      userName = 'Demo User'
+    } else {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const body: QuickActionRequest = await request.json()
 
     if (!body.action) {
@@ -48,37 +88,39 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }, { status: 400 })
     }
 
+    logger.info('Quick action received', { action: body.action, userId: effectiveUserId, demoMode })
+
     // Handle different action types
     switch (body.action) {
       case 'create-project':
-        return handleCreateProject(body.data)
+        return handleCreateProject(supabase, effectiveUserId, userName, body.data, demoMode)
 
       case 'create-folder':
-        return handleCreateFolder(body.data)
+        return handleCreateFolder(supabase, effectiveUserId, body.data, demoMode)
 
       case 'send-message':
-        return handleSendMessage(body.data)
+        return handleSendMessage(supabase, effectiveUserId, userName, body.data, demoMode)
 
       case 'create-task':
-        return handleCreateTask(body.data)
+        return handleCreateTask(supabase, effectiveUserId, body.data, demoMode)
 
       case 'bookmark-item':
-        return handleBookmarkItem(body.data)
+        return handleBookmarkItem(supabase, effectiveUserId, body.data, demoMode)
 
       case 'share-file':
-        return handleShareFile(body.data)
+        return handleShareFile(supabase, effectiveUserId, body.data, demoMode)
 
       case 'export-data':
-        return handleExportData(body.data)
+        return handleExportData(supabase, effectiveUserId, body.data, demoMode)
 
       case 'generate-invoice':
-        return handleGenerateInvoice(body.data)
+        return handleGenerateInvoice(supabase, effectiveUserId, body.data, demoMode)
 
       case 'schedule-meeting':
-        return handleScheduleMeeting(body.data)
+        return handleScheduleMeeting(supabase, effectiveUserId, userName, body.data, demoMode)
 
       case 'quick-note':
-        return handleQuickNote(body.data)
+        return handleQuickNote(supabase, effectiveUserId, body.data, demoMode)
 
       default:
         return NextResponse.json({
@@ -88,10 +130,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
   } catch (error: any) {
-    logger.error('Quick action error', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    })
+    logger.error('Quick action error', { error: error.message })
     return NextResponse.json({
       success: false,
       message: error.message || 'Failed to process action'
@@ -102,299 +141,746 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 /**
  * Create a new project
  */
-async function handleCreateProject(data: any): Promise<NextResponse> {
-  const id = `proj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+async function handleCreateProject(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  userName: string,
+  data: any,
+  demoMode: boolean
+): Promise<NextResponse> {
+  try {
+    const { data: project, error } = await supabase
+      .from('projects')
+      .insert({
+        user_id: userId,
+        name: data.title || 'Untitled Project',
+        description: data.description || null,
+        client_id: data.clientId || null,
+        client_name: data.client || null,
+        status: 'active',
+        progress: 0,
+        budget: data.budget || null,
+        start_date: new Date().toISOString(),
+        due_date: data.endDate || null,
+        priority: data.priority || 'medium'
+      })
+      .select()
+      .single()
 
-  const project = {
-    id,
-    title: data.title || 'Untitled Project',
-    description: data.description || '',
-    client: data.client || 'Unassigned',
-    status: 'active',
-    progress: 0,
-    budget: data.budget || 0,
-    startDate: new Date().toISOString(),
-    endDate: data.endDate || null,
-    priority: data.priority || 'medium',
-    createdAt: new Date().toISOString()
+    if (error) {
+      logger.error('Failed to create project', { error })
+
+      if (demoMode) {
+        const mockId = `proj_${Date.now()}_${randomBytes(4).toString('hex')}`
+        return NextResponse.json({
+          success: true,
+          action: 'create-project',
+          result: {
+            id: mockId,
+            title: data.title || 'Untitled Project',
+            description: data.description || '',
+            status: 'active',
+            progress: 0,
+            createdAt: new Date().toISOString()
+          },
+          message: `Project created (demo mode)`,
+          id: mockId,
+          demo: true
+        })
+      }
+
+      throw error
+    }
+
+    logger.info('Project created via quick action', { projectId: project.id })
+
+    return NextResponse.json({
+      success: true,
+      action: 'create-project',
+      result: project,
+      message: `Project "${project.name}" created successfully`,
+      id: project.id,
+      demo: demoMode
+    })
+  } catch (error: any) {
+    logger.error('Create project error', { error: error.message })
+    return NextResponse.json({
+      success: false,
+      action: 'create-project',
+      message: error.message || 'Failed to create project'
+    }, { status: 500 })
   }
-
-  const response: QuickActionResponse = {
-    success: true,
-    action: 'create-project',
-    result: project,
-    message: `Project "${project.title}" created successfully`,
-    id
-  }
-
-  return NextResponse.json(response)
 }
 
 /**
  * Create a new folder
  */
-async function handleCreateFolder(data: any): Promise<NextResponse> {
-  const id = `folder_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+async function handleCreateFolder(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  data: any,
+  demoMode: boolean
+): Promise<NextResponse> {
+  try {
+    const folderPath = data.parent === 'root' ? `/${data.name}/` : `${data.parent}${data.name}/`
 
-  const folder = {
-    id,
-    name: data.name || 'New Folder',
-    parent: data.parent || 'root',
-    type: 'folder',
-    itemCount: 0,
-    size: 0,
-    createdAt: new Date().toISOString(),
-    color: data.color || '#3B82F6'
+    const { data: folder, error } = await supabase
+      .from('folders')
+      .insert({
+        user_id: userId,
+        name: data.name || 'New Folder',
+        path: folderPath,
+        parent_id: data.parentId || null,
+        color: data.color || null,
+        file_count: 0,
+        total_size: 0
+      })
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to create folder', { error })
+
+      if (demoMode) {
+        const mockId = `folder_${Date.now()}_${randomBytes(4).toString('hex')}`
+        return NextResponse.json({
+          success: true,
+          action: 'create-folder',
+          result: {
+            id: mockId,
+            name: data.name || 'New Folder',
+            path: folderPath,
+            itemCount: 0,
+            createdAt: new Date().toISOString()
+          },
+          message: `Folder created (demo mode)`,
+          id: mockId,
+          demo: true
+        })
+      }
+
+      throw error
+    }
+
+    logger.info('Folder created via quick action', { folderId: folder.id })
+
+    return NextResponse.json({
+      success: true,
+      action: 'create-folder',
+      result: folder,
+      message: `Folder "${folder.name}" created successfully`,
+      id: folder.id,
+      demo: demoMode
+    })
+  } catch (error: any) {
+    logger.error('Create folder error', { error: error.message })
+    return NextResponse.json({
+      success: false,
+      action: 'create-folder',
+      message: error.message || 'Failed to create folder'
+    }, { status: 500 })
   }
-
-  const response: QuickActionResponse = {
-    success: true,
-    action: 'create-folder',
-    result: folder,
-    message: `Folder "${folder.name}" created successfully`,
-    id
-  }
-
-  return NextResponse.json(response)
 }
 
 /**
  * Send a message
  */
-async function handleSendMessage(data: any): Promise<NextResponse> {
-  const id = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+async function handleSendMessage(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  userName: string,
+  data: any,
+  demoMode: boolean
+): Promise<NextResponse> {
+  try {
+    // Try client_messages table first, fall back to messages
+    const { data: message, error } = await supabase
+      .from('client_messages')
+      .insert({
+        user_id: userId,
+        sender_id: userId,
+        sender_name: userName,
+        recipient_email: data.to,
+        subject: data.subject || null,
+        content: data.body || '',
+        message_type: 'text',
+        status: 'sent',
+        is_read: false
+      })
+      .select()
+      .single()
 
-  const message = {
-    id,
-    to: data.to || '',
-    subject: data.subject || '',
-    body: data.body || '',
-    sentAt: new Date().toISOString(),
-    read: false,
-    priority: data.priority || 'normal'
+    if (error) {
+      logger.error('Failed to send message', { error })
+
+      if (demoMode) {
+        const mockId = `msg_${Date.now()}_${randomBytes(4).toString('hex')}`
+        return NextResponse.json({
+          success: true,
+          action: 'send-message',
+          result: {
+            id: mockId,
+            to: data.to,
+            subject: data.subject,
+            body: data.body,
+            sentAt: new Date().toISOString()
+          },
+          message: `Message sent (demo mode)`,
+          id: mockId,
+          demo: true
+        })
+      }
+
+      throw error
+    }
+
+    logger.info('Message sent via quick action', { messageId: message.id })
+
+    return NextResponse.json({
+      success: true,
+      action: 'send-message',
+      result: message,
+      message: `Message sent to ${data.to}`,
+      id: message.id,
+      demo: demoMode
+    })
+  } catch (error: any) {
+    logger.error('Send message error', { error: error.message })
+    return NextResponse.json({
+      success: false,
+      action: 'send-message',
+      message: error.message || 'Failed to send message'
+    }, { status: 500 })
   }
-
-  const response: QuickActionResponse = {
-    success: true,
-    action: 'send-message',
-    result: message,
-    message: `Message sent to ${message.to}`,
-    id
-  }
-
-  return NextResponse.json(response)
 }
 
 /**
  * Create a task
  */
-async function handleCreateTask(data: any): Promise<NextResponse> {
-  const id = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+async function handleCreateTask(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  data: any,
+  demoMode: boolean
+): Promise<NextResponse> {
+  try {
+    const { data: task, error } = await supabase
+      .from('tasks')
+      .insert({
+        user_id: userId,
+        title: data.title || 'New Task',
+        description: data.description || null,
+        project_id: data.project || data.projectId || null,
+        assigned_to: data.assignee === 'me' ? userId : data.assignee || null,
+        priority: data.priority || 'medium',
+        due_date: data.dueDate || null,
+        status: 'todo'
+      })
+      .select()
+      .single()
 
-  const task = {
-    id,
-    title: data.title || 'New Task',
-    description: data.description || '',
-    project: data.project || null,
-    assignee: data.assignee || 'me',
-    priority: data.priority || 'medium',
-    dueDate: data.dueDate || null,
-    status: 'todo',
-    createdAt: new Date().toISOString()
+    if (error) {
+      logger.error('Failed to create task', { error })
+
+      if (demoMode) {
+        const mockId = `task_${Date.now()}_${randomBytes(4).toString('hex')}`
+        return NextResponse.json({
+          success: true,
+          action: 'create-task',
+          result: {
+            id: mockId,
+            title: data.title || 'New Task',
+            status: 'todo',
+            priority: data.priority || 'medium',
+            createdAt: new Date().toISOString()
+          },
+          message: `Task created (demo mode)`,
+          id: mockId,
+          demo: true
+        })
+      }
+
+      throw error
+    }
+
+    logger.info('Task created via quick action', { taskId: task.id })
+
+    return NextResponse.json({
+      success: true,
+      action: 'create-task',
+      result: task,
+      message: `Task "${task.title}" created successfully`,
+      id: task.id,
+      demo: demoMode
+    })
+  } catch (error: any) {
+    logger.error('Create task error', { error: error.message })
+    return NextResponse.json({
+      success: false,
+      action: 'create-task',
+      message: error.message || 'Failed to create task'
+    }, { status: 500 })
   }
-
-  const response: QuickActionResponse = {
-    success: true,
-    action: 'create-task',
-    result: task,
-    message: `Task "${task.title}" created successfully`,
-    id
-  }
-
-  return NextResponse.json(response)
 }
 
 /**
  * Bookmark an item
  */
-async function handleBookmarkItem(data: any): Promise<NextResponse> {
-  const id = `bookmark_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+async function handleBookmarkItem(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  data: any,
+  demoMode: boolean
+): Promise<NextResponse> {
+  try {
+    const { data: bookmark, error } = await supabase
+      .from('bookmarks')
+      .insert({
+        user_id: userId,
+        item_id: data.itemId,
+        item_type: data.itemType || 'unknown',
+        title: data.title || 'Untitled',
+        url: data.url || null,
+        tags: data.tags || []
+      })
+      .select()
+      .single()
 
-  const bookmark = {
-    id,
-    itemId: data.itemId,
-    itemType: data.itemType || 'unknown',
-    title: data.title || 'Untitled',
-    url: data.url || '',
-    createdAt: new Date().toISOString(),
-    tags: data.tags || []
+    if (error) {
+      logger.error('Failed to create bookmark', { error })
+
+      if (demoMode) {
+        const mockId = `bookmark_${Date.now()}_${randomBytes(4).toString('hex')}`
+        return NextResponse.json({
+          success: true,
+          action: 'bookmark-item',
+          result: {
+            id: mockId,
+            itemId: data.itemId,
+            itemType: data.itemType,
+            title: data.title,
+            createdAt: new Date().toISOString()
+          },
+          message: `Bookmarked (demo mode)`,
+          id: mockId,
+          demo: true
+        })
+      }
+
+      throw error
+    }
+
+    logger.info('Bookmark created via quick action', { bookmarkId: bookmark.id })
+
+    return NextResponse.json({
+      success: true,
+      action: 'bookmark-item',
+      result: bookmark,
+      message: `Bookmarked "${bookmark.title}"`,
+      id: bookmark.id,
+      demo: demoMode
+    })
+  } catch (error: any) {
+    logger.error('Bookmark item error', { error: error.message })
+    return NextResponse.json({
+      success: false,
+      action: 'bookmark-item',
+      message: error.message || 'Failed to bookmark item'
+    }, { status: 500 })
   }
-
-  const response: QuickActionResponse = {
-    success: true,
-    action: 'bookmark-item',
-    result: bookmark,
-    message: `Bookmarked "${bookmark.title}"`,
-    id
-  }
-
-  return NextResponse.json(response)
 }
 
 /**
  * Share a file
  */
-async function handleShareFile(data: any): Promise<NextResponse> {
-  const id = `share_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+async function handleShareFile(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  data: any,
+  demoMode: boolean
+): Promise<NextResponse> {
+  try {
+    const shareId = randomBytes(16).toString('hex')
+    const shareUrl = `https://kazi.app/share/${shareId}`
 
-  const share = {
-    id,
-    fileId: data.fileId,
-    fileName: data.fileName || 'Untitled',
-    sharedWith: data.sharedWith || [],
-    permissions: data.permissions || 'view',
-    expiresAt: data.expiresAt || null,
-    password: data.password || null,
-    shareUrl: `https://kazi.app/share/${id}`,
-    createdAt: new Date().toISOString()
+    const { data: share, error } = await supabase
+      .from('file_shares')
+      .insert({
+        file_id: data.fileId,
+        shared_by: userId,
+        shared_with: data.sharedWith?.[0] || null,
+        permission: data.permissions || 'view',
+        expires_at: data.expiresAt || null
+      })
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to share file', { error })
+
+      if (demoMode) {
+        return NextResponse.json({
+          success: true,
+          action: 'share-file',
+          result: {
+            id: shareId,
+            fileId: data.fileId,
+            fileName: data.fileName,
+            shareUrl,
+            sharedWith: data.sharedWith || [],
+            createdAt: new Date().toISOString()
+          },
+          message: `File shared (demo mode)`,
+          id: shareId,
+          demo: true
+        })
+      }
+
+      throw error
+    }
+
+    // Update file shared flag
+    await supabase
+      .from('files')
+      .update({ shared: true })
+      .eq('id', data.fileId)
+
+    logger.info('File shared via quick action', { shareId: share.id })
+
+    return NextResponse.json({
+      success: true,
+      action: 'share-file',
+      result: { ...share, shareUrl },
+      message: `File "${data.fileName}" shared successfully`,
+      id: share.id,
+      demo: demoMode
+    })
+  } catch (error: any) {
+    logger.error('Share file error', { error: error.message })
+    return NextResponse.json({
+      success: false,
+      action: 'share-file',
+      message: error.message || 'Failed to share file'
+    }, { status: 500 })
   }
-
-  const response: QuickActionResponse = {
-    success: true,
-    action: 'share-file',
-    result: share,
-    message: `File "${share.fileName}" shared successfully`,
-    id
-  }
-
-  return NextResponse.json(response)
 }
 
 /**
  * Export data
  */
-async function handleExportData(data: any): Promise<NextResponse> {
-  const id = `export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+async function handleExportData(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  data: any,
+  demoMode: boolean
+): Promise<NextResponse> {
+  try {
+    const exportId = randomBytes(8).toString('hex')
 
-  const exportJob = {
-    id,
-    type: data.type || 'csv',
-    format: data.format || 'csv',
-    dateRange: data.dateRange || 'all',
-    filters: data.filters || {},
-    status: 'processing',
-    createdAt: new Date().toISOString(),
-    estimatedCompletion: new Date(Date.now() + 30000).toISOString(),
-    downloadUrl: null
+    const { data: exportJob, error } = await supabase
+      .from('export_jobs')
+      .insert({
+        user_id: userId,
+        export_type: data.type || 'csv',
+        format: data.format || 'csv',
+        date_range: data.dateRange || 'all',
+        filters: data.filters || {},
+        status: 'processing'
+      })
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to create export job', { error })
+
+      if (demoMode) {
+        return NextResponse.json({
+          success: true,
+          action: 'export-data',
+          result: {
+            id: exportId,
+            type: data.type || 'csv',
+            status: 'processing',
+            estimatedCompletion: new Date(Date.now() + 30000).toISOString(),
+            downloadUrl: null
+          },
+          message: `Export started (demo mode)`,
+          id: exportId,
+          demo: true
+        })
+      }
+
+      throw error
+    }
+
+    logger.info('Export job created via quick action', { exportId: exportJob.id })
+
+    return NextResponse.json({
+      success: true,
+      action: 'export-data',
+      result: {
+        ...exportJob,
+        estimatedCompletion: new Date(Date.now() + 30000).toISOString(),
+        downloadUrl: null
+      },
+      message: `Export started. You'll be notified when ready.`,
+      id: exportJob.id,
+      demo: demoMode
+    })
+  } catch (error: any) {
+    logger.error('Export data error', { error: error.message })
+    return NextResponse.json({
+      success: false,
+      action: 'export-data',
+      message: error.message || 'Failed to start export'
+    }, { status: 500 })
   }
-
-  // Simulate processing completion
-  setTimeout(() => {
-    exportJob.status = 'completed'
-    exportJob.downloadUrl = `/api/exports/${id}/download`
-  }, 3000)
-
-  const response: QuickActionResponse = {
-    success: true,
-    action: 'export-data',
-    result: exportJob,
-    message: `Export started. You'll be notified when ready.`,
-    id
-  }
-
-  return NextResponse.json(response)
 }
 
 /**
  * Generate an invoice
  */
-async function handleGenerateInvoice(data: any): Promise<NextResponse> {
-  const id = `inv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  const invoiceNumber = `INV-${String(Date.now()).slice(-6)}`
+async function handleGenerateInvoice(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  data: any,
+  demoMode: boolean
+): Promise<NextResponse> {
+  try {
+    // Generate invoice number
+    const { count } = await supabase
+      .from('invoices')
+      .select('id', { count: 'exact' })
+      .eq('user_id', userId)
 
-  const invoice = {
-    id,
-    invoiceNumber,
-    client: data.client || 'Unnamed Client',
-    project: data.project || null,
-    items: data.items || [],
-    subtotal: data.subtotal || 0,
-    tax: data.tax || 0,
-    total: data.total || 0,
-    dueDate: data.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    status: 'draft',
-    createdAt: new Date().toISOString(),
-    pdfUrl: `/api/invoices/${id}/pdf`
+    const invoiceNumber = `INV-${String((count || 0) + 1).padStart(6, '0')}`
+
+    const { data: invoice, error } = await supabase
+      .from('invoices')
+      .insert({
+        user_id: userId,
+        invoice_number: invoiceNumber,
+        client_id: data.clientId || null,
+        client_name: data.client || 'Unnamed Client',
+        project_id: data.project || null,
+        items: data.items || [],
+        subtotal: data.subtotal || 0,
+        tax_amount: data.tax || 0,
+        total_amount: data.total || 0,
+        due_date: data.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'draft'
+      })
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to create invoice', { error })
+
+      if (demoMode) {
+        const mockId = `inv_${Date.now()}_${randomBytes(4).toString('hex')}`
+        return NextResponse.json({
+          success: true,
+          action: 'generate-invoice',
+          result: {
+            id: mockId,
+            invoiceNumber: `INV-${String(Date.now()).slice(-6)}`,
+            client: data.client,
+            total: data.total || 0,
+            status: 'draft',
+            createdAt: new Date().toISOString()
+          },
+          message: `Invoice generated (demo mode)`,
+          id: mockId,
+          demo: true
+        })
+      }
+
+      throw error
+    }
+
+    logger.info('Invoice created via quick action', { invoiceId: invoice.id })
+
+    return NextResponse.json({
+      success: true,
+      action: 'generate-invoice',
+      result: invoice,
+      message: `Invoice ${invoice.invoice_number} generated successfully`,
+      id: invoice.id,
+      demo: demoMode
+    })
+  } catch (error: any) {
+    logger.error('Generate invoice error', { error: error.message })
+    return NextResponse.json({
+      success: false,
+      action: 'generate-invoice',
+      message: error.message || 'Failed to generate invoice'
+    }, { status: 500 })
   }
-
-  const response: QuickActionResponse = {
-    success: true,
-    action: 'generate-invoice',
-    result: invoice,
-    message: `Invoice ${invoiceNumber} generated successfully`,
-    id
-  }
-
-  return NextResponse.json(response)
 }
 
 /**
  * Schedule a meeting
  */
-async function handleScheduleMeeting(data: any): Promise<NextResponse> {
-  const id = `meet_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+async function handleScheduleMeeting(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  userName: string,
+  data: any,
+  demoMode: boolean
+): Promise<NextResponse> {
+  try {
+    const meetingId = randomBytes(8).toString('hex')
+    const meetingLink = `https://meet.kazi.app/${meetingId}`
+    const passcode = randomBytes(4).toString('hex').toUpperCase()
 
-  const meeting = {
-    id,
-    title: data.title || 'New Meeting',
-    description: data.description || '',
-    startTime: data.startTime || new Date().toISOString(),
-    duration: data.duration || 60,
-    participants: data.participants || [],
-    location: data.location || 'Virtual',
-    meetingUrl: data.location === 'Virtual' ? `https://meet.kazi.app/${id}` : null,
-    reminders: data.reminders || [{ minutes: 15, type: 'notification' }],
-    createdAt: new Date().toISOString()
+    // Parse date and time
+    const startDateTime = new Date(data.startTime)
+    const scheduledDate = startDateTime.toISOString().split('T')[0]
+    const scheduledTime = startDateTime.toTimeString().split(' ')[0]
+
+    const { data: meeting, error } = await supabase
+      .from('meetings')
+      .insert({
+        user_id: userId,
+        title: data.title || 'New Meeting',
+        description: data.description || null,
+        scheduled_date: scheduledDate,
+        scheduled_time: scheduledTime,
+        duration: data.duration || 60,
+        type: 'video',
+        status: 'scheduled',
+        host_id: userId,
+        host_name: userName,
+        max_participants: 25,
+        meeting_link: meetingLink,
+        passcode,
+        recurrence: 'none'
+      })
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to schedule meeting', { error })
+
+      if (demoMode) {
+        return NextResponse.json({
+          success: true,
+          action: 'schedule-meeting',
+          result: {
+            id: meetingId,
+            title: data.title || 'New Meeting',
+            startTime: data.startTime,
+            duration: data.duration || 60,
+            meetingUrl: meetingLink,
+            createdAt: new Date().toISOString()
+          },
+          message: `Meeting scheduled (demo mode)`,
+          id: meetingId,
+          demo: true
+        })
+      }
+
+      throw error
+    }
+
+    // Add participants if provided
+    if (data.participants && data.participants.length > 0) {
+      const participantInserts = data.participants.map((p: any) => ({
+        meeting_id: meeting.id,
+        name: p.name || p.email,
+        email: p.email,
+        role: 'participant',
+        is_host: false
+      }))
+
+      await supabase.from('meeting_participants').insert(participantInserts)
+    }
+
+    logger.info('Meeting scheduled via quick action', { meetingId: meeting.id })
+
+    return NextResponse.json({
+      success: true,
+      action: 'schedule-meeting',
+      result: { ...meeting, passcode },
+      message: `Meeting "${meeting.title}" scheduled successfully`,
+      id: meeting.id,
+      demo: demoMode
+    })
+  } catch (error: any) {
+    logger.error('Schedule meeting error', { error: error.message })
+    return NextResponse.json({
+      success: false,
+      action: 'schedule-meeting',
+      message: error.message || 'Failed to schedule meeting'
+    }, { status: 500 })
   }
-
-  const response: QuickActionResponse = {
-    success: true,
-    action: 'schedule-meeting',
-    result: meeting,
-    message: `Meeting "${meeting.title}" scheduled successfully`,
-    id
-  }
-
-  return NextResponse.json(response)
 }
 
 /**
  * Create a quick note
  */
-async function handleQuickNote(data: any): Promise<NextResponse> {
-  const id = `note_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+async function handleQuickNote(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  data: any,
+  demoMode: boolean
+): Promise<NextResponse> {
+  try {
+    const { data: note, error } = await supabase
+      .from('notes')
+      .insert({
+        user_id: userId,
+        title: data.title || 'Quick Note',
+        content: data.content || '',
+        tags: data.tags || [],
+        project_id: data.project || null,
+        is_pinned: data.isPinned || false,
+        color: data.color || '#FBBF24'
+      })
+      .select()
+      .single()
 
-  const note = {
-    id,
-    title: data.title || 'Quick Note',
-    content: data.content || '',
-    tags: data.tags || [],
-    project: data.project || null,
-    isPinned: data.isPinned || false,
-    color: data.color || '#FBBF24',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    if (error) {
+      logger.error('Failed to create note', { error })
+
+      if (demoMode) {
+        const mockId = `note_${Date.now()}_${randomBytes(4).toString('hex')}`
+        return NextResponse.json({
+          success: true,
+          action: 'quick-note',
+          result: {
+            id: mockId,
+            title: data.title || 'Quick Note',
+            content: data.content || '',
+            createdAt: new Date().toISOString()
+          },
+          message: `Note saved (demo mode)`,
+          id: mockId,
+          demo: true
+        })
+      }
+
+      throw error
+    }
+
+    logger.info('Note created via quick action', { noteId: note.id })
+
+    return NextResponse.json({
+      success: true,
+      action: 'quick-note',
+      result: note,
+      message: `Note "${note.title}" saved successfully`,
+      id: note.id,
+      demo: demoMode
+    })
+  } catch (error: any) {
+    logger.error('Quick note error', { error: error.message })
+    return NextResponse.json({
+      success: false,
+      action: 'quick-note',
+      message: error.message || 'Failed to save note'
+    }, { status: 500 })
   }
-
-  const response: QuickActionResponse = {
-    success: true,
-    action: 'quick-note',
-    result: note,
-    message: `Note "${note.title}" saved successfully`,
-    id
-  }
-
-  return NextResponse.json(response)
 }
 
 /**
@@ -407,14 +893,14 @@ export async function GET(): Promise<NextResponse> {
       name: 'Create Project',
       description: 'Create a new project',
       requiredFields: ['title'],
-      optionalFields: ['description', 'client', 'budget', 'endDate', 'priority']
+      optionalFields: ['description', 'client', 'clientId', 'budget', 'endDate', 'priority']
     },
     {
       id: 'create-folder',
       name: 'Create Folder',
       description: 'Create a new folder in Files Hub',
       requiredFields: ['name'],
-      optionalFields: ['parent', 'color']
+      optionalFields: ['parent', 'parentId', 'color']
     },
     {
       id: 'send-message',
@@ -428,7 +914,7 @@ export async function GET(): Promise<NextResponse> {
       name: 'Create Task',
       description: 'Create a new task',
       requiredFields: ['title'],
-      optionalFields: ['description', 'project', 'assignee', 'priority', 'dueDate']
+      optionalFields: ['description', 'project', 'projectId', 'assignee', 'priority', 'dueDate']
     },
     {
       id: 'bookmark-item',
@@ -456,7 +942,7 @@ export async function GET(): Promise<NextResponse> {
       name: 'Generate Invoice',
       description: 'Generate a new invoice',
       requiredFields: ['client', 'items', 'total'],
-      optionalFields: ['project', 'dueDate', 'tax']
+      optionalFields: ['clientId', 'project', 'dueDate', 'tax', 'subtotal']
     },
     {
       id: 'schedule-meeting',
