@@ -99,6 +99,21 @@ const nextConfig = {
   },
   experimental: {
     externalDir: true,
+    // A+++ Performance: Optimize package imports for tree-shaking
+    optimizePackageImports: [
+      'lucide-react',
+      '@phosphor-icons/react',
+      '@radix-ui/react-icons',
+      'framer-motion',
+      'recharts',
+      '@tanstack/react-table',
+      'date-fns',
+      '@heroicons/react',
+    ],
+    // Note: SRI (Subresource Integrity) disabled - incompatible with Turbopack
+    // Enable when using webpack: sri: { algorithm: 'sha256' },
+    // Memory optimization for large builds
+    webpackMemoryOptimizations: true,
   },
 
   // Exclude native modules from server bundling
@@ -186,8 +201,26 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
 
-  // Performance headers
+  // A+++ Security & Performance headers
   async headers() {
+    // Content Security Policy for production security
+    const cspHeader = process.env.NODE_ENV === 'production'
+      ? `
+        default-src 'self';
+        script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://vercel.live;
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' blob: data: https://*.supabase.co https://*.supabase.in https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://images.unsplash.com https://ui-avatars.com https://api.dicebear.com https://*.gravatar.com;
+        font-src 'self' data: https://fonts.gstatic.com;
+        connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://api.stripe.com https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.fal.ai https://openrouter.ai https://vitals.vercel-insights.com;
+        frame-src 'self' https://js.stripe.com https://hooks.stripe.com;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'self';
+        upgrade-insecure-requests;
+      `.replace(/\s{2,}/g, ' ').trim()
+      : '';
+
     return [
       {
         source: '/:path*',
@@ -200,10 +233,37 @@ const nextConfig = {
             key: 'X-Frame-Options',
             value: 'SAMEORIGIN'
           },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(self), payment=(self)'
+          },
+          // Only add CSP in production
+          ...(process.env.NODE_ENV === 'production' ? [{
+            key: 'Content-Security-Policy',
+            value: cspHeader
+          }] : []),
         ],
       },
       {
         source: '/fonts/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Cache static assets aggressively
+      {
+        source: '/icons/:path*',
         headers: [
           {
             key: 'Cache-Control',

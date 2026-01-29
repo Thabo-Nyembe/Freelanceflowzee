@@ -1,16 +1,17 @@
 {
-  "name": "FreeflowZee - Ultimate Freelance Management Platform",
-  "short_name": "FreeflowZee",
-  "description": "Comprehensive freelance management platform with universal feedback, project tracking, financial management, and team collaboration",
+  "name": "KAZI - All-in-One AI-Powered Creative Platform",
+  "short_name": "KAZI",
+  "description": "AI-powered platform for creative professionals: video studio, design tools, project management, invoicing, escrow payments, and 12+ AI models - all in one place",
   "start_url": "/dashboard",
   "display": "standalone",
-  "orientation": "portrait",
-  "theme_color": "#6366f1",
-  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "theme_color": "#7c3aed",
+  "background_color": "#000000",
   "scope": "/",
-  "categories": ["business", "productivity", "finance"],
+  "categories": ["business", "productivity", "finance", "utilities"],
   "lang": "en-US",
   "dir": "ltr",
+  "id": "kazi-app",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -63,13 +64,13 @@
   ],
   "shortcuts": [
     {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
-      "description": "View your freelance dashboard",
-      "url": "/dashboard",
+      "name": "My Day",
+      "short_name": "My Day",
+      "description": "AI-powered daily planner",
+      "url": "/dashboard/my-day",
       "icons": [
         {
-          "src": "/icons/dashboard-icon-96x96.png",
+          "src": "/icons/icon-96x96.png",
           "sizes": "96x96"
         }
       ]
@@ -78,34 +79,34 @@
       "name": "Projects",
       "short_name": "Projects",
       "description": "Manage your projects",
-      "url": "/projects",
+      "url": "/dashboard/projects",
       "icons": [
         {
-          "src": "/icons/projects-icon-96x96.png",
+          "src": "/icons/icon-96x96.png",
           "sizes": "96x96"
         }
       ]
     },
     {
-      "name": "Payments",
-      "short_name": "Payments",
-      "description": "Handle payments and invoices",
-      "url": "/payment",
+      "name": "Messages",
+      "short_name": "Messages",
+      "description": "Team and client messages",
+      "url": "/dashboard/messages",
       "icons": [
         {
-          "src": "/icons/payment-icon-96x96.png",
+          "src": "/icons/icon-96x96.png",
           "sizes": "96x96"
         }
       ]
     },
     {
-      "name": "New Project",
-      "short_name": "New Project",
-      "description": "Create a new project",
-      "url": "/projects/new",
+      "name": "Video Studio",
+      "short_name": "Video",
+      "description": "Professional video editing",
+      "url": "/dashboard/video-studio-v2",
       "icons": [
         {
-          "src": "/icons/new-project-icon-96x96.png",
+          "src": "/icons/icon-96x96.png",
           "sizes": "96x96"
         }
       ]
@@ -144,7 +145,7 @@
   "related_applications": [
     {
       "platform": "webapp",
-      "url": "https://freeflowzee.vercel.app/manifest.json"
+      "url": "https://kazi.app/manifest.json"
     }
   ],
   "prefer_related_applications": false,
@@ -156,8 +157,8 @@
   },
   "protocol_handlers": [
     {
-      "protocol": "web+freeflowzee",
-      "url": "/projects?project=%s"
+      "protocol": "web+kazi",
+      "url": "/dashboard/projects?project=%s"
     }
   ],
   "file_handlers": [
