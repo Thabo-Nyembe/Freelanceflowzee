@@ -229,36 +229,96 @@ export async function POST(request: NextRequest) {
       case 'validate-tax-id': {
         const { taxId, country, type } = params;
 
-        // In production, this would call external validation services:
-        // - EU VAT: VIES API
-        // - UK VAT: HMRC API
-        // - Australia ABN: ABR API
-        // - etc.
-
         let isValid = false;
         let companyName = null;
         let address = null;
+        let validationSource = 'format';
 
-        // Basic format validation
+        // Clean the tax ID
+        const cleanedTaxId = taxId?.toUpperCase().replace(/[\s-]/g, '') || '';
+
+        // Basic format validation first
         if (type === 'vat' && country) {
           // EU VAT format: Country code (2 letters) + 2-12 alphanumeric
           const vatRegex = /^[A-Z]{2}[0-9A-Z]{2,12}$/;
-          isValid = vatRegex.test(taxId.toUpperCase().replace(/\s/g, ''));
+          isValid = vatRegex.test(cleanedTaxId);
 
-          // Simulate VIES response for demo
+          // If format is valid and it's an EU country, validate with VIES
+          const euCountries = ['AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK'];
+          const extractedCountry = cleanedTaxId.substring(0, 2);
+
+          if (isValid && euCountries.includes(extractedCountry)) {
+            try {
+              // Call EU VIES API for validation
+              const vatNumber = cleanedTaxId.substring(2);
+              const viesResponse = await fetch('https://ec.europa.eu/taxation_customs/vies/rest-api/ms/' + extractedCountry + '/vat/' + vatNumber, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                next: { revalidate: 3600 } // Cache for 1 hour
+              });
+
+              if (viesResponse.ok) {
+                const viesData = await viesResponse.json();
+                isValid = viesData.isValid === true;
+                companyName = viesData.name || null;
+                address = viesData.address || null;
+                validationSource = 'vies';
+              }
+            } catch (error) {
+              logger.warn('VIES API validation failed, using format validation', { taxId: cleanedTaxId });
+              // Fall back to format validation only
+            }
+          }
+        } else if (type === 'vat' && country === 'GB') {
+          // UK VAT: 9 or 12 digits (GB prefix optional)
+          const ukVatRegex = /^(GB)?(\d{9}|\d{12})$/;
+          isValid = ukVatRegex.test(cleanedTaxId);
+
+          // In production, validate with HMRC API
           if (isValid) {
-            companyName = 'Demo Company Ltd';
-            address = '123 Business Street, City';
+            validationSource = 'format';
           }
         } else if (type === 'ein' && country === 'US') {
-          // US EIN format: XX-XXXXXXX
-          const einRegex = /^\d{2}-\d{7}$/;
-          isValid = einRegex.test(taxId);
+          // US EIN format: XX-XXXXXXX or XXXXXXXXX
+          const einRegex = /^\d{9}$/;
+          const cleanedEin = taxId.replace(/-/g, '');
+          isValid = einRegex.test(cleanedEin);
         } else if (type === 'gst' && country === 'IN') {
           // India GST format: 15 alphanumeric
           const gstRegex = /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/;
-          isValid = gstRegex.test(taxId.toUpperCase());
+          isValid = gstRegex.test(cleanedTaxId);
+        } else if (type === 'abn' && country === 'AU') {
+          // Australian ABN: 11 digits
+          const abnRegex = /^\d{11}$/;
+          isValid = abnRegex.test(cleanedTaxId.replace(/\s/g, ''));
+        } else if (type === 'gst' && country === 'AU') {
+          // Australian GST is same as ABN
+          const abnRegex = /^\d{11}$/;
+          isValid = abnRegex.test(cleanedTaxId.replace(/\s/g, ''));
+        } else if (type === 'gst' && country === 'NZ') {
+          // New Zealand GST: 8-9 digits
+          const nzGstRegex = /^\d{8,9}$/;
+          isValid = nzGstRegex.test(cleanedTaxId.replace(/-/g, ''));
+        } else if (type === 'gst' && country === 'CA') {
+          // Canadian GST/HST: 9 digits + RT + 4 digits
+          const caGstRegex = /^\d{9}RT\d{4}$/;
+          isValid = caGstRegex.test(cleanedTaxId);
         }
+
+        // Store validation result
+        await supabase.from('tax_id_validations').insert({
+          user_id: user.id,
+          tax_id: taxId,
+          country,
+          type,
+          is_valid: isValid,
+          company_name: companyName,
+          address,
+          validation_source: validationSource,
+          validated_at: new Date().toISOString()
+        }).catch(() => {
+          // Table might not exist, gracefully handle
+        });
 
         return NextResponse.json({
           success: true,
@@ -268,6 +328,7 @@ export async function POST(request: NextRequest) {
           type,
           companyName,
           address,
+          validationSource,
           validatedAt: new Date().toISOString()
         });
       }

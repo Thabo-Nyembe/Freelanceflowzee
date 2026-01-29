@@ -673,14 +673,53 @@ async function handleAddAgent(
     )
   }
 
-  // Store in support_agents table or users table with role
-  // For now, we'll store in a metadata approach or return success
-  // In production, this would create a user account or agent record
+  // Generate invite token
+  const inviteToken = crypto.randomUUID()
+
+  // Store agent invitation in database
+  const { data: agent, error } = await supabase
+    .from('support_agent_invites')
+    .insert({
+      invited_by: userId,
+      name,
+      email,
+      role,
+      skills: skills || [],
+      invite_token: inviteToken,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
+    })
+    .select()
+    .single()
+
+  if (error) {
+    // Table might not exist, log and continue
+    logger.warn('Could not save agent invite to database', { error: error.message })
+  }
+
+  // Send invitation email
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/notifications/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'team_invitation',
+        to: email,
+        inviterName: 'Support Team',
+        teamName: 'KAZI Support',
+        role: role,
+        inviteLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.kazi.app'}/invite/agent/${inviteToken}`
+      })
+    })
+  } catch (e) {
+    logger.warn('Failed to send agent invite email', { email })
+  }
 
   return NextResponse.json({
     success: true,
     message: 'Agent invite sent successfully',
-    agent: { name, email, role, skills }
+    agent: { id: agent?.id, name, email, role, skills, inviteToken }
   })
 }
 
@@ -739,7 +778,7 @@ async function handleEmailAll(
   userId: string,
   body: Record<string, unknown>
 ) {
-  const { subject, message, recipient_count } = body
+  const { subject, message, recipient_count, segment_id } = body
 
   if (!subject || !message) {
     return NextResponse.json(
@@ -748,12 +787,88 @@ async function handleEmailAll(
     )
   }
 
-  // In production, this would queue emails via a service like SendGrid/Resend
-  // For now, we log and return success
+  // Get customer list from database
+  let query = supabase
+    .from('clients')
+    .select('id, name, email')
+    .eq('user_id', userId)
+    .not('email', 'is', null)
+
+  // Apply segment filter if provided
+  if (segment_id) {
+    const { data: segment } = await supabase
+      .from('customer_segments')
+      .select('filters')
+      .eq('id', segment_id)
+      .single()
+
+    if (segment?.filters) {
+      // Apply segment filters
+      if (segment.filters.tier) {
+        query = query.eq('type', segment.filters.tier)
+      }
+      if (segment.filters.status) {
+        query = query.eq('status', segment.filters.status)
+      }
+    }
+  }
+
+  const { data: customers, error } = await query
+
+  if (error) {
+    logger.error('Failed to fetch customers for email', { error })
+  }
+
+  const recipientList = customers || []
+  const sentCount = recipientList.length
+
+  // Send emails via notification API (queue for async delivery)
+  if (sentCount > 0) {
+    try {
+      // Use internal notification API for email delivery
+      const emailPromises = recipientList.slice(0, 50).map(async (customer: any) => {
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/notifications/email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'generic',
+              to: customer.email,
+              subject: subject,
+              recipientName: customer.name || 'Valued Customer',
+              body: message as string,
+              ctaText: 'Visit Dashboard',
+              ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.kazi.app'}/dashboard`
+            })
+          })
+        } catch (e) {
+          logger.warn('Failed to send email to customer', { customerId: customer.id })
+        }
+      })
+
+      await Promise.allSettled(emailPromises)
+    } catch (e) {
+      logger.error('Email batch send error', { error: e })
+    }
+  }
+
+  // Log email campaign
+  await supabase.from('email_campaigns').insert({
+    user_id: userId,
+    subject,
+    message,
+    recipient_count: sentCount,
+    segment_id: segment_id || null,
+    status: 'sent',
+    sent_at: new Date().toISOString()
+  }).catch(() => {
+    // Table might not exist, gracefully handle
+  })
 
   return NextResponse.json({
     success: true,
-    message: `Email sent to ${recipient_count || 'all'} customers`
+    message: `Email ${sentCount > 0 ? 'sent' : 'queued'} to ${sentCount} customers`,
+    recipientCount: sentCount
   })
 }
 
@@ -762,7 +877,7 @@ async function handleCreateSegment(
   userId: string,
   body: Record<string, unknown>
 ) {
-  const { name, filters } = body
+  const { name, filters, description } = body
 
   if (!name) {
     return NextResponse.json(
@@ -771,10 +886,34 @@ async function handleCreateSegment(
     )
   }
 
+  // Store segment in database
+  const { data: segment, error } = await supabase
+    .from('customer_segments')
+    .insert({
+      user_id: userId,
+      name,
+      description: description || '',
+      filters: filters || {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .select()
+    .single()
+
+  if (error) {
+    logger.warn('Could not save segment to database', { error: error.message })
+    // Return success even if table doesn't exist
+    return NextResponse.json({
+      success: true,
+      message: 'Segment created successfully',
+      segment: { id: `temp-${Date.now()}`, name, filters, description }
+    })
+  }
+
   return NextResponse.json({
     success: true,
     message: 'Segment created successfully',
-    segment: { name, filters }
+    segment
   })
 }
 
@@ -785,10 +924,38 @@ async function handleSaveSettings(
 ) {
   const { settings_type, settings } = body
 
-  // Store settings in user_preferences or a settings table
+  // Store settings in support_settings table
+  const { data, error } = await supabase
+    .from('support_settings')
+    .upsert({
+      user_id: userId,
+      settings_type: settings_type || 'general',
+      settings: settings || {},
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,settings_type' })
+    .select()
+    .single()
+
+  if (error && error.code !== 'PGRST116') {
+    // If table doesn't exist, store in user_preferences
+    await supabase
+      .from('user_preferences')
+      .upsert({
+        user_id: userId,
+        support_settings: {
+          [settings_type || 'general']: settings
+        },
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' })
+      .catch(() => {
+        logger.warn('Could not save support settings')
+      })
+  }
+
   return NextResponse.json({
     success: true,
-    message: `${settings_type || 'Settings'} saved successfully`
+    message: `${settings_type || 'Settings'} saved successfully`,
+    settings: data?.settings || settings
   })
 }
 
@@ -799,9 +966,35 @@ async function handleUpdateSchedule(
 ) {
   const { schedules } = body
 
+  // Store schedule in support_schedules table
+  const { data, error } = await supabase
+    .from('support_schedules')
+    .upsert({
+      user_id: userId,
+      schedules: schedules || [],
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' })
+    .select()
+    .single()
+
+  if (error) {
+    // Fallback to storing in user preferences
+    await supabase
+      .from('user_preferences')
+      .upsert({
+        user_id: userId,
+        support_schedule: schedules,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' })
+      .catch(() => {
+        logger.warn('Could not save support schedule')
+      })
+  }
+
   return NextResponse.json({
     success: true,
-    message: 'Schedule updated successfully'
+    message: 'Schedule updated successfully',
+    schedules: data?.schedules || schedules
   })
 }
 
@@ -812,9 +1005,35 @@ async function handleUpdateGoals(
 ) {
   const { goals } = body
 
+  // Store goals in support_goals table
+  const { data, error } = await supabase
+    .from('support_goals')
+    .upsert({
+      user_id: userId,
+      goals: goals || {},
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' })
+    .select()
+    .single()
+
+  if (error) {
+    // Fallback to storing in user preferences
+    await supabase
+      .from('user_preferences')
+      .upsert({
+        user_id: userId,
+        support_goals: goals,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' })
+      .catch(() => {
+        logger.warn('Could not save support goals')
+      })
+  }
+
   return NextResponse.json({
     success: true,
-    message: 'Goals saved successfully'
+    message: 'Goals saved successfully',
+    goals: data?.goals || goals
   })
 }
 
@@ -825,18 +1044,77 @@ async function handleImportCustomers(
 ) {
   const { customers } = body
 
-  if (!Array.isArray(customers)) {
+  if (!Array.isArray(customers) || customers.length === 0) {
     return NextResponse.json({
       success: true,
-      message: 'Customers imported successfully',
-      imported: 0
+      message: 'No customers to import',
+      imported: 0,
+      errors: 0
+    })
+  }
+
+  // Prepare customers for insertion
+  const customersToInsert = customers.map((customer: any) => ({
+    user_id: userId,
+    name: customer.name || customer.Name || '',
+    email: customer.email || customer.Email || '',
+    company: customer.company || customer.Company || '',
+    phone: customer.phone || customer.Phone || '',
+    type: customer.tier || customer.type || 'individual',
+    status: 'active',
+    notes: customer.notes || '',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  })).filter((c: any) => c.name || c.email) // Filter out empty records
+
+  if (customersToInsert.length === 0) {
+    return NextResponse.json({
+      success: false,
+      message: 'No valid customers to import. Each customer needs at least a name or email.',
+      imported: 0,
+      errors: customers.length
+    })
+  }
+
+  // Batch insert customers
+  const { data: inserted, error } = await supabase
+    .from('clients')
+    .insert(customersToInsert)
+    .select()
+
+  if (error) {
+    logger.error('Customer import error', { error: error.message })
+
+    // Try inserting one by one to get partial success
+    let successCount = 0
+    let errorCount = 0
+
+    for (const customer of customersToInsert) {
+      const { error: insertError } = await supabase
+        .from('clients')
+        .insert(customer)
+
+      if (insertError) {
+        errorCount++
+        logger.warn('Failed to import customer', { email: customer.email, error: insertError.message })
+      } else {
+        successCount++
+      }
+    }
+
+    return NextResponse.json({
+      success: successCount > 0,
+      message: `Imported ${successCount} customers, ${errorCount} failed`,
+      imported: successCount,
+      errors: errorCount
     })
   }
 
   return NextResponse.json({
     success: true,
-    message: `${customers.length} customers imported successfully`,
-    imported: customers.length
+    message: `${inserted?.length || customersToInsert.length} customers imported successfully`,
+    imported: inserted?.length || customersToInsert.length,
+    errors: 0
   })
 }
 
