@@ -222,13 +222,65 @@ async function testSendGrid(apiKey: string) {
 }
 
 async function testTwilio(accountSid: string, authToken?: string) {
-  // For Twilio, we need both Account SID and Auth Token
-  // This is simplified - in production, handle both properly
-  return {
-    success: true,
-    details: {
-      provider: 'Twilio',
-      note: 'Format validated'
+  // Validate format first
+  if (!accountSid.startsWith('AC') || accountSid.length !== 34) {
+    return {
+      success: false,
+      error: 'Invalid Account SID format. Must start with AC and be 34 characters.'
+    }
+  }
+
+  // If no auth token provided, only format validation
+  if (!authToken) {
+    return {
+      success: true,
+      details: {
+        provider: 'Twilio',
+        accountSid: accountSid.substring(0, 6) + '...' + accountSid.slice(-4),
+        note: 'Format validated. Provide auth token for full verification.'
+      }
+    }
+  }
+
+  try {
+    // Test API credentials by fetching account info
+    const credentials = Buffer.from(`${accountSid}:${authToken}`).toString('base64')
+
+    const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}.json`, {
+      headers: {
+        'Authorization': `Basic ${credentials}`
+      }
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      return {
+        success: true,
+        details: {
+          provider: 'Twilio',
+          accountSid: accountSid.substring(0, 6) + '...' + accountSid.slice(-4),
+          friendlyName: data.friendly_name,
+          status: data.status,
+          type: data.type,
+          verified: true
+        }
+      }
+    } else if (response.status === 401) {
+      return {
+        success: false,
+        error: 'Invalid credentials. Please check your Account SID and Auth Token.'
+      }
+    } else {
+      const errorData = await response.json().catch(() => ({}))
+      return {
+        success: false,
+        error: errorData.message || `API error: ${response.status}`
+      }
+    }
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || 'Failed to test Twilio credentials'
     }
   }
 }

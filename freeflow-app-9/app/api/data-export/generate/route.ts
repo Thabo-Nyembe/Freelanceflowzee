@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { createFeatureLogger } from '@/lib/logger';
+import * as XLSX from 'xlsx';
 
 const logger = createFeatureLogger('data-export');
 
@@ -613,29 +614,44 @@ function generatePDFHTML(data: any[], dataSource: string): { content: string; co
   };
 }
 
-function generateXLSX(data: any[]): { content: string; contentType: string; extension: string } {
+function generateXLSX(data: any[]): { content: Buffer; contentType: string; extension: string } {
+  const workbook = XLSX.utils.book_new();
+
   if (data.length === 0) {
-    return { content: '', contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', extension: 'xlsx' };
+    const emptySheet = XLSX.utils.aoa_to_sheet([['No data available']]);
+    XLSX.utils.book_append_sheet(workbook, emptySheet, 'Export');
+  } else {
+    // Create worksheet from data
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    // Auto-size columns based on content
+    const headers = Object.keys(data[0]);
+    const columnWidths = headers.map(key => ({
+      wch: Math.min(
+        50, // Max width
+        Math.max(
+          key.length + 2,
+          ...data.slice(0, 100).map(row => {
+            const val = row[key];
+            if (val === null || val === undefined) return 0;
+            if (typeof val === 'object') return JSON.stringify(val).length;
+            return String(val).length;
+          })
+        )
+      )
+    }));
+    worksheet['!cols'] = columnWidths;
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Export');
   }
 
-  // Generate TSV that Excel can open
-  const headers = Object.keys(data[0]);
-  const rows = [
-    headers.join('\t'),
-    ...data.map(row =>
-      headers.map(h => {
-        const val = row[h];
-        if (val === null || val === undefined) return '';
-        if (typeof val === 'object') return JSON.stringify(val);
-        return String(val).replace(/\t/g, ' ').replace(/\n/g, ' ');
-      }).join('\t')
-    )
-  ];
+  // Generate buffer
+  const buffer = Buffer.from(XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }));
 
   return {
-    content: rows.join('\n'),
-    contentType: 'text/tab-separated-values; charset=utf-8',
-    extension: 'tsv'
+    content: buffer,
+    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    extension: 'xlsx'
   };
 }
 

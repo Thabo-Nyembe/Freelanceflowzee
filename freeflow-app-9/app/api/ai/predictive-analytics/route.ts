@@ -7,6 +7,7 @@ import { sanitizeInput } from '@/lib/security';
 import { logApiUsage, trackMetric } from '@/lib/analytics';
 import { v4 as uuidv4 } from 'uuid';
 import { createFeatureLogger } from '@/lib/logger'
+import * as XLSX from 'xlsx'
 
 // Inline type definitions
 type TimeWindow = '1h' | '24h' | '7d' | '30d' | '90d' | '1y';
@@ -141,22 +142,79 @@ function parseRequestFormat(req: NextRequest): 'json' | 'csv' | 'excel' {
 function generateCSV(data: any): string {
   // Simple CSV generation for demonstration
   if (!data || typeof data !== 'object') return '';
-  
+
   if (Array.isArray(data)) {
     // Handle array of objects
     if (data.length === 0) return '';
-    
+
     const headers = Object.keys(data[0]).join(',');
     const rows = data.map(item => Object.values(item).join(',')).join('\n');
-    
+
     return `${headers}\n${rows}`;
   } else {
     // Handle single object
     const headers = Object.keys(data).join(',');
     const values = Object.values(data).join(',');
-    
+
     return `${headers}\n${values}`;
   }
+}
+
+// Helper to generate Excel format
+function generateExcel(data: any, sheetName: string = 'Dashboard Metrics'): Buffer {
+  const workbook = XLSX.utils.book_new();
+
+  if (!data || typeof data !== 'object') {
+    // Empty workbook
+    const emptySheet = XLSX.utils.aoa_to_sheet([['No data available']]);
+    XLSX.utils.book_append_sheet(workbook, emptySheet, sheetName);
+  } else if (Array.isArray(data)) {
+    // Handle array of objects
+    if (data.length === 0) {
+      const emptySheet = XLSX.utils.aoa_to_sheet([['No data available']]);
+      XLSX.utils.book_append_sheet(workbook, emptySheet, sheetName);
+    } else {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+
+      // Auto-size columns
+      const columnWidths = Object.keys(data[0]).map(key => ({
+        wch: Math.max(
+          key.length,
+          ...data.map(row => String(row[key] || '').length)
+        )
+      }));
+      worksheet['!cols'] = columnWidths;
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    }
+  } else {
+    // Handle nested object with multiple sections
+    const sections = Object.keys(data);
+
+    sections.forEach(sectionName => {
+      const sectionData = data[sectionName];
+      let worksheet;
+
+      if (Array.isArray(sectionData) && sectionData.length > 0) {
+        worksheet = XLSX.utils.json_to_sheet(sectionData);
+      } else if (typeof sectionData === 'object' && sectionData !== null) {
+        // Convert object to key-value pairs
+        const pairs = Object.entries(sectionData).map(([key, value]) => ({
+          Property: key,
+          Value: typeof value === 'object' ? JSON.stringify(value) : value
+        }));
+        worksheet = XLSX.utils.json_to_sheet(pairs);
+      } else {
+        worksheet = XLSX.utils.aoa_to_sheet([[sectionName, sectionData]]);
+      }
+
+      const sanitizedName = sectionName.substring(0, 31).replace(/[\\/*?:\[\]]/g, '_');
+      XLSX.utils.book_append_sheet(workbook, worksheet, sanitizedName);
+    });
+  }
+
+  // Generate buffer
+  return Buffer.from(XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }));
 }
 
 // Helper to validate optimization strategy
@@ -281,11 +339,12 @@ async function handleDashboardMetrics(req: NextRequest) {
         }
       });
     } else if (format === 'excel') {
-      // In a real implementation, we would generate Excel format
-      // For now, return JSON with a message
-      return NextResponse.json({
-        message: 'Excel format not implemented yet',
-        data: metrics
+      const excelBuffer = generateExcel(metrics, 'Dashboard Metrics');
+      return new NextResponse(excelBuffer, {
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'Content-Disposition': `attachment; filename=dashboard-metrics-${timeWindow}-${new Date().toISOString().split('T')[0]}.xlsx`
+        }
       });
     }
     
