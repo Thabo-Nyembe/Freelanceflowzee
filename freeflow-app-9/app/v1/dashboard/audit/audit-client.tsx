@@ -171,14 +171,28 @@ interface AuditClientProps {
 
 // Types are defined above - using inline empty arrays where needed
 
-// Typed empty arrays for competitive upgrade components
-const mockAuditAIInsights: Array<{ id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }> = []
+// Audit insights data for competitive upgrade components
+const mockAuditAIInsights: Array<{ id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }> = [
+  { id: '1', type: 'success', title: 'Compliance Score Improved', description: 'Overall compliance score increased by 5% this month', priority: 'medium', timestamp: new Date().toISOString(), category: 'compliance' },
+  { id: '2', type: 'warning', title: 'Pending Audits', description: '3 audits scheduled for next week require preparation', priority: 'high', timestamp: new Date().toISOString(), category: 'audit' },
+  { id: '3', type: 'info', title: 'New Regulations', description: 'GDPR updates effective next quarter', priority: 'low', timestamp: new Date().toISOString(), category: 'regulatory' }
+]
 
-const mockAuditCollaborators: Array<{ id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }> = []
+const mockAuditCollaborators: Array<{ id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }> = [
+  { id: '1', name: 'Compliance Officer', avatar: '', status: 'online', role: 'Lead Auditor' },
+  { id: '2', name: 'Security Analyst', avatar: '', status: 'away', role: 'Reviewer' },
+  { id: '3', name: 'Legal Counsel', avatar: '', status: 'offline', role: 'Advisor' }
+]
 
-const mockAuditPredictions: Array<{ id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact?: string }> = []
+const mockAuditPredictions: Array<{ id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact?: string }> = [
+  { id: '1', title: 'Compliance Risk', prediction: 'Low risk of compliance issues', confidence: 92, trend: 'stable', impact: 'Minimal' },
+  { id: '2', title: 'Audit Outcomes', prediction: 'Expected to pass upcoming audits', confidence: 88, trend: 'up', impact: 'Positive' }
+]
 
-const mockAuditActivities: Array<{ id: string; user: { id: string; name: string; avatar?: string }; action?: string; target?: { type: string; name: string }; timestamp: string | Date; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'; title?: string }> = []
+const mockAuditActivities: Array<{ id: string; user: { id: string; name: string; avatar?: string }; action?: string; target?: { type: string; name: string }; timestamp: string | Date; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'; title?: string }> = [
+  { id: '1', user: { id: '1', name: 'System' }, action: 'completed', target: { type: 'audit', name: 'Q4 Compliance Review' }, timestamp: new Date(), type: 'milestone', title: 'Audit Completed' },
+  { id: '2', user: { id: '2', name: 'Compliance Team' }, action: 'updated', target: { type: 'policy', name: 'Data Retention Policy' }, timestamp: new Date(), type: 'update', title: 'Policy Updated' }
+]
 
 const mockAuditQuickActions: Array<{ id: string; label: string; icon: React.ReactNode; action: () => void; shortcut?: string }> = []
 
