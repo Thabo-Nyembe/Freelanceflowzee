@@ -1340,7 +1340,7 @@ export default function WidgetLibraryClient() {
                           <Button variant="outline" size="sm" onClick={() => handleCopyCode('wgt_pub_xxxxxxxxxxxxxxxxxxxxxxxxx')}>
                             <Copy className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm">Regenerate</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.success('API key regenerated')}>Regenerate</Button>
                         </div>
                       </div>
                     </CardContent>

@@ -124,6 +124,9 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
   const [selectedUser, setSelectedUser] = useState<ManagedUser | null>(null)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showRoleModal, setShowRoleModal] = useState(false)
+  const [showBulkImportModal, setShowBulkImportModal] = useState(false)
+  const [bulkImportData, setBulkImportData] = useState<string>('')
+  const [isImporting, setIsImporting] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
   const { users, loading, error, createUser, updateUser, deleteUser, refetch } = useUserManagement({ role: roleFilter, status: statusFilter })
@@ -229,7 +232,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       setQuickActions([
         { id: '1', label: 'Invite User', icon: 'UserPlus', variant: 'primary', onClick: () => setShowInviteModal(true) },
         { id: '2', label: 'Export Users', icon: 'Download', variant: 'secondary', onClick: () => handleExportUsers() },
-        { id: '3', label: 'Bulk Import', icon: 'Upload', variant: 'secondary', onClick: () => toast.info('Bulk import coming soon') },
+        { id: '3', label: 'Bulk Import', icon: 'Upload', variant: 'secondary', onClick: () => setShowBulkImportModal(true) },
         { id: '4', label: 'Audit Report', icon: 'FileText', variant: 'secondary', onClick: () => setActiveView('logs') },
       ])
     }
@@ -544,6 +547,66 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     }
   }
 
+  const handleBulkImport = async () => {
+    if (!bulkImportData.trim()) {
+      toast.error('Please paste CSV data to import')
+      return
+    }
+
+    setIsImporting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const lines = bulkImportData.trim().split('\n')
+      if (lines.length < 2) {
+        toast.error('CSV must have header row and at least one data row')
+        return
+      }
+
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''))
+      const emailIdx = headers.findIndex(h => h === 'email')
+      const nameIdx = headers.findIndex(h => h === 'full_name' || h === 'name')
+      const roleIdx = headers.findIndex(h => h === 'role')
+
+      if (emailIdx === -1) {
+        toast.error('CSV must have an "email" column')
+        return
+      }
+
+      let importedCount = 0
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''))
+        const email = values[emailIdx]
+        if (!email) continue
+
+        const userData: Record<string, any> = {
+          user_id: user.id,
+          email,
+          full_name: nameIdx >= 0 ? values[nameIdx] : '',
+          role: roleIdx >= 0 ? values[roleIdx] : 'user',
+          status: 'pending',
+          created_at: new Date().toISOString()
+        }
+
+        const { error } = await supabase
+          .from('user_management')
+          .upsert(userData, { onConflict: 'user_id,email' })
+
+        if (!error) importedCount++
+      }
+
+      toast.success(`Imported ${importedCount} users successfully`)
+      setShowBulkImportModal(false)
+      setBulkImportData('')
+      refetch()
+    } catch (error: any) {
+      toast.error('Import failed: ' + (error.message || 'Unknown error'))
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
   const handleAssignRole = async (user: ManagedUser, newRole: UserRole) => {
     setUpdatingRole(user.id)
     try {
@@ -660,18 +723,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
               <Download className="w-4 h-4" />
               {exporting ? 'Exporting...' : 'Export'}
             </Button>
-            <Button variant="outline" className="gap-2" onClick={() => {
-              const input = document.createElement('input')
-              input.type = 'file'
-              input.accept = '.csv,.xlsx,.json'
-              input.onchange = async (e) => {
-                const file = (e.target as HTMLInputElement).files?.[0]
-                if (file) {
-                  toast.success(`Selected: ${file.name}. Import functionality ready.`)
-                }
-              }
-              input.click()
-            }}>
+            <Button variant="outline" className="gap-2" onClick={() => setShowBulkImportModal(true)}>
               <Upload className="w-4 h-4" />
               Import
             </Button>
@@ -740,6 +792,62 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                     disabled={inviting}
                   >
                     {inviting ? 'Sending...' : 'Send Invitation'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={showBulkImportModal} onOpenChange={setShowBulkImportModal}>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Bulk Import Users</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-700 dark:text-blue-300">
+                    <p className="font-medium">CSV Format Required</p>
+                    <p className="mt-1">Required columns: email | Optional: full_name, role</p>
+                    <p className="mt-1 text-xs">Example: email,full_name,role<br/>john@example.com,John Doe,user</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Paste CSV Data</label>
+                    <textarea
+                      className="w-full h-48 px-3 py-2 border rounded-lg font-mono text-sm dark:bg-gray-800 dark:border-gray-700"
+                      placeholder="email,full_name,role&#10;user1@example.com,User One,user&#10;user2@example.com,User Two,admin"
+                      value={bulkImportData}
+                      onChange={(e) => setBulkImportData(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const input = document.createElement('input')
+                        input.type = 'file'
+                        input.accept = '.csv'
+                        input.onchange = async (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0]
+                          if (file) {
+                            const text = await file.text()
+                            setBulkImportData(text)
+                            toast.success(`Loaded ${file.name}`)
+                          }
+                        }
+                        input.click()
+                      }}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Load from File
+                    </Button>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowBulkImportModal(false)}>Cancel</Button>
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={handleBulkImport}
+                    disabled={isImporting || !bulkImportData.trim()}
+                  >
+                    {isImporting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Importing...</> : 'Import Users'}
                   </Button>
                 </DialogFooter>
               </DialogContent>

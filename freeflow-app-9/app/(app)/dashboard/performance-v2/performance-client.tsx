@@ -1819,10 +1819,10 @@ export default function PerformanceClient() {
                         </div>
 
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.info('Manage subscription')}>
                             Manage Subscription
                           </Button>
-                          <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                          <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => toast.info('View upgrade options')}>
                             Upgrade Plan
                           </Button>
                         </div>

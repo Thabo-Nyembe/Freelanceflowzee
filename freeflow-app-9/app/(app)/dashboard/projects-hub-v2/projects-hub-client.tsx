@@ -1752,7 +1752,7 @@ export default function ProjectsHubClient() {
                 <FileText className="h-12 w-12 mb-4 text-gray-300" />
                 <p className="text-lg font-medium mb-2">No project templates</p>
                 <p className="text-sm mb-4 text-center">Project templates allow you to quickly create new projects with predefined structures</p>
-                <Button variant="outline"><Plus className="h-4 w-4 mr-2" />Create Template</Button>
+                <Button variant="outline" onClick={() => toast.info('Create template feature')}><Plus className="h-4 w-4 mr-2" />Create Template</Button>
               </CardContent>
             </Card>
           </TabsContent>

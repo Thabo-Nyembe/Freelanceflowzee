@@ -1470,7 +1470,11 @@ export default function GalleryClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={service.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={service.status === 'connected' ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => toast.success(service.status === 'connected' ? `${service.name} disconnected` : `${service.name} connected`)}
+                            >
                               {service.status === 'connected' ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>

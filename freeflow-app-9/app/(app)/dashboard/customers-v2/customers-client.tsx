@@ -3632,7 +3632,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                         toast.error('Failed to parse CSV file')
                       }
                     } else {
-                      toast.info('Excel support coming soon. Please use CSV format.')
+                      toast.warning('Please save your Excel file as CSV format for import. Excel (.xlsx) files can be saved as CSV from File > Save As.')
                     }
                   }
                 }

@@ -2699,7 +2699,7 @@ export default function CommunityClient() {
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Voice Time</p><p className="font-medium">{Math.floor(selectedMember.voiceMinutes / 60)}h</p></div>
               </div>
               <div className="flex gap-2">
-                <Button className="flex-1"><MessageSquare className="w-4 h-4 mr-2" />Message</Button>
+                <Button className="flex-1" onClick={() => toast.info('Opening direct message')}><MessageSquare className="w-4 h-4 mr-2" />Message</Button>
                 <Button variant="outline" onClick={() => selectedMember && handleFollowUser(selectedMember.id)}><UserPlus className="w-4 h-4" /></Button>
               </div>
             </div>

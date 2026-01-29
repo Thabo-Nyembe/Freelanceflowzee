@@ -1178,7 +1178,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{comment.content}</p>
                       <div className="flex items-center gap-2 mt-3">
-                        <Button size="sm" variant="outline">Reply</Button>
+                        <Button size="sm" variant="outline" onClick={() => toast.info('Reply to comment')}>Reply</Button>
                         <Button size="sm" variant="ghost" onClick={() => handleResolveComment(comment.id)}>Resolve</Button>
                       </div>
                     </div>

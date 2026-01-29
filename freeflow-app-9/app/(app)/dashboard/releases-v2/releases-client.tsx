@@ -1890,7 +1890,7 @@ export default function ReleasesClient() {
                             <Badge className={env === 'Production' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
                               {env === 'Production' ? 'Active' : 'Available'}
                             </Badge>
-                            <Button size="sm" variant="outline">Configure</Button>
+                            <Button size="sm" variant="outline" onClick={() => toast.info(`Configure ${env} environment`)}>Configure</Button>
                           </div>
                         </div>
                       ))}

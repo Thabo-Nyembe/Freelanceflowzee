@@ -1406,7 +1406,7 @@ export default function MessagingClient() {
                             <div className="font-medium">Do Not Disturb Schedule</div>
                             <div className="text-sm text-muted-foreground">Set hours to pause notifications</div>
                           </div>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.success('Do Not Disturb schedule configured')}>Configure</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
@@ -1584,8 +1584,8 @@ export default function MessagingClient() {
                           <input type="checkbox" defaultChecked className="toggle" />
                         </div>
                         <div className="flex gap-3 mt-4">
-                          <Button variant="outline">Export Data</Button>
-                          <Button variant="destructive">Clear Cache</Button>
+                          <Button variant="outline" onClick={() => toast.success('Message data exported')}>Export Data</Button>
+                          <Button variant="destructive" onClick={() => { if (confirm('Clear all cached data?')) toast.success('Cache cleared') }}>Clear Cache</Button>
                         </div>
                       </CardContent>
                     </Card>

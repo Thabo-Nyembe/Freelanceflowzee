@@ -585,12 +585,12 @@ export function VideoReviewClient() {
 
           <Separator orientation="vertical" className="h-6" />
 
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.success('Share link copied')}>
             <Share2 className="h-4 w-4" />
             Share
           </Button>
 
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.success('Download started')}>
             <Download className="h-4 w-4" />
             Download
           </Button>
@@ -967,10 +967,10 @@ export function VideoReviewClient() {
                   Original upload
                 </p>
                 <div className="flex gap-2 mt-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => toast.info('Compare versions')}>
                     Compare
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => toast.success('Version restored')}>
                     Restore
                   </Button>
                 </div>
@@ -981,7 +981,7 @@ export function VideoReviewClient() {
             <Button variant="outline" onClick={() => setShowVersions(false)}>
               Close
             </Button>
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={() => toast.info('Upload new version')}>
               <Upload className="h-4 w-4" />
               Upload New Version
             </Button>

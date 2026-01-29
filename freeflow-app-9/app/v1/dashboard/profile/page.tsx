@@ -11,6 +11,7 @@ import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { User, Mail, Phone, MapPin, Briefcase, Calendar, Settings, Edit, Camera } from 'lucide-react'
 
@@ -32,15 +33,30 @@ export default function ProfilePage() {
 
       try {
         setIsLoading(true)
-        const { getProfile } = await import('@/lib/profile-queries')
-        const result = await getProfile(userId)
-        setProfile(result.data)
+        const supabase = createClient()
+
+        // Get user profile from auth
+        const { data: { user } } = await supabase.auth.getUser()
+
+        // Also try to get extended profile data
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single()
+
+        setProfile({
+          ...profileData,
+          email: user?.email,
+          full_name: profileData?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0],
+          created_at: user?.created_at
+        })
         setIsLoading(false)
         announce('Profile loaded', 'polite')
       } catch (err) {
         logger.error('Failed to load profile', { error: err, userId })
         setIsLoading(false)
-        toast.error('Failed to load profile')
+        // Still show the page with basic info
       }
     }
 

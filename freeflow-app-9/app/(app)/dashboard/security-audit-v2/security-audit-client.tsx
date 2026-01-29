@@ -2021,7 +2021,7 @@ export default function SecurityAuditClient() {
                 <label className="text-sm font-medium">Status</label>
                 <div className="flex flex-wrap gap-2">
                   {['open', 'in-progress', 'resolved', 'accepted', 'false-positive'].map(status => (
-                    <Button key={status} variant="outline" size="sm" className="capitalize">{status}</Button>
+                    <Button key={status} variant="outline" size="sm" className="capitalize" onClick={() => toast.info(`Filter: ${status}`)}>{status}</Button>
                   ))}
                 </div>
               </div>
@@ -2029,7 +2029,7 @@ export default function SecurityAuditClient() {
                 <label className="text-sm font-medium">Asset Type</label>
                 <div className="flex flex-wrap gap-2">
                   {['server', 'database', 'application', 'cloud', 'container', 'network'].map(type => (
-                    <Button key={type} variant="outline" size="sm" className="capitalize">{type}</Button>
+                    <Button key={type} variant="outline" size="sm" className="capitalize" onClick={() => toast.info(`Filter: ${type}`)}>{type}</Button>
                   ))}
                 </div>
               </div>
@@ -2224,7 +2224,7 @@ export default function SecurityAuditClient() {
                 <label className="text-sm font-medium">Scope</label>
                 <div className="flex flex-wrap gap-2">
                   {['All Assets', 'Production Only', 'Critical Systems', 'Web Applications', 'Cloud Infrastructure'].map(scope => (
-                    <Button key={scope} variant="outline" size="sm">{scope}</Button>
+                    <Button key={scope} variant="outline" size="sm" onClick={() => toast.info(`Selected: ${scope}`)}>{scope}</Button>
                   ))}
                 </div>
               </div>
@@ -2232,7 +2232,7 @@ export default function SecurityAuditClient() {
                 <label className="text-sm font-medium">Compliance Frameworks</label>
                 <div className="flex flex-wrap gap-2">
                   {['SOC2', 'ISO27001', 'PCI-DSS', 'HIPAA', 'GDPR', 'NIST'].map(fw => (
-                    <Button key={fw} variant="outline" size="sm">{fw}</Button>
+                    <Button key={fw} variant="outline" size="sm" onClick={() => toast.info(`Selected: ${fw}`)}>{fw}</Button>
                   ))}
                 </div>
               </div>

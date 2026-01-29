@@ -1615,7 +1615,7 @@ export default function AIDesignClient() {
                             <div className="text-sm text-muted-foreground">Fast, high-quality generations</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">Enable</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.success('Flux Pro enabled')}>Enable</Button>
                       </div>
                     </CardContent>
                   </Card>

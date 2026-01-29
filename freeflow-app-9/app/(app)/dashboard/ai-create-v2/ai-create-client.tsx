@@ -2551,7 +2551,7 @@ export default function AICreateClient() {
                 <Label>Generation Type</Label>
                 <div className="flex flex-wrap gap-2">
                   {['All', 'Image', 'Video', 'Audio', 'Text'].map((type) => (
-                    <Button key={type} variant="outline" size="sm">{type}</Button>
+                    <Button key={type} variant="outline" size="sm" onClick={() => toast.info(`Filter: ${type}`)}>{type}</Button>
                   ))}
                 </div>
               </div>
@@ -2559,7 +2559,7 @@ export default function AICreateClient() {
                 <Label>Status</Label>
                 <div className="flex flex-wrap gap-2">
                   {['All', 'Completed', 'Processing', 'Failed'].map((status) => (
-                    <Button key={status} variant="outline" size="sm">{status}</Button>
+                    <Button key={status} variant="outline" size="sm" onClick={() => toast.info(`Filter: ${status}`)}>{status}</Button>
                   ))}
                 </div>
               </div>
@@ -2567,7 +2567,7 @@ export default function AICreateClient() {
                 <Label>Style</Label>
                 <div className="flex flex-wrap gap-2">
                   {['Realistic', 'Anime', 'Digital Art', 'Fantasy'].map((style) => (
-                    <Button key={style} variant="outline" size="sm">{style}</Button>
+                    <Button key={style} variant="outline" size="sm" onClick={() => toast.info(`Filter: ${style}`)}>{style}</Button>
                   ))}
                 </div>
               </div>
