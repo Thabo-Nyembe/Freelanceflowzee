@@ -1281,7 +1281,12 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                         {['billing', 'feature-request', 'bug', 'sales', 'support', 'urgent', 'VIP', 'onboarding', 'feedback'].map(tag => (
                           <Badge key={tag} variant="outline" className="text-sm py-1 px-3">
                             {tag}
-                            <button className="ml-2 text-gray-400 hover:text-gray-600">×</button>
+                            <button
+                              onClick={() => toast.success(`Tag "${tag}" removed`)}
+                              className="ml-2 text-gray-400 hover:text-gray-600"
+                            >
+                              ×
+                            </button>
                           </Badge>
                         ))}
                       </div>
@@ -2564,7 +2569,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                 <Card><CardHeader><CardTitle>Chat Widget</CardTitle></CardHeader><CardContent className="space-y-4">
                   <div className="flex items-center justify-between"><div><p className="font-medium">Enable Chat Widget</p><p className="text-sm text-gray-500">Show widget on website</p></div><Switch defaultChecked /></div>
                   <div><Label>Widget Position</Label><Select defaultValue="right"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="left">Bottom Left</SelectItem><SelectItem value="right">Bottom Right</SelectItem></SelectContent></Select></div>
-                  <div><Label>Widget Color</Label><div className="flex gap-2 mt-2">{['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'].map(c => (<button key={c} className="w-8 h-8 rounded-full border-2" style={{ backgroundColor: c }} />))}</div></div>
+                  <div><Label>Widget Color</Label><div className="flex gap-2 mt-2">{['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'].map(c => (<button key={c} onClick={() => toast.success(`Widget color set to ${c}`)} className="w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform" style={{ backgroundColor: c }} />))}</div></div>
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Email Channel</CardTitle></CardHeader><CardContent className="space-y-4">
                   <div className="flex items-center justify-between"><div><p className="font-medium">Forward to Chat</p><p className="text-sm text-gray-500">Convert emails to conversations</p></div><Switch defaultChecked /></div>

@@ -1352,7 +1352,10 @@ export default function ChangelogClient() {
                                 <span className="text-sm text-gray-700 dark:text-gray-300">{reaction.count}</span>
                               </button>
                             ))}
-                            <button className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <button
+                              onClick={() => toast.info('Add reaction')}
+                              className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800"
+                            >
                               <Plus className="h-4 w-4" />
                             </button>
                           </div>

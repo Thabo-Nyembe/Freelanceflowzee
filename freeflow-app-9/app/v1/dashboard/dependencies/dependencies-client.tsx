@@ -1326,7 +1326,10 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                         )}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
+                        <button
+                          onClick={() => window.open(`https://npmjs.com/package/${dep.name}`, '_blank')}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
+                        >
                           <ExternalLink className="w-4 h-4" />
                         </button>
                       </td>

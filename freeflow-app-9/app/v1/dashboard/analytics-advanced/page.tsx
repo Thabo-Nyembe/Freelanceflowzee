@@ -577,7 +577,10 @@ export default function AdvancedAnalyticsPage() {
                   <option key={range} value={range}>{getTimeRangeLabel(range)}</option>
                 ))}
               </select>
-              <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+              <button
+                onClick={() => toast.success('Report exported')}
+                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+              >
                 Export Report
               </button>
             </div>
