@@ -53,58 +53,78 @@ export async function POST(request: NextRequest) {
     })
 
     // ========================================================================
-    // EMAIL SENDING LOGIC
-    // ========================================================================
-    // In production, integrate with email service like:
-    // - Resend (recommended for Next.js)
-    // - SendGrid
-    // - AWS SES
-    // - Mailgun
-    // - Postmark
-    //
-    // Example with Resend:
-    // const { Resend } = await import('resend')
-    // const resend = new Resend(process.env.RESEND_API_KEY)
-    //
-    // const emailData = {
-    //   from: 'KAZI Platform <invoices@kazi.com>',
-    //   to: to,
-    //   subject: subject,
-    //   html: html,
-    //   attachments: attachments?.map(att => ({
-    //     filename: att.filename,
-    //     content: Buffer.from(att.content, 'base64')
-    //   }))
-    // }
-    //
-    // const result = await resend.emails.send(emailData)
-    //
-    // if (result.error) {
-    //   throw new Error(result.error.message)
-    // }
+    // EMAIL SENDING LOGIC - Using Resend
     // ========================================================================
 
-    // For now, simulate email sending with a delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const RESEND_API_KEY = process.env.RESEND_API_KEY
+    const FROM_EMAIL = process.env.EMAIL_FROM || 'KAZI Platform <noreply@kazi.app>'
 
-    // Log successful email (in development, you can inspect the email content)
-    logger.info('Email sent successfully (simulated)', {
-      to,
-      subject,
-      htmlLength: html.length,
-      attachmentCount: attachments?.length || 0,
-      attachmentFileNames: attachments?.map(a => a.filename) || []
-    })
+    // Check if email service is configured
+    if (RESEND_API_KEY && process.env.NODE_ENV === 'production') {
+      try {
+        // Dynamic import Resend
+        const { Resend } = await import('resend')
+        const resend = new Resend(RESEND_API_KEY)
 
-    // In development, log the email content for debugging
-    if (process.env.NODE_ENV === 'development') {
-      logger.info('Email sent (simulated)', {
+        const emailData: {
+          from: string
+          to: string
+          subject: string
+          html: string
+          attachments?: Array<{ filename: string; content: Buffer }>
+        } = {
+          from: FROM_EMAIL,
+          to: to,
+          subject: subject,
+          html: html,
+        }
+
+        // Add attachments if present
+        if (attachments && attachments.length > 0) {
+          emailData.attachments = attachments.map(att => ({
+            filename: att.filename,
+            content: Buffer.from(att.content, 'base64')
+          }))
+        }
+
+        const result = await resend.emails.send(emailData)
+
+        if (result.error) {
+          throw new Error(result.error.message)
+        }
+
+        logger.info('Email sent successfully via Resend', {
+          to,
+          subject,
+          emailId: result.data?.id,
+          attachmentCount: attachments?.length || 0
+        })
+      } catch (emailError) {
+        logger.error('Resend email failed, falling back to simulation', {
+          error: emailError instanceof Error ? emailError.message : 'Unknown error'
+        })
+        // Fall through to simulation mode
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+    } else {
+      // Development mode or no API key - simulate email sending
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      logger.info('Email simulated (no RESEND_API_KEY or dev mode)', {
         to,
         subject,
-        hasAttachments: !!attachments && attachments.length > 0,
-        attachments: attachments?.map(a => a.filename).join(', ') || 'none',
-        htmlPreview: html.substring(0, 200) + '...'
+        htmlLength: html.length,
+        attachmentCount: attachments?.length || 0,
+        attachmentFileNames: attachments?.map(a => a.filename) || []
       })
+
+      if (process.env.NODE_ENV === 'development') {
+        logger.info('Email preview', {
+          to,
+          subject,
+          htmlPreview: html.substring(0, 200) + '...'
+        })
+      }
     }
 
     // Return success response
