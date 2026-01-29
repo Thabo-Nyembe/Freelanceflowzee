@@ -26,6 +26,13 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
+import {
+  createReport,
+  updateReport,
+  createReportExport,
+  type ReportType,
+  type ExportFormat
+} from '@/lib/reports-queries'
 
 const logger = createFeatureLogger('ReportingPage')
 
@@ -49,6 +56,15 @@ export default function ReportingPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [selectedReport, setSelectedReport] = useState<string | null>(null)
+
+  // Modal and form states
+  const [showCreateReportModal, setShowCreateReportModal] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [newReportName, setNewReportName] = useState('')
+  const [newReportDescription, setNewReportDescription] = useState('')
+  const [reportSections, setReportSections] = useState<any[]>([])
+  const [selectedExportFormat, setSelectedExportFormat] = useState<ExportFormat>('pdf')
+  const [selectedExportReport, setSelectedExportReport] = useState<string>('')
 
   // A+++ LOAD REPORTING DATA
   useEffect(() => {
@@ -323,7 +339,10 @@ export default function ReportingPage() {
                 Build custom reports, schedule automation, and export data
               </p>
             </div>
-            <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-600 transition-colors">
+            <button
+              onClick={() => setShowCreateReportModal(true)}
+              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-600 transition-colors"
+            >
               + Create Report
             </button>
           </div>
@@ -666,7 +685,14 @@ export default function ReportingPage() {
                     <div className="border-t pt-6">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="font-semibold">Report Sections</h4>
-                        <button className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm font-medium transition-colors">
+                        <button
+                          onClick={() => {
+                            const newSection = { id: Date.now().toString(), title: 'New Section', type: 'metric', config: {} }
+                            setReportSections(prev => [...prev, newSection])
+                            toast.success('Section added')
+                          }}
+                          className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm font-medium transition-colors"
+                        >
                           + Add Section
                         </button>
                       </div>
@@ -685,10 +711,19 @@ export default function ReportingPage() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <button className="p-1 hover:bg-muted rounded">
+                                <button
+                                  onClick={() => toast.info('Section settings')}
+                                  className="p-1 hover:bg-muted rounded"
+                                >
                                   <span className="text-gray-400">⚙️</span>
                                 </button>
-                                <button className="p-1 hover:bg-muted rounded">
+                                <button
+                                  onClick={() => {
+                                    setReportSections(prev => prev.filter(s => s.id !== section.id))
+                                    toast.success('Section removed')
+                                  }}
+                                  className="p-1 hover:bg-muted rounded"
+                                >
                                   <span className="text-red-400">🗑️</span>
                                 </button>
                               </div>
@@ -748,7 +783,12 @@ export default function ReportingPage() {
                           {exportFormats.map((format) => (
                             <button
                               key={format}
-                              className="px-3 py-2 bg-muted hover:bg-muted/80 rounded text-sm transition-colors flex items-center justify-center gap-2"
+                              onClick={() => setSelectedExportFormat(format)}
+                              className={`px-3 py-2 rounded text-sm transition-colors flex items-center justify-center gap-2 ${
+                                selectedExportFormat === format
+                                  ? 'bg-blue-500 text-white'
+                                  : 'bg-muted hover:bg-muted/80'
+                              }`}
                             >
                               <span>{getFormatIcon(format)}</span>
                               <span className="uppercase">{format}</span>
@@ -759,11 +799,60 @@ export default function ReportingPage() {
 
                       {/* Actions */}
                       <div className="pt-4 border-t space-y-2">
-                        <button className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-lg text-sm font-medium transition-colors">
-                          Save Report
+                        <button
+                          onClick={async () => {
+                            if (!newReportName.trim()) {
+                              toast.error('Report name is required')
+                              return
+                            }
+                            setIsSubmitting(true)
+                            try {
+                              await handleCreateReport({
+                                name: newReportName,
+                                description: newReportDescription,
+                                type: 'custom' as ReportType,
+                                status: 'draft'
+                              })
+                              setNewReportName('')
+                              setNewReportDescription('')
+                              setReportSections([])
+                            } finally {
+                              setIsSubmitting(false)
+                            }
+                          }}
+                          disabled={isSubmitting}
+                          className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                        >
+                          {isSubmitting ? 'Saving...' : 'Save Report'}
                         </button>
-                        <button className="w-full px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors">
-                          Generate Now
+                        <button
+                          onClick={async () => {
+                            if (!newReportName.trim()) {
+                              toast.error('Report name is required')
+                              return
+                            }
+                            setIsSubmitting(true)
+                            try {
+                              const report = await handleCreateReport({
+                                name: newReportName,
+                                description: newReportDescription,
+                                type: 'custom' as ReportType,
+                                status: 'generating'
+                              })
+                              if (report) {
+                                await handleExportReport(report.id, selectedExportFormat)
+                              }
+                              setNewReportName('')
+                              setNewReportDescription('')
+                              setReportSections([])
+                            } finally {
+                              setIsSubmitting(false)
+                            }
+                          }}
+                          disabled={isSubmitting}
+                          className="w-full px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                        >
+                          {isSubmitting ? 'Generating...' : 'Generate Now'}
                         </button>
                       </div>
                     </div>
@@ -825,16 +914,18 @@ export default function ReportingPage() {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">Select Report</label>
-                      <select className="w-full px-4 py-2 rounded-lg bg-muted text-sm" disabled={reports.length === 0}>
-                        {reports.length === 0 ? (
-                          <option>No reports available</option>
-                        ) : (
-                          reports.map((report) => (
-                            <option key={report.id} value={report.id}>
-                              {report.name}
-                            </option>
-                          ))
-                        )}
+                      <select
+                        value={selectedExportReport}
+                        onChange={(e) => setSelectedExportReport(e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg bg-muted text-sm"
+                        disabled={reports.length === 0}
+                      >
+                        <option value="">Select a report...</option>
+                        {reports.map((report) => (
+                          <option key={report.id} value={report.id}>
+                            {report.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
@@ -844,7 +935,12 @@ export default function ReportingPage() {
                         {exportFormats.map((format) => (
                           <button
                             key={format}
-                            className="px-4 py-3 bg-muted hover:bg-muted/80 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 font-medium"
+                            onClick={() => setSelectedExportFormat(format)}
+                            className={`px-4 py-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 font-medium ${
+                              selectedExportFormat === format
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-muted hover:bg-muted/80'
+                            }`}
                           >
                             <span className="text-xl">{getFormatIcon(format)}</span>
                             <span className="uppercase">{format}</span>
@@ -853,8 +949,23 @@ export default function ReportingPage() {
                       </div>
                     </div>
 
-                    <button className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg text-sm font-medium transition-colors">
-                      Export Now
+                    <button
+                      onClick={async () => {
+                        if (!selectedExportReport) {
+                          toast.error('Please select a report to export')
+                          return
+                        }
+                        setIsSubmitting(true)
+                        try {
+                          await handleExportReport(selectedExportReport, selectedExportFormat)
+                        } finally {
+                          setIsSubmitting(false)
+                        }
+                      }}
+                      disabled={isSubmitting || !selectedExportReport}
+                      className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                    >
+                      {isSubmitting ? 'Exporting...' : 'Export Now'}
                     </button>
                   </div>
                 </div>
@@ -863,6 +974,75 @@ export default function ReportingPage() {
           </ScrollReveal>
         )}
       </div>
+
+      {/* Create Report Modal */}
+      {showCreateReportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <h3 className="text-xl font-semibold mb-4">Create New Report</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Report Name *</label>
+                <input
+                  type="text"
+                  placeholder="Enter report name"
+                  value={newReportName}
+                  onChange={(e) => setNewReportName(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <textarea
+                  placeholder="Enter report description"
+                  value={newReportDescription}
+                  onChange={(e) => setNewReportDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowCreateReportModal(false)
+                  setNewReportName('')
+                  setNewReportDescription('')
+                }}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!newReportName.trim()) {
+                    toast.error('Report name is required')
+                    return
+                  }
+                  setIsSubmitting(true)
+                  try {
+                    await handleCreateReport({
+                      name: newReportName,
+                      description: newReportDescription,
+                      type: 'custom' as ReportType,
+                      status: 'draft'
+                    })
+                    setShowCreateReportModal(false)
+                    setNewReportName('')
+                    setNewReportDescription('')
+                  } finally {
+                    setIsSubmitting(false)
+                  }
+                }}
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+              >
+                {isSubmitting ? 'Creating...' : 'Create Report'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
