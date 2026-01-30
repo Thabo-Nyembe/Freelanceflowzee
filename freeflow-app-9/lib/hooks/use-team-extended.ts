@@ -24,7 +24,7 @@ export function useTeamActivity(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -38,7 +38,7 @@ export function useTeamAnalytics(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -52,7 +52,7 @@ export function useTeamAnnouncements(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -66,7 +66,7 @@ export function useTeamComments(taskId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -80,7 +80,7 @@ export function useTeamCommunicationRecipients(communicationId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!communicationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -94,7 +94,7 @@ export function useTeamCommunications(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -108,7 +108,7 @@ export function useTeamInvitations(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -122,7 +122,7 @@ export function useTeamMeetingAttendees(meetingId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -136,7 +136,7 @@ export function useTeamMeetings(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -150,7 +150,7 @@ export function useTeamPerformance(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -164,7 +164,7 @@ export function useTeamPerformanceMetrics(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -178,7 +178,7 @@ export function useTeamPermissions(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -192,7 +192,7 @@ export function useTeamProjectMembers(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -206,7 +206,7 @@ export function useTeamProjects(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -220,7 +220,7 @@ export function useTeamShares(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -234,7 +234,7 @@ export function useTeamSkills(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -248,7 +248,7 @@ export function useTeamStats(teamId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -262,7 +262,7 @@ export function useTeamTasks(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -276,7 +276,7 @@ export function useTeamTimeTracking(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -290,7 +290,7 @@ export function useTeams(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)

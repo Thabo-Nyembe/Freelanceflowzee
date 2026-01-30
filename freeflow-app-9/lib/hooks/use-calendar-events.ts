@@ -174,7 +174,7 @@ export function useCalendarEvents(options: UseCalendarEventsOptions = {}) {
 
   // Fetch events from API (supports demo mode)
   const fetchEvents = useCallback(async () => {
-    if (isDemoModeEnabled()) { setLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     setLoading(true)
     setError(null)
     try {

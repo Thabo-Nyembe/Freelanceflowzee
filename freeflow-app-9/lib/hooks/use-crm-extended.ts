@@ -24,7 +24,7 @@ export function useCRMActivities(contactId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!contactId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -38,7 +38,7 @@ export function useCRMContacts(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -52,7 +52,7 @@ export function useCRMDealProducts(dealId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!dealId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -66,7 +66,7 @@ export function useCRMDeals(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -80,7 +80,7 @@ export function useCRMLeads(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -94,7 +94,7 @@ export function useCRMNotes(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)

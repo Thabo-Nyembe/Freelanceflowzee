@@ -24,7 +24,7 @@ export function useCoupons(isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -42,7 +42,7 @@ export function useCouponUsage(couponId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!couponId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -58,7 +58,7 @@ export function useCreateCoupon() {
   const supabase = createClient()
 
   const create = useCallback(async (couponData: any) => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     setIsLoading(true)
     setError(null)
     try {

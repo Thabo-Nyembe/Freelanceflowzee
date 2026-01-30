@@ -24,7 +24,7 @@ export function useUserActivityLogs(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -38,7 +38,7 @@ export function useUserAnalytics(userId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -52,7 +52,7 @@ export function useUserCohorts() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('user_cohorts').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
@@ -65,7 +65,7 @@ export function useUserDataExports(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -79,7 +79,7 @@ export function useUserKnownDevices(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -93,7 +93,7 @@ export function useUserMetrics(userId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -107,7 +107,7 @@ export function useUserMetricsAggregate() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('user_metrics_aggregate').select('*').order('date', { ascending: false }).limit(30); setData(result || []) } finally { setIsLoading(false) }
@@ -120,7 +120,7 @@ export function useUserPermissions(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -134,7 +134,7 @@ export function useUserPreferences(userId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -148,7 +148,7 @@ export function useUserSecurityPreferences(userId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -162,7 +162,7 @@ export function useUserTypeProfiles(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)

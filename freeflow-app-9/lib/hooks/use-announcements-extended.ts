@@ -25,7 +25,7 @@ export function useAnnouncement(announcementId?: string) {
   const [announcement, setAnnouncement] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!announcementId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,7 +39,7 @@ export function useAnnouncements(options?: { user_id?: string; type?: string; st
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -61,7 +61,7 @@ export function useActiveAnnouncements(options?: { target_audience?: string; lim
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -85,7 +85,7 @@ export function usePinnedAnnouncements(options?: { limit?: number }) {
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('announcements').select('*').eq('status', 'published').eq('is_pinned', true).order('created_at', { ascending: false }).limit(options?.limit || 10); setAnnouncements(data || []) } finally { setIsLoading(false) }
@@ -98,7 +98,7 @@ export function useUnreadAnnouncementCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)

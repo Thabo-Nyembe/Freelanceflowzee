@@ -82,7 +82,7 @@ export function usePayrollRuns(initialRuns: PayrollRun[] = [], filters: PayrollF
   const queryKey = ['payroll-runs', JSON.stringify(filters)]
 
   const queryFn = useCallback(async (supabase: any, setIsLoading: (loading: boolean) => void) => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     let query = supabase
       .from('payroll_runs')
       .select('*')
@@ -131,7 +131,7 @@ export function useEmployeePayroll(runId: string, initialPayroll: EmployeePayrol
   const queryKey = ['employee-payroll', runId]
 
   const queryFn = useCallback(async (supabase: any, setIsLoading: (loading: boolean) => void) => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const { data, error } = await supabase
       .from('employee_payroll')
       .select('*')

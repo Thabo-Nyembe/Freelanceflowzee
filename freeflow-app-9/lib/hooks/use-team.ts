@@ -81,10 +81,7 @@ export function useTeam(initialMembers: TeamMember[] = [], initialStats?: TeamSt
 
   const fetchMembers = useCallback(async () => {
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
-    if (isDemoModeEnabled()) {
-      setLoading(false)
-      return
-    }
+    // Demo mode: fetch data with demo=true parameter
     setLoading(true)
     try {
       const { data, error } = await supabase

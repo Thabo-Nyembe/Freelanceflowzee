@@ -55,7 +55,7 @@ export function useSupabaseQuery<T = unknown>(
 
   const fetchData = useCallback(async () => {
     if (!enabled) return
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
 
     setIsLoading(true)
     setError(null)

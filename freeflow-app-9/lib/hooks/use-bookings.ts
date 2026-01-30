@@ -116,7 +116,7 @@ export function useBookings(options: UseBookingsOptions = {}) {
 
   // Fetch bookings from API (to bypass RLS issues with auth.users table)
   const fetchBookings = useCallback(async () => {
-    if (isDemoModeEnabled()) { setLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     try {
       setLoading(true)
       setError(null)

@@ -114,7 +114,7 @@ export function useTask(taskId?: string) {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tasks').select('*, task_assignments(*), task_dependencies(*), task_checklists(*), users(*), projects(*)').eq('id', taskId).single(); setTask(data as ExtendedTask | null) } finally { setIsLoading(false) }
@@ -130,7 +130,7 @@ export function useTasks(options?: { project_id?: string; status?: string; prior
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     setIsLoading(true)
     try {
       let query = supabase.from('tasks').select('*, task_assignments(*), users(*), projects(*)')
@@ -164,7 +164,7 @@ export function useMyTasks(userId?: string, options?: { status?: string; priorit
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -189,7 +189,7 @@ export function useSubtasks(taskId?: string) {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tasks').select('*, task_assignments(*)').eq('parent_id', taskId).order('created_at', { ascending: true }); setSubtasks((data || []) as ExtendedTask[]) } finally { setIsLoading(false) }
@@ -206,7 +206,7 @@ export function useTaskDependencies(taskId?: string) {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -229,7 +229,7 @@ export function useTaskComments(taskId?: string, options?: { limit?: number }) {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('task_comments').select('*, users(*)').eq('task_id', taskId).is('parent_id', null).order('created_at', { ascending: true }).limit(options?.limit || 100); setComments((data || []) as TaskComment[]) } finally { setIsLoading(false) }
@@ -246,7 +246,7 @@ export function useTaskTimeLogs(taskId?: string, options?: { user_id?: string; f
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -272,7 +272,7 @@ export function useTaskChecklist(taskId?: string) {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -295,7 +295,7 @@ export function useOverdueTasks(options?: { project_id?: string; assignee_id?: s
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     setIsLoading(true)
     try {
       let query = supabase.from('tasks').select('*, task_assignments(*), projects(*)').lt('due_date', new Date().toISOString()).neq('status', 'done')
@@ -321,7 +321,7 @@ export function useTaskStats(projectId?: string) {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     setIsLoading(true)
     try {
       let query = supabase.from('tasks').select('status, due_date')

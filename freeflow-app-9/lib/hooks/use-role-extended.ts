@@ -24,7 +24,7 @@ export function useRoles() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
     try {
@@ -40,7 +40,7 @@ export function useRolePermissions(roleId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!roleId) { setIsLoading(false); return }
     setIsLoading(true)

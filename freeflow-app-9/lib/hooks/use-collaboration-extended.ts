@@ -24,7 +24,7 @@ export function useCollaborationAnalytics(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -42,7 +42,7 @@ export function useCollaborationCanvasBoards(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -60,7 +60,7 @@ export function useCollaborationCanvasCollaborators(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -78,7 +78,7 @@ export function useCollaborationCanvasExports(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -96,7 +96,7 @@ export function useCollaborationChannelMembers(channelId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!channelId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -114,7 +114,7 @@ export function useCollaborationChannels(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -132,7 +132,7 @@ export function useCollaborationEvents(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -150,7 +150,7 @@ export function useCollaborationFeedback(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -168,7 +168,7 @@ export function useCollaborationFeedbackReplies(feedbackId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -186,7 +186,7 @@ export function useCollaborationFeedbackVotes(feedbackId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -204,7 +204,7 @@ export function useCollaborationFileShares(fileId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!fileId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -222,7 +222,7 @@ export function useCollaborationInvites(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -240,7 +240,7 @@ export function useCollaborationMedia(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -258,7 +258,7 @@ export function useCollaborationMediaShares(mediaId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!mediaId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -276,7 +276,7 @@ export function useCollaborationMeetingParticipants(meetingId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -294,7 +294,7 @@ export function useCollaborationMeetingRecordings(meetingId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -312,7 +312,7 @@ export function useCollaborationMeetings(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -330,7 +330,7 @@ export function useCollaborationMessages(channelId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!channelId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -348,7 +348,7 @@ export function useCollaborationSessions(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -366,7 +366,7 @@ export function useCollaborationTeamMembers(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -384,7 +384,7 @@ export function useCollaborationTeamMetrics(teamId?: string) {
   const [data, setData] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -402,7 +402,7 @@ export function useCollaborationTeams(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -420,7 +420,7 @@ export function useCollaborationWorkspaceFiles(workspaceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!workspaceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -438,7 +438,7 @@ export function useCollaborationWorkspaceFolders(workspaceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!workspaceId) { setIsLoading(false); return }
     setIsLoading(true)

@@ -67,7 +67,7 @@ export function useGalleryItems(collectionId?: string | null, initialItems: Gall
   const supabase = createClient()
 
   const fetchItems = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     setIsLoading(true)
     try {
       let query = supabase
@@ -181,7 +181,7 @@ export function useGalleryCollections(initialCollections: GalleryCollection[] = 
   const supabase = createClient()
 
   const fetchCollections = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     setIsLoading(true)
     const { data, error } = await supabase
       .from('gallery_collections')

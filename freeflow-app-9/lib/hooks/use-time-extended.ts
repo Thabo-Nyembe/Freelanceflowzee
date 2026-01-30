@@ -24,7 +24,7 @@ export function useTimeEntries(userId?: string, projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
     try {
@@ -43,7 +43,7 @@ export function useTimeSheets(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
     try {

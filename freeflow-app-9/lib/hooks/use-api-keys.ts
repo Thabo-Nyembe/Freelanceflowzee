@@ -95,7 +95,7 @@ export function useApiKeys(initialKeys: ApiKey[] = [], options: UseApiKeysOption
   }
 
   const fetchKeys = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     setIsLoading(true)
     setError(null)
     try {

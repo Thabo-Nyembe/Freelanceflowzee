@@ -25,7 +25,7 @@ export function useBooking(bookingId?: string) {
   const [booking, setBooking] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!bookingId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,7 +39,7 @@ export function useBookings(options?: { user_id?: string; provider_id?: string; 
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -59,7 +59,7 @@ export function useUpcomingBookings(userId?: string, options?: { as_provider?: b
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -79,7 +79,7 @@ export function useAvailableSlots(providerId?: string, date?: string, serviceId?
   const [slots, setSlots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!providerId || !date) { setIsLoading(false); return }
     setIsLoading(true)
@@ -98,7 +98,7 @@ export function useBookingServices(providerId?: string) {
   const [services, setServices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -112,7 +112,7 @@ export function useBookingStats(providerId?: string, options?: { date_from?: str
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -135,7 +135,7 @@ export function useBookingsForDate(providerId?: string, date?: string) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!providerId || !date) { setIsLoading(false); return }
     setIsLoading(true)

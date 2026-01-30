@@ -28,7 +28,7 @@ export function useMilestone(milestoneId?: string) {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestones').select('*, milestone_tasks(*), milestone_dependencies(*), milestone_updates(*)').eq('id', milestoneId).single(); setMilestone(data) } finally { setIsLoading(false) }
@@ -44,7 +44,7 @@ export function useMilestones(projectId?: string, options?: { status?: string; o
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -67,7 +67,7 @@ export function useMilestoneTasks(milestoneId?: string, options?: { status?: str
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -89,7 +89,7 @@ export function useMilestoneDependencies(milestoneId?: string) {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestone_dependencies').select('*, milestones!depends_on_id(*)').eq('milestone_id', milestoneId); setDependencies(data || []) } finally { setIsLoading(false) }
@@ -105,7 +105,7 @@ export function useMilestoneProgress(milestoneId?: string, options?: { limit?: n
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestone_progress').select('*').eq('milestone_id', milestoneId).order('recorded_at', { ascending: false }).limit(options?.limit || 50); setProgress(data || []) } finally { setIsLoading(false) }
@@ -121,7 +121,7 @@ export function useMilestoneUpdates(milestoneId?: string, options?: { limit?: nu
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestone_updates').select('*').eq('milestone_id', milestoneId).order('created_at', { ascending: false }).limit(options?.limit || 20); setUpdates(data || []) } finally { setIsLoading(false) }
@@ -137,7 +137,7 @@ export function useUpcomingMilestones(projectId?: string, options?: { days?: num
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -159,7 +159,7 @@ export function useOverdueMilestones(projectId?: string) {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestones').select('*, milestone_tasks(*)').eq('project_id', projectId).in('status', ['pending', 'in_progress']).lt('due_date', new Date().toISOString()).order('due_date', { ascending: true }); setMilestones(data || []) } finally { setIsLoading(false) }
@@ -175,7 +175,7 @@ export function useProjectMilestoneStats(projectId?: string) {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

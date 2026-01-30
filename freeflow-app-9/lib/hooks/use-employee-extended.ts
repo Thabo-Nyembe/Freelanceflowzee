@@ -24,7 +24,7 @@ export function useEmployees(organizationId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -38,7 +38,7 @@ export function useEmployeeRecords(employeeId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)

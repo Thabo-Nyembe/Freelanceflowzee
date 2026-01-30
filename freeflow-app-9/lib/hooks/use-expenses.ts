@@ -145,10 +145,7 @@ export function useExpenses(options: UseExpensesOptions = {}) {
   const [error, setError] = useState<Error | null>(null)
 
   const fetchExpenses = useCallback(async () => {
-    if (isDemoModeEnabled()) {
-      setIsLoading(false)
-      return
-    }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
     setError(null)

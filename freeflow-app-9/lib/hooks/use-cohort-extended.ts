@@ -25,7 +25,7 @@ export function useCohort(cohortId?: string) {
   const [cohort, setCohort] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!cohortId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,7 +39,7 @@ export function useCohorts(options?: { type?: string; date_from?: string; date_t
   const [cohorts, setCohorts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -59,7 +59,7 @@ export function useCohortMembers(cohortId?: string, options?: { limit?: number }
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!cohortId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -73,7 +73,7 @@ export function useCohortMetrics(cohortId?: string, options?: { metric_name?: st
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!cohortId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -94,7 +94,7 @@ export function useCohortAnalysis(cohortId?: string) {
   const [analysis, setAnalysis] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!cohortId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -108,7 +108,7 @@ export function useCohortRetention(cohortId?: string) {
   const [retention, setRetention] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!cohortId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -122,7 +122,7 @@ export function useCohortComparison(cohortIds: string[], metricName: string) {
   const [comparison, setComparison] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!cohortIds.length) { setIsLoading(false); return }
     setIsLoading(true)

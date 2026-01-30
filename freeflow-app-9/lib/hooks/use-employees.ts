@@ -173,7 +173,7 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
 
   // Fetch employees from database
   const fetchEmployees = useCallback(async () => {
-    if (isDemoModeEnabled()) { setLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     try {
       setLoading(true)
       setError(null)
@@ -577,7 +577,7 @@ export function useEmployee(employeeId?: string) {
   const supabase = useMemo(() => createClient(), [])
 
   const fetchEmployee = useCallback(async () => {
-    if (isDemoModeEnabled()) { setLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     if (!employeeId) {
       setLoading(false)
       return

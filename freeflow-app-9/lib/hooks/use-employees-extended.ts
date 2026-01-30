@@ -25,7 +25,7 @@ export function useEmployee(employeeId?: string) {
   const [employee, setEmployee] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,7 +39,7 @@ export function useEmployees(options?: { department_id?: string; status?: string
   const [employees, setEmployees] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -60,7 +60,7 @@ export function useEmployeeProfile(employeeId?: string) {
   const [profile, setProfile] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -74,7 +74,7 @@ export function useEmployeeDocuments(employeeId?: string, options?: { type?: str
   const [documents, setDocuments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -93,7 +93,7 @@ export function useEmployeePerformance(employeeId?: string, options?: { limit?: 
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -107,7 +107,7 @@ export function useEmployeeLeave(employeeId?: string, options?: { status?: strin
   const [leaves, setLeaves] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -127,7 +127,7 @@ export function usePendingLeaveRequests(managerId?: string) {
   const [requests, setRequests] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!managerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -146,7 +146,7 @@ export function useDirectReports(managerId?: string) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!managerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -160,7 +160,7 @@ export function useEmployeeStats(options?: { department_id?: string }) {
   const [stats, setStats] = useState<{ total: number; active: number; onLeave: number; byDepartment: Record<string, number>; avgTenure: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try {

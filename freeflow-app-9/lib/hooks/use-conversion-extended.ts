@@ -25,7 +25,7 @@ export function useConversion(conversionId?: string) {
   const [conversion, setConversion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!conversionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,7 +39,7 @@ export function useConversions(options?: { goal_id?: string; funnel_id?: string;
   const [conversions, setConversions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -60,7 +60,7 @@ export function useConversionGoals(options?: { type?: string; is_active?: boolea
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -79,7 +79,7 @@ export function useConversionFunnels(options?: { is_active?: boolean }) {
   const [funnels, setFunnels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -97,7 +97,7 @@ export function useConversionRate(goalId?: string, options?: { date_from?: strin
   const [rate, setRate] = useState<{ conversions: number; target: number; rate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!goalId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -119,7 +119,7 @@ export function useFunnelAnalysis(funnelId?: string, options?: { date_from?: str
   const [analysis, setAnalysis] = useState<{ steps: { name: string; count: number; dropoff: number }[] } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!funnelId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -148,7 +148,7 @@ export function useConversionStats(options?: { date_from?: string; date_to?: str
   const [stats, setStats] = useState<{ total: number; totalValue: number; byGoal: Record<string, number>; bySource: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try {

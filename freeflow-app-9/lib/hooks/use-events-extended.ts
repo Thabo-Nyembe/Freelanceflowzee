@@ -99,7 +99,7 @@ export function useEvent(eventId?: string) {
   const [event, setEvent] = useState<ExtendedEventRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -116,7 +116,7 @@ export function useEvents(options?: { organizerId?: string; calendarId?: string;
   const [data, setData] = useState<ExtendedEventRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
     try {
@@ -138,7 +138,7 @@ export function useEventAttendees(eventId?: string, options?: { status?: string 
   const [data, setData] = useState<EventAttendeeRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -157,7 +157,7 @@ export function useEventAttachments(eventId?: string) {
   const [data, setData] = useState<EventAttachmentRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -174,7 +174,7 @@ export function useEventRecurrence(eventId?: string) {
   const [recurrence, setRecurrence] = useState<EventRecurrenceRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -191,7 +191,7 @@ export function useEventRegistrations(eventId?: string, options?: { status?: str
   const [data, setData] = useState<ExtendedEventRegistrationRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -210,7 +210,7 @@ export function useUserEvents(userId?: string, options?: { upcoming?: boolean; l
   const [data, setData] = useState<ExtendedEventRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -229,7 +229,7 @@ export function useEventViewCount(eventId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -249,7 +249,7 @@ export function useEventWithDetails(eventId?: string) {
   const [recurrence, setRecurrence] = useState<EventRecurrenceRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)

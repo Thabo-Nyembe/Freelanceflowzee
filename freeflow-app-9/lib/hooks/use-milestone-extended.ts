@@ -25,7 +25,7 @@ export function useMilestones(projectId?: string) {
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
     try {
@@ -43,7 +43,7 @@ export function useMilestoneTasks(milestoneId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)

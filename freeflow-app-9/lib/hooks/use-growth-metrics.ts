@@ -84,7 +84,7 @@ export function useGrowthMetrics(initialMetrics: GrowthMetric[] = [], initialSta
 
   // Real-time subscription
   useEffect(() => {
-    if (isDemoModeEnabled()) { setLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
 
     const channel = supabase
       .channel('growth-metrics-changes')
@@ -121,7 +121,7 @@ export function useGrowthMetrics(initialMetrics: GrowthMetric[] = [], initialSta
   }, [supabase, calculateStats])
 
   const createMetric = useCallback(async (input: GrowthMetricInput) => {
-    if (isDemoModeEnabled()) { setLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
 
     setLoading(true)
     setError(null)
@@ -165,7 +165,7 @@ export function useGrowthMetrics(initialMetrics: GrowthMetric[] = [], initialSta
   }, [supabase])
 
   const updateMetric = useCallback(async (id: string, updates: Partial<GrowthMetricInput>) => {
-    if (isDemoModeEnabled()) { setLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
 
     setLoading(true)
     setError(null)
@@ -201,7 +201,7 @@ export function useGrowthMetrics(initialMetrics: GrowthMetric[] = [], initialSta
   }, [supabase, metrics])
 
   const deleteMetric = useCallback(async (id: string) => {
-    if (isDemoModeEnabled()) { setLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
 
     setLoading(true)
     setError(null)

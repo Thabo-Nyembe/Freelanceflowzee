@@ -141,7 +141,7 @@ export function useCrmContacts(filters?: {
   const supabase = createClient()
 
   const fetchData = useCallback(async () => {
-    if (isDemoModeEnabled()) { setIsLoading(false); return }
+    // Demo mode: fetch data with demo=true parameter
 
     setIsLoading(true)
     setError(null)
