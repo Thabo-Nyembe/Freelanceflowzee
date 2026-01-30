@@ -61,7 +61,8 @@ import {
   Layers,
   Sparkles,
   Download,
-  Target
+  Target,
+  DollarSign
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -1256,6 +1257,10 @@ export default function HelpCenterClient() {
                 <BarChart3 className="w-4 h-4" />
                 Analytics
               </TabsTrigger>
+              <TabsTrigger value="videos" className="flex items-center gap-2">
+                <Video className="w-4 h-4" />
+                Video Tutorials
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-3">
@@ -2004,6 +2009,144 @@ export default function HelpCenterClient() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Video Tutorials Tab */}
+          <TabsContent value="videos" className="space-y-6">
+            {/* Videos Banner */}
+            <div className="bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Video Tutorials</h2>
+                  <p className="text-white/80">Learn KAZI with step-by-step video guides</p>
+                </div>
+                <Video className="w-12 h-12 text-white/80" />
+              </div>
+            </div>
+
+            {/* Featured Video */}
+            <Card className="overflow-hidden">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Play className="w-5 h-5 text-red-500" />
+                  Platform Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="relative rounded-lg overflow-hidden bg-slate-900">
+                  <video
+                    controls
+                    poster="/demo-captures/gallery-projects.png"
+                    className="w-full aspect-video"
+                    preload="metadata"
+                  >
+                    <source src="/demo-captures/final/01-platform-overview-with-voiceover.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+                <p className="text-muted-foreground mt-4">
+                  A complete overview of KAZI's features including projects, time tracking, invoicing, and AI tools.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Video Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                {
+                  title: 'Getting Started',
+                  description: 'Set up your account, add clients, and create your first project',
+                  duration: '51 seconds',
+                  file: '02-getting-started-with-voiceover.mp4',
+                  poster: 'gallery-my-day.png',
+                  category: 'Beginner'
+                },
+                {
+                  title: 'Invoicing Walkthrough',
+                  description: 'Create and send professional invoices to your clients',
+                  duration: '19 seconds',
+                  file: '03-invoicing-with-voiceover.mp4',
+                  poster: 'gallery-invoices.png',
+                  category: 'Invoicing'
+                },
+                {
+                  title: 'AI Features Demo',
+                  description: 'Explore 12+ AI models for writing, design, and analytics',
+                  duration: '27 seconds',
+                  file: '04-ai-features-with-voiceover.mp4',
+                  poster: '30-ai-dashboard.png',
+                  category: 'AI Tools'
+                },
+                {
+                  title: 'Full Platform Tour',
+                  description: 'Quick tour of every major feature in KAZI',
+                  duration: '25 seconds',
+                  file: '05-full-gallery-with-voiceover.mp4',
+                  poster: 'gallery-analytics.png',
+                  category: 'Overview'
+                }
+              ].map((video, index) => (
+                <Card key={index} className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
+                  <div className="relative">
+                    <img
+                      src={`/demo-captures/${video.poster}`}
+                      alt={video.title}
+                      className="w-full aspect-video object-cover group-hover:scale-105 transition-transform"
+                    />
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Play className="w-6 h-6 text-slate-900 ml-0.5" />
+                      </div>
+                    </div>
+                    <Badge className="absolute top-2 left-2 bg-black/70">{video.category}</Badge>
+                    <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-0.5 rounded text-xs text-white">
+                      {video.duration}
+                    </div>
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-1">{video.title}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{video.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Video Categories */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <BookOpen className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Getting Started</h4>
+                    <p className="text-sm text-muted-foreground">2 videos</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Invoicing & Payments</h4>
+                    <p className="text-sm text-muted-foreground">1 video</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">AI Features</h4>
+                    <p className="text-sm text-muted-foreground">1 video</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
 

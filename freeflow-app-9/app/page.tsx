@@ -393,6 +393,95 @@ export default function HomePage() {
         </div>
       </HeroBeam>
 
+      {/* Video Demo Section */}
+      <section
+        className="py-20 bg-gradient-to-b from-slate-900 to-slate-800"
+        aria-labelledby="demo-video-heading"
+        role="region"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <Badge
+              variant="secondary"
+              className="mb-4 bg-blue-500/20 text-blue-300 border-blue-500/30"
+            >
+              <Play className="w-3 h-3 mr-1" />
+              Watch Demo
+            </Badge>
+            <h2 id="demo-video-heading" className="text-4xl sm:text-5xl font-bold text-white mb-4">
+              See KAZI in Action
+            </h2>
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+              Watch how KAZI helps you manage projects, track time, and grow your freelance business.
+            </p>
+          </div>
+
+          {/* Main Demo Video */}
+          <div className="max-w-4xl mx-auto mb-12">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-500/20 border border-slate-700">
+              <video
+                controls
+                poster="/demo-captures/gallery-projects.png"
+                className="w-full aspect-video bg-slate-900"
+                preload="metadata"
+              >
+                <source src="/demo-captures/final/01-platform-overview-with-voiceover.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <p className="text-center text-slate-400 mt-4 text-sm">
+              Platform Overview - 2 minutes
+            </p>
+          </div>
+
+          {/* Video Thumbnails */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { title: 'Getting Started', duration: '51s', file: '02-getting-started-with-voiceover.mp4', poster: 'gallery-my-day.png' },
+              { title: 'Invoicing', duration: '19s', file: '03-invoicing-with-voiceover.mp4', poster: 'gallery-invoices.png' },
+              { title: 'AI Features', duration: '27s', file: '04-ai-features-with-voiceover.mp4', poster: '30-ai-dashboard.png' },
+              { title: 'Full Tour', duration: '25s', file: '05-full-gallery-with-voiceover.mp4', poster: 'gallery-analytics.png' },
+            ].map((video, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="group cursor-pointer"
+                onClick={() => {
+                  const mainVideo = document.querySelector('video') as HTMLVideoElement
+                  if (mainVideo) {
+                    mainVideo.src = `/demo-captures/final/${video.file}`
+                    mainVideo.play()
+                    mainVideo.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                  }
+                }}
+              >
+                <div className="relative rounded-lg overflow-hidden border border-slate-700 group-hover:border-blue-500 transition-all">
+                  <img
+                    src={`/demo-captures/${video.poster}`}
+                    alt={video.title}
+                    className="w-full aspect-video object-cover group-hover:scale-105 transition-transform"
+                  />
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Play className="w-5 h-5 text-slate-900 ml-0.5" />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-0.5 rounded text-xs text-white">
+                    {video.duration}
+                  </div>
+                </div>
+                <p className="text-slate-300 text-sm mt-2 text-center group-hover:text-white transition-colors">
+                  {video.title}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Stats Section */}
       <section
         className="py-12 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm"
