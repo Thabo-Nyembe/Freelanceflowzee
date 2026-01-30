@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import React, { useState } from 'react'
+import Image from 'next/image'
+import React, { useState, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -142,13 +143,19 @@ const trustBadges = [
   { icon: CheckCircle, label: '30-Day Guarantee' }
 ]
 
-import { AuroraBackground } from '@/components/ui/aurora-background';
+import dynamic from 'next/dynamic'
 import { HeroBeam } from '@/components/marketing/hero-beam';
 import { HeroTextReveal } from '@/components/ui/hero-text-reveal'
-import { Hero3DCard } from '@/components/marketing/hero-3d-card'
-import { BentoGrid, BentoGridItem } from '@/components/ui/bento-grid'
 import { MagneticButton } from '@/components/ui/magnetic-button'
-import { InfiniteMovingCards } from '@/components/ui/infinite-moving-cards'
+
+// Dynamic imports for below-the-fold components
+const Hero3DCard = dynamic(() => import('@/components/marketing/hero-3d-card').then(mod => ({ default: mod.Hero3DCard })), {
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-slate-800/20 rounded-xl animate-pulse" />
+})
+const BentoGrid = dynamic(() => import('@/components/ui/bento-grid').then(mod => ({ default: mod.BentoGrid })))
+const BentoGridItem = dynamic(() => import('@/components/ui/bento-grid').then(mod => ({ default: mod.BentoGridItem })))
+const InfiniteMovingCards = dynamic(() => import('@/components/ui/infinite-moving-cards').then(mod => ({ default: mod.InfiniteMovingCards })))
 
 export default function HomePage() {
   const router = useRouter()
@@ -156,6 +163,12 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white dark:bg-none dark:bg-gray-900 relative overflow-hidden">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[9999] focus:top-4 focus:left-4 focus:bg-gray-900 focus:text-white focus:px-6 focus:py-3 focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:font-semibold focus:min-h-[44px] focus:min-w-[44px] focus:flex focus:items-center"
+      >
+        Skip to main content
+      </a>
       {/* Animated Background Blobs Removed - Replaced by AuroraBackground in Hero */}
 
       {/* Navigation */}
@@ -175,14 +188,14 @@ export default function HomePage() {
               aria-label="KAZI Homepage"
             >
               <Sparkles className="w-6 h-6 text-blue-600" aria-hidden="true" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 KAZI
               </span>
             </Link>
             <div className="hidden md:flex items-center gap-8" role="menubar">
               <Link
                 href="/features"
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                className="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
                 role="menuitem"
                 aria-label="View all features"
               >
@@ -190,7 +203,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/pricing"
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                className="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
                 role="menuitem"
                 aria-label="View pricing plans"
               >
@@ -198,7 +211,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/blog"
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                className="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
                 role="menuitem"
                 aria-label="Read our blog"
               >
@@ -207,7 +220,7 @@ export default function HomePage() {
 
               <Link
                 href="/contact"
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                className="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
                 role="menuitem"
                 aria-label="Contact us"
               >
@@ -227,7 +240,6 @@ export default function HomePage() {
               <Link href="/signup" className="hidden sm:block">
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  aria-label="Start your free trial"
                 >
                   Start Free Trial
                 </Button>
@@ -292,8 +304,10 @@ export default function HomePage() {
 
 
 
-      {/* Hero Section */}
-      <HeroBeam className="w-full min-h-[50rem]">
+      {/* Main Content */}
+      <main id="main-content" role="main">
+        {/* Hero Section */}
+        <HeroBeam className="w-full min-h-[50rem]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-20">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             {/* Left Content */}
@@ -320,15 +334,10 @@ export default function HomePage() {
                 </span>
               </h1>
 
-              <motion.p
-                className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-xl leading-relaxed"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.8 }}
-              >
+              <p className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-xl leading-relaxed">
                 Why pay for Monday, Jasper, and Loom separately? KAZI gives you AI content creation,
                 video studio, escrow payments, and project management in one unified workspace for just $29/mo.
-              </motion.p>
+              </p>
 
               <motion.div
                 className="flex flex-col sm:flex-row gap-4"
@@ -421,7 +430,7 @@ export default function HomePage() {
             <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-500/20 border border-slate-700">
               <video
                 controls
-                poster="/demo-captures/gallery-projects.png"
+                poster="/demo-captures/gallery-projects.jpg"
                 className="w-full aspect-video bg-slate-900"
                 preload="metadata"
               >
@@ -437,10 +446,10 @@ export default function HomePage() {
           {/* Video Thumbnails */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { title: 'Getting Started', duration: '51s', file: '02-getting-started-with-voiceover.mp4', poster: 'gallery-my-day.png' },
-              { title: 'Invoicing', duration: '19s', file: '03-invoicing-with-voiceover.mp4', poster: 'gallery-invoices.png' },
-              { title: 'AI Features', duration: '27s', file: '04-ai-features-with-voiceover.mp4', poster: '30-ai-dashboard.png' },
-              { title: 'Full Tour', duration: '25s', file: '05-full-gallery-with-voiceover.mp4', poster: 'gallery-analytics.png' },
+              { title: 'Getting Started', duration: '51s', file: '02-getting-started-with-voiceover.mp4', poster: 'gallery-my-day.jpg' },
+              { title: 'Invoicing', duration: '19s', file: '03-invoicing-with-voiceover.mp4', poster: 'gallery-invoices.jpg' },
+              { title: 'AI Features', duration: '27s', file: '04-ai-features-with-voiceover.mp4', poster: '30-ai-dashboard.jpg' },
+              { title: 'Full Tour', duration: '25s', file: '05-full-gallery-with-voiceover.mp4', poster: 'gallery-analytics.jpg' },
             ].map((video, index) => (
               <motion.div
                 key={index}
@@ -458,11 +467,14 @@ export default function HomePage() {
                   }
                 }}
               >
-                <div className="relative rounded-lg overflow-hidden border border-slate-700 group-hover:border-blue-500 transition-all">
-                  <img
+                <div className="relative rounded-lg overflow-hidden border border-slate-700 group-hover:border-blue-500 transition-all aspect-video">
+                  <Image
                     src={`/demo-captures/${video.poster}`}
                     alt={video.title}
-                    className="w-full aspect-video object-cover group-hover:scale-105 transition-transform"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -740,7 +752,8 @@ export default function HomePage() {
             </p>
           </motion.div>
         </div>
-      </section >
+      </section>
+      </main>
 
       <SiteFooter />
     </div >

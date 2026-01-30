@@ -90,8 +90,8 @@ export function PricingComparisonTable() {
                             {row.kaziDetail && !row.isFooter && (
                                 <TooltipProvider>
                                     <Tooltip>
-                                        <TooltipTrigger>
-                                            <Info className="w-4 h-4 text-gray-400 hover:text-blue-500" />
+                                        <TooltipTrigger aria-label={`More info about ${row.feature}: ${row.kaziDetail}`}>
+                                            <Info className="w-4 h-4 text-gray-400 hover:text-blue-500" aria-hidden="true" />
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             <p>{row.kaziDetail}</p>

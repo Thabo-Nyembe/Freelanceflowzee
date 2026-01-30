@@ -28,7 +28,7 @@ export function LiveChatWidget() {
     }
 
     return (
-        <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -55,8 +55,9 @@ export function LiveChatWidget() {
                             <button
                                 onClick={() => setIsOpen(false)}
                                 className="text-blue-100 hover:text-white transition-colors"
+                                aria-label="Close chat window"
                             >
-                                <X className="w-5 h-5" />
+                                <X className="w-5 h-5" aria-hidden="true" />
                             </button>
                         </div>
 
@@ -93,8 +94,9 @@ export function LiveChatWidget() {
                                     type="submit"
                                     disabled={!message.trim()}
                                     className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 disabled:text-gray-300 transition-colors"
+                                    aria-label="Send message"
                                 >
-                                    <Send className="w-5 h-5" />
+                                    <Send className="w-5 h-5" aria-hidden="true" />
                                 </button>
                             </div>
                             <p className="text-[10px] text-gray-400 mt-2 text-center">
@@ -109,9 +111,11 @@ export function LiveChatWidget() {
                 onClick={() => setIsOpen(!isOpen)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg shadow-blue-600/30 flex items-center justify-center transition-colors"
+                className="w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg shadow-blue-600/30 flex items-center justify-center transition-colors"
+                aria-label={isOpen ? "Close chat" : "Open chat support"}
+                aria-expanded={isOpen}
             >
-                {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
+                {isOpen ? <X className="w-6 h-6" aria-hidden="true" /> : <MessageSquare className="w-6 h-6" aria-hidden="true" />}
             </motion.button>
         </div>
     )
