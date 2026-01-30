@@ -85,6 +85,19 @@ async function checkDemoMode() {
     pageErrors[currentPage].push(`[RequestFailed] ${url.replace(BASE_URL, '')} - ${request.failure()?.errorText || 'unknown'}`)
   })
 
+  // Capture HTTP 4xx/5xx responses for ALL requests
+  page.on('response', response => {
+    const status = response.status()
+    const url = response.url()
+    // Track any 4xx/5xx error from localhost
+    if (status >= 400 && url.includes('localhost')) {
+      if (!pageErrors[currentPage]) pageErrors[currentPage] = []
+      // Show full relative URL for easier debugging
+      const relUrl = url.replace(BASE_URL, '')
+      pageErrors[currentPage].push(`[HTTP ${status}] ${relUrl}`)
+    }
+  })
+
   try {
     for (const pagePath of PAGES_TO_CHECK) {
       currentPage = pagePath
