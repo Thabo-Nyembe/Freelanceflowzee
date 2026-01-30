@@ -46,6 +46,19 @@ import { useGoals } from '@/lib/hooks/use-goals'
 import { useTasks } from '@/lib/hooks/use-tasks'
 import { toast } from 'sonner'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 // Types
 type TimeEntryStatus = 'running' | 'stopped' | 'approved' | 'rejected'
 type ProjectStatus = 'active' | 'completed' | 'on_hold' | 'archived'
@@ -418,8 +431,18 @@ export default function TimeTrackingClient() {
     }
   }, [dbTimeEntries])
 
-  // Combined loading state
-  const isLoading = entriesLoading || projectsLoading || teamLoading || invoicesLoading || clientsLoading || goalsLoading
+  // Demo mode check - use useMemo for synchronous evaluation on every render
+  const isDemo = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return isDemoModeEnabled()
+    }
+    return false
+  }, [])
+
+  // Combined loading state - skip loading check in demo mode
+  // Double-check demo mode directly to ensure bypass even during hydration
+  const demoModeActive = typeof window !== 'undefined' && isDemoModeEnabled()
+  const isLoading = !demoModeActive && !isDemo && (entriesLoading || projectsLoading || teamLoading || invoicesLoading || clientsLoading || goalsLoading)
 
   // Map database data to component-expected formats
   const projects = useMemo(() => (dbProjects || []).map(p => ({
@@ -1157,8 +1180,8 @@ export default function TimeTrackingClient() {
     { id: '3', label: 'Reports', icon: 'barChart', action: () => setActiveTab('reports'), variant: 'outline' as const },
   ]
 
-  // Loading state early return
-  if (entriesLoading) {
+  // Loading state early return - skip in demo mode
+  if (entriesLoading && !demoModeActive && !isDemo) {
     return (
       <div className="flex items-center justify-center h-full">
         <Loader2 className="h-8 w-8 animate-spin" />

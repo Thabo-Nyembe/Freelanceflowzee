@@ -59,24 +59,20 @@ export function SessionProvider({ children, session }: SessionProviderProps) {
     return <>{children}</>
   }
 
-  // In demo mode, completely bypass NextAuth to prevent any CLIENT_FETCH_ERROR
-  if (isDemo) {
-    return (
-      <DemoSessionContext.Provider value={{ data: DEMO_SESSION, status: 'authenticated' }}>
-        {children}
-      </DemoSessionContext.Provider>
-    )
-  }
+  // Always use NextAuthSessionProvider to ensure useSession() works
+  // In demo mode, pass the demo session; in normal mode, pass the real session
+  const sessionToUse = isDemo ? DEMO_SESSION : session
 
-  // Normal mode - use NextAuth
   return (
-    <NextAuthSessionProvider
-      session={session}
-      refetchInterval={5 * 60}
-      refetchOnWindowFocus={true}
-    >
-      {children}
-    </NextAuthSessionProvider>
+    <DemoSessionContext.Provider value={{ data: isDemo ? DEMO_SESSION : null, status: isDemo ? 'authenticated' : 'loading' }}>
+      <NextAuthSessionProvider
+        session={sessionToUse}
+        refetchInterval={isDemo ? 0 : 5 * 60}
+        refetchOnWindowFocus={!isDemo}
+      >
+        {children}
+      </NextAuthSessionProvider>
+    </DemoSessionContext.Provider>
   )
 }
 

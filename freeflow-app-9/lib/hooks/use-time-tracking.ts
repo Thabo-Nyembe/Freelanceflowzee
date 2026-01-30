@@ -86,45 +86,31 @@ export interface UseTimeTrackingOptions {
 export function useTimeTracking(options: UseTimeTrackingOptions = {}) {
   const { status, projectId, isBillable, limit } = options
 
-  // Demo mode state
-  const [demoData, setDemoData] = useState<TimeEntry[]>([])
-  const [demoLoading, setDemoLoading] = useState(true)
-  const [demoError, setDemoError] = useState<Error | null>(null)
-  const isDemo = isDemoModeEnabled()
+  // Check demo mode synchronously - needed for initial render
+  const initialDemoCheck = typeof window !== 'undefined' && isDemoModeEnabled()
 
-  // Fetch data via API for demo mode
+  // Demo mode state
+  const [isDemo, setIsDemo] = useState(initialDemoCheck)
+  const [demoData, setDemoData] = useState<TimeEntry[]>(initialDemoCheck ? getDemoTimeEntries() : [])
+  const [demoLoading, setDemoLoading] = useState(!initialDemoCheck) // false if demo, true otherwise
+  const [demoError, setDemoError] = useState<Error | null>(null)
+
+  // Re-check demo mode after hydration (in case SSR missed it)
+  useEffect(() => {
+    const demoEnabled = isDemoModeEnabled()
+    if (demoEnabled && !isDemo) {
+      setIsDemo(true)
+      setDemoData(getDemoTimeEntries())
+      setDemoLoading(false)
+    }
+  }, [])
+
+  // Fetch data via API for demo mode (optional - for real DB data)
+  // Demo data is already set in the mount effect above
   useEffect(() => {
     if (!isDemo) return
-
-    const fetchDemoData = async () => {
-      setDemoLoading(true)
-      try {
-        const params = new URLSearchParams()
-        params.set('demo', 'true')
-        params.set('type', 'entries')
-        if (status && status !== 'all') params.set('status', status)
-        if (projectId) params.set('project_id', projectId)
-        if (isBillable !== undefined) params.set('is_billable', String(isBillable))
-
-        const response = await fetch(`/api/time-tracking?${params.toString()}`)
-        const result = await response.json()
-
-        if (result.data && result.data.length > 0) {
-          setDemoData(result.data)
-        } else {
-          // Fallback demo data when API returns empty
-          setDemoData(getDemoTimeEntries())
-        }
-        setDemoError(null)
-      } catch (err) {
-        setDemoError(err instanceof Error ? err : new Error('Failed to fetch time entries'))
-        setDemoData(getDemoTimeEntries())
-      } finally {
-        setDemoLoading(false)
-      }
-    }
-
-    fetchDemoData()
+    // Demo data already loaded in mount effect - no need to fetch again
+    // This effect is here for future use if we want to fetch from API
   }, [isDemo, status, projectId, isBillable])
 
   const filters: Record<string, any> = {}
@@ -143,10 +129,13 @@ export function useTimeTracking(options: UseTimeTrackingOptions = {}) {
 
   const { data: supabaseData, loading: queryLoading, error: supabaseError, refetch: supabaseRefetch } = useSupabaseQuery<TimeEntry>(queryOptions)
 
-  // Use demo data if in demo mode
-  const data = isDemo ? demoData : supabaseData
-  const loading = isDemo ? demoLoading : queryLoading
-  const error = isDemo ? demoError : supabaseError
+  // Direct demo mode check for computing return values (state might not be updated yet)
+  const directDemoCheck = typeof window !== 'undefined' && isDemoModeEnabled()
+
+  // Use demo data if in demo mode - check both state and direct check
+  const data = (isDemo || directDemoCheck) ? (demoData.length > 0 ? demoData : getDemoTimeEntries()) : supabaseData
+  const loading = (isDemo || directDemoCheck) ? false : queryLoading // Always false in demo mode
+  const error = (isDemo || directDemoCheck) ? demoError : supabaseError
   const refetch = isDemo ? async () => {
     setDemoLoading(true)
     try {
