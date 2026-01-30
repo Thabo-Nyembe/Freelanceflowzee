@@ -4,6 +4,21 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
 // Types
 export type ChartType = 'bar' | 'line' | 'pie' | 'area' | 'scatter' | 'heatmap' | 'gauge' | 'table' | 'kpi' | 'map'
 export type DataSourceType = 'postgresql' | 'mysql' | 'mongodb' | 'csv' | 'api' | 'snowflake' | 'bigquery'
@@ -84,12 +99,28 @@ export function useDashboards() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const supabase = createClient()
+  const isDemo = isDemoModeEnabled()
 
   const fetchDashboards = useCallback(async () => {
     try {
       setLoading(true)
+
+      // Demo mode: use fallback data
+      if (isDemo) {
+        setDashboards(getDemoDashboards())
+        setError(null)
+        setLoading(false)
+        return
+      }
+
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user) {
+        // Fallback to demo data if not authenticated
+        setDashboards(getDemoDashboards())
+        setError(null)
+        setLoading(false)
+        return
+      }
 
       const { data, error: queryError } = await supabase
         .from('reporting_dashboards')
@@ -103,10 +134,12 @@ export function useDashboards() {
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch dashboards'))
+      // Fallback to demo data on error
+      if (isDemo) setDashboards(getDemoDashboards())
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, isDemo])
 
   useEffect(() => {
     fetchDashboards()
@@ -249,12 +282,27 @@ export function useWorksheets() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const supabase = createClient()
+  const isDemo = isDemoModeEnabled()
 
   const fetchWorksheets = useCallback(async () => {
     try {
       setLoading(true)
+
+      // Demo mode: use empty array (no worksheets needed)
+      if (isDemo) {
+        setWorksheets([])
+        setError(null)
+        setLoading(false)
+        return
+      }
+
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user) {
+        setWorksheets([])
+        setError(null)
+        setLoading(false)
+        return
+      }
 
       const { data, error: queryError } = await supabase
         .from('reporting_worksheets')
@@ -271,7 +319,7 @@ export function useWorksheets() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, isDemo])
 
   useEffect(() => {
     fetchWorksheets()
@@ -367,12 +415,27 @@ export function useReportDataSources() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const supabase = createClient()
+  const isDemo = isDemoModeEnabled()
 
   const fetchDataSources = useCallback(async () => {
     try {
       setLoading(true)
+
+      // Demo mode: use fallback data
+      if (isDemo) {
+        setDataSources(getDemoDataSources())
+        setError(null)
+        setLoading(false)
+        return
+      }
+
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user) {
+        setDataSources(getDemoDataSources())
+        setError(null)
+        setLoading(false)
+        return
+      }
 
       const { data, error: queryError } = await supabase
         .from('reporting_data_sources')
@@ -386,10 +449,11 @@ export function useReportDataSources() {
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch data sources'))
+      if (isDemo) setDataSources(getDemoDataSources())
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, isDemo])
 
   useEffect(() => {
     fetchDataSources()
@@ -512,12 +576,27 @@ export function useScheduledReports() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const supabase = createClient()
+  const isDemo = isDemoModeEnabled()
 
   const fetchScheduledReports = useCallback(async () => {
     try {
       setLoading(true)
+
+      // Demo mode: use fallback data
+      if (isDemo) {
+        setScheduledReports(getDemoScheduledReports())
+        setError(null)
+        setLoading(false)
+        return
+      }
+
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user) {
+        setScheduledReports(getDemoScheduledReports())
+        setError(null)
+        setLoading(false)
+        return
+      }
 
       const { data, error: queryError } = await supabase
         .from('scheduled_reports')
@@ -531,10 +610,11 @@ export function useScheduledReports() {
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch scheduled reports'))
+      if (isDemo) setScheduledReports(getDemoScheduledReports())
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, isDemo])
 
   useEffect(() => {
     fetchScheduledReports()
@@ -703,4 +783,148 @@ function calculateNextRun(schedule: ScheduleType): string {
   }
 
   return nextRun.toISOString()
+}
+
+// Demo data helper functions
+function getDemoDashboards(): Dashboard[] {
+  const now = new Date()
+  return [
+    {
+      id: 'demo-dash-1',
+      user_id: DEMO_USER_ID,
+      name: 'Financial Overview',
+      description: 'Key financial metrics and revenue trends',
+      thumbnail: '/images/dashboard-finance.png',
+      widgets: [
+        { id: 'w1', type: 'kpi', title: 'Total Revenue' },
+        { id: 'w2', type: 'line', title: 'Revenue Trend' },
+        { id: 'w3', type: 'pie', title: 'Revenue by Client' }
+      ],
+      views: 245,
+      favorites: 12,
+      is_favorite: true,
+      is_published: true,
+      tags: ['finance', 'revenue'],
+      author: 'Alexandra Chen',
+      created_at: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-dash-2',
+      user_id: DEMO_USER_ID,
+      name: 'Project Analytics',
+      description: 'Track project progress and team performance',
+      widgets: [
+        { id: 'w1', type: 'bar', title: 'Projects by Status' },
+        { id: 'w2', type: 'gauge', title: 'Completion Rate' }
+      ],
+      views: 128,
+      favorites: 8,
+      is_favorite: false,
+      is_published: true,
+      tags: ['projects', 'analytics'],
+      author: 'Alexandra Chen',
+      created_at: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-dash-3',
+      user_id: DEMO_USER_ID,
+      name: 'Client Engagement',
+      description: 'Client activity and satisfaction metrics',
+      widgets: [],
+      views: 67,
+      favorites: 3,
+      is_favorite: false,
+      is_published: false,
+      tags: ['clients'],
+      author: 'Alexandra Chen',
+      created_at: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: now.toISOString()
+    }
+  ]
+}
+
+function getDemoDataSources(): ReportDataSource[] {
+  const now = new Date()
+  return [
+    {
+      id: 'demo-ds-1',
+      user_id: DEMO_USER_ID,
+      name: 'Supabase Production',
+      type: 'postgresql',
+      host: 'db.supabase.co',
+      database_name: 'kazi_production',
+      status: 'connected',
+      last_sync: new Date(now.getTime() - 1 * 60 * 60 * 1000).toISOString(),
+      tables: 42,
+      row_count: 15420,
+      created_at: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: now.toISOString()
+    },
+    {
+      id: 'demo-ds-2',
+      user_id: DEMO_USER_ID,
+      name: 'Analytics CSV Export',
+      type: 'csv',
+      host: 'local',
+      database_name: 'analytics_data.csv',
+      status: 'connected',
+      last_sync: new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(),
+      tables: 1,
+      row_count: 5000,
+      created_at: new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
+    }
+  ]
+}
+
+function getDemoScheduledReports(): ScheduledReport[] {
+  const now = new Date()
+  return [
+    {
+      id: 'demo-sr-1',
+      user_id: DEMO_USER_ID,
+      name: 'Weekly Revenue Report',
+      dashboard_id: 'demo-dash-1',
+      dashboard_name: 'Financial Overview',
+      schedule: 'weekly',
+      next_run: calculateNextRun('weekly'),
+      last_run: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      recipients: ['alex@freeflow.io', 'team@freeflow.io'],
+      format: 'pdf',
+      enabled: true,
+      created_at: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: now.toISOString()
+    },
+    {
+      id: 'demo-sr-2',
+      user_id: DEMO_USER_ID,
+      name: 'Monthly Project Summary',
+      dashboard_id: 'demo-dash-2',
+      dashboard_name: 'Project Analytics',
+      schedule: 'monthly',
+      next_run: calculateNextRun('monthly'),
+      last_run: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      recipients: ['alex@freeflow.io'],
+      format: 'xlsx',
+      enabled: true,
+      created_at: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: now.toISOString()
+    },
+    {
+      id: 'demo-sr-3',
+      user_id: DEMO_USER_ID,
+      name: 'Daily Activity Digest',
+      dashboard_id: 'demo-dash-1',
+      dashboard_name: 'Financial Overview',
+      schedule: 'daily',
+      next_run: calculateNextRun('daily'),
+      recipients: ['alex@freeflow.io'],
+      format: 'pdf',
+      enabled: false,
+      created_at: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: now.toISOString()
+    }
+  ]
 }

@@ -2,6 +2,19 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -222,19 +235,21 @@ interface UseSettingsOptions {
 
 export function useSettings(options: UseSettingsOptions = {}) {
   const {
-    
+
     autoSave = false,
     autoSaveDelay = 1000
   } = options
+
+  const isDemo = isDemoModeEnabled()
 
   // State
   const [notifications, setNotifications] = useState<NotificationSettings>(mockNotifications)
   const [security, setSecurity] = useState<SecuritySettings>(mockSecurity)
   const [appearance, setAppearance] = useState<AppearanceSettings>(mockAppearance)
   const [privacy, setPrivacy] = useState<PrivacySettings>(mockPrivacy)
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
-  const [sessions, setSessions] = useState<Session[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>(isDemo ? mockApiKeys : [])
+  const [sessions, setSessions] = useState<Session[]>(isDemo ? mockSessions : [])
+  const [isLoading, setIsLoading] = useState(!isDemo)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({})
@@ -242,6 +257,13 @@ export function useSettings(options: UseSettingsOptions = {}) {
 
   // Fetch all settings
   const fetchSettings = useCallback(async () => {
+    // In demo mode, use mock data
+    if (isDemo) {
+      setApiKeys(mockApiKeys)
+      setIsLoading(false)
+      return mockApiKeys
+    }
+
     try {
       const response = await fetch('/api/settings?category=api-keys')
       const result = await response.json()
@@ -257,10 +279,16 @@ export function useSettings(options: UseSettingsOptions = {}) {
       setApiKeys([])
       return []
     }
-  }, [])
+  }, [isDemo])
 
   // Fetch sessions
   const fetchSessions = useCallback(async () => {
+    // In demo mode, use mock data
+    if (isDemo) {
+      setSessions(mockSessions)
+      return mockSessions
+    }
+
     try {
       const response = await fetch('/api/settings?category=sessions')
       const result = await response.json()
@@ -276,10 +304,16 @@ export function useSettings(options: UseSettingsOptions = {}) {
       setSessions(mockSessions)
       return []
     }
-  }, [])
+  }, [isDemo])
 
   // Fetch API Keys
   const fetchApiKeys = useCallback(async () => {
+    // In demo mode, use mock data
+    if (isDemo) {
+      setApiKeys(mockApiKeys)
+      return mockApiKeys
+    }
+
     try {
       const response = await fetch('/api/settings?category=api-keys')
       const result = await response.json()
@@ -295,7 +329,7 @@ export function useSettings(options: UseSettingsOptions = {}) {
       setApiKeys([])
       return []
     }
-  }, [])
+  }, [isDemo])
 
   // Transform helpers
   const transformNotifications = (data: any): NotificationSettings => ({

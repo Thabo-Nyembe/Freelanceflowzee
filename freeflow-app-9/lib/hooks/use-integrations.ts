@@ -4,6 +4,21 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
 export interface Integration {
   id: string
   user_id: string
@@ -37,15 +52,18 @@ export interface IntegrationStats {
 }
 
 export function useIntegrations(initialIntegrations: Integration[] = [], initialStats?: IntegrationStats) {
-  const [integrations, setIntegrations] = useState<Integration[]>(initialIntegrations)
+  const isDemo = isDemoModeEnabled()
+  const demoIntegrations = getDemoIntegrations()
+
+  const [integrations, setIntegrations] = useState<Integration[]>(isDemo ? demoIntegrations : initialIntegrations)
   const [stats, setStats] = useState<IntegrationStats>(initialStats || {
-    total: 0,
-    connected: 0,
-    disconnected: 0,
-    totalApiCalls: 0,
-    totalDataSynced: 0
+    total: isDemo ? demoIntegrations.length : 0,
+    connected: isDemo ? demoIntegrations.filter(i => i.is_connected).length : 0,
+    disconnected: isDemo ? demoIntegrations.filter(i => !i.is_connected).length : 0,
+    totalApiCalls: isDemo ? demoIntegrations.reduce((sum, i) => sum + i.api_calls_count, 0) : 0,
+    totalDataSynced: isDemo ? demoIntegrations.reduce((sum, i) => sum + i.data_synced_count, 0) : 0
   })
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(!isDemo)
   const supabase = createClient()
   const { toast } = useToast()
 
@@ -60,6 +78,15 @@ export function useIntegrations(initialIntegrations: Integration[] = [], initial
   }, [])
 
   const fetchIntegrations = useCallback(async () => {
+    // Demo mode: use demo data
+    if (isDemo) {
+      const demoData = getDemoIntegrations()
+      setIntegrations(demoData)
+      setStats(calculateStats(demoData))
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     try {
       const { data, error } = await supabase
@@ -71,15 +98,22 @@ export function useIntegrations(initialIntegrations: Integration[] = [], initial
       setIntegrations(data || [])
       setStats(calculateStats(data || []))
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to fetch integrations',
-        variant: 'destructive'
-      })
+      // Fallback to demo data on error
+      if (isDemo) {
+        const demoData = getDemoIntegrations()
+        setIntegrations(demoData)
+        setStats(calculateStats(demoData))
+      } else {
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to fetch integrations',
+          variant: 'destructive'
+        })
+      }
     } finally {
       setLoading(false)
     }
-  }, [supabase, toast, calculateStats])
+  }, [supabase, toast, calculateStats, isDemo])
 
   const createIntegration = useCallback(async (integrationData: Partial<Integration>) => {
     setLoading(true)
@@ -228,8 +262,10 @@ export function useIntegrations(initialIntegrations: Integration[] = [], initial
     return true
   }, [integrations, updateIntegration, toast])
 
-  // Real-time subscription
+  // Real-time subscription (disabled in demo mode)
   useEffect(() => {
+    if (isDemo) return
+
     const channel = supabase
       .channel('integrations_changes')
       .on(
@@ -268,7 +304,7 @@ export function useIntegrations(initialIntegrations: Integration[] = [], initial
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [supabase, calculateStats])
+  }, [supabase, calculateStats, isDemo])
 
   return {
     integrations,
@@ -282,4 +318,126 @@ export function useIntegrations(initialIntegrations: Integration[] = [], initial
     disconnectIntegration,
     syncIntegration
   }
+}
+
+// Demo integrations data
+function getDemoIntegrations(): Integration[] {
+  const now = new Date()
+  return [
+    {
+      id: 'demo-int-1',
+      user_id: DEMO_USER_ID,
+      name: 'Slack',
+      provider: 'slack',
+      description: 'Team communication and notifications',
+      icon: '/integrations/slack.svg',
+      category: 'communication',
+      is_connected: true,
+      status: 'connected',
+      access_token: null,
+      refresh_token: null,
+      token_expires_at: null,
+      config: { channel: '#general', notifications: true },
+      permissions: ['chat:write', 'channels:read'],
+      api_calls_count: 1245,
+      data_synced_count: 532,
+      last_sync_at: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(),
+      metadata: {},
+      created_at: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: now.toISOString(),
+      connected_at: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-int-2',
+      user_id: DEMO_USER_ID,
+      name: 'Google Calendar',
+      provider: 'google',
+      description: 'Calendar sync and scheduling',
+      icon: '/integrations/google-calendar.svg',
+      category: 'calendar',
+      is_connected: true,
+      status: 'connected',
+      access_token: null,
+      refresh_token: null,
+      token_expires_at: null,
+      config: { calendarId: 'primary', sync_events: true },
+      permissions: ['calendar.events', 'calendar.readonly'],
+      api_calls_count: 892,
+      data_synced_count: 234,
+      last_sync_at: new Date(now.getTime() - 1 * 60 * 60 * 1000).toISOString(),
+      metadata: {},
+      created_at: new Date(now.getTime() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: now.toISOString(),
+      connected_at: new Date(now.getTime() - 45 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-int-3',
+      user_id: DEMO_USER_ID,
+      name: 'GitHub',
+      provider: 'github',
+      description: 'Code repository and project tracking',
+      icon: '/integrations/github.svg',
+      category: 'development',
+      is_connected: true,
+      status: 'connected',
+      access_token: null,
+      refresh_token: null,
+      token_expires_at: null,
+      config: { repos: ['kazi-platform', 'freeflow-app'] },
+      permissions: ['repo:read', 'issues:write'],
+      api_calls_count: 567,
+      data_synced_count: 89,
+      last_sync_at: new Date(now.getTime() - 30 * 60 * 1000).toISOString(),
+      metadata: {},
+      created_at: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: now.toISOString(),
+      connected_at: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-int-4',
+      user_id: DEMO_USER_ID,
+      name: 'Stripe',
+      provider: 'stripe',
+      description: 'Payment processing',
+      icon: '/integrations/stripe.svg',
+      category: 'payments',
+      is_connected: false,
+      status: 'disconnected',
+      access_token: null,
+      refresh_token: null,
+      token_expires_at: null,
+      config: {},
+      permissions: [],
+      api_calls_count: 0,
+      data_synced_count: 0,
+      last_sync_at: null,
+      metadata: {},
+      created_at: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: now.toISOString(),
+      connected_at: null
+    },
+    {
+      id: 'demo-int-5',
+      user_id: DEMO_USER_ID,
+      name: 'Zapier',
+      provider: 'zapier',
+      description: 'Workflow automation',
+      icon: '/integrations/zapier.svg',
+      category: 'automation',
+      is_connected: false,
+      status: 'disconnected',
+      access_token: null,
+      refresh_token: null,
+      token_expires_at: null,
+      config: {},
+      permissions: [],
+      api_calls_count: 0,
+      data_synced_count: 0,
+      last_sync_at: null,
+      metadata: {},
+      created_at: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: now.toISOString(),
+      connected_at: null
+    }
+  ]
 }

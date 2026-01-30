@@ -1,6 +1,19 @@
 import { useSupabaseQuery } from './use-supabase-query'
 import { useSupabaseMutation } from './use-supabase-mutation'
-import { useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
 
 export type EntryType = 'manual' | 'timer' | 'automatic' | 'imported' | 'adjusted'
 export type TimeTrackingStatus = 'running' | 'paused' | 'stopped' | 'submitted' | 'approved' | 'rejected' | 'invoiced'
@@ -73,6 +86,47 @@ export interface UseTimeTrackingOptions {
 export function useTimeTracking(options: UseTimeTrackingOptions = {}) {
   const { status, projectId, isBillable, limit } = options
 
+  // Demo mode state
+  const [demoData, setDemoData] = useState<TimeEntry[]>([])
+  const [demoLoading, setDemoLoading] = useState(true)
+  const [demoError, setDemoError] = useState<Error | null>(null)
+  const isDemo = isDemoModeEnabled()
+
+  // Fetch data via API for demo mode
+  useEffect(() => {
+    if (!isDemo) return
+
+    const fetchDemoData = async () => {
+      setDemoLoading(true)
+      try {
+        const params = new URLSearchParams()
+        params.set('demo', 'true')
+        params.set('type', 'entries')
+        if (status && status !== 'all') params.set('status', status)
+        if (projectId) params.set('project_id', projectId)
+        if (isBillable !== undefined) params.set('is_billable', String(isBillable))
+
+        const response = await fetch(`/api/time-tracking?${params.toString()}`)
+        const result = await response.json()
+
+        if (result.data) {
+          setDemoData(result.data)
+        } else {
+          // Fallback demo data
+          setDemoData(getDemoTimeEntries())
+        }
+        setDemoError(null)
+      } catch (err) {
+        setDemoError(err instanceof Error ? err : new Error('Failed to fetch time entries'))
+        setDemoData(getDemoTimeEntries())
+      } finally {
+        setDemoLoading(false)
+      }
+    }
+
+    fetchDemoData()
+  }, [isDemo, status, projectId, isBillable])
+
   const filters: Record<string, any> = {}
   if (status && status !== 'all') filters.status = status
   if (projectId) filters.project_id = projectId
@@ -83,15 +137,35 @@ export function useTimeTracking(options: UseTimeTrackingOptions = {}) {
     filters,
     orderBy: { column: 'start_time', ascending: false },
     limit: limit || 50,
-    realtime: true
+    realtime: !isDemo // Disable realtime in demo mode
   }
 
-  const { data, loading: queryLoading, error, refetch } = useSupabaseQuery<TimeEntry>(queryOptions)
+  const { data: supabaseData, loading: queryLoading, error: supabaseError, refetch: supabaseRefetch } = useSupabaseQuery<TimeEntry>(queryOptions)
+
+  // Use demo data if in demo mode
+  const data = isDemo ? demoData : supabaseData
+  const loading = isDemo ? demoLoading : queryLoading
+  const error = isDemo ? demoError : supabaseError
+  const refetch = isDemo ? async () => {
+    setDemoLoading(true)
+    try {
+      const params = new URLSearchParams()
+      params.set('demo', 'true')
+      params.set('type', 'entries')
+      const response = await fetch(`/api/time-tracking?${params.toString()}`)
+      const result = await response.json()
+      if (result.data) setDemoData(result.data)
+    } catch (err) {
+      setDemoError(err instanceof Error ? err : new Error('Failed to fetch'))
+    } finally {
+      setDemoLoading(false)
+    }
+  } : supabaseRefetch
 
   // Use the mutation hook with proper methods
   const { create, update, remove, loading: mutationLoading } = useSupabaseMutation({
     table: 'time_tracking',
-    onSuccess: () => refetch()
+    onSuccess: () => !isDemo && supabaseRefetch()
   })
 
   // Create a new time entry (for manual entries or starting a timer)
@@ -206,7 +280,7 @@ export function useTimeTracking(options: UseTimeTrackingOptions = {}) {
   return {
     // Data
     timeEntries: data,
-    loading: queryLoading || mutationLoading,
+    loading: loading || mutationLoading,
     error,
     refetch,
 
@@ -226,4 +300,97 @@ export function useTimeTracking(options: UseTimeTrackingOptions = {}) {
     lockEntry,
     unlockEntry
   }
+}
+
+// Demo time entries for fallback
+function getDemoTimeEntries(): TimeEntry[] {
+  const now = new Date()
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000)
+
+  return [
+    {
+      id: 'demo-1',
+      user_id: '00000000-0000-0000-0000-000000000001',
+      entry_type: 'timer',
+      title: 'Client Website Redesign',
+      description: 'Working on homepage mockups',
+      start_time: new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString(),
+      end_time: new Date(now.getTime() - 1 * 60 * 60 * 1000).toISOString(),
+      duration_seconds: 7200,
+      duration_hours: 2,
+      status: 'stopped',
+      is_billable: true,
+      is_locked: false,
+      project_id: 'proj-1',
+      hourly_rate: 150,
+      billable_amount: 300,
+      currency: 'USD',
+      idle_time_seconds: 0,
+      active_time_seconds: 7200,
+      breaks_count: 0,
+      screenshots_enabled: false,
+      screenshots: null,
+      activity_data: null,
+      apps_used: null,
+      metadata: {},
+      created_at: now.toISOString(),
+      updated_at: now.toISOString()
+    },
+    {
+      id: 'demo-2',
+      user_id: '00000000-0000-0000-0000-000000000001',
+      entry_type: 'manual',
+      title: 'Team Meeting',
+      description: 'Weekly sprint planning',
+      start_time: new Date(yesterday.getTime() - 1 * 60 * 60 * 1000).toISOString(),
+      end_time: yesterday.toISOString(),
+      duration_seconds: 3600,
+      duration_hours: 1,
+      status: 'approved',
+      is_billable: false,
+      is_locked: true,
+      hourly_rate: 0,
+      billable_amount: 0,
+      currency: 'USD',
+      idle_time_seconds: 0,
+      active_time_seconds: 3600,
+      breaks_count: 0,
+      screenshots_enabled: false,
+      screenshots: null,
+      activity_data: null,
+      apps_used: null,
+      metadata: {},
+      created_at: yesterday.toISOString(),
+      updated_at: yesterday.toISOString()
+    },
+    {
+      id: 'demo-3',
+      user_id: '00000000-0000-0000-0000-000000000001',
+      entry_type: 'timer',
+      title: 'Mobile App Development',
+      description: 'Implementing authentication flow',
+      start_time: new Date(twoDaysAgo.getTime() - 4 * 60 * 60 * 1000).toISOString(),
+      end_time: twoDaysAgo.toISOString(),
+      duration_seconds: 14400,
+      duration_hours: 4,
+      status: 'submitted',
+      is_billable: true,
+      is_locked: false,
+      project_id: 'proj-2',
+      hourly_rate: 175,
+      billable_amount: 700,
+      currency: 'USD',
+      idle_time_seconds: 600,
+      active_time_seconds: 13800,
+      breaks_count: 1,
+      screenshots_enabled: false,
+      screenshots: null,
+      activity_data: null,
+      apps_used: null,
+      metadata: {},
+      created_at: twoDaysAgo.toISOString(),
+      updated_at: twoDaysAgo.toISOString()
+    }
+  ]
 }
