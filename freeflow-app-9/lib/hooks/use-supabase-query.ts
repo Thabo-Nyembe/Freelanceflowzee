@@ -1,9 +1,18 @@
 // Base hook for Supabase queries with real-time subscriptions
 // Created: December 14, 2024
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { SupabaseClient } from '@supabase/supabase-js'
+
+// Module-level singleton for stable Supabase client reference
+let supabaseClientSingleton: SupabaseClient | null = null
+function getSupabaseClient(): SupabaseClient {
+  if (!supabaseClientSingleton) {
+    supabaseClientSingleton = createClient()
+  }
+  return supabaseClientSingleton
+}
 
 // Demo mode detection
 function isDemoModeEnabled(): boolean {
@@ -72,7 +81,7 @@ function useSupabaseQueryWithFn<T>(
   const [data, setData] = useState<T | null>(options?.initialData ?? null)
   const [isLoading, setIsLoading] = useState(options?.enabled !== false)
   const [error, setError] = useState<Error | null>(null)
-  const supabase = createClient()
+  const supabase = getSupabaseClient()
 
   const fetchData = useCallback(async () => {
     if (options?.enabled === false) return
@@ -93,7 +102,7 @@ function useSupabaseQueryWithFn<T>(
     } finally {
       setIsLoading(false)
     }
-  }, [queryFn, supabase, options?.enabled])
+  }, [queryFn, options?.enabled]) // supabase is stable singleton
 
   useEffect(() => {
     fetchData()
@@ -115,7 +124,7 @@ function useSupabaseQueryWithOptions<T>({
   const [data, setData] = useState<T[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const supabase = createClient()
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
     // Demo mode - return empty data without Supabase call
@@ -292,7 +301,7 @@ function useSupabaseMutationWithFn<TInput, TOutput>(
 ): { mutate: (data: TInput) => Promise<TOutput | null>; isPending: boolean; error: Error | null } {
   const [isPending, setIsPending] = useState(false)
   const [error, setError] = useState<Error | null>(null)
-  const supabase = createClient()
+  const supabase = getSupabaseClient()
 
   const mutate = useCallback(async (data: TInput): Promise<TOutput | null> => {
     setIsPending(true)
@@ -310,7 +319,7 @@ function useSupabaseMutationWithFn<TInput, TOutput>(
     } finally {
       setIsPending(false)
     }
-  }, [mutationFn, supabase, options])
+  }, [mutationFn, options]) // supabase is stable singleton
 
   return { mutate, isPending, error }
 }
@@ -328,7 +337,7 @@ function useSupabaseMutationWithOptions<T>({
 } {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
-  const supabase = createClient()
+  const supabase = getSupabaseClient()
 
   const mutate = useCallback(async (data: Partial<T>, id?: string): Promise<T | null> => {
     setLoading(true)
@@ -373,7 +382,7 @@ function useSupabaseMutationWithOptions<T>({
     } finally {
       setLoading(false)
     }
-  }, [supabase, table, onSuccess, onError])
+  }, [table, onSuccess, onError]) // supabase is stable singleton
 
   const remove = useCallback(async (id: string): Promise<boolean> => {
     setLoading(true)
@@ -402,7 +411,7 @@ function useSupabaseMutationWithOptions<T>({
     } finally {
       setLoading(false)
     }
-  }, [supabase, table, onSuccess, onError])
+  }, [table, onSuccess, onError]) // supabase is stable singleton
 
   return { mutate, remove, loading, error }
 }

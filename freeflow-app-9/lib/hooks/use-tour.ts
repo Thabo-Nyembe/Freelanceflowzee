@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, createContext, useContext } from 'react'
+import { useState, useEffect, useCallback, createContext, useContext, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
@@ -268,7 +268,9 @@ export function useTour() {
     completedTours: []
   })
 
-  const supabase = createClient()
+  // Use ref to store stable supabase client reference (prevents infinite loops)
+  const supabaseRef = useRef(createClient())
+  const supabase = supabaseRef.current
 
   // Load progress from localStorage and sync with database
   useEffect(() => {
@@ -313,7 +315,7 @@ export function useTour() {
     }
 
     loadProgress()
-  }, [supabase])
+  }, []) // Empty deps - only run once on mount
 
   // Save progress
   const saveProgress = useCallback(async (progress: Map<string, TourProgress>, completedTours: string[]) => {
