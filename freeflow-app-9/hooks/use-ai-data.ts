@@ -494,11 +494,45 @@ export function useUserMetrics(userId?: string) {
 // CURRENT USER HOOK - Fetches session via API (no SessionProvider required)
 // ============================================================================
 
+// Demo user constants
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+const DEMO_USER_EMAIL = 'alex@freeflow.io'
+const DEMO_USER_NAME = 'Alexandra Chen'
+
+// Check if demo mode is enabled
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
+
 export function useCurrentUser() {
   const [session, setSession] = useState<any>(null)
   const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading')
+  const [isDemo, setIsDemo] = useState(false)
 
   useEffect(() => {
+    // Check for demo mode first
+    if (isDemoModeEnabled()) {
+      setIsDemo(true)
+      setSession({
+        user: {
+          id: DEMO_USER_ID,
+          email: DEMO_USER_EMAIL,
+          name: DEMO_USER_NAME
+        }
+      })
+      setStatus('authenticated')
+      return
+    }
+
+    // Otherwise fetch real session
     fetch('/api/auth/session')
       .then(res => res.json())
       .then(data => {
@@ -515,7 +549,7 @@ export function useCurrentUser() {
   const loading = status === 'loading'
   const error = null // API handles errors differently
 
-  return { userId, userEmail, userName, loading, error }
+  return { userId, userEmail, userName, loading, error, isDemo }
 }
 
 // ============================================================================

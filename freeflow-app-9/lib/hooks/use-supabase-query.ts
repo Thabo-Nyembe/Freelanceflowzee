@@ -14,6 +14,9 @@ function getSupabaseClient(): SupabaseClient {
   return supabaseClientSingleton
 }
 
+// Demo user ID for demo mode queries
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
 // Demo mode detection
 function isDemoModeEnabled(): boolean {
   if (typeof window === 'undefined') return false
@@ -25,6 +28,14 @@ function isDemoModeEnabled(): boolean {
     if (name === 'demo_mode' && value === 'true') return true
   }
   return false
+}
+
+// Get user ID - returns demo user ID in demo mode
+function getDemoAwareUserId(): string | null {
+  if (isDemoModeEnabled()) {
+    return DEMO_USER_ID
+  }
+  return null
 }
 
 // TanStack Query-style interface for custom query functions
@@ -85,16 +96,12 @@ function useSupabaseQueryWithFn<T>(
 
   const fetchData = useCallback(async () => {
     if (options?.enabled === false) return
-    // Demo mode - return empty data without Supabase call
-    if (isDemoModeEnabled()) {
-      setIsLoading(false)
-      return
-    }
 
     setIsLoading(true)
     setError(null)
 
     try {
+      // In demo mode, queries will use demo user ID through the API routes
       const result = await queryFn(supabase)
       setData(result)
     } catch (err) {
@@ -127,12 +134,6 @@ function useSupabaseQueryWithOptions<T>({
   const supabase = getSupabaseClient()
 
   useEffect(() => {
-    // Demo mode - return empty data without Supabase call
-    if (isDemoModeEnabled()) {
-      setLoading(false)
-      return
-    }
-
     async function fetchData() {
       try {
         setLoading(true)
@@ -202,12 +203,6 @@ function useSupabaseQueryWithOptions<T>({
   }, [table, JSON.stringify(filters), orderBy?.column, orderBy?.ascending, limit, realtime])
 
   const refetch = async () => {
-    // Demo mode - skip Supabase calls
-    if (isDemoModeEnabled()) {
-      setLoading(false)
-      return
-    }
-
     try {
       setLoading(true)
       let query = supabase.from(table).select(select)
