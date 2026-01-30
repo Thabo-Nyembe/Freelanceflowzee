@@ -1,8 +1,22 @@
 // Hook for Messages management
 // Created: December 14, 2024
 
+import { useState, useEffect, useCallback } from 'react'
 import { useSupabaseQuery } from './use-supabase-query'
 import { useSupabaseMutation } from './use-supabase-mutation'
+
+// Demo mode detection
+function isDemoModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+  return false
+}
 
 export type MessageType = 'direct' | 'group' | 'broadcast' | 'system' | 'automated'
 export type MessageStatus = 'draft' | 'sent' | 'delivered' | 'read' | 'archived' | 'deleted' | 'failed'
@@ -64,8 +78,176 @@ interface UseMessagesOptions {
   limit?: number
 }
 
+// Demo messages data
+function getDemoMessages(): Message[] {
+  const demoUserId = '00000000-0000-0000-0000-000000000001'
+  const now = new Date()
+  return [
+    {
+      id: 'msg-demo-1',
+      user_id: demoUserId,
+      organization_id: null,
+      sender_id: 'sender-1',
+      recipient_id: demoUserId,
+      thread_id: null,
+      parent_message_id: null,
+      subject: 'Project Update - Q1 Goals',
+      body: 'Hi team, I wanted to share our progress on the Q1 objectives. We\'ve completed 80% of the planned milestones and are on track for the deadline.',
+      message_type: 'direct',
+      status: 'delivered',
+      priority: 'normal',
+      is_read: true,
+      read_at: new Date(now.getTime() - 1000 * 60 * 30).toISOString(),
+      delivered_at: new Date(now.getTime() - 1000 * 60 * 60).toISOString(),
+      sent_at: new Date(now.getTime() - 1000 * 60 * 60).toISOString(),
+      attachments: null,
+      has_attachments: false,
+      attachment_count: 0,
+      is_pinned: false,
+      is_starred: true,
+      is_important: false,
+      is_spam: false,
+      reply_to_message_id: null,
+      forwarded_from_message_id: null,
+      is_forwarded: false,
+      labels: ['work', 'q1'],
+      category: 'work',
+      folder: 'inbox',
+      recipients: null,
+      cc_recipients: null,
+      bcc_recipients: null,
+      reactions: null,
+      reaction_count: 0,
+      is_encrypted: false,
+      encryption_key_id: null,
+      scheduled_for: null,
+      is_scheduled: false,
+      expires_at: null,
+      auto_delete_after_days: null,
+      metadata: null,
+      user_agent: null,
+      ip_address: null,
+      created_at: new Date(now.getTime() - 1000 * 60 * 60).toISOString(),
+      updated_at: new Date(now.getTime() - 1000 * 60 * 60).toISOString(),
+      deleted_at: null
+    },
+    {
+      id: 'msg-demo-2',
+      user_id: demoUserId,
+      organization_id: null,
+      sender_id: 'sender-2',
+      recipient_id: demoUserId,
+      thread_id: null,
+      parent_message_id: null,
+      subject: 'Invoice #INV-2024-0125 Approved',
+      body: 'Your invoice has been approved and payment will be processed within 5 business days. Thank you for your work!',
+      message_type: 'system',
+      status: 'delivered',
+      priority: 'high',
+      is_read: false,
+      read_at: null,
+      delivered_at: new Date(now.getTime() - 1000 * 60 * 120).toISOString(),
+      sent_at: new Date(now.getTime() - 1000 * 60 * 120).toISOString(),
+      attachments: null,
+      has_attachments: false,
+      attachment_count: 0,
+      is_pinned: false,
+      is_starred: false,
+      is_important: true,
+      is_spam: false,
+      reply_to_message_id: null,
+      forwarded_from_message_id: null,
+      is_forwarded: false,
+      labels: ['finance'],
+      category: 'finance',
+      folder: 'inbox',
+      recipients: null,
+      cc_recipients: null,
+      bcc_recipients: null,
+      reactions: null,
+      reaction_count: 0,
+      is_encrypted: false,
+      encryption_key_id: null,
+      scheduled_for: null,
+      is_scheduled: false,
+      expires_at: null,
+      auto_delete_after_days: null,
+      metadata: null,
+      user_agent: null,
+      ip_address: null,
+      created_at: new Date(now.getTime() - 1000 * 60 * 120).toISOString(),
+      updated_at: new Date(now.getTime() - 1000 * 60 * 120).toISOString(),
+      deleted_at: null
+    },
+    {
+      id: 'msg-demo-3',
+      user_id: demoUserId,
+      organization_id: null,
+      sender_id: 'sender-3',
+      recipient_id: demoUserId,
+      thread_id: null,
+      parent_message_id: null,
+      subject: 'New Feature Request - Client Portal',
+      body: 'We\'d like to add a self-service portal for clients to track their project progress. Can we schedule a call to discuss requirements?',
+      message_type: 'direct',
+      status: 'delivered',
+      priority: 'normal',
+      is_read: true,
+      read_at: new Date(now.getTime() - 1000 * 60 * 180).toISOString(),
+      delivered_at: new Date(now.getTime() - 1000 * 60 * 240).toISOString(),
+      sent_at: new Date(now.getTime() - 1000 * 60 * 240).toISOString(),
+      attachments: null,
+      has_attachments: false,
+      attachment_count: 0,
+      is_pinned: true,
+      is_starred: false,
+      is_important: false,
+      is_spam: false,
+      reply_to_message_id: null,
+      forwarded_from_message_id: null,
+      is_forwarded: false,
+      labels: ['feature-request'],
+      category: 'work',
+      folder: 'inbox',
+      recipients: null,
+      cc_recipients: null,
+      bcc_recipients: null,
+      reactions: null,
+      reaction_count: 0,
+      is_encrypted: false,
+      encryption_key_id: null,
+      scheduled_for: null,
+      is_scheduled: false,
+      expires_at: null,
+      auto_delete_after_days: null,
+      metadata: null,
+      user_agent: null,
+      ip_address: null,
+      created_at: new Date(now.getTime() - 1000 * 60 * 240).toISOString(),
+      updated_at: new Date(now.getTime() - 1000 * 60 * 240).toISOString(),
+      deleted_at: null
+    }
+  ]
+}
+
 export function useMessages(options: UseMessagesOptions = {}) {
   const { status, messageType, folder, limit } = options
+  const isDemo = isDemoModeEnabled()
+
+  // Demo mode state
+  const [demoData, setDemoData] = useState<Message[]>([])
+  const [demoLoading, setDemoLoading] = useState(isDemo)
+
+  // Demo mode effect
+  useEffect(() => {
+    if (!isDemo) return
+    setDemoLoading(true)
+    // Simulate API fetch
+    setTimeout(() => {
+      setDemoData(getDemoMessages())
+      setDemoLoading(false)
+    }, 100)
+  }, [isDemo])
 
   const filters: Record<string, any> = {}
   if (status && status !== 'all') filters.status = status
@@ -76,8 +258,9 @@ export function useMessages(options: UseMessagesOptions = {}) {
     table: 'messages',
     filters,
     orderBy: { column: 'created_at', ascending: false },
-    realtime: true,
-    softDelete: false // messages table doesn't have deleted_at column
+    realtime: !isDemo, // Disable realtime for demo mode
+    softDelete: false, // messages table doesn't have deleted_at column
+    enabled: !isDemo // Skip query in demo mode
   }
   if (limit !== undefined) queryOptions.limit = limit
 
@@ -87,6 +270,73 @@ export function useMessages(options: UseMessagesOptions = {}) {
     table: 'messages',
     onSuccess: refetch
   })
+
+  // Demo mode handlers
+  const demoCreateMessage = useCallback(async (newMessage: Partial<Message>) => {
+    const msg: Message = {
+      id: `msg-demo-${Date.now()}`,
+      user_id: '00000000-0000-0000-0000-000000000001',
+      organization_id: null,
+      sender_id: '00000000-0000-0000-0000-000000000001',
+      recipient_id: newMessage.recipient_id || 'recipient-1',
+      thread_id: null,
+      parent_message_id: null,
+      subject: newMessage.subject || 'New Message',
+      body: newMessage.body || '',
+      message_type: newMessage.message_type || 'direct',
+      status: 'sent',
+      priority: newMessage.priority || 'normal',
+      is_read: false,
+      read_at: null,
+      delivered_at: null,
+      sent_at: new Date().toISOString(),
+      attachments: null,
+      has_attachments: false,
+      attachment_count: 0,
+      is_pinned: false,
+      is_starred: false,
+      is_important: false,
+      is_spam: false,
+      reply_to_message_id: null,
+      forwarded_from_message_id: null,
+      is_forwarded: false,
+      labels: [],
+      category: null,
+      folder: 'sent',
+      recipients: null,
+      cc_recipients: null,
+      bcc_recipients: null,
+      reactions: null,
+      reaction_count: 0,
+      is_encrypted: false,
+      encryption_key_id: null,
+      scheduled_for: null,
+      is_scheduled: false,
+      expires_at: null,
+      auto_delete_after_days: null,
+      metadata: null,
+      user_agent: null,
+      ip_address: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_at: null
+    }
+    setDemoData(prev => [msg, ...prev])
+    return msg
+  }, [])
+
+  if (isDemo) {
+    return {
+      messages: demoData,
+      loading: demoLoading,
+      error: null,
+      mutating: false,
+      createMessage: demoCreateMessage,
+      updateMessage: async () => {},
+      deleteMessage: async () => {},
+      refetch: () => {}
+    }
+  }
 
   return {
     messages: data,
