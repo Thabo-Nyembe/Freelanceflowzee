@@ -109,10 +109,10 @@ export function useTimeTracking(options: UseTimeTrackingOptions = {}) {
         const response = await fetch(`/api/time-tracking?${params.toString()}`)
         const result = await response.json()
 
-        if (result.data) {
+        if (result.data && result.data.length > 0) {
           setDemoData(result.data)
         } else {
-          // Fallback demo data
+          // Fallback demo data when API returns empty
           setDemoData(getDemoTimeEntries())
         }
         setDemoError(null)
@@ -137,7 +137,8 @@ export function useTimeTracking(options: UseTimeTrackingOptions = {}) {
     filters,
     orderBy: { column: 'start_time', ascending: false },
     limit: limit || 50,
-    realtime: !isDemo // Disable realtime in demo mode
+    realtime: !isDemo, // Disable realtime in demo mode
+    enabled: !isDemo // Skip Supabase query in demo mode
   }
 
   const { data: supabaseData, loading: queryLoading, error: supabaseError, refetch: supabaseRefetch } = useSupabaseQuery<TimeEntry>(queryOptions)
