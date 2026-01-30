@@ -122,7 +122,7 @@ const useOptimizedSLAMonitoring = () => ({
 
 export default function DashboardPage() {
   // REAL USER AUTH & AI DATA
-  const { userId, loading: userLoading } = useCurrentUser()
+  const { userId, loading: userLoading, isDemo } = useCurrentUser()
   const aiData = useAIData(userId || undefined)
 
   // NEW USER ONBOARDING DETECTION
@@ -200,7 +200,75 @@ export default function DashboardPage() {
       try {
         setError(null)
 
-        // Import dashboard stats utility
+        // In demo mode, use API endpoint which has server-side access
+        if (isDemo) {
+          const response = await fetch('/api/dashboard?demo=true')
+          const apiData = await response.json()
+
+          if (apiData.success && apiData.data) {
+            const { stats, activity, projects: apiProjects } = apiData.data
+
+            // Update dashboard stats from API
+            setDashboardStats({
+              earnings: stats.revenue?.total || 0,
+              activeProjects: stats.projects?.active || 0,
+              completedProjects: stats.projects?.completed || 0,
+              totalClients: stats.clients?.total || 0,
+              hoursThisMonth: 0,
+              revenue: {
+                total: stats.revenue?.total || 0,
+                growth: stats.revenue?.growth || 0
+              },
+              tasks: {
+                total: stats.tasks?.total || 0,
+                completed: stats.tasks?.completed || 0
+              },
+              files: {
+                total: stats.files?.total || 0,
+                size: stats.files?.size || 0
+              }
+            })
+
+            // Update activities from API
+            if (activity && activity.length > 0) {
+              setLiveActivities(activity.slice(0, 10).map((act: any) => ({
+                id: act.id,
+                type: act.type,
+                message: `${act.type === 'project' ? 'Project' : act.type === 'task' ? 'Task' : 'File'}: ${act.title}`,
+                time: new Date(act.timestamp).toLocaleTimeString(),
+                status: 'success',
+                impact: 'medium'
+              })))
+            }
+
+            // Update projects from API
+            if (apiProjects && apiProjects.length > 0) {
+              setProjects(apiProjects.slice(0, 5).map((p: any) => ({
+                ...p,
+                value: p.value || p.budget || 50000,
+                budget: p.budget || p.value || 50000,
+                progress: p.progress || 50,
+                priority: p.priority || 'Medium',
+                client: p.client || 'Client',
+              })))
+            }
+
+            logger.info('Dashboard data loaded from API (demo mode)', {
+              projects: stats.projects?.total,
+              clients: stats.clients?.total,
+              revenue: stats.revenue?.total
+            })
+
+            toast.success('Dashboard loaded', {
+              description: `${stats.projects?.active || 0} active projects • $${(stats.revenue?.total || 0).toLocaleString()} revenue`
+            })
+          }
+
+          setIsLoading(false)
+          return
+        }
+
+        // Import dashboard stats utility (non-demo mode)
         const { getDashboardStats, getRecentActivity, getRecentProjects } = await import('@/lib/dashboard-stats')
         const { getTimeEntries } = await import('@/lib/time-tracking-queries')
 
@@ -309,7 +377,7 @@ export default function DashboardPage() {
     }, 10000)
 
     return () => clearTimeout(loadingTimeout)
-  }, [userId, userLoading, announce]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading, isDemo, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
