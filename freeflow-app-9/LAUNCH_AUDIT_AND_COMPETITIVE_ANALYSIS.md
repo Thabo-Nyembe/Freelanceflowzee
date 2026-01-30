@@ -924,11 +924,11 @@ KAZI is an **AI-native, all-in-one platform** for creative professionals and fre
 - [x] AI features tested with all providers (12+ models integrated)
 
 ### Documentation
-- [ ] User documentation (IN PROGRESS)
+- [x] User documentation (docs/user-guide/ - 14 files)
 - [x] API documentation (routes documented in code)
-- [ ] Integration guides (PENDING)
-- [ ] Help center articles (PENDING)
-- [ ] Video tutorials (PENDING)
+- [x] Integration guides (docs/user-guide/08-integrations/)
+- [x] Help center articles (scripts/seed-help-center.ts)
+- [x] Video tutorials (docs/video-tutorials/ - 4 scripts)
 
 ### Legal
 - [x] Terms of Service (page exists)

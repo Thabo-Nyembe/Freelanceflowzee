@@ -6,107 +6,49 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { config } from 'dotenv'
+import { resolve } from 'path'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Load environment variables from .env.local
+config({ path: resolve(process.cwd(), '.env.local') })
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Missing environment variables:')
+  console.error('- NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? 'SET' : 'MISSING')
+  console.error('- SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? 'SET' : 'MISSING')
+  process.exit(1)
+}
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // Demo user ID for seeding
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
-// Help Categories
+// Help Categories (matching actual schema)
 const categories = [
-  {
-    name: 'Getting Started',
-    slug: 'getting-started',
-    description: 'Learn the basics of KAZI and set up your account',
-    icon: 'rocket',
-    color: '#10B981',
-    sort_order: 1,
-  },
-  {
-    name: 'Projects',
-    slug: 'projects',
-    description: 'Managing projects, tasks, and workflows',
-    icon: 'folder',
-    color: '#3B82F6',
-    sort_order: 2,
-  },
-  {
-    name: 'Time Tracking',
-    slug: 'time-tracking',
-    description: 'Track time, manage timers, and generate reports',
-    icon: 'clock',
-    color: '#F59E0B',
-    sort_order: 3,
-  },
-  {
-    name: 'Invoicing',
-    slug: 'invoicing',
-    description: 'Create invoices, manage payments, and billing',
-    icon: 'file-text',
-    color: '#8B5CF6',
-    sort_order: 4,
-  },
-  {
-    name: 'Clients',
-    slug: 'clients',
-    description: 'Manage clients and the client portal',
-    icon: 'users',
-    color: '#EC4899',
-    sort_order: 5,
-  },
-  {
-    name: 'Team',
-    slug: 'team',
-    description: 'Collaborate with team members',
-    icon: 'users-2',
-    color: '#06B6D4',
-    sort_order: 6,
-  },
-  {
-    name: 'Integrations',
-    slug: 'integrations',
-    description: 'Connect with other tools and services',
-    icon: 'plug',
-    color: '#84CC16',
-    sort_order: 7,
-  },
-  {
-    name: 'AI Features',
-    slug: 'ai-features',
-    description: 'Using AI-powered tools',
-    icon: 'sparkles',
-    color: '#F472B6',
-    sort_order: 8,
-  },
-  {
-    name: 'Account & Billing',
-    slug: 'account-billing',
-    description: 'Manage your account and subscription',
-    icon: 'settings',
-    color: '#6B7280',
-    sort_order: 9,
-  },
-  {
-    name: 'Troubleshooting',
-    slug: 'troubleshooting',
-    description: 'Common issues and solutions',
-    icon: 'help-circle',
-    color: '#EF4444',
-    sort_order: 10,
-  },
+  { name: 'Getting Started', slug: 'getting-started', description: 'Learn the basics of KAZI', icon: 'rocket', color: '#10B981', sort_order: 1 },
+  { name: 'Projects', slug: 'projects', description: 'Managing projects and tasks', icon: 'folder', color: '#3B82F6', sort_order: 2 },
+  { name: 'Time Tracking', slug: 'time-tracking', description: 'Track time and generate reports', icon: 'clock', color: '#F59E0B', sort_order: 3 },
+  { name: 'Invoicing', slug: 'invoicing', description: 'Create invoices and manage payments', icon: 'file-text', color: '#8B5CF6', sort_order: 4 },
+  { name: 'Clients', slug: 'clients', description: 'Manage clients and the client portal', icon: 'users', color: '#EC4899', sort_order: 5 },
+  { name: 'Team', slug: 'team', description: 'Collaborate with team members', icon: 'users-2', color: '#06B6D4', sort_order: 6 },
+  { name: 'Integrations', slug: 'integrations', description: 'Connect with other tools', icon: 'plug', color: '#84CC16', sort_order: 7 },
+  { name: 'AI Features', slug: 'ai-features', description: 'Using AI-powered tools', icon: 'sparkles', color: '#F472B6', sort_order: 8 },
+  { name: 'Account', slug: 'account', description: 'Manage your account', icon: 'settings', color: '#6B7280', sort_order: 9 },
+  { name: 'Troubleshooting', slug: 'troubleshooting', description: 'Common issues and solutions', icon: 'help-circle', color: '#EF4444', sort_order: 10 },
 ]
 
-// Help Articles
+// Help Articles (matching actual schema - uses 'category' as string, not category_id)
 const articles = [
   // Getting Started
   {
-    category_slug: 'getting-started',
+    category: 'guide',
     title: 'Welcome to KAZI',
     slug: 'welcome-to-kazi',
-    excerpt: 'Get started with KAZI and learn what you can accomplish with the platform.',
+    excerpt: 'Get started with KAZI and learn what you can accomplish.',
     content: `# Welcome to KAZI
 
 KAZI is your all-in-one freelance business management platform. Whether you're a solo freelancer or running a small agency, KAZI helps you manage projects, track time, send invoices, and grow your business.
@@ -142,12 +84,12 @@ KAZI is your all-in-one freelance business management platform. Whether you're a
 5. Start tracking time
 
 Ready to begin? Check out our Quick Start Guide.`,
-    tags: ['welcome', 'overview', 'introduction'],
-    seo_title: 'Welcome to KAZI - Freelance Business Management',
-    seo_description: 'Learn how to use KAZI to manage your freelance business with project management, time tracking, and invoicing.',
+    meta_title: 'Welcome to KAZI - Freelance Business Management',
+    meta_description: 'Learn how to use KAZI to manage your freelance business.',
+    keywords: ['welcome', 'overview', 'introduction'],
   },
   {
-    category_slug: 'getting-started',
+    category: 'guide',
     title: 'Quick Start Guide',
     slug: 'quick-start-guide',
     excerpt: 'Get up and running with KAZI in under 10 minutes.',
@@ -187,20 +129,16 @@ Get up and running with KAZI in under 10 minutes.
 
 ## You're Ready!
 
-You've now set up the basics. Explore other features like:
-- AI writing tools
-- Team collaboration
-- Integrations
-- Analytics`,
-    tags: ['quick-start', 'tutorial', 'basics'],
-    seo_title: 'KAZI Quick Start Guide - Get Started in 10 Minutes',
-    seo_description: 'Follow this quick start guide to set up KAZI and start managing your freelance business.',
+Explore other features like AI tools, team collaboration, integrations, and analytics.`,
+    meta_title: 'KAZI Quick Start Guide',
+    meta_description: 'Follow this quick start guide to set up KAZI in minutes.',
+    keywords: ['quick-start', 'tutorial', 'basics'],
   },
   {
-    category_slug: 'getting-started',
+    category: 'guide',
     title: 'Account Setup',
     slug: 'account-setup',
-    excerpt: 'Complete your KAZI account setup with this step-by-step guide.',
+    excerpt: 'Complete your KAZI account setup step by step.',
     content: `# Account Setup Guide
 
 Complete your KAZI account setup to get the most out of the platform.
@@ -236,32 +174,24 @@ Complete your KAZI account setup to get the most out of the platform.
 - Bank transfer
 - Cryptocurrency
 
-## Notification Preferences
-
-1. Go to **Settings > Notifications**
-2. Configure email notifications
-3. Set up push notifications
-4. Choose notification frequency
-
 ## Security
 
 1. Enable Two-Factor Authentication
 2. Review active sessions
 3. Set session timeout preferences`,
-    tags: ['account', 'setup', 'profile', 'payments'],
-    seo_title: 'KAZI Account Setup Guide',
-    seo_description: 'Step-by-step guide to setting up your KAZI account, including profile, payments, and security.',
+    meta_title: 'KAZI Account Setup Guide',
+    meta_description: 'Step-by-step guide to setting up your KAZI account.',
+    keywords: ['account', 'setup', 'profile', 'payments'],
   },
-
   // Projects
   {
-    category_slug: 'projects',
+    category: 'tutorial',
     title: 'Creating Your First Project',
     slug: 'creating-first-project',
-    excerpt: 'Learn how to create and configure a new project in KAZI.',
+    excerpt: 'Learn how to create and configure a new project.',
     content: `# Creating Your First Project
 
-Projects are the foundation of your work in KAZI. Here's how to create one.
+Projects are the foundation of your work in KAZI.
 
 ## Create a New Project
 
@@ -296,69 +226,24 @@ Once your project is created:
 
 ## Project Views
 
-Switch between views:
+Switch between:
 - **Kanban**: Visual workflow
 - **List**: Traditional task list
 - **Calendar**: Timeline view
 - **Gantt**: Dependencies and timeline`,
-    tags: ['projects', 'create', 'setup', 'tasks'],
-    seo_title: 'How to Create a Project in KAZI',
-    seo_description: 'Learn how to create and configure projects in KAZI with tasks, milestones, and billing.',
+    meta_title: 'How to Create a Project in KAZI',
+    meta_description: 'Learn how to create and configure projects in KAZI.',
+    keywords: ['projects', 'create', 'setup', 'tasks'],
   },
-  {
-    category_slug: 'projects',
-    title: 'Using Project Templates',
-    slug: 'project-templates',
-    excerpt: 'Save time by creating and using project templates.',
-    content: `# Using Project Templates
-
-Templates help you start new projects faster with predefined tasks and structures.
-
-## Creating a Template
-
-1. Go to **Settings > Project Templates**
-2. Click **+ New Template**
-3. Define:
-   - Template name
-   - Default tasks
-   - Standard milestones
-   - Workflow stages
-
-## Using a Template
-
-1. Click **+ New Project**
-2. Select **From Template**
-3. Choose your template
-4. Customize as needed
-
-## Pre-built Templates
-
-KAZI includes templates for:
-- Web Development
-- Content Creation
-- Marketing Campaign
-- Consulting
-- Design Projects
-
-## Tips
-
-- Create templates for recurring project types
-- Include common tasks and estimated hours
-- Update templates as your process improves`,
-    tags: ['templates', 'projects', 'workflow'],
-    seo_title: 'KAZI Project Templates Guide',
-    seo_description: 'Create and use project templates to streamline your workflow in KAZI.',
-  },
-
   // Time Tracking
   {
-    category_slug: 'time-tracking',
+    category: 'tutorial',
     title: 'How to Track Time',
     slug: 'how-to-track-time',
-    excerpt: 'Master KAZI\'s time tracking features for accurate billing.',
+    excerpt: 'Master KAZI time tracking for accurate billing.',
     content: `# How to Track Time
 
-Accurate time tracking is essential for billing and productivity insights.
+Accurate time tracking is essential for billing and productivity.
 
 ## Using the Timer
 
@@ -397,14 +282,13 @@ Accurate time tracking is essential for billing and productivity insights.
 2. Add descriptions immediately
 3. Review entries daily
 4. Mark non-billable time appropriately`,
-    tags: ['time-tracking', 'timer', 'billing'],
-    seo_title: 'How to Track Time in KAZI',
-    seo_description: 'Learn how to use KAZI time tracking features including timers, manual entry, and reports.',
+    meta_title: 'How to Track Time in KAZI',
+    meta_description: 'Learn how to use KAZI time tracking features.',
+    keywords: ['time-tracking', 'timer', 'billing'],
   },
-
   // Invoicing
   {
-    category_slug: 'invoicing',
+    category: 'tutorial',
     title: 'Creating Invoices',
     slug: 'creating-invoices',
     excerpt: 'Create professional invoices and get paid faster.',
@@ -453,14 +337,13 @@ Clients can pay via:
 - PayPal
 - Bank transfer
 - Cryptocurrency`,
-    tags: ['invoices', 'billing', 'payments'],
-    seo_title: 'How to Create Invoices in KAZI',
-    seo_description: 'Step-by-step guide to creating and sending professional invoices with KAZI.',
+    meta_title: 'How to Create Invoices in KAZI',
+    meta_description: 'Step-by-step guide to creating invoices with KAZI.',
+    keywords: ['invoices', 'billing', 'payments'],
   },
-
   // Integrations
   {
-    category_slug: 'integrations',
+    category: 'guide',
     title: 'Connecting Stripe',
     slug: 'connecting-stripe',
     excerpt: 'Accept credit card payments by connecting Stripe.',
@@ -501,12 +384,12 @@ Accept credit and debit card payments from clients with Stripe.
 - Verify live mode is enabled
 - Check Stripe dashboard
 - Contact support`,
-    tags: ['stripe', 'payments', 'integrations'],
-    seo_title: 'How to Connect Stripe to KAZI',
-    seo_description: 'Accept credit card payments by connecting your Stripe account to KAZI.',
+    meta_title: 'How to Connect Stripe to KAZI',
+    meta_description: 'Accept credit card payments by connecting Stripe.',
+    keywords: ['stripe', 'payments', 'integrations'],
   },
   {
-    category_slug: 'integrations',
+    category: 'guide',
     title: 'Calendar Sync',
     slug: 'calendar-sync',
     excerpt: 'Sync KAZI with Google Calendar or Outlook.',
@@ -550,14 +433,13 @@ Keep your schedule in sync with Google Calendar or Outlook.
 - Verify calendar permissions
 - Wait for sync interval
 - Try manual sync`,
-    tags: ['calendar', 'google', 'outlook', 'integrations'],
-    seo_title: 'How to Sync Calendar with KAZI',
-    seo_description: 'Sync KAZI with Google Calendar or Outlook for seamless scheduling.',
+    meta_title: 'How to Sync Calendar with KAZI',
+    meta_description: 'Sync KAZI with Google Calendar or Outlook.',
+    keywords: ['calendar', 'google', 'outlook', 'integrations'],
   },
-
   // AI Features
   {
-    category_slug: 'ai-features',
+    category: 'guide',
     title: 'AI Writing Assistant',
     slug: 'ai-writing-assistant',
     excerpt: 'Use AI to write proposals, emails, and more.',
@@ -606,17 +488,16 @@ In any text field:
 2. Always review AI output
 3. Maintain your voice
 4. Use as starting point`,
-    tags: ['ai', 'writing', 'proposals', 'emails'],
-    seo_title: 'KAZI AI Writing Assistant Guide',
-    seo_description: 'Use KAZI AI writing assistant to create proposals, emails, and contracts faster.',
+    meta_title: 'KAZI AI Writing Assistant Guide',
+    meta_description: 'Use AI to create proposals, emails, and contracts faster.',
+    keywords: ['ai', 'writing', 'proposals', 'emails'],
   },
-
   // Troubleshooting
   {
-    category_slug: 'troubleshooting',
+    category: 'troubleshooting',
     title: 'Login Issues',
     slug: 'login-issues',
-    excerpt: 'Can\'t log in? Here are common solutions.',
+    excerpt: 'Solutions for common login problems.',
     content: `# Login Issues
 
 Having trouble logging in? Try these solutions.
@@ -656,12 +537,12 @@ Contact support@kazi.com with:
 - Your account email
 - Browser and device info
 - Screenshots of errors`,
-    tags: ['login', 'password', '2fa', 'troubleshooting'],
-    seo_title: 'KAZI Login Troubleshooting',
-    seo_description: 'Solutions for common KAZI login issues including password reset and 2FA problems.',
+    meta_title: 'KAZI Login Troubleshooting',
+    meta_description: 'Solutions for common KAZI login issues.',
+    keywords: ['login', 'password', '2fa', 'troubleshooting'],
   },
   {
-    category_slug: 'troubleshooting',
+    category: 'troubleshooting',
     title: 'Timer Not Working',
     slug: 'timer-not-working',
     excerpt: 'Troubleshoot time tracking and timer issues.',
@@ -706,121 +587,183 @@ Contact support with:
 - Browser version
 - Steps to reproduce
 - Screenshots`,
-    tags: ['timer', 'time-tracking', 'troubleshooting'],
-    seo_title: 'KAZI Timer Troubleshooting',
-    seo_description: 'Fix time tracking and timer issues in KAZI with these troubleshooting steps.',
+    meta_title: 'KAZI Timer Troubleshooting',
+    meta_description: 'Fix time tracking and timer issues in KAZI.',
+    keywords: ['timer', 'time-tracking', 'troubleshooting'],
+  },
+  // FAQ
+  {
+    category: 'faq',
+    title: 'Frequently Asked Questions',
+    slug: 'faq',
+    excerpt: 'Answers to common questions about KAZI.',
+    content: `# Frequently Asked Questions
+
+## Getting Started
+
+### What is KAZI?
+KAZI is an all-in-one freelance business management platform combining project management, time tracking, invoicing, and AI tools.
+
+### Is KAZI free?
+KAZI offers a free tier with basic features. Premium plans unlock advanced features.
+
+### What devices can I use?
+KAZI works on any modern browser on desktop, tablet, and mobile.
+
+## Account & Billing
+
+### How do I upgrade?
+Go to Settings > Billing and click "Upgrade Plan".
+
+### Can I cancel anytime?
+Yes, cancel anytime. You keep access until the billing period ends.
+
+### Do you offer refunds?
+14-day money-back guarantee for annual plans.
+
+## Features
+
+### How many projects can I create?
+Free: 3 active projects. Pro: Unlimited.
+
+### Does the timer work offline?
+The browser extension works offline and syncs when reconnected.
+
+### What payment methods do clients have?
+Credit/debit cards, PayPal, bank transfer, or cryptocurrency.
+
+## Security
+
+### Is my data secure?
+Yes, we use 256-bit encryption and are SOC 2 compliant.
+
+### Can I enable 2FA?
+Yes, go to Settings > Security to enable Two-Factor Authentication.
+
+## Support
+
+### How do I contact support?
+Email: support@kazi.com
+Live chat: Available in-app`,
+    meta_title: 'KAZI FAQ - Frequently Asked Questions',
+    meta_description: 'Answers to common questions about using KAZI.',
+    keywords: ['faq', 'questions', 'help'],
   },
 ]
 
-async function seedCategories() {
+async function seedCategories(): Promise<{ created: number; skipped: number; errors: number }> {
   console.log('Seeding categories...')
+  let created = 0, skipped = 0, errors = 0
 
-  for (const category of categories) {
-    const { data, error } = await supabase
+  for (const cat of categories) {
+    // Check if category already exists
+    const { data: existing } = await supabase
       .from('help_categories')
-      .upsert({
-        ...category,
-        user_id: DEMO_USER_ID,
-        is_visible: true,
-        article_count: 0,
-      }, {
-        onConflict: 'slug'
-      })
-      .select()
+      .select('id')
+      .eq('slug', cat.slug)
       .single()
 
+    if (existing) {
+      console.log(`⏭ Category already exists: ${cat.name}`)
+      skipped++
+      continue
+    }
+
+    const { error } = await supabase
+      .from('help_categories')
+      .insert({
+        user_id: DEMO_USER_ID,
+        name: cat.name,
+        slug: cat.slug,
+        description: cat.description,
+        icon: cat.icon,
+        color: cat.color,
+        sort_order: cat.sort_order,
+        status: 'active',
+        article_count: 0,
+      })
+
     if (error) {
-      console.error(`Error creating category ${category.name}:`, error.message)
+      console.error(`Error creating category ${cat.name}:`, error.message)
+      errors++
     } else {
-      console.log(`✓ Created category: ${category.name}`)
+      console.log(`✓ Created category: ${cat.name}`)
+      created++
     }
   }
+
+  return { created, skipped, errors }
 }
 
-async function seedArticles() {
+async function seedArticles(): Promise<{ created: number; skipped: number; errors: number }> {
   console.log('\nSeeding articles...')
-
-  // First, get category IDs
-  const { data: cats } = await supabase
-    .from('help_categories')
-    .select('id, slug')
-    .eq('user_id', DEMO_USER_ID)
-
-  const categoryMap = new Map(cats?.map(c => [c.slug, c.id]) || [])
+  let created = 0, skipped = 0, errors = 0
 
   for (const article of articles) {
-    const categoryId = categoryMap.get(article.category_slug)
-
-    const { data, error } = await supabase
+    // Check if article already exists
+    const { data: existing } = await supabase
       .from('help_articles')
-      .upsert({
+      .select('id')
+      .eq('slug', article.slug)
+      .single()
+
+    if (existing) {
+      console.log(`⏭ Article already exists: ${article.title}`)
+      skipped++
+      continue
+    }
+
+    const { error } = await supabase
+      .from('help_articles')
+      .insert({
         user_id: DEMO_USER_ID,
-        article_code: `ART-${article.slug.toUpperCase().replace(/-/g, '')}`,
         title: article.title,
         slug: article.slug,
         content: article.content,
         excerpt: article.excerpt,
-        category_id: categoryId,
+        category: article.category,
         status: 'published',
-        visibility: 'public',
-        author_name: 'KAZI Team',
-        tags: article.tags,
-        view_count: Math.floor(Math.random() * 500) + 100,
+        published_at: new Date().toISOString(),
+        views: Math.floor(Math.random() * 500) + 100,
         helpful_count: Math.floor(Math.random() * 50) + 10,
         not_helpful_count: Math.floor(Math.random() * 5),
-        seo_title: article.seo_title,
-        seo_description: article.seo_description,
-        published_at: new Date().toISOString(),
-        metadata: {},
-      }, {
-        onConflict: 'slug'
+        read_time_minutes: Math.ceil(article.content.length / 1000),
+        meta_title: article.meta_title,
+        meta_description: article.meta_description,
+        keywords: article.keywords,
       })
-      .select()
-      .single()
 
     if (error) {
       console.error(`Error creating article ${article.title}:`, error.message)
+      errors++
     } else {
       console.log(`✓ Created article: ${article.title}`)
+      created++
     }
   }
-}
 
-async function updateCategoryCounts() {
-  console.log('\nUpdating category article counts...')
-
-  const { data: cats } = await supabase
-    .from('help_categories')
-    .select('id')
-    .eq('user_id', DEMO_USER_ID)
-
-  for (const cat of cats || []) {
-    const { count } = await supabase
-      .from('help_articles')
-      .select('*', { count: 'exact', head: true })
-      .eq('category_id', cat.id)
-      .eq('status', 'published')
-
-    await supabase
-      .from('help_categories')
-      .update({ article_count: count || 0 })
-      .eq('id', cat.id)
-  }
-
-  console.log('✓ Updated category counts')
+  return { created, skipped, errors }
 }
 
 async function main() {
   console.log('=== KAZI Help Center Seed Script ===\n')
 
   try {
-    await seedCategories()
-    await seedArticles()
-    await updateCategoryCounts()
+    const catStats = await seedCategories()
+    const artStats = await seedArticles()
 
     console.log('\n=== Seeding Complete ===')
-    console.log(`Created ${categories.length} categories`)
-    console.log(`Created ${articles.length} articles`)
+    console.log('\nCategories:')
+    console.log(`  ✓ Created: ${catStats.created}`)
+    console.log(`  ⏭ Skipped: ${catStats.skipped}`)
+    if (catStats.errors > 0) console.log(`  ✗ Errors: ${catStats.errors}`)
+
+    console.log('\nArticles:')
+    console.log(`  ✓ Created: ${artStats.created}`)
+    console.log(`  ⏭ Skipped: ${artStats.skipped}`)
+    if (artStats.errors > 0) console.log(`  ✗ Errors: ${artStats.errors}`)
+
+    console.log('\nTotal in database: up to', categories.length, 'categories and', articles.length, 'articles')
   } catch (error) {
     console.error('Seeding failed:', error)
     process.exit(1)
