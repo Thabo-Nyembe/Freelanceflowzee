@@ -16,6 +16,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
+import { getClientSession } from '@/lib/demo-session'
 
 export interface Notification {
   id: string
@@ -65,8 +66,7 @@ export function useRealtimeNotifications(
   const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading')
 
   useEffect(() => {
-    fetch('/api/auth/session')
-      .then(res => res.json())
+    getClientSession()
       .then(data => {
         setSession(data)
         setStatus(data?.user ? 'authenticated' : 'unauthenticated')
@@ -100,6 +100,9 @@ export function useRealtimeNotifications(
     }
   }, [requestDesktopPermission])
 
+  // Ref to track previous notification IDs (avoids dependency on notifications state)
+  const previousNotificationIdsRef = useRef<Set<string>>(new Set())
+
   // Fetch notifications from API
   const fetchNotifications = useCallback(async () => {
     if (status !== 'authenticated') return
@@ -122,9 +125,13 @@ export function useRealtimeNotifications(
           data: n.data
         }))
 
-        // Check for new notifications
-        const previousIds = new Set(notifications.map(n => n.id))
-        const newOnes = newNotifications.filter((n: Notification) => !previousIds.has(n.id) && !n.read)
+        // Check for new notifications using ref (not state)
+        const newOnes = newNotifications.filter((n: Notification) =>
+          !previousNotificationIdsRef.current.has(n.id) && !n.read
+        )
+
+        // Update ref with current notification IDs
+        previousNotificationIdsRef.current = new Set(newNotifications.map((n: Notification) => n.id))
 
         // Show toast for new notifications
         if (showToasts && newOnes.length > 0) {
@@ -164,7 +171,7 @@ export function useRealtimeNotifications(
     } finally {
       setIsLoading(false)
     }
-  }, [status, notifications, showToasts, playSound])
+  }, [status, showToasts, playSound])
 
   // WebSocket connection
   useEffect(() => {
@@ -314,15 +321,18 @@ export function useRealtimeNotifications(
         body: JSON.stringify({ action: 'delete', data: { notificationId: id } })
       })
 
-      setNotifications(prev => prev.filter(n => n.id !== id))
-      setUnreadCount(prev => {
-        const wasUnread = notifications.find(n => n.id === id && !n.read)
-        return wasUnread ? Math.max(0, prev - 1) : prev
+      setNotifications(prev => {
+        const notification = prev.find(n => n.id === id)
+        const wasUnread = notification && !notification.read
+        if (wasUnread) {
+          setUnreadCount(count => Math.max(0, count - 1))
+        }
+        return prev.filter(n => n.id !== id)
       })
     } catch (error) {
       console.error('Failed to delete notification:', error)
     }
-  }, [notifications])
+  }, [])
 
   // Clear all notifications
   const clearAll = useCallback(async () => {

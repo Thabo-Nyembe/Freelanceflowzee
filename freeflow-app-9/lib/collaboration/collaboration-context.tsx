@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import * as Y from 'yjs'
 import { createYjsProvider, ConnectionStatus, YjsProviderInstance } from './yjs-provider'
+import { getClientSession } from '@/lib/demo-session'
 
 // Types
 export interface CollaboratorInfo {
@@ -78,15 +79,14 @@ export function CollaborationProvider({ children }: { children: React.ReactNode 
       yjsRef.current.destroy()
     }
 
-    // Get user info
-    const userRes = await fetch('/api/auth/session')
-    const userData = await userRes.json()
-    const userId = userData.user?.id || `anon-${Math.random().toString(36).slice(2, 9)}`
+    // Get user info (supports demo mode)
+    const userData = await getClientSession()
+    const userId = userData?.user?.id || `anon-${Math.random().toString(36).slice(2, 9)}`
 
     const localUser: CollaboratorInfo = {
       id: userId,
-      name: userData.user?.name || 'Anonymous',
-      avatar: userData.user?.avatar_url,
+      name: userData?.user?.name || 'Anonymous',
+      avatar: userData?.user?.image || userData?.user?.avatar_url,
       color: getUserColor(userId),
       isActive: true
     }

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { createEngagementAlgorithm, EngagementAlgorithm } from '@/lib/engagement-algorithm'
+import { getClientSession } from '@/lib/demo-session'
 
 interface EngagementContextValue {
   trackClick: (buttonName: string, metadata?: Record<string, any>) => void
@@ -43,12 +44,8 @@ function useSafeSession() {
 
   useEffect(() => {
     let isMounted = true
-    // Fetch session directly from API to avoid SessionProvider requirement
-    fetch('/api/auth/session')
-      .then(res => {
-        if (!res.ok) throw new Error('Session fetch failed')
-        return res.json()
-      })
+    // Use getClientSession for demo mode support
+    getClientSession()
       .then(data => {
         if (isMounted && data?.user?.id) {
           setSessionUserId(data.user.id)

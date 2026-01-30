@@ -15,6 +15,7 @@ import {
   Recommendation,
   EngagementInsight
 } from '@/lib/engagement-algorithm'
+import { getClientSession } from '@/lib/demo-session'
 
 // ============================================================================
 // ENGAGEMENT HOOK - Main hook for personalization
@@ -24,10 +25,7 @@ export function useEngagement() {
   const [session, setSession] = useState<any>(null)
 
   useEffect(() => {
-    fetch('/api/auth/session')
-      .then(res => res.json())
-      .then(data => setSession(data))
-      .catch(() => {})
+    getClientSession().then(data => setSession(data)).catch(() => {})
   }, [])
 
   const userId = session?.user?.id
@@ -153,10 +151,7 @@ export function useActivityTracking() {
   const [session, setSession] = useState<any>(null)
 
   useEffect(() => {
-    fetch('/api/auth/session')
-      .then(res => res.json())
-      .then(data => setSession(data))
-      .catch(() => {})
+    getClientSession().then(data => setSession(data)).catch(() => {})
   }, [])
 
   const userId = session?.user?.id
