@@ -123,12 +123,7 @@ export function useProjects(initialProjects: Project[] = []) {
         throw new Error(result.error || 'Failed to fetch projects')
       }
 
-      // Handle demo mode
-      if (result.demo) {
-        setProjects([])
-        return
-      }
-
+      // Demo mode now returns actual data from database, no need to skip
       const data = result.projects || []
 
       // Map DB fields to Project interface
