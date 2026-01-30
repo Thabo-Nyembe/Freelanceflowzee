@@ -154,14 +154,11 @@ export function useTasks(options: UseTasksOptions = {}) {
     sortOrder?: 'asc' | 'desc'
     limit?: number
   }) => {
-    // Skip fetching in demo mode
-    if (isDemoModeEnabled()) {
-      setIsLoading(false)
-      return
-    }
-
     setIsLoading(true)
     setError(null)
+
+    // In demo mode, add demo=true to query
+    const isDemo = isDemoModeEnabled()
 
     try {
       // Build query parameters
@@ -177,6 +174,7 @@ export function useTasks(options: UseTasksOptions = {}) {
       if (filters?.limit) params.set('limit', String(filters.limit))
 
       // Fetch via API (uses service role key, bypasses RLS)
+      if (isDemo) params.set('demo', 'true')
       const response = await fetch(`/api/tasks?${params.toString()}`, {
         credentials: 'include'
       })
