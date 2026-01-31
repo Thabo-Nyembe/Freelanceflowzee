@@ -310,11 +310,7 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             {/* Left Content */}
             <div className="text-left">
-              <motion.div
-                initial={{ opacity: 1, y: 0 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
+              <div>
                 <Badge
                   variant="secondary"
                   className="mb-6 bg-blue-50/50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 backdrop-blur-sm px-4 py-2"
@@ -323,10 +319,10 @@ export default function HomePage() {
                   <Sparkles className="w-4 h-4 inline mr-2 text-blue-500" />
                   Trusted by 25,000+ Professionals
                 </Badge>
-              </motion.div>
+              </div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-slate-900 dark:text-white leading-tight">
-                <HeroTextReveal text="More Features. Less Cost." className="justify-start text-slate-900 dark:text-white" />
+                <span className="flex flex-wrap justify-start text-slate-900 dark:text-white">More Features. Less Cost.</span>
                 <span className="block mt-2 bg-gradient-to-r from-blue-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">
                   Zero Compromises.
                 </span>
@@ -337,43 +333,29 @@ export default function HomePage() {
                 video studio, escrow payments, and project management in one unified workspace for just $29/mo.
               </p>
 
-              <motion.div
-                className="flex flex-col sm:flex-row gap-4"
-                initial={{ opacity: 1, y: 0 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/signup">
-                  <MagneticButton>
-                    <Button
-                      size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 !text-white hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6 h-auto shadow-2xl shadow-blue-900/20 transition-all hover:scale-105"
-                    >
-                      Start Free Trial
-                      <ArrowRight className="ml-2 w-5 h-5" />
-                    </Button>
-                  </MagneticButton>
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 !text-white hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6 h-auto shadow-2xl shadow-blue-900/20 transition-all hover:scale-105"
+                  >
+                    Start Free Trial
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
                 </Link>
                 <Link href="/demo-features">
-                  <MagneticButton>
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="text-lg px-8 py-6 h-auto border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:bg-slate-800/50 backdrop-blur-sm"
-                    >
-                      <Play className="mr-2 w-5 h-5" />
-                      Watch Demo
-                    </Button>
-                  </MagneticButton>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="text-lg px-8 py-6 h-auto border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:bg-slate-800/50 backdrop-blur-sm"
+                  >
+                    <Play className="mr-2 w-5 h-5" />
+                    Watch Demo
+                  </Button>
                 </Link>
-              </motion.div>
+              </div>
 
-              <motion.div
-                className="mt-10 flex items-center gap-6 text-sm text-slate-500 font-medium"
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
+              <div className="mt-10 flex items-center gap-6 text-sm text-slate-500 font-medium">
                 <div className="flex -space-x-2">
                   {[1, 2, 3, 4].map(i => (
                     <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-slate-200" />
@@ -387,7 +369,7 @@ export default function HomePage() {
                   <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                 </div>
                 <span>from 500+ reviews</span>
-              </motion.div>
+              </div>
             </div>
 
             {/* Right Visual - 3D Card */}
