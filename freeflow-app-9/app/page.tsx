@@ -22,13 +22,6 @@ import {
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white dark:bg-none dark:bg-gray-900 relative overflow-hidden">
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-[9999] focus:top-4 focus:left-4 focus:bg-gray-900 focus:text-white focus:px-6 focus:py-3 focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:font-semibold focus:min-h-[44px] focus:min-w-[44px] focus:flex focus:items-center"
-      >
-        Skip to main content
-      </a>
-
       {/* Navigation - Client Component for interactivity */}
       <ClientNav />
 

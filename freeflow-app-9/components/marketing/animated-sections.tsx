@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Star, Play } from 'lucide-react'
 import { ReactNode } from 'react'
 
-// Animated stat card
+// Animated stat card - opacity only to prevent CLS
 export function AnimatedStatCard({
   stat,
   index
@@ -18,8 +18,8 @@ export function AnimatedStatCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
     >
@@ -38,7 +38,7 @@ export function AnimatedStatCard({
   )
 }
 
-// Animated testimonial card
+// Animated testimonial card - opacity only to prevent CLS
 export function AnimatedTestimonialCard({
   testimonial,
   index
@@ -55,8 +55,8 @@ export function AnimatedTestimonialCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       role="listitem"
@@ -106,7 +106,7 @@ export function AnimatedTestimonialCard({
   )
 }
 
-// Animated video thumbnail
+// Animated video thumbnail - opacity only to prevent CLS
 export function AnimatedVideoThumbnail({
   video,
   index,
@@ -118,14 +118,17 @@ export function AnimatedVideoThumbnail({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="group cursor-pointer"
       onClick={onSelect}
     >
-      <div className="relative rounded-lg overflow-hidden border border-slate-700 group-hover:border-blue-500 transition-all aspect-video">
+      <div
+        className="relative rounded-lg overflow-hidden border border-slate-700 group-hover:border-blue-500 transition-all"
+        style={{ aspectRatio: '16/9' }}
+      >
         <Image
           src={`/demo-captures/${video.poster}`}
           alt={video.title}
@@ -133,6 +136,7 @@ export function AnimatedVideoThumbnail({
           sizes="(max-width: 768px) 50vw, 25vw"
           className="object-cover group-hover:scale-105 transition-transform"
           loading="lazy"
+          style={{ objectFit: 'cover' }}
         />
         <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
           <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -150,7 +154,7 @@ export function AnimatedVideoThumbnail({
   )
 }
 
-// Animated CTA section
+// Animated CTA section - opacity only to prevent CLS
 export function AnimatedCTASection({ children }: { children: ReactNode }) {
   return (
     <>
@@ -171,8 +175,8 @@ export function AnimatedCTASection({ children }: { children: ReactNode }) {
         aria-hidden="true"
       />
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
       >

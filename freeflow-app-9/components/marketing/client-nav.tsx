@@ -14,9 +14,9 @@ export function ClientNav() {
   return (
     <motion.nav
       className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800"
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
       role="navigation"
       aria-label="Main navigation"
     >
@@ -24,18 +24,18 @@ export function ClientNav() {
         <div className="flex justify-between items-center h-16">
           <Link
             href="/"
-            className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg px-2 py-1"
+            className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg px-2 py-1 min-h-[44px]"
             aria-label="KAZI Homepage"
           >
-            <Sparkles className="w-6 h-6 text-blue-600" aria-hidden="true" />
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            <Sparkles className="w-6 h-6 text-blue-700" aria-hidden="true" />
+            <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">
               KAZI
             </span>
           </Link>
           <div className="hidden md:flex items-center gap-8" role="menubar">
             <Link
               href="/features"
-              className="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
+              className="text-gray-800 dark:text-gray-100 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
               role="menuitem"
               aria-label="View all features"
             >
@@ -43,7 +43,7 @@ export function ClientNav() {
             </Link>
             <Link
               href="/pricing"
-              className="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
+              className="text-gray-800 dark:text-gray-100 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
               role="menuitem"
               aria-label="View pricing plans"
             >
@@ -51,7 +51,7 @@ export function ClientNav() {
             </Link>
             <Link
               href="/blog"
-              className="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
+              className="text-gray-800 dark:text-gray-100 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
               role="menuitem"
               aria-label="Read our blog"
             >
@@ -59,7 +59,7 @@ export function ClientNav() {
             </Link>
             <Link
               href="/contact"
-              className="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
+              className="text-gray-800 dark:text-gray-100 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg min-h-[44px] min-w-[44px] px-4 py-3 flex items-center"
               role="menuitem"
               aria-label="Contact us"
             >

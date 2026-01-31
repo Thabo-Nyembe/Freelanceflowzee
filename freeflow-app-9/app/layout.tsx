@@ -133,7 +133,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <OrganizationJsonLd />
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
-          {/* Skip to main content link for accessibility */}
+          {/* Skip to main content link for accessibility (WCAG 2.4.1) */}
           <a href="#main-content" className="skip-to-content">
             Skip to main content
           </a>

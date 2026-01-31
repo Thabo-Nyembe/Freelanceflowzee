@@ -4,7 +4,7 @@ import { Separator } from '@/components/ui/separator'
 
 export function SiteFooter() {
     return (
-        <footer className="bg-black text-white py-24 border-t border-white/10 relative overflow-hidden" role="contentinfo" aria-label="Site footer">
+        <footer className="bg-black text-white py-24 border-t border-white/10 relative overflow-hidden" role="contentinfo" aria-label="Site footer" style={{ backgroundColor: '#000000', color: '#ffffff' }}>
             <div className="max-w-[1400px] mx-auto px-6 sm:px-8 relative z-10">
                 {/* Massive Architectural Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-20">
@@ -26,7 +26,7 @@ export function SiteFooter() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-8 mb-24 border-t border-white/10 pt-16">
                     <div className="space-y-6">
-                        <div className="font-mono text-xs uppercase tracking-widest text-white/70 mb-8" role="heading" aria-level="3">Product</div>
+                        <div className="font-mono text-xs uppercase tracking-widest text-gray-400 mb-8" role="heading" aria-level="3">Product</div>
                         <FooterLink href="/features">Features</FooterLink>
                         <FooterLink href="/pricing">Pricing</FooterLink>
                         <FooterLink href="/demo-features">Live Demo</FooterLink>
@@ -34,7 +34,7 @@ export function SiteFooter() {
                     </div>
 
                     <div className="space-y-6">
-                        <div className="font-mono text-xs uppercase tracking-widest text-white/70 mb-8" role="heading" aria-level="3">Solutions</div>
+                        <div className="font-mono text-xs uppercase tracking-widest text-gray-400 mb-8" role="heading" aria-level="3">Solutions</div>
                         <FooterLink href="/for/freelance-designers">Designers</FooterLink>
                         <FooterLink href="/for/agencies">Agencies</FooterLink>
                         <FooterLink href="/for/writers">Writers</FooterLink>
@@ -42,7 +42,7 @@ export function SiteFooter() {
                     </div>
 
                     <div className="space-y-6">
-                        <div className="font-mono text-xs uppercase tracking-widest text-white/70 mb-8" role="heading" aria-level="3">Compare</div>
+                        <div className="font-mono text-xs uppercase tracking-widest text-gray-400 mb-8" role="heading" aria-level="3">Compare</div>
                         <FooterLink href="/compare/kazi-vs-upwork">vs Upwork</FooterLink>
                         <FooterLink href="/compare/kazi-vs-fiverr">vs Fiverr</FooterLink>
                         <FooterLink href="/compare/kazi-vs-monday">vs Monday</FooterLink>
@@ -50,7 +50,7 @@ export function SiteFooter() {
                     </div>
 
                     <div className="space-y-6">
-                        <div className="font-mono text-xs uppercase tracking-widest text-white/70 mb-8" role="heading" aria-level="3">Connect</div>
+                        <div className="font-mono text-xs uppercase tracking-widest text-gray-400 mb-8" role="heading" aria-level="3">Connect</div>
                         <div className="flex gap-4">
                             <SocialLink href="https://twitter.com/kaziplatform" icon={<Twitter className="w-5 h-5" aria-hidden="true" />} label="Follow us on Twitter" />
                             <SocialLink href="https://linkedin.com/company/kaziplatform" icon={<Linkedin className="w-5 h-5" aria-hidden="true" />} label="Connect on LinkedIn" />
@@ -59,12 +59,12 @@ export function SiteFooter() {
                     </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-center text-white/70 text-sm gap-4 border-t border-white/10 pt-8 font-mono">
+                <div className="flex flex-col md:flex-row justify-between items-center text-gray-300 text-sm gap-4 border-t border-white/10 pt-8 font-mono">
                     <p>© 2025 KAZI. Engineered in South Africa 🇿🇦</p>
                     <div className="flex gap-8">
-                        <Link href="/privacy" className="text-white/70 hover:text-white transition-colors underline-offset-4 hover:underline">Privacy</Link>
-                        <Link href="/terms" className="text-white/70 hover:text-white transition-colors underline-offset-4 hover:underline">Terms</Link>
-                        <Link href="/security" className="text-white/70 hover:text-white transition-colors underline-offset-4 hover:underline">Security</Link>
+                        <Link href="/privacy" className="text-gray-300 hover:text-white transition-colors underline-offset-4 hover:underline">Privacy</Link>
+                        <Link href="/terms" className="text-gray-300 hover:text-white transition-colors underline-offset-4 hover:underline">Terms</Link>
+                        <Link href="/security" className="text-gray-300 hover:text-white transition-colors underline-offset-4 hover:underline">Security</Link>
                     </div>
                 </div>
             </div>
@@ -76,8 +76,8 @@ export function SiteFooter() {
 }
 
 const FooterLink = ({ href, children }: { href: string, children: React.ReactNode }) => (
-    <Link href={href} className="group flex items-center gap-2 text-white/80 hover:text-white transition-colors duration-200">
-        <span className="text-lg">{children}</span>
+    <Link href={href} className="group flex items-center gap-2 hover:text-blue-300 transition-colors duration-200" style={{ color: '#ffffff' }}>
+        <span className="text-lg" style={{ color: 'inherit' }}>{children}</span>
         <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1 group-hover:-translate-y-1 text-blue-400" aria-hidden="true" />
     </Link>
 )
