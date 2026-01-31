@@ -14,7 +14,7 @@ import React from 'react'
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
 import { Toaster } from 'sonner'
-import { Analytics } from '@vercel/analytics/react'
+import { VercelAnalytics } from '@/components/analytics/vercel-analytics'
 
 import { Context7Provider } from '@/components/providers/context7-provider'
 import { Providers } from '@/components/providers'
@@ -155,12 +155,14 @@ export default function RootLayout({
                     <Toaster />
                     <ExitIntentPopup />
                     <LiveChatWidget />
-                    {children}
+                    <main id="main-content">
+                      {children}
+                    </main>
                   </Context7Provider>
                 </AnalyticsProvider>
               </Providers>
             </SessionProvider>
-            <Analytics />
+            <VercelAnalytics />
             <WebVitals sendToAnalytics={process.env.NODE_ENV === 'production'} />
           </ThemeProvider>
         </ErrorBoundary>

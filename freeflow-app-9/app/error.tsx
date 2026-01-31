@@ -256,10 +256,10 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
               className="max-w-2xl mx-auto"
             >
               <Card className="p-6 text-left">
-                <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
                   <Bug className="w-5 h-5" />
                   Development Error Details
-                </h3>
+                </h2>
                 <div className="space-y-3">
                   <div>
                     <h4 className="font-medium text-sm text-muted-foreground">Error Message:</h4>
@@ -288,10 +288,10 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
             className="max-w-2xl mx-auto"
           >
             <Card className="p-6">
-              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+              <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
                 <Shield className="w-5 h-5 text-primary" />
                 Troubleshooting Steps
-              </h3>
+              </h2>
               <div className="space-y-2 text-left">
                 {TROUBLESHOOTING_STEPS.map((step, index) => (
                   <motion.div

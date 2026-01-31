@@ -11,11 +11,12 @@ interface HeroTextRevealProps {
 export const HeroTextReveal = ({ text, className = "", delay = 0 }: HeroTextRevealProps) => {
     const words = text.split(" ");
 
+    // Start visible for better LCP, animate subtly after
     const container = {
-        hidden: { opacity: 0 },
+        hidden: { opacity: 1 },
         visible: (i = 1) => ({
             opacity: 1,
-            transition: { staggerChildren: 0.12, delayChildren: 0.04 * i + delay },
+            transition: { staggerChildren: 0.08, delayChildren: 0.02 * i + delay },
         }),
     };
 
@@ -23,21 +24,19 @@ export const HeroTextReveal = ({ text, className = "", delay = 0 }: HeroTextReve
         visible: {
             opacity: 1,
             y: 0,
-            filter: "blur(0px)",
             transition: {
                 type: "spring",
-                damping: 12,
-                stiffness: 100,
+                damping: 20,
+                stiffness: 150,
             },
         },
         hidden: {
-            opacity: 0,
-            y: 20,
-            filter: "blur(2px)",
+            opacity: 1,
+            y: 0,
             transition: {
                 type: "spring",
-                damping: 12,
-                stiffness: 100,
+                damping: 20,
+                stiffness: 150,
             },
         },
     };

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 
 export default function Loading() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-background" role="main">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background">
       {/* Animated KAZI Logo Loader */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
@@ -69,6 +69,6 @@ export default function Loading() {
           />
         </div>
       </motion.div>
-    </main>
+    </div>
   )
 }

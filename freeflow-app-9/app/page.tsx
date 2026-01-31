@@ -304,18 +304,16 @@ export default function HomePage() {
 
 
 
-      {/* Main Content */}
-      <main id="main-content" role="main">
-        {/* Hero Section */}
+      {/* Hero Section */}
         <HeroBeam className="w-full min-h-[50rem]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-20">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             {/* Left Content */}
             <div className="text-left">
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
+                transition={{ duration: 0.3 }}
               >
                 <Badge
                   variant="secondary"
@@ -341,15 +339,15 @@ export default function HomePage() {
 
               <motion.div
                 className="flex flex-col sm:flex-row gap-4"
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
+                transition={{ duration: 0.3 }}
               >
                 <Link href="/signup">
                   <MagneticButton>
                     <Button
                       size="lg"
-                      className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-lg px-8 py-6 h-auto shadow-2xl shadow-blue-900/20 transition-all hover:scale-105"
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 !text-white hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6 h-auto shadow-2xl shadow-blue-900/20 transition-all hover:scale-105"
                     >
                       Start Free Trial
                       <ArrowRight className="ml-2 w-5 h-5" />
@@ -372,9 +370,9 @@ export default function HomePage() {
 
               <motion.div
                 className="mt-10 flex items-center gap-6 text-sm text-slate-500 font-medium"
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 1 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
+                transition={{ duration: 0.3 }}
               >
                 <div className="flex -space-x-2">
                   {[1, 2, 3, 4].map(i => (
@@ -753,7 +751,6 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
-      </main>
 
       <SiteFooter />
     </div >
