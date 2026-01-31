@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { MessageSquare, X, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,14 +28,10 @@ export function LiveChatWidget() {
 
     return (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="mb-4 w-[350px] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-800 overflow-hidden"
-                    >
+            {isOpen && (
+                <div
+                    className="mb-4 w-[350px] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-800 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200"
+                >
                         {/* Header */}
                         <div className="bg-blue-600 p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -54,10 +49,10 @@ export function LiveChatWidget() {
                             </div>
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="text-blue-100 hover:text-white transition-colors"
+                                className="text-blue-100 hover:text-white transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2"
                                 aria-label="Close chat window"
                             >
-                                <X className="w-5 h-5" aria-hidden="true" />
+                                <X className="w-6 h-6" aria-hidden="true" />
                             </button>
                         </div>
 
@@ -93,7 +88,7 @@ export function LiveChatWidget() {
                                 <button
                                     type="submit"
                                     disabled={!message.trim()}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 disabled:text-gray-300 transition-colors"
+                                    className="absolute right-0 top-1/2 -translate-y-1/2 text-blue-600 disabled:text-gray-300 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                                     aria-label="Send message"
                                 >
                                     <Send className="w-5 h-5" aria-hidden="true" />
@@ -103,20 +98,17 @@ export function LiveChatWidget() {
                                 Powered by KAZI Intercom
                             </p>
                         </form>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                </div>
+            )}
 
-            <motion.button
+            <button
                 onClick={() => setIsOpen(!isOpen)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg shadow-blue-600/30 flex items-center justify-center transition-colors"
+                className="w-16 h-16 bg-blue-600 hover:bg-blue-700 hover:scale-105 active:scale-95 text-white rounded-full shadow-lg shadow-blue-600/30 flex items-center justify-center transition-all"
                 aria-label={isOpen ? "Close chat" : "Open chat support"}
                 aria-expanded={isOpen}
             >
                 {isOpen ? <X className="w-6 h-6" aria-hidden="true" /> : <MessageSquare className="w-6 h-6" aria-hidden="true" />}
-            </motion.button>
+            </button>
         </div>
     )
 }

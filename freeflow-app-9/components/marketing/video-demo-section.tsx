@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Play } from 'lucide-react'
-import { AnimatedVideoThumbnail } from './animated-sections'
+import Image from 'next/image'
 
 const videos = [
   { title: 'Getting Started', duration: '51s', file: '02-getting-started-with-voiceover.mp4', poster: 'gallery-my-day.jpg' },
@@ -108,12 +108,37 @@ export function VideoDemoSection() {
         {/* Video Thumbnails */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {videos.map((video, index) => (
-            <AnimatedVideoThumbnail
+            <div
               key={index}
-              video={video}
-              index={index}
-              onSelect={() => handleVideoSelect(video.file)}
-            />
+              className="group cursor-pointer"
+              onClick={() => handleVideoSelect(video.file)}
+            >
+              <div
+                className="relative rounded-lg overflow-hidden border border-slate-700 group-hover:border-blue-500 transition-all"
+                style={{ aspectRatio: '16/9' }}
+              >
+                <Image
+                  src={`/demo-captures/${video.poster}`}
+                  alt={video.title}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-transform"
+                  loading="lazy"
+                  style={{ objectFit: 'cover' }}
+                />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Play className="w-5 h-5 text-slate-900 ml-0.5" />
+                  </div>
+                </div>
+                <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-0.5 rounded text-xs text-white">
+                  {video.duration}
+                </div>
+              </div>
+              <p className="text-slate-300 text-sm mt-2 text-center group-hover:text-white transition-colors">
+                {video.title}
+              </p>
+            </div>
           ))}
         </div>
       </div>

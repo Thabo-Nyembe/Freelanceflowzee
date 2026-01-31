@@ -1,14 +1,12 @@
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { SiteFooter } from '@/components/marketing/site-footer'
 import { HeroBeam } from '@/components/marketing/hero-beam'
-import { PricingComparisonTable } from '@/components/marketing/pricing-comparison-table'
 import { ClientNav } from '@/components/marketing/client-nav'
-import { VideoDemoSection } from '@/components/marketing/video-demo-section'
 import { Hero3DWrapper } from '@/components/marketing/hero-3d-wrapper'
 import { FeaturesSection } from '@/components/marketing/features-section'
-import { SocialProofSection } from '@/components/marketing/social-proof-section'
 import { StatsSection } from '@/components/marketing/stats-section'
 import { TestimonialsSection } from '@/components/marketing/testimonials-section'
 import { CTASection } from '@/components/marketing/cta-section'
@@ -18,6 +16,22 @@ import {
   Star,
   Sparkles,
 } from 'lucide-react'
+
+// Lazy load below-the-fold client components
+const VideoDemoSection = dynamic(
+  () => import('@/components/marketing/video-demo-section').then(mod => ({ default: mod.VideoDemoSection })),
+  { ssr: true, loading: () => <div className="py-20 bg-gradient-to-b from-slate-900 to-slate-800 min-h-[600px]" /> }
+)
+
+const PricingComparisonTable = dynamic(
+  () => import('@/components/marketing/pricing-comparison-table').then(mod => ({ default: mod.PricingComparisonTable })),
+  { ssr: true, loading: () => <div className="w-full max-w-4xl mx-auto h-[400px] bg-white dark:bg-slate-900 rounded-2xl animate-pulse" /> }
+)
+
+const SocialProofSection = dynamic(
+  () => import('@/components/marketing/social-proof-section').then(mod => ({ default: mod.SocialProofSection })),
+  { ssr: true, loading: () => <div className="py-10 bg-white dark:bg-gray-900 h-24" /> }
+)
 
 export default function HomePage() {
   return (

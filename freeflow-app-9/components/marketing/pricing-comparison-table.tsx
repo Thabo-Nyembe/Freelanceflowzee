@@ -1,7 +1,6 @@
 'use client'
 
-import { Check, X, Info } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Check, Info } from 'lucide-react'
 import {
     Tooltip,
     TooltipContent,
@@ -74,13 +73,9 @@ export function PricingComparisonTable() {
             </div>
 
             <div className="divide-y divide-gray-100 dark:divide-slate-800">
-                {comparisons.map((row, index) => (
-                    <motion.div
+                {comparisons.map((row) => (
+                    <div
                         key={row.feature}
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        viewport={{ once: true }}
                         className={`grid grid-cols-12 p-6 items-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${row.isFooter ? 'bg-blue-50/50 dark:bg-blue-900/10 font-bold' : ''
                             }`}
                     >
@@ -120,16 +115,16 @@ export function PricingComparisonTable() {
                             {row.isFooter ? (
                                 <div className="flex flex-col">
                                     <span className="text-xl line-through text-red-400 decoration-2">{row.competitor}</span>
-                                    <span className="text-xs text-red-500 font-normal">Multiple subscriptions</span>
+                                    <span className="text-xs text-red-300 font-normal">Multiple subscriptions</span>
                                 </div>
                             ) : (
                                 <div className="flex flex-col">
                                     <span className="font-medium text-gray-700 dark:text-gray-300">{row.competitor}</span>
-                                    <span className="text-xs text-red-500 font-medium">{row.competitorPrice}</span>
+                                    <span className="text-xs text-red-400 dark:text-red-300 font-medium">{row.competitorPrice}</span>
                                 </div>
                             )}
                         </div>
-                    </motion.div>
+                    </div>
                 ))}
             </div>
 

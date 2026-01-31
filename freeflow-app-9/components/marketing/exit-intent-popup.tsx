@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { X, Gift, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -47,26 +46,20 @@ export function ExitIntentPopup() {
         handleClose()
     }
 
-    return (
-        <AnimatePresence>
-            {isVisible && (
-                <>
-                    {/* Backdrop */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={handleClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
-                    />
+    if (!isVisible) return null
 
-                    {/* Popup */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="fixed inset-0 m-auto w-full max-w-lg h-fit z-[101] p-4"
-                    >
+    return (
+        <>
+            {/* Backdrop */}
+            <div
+                onClick={handleClose}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] animate-in fade-in duration-200"
+            />
+
+            {/* Popup */}
+            <div
+                className="fixed inset-0 m-auto w-full max-w-lg h-fit z-[101] p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-200"
+            >
                         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-blue-100 dark:border-slate-800 relative">
                             <button
                                 onClick={handleClose}
@@ -114,9 +107,7 @@ export function ExitIntentPopup() {
                                 </div>
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
                 </>
-            )}
-        </AnimatePresence>
     )
 }

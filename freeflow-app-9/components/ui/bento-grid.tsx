@@ -1,7 +1,5 @@
-"use client";
 import { cn } from "@/lib/utils";
-import { ReactNode, useState, useRef, MouseEvent } from "react";
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { ReactNode } from "react";
 
 export const BentoGrid = ({
   className,
@@ -35,35 +33,15 @@ export const BentoGridItem = ({
   header?: ReactNode;
   icon?: ReactNode;
 }) => {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  function handleMouseMove({ currentTarget, clientX, clientY }: MouseEvent) {
-    let { left, top } = currentTarget.getBoundingClientRect();
-    mouseX.set(clientX - left);
-    mouseY.set(clientY - top);
-  }
-
   return (
     <div
       className={cn(
         "row-span-1 rounded-xl group/bento hover:shadow-xl transition duration-200 shadow-input dark:shadow-none p-4 dark:bg-black dark:border-white/[0.2] bg-white border border-transparent justify-between flex flex-col space-y-4 relative overflow-hidden",
         className
       )}
-      onMouseMove={handleMouseMove}
     >
-      <motion.div
-        className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition duration-300 group-hover/bento:opacity-100"
-        style={{
-          background: useMotionTemplate`
-            radial-gradient(
-              650px circle at ${mouseX}px ${mouseY}px,
-              rgba(14, 165, 233, 0.15),
-              transparent 80%
-            )
-          `,
-        }}
-      />
+      {/* Hover gradient effect using CSS */}
+      <div className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition duration-300 group-hover/bento:opacity-100 bg-gradient-radial from-sky-500/15 to-transparent" />
       <div className="group-hover/bento:translate-x-2 transition duration-200 relative z-20">
         {header}
         <div className="mt-4">

@@ -171,16 +171,16 @@ const config: Config = {
 },
     plugins: [
         tailwindcssAnimate,
-        function ({ matchUtilities, theme }: any) {
+        ({ matchUtilities, theme }: { matchUtilities: any; theme: any }) => {
             matchUtilities(
                 {
-                    "bg-dot-thick": (value: any) => ({
+                    "bg-dot-thick": (value: string) => ({
                         backgroundImage: `url("${svgToDataUri(
                             `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none"><circle fill="${value}" id="pattern-circle" cx="10" cy="10" r="2.5"></circle></svg>`
                         )}")`,
                     }),
                 },
-{ values: flattenColorPalette(theme("backgroundColor")), type: "color" }
+                { values: flattenColorPalette(theme("backgroundColor")), type: "color" }
             );
         },
     ],
