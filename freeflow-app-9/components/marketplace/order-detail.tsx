@@ -348,7 +348,7 @@ export function OrderDetail({ order, role, onRefresh }: OrderDetailProps) {
                             onChange={(e) => setDeliverMessage(e.target.value)}
                             rows={4}
                           />
-                          <Button variant="outline" className="w-full" onClick={() => toast.info('Upload', { description: 'Opening file picker...' })}>
+                          <Button variant="outline" className="w-full" onClick={() => toast.info('In Development', { description: 'File upload for deliveries is being built' })}>
                             <Upload className="h-4 w-4 mr-2" />
                             Upload Files
                           </Button>
@@ -547,7 +547,7 @@ export function OrderDetail({ order, role, onRefresh }: OrderDetailProps) {
                   </p>
                 </div>
               </div>
-              <Button variant="outline" className="w-full mt-4" onClick={() => toast.info('Message', { description: 'Opening message composer...' })}>
+              <Button variant="outline" className="w-full mt-4" onClick={() => toast.info('Coming Soon', { description: 'In-app messaging is coming soon' })}>
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Send Message
               </Button>

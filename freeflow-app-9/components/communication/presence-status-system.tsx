@@ -310,7 +310,7 @@ const UserPresenceCard: React.FC<UserPresenceCardProps> = ({
                         className="h-6 w-6 p-0"
                         onClick={(e) => {
                           e.stopPropagation()
-                          toast.success('Opening chat', { description: `Starting conversation with ${user.name}` })
+                          toast.info('Coming Soon', { description: `Chat with ${user.name} is coming soon` })
                         }}
                       >
                         <MessageSquare className="w-3 h-3" />
@@ -328,7 +328,7 @@ const UserPresenceCard: React.FC<UserPresenceCardProps> = ({
                           className="h-6 w-6 p-0"
                           onClick={(e) => {
                             e.stopPropagation()
-                            toast.success('Starting call', { description: `Calling ${user.name}...` })
+                            toast.info('Coming Soon', { description: `Video calls with ${user.name} coming in Q2 2026` })
                           }}
                         >
                           <Video className="w-3 h-3" />

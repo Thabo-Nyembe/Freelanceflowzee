@@ -143,7 +143,7 @@ export const FreelancerIntegrationsComponent = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">System Integrations</h2>
-        <Button variant="outline" onClick={() => toast.info('Sync', { description: 'Syncing all integrations...' })}>Sync All</Button>
+        <Button variant="outline" onClick={() => toast.info('In Development', { description: 'Batch sync functionality is being built' })}>Sync All</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

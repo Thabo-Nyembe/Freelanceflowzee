@@ -411,7 +411,7 @@ export function AdvancedGallerySharingSystem({
                   <Button onClick={() => _setLightboxItem(item)}>
                     <Eye />
                   </Button>
-                  <Button onClick={() => toast.info('Liked', { description: `Added ${item.name} to favorites` })}>
+                  <Button onClick={() => toast.info('In Development', { description: `Favorites for ${item.name} coming soon` })}>
                     <Heart />
                   </Button>
                   {settings.allowDownloads && (

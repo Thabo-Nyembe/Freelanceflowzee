@@ -68,7 +68,7 @@ export function ImageBlock({
               <p>Drag & drop an image here, or click to select</p>
             )}
           </div>
-          <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('Upload', { description: 'Click anywhere in the dropzone or drag an image' })}>
+          <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('In Development', { description: 'Block image upload is being built' })}>
             <Upload className="w-4 h-4 mr-2" />
             Upload Image
           </Button>

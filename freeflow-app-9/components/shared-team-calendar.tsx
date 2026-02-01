@@ -820,7 +820,7 @@ export function SharedTeamCalendar() {
                 <Button variant="outline" onClick={() => dispatch({ type: 'TOGGLE_EVENT_MODAL' })}>
                   Close
                 </Button>
-                <Button onClick={() => toast.success('Joining Meeting', { description: 'Opening video conference...' })}>
+                <Button onClick={() => toast.info('Coming Soon', { description: 'Video conferencing integration is coming in Q2 2026' })}>
                   <Video className="w-4 h-4 mr-2" />
                   Join Meeting
                 </Button>

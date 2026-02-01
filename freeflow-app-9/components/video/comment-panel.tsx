@@ -417,10 +417,10 @@ export function CommentPanel({
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setShowMentions(true); toast.info('Mention', { description: 'Type @ to mention a team member' }); }}>
                   <AtSign className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.info('Attach File', { description: 'File attachments coming soon' })}>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.info('Coming Soon', { description: 'File attachments will be available in Q2 2026' })}>
                   <Paperclip className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.info('Voice Note', { description: 'Voice recording coming soon' })}>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.info('Coming Soon', { description: 'Voice recording will be available in Q2 2026' })}>
                   <Mic className="h-4 w-4" />
                 </Button>
               </div>

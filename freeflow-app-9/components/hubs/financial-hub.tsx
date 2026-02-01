@@ -172,14 +172,14 @@ export default function FinancialHub({ invoices, _expenses, escrowTransactions, 
                         </div>
                     </div>
                     <div className="flex gap-2 pt-2">
-                        <Button size="sm" className="flex-1" onClick={() => toast.info('View Invoice', { description: `Opening invoice ${invoice.id}...` })}>
+                        <Button size="sm" className="flex-1" onClick={() => toast.info('In Development', { description: `Invoice viewer for ${invoice.id} coming soon` })}>
                             <Eye className="h-4 w-4 mr-2" />
                             View
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => toast.success('Download', { description: 'Invoice PDF downloading...' })}>
+                        <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: 'PDF export will be available soon' })}>
                             <Download className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => toast.info('Send', { description: 'Sending invoice to client...' })}>
+                        <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Email integration is planned for Q2 2026' })}>
                             <Send className="h-4 w-4" />
                         </Button>
                     </div>
@@ -219,7 +219,7 @@ export default function FinancialHub({ invoices, _expenses, escrowTransactions, 
                     </div>
                 </div>
                 <div className="flex gap-2 pt-2">
-                    <Button size="sm" className="flex-1" onClick={() => toast.info('View Details', { description: `Opening transaction ${transaction.id}...` })}>
+                    <Button size="sm" className="flex-1" onClick={() => toast.info('In Development', { description: `Transaction details view for ${transaction.id} coming soon` })}>
                         View Details
                     </Button>
                 </div>

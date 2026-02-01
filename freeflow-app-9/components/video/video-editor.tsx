@@ -220,11 +220,11 @@ export default function VideoEditor({
             {isProcessing ? 'Processing...' : 'Save Changes'}
           </Button>
           
-          <Button variant="outline" size="icon" onClick={() => toast.info('Share', { description: 'Share video link copied to clipboard' })}>
+          <Button variant="outline" size="icon" onClick={() => toast.info('In Development', { description: 'Video sharing is being built' })}>
             <Share className="w-4 h-4" />
           </Button>
 
-          <Button variant="outline" size="icon" onClick={() => toast.info('Preview', { description: 'Opening video preview...' })}>
+          <Button variant="outline" size="icon" onClick={() => toast.info('In Development', { description: 'Video preview mode coming soon' })}>
             <Eye className="w-4 h-4" />
           </Button>
         </div>

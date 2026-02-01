@@ -1014,8 +1014,8 @@ export default function StockClient() {
                 { icon: ClipboardCheck, label: 'Count', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowCountDialog(true) },
                 { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowExportDialog(true) },
-                { icon: Upload, label: 'Import', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Import Feature', { description: 'Drag and drop CSV/Excel file or click to browse' }) },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Settings', { description: 'Opening inventory settings...' }) }
+                { icon: Upload, label: 'Import', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Coming Soon', { description: 'CSV/Excel import will be available soon' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Coming Soon', { description: 'Inventory settings will be available in the next release' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1228,13 +1228,13 @@ export default function StockClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: ArrowDownToLine, label: 'Receive', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowAddStockDialog(true) },
-                { icon: ArrowUpFromLine, label: 'Ship', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Ship Stock', { description: 'Select items from inventory to create shipment' }) },
+                { icon: ArrowUpFromLine, label: 'Ship', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Coming Soon', { description: 'Shipment creation will be available soon' }) },
                 { icon: ArrowRightLeft, label: 'Transfer', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowTransferDialog(true) },
-                { icon: RotateCcw, label: 'Return', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Process Return', { description: 'Enter return details to process inventory return' }) },
+                { icon: RotateCcw, label: 'Return', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Coming Soon', { description: 'Return processing will be available soon' }) },
                 { icon: Search, label: 'Search', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => document.querySelector<HTMLInputElement>('input[placeholder="Search products..."]')?.focus() },
                 { icon: Filter, label: 'Filter', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setMovementTypeFilter('all') },
                 { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowExportDialog(true) },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Movement Settings', { description: 'Configure movement tracking preferences' }) }
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Coming Soon', { description: 'Movement settings will be available soon' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1351,14 +1351,14 @@ export default function StockClient() {
             {/* Warehouses Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Location', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Add Warehouse Location', { description: 'Configure new warehouse zone or bin location' }) },
-                { icon: Warehouse, label: 'Zones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Zone Management', { description: 'Manage warehouse zones and areas' }) },
-                { icon: MapPin, label: 'Locations', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.info('Bin Locations', { description: 'View and edit bin location assignments' }) },
-                { icon: Truck, label: 'Shipping', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Shipping Integration', { description: 'Configure shipping carriers and dock doors' }) },
-                { icon: BarChart3, label: 'Capacity', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.info('Capacity Report', { description: 'View warehouse capacity utilization details' }) },
-                { icon: Users, label: 'Staff', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => toast.info('Warehouse Staff', { description: 'Manage warehouse personnel and assignments' }) },
+                { icon: Plus, label: 'Add Location', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('In Development', { description: 'Warehouse location management coming soon' }) },
+                { icon: Warehouse, label: 'Zones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('In Development', { description: 'Zone management coming soon' }) },
+                { icon: MapPin, label: 'Locations', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.info('In Development', { description: 'Bin location management coming soon' }) },
+                { icon: Truck, label: 'Shipping', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Coming Soon', { description: 'Shipping carrier integration planned for Q2 2026' }) },
+                { icon: BarChart3, label: 'Capacity', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.info('In Development', { description: 'Capacity utilization reports coming soon' }) },
+                { icon: Users, label: 'Staff', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => toast.info('In Development', { description: 'Staff management coming soon' }) },
                 { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowExportDialog(true) },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Warehouse Settings', { description: 'Configure warehouse preferences' }) }
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Coming Soon', { description: 'Warehouse settings will be available soon' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1468,12 +1468,12 @@ export default function StockClient() {
               {[
                 { icon: Plus, label: 'New Count', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowCountDialog(true) },
                 { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowCountDialog(true) },
-                { icon: Users, label: 'Assign Team', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => toast.info('Assign Team', { description: 'Select team members to assign to stock count' }) },
-                { icon: ClipboardCheck, label: 'Start Count', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Start Count Session', { description: 'Begin recording inventory counts' }) },
-                { icon: CheckCircle2, label: 'Verify', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Verify Counts', { description: 'Review and approve count discrepancies' }) },
+                { icon: Users, label: 'Assign Team', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => toast.info('In Development', { description: 'Team assignment for counts coming soon' }) },
+                { icon: ClipboardCheck, label: 'Start Count', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('In Development', { description: 'Count session recording coming soon' }) },
+                { icon: CheckCircle2, label: 'Verify', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('In Development', { description: 'Count verification coming soon' }) },
                 { icon: FileText, label: 'Reports', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowExportDialog(true) },
-                { icon: History, label: 'History', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Count History', { description: 'View historical stock count records' }) },
-                { icon: Settings, label: 'Settings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Count Settings', { description: 'Configure count preferences and schedules' }) },
+                { icon: History, label: 'History', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Coming Soon', { description: 'Stock count history will be available soon' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Coming Soon', { description: 'Count settings will be available soon' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1577,14 +1577,14 @@ export default function StockClient() {
             {/* Alerts Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: AlertTriangle, label: 'View Critical', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.info('Critical Alerts', { description: `${alerts.filter(a => a.severity === 'critical').length} critical alerts require attention` }) },
-                { icon: Bell, label: 'Notifications', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Notification Settings', { description: 'Configure how you receive stock alerts' }) },
+                { icon: AlertTriangle, label: 'View Critical', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.warning('Critical Alerts', { description: `${alerts.filter(a => a.severity === 'critical').length} critical alerts require attention` }) },
+                { icon: Bell, label: 'Notifications', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Coming Soon', { description: 'Notification preferences will be available soon' }) },
                 { icon: CheckCircle2, label: 'Acknowledge', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.success('All Acknowledged', { description: 'All visible alerts have been acknowledged' }) },
                 { icon: Settings, label: 'Thresholds', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowAlertSettingsDialog(true) },
-                { icon: Mail, label: 'Email Rules', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Email Rules', { description: 'Configure email notification rules for alerts' }) },
-                { icon: Clock, label: 'Schedules', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Alert Schedules', { description: 'Set up scheduled alert digests' }) },
+                { icon: Mail, label: 'Email Rules', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Coming Soon', { description: 'Email notification rules planned for Q2 2026' }) },
+                { icon: Clock, label: 'Schedules', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Coming Soon', { description: 'Alert schedules will be available soon' }) },
                 { icon: FileText, label: 'Reports', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowExportDialog(true) },
-                { icon: Zap, label: 'Automations', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Alert Automations', { description: 'Create automated responses to stock alerts' }) },
+                { icon: Zap, label: 'Automations', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Coming Soon', { description: 'Alert automations planned for Q2 2026' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}

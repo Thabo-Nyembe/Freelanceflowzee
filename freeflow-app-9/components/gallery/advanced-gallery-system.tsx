@@ -258,7 +258,7 @@ export function AdvancedGallerySystem() {
             Manage your collections, analytics, and client galleries
           </p>
         </div>
-        <Button onClick={() => toast.info('Gallery Settings', { description: 'Opening gallery configuration...' })}>
+        <Button onClick={() => toast.info('Coming Soon', { description: 'Gallery settings will be available in the next release' })}>
           <Settings className="w-4 h-4 mr-2" />
           Settings
         </Button>

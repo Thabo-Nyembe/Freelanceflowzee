@@ -181,8 +181,8 @@ export function HelpWidget() {
                         onClick={(e) => {
                           e.preventDefault()
                           logger.info('Help link clicked', { title: link.title, category: link.category })
-                          toast.info('Opening resource', {
-                            description: `${link.title} - ${link.category}`
+                          toast.info('Coming Soon', {
+                            description: `${link.title} documentation will be available soon`
                           })
                         }}
                         className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all group"
@@ -207,8 +207,8 @@ export function HelpWidget() {
                   <Button
                     onClick={() => {
                       logger.info('Live chat opened from help widget')
-                      toast.info('Opening live chat', {
-                        description: 'Connect with our support team 24/7'
+                      toast.info('Coming Soon', {
+                        description: 'Live chat support will be available in Q2 2026'
                       })
                     }}
                     className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"

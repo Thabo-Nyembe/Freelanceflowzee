@@ -221,7 +221,7 @@ export function ActivityFeed({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => toast.info('Settings', { description: 'Notification settings coming soon' })}
+              onClick={() => toast.info('Coming Soon', { description: 'Notification settings will be available in the next release' })}
             >
               <Settings className="h-4 w-4" />
             </Button>

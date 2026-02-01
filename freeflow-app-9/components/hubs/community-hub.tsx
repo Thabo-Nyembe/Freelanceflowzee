@@ -552,7 +552,7 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
                   />
                 </div>
               </div>
-              <Button variant="outline" onClick={() => toast.info('Filters', { description: 'Opening member filters...' })}>
+              <Button variant="outline" onClick={() => toast.info('In Development', { description: 'Advanced member filters are being built' })}>
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
               </Button>
@@ -617,7 +617,7 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
                             <UserPlus className="w-3 h-3 mr-1" />
                             Connect
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Message', { description: `Opening chat with ${member.name}...` })}>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: `Direct messaging with ${member.name} is coming soon` })}>
                             <MessageSquare className="w-3 h-3" />
                           </Button>
                         </div>

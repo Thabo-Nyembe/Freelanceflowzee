@@ -112,7 +112,7 @@ export function FileBlock({
               <p>Drag & drop a file here, or click to select</p>
             )}
           </div>
-          <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('Upload', { description: 'Click anywhere in the dropzone or drag a file' })}>
+          <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('In Development', { description: 'Block file upload is being built' })}>
             <Upload className="w-4 h-4 mr-2" />
             Upload File
           </Button>

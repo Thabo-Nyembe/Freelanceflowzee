@@ -366,7 +366,7 @@ export function PackageSelector({
         </Sheet>
 
         {/* Contact Seller */}
-        <Button variant="outline" className="w-full" onClick={() => toast.info('Contact Seller', { description: 'Opening message composer...' })}>
+        <Button variant="outline" className="w-full" onClick={() => toast.info('Coming Soon', { description: 'Direct messaging with sellers is coming soon' })}>
           Contact Seller
         </Button>
       </CardContent>

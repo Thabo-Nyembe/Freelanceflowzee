@@ -239,19 +239,19 @@ export function RealtimeChat({
 
             {/* Header actions */}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => toast.info('Search', { description: 'Search messages in this chat' })}>
+              <Button variant="ghost" size="sm" onClick={() => toast.info('In Development', { description: 'Message search will be available soon' })}>
                 <Search className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => toast.info('Voice Call', { description: `Starting voice call with ${chatName}` })}>
+              <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Voice calls are coming in Q2 2026' })}>
                 <Phone className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => toast.info('Video Call', { description: `Starting video call with ${chatName}` })}>
+              <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Video calls are coming in Q2 2026' })}>
                 <Video className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => toast.info('Participants', { description: 'View chat participants' })}>
+              <Button variant="ghost" size="sm" onClick={() => toast.info('In Development', { description: 'Participant management coming soon' })}>
                 <Users className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => toast.info('More Options', { description: 'Chat settings and options' })}>
+              <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Advanced chat settings are planned' })}>
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </div>

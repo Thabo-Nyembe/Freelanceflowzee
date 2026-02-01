@@ -591,11 +591,11 @@ ${error.stack ? `\nStack:\n${error.stack}` : ''}
 
           {/* Quick Help Links */}
           <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
-            <Button variant="ghost" size="sm" className="flex items-center space-x-1" onClick={() => toast.info('Help Center', { description: 'Opening help documentation...' })}>
+            <Button variant="ghost" size="sm" className="flex items-center space-x-1" onClick={() => toast.info('Coming Soon', { description: 'Help center will be available soon' })}>
               <ExternalLink className="h-3 w-3" />
               <span>Help Center</span>
             </Button>
-            <Button variant="ghost" size="sm" className="flex items-center space-x-1" onClick={() => toast.info('Contact Support', { description: 'Support form opening...' })}>
+            <Button variant="ghost" size="sm" className="flex items-center space-x-1" onClick={() => toast.info('Coming Soon', { description: 'Contact support will be available in Q2 2026' })}>
               <MessageSquare className="h-3 w-3" />
               <span>Contact Support</span>
             </Button>

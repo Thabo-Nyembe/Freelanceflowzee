@@ -559,16 +559,16 @@ export function EnhancedCommentSystem({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {allowAttachments && (
-                    <Button variant="ghost" size="sm" onClick={() => toast.info('Attach File', { description: 'File attachments coming soon' })}>
+                    <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'File attachments will be available in Q2 2026' })}>
                       <Paperclip className="h-4 w-4" />
                     </Button>
                   )}
                   {allowMentions && (
-                    <Button variant="ghost" size="sm" onClick={() => toast.info('Mention', { description: 'Type @ to mention a team member' })}>
+                    <Button variant="ghost" size="sm" onClick={() => toast.info('In Development', { description: 'Type @ to mention - feature being refined' })}>
                       <AtSign className="h-4 w-4" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" onClick={() => toast.info('Emoji', { description: 'Emoji picker coming soon' })}>
+                  <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Emoji picker will be available soon' })}>
                     <Smile className="h-4 w-4" />
                   </Button>
                 </div>

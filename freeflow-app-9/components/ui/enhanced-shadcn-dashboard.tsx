@@ -441,17 +441,17 @@ export function EnhancedShadcnDashboard({
               </DialogContent>
             </Dialog>
             
-            <Button variant="outline" size="sm" onClick={() => toast.info('Team Invitations', { description: 'Opening team invitation dialog...' })}>
+            <Button variant="outline" size="sm" onClick={() => toast.info('In Development', { description: 'Team invitation system is being built' })}>
               <Users className="mr-2 h-4 w-4" />
               Invite Team
             </Button>
 
-            <Button variant="outline" size="sm" onClick={() => toast.info('Reports', { description: 'Loading analytics reports...' })}>
+            <Button variant="outline" size="sm" onClick={() => toast.info('In Development', { description: 'Advanced analytics reports coming soon' })}>
               <BarChart3 className="mr-2 h-4 w-4" />
               View Reports
             </Button>
 
-            <Button variant="outline" size="sm" onClick={() => toast.info('Notifications', { description: 'Opening notification center...' })}>
+            <Button variant="outline" size="sm" onClick={() => toast.info('In Development', { description: 'Notification center is being refined' })}>
               <Bell className="mr-2 h-4 w-4" />
               Notifications
             </Button>

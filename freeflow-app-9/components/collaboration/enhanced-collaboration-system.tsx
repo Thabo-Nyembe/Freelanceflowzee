@@ -245,14 +245,14 @@ export default function EnhancedCollaborationSystem({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => toast.info('Share session', { description: `Invite link copied for ${session.title}` })}
+            onClick={() => toast.info('In Development', { description: `Session sharing for ${session.title} coming soon` })}
           >
             <Share2 className="h-5 w-5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => toast.info('Settings', { description: 'Session settings coming soon' })}
+            onClick={() => toast.info('Coming Soon', { description: 'Session settings will be available in the next release' })}
           >
             <Settings className="h-5 w-5" />
           </Button>

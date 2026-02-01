@@ -493,15 +493,15 @@ export default function ReviewManagementDashboard({
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.info('View', { description: `Opening review ${review.name}...` })}>
+                    <Button variant="outline" size="sm" onClick={() => toast.info('In Development', { description: `Review viewer for ${review.name} coming soon` })}>
                       <Eye className="w-4 h-4 mr-1" />
                       View
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => toast.info('Edit', { description: `Editing review ${review.name}...` })}>
+                    <Button variant="outline" size="sm" onClick={() => toast.info('In Development', { description: `Review editor for ${review.name} coming soon` })}>
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => toast.success('Share', { description: 'Share link copied to clipboard' })}>
+                    <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Review sharing will be available soon' })}>
                       <Share className="w-4 h-4 mr-1" />
                       Share
                     </Button>
