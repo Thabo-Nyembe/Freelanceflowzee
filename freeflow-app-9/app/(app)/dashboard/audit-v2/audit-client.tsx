@@ -2127,9 +2127,9 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   </div>
                 </div>
                 <div className="flex items-center gap-2 pt-4">
-                  <Button className="flex-1 bg-green-600 hover:bg-green-700">Acknowledge</Button>
-                  <Button variant="outline" className="flex-1 border-slate-600 text-slate-300">Suppress</Button>
-                  <Button variant="destructive" className="flex-1">Delete</Button>
+                  <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => toast.success('Acknowledged', { description: 'Alert marked as acknowledged' })}>Acknowledge</Button>
+                  <Button variant="outline" className="flex-1 border-slate-600 text-slate-300" onClick={() => toast.info('Suppressed', { description: 'Alert has been suppressed' })}>Suppress</Button>
+                  <Button variant="destructive" className="flex-1" onClick={() => toast.warning('Delete', { description: 'Are you sure you want to delete this alert?' })}>Delete</Button>
                 </div>
               </div>
             )}

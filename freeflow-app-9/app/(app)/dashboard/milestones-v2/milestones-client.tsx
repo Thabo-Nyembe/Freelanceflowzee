@@ -2424,7 +2424,7 @@ export default function MilestonesClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset All Milestones</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Delete all milestone data</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Reset', { description: 'Are you sure? This will delete all milestone data.' })}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>

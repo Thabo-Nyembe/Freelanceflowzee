@@ -2089,14 +2089,14 @@ export default function InvestorMetricsClient() {
                               <Label className="text-red-700 dark:text-red-400">Reset All KPIs</Label>
                               <p className="text-sm text-red-600 dark:text-red-500">Clear all historical KPI data</p>
                             </div>
-                            <Button variant="destructive" size="sm">Reset</Button>
+                            <Button variant="destructive" size="sm" onClick={() => toast.warning('Reset', { description: 'Are you sure? This will clear all historical KPI data.' })}>Reset</Button>
                           </div>
                           <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                             <div>
                               <Label className="text-red-700 dark:text-red-400">Export & Delete Account</Label>
                               <p className="text-sm text-red-600 dark:text-red-500">Download all data and close account</p>
                             </div>
-                            <Button variant="destructive" size="sm">Export & Delete</Button>
+                            <Button variant="destructive" size="sm" onClick={() => toast.error('Export & Delete', { description: 'Are you sure? This action cannot be undone.' })}>Export & Delete</Button>
                           </div>
                         </CardContent>
                       </Card>

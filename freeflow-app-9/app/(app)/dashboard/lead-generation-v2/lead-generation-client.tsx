@@ -2800,7 +2800,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                             <p className="font-medium text-red-700 dark:text-red-400">Reset All Scoring</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Reset all lead scores to zero</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Reset', { description: 'Are you sure? This will reset all lead scores to zero.' })}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>

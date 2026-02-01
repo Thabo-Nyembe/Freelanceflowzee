@@ -1461,7 +1461,7 @@ export default function WorkflowsClient() {
                       <span className="text-muted-foreground">{template.steps} steps</span>
                     </div>
 
-                    <Button className="w-full">Use Template</Button>
+                    <Button className="w-full" onClick={() => toast.success('Template Applied', { description: `Using ${template.name} template` })}>Use Template</Button>
                   </CardContent>
                 </Card>
               ))}

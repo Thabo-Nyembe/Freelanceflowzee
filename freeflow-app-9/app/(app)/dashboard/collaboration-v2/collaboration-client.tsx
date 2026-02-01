@@ -1730,7 +1730,7 @@ export default function CollaborationClient() {
                             <p className="text-sm text-gray-500">Type: {integration.type}</p>
                           </div>
                           <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : integration.status === 'error' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge>
-                          {integration.status === 'connected' ? <Button variant="outline" size="sm">Disconnect</Button> : <Button size="sm">Connect</Button>}
+                          {integration.status === 'connected' ? <Button variant="outline" size="sm" onClick={() => toast.info('Disconnect', { description: `Disconnecting ${integration.name}...` })}>Disconnect</Button> : <Button size="sm" onClick={() => toast.success('Connect', { description: `Connecting ${integration.name}...` })}>Connect</Button>}
                         </div>
                       ))}
                     </div>
@@ -1921,7 +1921,7 @@ export default function CollaborationClient() {
                       </div>
                       <span className="font-medium">{integration}</span>
                     </div>
-                    <Button size="sm">Connect</Button>
+                    <Button size="sm" onClick={() => toast.success('Connect', { description: `Connecting ${integration}...` })}>Connect</Button>
                   </div>
                 ))}
               </div>

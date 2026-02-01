@@ -2223,14 +2223,14 @@ export default function CiCdClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Disable All Workflows</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Temporarily pause all workflows</p>
                           </div>
-                          <Button variant="destructive" size="sm">Disable</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Disable', { description: 'Are you sure? This will pause all workflows.' })}>Disable</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Artifacts</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all stored artifacts</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Delete', { description: 'Are you sure? This will remove all stored artifacts.' })}>Delete</Button>
                         </div>
                       </CardContent>
                     </Card>

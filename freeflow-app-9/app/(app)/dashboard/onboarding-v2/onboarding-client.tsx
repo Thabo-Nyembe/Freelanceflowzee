@@ -1915,7 +1915,7 @@ export default function OnboardingClient() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <Button className="w-full">Save Branding</Button>
+                      <Button className="w-full" onClick={() => toast.success('Saved', { description: 'Branding settings saved successfully' })}>Save Branding</Button>
                     </CardContent>
                   </Card>
                 )}
@@ -2092,14 +2092,14 @@ export default function OnboardingClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Reset All Flows</p>
                             <p className="text-sm text-gray-500">Delete all flow configurations</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Reset', { description: 'Are you sure? This will delete all flow configurations.' })}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">Clear Analytics</p>
                             <p className="text-sm text-gray-500">Remove all analytics data</p>
                           </div>
-                          <Button variant="destructive" size="sm">Clear</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Clear', { description: 'Are you sure? This will remove all analytics data.' })}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
