@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { createFeatureLogger } from '@/lib/logger';
-import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
 
 const logger = createFeatureLogger('data-export');
 
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       : data;
 
     // Generate export based on format
-    let exportResult: { content: string; contentType: string; extension: string };
+    let exportResult: { content: string | Buffer; contentType: string; extension: string };
 
     switch (format) {
       case 'csv':
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         exportResult = generatePDFHTML(exportData, dataSource);
         break;
       case 'xlsx':
-        exportResult = generateXLSX(exportData);
+        exportResult = await generateXLSX(exportData);
         break;
       case 'sql':
         exportResult = generateSQL(exportData, dataSource);
@@ -614,42 +614,59 @@ function generatePDFHTML(data: any[], dataSource: string): { content: string; co
   };
 }
 
-function generateXLSX(data: any[]): { content: Buffer; contentType: string; extension: string } {
-  const workbook = XLSX.utils.book_new();
+async function generateXLSX(data: any[]): Promise<{ content: Buffer; contentType: string; extension: string }> {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'KAZI Export System';
+  workbook.created = new Date();
 
   if (data.length === 0) {
-    const emptySheet = XLSX.utils.aoa_to_sheet([['No data available']]);
-    XLSX.utils.book_append_sheet(workbook, emptySheet, 'Export');
+    const worksheet = workbook.addWorksheet('Export');
+    worksheet.addRow(['No data available']);
   } else {
-    // Create worksheet from data
-    const worksheet = XLSX.utils.json_to_sheet(data);
-
-    // Auto-size columns based on content
+    const worksheet = workbook.addWorksheet('Export');
     const headers = Object.keys(data[0]);
-    const columnWidths = headers.map(key => ({
-      wch: Math.min(
-        50, // Max width
-        Math.max(
-          key.length + 2,
-          ...data.slice(0, 100).map(row => {
-            const val = row[key];
-            if (val === null || val === undefined) return 0;
-            if (typeof val === 'object') return JSON.stringify(val).length;
-            return String(val).length;
-          })
-        )
-      )
-    }));
-    worksheet['!cols'] = columnWidths;
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Export');
+    // Add header row with styling
+    const headerRow = worksheet.addRow(headers);
+    headerRow.font = { bold: true };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF7C3AED' }
+    };
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+
+    // Add data rows
+    data.forEach(row => {
+      const values = headers.map(h => {
+        const val = row[h];
+        if (val === null || val === undefined) return '';
+        if (typeof val === 'object') return JSON.stringify(val);
+        return val;
+      });
+      worksheet.addRow(values);
+    });
+
+    // Auto-size columns
+    headers.forEach((header, i) => {
+      const maxLength = Math.max(
+        header.length,
+        ...data.slice(0, 100).map(row => {
+          const val = row[header];
+          if (val === null || val === undefined) return 0;
+          if (typeof val === 'object') return JSON.stringify(val).length;
+          return String(val).length;
+        })
+      );
+      worksheet.getColumn(i + 1).width = Math.min(50, maxLength + 2);
+    });
   }
 
   // Generate buffer
-  const buffer = Buffer.from(XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }));
+  const buffer = await workbook.xlsx.writeBuffer();
 
   return {
-    content: buffer,
+    content: Buffer.from(buffer),
     contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     extension: 'xlsx'
   };

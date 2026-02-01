@@ -7,7 +7,7 @@ import { sanitizeInput } from '@/lib/security';
 import { logApiUsage, trackMetric } from '@/lib/analytics';
 import { v4 as uuidv4 } from 'uuid';
 import { createFeatureLogger } from '@/lib/logger'
-import * as XLSX from 'xlsx'
+import * as ExcelJS from 'exceljs'
 
 // Inline type definitions
 type TimeWindow = '1h' | '24h' | '7d' | '30d' | '90d' | '1y';
@@ -161,31 +161,42 @@ function generateCSV(data: any): string {
 }
 
 // Helper to generate Excel format
-function generateExcel(data: any, sheetName: string = 'Dashboard Metrics'): Buffer {
-  const workbook = XLSX.utils.book_new();
+async function generateExcel(data: any, sheetName: string = 'Dashboard Metrics'): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'KAZI Predictive Analytics';
+  workbook.created = new Date();
 
   if (!data || typeof data !== 'object') {
     // Empty workbook
-    const emptySheet = XLSX.utils.aoa_to_sheet([['No data available']]);
-    XLSX.utils.book_append_sheet(workbook, emptySheet, sheetName);
+    const worksheet = workbook.addWorksheet(sheetName);
+    worksheet.addRow(['No data available']);
   } else if (Array.isArray(data)) {
     // Handle array of objects
     if (data.length === 0) {
-      const emptySheet = XLSX.utils.aoa_to_sheet([['No data available']]);
-      XLSX.utils.book_append_sheet(workbook, emptySheet, sheetName);
+      const worksheet = workbook.addWorksheet(sheetName);
+      worksheet.addRow(['No data available']);
     } else {
-      const worksheet = XLSX.utils.json_to_sheet(data);
+      const worksheet = workbook.addWorksheet(sheetName);
+      const headers = Object.keys(data[0]);
+
+      // Add header row
+      const headerRow = worksheet.addRow(headers);
+      headerRow.font = { bold: true };
+
+      // Add data rows
+      data.forEach(row => {
+        const values = headers.map(h => row[h] ?? '');
+        worksheet.addRow(values);
+      });
 
       // Auto-size columns
-      const columnWidths = Object.keys(data[0]).map(key => ({
-        wch: Math.max(
-          key.length,
-          ...data.map(row => String(row[key] || '').length)
-        )
-      }));
-      worksheet['!cols'] = columnWidths;
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      headers.forEach((header, i) => {
+        const maxLength = Math.max(
+          header.length,
+          ...data.map(row => String(row[header] || '').length)
+        );
+        worksheet.getColumn(i + 1).width = Math.min(50, maxLength + 2);
+      });
     }
   } else {
     // Handle nested object with multiple sections
@@ -193,28 +204,31 @@ function generateExcel(data: any, sheetName: string = 'Dashboard Metrics'): Buff
 
     sections.forEach(sectionName => {
       const sectionData = data[sectionName];
-      let worksheet;
+      const sanitizedName = sectionName.substring(0, 31).replace(/[\\/*?:\[\]]/g, '_');
+      const worksheet = workbook.addWorksheet(sanitizedName);
 
       if (Array.isArray(sectionData) && sectionData.length > 0) {
-        worksheet = XLSX.utils.json_to_sheet(sectionData);
+        const headers = Object.keys(sectionData[0]);
+        worksheet.addRow(headers);
+        sectionData.forEach(row => {
+          const values = headers.map(h => row[h] ?? '');
+          worksheet.addRow(values);
+        });
       } else if (typeof sectionData === 'object' && sectionData !== null) {
         // Convert object to key-value pairs
-        const pairs = Object.entries(sectionData).map(([key, value]) => ({
-          Property: key,
-          Value: typeof value === 'object' ? JSON.stringify(value) : value
-        }));
-        worksheet = XLSX.utils.json_to_sheet(pairs);
+        worksheet.addRow(['Property', 'Value']);
+        Object.entries(sectionData).forEach(([key, value]) => {
+          worksheet.addRow([key, typeof value === 'object' ? JSON.stringify(value) : value]);
+        });
       } else {
-        worksheet = XLSX.utils.aoa_to_sheet([[sectionName, sectionData]]);
+        worksheet.addRow([sectionName, sectionData]);
       }
-
-      const sanitizedName = sectionName.substring(0, 31).replace(/[\\/*?:\[\]]/g, '_');
-      XLSX.utils.book_append_sheet(workbook, worksheet, sanitizedName);
     });
   }
 
   // Generate buffer
-  return Buffer.from(XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }));
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(buffer);
 }
 
 // Helper to validate optimization strategy
@@ -339,7 +353,7 @@ async function handleDashboardMetrics(req: NextRequest) {
         }
       });
     } else if (format === 'excel') {
-      const excelBuffer = generateExcel(metrics, 'Dashboard Metrics');
+      const excelBuffer = await generateExcel(metrics, 'Dashboard Metrics');
       return new NextResponse(excelBuffer, {
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
