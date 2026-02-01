@@ -709,7 +709,7 @@ export default function CollaborationClient() {
     try {
       await sendInvitation.mutateAsync({
         email: inviteEmail.trim(),
-        role: inviteRole as any
+        role: inviteRole
       })
       setShowInviteDialog(false)
       setInviteEmail('')

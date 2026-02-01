@@ -496,7 +496,7 @@ export default function KnowledgeBaseClient() {
         description: newPageContent.trim() || null,
         content: newPageContent.trim() || null,
         category: newPageCategory as string,
-        status: 'draft' as any,
+        status: 'draft',
       })
 
       toast.success('Page created', { description: `"${newPageTitle}" has been created` })
@@ -523,7 +523,7 @@ export default function KnowledgeBaseClient() {
   const handlePublishPage = async (pageId: string, pageTitle: string) => {
     try {
       await updateArticle(pageId, {
-        status: 'published' as any,
+        status: 'published',
         is_published: true,
         published_at: new Date().toISOString()
       })

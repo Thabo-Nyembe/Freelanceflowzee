@@ -165,7 +165,7 @@ const transformWidget = (w: LibraryWidget, isBookmarked: boolean): Widget => ({
   is_featured: w.is_featured || false,
   is_official: w.is_official || false,
   is_bookmarked: isBookmarked,
-  compatibility: w.compatibility as any || { react: '>=18.0.0', next: '>=14.0.0', tailwind: '>=3.0.0' },
+  compatibility: w.compatibility || { react: '>=18.0.0', next: '>=14.0.0', tailwind: '>=3.0.0' },
   code_snippet: w.code_snippet || ''
 })
 

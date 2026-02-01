@@ -577,7 +577,7 @@ export default function LearningClient() {
 
   // Supabase hooks
   const { paths: dbPaths, loading: pathsLoading, createPath, updatePath, deletePath, mutating: pathsMutating } = useLearning()
-  const { courses: dbCourses, loading: coursesLoading, createCourse, updateCourse, deleteCourse, mutating: coursesMutating } = useCourses({ category: selectedCategory, level: selectedLevel as any })
+  const { courses: dbCourses, loading: coursesLoading, createCourse, updateCourse, deleteCourse, mutating: coursesMutating } = useCourses({ category: selectedCategory, level: selectedLevel })
   const { progress: dbProgress, loading: progressLoading, updateProgress } = useUserProgress()
   const { collections: dbCollections, loading: collectionsLoading, createCollection, updateCollection, deleteCollection, mutating: collectionsMutating } = useCollections()
 

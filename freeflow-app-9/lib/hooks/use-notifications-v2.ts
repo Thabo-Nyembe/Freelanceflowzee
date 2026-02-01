@@ -244,7 +244,7 @@ export function useNotificationsV2(options: UseNotificationsV2Options = {}) {
           filter: `user_id=eq.${userId}`
         },
         (payload) => {
-          const newNotification = payload.new as any
+          const newNotification = payload.new as Record<string, unknown>
           const transformed: NotificationV2 = {
             id: newNotification.id,
             user_id: newNotification.user_id,
@@ -281,7 +281,7 @@ export function useNotificationsV2(options: UseNotificationsV2Options = {}) {
           filter: `user_id=eq.${userId}`
         },
         (payload) => {
-          const updated = payload.new as any
+          const updated = payload.new as Record<string, unknown>
           setNotifications(prev =>
             prev.map(n => {
               if (n.id === updated.id) {

@@ -1375,7 +1375,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <CardContent>
                   <div className="space-y-3">
                     {['platinum', 'gold', 'silver', 'bronze'].map(tier => {
-                      const tierClients = filteredClients.filter(c => c.tier === tier as any)
+                      const tierClients = filteredClients.filter(c => c.tier === tier)
                       const tierRevenue = tierClients.reduce((sum, c) => sum + c.revenue, 0)
                       return (
                         <div key={tier} className="space-y-1">

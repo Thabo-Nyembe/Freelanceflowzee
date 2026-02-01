@@ -65,7 +65,7 @@ export function useAIOperations() {
         (payload) => {
           // Handle realtime AI operation updates
           if (payload.eventType === 'UPDATE' && payload.new) {
-            const operation = payload.new as any
+            const operation = payload.new as Record<string, unknown>
             if (operation.operation_type === 'transcription' && operation.result) {
               setAIData(prev => ({ ...prev, transcription: operation.result }))
             } else if (operation.operation_type === 'analysis' && operation.result) {

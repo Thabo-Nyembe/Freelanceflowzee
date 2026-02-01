@@ -562,7 +562,7 @@ export default function ModelingStudioPage() {
 
                   {/* View options */}
                   <div className="flex items-center gap-4">
-                    <Select value={viewMode} onValueChange={setViewMode as any}>
+                    <Select value={viewMode} onValueChange={setViewMode}>
                       <SelectTrigger data-testid="3d-view-mode-select" className="w-32">
                         <SelectValue />
                       </SelectTrigger>

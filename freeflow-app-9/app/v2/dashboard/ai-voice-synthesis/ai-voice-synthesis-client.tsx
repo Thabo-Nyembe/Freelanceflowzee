@@ -243,7 +243,7 @@ export default function AiVoiceSynthesisClient() {
   }, [userId, announce])
 
   const filteredVoices = filterVoices(voices, {
-    gender: voiceGender !== 'all' ? voiceGender as any : undefined,
+    gender: voiceGender !== 'all' ? voiceGender : undefined,
     search: voiceSearch || undefined
   })
 

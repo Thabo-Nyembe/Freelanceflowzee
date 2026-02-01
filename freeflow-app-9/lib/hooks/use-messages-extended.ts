@@ -175,7 +175,7 @@ export function useDirectMessagesRealtime(userId1?: string, userId2?: string) {
     supabase.from('messages').select('*, message_attachments(*)').or(`and(sender_id.eq.${userId1},recipient_id.eq.${userId2}),and(sender_id.eq.${userId2},recipient_id.eq.${userId1})`).eq('is_deleted', false).order('created_at', { ascending: true }).limit(100).then(({ data }) => setMessages(data || []))
     const channel = supabase.channel(`dm_${[userId1, userId2].sort().join('_')}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-        const msg = payload.new as any
+        const msg = payload.new as Record<string, unknown>
         if ((msg.sender_id === userId1 && msg.recipient_id === userId2) || (msg.sender_id === userId2 && msg.recipient_id === userId1)) {
           setMessages(prev => [...prev, msg])
         }

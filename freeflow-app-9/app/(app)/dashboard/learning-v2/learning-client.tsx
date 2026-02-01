@@ -338,7 +338,7 @@ export default function LearningClient() {
 
   // Supabase hooks - real data from database
   const { paths: dbPaths, loading: pathsLoading, error: pathsError, createPath, updatePath, deletePath, mutating: pathsMutating, refetch: refetchPaths } = useLearning()
-  const { courses: dbCourses, loading: coursesLoading, error: coursesError, createCourse, updateCourse, deleteCourse, mutating: coursesMutating, refetch: refetchCourses } = useCourses({ category: selectedCategory, level: selectedLevel as any })
+  const { courses: dbCourses, loading: coursesLoading, error: coursesError, createCourse, updateCourse, deleteCourse, mutating: coursesMutating, refetch: refetchCourses } = useCourses({ category: selectedCategory, level: selectedLevel })
   const { progress: dbProgress, loading: progressLoading, error: progressError, updateProgress, refetch: refetchProgress } = useUserProgress()
   const { collections: dbCollections, loading: collectionsLoading, error: collectionsError, createCollection, updateCollection, deleteCollection, mutating: collectionsMutating, refetch: refetchCollections } = useCollections()
 

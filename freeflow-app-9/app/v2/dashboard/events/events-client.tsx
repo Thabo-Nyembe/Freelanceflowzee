@@ -2887,7 +2887,7 @@ export default function EventsClient() {
             <Button
               variant="outline"
               className="text-red-600 border-red-300 hover:bg-red-50"
-              onClick={() => eventToEdit && handleCancelEvent(eventToEdit as any)}
+              onClick={() => eventToEdit && handleCancelEvent(eventToEdit)}
               disabled={mutating}
             >
               <XCircle className="w-4 h-4 mr-2" />

@@ -409,7 +409,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const { data: clientsData, isLoading: clientsLoading, error: clientsError, refetch: refetchClients } = useClients(
     page,
     pageSize,
-    statusFilter !== 'all' ? { status: [statusFilter === 'customer' ? 'active' : statusFilter] as any } : undefined
+    statusFilter !== 'all' ? { status: [statusFilter === 'customer' ? 'active' : statusFilter] } : undefined
   )
 
   // Client Stats Query - dashboard metrics
@@ -656,7 +656,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         contactName: client.primaryContact?.name || client.name || '',
         email: client.primaryContact?.email || client.email || '',
         phone: client.primaryContact?.phone || client.phone || '',
-        status: client.status === 'customer' ? 'active' : (client.status as any) || 'active'
+        status: client.status === 'customer' ? 'active' : client.status || 'active'
       })
     }
     setShowEditDialog(true)
@@ -1705,7 +1705,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <CardContent>
                   <div className="space-y-3">
                     {['platinum', 'gold', 'silver', 'bronze'].map(tier => {
-                      const tierClients = filteredClients.filter(c => c.tier === tier as any)
+                      const tierClients = filteredClients.filter(c => c.tier === tier)
                       const tierRevenue = tierClients.reduce((sum, c) => sum + c.revenue, 0)
                       return (
                         <div key={tier} className="space-y-1">

@@ -2651,7 +2651,7 @@ export default function ProjectsHubClient() {
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={[] as any}
+              insights={[]}
               onInsightAction={(insight: any) => {
                 toast.promise(
                   fetch('/api/projects/insights/apply', {
@@ -2679,7 +2679,7 @@ export default function ProjectsHubClient() {
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={[] as any}
+              predictions={[]}
             />
           </div>
         </div>
@@ -2691,7 +2691,7 @@ export default function ProjectsHubClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={[] as any}
+            actions={[]}
           />
         </div>
 

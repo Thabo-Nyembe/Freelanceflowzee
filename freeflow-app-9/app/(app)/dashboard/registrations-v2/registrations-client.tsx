@@ -818,10 +818,10 @@ export default function RegistrationsClient() {
       job_title: registration.job_title || '',
       event_id: registration.event_id || '',
       registration_type: registration.registration_type,
-      ticket_type: (registration.ticket_type as any) || 'paid',
+      ticket_type: registration.ticket_type || 'paid',
       ticket_price: registration.ticket_price || 0,
       status: registration.status,
-      payment_status: (registration.payment_status as any) || 'pending'
+      payment_status: registration.payment_status || 'pending'
     })
     setShowEditDialog(true)
   }

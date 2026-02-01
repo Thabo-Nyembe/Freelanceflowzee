@@ -62,7 +62,7 @@ export function useGrowthAutomation(): UseGrowthAutomationReturn {
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             // Trigger a refresh of lead scores
             setLeadScores(prev => {
-              const newLead = payload.new as any
+              const newLead = payload.new as Record<string, unknown>
               const exists = prev.find(l => l.leadId === newLead.id)
               if (exists) {
                 return prev.map(l => l.leadId === newLead.id ? { ...l, ...newLead } : l)

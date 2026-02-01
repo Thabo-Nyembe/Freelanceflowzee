@@ -102,7 +102,7 @@ export function useStorageOnboarding(): UseStorageOnboardingReturn {
         { event: '*', schema: 'public', table: 'user_preferences' },
         async (payload) => {
           if (payload.eventType === 'UPDATE') {
-            const newPrefs = payload.new as any
+            const newPrefs = payload.new as Record<string, unknown>
             if (newPrefs.storage_onboarding_completed || newPrefs.storage_onboarding_skipped) {
               setShowWizard(false)
             }

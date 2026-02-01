@@ -295,7 +295,7 @@ export default function LogsClient() {
     const channel = supabase
       .channel('system_logs_changes')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'system_logs' }, (payload) => {
-        setDbSystemLogs(prev => [payload.new as any, ...prev].slice(0, 100))
+        setDbSystemLogs(prev => [payload.new as Record<string, unknown>, ...prev].slice(0, 100))
       })
       .subscribe()
 

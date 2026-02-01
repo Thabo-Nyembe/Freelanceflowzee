@@ -63,7 +63,7 @@ export function useRevenueIntelligence(): UseRevenueIntelligenceReturn {
         { event: '*', schema: 'public', table: 'revenue_reports' },
         (payload) => {
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-            const newReport = payload.new as any
+            const newReport = payload.new as Record<string, unknown>
             if (newReport.report_data) {
               setReport(newReport.report_data)
             }

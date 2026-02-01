@@ -392,7 +392,7 @@ export default function KaziWorkflowsClient() {
   // Handle archive
   const handleArchive = useCallback(async () => {
     if (!selectedWorkflow) return
-    await updateWorkflow(selectedWorkflow.id, { ...selectedWorkflow, status: 'archived' as any })
+    await updateWorkflow(selectedWorkflow.id, { ...selectedWorkflow, status: 'archived' })
     setIsArchiveDialogOpen(false)
     toast.success(`Workflow "${selectedWorkflow.name}" has been archived.`)
   }, [selectedWorkflow, updateWorkflow])

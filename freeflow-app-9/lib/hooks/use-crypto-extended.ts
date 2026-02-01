@@ -139,7 +139,7 @@ export function useCryptoPricesRealtime(currencies?: string[]) {
     const channel = supabase.channel('crypto_prices_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'crypto_prices' }, (payload) => {
         if (payload.new) {
-          const p = payload.new as any
+          const p = payload.new as Record<string, unknown>
           setPrices(prev => ({ ...prev, [`${p.currency}_${p.network}`]: p }))
         }
       })

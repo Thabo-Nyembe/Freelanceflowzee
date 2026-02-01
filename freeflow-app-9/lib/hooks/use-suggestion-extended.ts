@@ -169,7 +169,7 @@ export function useSuggestionsRealtime(userId?: string) {
         }
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'suggestions', filter: `user_id=eq.${userId}` }, (payload) => {
-        const updated = payload.new as any
+        const updated = payload.new as Record<string, unknown>
         if (updated.status === 'pending') {
           setSuggestions(prev => prev.map(s => s.id === updated.id ? updated : s))
         } else {
