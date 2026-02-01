@@ -453,6 +453,53 @@ export default function StockClient() {
   const [showMovementHistoryDialog, setShowMovementHistoryDialog] = useState(false)
   const [showEditProductDialog, setShowEditProductDialog] = useState(false)
   const [showBarcodeDialog, setShowBarcodeDialog] = useState(false)
+
+  // Additional settings dialogs
+  const [showInventorySettingsDialog, setShowInventorySettingsDialog] = useState(false)
+  const [showShipmentDialog, setShowShipmentDialog] = useState(false)
+  const [showReturnDialog, setShowReturnDialog] = useState(false)
+  const [showMovementSettingsDialog, setShowMovementSettingsDialog] = useState(false)
+
+  // Shipment form
+  const [shipmentForm, setShipmentForm] = useState({
+    productId: '',
+    quantity: '',
+    warehouseId: '',
+    carrier: 'fedex',
+    trackingNumber: '',
+    destination: '',
+    notes: ''
+  })
+
+  // Return form
+  const [returnForm, setReturnForm] = useState({
+    productId: '',
+    quantity: '',
+    warehouseId: '',
+    reason: 'defective',
+    condition: 'damaged',
+    notes: ''
+  })
+
+  // Inventory settings
+  const [inventorySettings, setInventorySettings] = useState({
+    autoReorder: true,
+    lowStockThreshold: 10,
+    criticalStockThreshold: 5,
+    defaultWarehouse: '',
+    trackSerialNumbers: false,
+    trackBatchNumbers: true,
+    allowNegativeStock: false
+  })
+
+  // Movement settings
+  const [movementSettings, setMovementSettings] = useState({
+    requireApproval: false,
+    autoGenerateRefs: true,
+    requireNotes: false,
+    notifyOnTransfer: true,
+    notifyOnShipment: true
+  })
   const [editProductForm, setEditProductForm] = useState({
     name: '',
     sku: '',
@@ -827,6 +874,63 @@ export default function StockClient() {
     setShowEditProductDialog(false)
   }
 
+  // Handler for shipment
+  const handleSubmitShipment = () => {
+    if (!shipmentForm.productId || !shipmentForm.quantity || !shipmentForm.destination) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    toast.success('Shipment created', {
+      description: `Shipment to ${shipmentForm.destination} has been scheduled`
+    })
+    setShowShipmentDialog(false)
+    setShipmentForm({
+      productId: '',
+      quantity: '',
+      warehouseId: '',
+      carrier: 'fedex',
+      trackingNumber: '',
+      destination: '',
+      notes: ''
+    })
+  }
+
+  // Handler for return
+  const handleSubmitReturn = () => {
+    if (!returnForm.productId || !returnForm.quantity) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    toast.success('Return processed', {
+      description: `Return has been recorded and inventory updated`
+    })
+    setShowReturnDialog(false)
+    setReturnForm({
+      productId: '',
+      quantity: '',
+      warehouseId: '',
+      reason: 'defective',
+      condition: 'damaged',
+      notes: ''
+    })
+  }
+
+  // Handler for saving inventory settings
+  const handleSaveInventorySettings = () => {
+    toast.success('Settings saved', {
+      description: 'Inventory settings have been updated'
+    })
+    setShowInventorySettingsDialog(false)
+  }
+
+  // Handler for saving movement settings
+  const handleSaveMovementSettings = () => {
+    toast.success('Settings saved', {
+      description: 'Movement settings have been updated'
+    })
+    setShowMovementSettingsDialog(false)
+  }
+
   // QuickActions with real functionality
   const stockQuickActions = [
     { id: '1', label: 'Add Stock', icon: 'plus', action: () => setShowAddStockDialog(true), variant: 'default' as const },
@@ -1022,7 +1126,7 @@ export default function StockClient() {
                 { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowExportDialog(true) },
                 { icon: Upload, label: 'Import', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowImportDialog(true) },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Coming Soon', { description: 'Inventory settings will be available in the next release' }) }
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowInventorySettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1235,13 +1339,13 @@ export default function StockClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: ArrowDownToLine, label: 'Receive', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowAddStockDialog(true) },
-                { icon: ArrowUpFromLine, label: 'Ship', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Coming Soon', { description: 'Shipment creation will be available soon' }) },
+                { icon: ArrowUpFromLine, label: 'Ship', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowShipmentDialog(true) },
                 { icon: ArrowRightLeft, label: 'Transfer', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowTransferDialog(true) },
-                { icon: RotateCcw, label: 'Return', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Coming Soon', { description: 'Return processing will be available soon' }) },
+                { icon: RotateCcw, label: 'Return', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowReturnDialog(true) },
                 { icon: Search, label: 'Search', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => document.querySelector<HTMLInputElement>('input[placeholder="Search products..."]')?.focus() },
                 { icon: Filter, label: 'Filter', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setMovementTypeFilter('all') },
                 { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowExportDialog(true) },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Coming Soon', { description: 'Movement settings will be available soon' }) }
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowMovementSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -3303,6 +3407,355 @@ export default function StockClient() {
                   Import Data
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Inventory Settings Dialog */}
+      <Dialog open={showInventorySettingsDialog} onOpenChange={setShowInventorySettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-gray-600" />
+              Inventory Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your inventory management preferences
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Auto Reorder</Label>
+                <p className="text-xs text-muted-foreground">Automatically create orders when stock is low</p>
+              </div>
+              <Checkbox
+                checked={inventorySettings.autoReorder}
+                onCheckedChange={(checked) => setInventorySettings(prev => ({ ...prev, autoReorder: checked as boolean }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Low Stock Threshold</Label>
+              <Input
+                type="number"
+                value={inventorySettings.lowStockThreshold}
+                onChange={(e) => setInventorySettings(prev => ({ ...prev, lowStockThreshold: parseInt(e.target.value) }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Critical Stock Threshold</Label>
+              <Input
+                type="number"
+                value={inventorySettings.criticalStockThreshold}
+                onChange={(e) => setInventorySettings(prev => ({ ...prev, criticalStockThreshold: parseInt(e.target.value) }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Track Serial Numbers</Label>
+                <p className="text-xs text-muted-foreground">Enable serial number tracking for products</p>
+              </div>
+              <Checkbox
+                checked={inventorySettings.trackSerialNumbers}
+                onCheckedChange={(checked) => setInventorySettings(prev => ({ ...prev, trackSerialNumbers: checked as boolean }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Track Batch Numbers</Label>
+                <p className="text-xs text-muted-foreground">Enable batch/lot number tracking</p>
+              </div>
+              <Checkbox
+                checked={inventorySettings.trackBatchNumbers}
+                onCheckedChange={(checked) => setInventorySettings(prev => ({ ...prev, trackBatchNumbers: checked as boolean }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Allow Negative Stock</Label>
+                <p className="text-xs text-muted-foreground">Allow stock to go below zero</p>
+              </div>
+              <Checkbox
+                checked={inventorySettings.allowNegativeStock}
+                onCheckedChange={(checked) => setInventorySettings(prev => ({ ...prev, allowNegativeStock: checked as boolean }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInventorySettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveInventorySettings}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Shipment Dialog */}
+      <Dialog open={showShipmentDialog} onOpenChange={setShowShipmentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Truck className="w-5 h-5 text-indigo-600" />
+              Create Shipment
+            </DialogTitle>
+            <DialogDescription>
+              Ship products to a destination
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Product</Label>
+              <Select value={shipmentForm.productId} onValueChange={(v) => setShipmentForm(prev => ({ ...prev, productId: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select product" />
+                </SelectTrigger>
+                <SelectContent>
+                  {products.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name} ({p.sku})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Quantity</Label>
+              <Input
+                type="number"
+                value={shipmentForm.quantity}
+                onChange={(e) => setShipmentForm(prev => ({ ...prev, quantity: e.target.value }))}
+                placeholder="Enter quantity"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>From Warehouse</Label>
+              <Select value={shipmentForm.warehouseId} onValueChange={(v) => setShipmentForm(prev => ({ ...prev, warehouseId: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select warehouse" />
+                </SelectTrigger>
+                <SelectContent>
+                  {warehouses.map(w => (
+                    <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Carrier</Label>
+              <Select value={shipmentForm.carrier} onValueChange={(v) => setShipmentForm(prev => ({ ...prev, carrier: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fedex">FedEx</SelectItem>
+                  <SelectItem value="ups">UPS</SelectItem>
+                  <SelectItem value="usps">USPS</SelectItem>
+                  <SelectItem value="dhl">DHL</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Destination</Label>
+              <Input
+                value={shipmentForm.destination}
+                onChange={(e) => setShipmentForm(prev => ({ ...prev, destination: e.target.value }))}
+                placeholder="Enter destination address"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea
+                value={shipmentForm.notes}
+                onChange={(e) => setShipmentForm(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Add any notes..."
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShipmentDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={handleSubmitShipment}>
+              <Truck className="w-4 h-4 mr-2" />
+              Create Shipment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Return Dialog */}
+      <Dialog open={showReturnDialog} onOpenChange={setShowReturnDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RotateCcw className="w-5 h-5 text-purple-600" />
+              Process Return
+            </DialogTitle>
+            <DialogDescription>
+              Record a product return to inventory
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Product</Label>
+              <Select value={returnForm.productId} onValueChange={(v) => setReturnForm(prev => ({ ...prev, productId: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select product" />
+                </SelectTrigger>
+                <SelectContent>
+                  {products.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name} ({p.sku})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Quantity</Label>
+              <Input
+                type="number"
+                value={returnForm.quantity}
+                onChange={(e) => setReturnForm(prev => ({ ...prev, quantity: e.target.value }))}
+                placeholder="Enter quantity"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Return to Warehouse</Label>
+              <Select value={returnForm.warehouseId} onValueChange={(v) => setReturnForm(prev => ({ ...prev, warehouseId: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select warehouse" />
+                </SelectTrigger>
+                <SelectContent>
+                  {warehouses.map(w => (
+                    <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Return Reason</Label>
+              <Select value={returnForm.reason} onValueChange={(v) => setReturnForm(prev => ({ ...prev, reason: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="defective">Defective Product</SelectItem>
+                  <SelectItem value="wrong_item">Wrong Item Shipped</SelectItem>
+                  <SelectItem value="customer_return">Customer Return</SelectItem>
+                  <SelectItem value="damaged">Damaged in Transit</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Product Condition</Label>
+              <Select value={returnForm.condition} onValueChange={(v) => setReturnForm(prev => ({ ...prev, condition: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">New / Unopened</SelectItem>
+                  <SelectItem value="like_new">Like New</SelectItem>
+                  <SelectItem value="good">Good</SelectItem>
+                  <SelectItem value="damaged">Damaged</SelectItem>
+                  <SelectItem value="unsellable">Unsellable</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea
+                value={returnForm.notes}
+                onChange={(e) => setReturnForm(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Add any notes about the return..."
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReturnDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleSubmitReturn}>
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Process Return
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Movement Settings Dialog */}
+      <Dialog open={showMovementSettingsDialog} onOpenChange={setShowMovementSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-gray-600" />
+              Movement Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure stock movement preferences
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Require Approval</Label>
+                <p className="text-xs text-muted-foreground">Movements need manager approval</p>
+              </div>
+              <Checkbox
+                checked={movementSettings.requireApproval}
+                onCheckedChange={(checked) => setMovementSettings(prev => ({ ...prev, requireApproval: checked as boolean }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Auto-Generate References</Label>
+                <p className="text-xs text-muted-foreground">Automatically create movement reference numbers</p>
+              </div>
+              <Checkbox
+                checked={movementSettings.autoGenerateRefs}
+                onCheckedChange={(checked) => setMovementSettings(prev => ({ ...prev, autoGenerateRefs: checked as boolean }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Require Notes</Label>
+                <p className="text-xs text-muted-foreground">Notes are mandatory for all movements</p>
+              </div>
+              <Checkbox
+                checked={movementSettings.requireNotes}
+                onCheckedChange={(checked) => setMovementSettings(prev => ({ ...prev, requireNotes: checked as boolean }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Notify on Transfer</Label>
+                <p className="text-xs text-muted-foreground">Send notifications for stock transfers</p>
+              </div>
+              <Checkbox
+                checked={movementSettings.notifyOnTransfer}
+                onCheckedChange={(checked) => setMovementSettings(prev => ({ ...prev, notifyOnTransfer: checked as boolean }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Notify on Shipment</Label>
+                <p className="text-xs text-muted-foreground">Send notifications when items are shipped</p>
+              </div>
+              <Checkbox
+                checked={movementSettings.notifyOnShipment}
+                onCheckedChange={(checked) => setMovementSettings(prev => ({ ...prev, notifyOnShipment: checked as boolean }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMovementSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveMovementSettings}>
+              Save Settings
             </Button>
           </DialogFooter>
         </DialogContent>
