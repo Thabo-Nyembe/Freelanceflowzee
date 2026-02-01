@@ -94,7 +94,22 @@ export default function ProfilePage() {
                     {profile?.full_name?.charAt(0) || 'U'}
                   </div>
                   <button
-                    onClick={() => toast.info('Upload profile photo')}
+                    onClick={() => {
+                      const input = document.createElement('input')
+                      input.type = 'file'
+                      input.accept = 'image/*'
+                      input.onchange = async (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0]
+                        if (file) {
+                          if (file.size > 5 * 1024 * 1024) {
+                            toast.error('File too large', { description: 'Max file size is 5MB' })
+                            return
+                          }
+                          toast.success('Photo selected', { description: `${file.name} ready to upload` })
+                        }
+                      }
+                      input.click()
+                    }}
                     className="absolute bottom-0 right-0 w-8 h-8 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50"
                   >
                     <Camera className="w-4 h-4" />
@@ -112,7 +127,10 @@ export default function ProfilePage() {
                       Settings
                     </button>
                     <button
-                      onClick={() => toast.info('Edit profile')}
+                      onClick={() => {
+                        router.push('/v1/dashboard/settings?tab=profile')
+                        toast.info('Edit profile', { description: 'Update your profile details below' })
+                      }}
                       className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-pink-600 flex items-center gap-2"
                     >
                       <Edit className="w-4 h-4" />

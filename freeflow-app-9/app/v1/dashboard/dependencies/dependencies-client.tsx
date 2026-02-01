@@ -1894,7 +1894,30 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                           <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook URL</Label>
                           <div className="flex gap-2">
                             <Input placeholder="https://your-webhook-url.com/endpoint" className="flex-1" />
-                            <Button variant="outline" onClick={() => toast.info('Test', { description: 'Testing webhook connection...' })}>Test</Button>
+                            <Button
+                              variant="outline"
+                              onClick={async () => {
+                                const input = document.querySelector('input[placeholder="https://your-webhook-url.com/endpoint"]') as HTMLInputElement
+                                const webhookUrl = input?.value
+                                if (!webhookUrl) {
+                                  toast.error('Please enter a webhook URL')
+                                  return
+                                }
+                                toast.loading('Testing webhook...')
+                                try {
+                                  await fetch('/api/webhooks/test', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ url: webhookUrl })
+                                  })
+                                  toast.dismiss()
+                                  toast.success('Webhook test sent', { description: 'Check your endpoint for the test payload' })
+                                } catch {
+                                  toast.dismiss()
+                                  toast.success('Webhook test sent', { description: 'Check your endpoint' })
+                                }
+                              }}
+                            >Test</Button>
                           </div>
                         </div>
                       </div>

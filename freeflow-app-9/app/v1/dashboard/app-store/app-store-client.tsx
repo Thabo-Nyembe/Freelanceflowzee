@@ -1061,7 +1061,10 @@ export default function AppStoreClient() {
                   <Award className="w-5 h-5 text-yellow-500" />
                   Editor's Choice
                 </h3>
-                <Button variant="ghost" size="sm" onClick={() => toast.info('Editor\'s Choice', { description: 'Viewing all editor\'s choice apps...' })}>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  setSearchQuery('editor choice')
+                  toast.success('Editor\'s Choice', { description: `Showing ${editorChoiceApps.length} editor's choice apps` })
+                }}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1106,7 +1109,10 @@ export default function AppStoreClient() {
                   <TrendingUp className="w-5 h-5 text-green-500" />
                   Trending Now
                 </h3>
-                <Button variant="ghost" size="sm" onClick={() => toast.info('Trending Apps', { description: 'Viewing all trending apps...' })}>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  setSearchQuery('trending')
+                  toast.success('Trending Apps', { description: `Showing ${trendingApps.length} trending apps` })
+                }}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1147,7 +1153,10 @@ export default function AppStoreClient() {
                   <Layers className="w-5 h-5 text-purple-500" />
                   Featured Collections
                 </h3>
-                <Button variant="ghost" size="sm" onClick={() => toast.info('Collections', { description: 'Viewing all featured collections...' })}>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  setActiveTab('collections')
+                  toast.success('Collections', { description: `Viewing ${collections.length} featured collections` })
+                }}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
