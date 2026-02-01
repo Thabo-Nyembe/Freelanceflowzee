@@ -53,6 +53,7 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip';
 import { useCodeBuilder, GeneratedFile, AgentStep, AgentMessage } from '@/hooks/use-code-builder';
+import { toast } from 'sonner';
 
 // Monaco Editor placeholder (would use @monaco-editor/react in production)
 const MonacoEditor = ({ code, language, onChange }: {
@@ -656,7 +657,12 @@ export default function AICodeBuilderV2Client() {
               <span className="text-xs text-gray-400">{session.model}</span>
             </div>
           )}
-          <Button variant="ghost" size="sm" className="h-7 text-gray-400">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-gray-400"
+            onClick={() => toast.info('Settings', { description: 'AI Code Builder settings coming soon' })}
+          >
             <Settings className="h-4 w-4" />
           </Button>
           {files.length > 0 && (

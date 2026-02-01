@@ -363,12 +363,25 @@ function SpatialConnection({
 function SpatialControlPanel({
   cameraState,
   onCameraChange,
-  selectedNode
+  selectedNode,
+  onNodeAction
 }: {
   cameraState: any
   onCameraChange: (state: any) => void
   selectedNode: string | null
+  onNodeAction?: (action: string, nodeId: string) => void
 }) {
+  const handleCameraAction = (action: string) => {
+    const actions: Record<string, any> = {
+      focus: { zoom: 1.5, transition: 'smooth' },
+      pan: { mode: 'pan', cursor: 'grab' },
+      rotate: { mode: 'rotate', cursor: 'crosshair' },
+      globe: { view: 'globe', perspective: true },
+      orbit: { view: 'orbit', autoRotate: true }
+    }
+    onCameraChange({ ...cameraState, ...actions[action], action })
+  }
+
   return (
     <Card className="bg-black/80 border-white/20 text-white backdrop-blur-xl">
       <CardHeader className="pb-2">
@@ -382,13 +395,31 @@ function SpatialControlPanel({
         <div className="space-y-2">
           <div className="text-xs text-gray-300">Camera</div>
           <div className="grid grid-cols-3 gap-1">
-            <Button size="sm" variant="ghost" className="h-8 text-xs">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 text-xs"
+              onClick={() => handleCameraAction('focus')}
+              title="Focus View"
+            >
               <Eye className="h-3 w-3" />
             </Button>
-            <Button size="sm" variant="ghost" className="h-8 text-xs">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 text-xs"
+              onClick={() => handleCameraAction('pan')}
+              title="Pan Camera"
+            >
               <Move3D className="h-3 w-3" />
             </Button>
-            <Button size="sm" variant="ghost" className="h-8 text-xs">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 text-xs"
+              onClick={() => handleCameraAction('rotate')}
+              title="Rotate Camera"
+            >
               <RotateCw className="h-3 w-3" />
             </Button>
           </div>
@@ -399,10 +430,22 @@ function SpatialControlPanel({
           <div className="space-y-2">
             <div className="text-xs text-gray-300">Selected Node</div>
             <div className="grid grid-cols-2 gap-1">
-              <Button size="sm" variant="ghost" className="h-8 text-xs">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 text-xs"
+                onClick={() => onNodeAction?.('layers', selectedNode)}
+                title="Toggle Layers"
+              >
                 <Layers3 className="h-3 w-3" />
               </Button>
-              <Button size="sm" variant="ghost" className="h-8 text-xs">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 text-xs"
+                onClick={() => onNodeAction?.('maximize', selectedNode)}
+                title="Maximize Node"
+              >
                 <Maximize className="h-3 w-3" />
               </Button>
             </div>
@@ -413,10 +456,22 @@ function SpatialControlPanel({
         <div className="space-y-2">
           <div className="text-xs text-gray-300">View</div>
           <div className="grid grid-cols-2 gap-1">
-            <Button size="sm" variant="ghost" className="h-8 text-xs">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 text-xs"
+              onClick={() => handleCameraAction('globe')}
+              title="Globe View"
+            >
               <Globe className="h-3 w-3" />
             </Button>
-            <Button size="sm" variant="ghost" className="h-8 text-xs">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 text-xs"
+              onClick={() => handleCameraAction('orbit')}
+              title="Orbit View"
+            >
               <Orbit className="h-3 w-3" />
             </Button>
           </div>

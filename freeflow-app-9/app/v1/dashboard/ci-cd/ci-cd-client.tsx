@@ -1646,10 +1646,18 @@ export default function CiCdClient() {
                             <td className="px-6 py-4 text-sm text-gray-500">{secret.updatedAt}</td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toast.info('Edit Secret', { description: `Configure ${secret.name}` })}
+                                >
                                   <Settings className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toast.warning('Delete Secret', { description: `Are you sure you want to delete ${secret.name}?` })}
+                                >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
