@@ -1031,6 +1031,12 @@ html.dark .kazi-card,
   100% { transform: scaleX(1); }
 }
 
+/* Background gradient shift animation */
+@keyframes gradient-shift {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
 /* Kinetic Typography Keyframes - 2025 UI/UX Trends */
 @keyframes glitch-1 {
   0% { transform: translate(0); }

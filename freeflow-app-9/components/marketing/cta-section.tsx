@@ -10,14 +10,14 @@ export function CTASection() {
       role="region"
     >
       <div
-        className="absolute inset-0 opacity-30"
+        className="absolute inset-0 opacity-30 animate-[gradient-shift_20s_ease-in-out_infinite_alternate]"
         style={{
           backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
           backgroundSize: '50px 50px'
         }}
         aria-hidden="true"
       />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
         <h2 id="final-cta-heading" className="text-4xl sm:text-5xl font-bold text-white mb-6">
           Ready to Streamline Your Workflow?
         </h2>

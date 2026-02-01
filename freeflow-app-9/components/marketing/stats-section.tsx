@@ -23,7 +23,8 @@ export function StatsSection() {
             return (
               <Card
                 key={index}
-                className="text-center border-2 hover:border-blue-600 transition-all hover:shadow-xl"
+                className="text-center border-2 hover:border-blue-600 transition-all hover:shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500"
+                style={{ animationDelay: `${index * 100}ms` }}
                 role="status"
                 aria-label={`${stat.label}: ${stat.value}`}
               >

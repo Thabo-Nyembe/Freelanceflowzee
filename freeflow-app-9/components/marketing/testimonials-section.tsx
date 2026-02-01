@@ -74,8 +74,12 @@ export function TestimonialsSection() {
 
         {/* Testimonials Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials.map((testimonial) => (
-            <Card key={testimonial.author} className="h-full bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-shadow">
+          {testimonials.map((testimonial, index) => (
+            <Card
+              key={testimonial.author}
+              className="h-full bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-shadow animate-in fade-in slide-in-from-bottom-4 duration-500"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
               <CardContent className="p-6">
                 {/* Quote Icon */}
                 <Quote className="w-10 h-10 text-purple-200 dark:text-purple-800 mb-4" />
@@ -116,8 +120,12 @@ export function TestimonialsSection() {
             { value: '$12M+', label: 'Projects Managed' },
             { value: '98%', label: 'Satisfaction Rate' },
             { value: '4.9/5', label: 'Average Rating' },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
+          ].map((stat, index) => (
+            <div
+              key={stat.label}
+              className="text-center animate-in fade-in zoom-in-95 duration-500"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
               <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                 {stat.value}
               </p>
