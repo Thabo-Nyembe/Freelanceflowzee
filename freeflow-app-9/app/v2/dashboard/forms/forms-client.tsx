@@ -1301,7 +1301,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                     <div className="h-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 relative">
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
                         <div className="flex items-center gap-2">
-                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); toast.info('Preview Form'); }}>
+                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); setSelectedForm(form); window.open(`/v2/dashboard/forms/preview/${form.id}`, '_blank'); toast.info('Preview Opened', { description: `Viewing "${form.title}" in new tab` }); }}>
                             <Eye className="h-4 w-4" />
                           </button>
                           <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); handleOpenEditDialog(form); }}>
@@ -2409,7 +2409,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   <Link2 className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Link</span>
                 </button>
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={async () => { const embedCode = `<iframe src="https://freeflow.io/form/${selectedForm?.id || 'abc123'}" width="100%" height="500" frameborder="0"></iframe>`; await navigator.clipboard.writeText(embedCode); toast.info('Embed Code'); }}>
+                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={async () => { const embedCode = `<iframe src="https://freeflow.io/form/${selectedForm?.id || 'abc123'}" width="100%" height="500" frameborder="0"></iframe>`; await navigator.clipboard.writeText(embedCode); toast.success('Embed Code Copied', { description: 'Paste this iframe code into your website' }); }}>
                   <Code className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Embed</span>
                 </button>
@@ -2529,7 +2529,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             <ScrollArea className="h-[400px]">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4 pr-4">
                 {questionTypes.map(type => (
-                  <button key={type.id} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors text-left relative" onClick={() => { if (type.isPremium) { toast.info('Pro Feature'); } else { toast.success('Question Added'); setShowQuestionTypesDialog(false); } }}>
+                  <button key={type.id} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors text-left relative" onClick={() => { if (type.isPremium) { toast.info('Pro Feature', { description: `Upgrade to Pro to unlock "${type.label}" question type` }); } else { toast.success('Question Added', { description: `"${type.label}" field added to your form` }); setShowQuestionTypesDialog(false); } }}>
                     {type.isPremium && (
                       <Badge className="absolute top-1 right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs">
                         Pro

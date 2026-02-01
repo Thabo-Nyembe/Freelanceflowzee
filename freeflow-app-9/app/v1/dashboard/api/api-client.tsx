@@ -1817,8 +1817,22 @@ export default KaziApiClient;`
                     toast.error('Failed to export collections')
                   }
                 }},
-                { icon: Users, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Share Collections') },
-                { icon: GitBranch, label: 'Fork', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Fork Collection') },
+                { icon: Users, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: async () => {
+                  const shareUrl = `${window.location.origin}/v1/dashboard/api/shared/${collections[0]?.id || 'collection'}`
+                  try {
+                    await navigator.clipboard.writeText(shareUrl)
+                    toast.success('Share Link Copied', { description: 'Collection link copied to clipboard' })
+                  } catch {
+                    toast.info('Share Collections', { description: 'Select collections to share with your team' })
+                  }
+                }},
+                { icon: GitBranch, label: 'Fork', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => {
+                  if (collections.length === 0) {
+                    toast.info('No Collections', { description: 'Create a collection first to fork' })
+                    return
+                  }
+                  toast.success('Fork Collection', { description: 'Select a collection to create a copy' })
+                }},
                 { icon: FileCode, label: 'Generate SDK', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowGenerateSdkDialog(true) },
                 { icon: PlayCircle, label: 'Run All', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: async () => {
                   toast.promise(
@@ -1840,7 +1854,13 @@ export default KaziApiClient;`
                     }
                   )
                 }},
-                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Archive Collections') }
+                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => {
+                  if (collections.length === 0) {
+                    toast.info('No Collections', { description: 'No collections to archive' })
+                    return
+                  }
+                  toast.info('Archive Collections', { description: 'Select collections to move to archive' })
+                }}
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1933,8 +1953,14 @@ export default KaziApiClient;`
             {/* History Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Search, label: 'Search', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Search History') },
-                { icon: Filter, label: 'Filter', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Filter Requests') },
+                { icon: Search, label: 'Search', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => {
+                  const searchTerm = prompt('Search request history:')
+                  if (searchTerm) {
+                    const results = history.filter(h => h.url.includes(searchTerm) || h.method.includes(searchTerm.toUpperCase()))
+                    toast.success(`Found ${results.length} Requests`, { description: `Matching "${searchTerm}" in history` })
+                  }
+                }},
+                { icon: Filter, label: 'Filter', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Filter Requests', { description: 'Use the method dropdown below to filter by request type' }) },
                 { icon: Download, label: 'Export HAR', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: async () => {
                   try {
                     const harData = {
@@ -1963,8 +1989,19 @@ export default KaziApiClient;`
                     toast.error('Failed to export HAR file')
                   }
                 }},
-                { icon: Trash2, label: 'Clear All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.warning('Clear History') },
-                { icon: RefreshCw, label: 'Replay', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.info('Replay Request') },
+                { icon: Trash2, label: 'Clear All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => {
+                  if (window.confirm('Clear all request history? This action cannot be undone.')) {
+                    setHistory([])
+                    toast.success('History Cleared', { description: 'All request history has been removed' })
+                  }
+                }},
+                { icon: RefreshCw, label: 'Replay', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => {
+                  if (history.length > 0) {
+                    toast.info('Select Request', { description: 'Click on a request in the history list to replay it' })
+                  } else {
+                    toast.info('No History', { description: 'Make some API requests first to have history to replay' })
+                  }
+                }},
                 { icon: Copy, label: 'Copy cURL', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: async () => {
                   if (history.length > 0) {
                     const lastRequest = history[0]
@@ -1975,8 +2012,20 @@ export default KaziApiClient;`
                     toast.info('No requests to copy')
                   }
                 }},
-                { icon: Eye, label: 'Inspect', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.info('Inspect Request') },
-                { icon: BookmarkPlus, label: 'Save', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Save to Collection') }
+                { icon: Eye, label: 'Inspect', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => {
+                  if (history.length > 0) {
+                    toast.info('Inspect Request', { description: 'Click on a request to view full details including headers and body' })
+                  } else {
+                    toast.info('No Requests', { description: 'Make API requests first to inspect them' })
+                  }
+                }},
+                { icon: BookmarkPlus, label: 'Save', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
+                  if (history.length > 0) {
+                    toast.info('Save to Collection', { description: 'Select a request, then save it to a collection for reuse' })
+                  } else {
+                    toast.info('No Requests', { description: 'Make API requests first to save them' })
+                  }
+                }}
               ].map((action, idx) => (
                 <Button
                   key={idx}

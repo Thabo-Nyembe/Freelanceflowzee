@@ -381,9 +381,9 @@ const mockSalesQuickActions = [
       const callWindow = window.open('about:blank', 'callLogger', 'width=600,height=500,top=100,left=100')
       if (callWindow) {
         callWindow.document.write('<html><head><title>Call Logger</title></head><body style="font-family:sans-serif;padding:20px;"><h1>Call Logger</h1><p>Logging call activity...</p></body></html>')
-        toast.success('Call logger opened')
+        toast.success('Call Logger Ready', { description: 'Log call details and notes in the new window' })
       } else {
-        toast.error('Failed to open call logger - popup may be blocked')
+        toast.error('Popup Blocked', { description: 'Allow popups for this site to use the call logger' })
       }
     }
   },
@@ -396,9 +396,9 @@ const mockSalesQuickActions = [
       const emailWindow = window.open('about:blank', 'emailComposer', 'width=700,height=600,top=100,left=100')
       if (emailWindow) {
         emailWindow.document.write('<html><head><title>Email Composer</title></head><body style="font-family:sans-serif;padding:20px;"><h1>Email Composer</h1><form><input type="email" placeholder="To:" style="width:100%;padding:10px;margin:10px 0;"/><input type="text" placeholder="Subject:" style="width:100%;padding:10px;margin:10px 0;"/><textarea placeholder="Message body..." style="width:100%;height:300px;padding:10px;margin:10px 0;"></textarea><button type="submit" style="padding:10px 20px;background:#3b82f6;color:white;border:none;border-radius:4px;cursor:pointer;">Send</button></form></body></html>')
-        toast.success('Email composer ready')
+        toast.success('Email Composer Ready', { description: 'Compose and send your email in the new window' })
       } else {
-        toast.error('Failed to open email composer - popup may be blocked')
+        toast.error('Popup Blocked', { description: 'Allow popups for this site to use the email composer' })
       }
     }
   },
@@ -411,9 +411,9 @@ const mockSalesQuickActions = [
       const meetingWindow = window.open('about:blank', 'meetingScheduler', 'width=600,height=500,top=100,left=100')
       if (meetingWindow) {
         meetingWindow.document.write('<html><head><title>Meeting Scheduler</title></head><body style="font-family:sans-serif;padding:20px;"><h1>Schedule Meeting</h1><form><input type="text" placeholder="Title:" style="width:100%;padding:10px;margin:10px 0;"/><input type="datetime-local" style="width:100%;padding:10px;margin:10px 0;"/><input type="number" placeholder="Duration (minutes):" style="width:100%;padding:10px;margin:10px 0;"/><button type="submit" style="padding:10px 20px;background:#3b82f6;color:white;border:none;border-radius:4px;cursor:pointer;">Schedule</button></form></body></html>')
-        toast.success('Meeting scheduler ready')
+        toast.success('Meeting Scheduler Ready', { description: 'Schedule your meeting in the new window' })
       } else {
-        toast.error('Failed to open scheduler - popup may be blocked')
+        toast.error('Popup Blocked', { description: 'Allow popups for this site to use the meeting scheduler' })
       }
     }
   },
@@ -771,9 +771,14 @@ export default function SalesClient() {
   }
 
   const handleRefresh = async () => {
-    toast.info('Refreshing')
-    await fetchDeals()
-    toast.success('Refreshed')
+    toast.promise(
+      fetchDeals(),
+      {
+        loading: 'Refreshing sales data...',
+        success: 'Sales Data Updated',
+        error: 'Failed to refresh data'
+      }
+    )
   }
 
   const openEditDialog = (deal: SalesDeal) => {
