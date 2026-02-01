@@ -1514,7 +1514,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search users..." className="w-64" />
-                      <Button variant="outline" onClick={() => toast.info('Filter panel')}><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => toast.info('Filter Options', { description: 'Use the search box to filter by name, role, or status' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -1631,7 +1631,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search policies..." className="w-64" />
-                      <Button variant="outline" onClick={() => toast.info('Filter panel')}><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => toast.info('Filter Options', { description: 'Use the search box to filter by name, role, or status' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -1704,7 +1704,7 @@ export default function RolesClient() {
                       a.click(); URL.revokeObjectURL(url)
                       toast.success('Audit logs exported')
                     }}><Download className="h-4 w-4 mr-2" />Export</Button>
-                    <Button className="bg-white text-slate-700 hover:bg-slate-50" onClick={() => toast.info('Filter audit logs')}><Filter className="h-4 w-4 mr-2" />Filter</Button>
+                    <Button className="bg-white text-slate-700 hover:bg-slate-50" onClick={() => toast.info('Filter Audit Logs', { description: 'Filter by action type, user, or date range' })}><Filter className="h-4 w-4 mr-2" />Filter</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
@@ -1870,7 +1870,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search groups..." className="w-64" />
-                      <Button variant="outline" onClick={() => toast.info('Filter groups')}><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => toast.info('Filter Groups', { description: 'Use the search box to filter groups by name or member count' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
