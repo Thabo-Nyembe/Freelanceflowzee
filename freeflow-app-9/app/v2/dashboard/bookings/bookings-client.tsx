@@ -147,6 +147,36 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     endTime: '10:00',
     reason: ''
   })
+
+  // Service form state for add/edit
+  const [serviceForm, setServiceForm] = useState({
+    name: '',
+    duration: 60,
+    price: 0,
+    description: '',
+    buffer: 15,
+    maxCapacity: 1,
+    color: 'sky'
+  })
+
+  // Team member form state
+  const [memberForm, setMemberForm] = useState({
+    name: '',
+    email: '',
+    role: '',
+    availability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+  })
+
+  // Webhook form state
+  const [webhookForm, setWebhookForm] = useState({
+    url: '',
+    events: ['booking.created', 'booking.updated', 'booking.cancelled', 'booking.completed'],
+    secret: ''
+  })
+
+  // Calendar sync state
+  const [calendarSyncEnabled, setCalendarSyncEnabled] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const displayBookings = (bookings && bookings.length > 0) ? bookings : (initialBookings || [])
 
   // Service types
@@ -264,18 +294,55 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
   const handleConfirmBooking = async (booking: Booking) => {
     try {
+      const confirmationCode = `CONF-${Date.now().toString(36).toUpperCase()}`
       await updateBooking(booking.id, {
         status: 'confirmed' as BookingStatus,
         confirmed_at: new Date().toISOString(),
-        confirmation_code: `CONF-${Date.now().toString(36).toUpperCase()}`
+        confirmation_code: confirmationCode,
+        confirmation_sent: true,
+        confirmation_sent_at: new Date().toISOString()
       })
-      toast.success('Booking has been confirmed')
+
+      // Send confirmation notification to customer via API
+      if (booking.customer_email) {
+        try {
+          await fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'send',
+              data: {
+                title: 'Booking Confirmed',
+                message: `Your booking for "${booking.title}" on ${new Date(booking.start_time).toLocaleDateString()} at ${new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} has been confirmed. Confirmation code: ${confirmationCode}`,
+                type: 'success',
+                category: 'general',
+                channels: ['in_app', 'email'],
+                priority: 'high',
+                data: {
+                  booking_id: booking.id,
+                  booking_number: booking.booking_number,
+                  confirmation_code: confirmationCode,
+                  customer_email: booking.customer_email
+                },
+                actionUrl: `/v2/dashboard/bookings?booking=${booking.id}`,
+                actionLabel: 'View Booking'
+              }
+            })
+          })
+        } catch (notifError) {
+          console.warn('Failed to send notification:', notifError)
+        }
+      }
+
+      toast.success('Booking Confirmed', {
+        description: `Confirmation sent to ${booking.customer_email || 'customer'}`
+      })
       refetch()
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
     } catch (error) {
-      toast.error('Error')
+      toast.error('Error', { description: 'Failed to confirm booking' })
     }
   }
 
@@ -435,19 +502,48 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   // Send reminder to a client
   const handleSendReminder = async (booking: Booking) => {
     if (!booking.customer_email) {
-      toast.error('No Email')
+      toast.error('No Email', { description: 'Customer email is required to send reminder' })
       return
     }
-    // In a real implementation, this would call an API to send an email
     toast.loading('Sending reminder...', { id: 'send-reminder' })
     try {
+      // Send reminder notification via notifications API
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send',
+          data: {
+            title: 'Upcoming Booking Reminder',
+            message: `Reminder: You have a booking for "${booking.title}" scheduled for ${new Date(booking.start_time).toLocaleDateString()} at ${new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. ${booking.meeting_url ? `Meeting link: ${booking.meeting_url}` : ''}`,
+            type: 'info',
+            category: 'general',
+            channels: ['in_app', 'email'],
+            priority: 'high',
+            data: {
+              booking_id: booking.id,
+              booking_number: booking.booking_number,
+              customer_email: booking.customer_email,
+              start_time: booking.start_time
+            },
+            actionUrl: booking.meeting_url || `/v2/dashboard/bookings?booking=${booking.id}`,
+            actionLabel: booking.meeting_url ? 'Join Meeting' : 'View Booking'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send notification')
+      }
+
+      // Update booking to track reminder was sent
       await updateBooking(booking.id, {
         reminder_sent: true,
         reminder_sent_at: new Date().toISOString()
       })
       toast.success('Reminder Sent', { id: 'send-reminder', description: `Reminder sent to ${booking.customer_email}` })
     } catch (err) {
-      toast.error('Failed to Send', { id: 'send-reminder', description: 'Could not send reminder email' })
+      toast.error('Failed to Send', { id: 'send-reminder', description: err instanceof Error ? err.message : 'Could not send reminder email' })
     }
   }
 
@@ -2548,134 +2644,365 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         </Dialog>
 
         {/* Add Service Dialog */}
-        <Dialog open={showAddServiceDialog} onOpenChange={setShowAddServiceDialog}>
+        <Dialog open={showAddServiceDialog} onOpenChange={(open) => {
+          setShowAddServiceDialog(open)
+          if (!open) setServiceForm({ name: '', duration: 60, price: 0, description: '', buffer: 15, maxCapacity: 1, color: 'sky' })
+        }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Add New Service</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
-                <Label>Service Name</Label>
-                <Input placeholder="e.g., Strategy Session" className="mt-1" />
+                <Label>Service Name *</Label>
+                <Input
+                  placeholder="e.g., Strategy Session"
+                  className="mt-1"
+                  value={serviceForm.name}
+                  onChange={(e) => setServiceForm(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                  <Label>Duration (minutes)</Label>
-                  <Input type="number" placeholder="60" className="mt-1" />
+                  <Label>Duration (minutes) *</Label>
+                  <Input
+                    type="number"
+                    placeholder="60"
+                    className="mt-1"
+                    value={serviceForm.duration}
+                    onChange={(e) => setServiceForm(prev => ({ ...prev, duration: parseInt(e.target.value) || 60 }))}
+                  />
                 </div>
                 <div>
                   <Label>Price ($)</Label>
-                  <Input type="number" placeholder="100" className="mt-1" />
+                  <Input
+                    type="number"
+                    placeholder="100"
+                    className="mt-1"
+                    value={serviceForm.price}
+                    onChange={(e) => setServiceForm(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                  />
                 </div>
               </div>
               <div>
                 <Label>Description</Label>
-                <Input placeholder="Brief description of the service" className="mt-1" />
+                <Input
+                  placeholder="Brief description of the service"
+                  className="mt-1"
+                  value={serviceForm.description}
+                  onChange={(e) => setServiceForm(prev => ({ ...prev, description: e.target.value }))}
+                />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Buffer Time (minutes)</Label>
-                  <Input type="number" placeholder="15" className="mt-1" />
+                  <Input
+                    type="number"
+                    placeholder="15"
+                    className="mt-1"
+                    value={serviceForm.buffer}
+                    onChange={(e) => setServiceForm(prev => ({ ...prev, buffer: parseInt(e.target.value) || 0 }))}
+                  />
                 </div>
                 <div>
                   <Label>Max Capacity</Label>
-                  <Input type="number" placeholder="1" className="mt-1" />
+                  <Input
+                    type="number"
+                    placeholder="1"
+                    className="mt-1"
+                    value={serviceForm.maxCapacity}
+                    onChange={(e) => setServiceForm(prev => ({ ...prev, maxCapacity: parseInt(e.target.value) || 1 }))}
+                  />
                 </div>
+              </div>
+              <div>
+                <Label>Color</Label>
+                <Select value={serviceForm.color} onValueChange={(value) => setServiceForm(prev => ({ ...prev, color: value }))}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sky">Sky Blue</SelectItem>
+                    <SelectItem value="indigo">Indigo</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                    <SelectItem value="emerald">Emerald</SelectItem>
+                    <SelectItem value="amber">Amber</SelectItem>
+                    <SelectItem value="rose">Rose</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => setShowAddServiceDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
+              <Button variant="outline" onClick={() => setShowAddServiceDialog(false)} disabled={isSaving}>Cancel</Button>
+              <Button disabled={isSaving || !serviceForm.name || !serviceForm.duration} onClick={async () => {
+                if (!serviceForm.name || !serviceForm.duration) {
+                  toast.error('Validation Error', { description: 'Name and duration are required' })
+                  return
+                }
+                setIsSaving(true)
                 toast.loading('Adding service...', { id: 'add-service' })
                 try {
-                  const response = await fetch('/api/bookings', {
+                  const response = await fetch('/api/bookings/services', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'add-service', type: 'service' })
+                    body: JSON.stringify({
+                      name: serviceForm.name,
+                      duration: serviceForm.duration,
+                      price: serviceForm.price,
+                      description: serviceForm.description,
+                      buffer: serviceForm.buffer,
+                      maxCapacity: serviceForm.maxCapacity,
+                      color: serviceForm.color
+                    })
                   })
-                  if (!response.ok) throw new Error('Failed to add service')
-                  toast.success('Service added successfully', { id: 'add-service' })
+                  const result = await response.json()
+                  if (!response.ok) throw new Error(result.error || 'Failed to add service')
+                  toast.success('Service Created', { id: 'add-service', description: `${serviceForm.name} has been added` })
                   setShowAddServiceDialog(false)
+                  setServiceForm({ name: '', duration: 60, price: 0, description: '', buffer: 15, maxCapacity: 1, color: 'sky' })
+
+                  // Send notification
+                  await fetch('/api/notifications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'send',
+                      data: {
+                        title: 'New Booking Service Added',
+                        message: `Service "${serviceForm.name}" (${serviceForm.duration} min, $${serviceForm.price}) is now available for bookings.`,
+                        type: 'success',
+                        category: 'general',
+                        channels: ['in_app']
+                      }
+                    })
+                  }).catch(() => {})
                 } catch (error) {
-                  toast.error('Failed to add service', { id: 'add-service', description: error instanceof Error ? error.message : 'Unknown error' })
+                  toast.error('Failed to Add', { id: 'add-service', description: error instanceof Error ? error.message : 'Unknown error' })
+                } finally {
+                  setIsSaving(false)
                 }
-              }}>Add Service</Button>
+              }}>{isSaving ? 'Adding...' : 'Add Service'}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* Edit Service Dialog */}
-        <Dialog open={showEditServiceDialog} onOpenChange={setShowEditServiceDialog}>
+        <Dialog open={showEditServiceDialog} onOpenChange={(open) => {
+          setShowEditServiceDialog(open)
+          if (open && selectedServiceId) {
+            const service = serviceTypes.find(s => s.id === selectedServiceId)
+            if (service) {
+              setServiceForm({
+                name: service.name,
+                duration: service.duration,
+                price: service.price,
+                description: service.description,
+                buffer: service.buffer,
+                maxCapacity: service.maxCapacity,
+                color: service.color
+              })
+            }
+          }
+        }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Edit Service</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
-                <Label>Service Name</Label>
-                <Input defaultValue={serviceTypes.find(s => s.id === selectedServiceId)?.name || ''} className="mt-1" />
+                <Label>Service Name *</Label>
+                <Input
+                  value={serviceForm.name}
+                  onChange={(e) => setServiceForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="mt-1"
+                />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                  <Label>Duration (minutes)</Label>
-                  <Input type="number" defaultValue={serviceTypes.find(s => s.id === selectedServiceId)?.duration || 60} className="mt-1" />
+                  <Label>Duration (minutes) *</Label>
+                  <Input
+                    type="number"
+                    value={serviceForm.duration}
+                    onChange={(e) => setServiceForm(prev => ({ ...prev, duration: parseInt(e.target.value) || 60 }))}
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <Label>Price ($)</Label>
-                  <Input type="number" defaultValue={serviceTypes.find(s => s.id === selectedServiceId)?.price || 0} className="mt-1" />
+                  <Input
+                    type="number"
+                    value={serviceForm.price}
+                    onChange={(e) => setServiceForm(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                    className="mt-1"
+                  />
                 </div>
               </div>
               <div>
                 <Label>Description</Label>
-                <Input defaultValue={serviceTypes.find(s => s.id === selectedServiceId)?.description || ''} className="mt-1" />
+                <Input
+                  value={serviceForm.description}
+                  onChange={(e) => setServiceForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div>
+                  <Label>Buffer Time (minutes)</Label>
+                  <Input
+                    type="number"
+                    value={serviceForm.buffer}
+                    onChange={(e) => setServiceForm(prev => ({ ...prev, buffer: parseInt(e.target.value) || 0 }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Max Capacity</Label>
+                  <Input
+                    type="number"
+                    value={serviceForm.maxCapacity}
+                    onChange={(e) => setServiceForm(prev => ({ ...prev, maxCapacity: parseInt(e.target.value) || 1 }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Color</Label>
+                <Select value={serviceForm.color} onValueChange={(value) => setServiceForm(prev => ({ ...prev, color: value }))}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sky">Sky Blue</SelectItem>
+                    <SelectItem value="indigo">Indigo</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                    <SelectItem value="emerald">Emerald</SelectItem>
+                    <SelectItem value="amber">Amber</SelectItem>
+                    <SelectItem value="rose">Rose</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => setShowEditServiceDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
+              <Button
+                variant="destructive"
+                disabled={isSaving}
+                className="mr-auto"
+                onClick={async () => {
+                  if (!selectedServiceId) return
+                  if (!confirm('Are you sure you want to delete this service?')) return
+                  setIsSaving(true)
+                  toast.loading('Deleting service...', { id: 'delete-service' })
+                  try {
+                    const response = await fetch(`/api/bookings/services?id=${selectedServiceId}`, {
+                      method: 'DELETE'
+                    })
+                    if (!response.ok) throw new Error('Failed to delete service')
+                    toast.success('Service Deleted', { id: 'delete-service' })
+                    setShowEditServiceDialog(false)
+                    setSelectedServiceId(null)
+                  } catch (error) {
+                    toast.error('Failed to Delete', { id: 'delete-service', description: error instanceof Error ? error.message : 'Unknown error' })
+                  } finally {
+                    setIsSaving(false)
+                  }
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+              <Button variant="outline" onClick={() => setShowEditServiceDialog(false)} disabled={isSaving}>Cancel</Button>
+              <Button disabled={isSaving || !serviceForm.name} onClick={async () => {
+                if (!serviceForm.name) {
+                  toast.error('Validation Error', { description: 'Service name is required' })
+                  return
+                }
+                setIsSaving(true)
                 toast.loading('Saving changes...', { id: 'update-service' })
                 try {
-                  const response = await fetch('/api/bookings', {
+                  const response = await fetch('/api/bookings/services', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'update-service', serviceId: selectedServiceId })
+                    body: JSON.stringify({
+                      id: selectedServiceId,
+                      name: serviceForm.name,
+                      duration: serviceForm.duration,
+                      price: serviceForm.price,
+                      description: serviceForm.description,
+                      buffer: serviceForm.buffer,
+                      maxCapacity: serviceForm.maxCapacity,
+                      color: serviceForm.color
+                    })
                   })
-                  if (!response.ok) throw new Error('Failed to update service')
-                  toast.success('Service updated successfully', { id: 'update-service' })
+                  const result = await response.json()
+                  if (!response.ok) throw new Error(result.error || 'Failed to update service')
+                  toast.success('Service Updated', { id: 'update-service', description: `${serviceForm.name} has been updated` })
                   setShowEditServiceDialog(false)
+                  setSelectedServiceId(null)
                 } catch (error) {
-                  toast.error('Failed to update service', { id: 'update-service', description: error instanceof Error ? error.message : 'Unknown error' })
+                  toast.error('Failed to Update', { id: 'update-service', description: error instanceof Error ? error.message : 'Unknown error' })
+                } finally {
+                  setIsSaving(false)
                 }
-              }}>Save Changes</Button>
+              }}>{isSaving ? 'Saving...' : 'Save Changes'}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* Add Member Dialog */}
-        <Dialog open={showAddMemberDialog} onOpenChange={setShowAddMemberDialog}>
+        <Dialog open={showAddMemberDialog} onOpenChange={(open) => {
+          setShowAddMemberDialog(open)
+          if (!open) setMemberForm({ name: '', email: '', role: '', availability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] })
+        }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Add Team Member</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
-                <Label>Full Name</Label>
-                <Input placeholder="e.g., John Smith" className="mt-1" />
+                <Label>Full Name *</Label>
+                <Input
+                  placeholder="e.g., John Smith"
+                  className="mt-1"
+                  value={memberForm.name}
+                  onChange={(e) => setMemberForm(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
               <div>
-                <Label>Email</Label>
-                <Input type="email" placeholder="john@example.com" className="mt-1" />
+                <Label>Email *</Label>
+                <Input
+                  type="email"
+                  placeholder="john@example.com"
+                  className="mt-1"
+                  value={memberForm.email}
+                  onChange={(e) => setMemberForm(prev => ({ ...prev, email: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Role</Label>
-                <Input placeholder="e.g., Senior Consultant" className="mt-1" />
+                <Input
+                  placeholder="e.g., Senior Consultant"
+                  className="mt-1"
+                  value={memberForm.role}
+                  onChange={(e) => setMemberForm(prev => ({ ...prev, role: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Available Days</Label>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => (
                     <label key={day} className="flex items-center gap-1 text-sm">
-                      <input type="checkbox" defaultChecked className="rounded" />
+                      <input
+                        type="checkbox"
+                        checked={memberForm.availability.includes(day)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setMemberForm(prev => ({ ...prev, availability: [...prev.availability, day] }))
+                          } else {
+                            setMemberForm(prev => ({ ...prev, availability: prev.availability.filter(d => d !== day) }))
+                          }
+                        }}
+                        className="rounded"
+                      />
                       {day}
                     </label>
                   ))}
@@ -2683,47 +3010,94 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               </div>
             </div>
             <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => setShowAddMemberDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
+              <Button variant="outline" onClick={() => setShowAddMemberDialog(false)} disabled={isSaving}>Cancel</Button>
+              <Button disabled={isSaving || !memberForm.name || !memberForm.email} onClick={async () => {
+                if (!memberForm.name || !memberForm.email) {
+                  toast.error('Validation Error', { description: 'Name and email are required' })
+                  return
+                }
+                setIsSaving(true)
                 toast.loading('Adding team member...', { id: 'add-member' })
                 try {
-                  const response = await fetch('/api/bookings', {
+                  const response = await fetch('/api/bookings/manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'add-member', type: 'team-member' })
+                    body: JSON.stringify({
+                      action: 'add-member',
+                      name: memberForm.name,
+                      email: memberForm.email,
+                      role: memberForm.role,
+                      availability: memberForm.availability
+                    })
                   })
-                  if (!response.ok) throw new Error('Failed to add team member')
-                  toast.success('Team member added successfully', { id: 'add-member' })
+                  const result = await response.json()
+                  if (!response.ok) throw new Error(result.error || 'Failed to add team member')
+                  toast.success('Team Member Added', { id: 'add-member', description: `${memberForm.name} has been added to the team` })
                   setShowAddMemberDialog(false)
+                  setMemberForm({ name: '', email: '', role: '', availability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] })
                 } catch (error) {
-                  toast.error('Failed to add team member', { id: 'add-member', description: error instanceof Error ? error.message : 'Unknown error' })
+                  toast.error('Failed to Add', { id: 'add-member', description: error instanceof Error ? error.message : 'Unknown error' })
+                } finally {
+                  setIsSaving(false)
                 }
-              }}>Add Member</Button>
+              }}>{isSaving ? 'Adding...' : 'Add Member'}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* Edit Member Dialog */}
-        <Dialog open={showEditMemberDialog} onOpenChange={setShowEditMemberDialog}>
+        <Dialog open={showEditMemberDialog} onOpenChange={(open) => {
+          setShowEditMemberDialog(open)
+          if (open && selectedMemberId) {
+            const member = teamMembers.find(m => m.id === selectedMemberId)
+            if (member) {
+              setMemberForm({
+                name: member.name,
+                email: '',
+                role: member.role,
+                availability: member.availability
+              })
+            }
+          }
+        }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Edit Team Member</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
-                <Label>Full Name</Label>
-                <Input defaultValue={teamMembers.find(m => m.id === selectedMemberId)?.name || ''} className="mt-1" />
+                <Label>Full Name *</Label>
+                <Input
+                  value={memberForm.name}
+                  onChange={(e) => setMemberForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="mt-1"
+                />
               </div>
               <div>
                 <Label>Role</Label>
-                <Input defaultValue={teamMembers.find(m => m.id === selectedMemberId)?.role || ''} className="mt-1" />
+                <Input
+                  value={memberForm.role}
+                  onChange={(e) => setMemberForm(prev => ({ ...prev, role: e.target.value }))}
+                  className="mt-1"
+                />
               </div>
               <div>
                 <Label>Available Days</Label>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => (
                     <label key={day} className="flex items-center gap-1 text-sm">
-                      <input type="checkbox" defaultChecked={teamMembers.find(m => m.id === selectedMemberId)?.availability.includes(day)} className="rounded" />
+                      <input
+                        type="checkbox"
+                        checked={memberForm.availability.includes(day)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setMemberForm(prev => ({ ...prev, availability: [...prev.availability, day] }))
+                          } else {
+                            setMemberForm(prev => ({ ...prev, availability: prev.availability.filter(d => d !== day) }))
+                          }
+                        }}
+                        className="rounded"
+                      />
                       {day}
                     </label>
                   ))}
@@ -2731,22 +3105,37 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               </div>
             </div>
             <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => setShowEditMemberDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
+              <Button variant="outline" onClick={() => setShowEditMemberDialog(false)} disabled={isSaving}>Cancel</Button>
+              <Button disabled={isSaving || !memberForm.name} onClick={async () => {
+                if (!memberForm.name) {
+                  toast.error('Validation Error', { description: 'Name is required' })
+                  return
+                }
+                setIsSaving(true)
                 toast.loading('Saving changes...', { id: 'update-member' })
                 try {
-                  const response = await fetch('/api/bookings', {
+                  const response = await fetch('/api/bookings/manage', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'update-member', memberId: selectedMemberId })
+                    body: JSON.stringify({
+                      action: 'update-member',
+                      memberId: selectedMemberId,
+                      name: memberForm.name,
+                      role: memberForm.role,
+                      availability: memberForm.availability
+                    })
                   })
-                  if (!response.ok) throw new Error('Failed to update team member')
-                  toast.success('Team member updated successfully', { id: 'update-member' })
+                  const result = await response.json()
+                  if (!response.ok) throw new Error(result.error || 'Failed to update team member')
+                  toast.success('Team Member Updated', { id: 'update-member', description: `${memberForm.name} has been updated` })
                   setShowEditMemberDialog(false)
+                  setSelectedMemberId(null)
                 } catch (error) {
-                  toast.error('Failed to update team member', { id: 'update-member', description: error instanceof Error ? error.message : 'Unknown error' })
+                  toast.error('Failed to Update', { id: 'update-member', description: error instanceof Error ? error.message : 'Unknown error' })
+                } finally {
+                  setIsSaving(false)
                 }
-              }}>Save Changes</Button>
+              }}>{isSaving ? 'Saving...' : 'Save Changes'}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2857,22 +3246,41 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         </Dialog>
 
         {/* Add Webhook Dialog */}
-        <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+        <Dialog open={showAddWebhookDialog} onOpenChange={(open) => {
+          setShowAddWebhookDialog(open)
+          if (!open) setWebhookForm({ url: '', events: ['booking.created', 'booking.updated', 'booking.cancelled', 'booking.completed'], secret: '' })
+        }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Add Webhook</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
-                <Label>Webhook URL</Label>
-                <Input placeholder="https://your-app.com/webhooks/bookings" className="mt-1" />
+                <Label>Webhook URL *</Label>
+                <Input
+                  placeholder="https://your-app.com/webhooks/bookings"
+                  className="mt-1"
+                  value={webhookForm.url}
+                  onChange={(e) => setWebhookForm(prev => ({ ...prev, url: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Events to Subscribe</Label>
                 <div className="space-y-2 mt-2">
                   {['booking.created', 'booking.updated', 'booking.cancelled', 'booking.completed'].map(event => (
                     <label key={event} className="flex items-center gap-2 text-sm">
-                      <input type="checkbox" defaultChecked className="rounded" />
+                      <input
+                        type="checkbox"
+                        checked={webhookForm.events.includes(event)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setWebhookForm(prev => ({ ...prev, events: [...prev.events, event] }))
+                          } else {
+                            setWebhookForm(prev => ({ ...prev, events: prev.events.filter(ev => ev !== event) }))
+                          }
+                        }}
+                        className="rounded"
+                      />
                       {event}
                     </label>
                   ))}
@@ -2880,26 +3288,49 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               </div>
               <div>
                 <Label>Secret Key (optional)</Label>
-                <Input placeholder="Optional secret for signature verification" className="mt-1" />
+                <Input
+                  placeholder="Optional secret for signature verification"
+                  className="mt-1"
+                  value={webhookForm.secret}
+                  onChange={(e) => setWebhookForm(prev => ({ ...prev, secret: e.target.value }))}
+                />
               </div>
             </div>
             <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
+              <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)} disabled={isSaving}>Cancel</Button>
+              <Button disabled={isSaving || !webhookForm.url || webhookForm.events.length === 0} onClick={async () => {
+                if (!webhookForm.url) {
+                  toast.error('Validation Error', { description: 'Webhook URL is required' })
+                  return
+                }
+                if (webhookForm.events.length === 0) {
+                  toast.error('Validation Error', { description: 'Select at least one event' })
+                  return
+                }
+                setIsSaving(true)
                 toast.loading('Adding webhook...', { id: 'add-webhook' })
                 try {
-                  const response = await fetch('/api/bookings', {
+                  const response = await fetch('/api/bookings/manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'add-webhook', type: 'webhook' })
+                    body: JSON.stringify({
+                      action: 'add-webhook',
+                      url: webhookForm.url,
+                      events: webhookForm.events,
+                      secret: webhookForm.secret || undefined
+                    })
                   })
-                  if (!response.ok) throw new Error('Failed to add webhook')
-                  toast.success('Webhook added successfully', { id: 'add-webhook' })
+                  const result = await response.json()
+                  if (!response.ok) throw new Error(result.error || 'Failed to add webhook')
+                  toast.success('Webhook Added', { id: 'add-webhook', description: 'Webhook endpoint has been configured' })
                   setShowAddWebhookDialog(false)
+                  setWebhookForm({ url: '', events: ['booking.created', 'booking.updated', 'booking.cancelled', 'booking.completed'], secret: '' })
                 } catch (error) {
-                  toast.error('Failed to add webhook', { id: 'add-webhook', description: error instanceof Error ? error.message : 'Unknown error' })
+                  toast.error('Failed to Add', { id: 'add-webhook', description: error instanceof Error ? error.message : 'Unknown error' })
+                } finally {
+                  setIsSaving(false)
                 }
-              }}>Add Webhook</Button>
+              }}>{isSaving ? 'Adding...' : 'Add Webhook'}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

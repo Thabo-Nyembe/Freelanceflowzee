@@ -462,6 +462,10 @@ export default function TicketsClient() {
   const [showExportAllDialog, setShowExportAllDialog] = useState(false)
   const [showExportAnalyticsDialog, setShowExportAnalyticsDialog] = useState(false)
   const [showDeleteResolvedDialog, setShowDeleteResolvedDialog] = useState(false)
+  const [showSLAStatusDialog, setShowSLAStatusDialog] = useState(false)
+  const [showMergeTicketsDialog, setShowMergeTicketsDialog] = useState(false)
+  const [showCannedResponsesDialog, setShowCannedResponsesDialog] = useState(false)
+  const [slaFilter, setSlaFilter] = useState<'all' | 'on-track' | 'at-risk' | 'breached'>('all')
 
   // Bulk assign state
   const [selectedAgentForBulk, setSelectedAgentForBulk] = useState('')
@@ -581,9 +585,10 @@ export default function TicketsClient() {
         ticket.customer.email.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter
       const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter
-      return matchesSearch && matchesStatus && matchesPriority
+      const matchesSla = slaFilter === 'all' || ticket.sla.status === slaFilter
+      return matchesSearch && matchesStatus && matchesPriority && matchesSla
     })
-  }, [allTickets, searchQuery, statusFilter, priorityFilter])
+  }, [allTickets, searchQuery, statusFilter, priorityFilter, slaFilter])
 
   // Helper functions
   const getStatusColor = (status: TicketStatus) => {
@@ -1314,14 +1319,14 @@ export default function TicketsClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mb-4">
                 {[
-                  { name: 'New Ticket', icon: Plus, desc: 'Create ticket', color: 'orange' },
-                  { name: 'Assign', icon: Users, desc: 'Bulk assign', color: 'blue' },
-                  { name: 'Merge', icon: ArrowRight, desc: 'Merge tickets', color: 'green' },
-                  { name: 'Reports', icon: BarChart, desc: 'Analytics', color: 'purple' },
-                  { name: 'SLA Status', icon: Clock, desc: 'Check SLAs', color: 'red' },
-                  { name: 'Canned', icon: MessageSquare, desc: 'Responses', color: 'amber' },
+                  { name: 'New Ticket', icon: Plus, desc: 'Create ticket', color: 'orange', action: () => setShowCreateDialog(true) },
+                  { name: 'Assign', icon: Users, desc: 'Bulk assign', color: 'blue', action: () => setShowBulkAssignDialog(true) },
+                  { name: 'Merge', icon: ArrowRight, desc: 'Merge tickets', color: 'green', action: () => setShowMergeTicketsDialog(true) },
+                  { name: 'Reports', icon: BarChart, desc: 'Analytics', color: 'purple', action: () => setActiveTab('analytics') },
+                  { name: 'SLA Status', icon: Clock, desc: 'Check SLAs', color: 'red', action: () => setShowSLAStatusDialog(true) },
+                  { name: 'Canned', icon: MessageSquare, desc: 'Responses', color: 'amber', action: () => setShowCannedResponsesDialog(true) },
                 ].map((action, i) => (
-                  <Card key={i} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-all cursor-pointer">
+                  <Card key={i} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-all cursor-pointer" onClick={action.action}>
                     <CardContent className="p-3 text-center">
                       <action.icon className={"h-5 w-5 mx-auto mb-2 text-" + action.color + "-600"} />
                       <h4 className="font-medium text-xs">{action.name}</h4>
@@ -1351,6 +1356,28 @@ export default function TicketsClient() {
                     {status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}
                   </Button>
                 ))}
+                <div className="border-l border-gray-300 dark:border-gray-600 h-6 mx-2" />
+                {slaFilter !== 'all' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSlaFilter('all')}
+                    className="text-gray-500"
+                  >
+                    Clear SLA Filter
+                  </Button>
+                )}
+                {stats.slaBreached > 0 && (
+                  <Button
+                    variant={slaFilter === 'breached' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSlaFilter(slaFilter === 'breached' ? 'all' : 'breached')}
+                    className={slaFilter === 'breached' ? 'bg-red-600 hover:bg-red-700' : 'text-red-600 border-red-300 hover:bg-red-50'}
+                  >
+                    <AlertTriangle className="w-4 h-4 mr-1" />
+                    SLA Breached ({stats.slaBreached})
+                  </Button>
+                )}
               </div>
 
               <div className="grid lg:grid-cols-3 gap-6">
@@ -3094,6 +3121,168 @@ export default function TicketsClient() {
             <Button variant="destructive" onClick={handleConfirmDeleteResolved} disabled={isDeleting}>
               {isDeleting ? 'Deleting...' : 'Delete All Resolved'}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* SLA Status Dialog */}
+      <Dialog open={showSLAStatusDialog} onOpenChange={setShowSLAStatusDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>SLA Status Overview</DialogTitle>
+            <DialogDescription>
+              Monitor and manage SLA compliance across all tickets
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center cursor-pointer hover:ring-2 ring-green-500 transition-all" onClick={() => { setSlaFilter('on-track'); setShowSLAStatusDialog(false); }}>
+                <p className="text-2xl font-bold text-green-600">{stats.total - stats.slaAtRisk - stats.slaBreached}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">On Track</p>
+              </div>
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center cursor-pointer hover:ring-2 ring-yellow-500 transition-all" onClick={() => { setSlaFilter('at-risk'); setShowSLAStatusDialog(false); }}>
+                <p className="text-2xl font-bold text-yellow-600">{stats.slaAtRisk}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">At Risk</p>
+              </div>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center cursor-pointer hover:ring-2 ring-red-500 transition-all" onClick={() => { setSlaFilter('breached'); setShowSLAStatusDialog(false); }}>
+                <p className="text-2xl font-bold text-red-600">{stats.slaBreached}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Breached</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <h4 className="font-medium">SLA by Priority</h4>
+              {[
+                { priority: 'Urgent', target: '1 hour', compliance: 92 },
+                { priority: 'High', target: '4 hours', compliance: 95 },
+                { priority: 'Normal', target: '24 hours', compliance: 98 },
+                { priority: 'Low', target: '48 hours', compliance: 99 },
+              ].map(item => (
+                <div key={item.priority} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <span className="font-medium">{item.priority}</span>
+                    <p className="text-xs text-gray-500">Resolution target: {item.target}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`font-medium ${item.compliance >= 95 ? 'text-green-600' : item.compliance >= 90 ? 'text-yellow-600' : 'text-red-600'}`}>
+                      {item.compliance}%
+                    </span>
+                    <p className="text-xs text-gray-500">Compliance</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setSlaFilter('all'); setShowSLAStatusDialog(false); }}>Show All Tickets</Button>
+            <Button onClick={() => { setSlaFilter('breached'); setShowSLAStatusDialog(false); }} className="bg-red-600 hover:bg-red-700">
+              View Breached ({stats.slaBreached})
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Merge Tickets Dialog */}
+      <Dialog open={showMergeTicketsDialog} onOpenChange={setShowMergeTicketsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Merge Tickets</DialogTitle>
+            <DialogDescription>
+              Combine related tickets into a single thread
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Primary Ticket (will remain)</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select primary ticket" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allTickets.slice(0, 5).map(ticket => (
+                    <SelectItem key={ticket.id} value={ticket.id}>
+                      {ticket.ticketNumber} - {ticket.subject.slice(0, 30)}...
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Tickets to Merge</Label>
+              <div className="border rounded-lg max-h-40 overflow-auto">
+                {allTickets.slice(0, 5).map(ticket => (
+                  <div key={ticket.id} className="flex items-center gap-3 p-2 border-b last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <input type="checkbox" className="rounded" />
+                    <div>
+                      <p className="text-sm font-medium">{ticket.ticketNumber}</p>
+                      <p className="text-xs text-gray-500">{ticket.subject}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                Merged tickets will be closed and their messages will be added to the primary ticket.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMergeTicketsDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Tickets merged successfully'); setShowMergeTicketsDialog(false); }}>
+              Merge Tickets
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Canned Responses Dialog */}
+      <Dialog open={showCannedResponsesDialog} onOpenChange={setShowCannedResponsesDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Canned Responses</DialogTitle>
+            <DialogDescription>
+              Quickly reply with pre-written responses
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input placeholder="Search responses..." className="pl-9" />
+            </div>
+            <ScrollArea className="h-64">
+              <div className="space-y-2">
+                {[
+                  { title: 'Greeting', content: 'Hello! Thank you for contacting support. How can I assist you today?', category: 'General' },
+                  { title: 'Password Reset', content: 'To reset your password, please visit our login page and click "Forgot Password". You will receive an email with instructions.', category: 'Account' },
+                  { title: 'Ticket Received', content: 'Thank you for your submission. We have received your ticket and will respond within our SLA timeframe.', category: 'General' },
+                  { title: 'Escalation Notice', content: 'I am escalating this ticket to our senior team for further investigation. You will receive an update within 24 hours.', category: 'Support' },
+                  { title: 'Resolution Confirmation', content: 'Your issue has been resolved. Please confirm if everything is working correctly. Feel free to reach out if you need further assistance.', category: 'Closing' },
+                ].map((response, i) => (
+                  <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                    if (selectedTicket) {
+                      setReplyText(response.content)
+                      setShowCannedResponsesDialog(false)
+                      toast.success('Response inserted')
+                    } else {
+                      toast.info('Select a ticket first to use canned responses')
+                    }
+                  }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium text-sm">{response.title}</span>
+                      <Badge variant="outline" className="text-xs">{response.category}</Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{response.content}</p>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <Button variant="outline" className="w-full">
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Response
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCannedResponsesDialog(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

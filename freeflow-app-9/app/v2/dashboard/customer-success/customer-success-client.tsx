@@ -473,6 +473,11 @@ export default function CustomerSuccessClient() {
   const [showGenerateReportDialog, setShowGenerateReportDialog] = useState(false)
   const [showIntroduceDialog, setShowIntroduceDialog] = useState(false)
   const [showAddCSMDialog, setShowAddCSMDialog] = useState(false)
+  const [showScheduleQBRDialog, setShowScheduleQBRDialog] = useState(false)
+  const [showHealthScoreDialog, setShowHealthScoreDialog] = useState(false)
+  const [showRiskAlertsDialog, setShowRiskAlertsDialog] = useState(false)
+  const [selectedCustomerForQBR, setSelectedCustomerForQBR] = useState<Customer | null>(null)
+  const [selectedCustomerForHealth, setSelectedCustomerForHealth] = useState<Customer | null>(null)
 
   // Form states
   const [newPlaybookData, setNewPlaybookData] = useState({ name: '', trigger: '', description: '' })
@@ -487,6 +492,8 @@ export default function CustomerSuccessClient() {
   const [reportData, setReportData] = useState({ type: 'summary', period: 'monthly', format: 'pdf' })
   const [introduceData, setIntroduceData] = useState({ from: '', to: '', context: '' })
   const [newCSMData, setNewCSMData] = useState({ name: '', email: '', capacity: '' })
+  const [qbrData, setQbrData] = useState({ date: '', time: '', notes: '' })
+  const [healthScoreData, setHealthScoreData] = useState({ score: 75, reason: '' })
   const [isProcessing, setIsProcessing] = useState(false)
 
   // Quick actions with dialog handlers
@@ -705,8 +712,101 @@ export default function CustomerSuccessClient() {
 
   // Handlers
   const handleScheduleQBR = (customerId: string) => {
-    toast.info('Schedule QBR')
+    const customer = customers.find(c => c.id === customerId)
+    if (customer) {
+      setSelectedCustomerForQBR(customer)
+      setShowScheduleQBRDialog(true)
+    }
   }
+
+  const handleConfirmScheduleQBR = async () => {
+    if (!selectedCustomerForQBR || !qbrData.date || !qbrData.time) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      // Create calendar event
+      const qbrDateTime = `${qbrData.date}T${qbrData.time}`
+      const eventData = {
+        title: `QBR - ${selectedCustomerForQBR.name}`,
+        date: qbrDateTime,
+        type: 'qbr',
+        customerId: selectedCustomerForQBR.id,
+        notes: qbrData.notes
+      }
+
+      // Save to calendar/database
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventData)
+      })
+
+      if (response.ok) {
+        toast.success('QBR Scheduled', {
+          description: `QBR with ${selectedCustomerForQBR.name} scheduled for ${qbrData.date} at ${qbrData.time}`
+        })
+      } else {
+        // Fallback: open calendar with pre-filled data
+        window.open(`/dashboard/calendar?action=schedule&type=qbr&customerId=${selectedCustomerForQBR.id}&date=${qbrData.date}&time=${qbrData.time}`, '_blank')
+        toast.success('Opening calendar to complete QBR scheduling')
+      }
+
+      setShowScheduleQBRDialog(false)
+      setSelectedCustomerForQBR(null)
+      setQbrData({ date: '', time: '', notes: '' })
+    } catch (error) {
+      toast.error('Failed to schedule QBR. Opening calendar instead.')
+      window.open(`/dashboard/calendar?action=schedule&type=qbr&customerId=${selectedCustomerForQBR.id}`, '_blank')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleOpenHealthScoreDialog = (customerId: string) => {
+    const customer = customers.find(c => c.id === customerId)
+    if (customer) {
+      setSelectedCustomerForHealth(customer)
+      setHealthScoreData({ score: customer.healthScore, reason: '' })
+      setShowHealthScoreDialog(true)
+    }
+  }
+
+  const handleUpdateHealthScore = async () => {
+    if (!selectedCustomerForHealth) return
+    setIsProcessing(true)
+    try {
+      const response = await fetch(`/api/customer-success/${selectedCustomerForHealth.id}/health-score`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          health_score: healthScoreData.score,
+          reason: healthScoreData.reason
+        })
+      })
+
+      if (response.ok) {
+        toast.success('Health Score Updated', {
+          description: `${selectedCustomerForHealth.name}'s health score updated to ${healthScoreData.score}`
+        })
+      } else {
+        toast.error('Failed to update health score')
+      }
+
+      setShowHealthScoreDialog(false)
+      setSelectedCustomerForHealth(null)
+    } catch (error) {
+      toast.error('Failed to update health score')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Get at-risk customers for alerts
+  const atRiskCustomers = customers.filter(c =>
+    c.healthStatus === 'at_risk' || c.healthStatus === 'critical' || c.renewalRisk === 'high' || c.renewalRisk === 'critical'
+  )
 
   const handleLogInteraction = (customerId: string) => {
     toast.success('Interaction logged')
@@ -732,9 +832,14 @@ export default function CustomerSuccessClient() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0" onClick={() => setActiveTab('settings')}>
+              <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0 relative" onClick={() => setShowRiskAlertsDialog(true)}>
                 <Bell className="h-4 w-4 mr-2" />
                 Alerts
+                {atRiskCustomers.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {atRiskCustomers.length}
+                  </span>
+                )}
               </Button>
               <Button className="bg-white text-emerald-600 hover:bg-white/90" onClick={() => setShowAddCustomerDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
@@ -1047,7 +1152,16 @@ export default function CustomerSuccessClient() {
                               <div className="text-sm text-gray-500">{customer.risks.length} active risks</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Take Action</Button>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => handleOpenHealthScoreDialog(customer.id)}>
+                              <Heart className="h-3 w-3 mr-1" />
+                              Update Score
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => handleScheduleQBR(customer.id)}>
+                              <Calendar className="h-3 w-3 mr-1" />
+                              Schedule QBR
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -2806,6 +2920,248 @@ export default function CustomerSuccessClient() {
             <Button variant="outline" onClick={() => setShowAddCSMDialog(false)}>Cancel</Button>
             <Button onClick={handleAddCSM} disabled={isProcessing}>
               {isProcessing ? 'Adding...' : 'Add CSM'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule QBR Dialog */}
+      <Dialog open={showScheduleQBRDialog} onOpenChange={setShowScheduleQBRDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Schedule Quarterly Business Review</DialogTitle>
+            <DialogDescription>
+              {selectedCustomerForQBR && `Schedule a QBR meeting with ${selectedCustomerForQBR.name}`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedCustomerForQBR && (
+              <div className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                <Avatar className="h-10 w-10">
+                  <AvatarFallback className="bg-emerald-500 text-white">
+                    {selectedCustomerForQBR.name.substring(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{selectedCustomerForQBR.name}</p>
+                  <p className="text-sm text-gray-500">Health Score: {selectedCustomerForQBR.healthScore}%</p>
+                </div>
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="qbr-date">Date *</Label>
+                <Input
+                  id="qbr-date"
+                  type="date"
+                  value={qbrData.date}
+                  onChange={(e) => setQbrData({ ...qbrData, date: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="qbr-time">Time *</Label>
+                <Input
+                  id="qbr-time"
+                  type="time"
+                  value={qbrData.time}
+                  onChange={(e) => setQbrData({ ...qbrData, time: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="qbr-notes">Meeting Notes / Agenda</Label>
+              <Textarea
+                id="qbr-notes"
+                placeholder="Add agenda items, topics to discuss, or preparation notes..."
+                value={qbrData.notes}
+                onChange={(e) => setQbrData({ ...qbrData, notes: e.target.value })}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowScheduleQBRDialog(false)
+              setSelectedCustomerForQBR(null)
+              setQbrData({ date: '', time: '', notes: '' })
+            }}>Cancel</Button>
+            <Button onClick={handleConfirmScheduleQBR} disabled={isProcessing}>
+              <Calendar className="h-4 w-4 mr-2" />
+              {isProcessing ? 'Scheduling...' : 'Schedule QBR'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Health Score Update Dialog */}
+      <Dialog open={showHealthScoreDialog} onOpenChange={setShowHealthScoreDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Update Health Score</DialogTitle>
+            <DialogDescription>
+              {selectedCustomerForHealth && `Adjust the health score for ${selectedCustomerForHealth.name}`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedCustomerForHealth && (
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="bg-emerald-500 text-white">
+                      {selectedCustomerForHealth.name.substring(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{selectedCustomerForHealth.name}</p>
+                    <p className="text-sm text-gray-500">Current: {selectedCustomerForHealth.healthScore}%</p>
+                  </div>
+                </div>
+                <Badge className={getHealthBadgeColor(selectedCustomerForHealth.healthStatus)}>
+                  {selectedCustomerForHealth.healthStatus.replace('_', ' ')}
+                </Badge>
+              </div>
+            )}
+            <div className="space-y-3">
+              <Label>New Health Score: {healthScoreData.score}%</Label>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-red-500">0</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={healthScoreData.score}
+                  onChange={(e) => setHealthScoreData({ ...healthScoreData, score: parseInt(e.target.value) })}
+                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                />
+                <span className="text-sm text-green-500">100</span>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Critical</span>
+                <span>At Risk</span>
+                <span>Good</span>
+                <span>Healthy</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="health-reason">Reason for Change</Label>
+              <Textarea
+                id="health-reason"
+                placeholder="Explain why the health score is being updated..."
+                value={healthScoreData.reason}
+                onChange={(e) => setHealthScoreData({ ...healthScoreData, reason: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowHealthScoreDialog(false)
+              setSelectedCustomerForHealth(null)
+            }}>Cancel</Button>
+            <Button onClick={handleUpdateHealthScore} disabled={isProcessing}>
+              <Heart className="h-4 w-4 mr-2" />
+              {isProcessing ? 'Updating...' : 'Update Score'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Risk Alerts Dialog */}
+      <Dialog open={showRiskAlertsDialog} onOpenChange={setShowRiskAlertsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Risk Alerts
+            </DialogTitle>
+            <DialogDescription>
+              {atRiskCustomers.length} customers require attention
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="flex-1 -mx-6 px-6">
+            <div className="space-y-3 py-4">
+              {atRiskCustomers.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Shield className="h-12 w-12 mx-auto mb-4 text-green-300" />
+                  <p className="font-medium text-green-600">All Clear!</p>
+                  <p className="text-sm">No customers currently at risk</p>
+                </div>
+              ) : (
+                atRiskCustomers.map(customer => (
+                  <Card key={customer.id} className={
+                    customer.healthStatus === 'critical' || customer.renewalRisk === 'critical'
+                      ? 'border-red-200 dark:border-red-900'
+                      : 'border-amber-200 dark:border-amber-900'
+                  }>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className={
+                              customer.healthStatus === 'critical' || customer.renewalRisk === 'critical'
+                                ? 'bg-red-500 text-white'
+                                : 'bg-amber-500 text-white'
+                            }>
+                              {customer.name.substring(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{customer.name}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge className={getHealthBadgeColor(customer.healthStatus)}>
+                                Health: {customer.healthScore}%
+                              </Badge>
+                              <Badge className={
+                                customer.renewalRisk === 'critical' ? 'bg-red-100 text-red-700' :
+                                customer.renewalRisk === 'high' ? 'bg-orange-100 text-orange-700' :
+                                'bg-yellow-100 text-yellow-700'
+                              }>
+                                {customer.renewalRisk} risk
+                              </Badge>
+                            </div>
+                            {customer.risks.length > 0 && (
+                              <div className="mt-2 text-sm text-gray-600">
+                                <span className="font-medium">Issues:</span> {customer.risks.map(r => r.description).join(', ')}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Button size="sm" variant="outline" onClick={() => {
+                            setShowRiskAlertsDialog(false)
+                            setSelectedCustomer(customer)
+                          }}>
+                            View Details
+                          </Button>
+                          <Button size="sm" onClick={() => {
+                            setShowRiskAlertsDialog(false)
+                            handleScheduleQBR(customer.id)
+                          }}>
+                            <Calendar className="h-3 w-3 mr-1" />
+                            Schedule QBR
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
+                        <span>ARR: {formatCurrency(customer.arr)}</span>
+                        <span>Renewal: {customer.daysToRenewal} days</span>
+                        <span>CSM: {customer.csm.name}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+          <DialogFooter className="border-t pt-4">
+            <Button variant="outline" onClick={() => setShowRiskAlertsDialog(false)}>Close</Button>
+            <Button onClick={() => {
+              setShowRiskAlertsDialog(false)
+              setSelectedHealth('at_risk')
+              setActiveTab('portfolio')
+            }}>
+              View All At-Risk Accounts
             </Button>
           </DialogFooter>
         </DialogContent>

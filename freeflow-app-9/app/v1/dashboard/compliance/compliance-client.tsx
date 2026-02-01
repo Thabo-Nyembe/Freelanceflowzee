@@ -343,6 +343,9 @@ export default function ComplianceClient() {
   const [showPolicyDialog, setShowPolicyDialog] = useState(false)
   const [showEvidenceUploadDialog, setShowEvidenceUploadDialog] = useState(false)
   const [showTrainingDialog, setShowTrainingDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+  const [showVersionHistoryDialog, setShowVersionHistoryDialog] = useState(false)
+  const [showAttestationDialog, setShowAttestationDialog] = useState(false)
 
   // Loading states
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -944,7 +947,7 @@ export default function ComplianceClient() {
         setShowAssignDialog(true)
         break
       case 'Templates':
-        toast.info('Opening policy templates library browser')
+        setShowTemplatesDialog(true)
         break
       case 'Approve':
         toast.success('Approving policies...')
@@ -964,10 +967,10 @@ export default function ComplianceClient() {
           .catch(err => toast.error(err.message || 'Failed to approve'))
         break
       case 'Versions':
-        toast.info('Opening version history viewer')
+        setShowVersionHistoryDialog(true)
         break
       case 'Attestation':
-        toast.info('Opening attestation tracking dashboard')
+        setShowAttestationDialog(true)
         break
       case 'Distribute':
         toast.success('Distributing policies...')
@@ -3978,6 +3981,330 @@ export default function ComplianceClient() {
                 Create Training
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Policy Templates Library Dialog */}
+      <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileCode className="w-5 h-5 text-purple-600" />
+              Policy Templates Library
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto space-y-4">
+            <div className="flex gap-4">
+              <Input placeholder="Search templates..." className="flex-1" />
+              <Select defaultValue="all">
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="security">Security</SelectItem>
+                  <SelectItem value="privacy">Privacy</SelectItem>
+                  <SelectItem value="hr">Human Resources</SelectItem>
+                  <SelectItem value="it">IT Operations</SelectItem>
+                  <SelectItem value="compliance">Compliance</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { name: 'Information Security Policy', category: 'Security', description: 'Comprehensive security controls and procedures', downloads: 1250, rating: 4.8 },
+                { name: 'Data Privacy Policy', category: 'Privacy', description: 'GDPR and CCPA compliant privacy framework', downloads: 980, rating: 4.9 },
+                { name: 'Acceptable Use Policy', category: 'IT Operations', description: 'Employee IT resource usage guidelines', downloads: 2100, rating: 4.7 },
+                { name: 'Incident Response Plan', category: 'Security', description: 'Step-by-step incident handling procedures', downloads: 875, rating: 4.6 },
+                { name: 'Business Continuity Plan', category: 'Compliance', description: 'Disaster recovery and continuity procedures', downloads: 650, rating: 4.5 },
+                { name: 'Employee Code of Conduct', category: 'HR', description: 'Behavioral standards and ethics guidelines', downloads: 1500, rating: 4.8 },
+                { name: 'Third-Party Risk Policy', category: 'Compliance', description: 'Vendor and supplier risk management', downloads: 420, rating: 4.4 },
+                { name: 'Access Control Policy', category: 'Security', description: 'Identity and access management standards', downloads: 780, rating: 4.7 },
+              ].map((template, idx) => (
+                <Card key={idx} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h4 className="font-medium text-gray-900 dark:text-white">{template.name}</h4>
+                      <Badge variant="outline" className="mt-1">{template.category}</Badge>
+                    </div>
+                    <div className="flex items-center gap-1 text-amber-500">
+                      <span className="text-sm font-medium">{template.rating}</span>
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{template.description}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-500">{template.downloads.toLocaleString()} downloads</span>
+                    <Button size="sm" variant="outline" onClick={() => {
+                      toast.success(`Template "${template.name}" added to your policies`)
+                      setShowTemplatesDialog(false)
+                    }}>
+                      <Download className="w-3 h-3 mr-1" />
+                      Use Template
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Version History Dialog */}
+      <Dialog open={showVersionHistoryDialog} onOpenChange={setShowVersionHistoryDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5 text-blue-600" />
+              Policy Version History
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto space-y-4">
+            <div className="space-y-2">
+              <Label>Select Policy</Label>
+              <Select defaultValue="info-security">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a policy" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="info-security">Information Security Policy</SelectItem>
+                  <SelectItem value="data-privacy">Data Privacy Policy</SelectItem>
+                  <SelectItem value="acceptable-use">Acceptable Use Policy</SelectItem>
+                  <SelectItem value="incident-response">Incident Response Plan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="border rounded-lg divide-y dark:divide-gray-700">
+              {[
+                { version: '3.2', date: '2024-01-15', author: 'Sarah Chen', status: 'Current', changes: 'Updated access control requirements per SOC 2 audit findings' },
+                { version: '3.1', date: '2023-11-20', author: 'Mike Johnson', status: 'Archived', changes: 'Added remote work security guidelines' },
+                { version: '3.0', date: '2023-09-01', author: 'Sarah Chen', status: 'Archived', changes: 'Major revision: Incorporated ISO 27001 controls' },
+                { version: '2.5', date: '2023-06-15', author: 'Emma Davis', status: 'Archived', changes: 'Updated password complexity requirements' },
+                { version: '2.4', date: '2023-03-10', author: 'Sarah Chen', status: 'Archived', changes: 'Added cloud security section' },
+                { version: '2.3', date: '2022-12-01', author: 'Mike Johnson', status: 'Archived', changes: 'Annual review updates' },
+              ].map((version, idx) => (
+                <div key={idx} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <GitBranch className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Version {version.version}</span>
+                          {version.status === 'Current' && (
+                            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Current</Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{version.changes}</p>
+                        <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {version.date}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            {version.author}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="ghost" onClick={() => toast.info(`Viewing version ${version.version}`)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => toast.info(`Downloading version ${version.version}`)}>
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      {version.status === 'Archived' && (
+                        <Button size="sm" variant="ghost" onClick={() => toast.success(`Restored version ${version.version}`)}>
+                          <RefreshCw className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-start gap-3">
+                <History className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div>
+                  <p className="font-medium text-blue-700 dark:text-blue-400">Version Control</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-500 mt-1">
+                    All policy versions are retained for 7 years to meet compliance requirements. You can compare, restore, or download any previous version.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowVersionHistoryDialog(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Attestation Tracking Dashboard Dialog */}
+      <Dialog open={showAttestationDialog} onOpenChange={setShowAttestationDialog}>
+        <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardCheck className="w-5 h-5 text-emerald-600" />
+              Attestation Tracking Dashboard
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto space-y-6">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-4 gap-4">
+              <Card className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-emerald-500 rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">847</p>
+                    <p className="text-sm text-emerald-600 dark:text-emerald-500">Completed</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-900/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-amber-500 rounded-lg">
+                    <Clock className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">156</p>
+                    <p className="text-sm text-amber-600 dark:text-amber-500">Pending</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-red-500 rounded-lg">
+                    <AlertTriangle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-red-700 dark:text-red-400">23</p>
+                    <p className="text-sm text-red-600 dark:text-red-500">Overdue</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500 rounded-lg">
+                    <Target className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">82.5%</p>
+                    <p className="text-sm text-blue-600 dark:text-blue-500">Completion Rate</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Attestation by Policy */}
+            <div>
+              <h3 className="font-medium text-gray-900 dark:text-white mb-3">Attestation by Policy</h3>
+              <div className="space-y-3">
+                {[
+                  { policy: 'Information Security Policy', total: 342, completed: 310, pending: 25, overdue: 7, dueDate: '2024-02-15' },
+                  { policy: 'Acceptable Use Policy', total: 342, completed: 298, pending: 38, overdue: 6, dueDate: '2024-02-20' },
+                  { policy: 'Data Privacy Policy', total: 342, completed: 285, pending: 47, overdue: 10, dueDate: '2024-02-28' },
+                  { policy: 'Code of Conduct', total: 342, completed: 342, pending: 0, overdue: 0, dueDate: '2024-01-31' },
+                ].map((item, idx) => (
+                  <div key={idx} className="p-4 border rounded-lg dark:border-gray-700">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">{item.policy}</h4>
+                        <p className="text-sm text-gray-500">Due: {item.dueDate}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                          {item.completed} completed
+                        </Badge>
+                        {item.pending > 0 && (
+                          <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                            {item.pending} pending
+                          </Badge>
+                        )}
+                        {item.overdue > 0 && (
+                          <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                            {item.overdue} overdue
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <Progress value={(item.completed / item.total) * 100} className="h-2" />
+                    <div className="flex justify-between mt-2 text-xs text-gray-500">
+                      <span>{Math.round((item.completed / item.total) * 100)}% complete</span>
+                      <span>{item.total} employees</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Pending Attestations */}
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-medium text-gray-900 dark:text-white">Pending Attestations</h3>
+                <Button size="sm" variant="outline" onClick={() => toast.success('Reminder emails sent to all pending employees')}>
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Reminders
+                </Button>
+              </div>
+              <div className="border rounded-lg divide-y dark:divide-gray-700">
+                {[
+                  { name: 'John Smith', department: 'Engineering', policy: 'Information Security Policy', dueDate: '2024-02-15', status: 'pending' },
+                  { name: 'Alice Brown', department: 'Marketing', policy: 'Data Privacy Policy', dueDate: '2024-02-10', status: 'overdue' },
+                  { name: 'Bob Wilson', department: 'Sales', policy: 'Acceptable Use Policy', dueDate: '2024-02-18', status: 'pending' },
+                  { name: 'Carol Davis', department: 'HR', policy: 'Code of Conduct', dueDate: '2024-02-08', status: 'overdue' },
+                  { name: 'David Lee', department: 'Finance', policy: 'Information Security Policy', dueDate: '2024-02-20', status: 'pending' },
+                ].map((item, idx) => (
+                  <div key={idx} className="p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback className="text-sm bg-gray-200 dark:bg-gray-700">
+                          {item.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
+                        <p className="text-sm text-gray-500">{item.department}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{item.policy}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-gray-500">Due: {item.dueDate}</span>
+                        <Badge className={item.status === 'overdue' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}>
+                          {item.status}
+                        </Badge>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => toast.success(`Reminder sent to ${item.name}`)}>
+                      <Bell className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-between gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => {
+              toast.success('Attestation report downloaded')
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Export Report
+            </Button>
+            <Button variant="outline" onClick={() => setShowAttestationDialog(false)}>Close</Button>
           </div>
         </DialogContent>
       </Dialog>

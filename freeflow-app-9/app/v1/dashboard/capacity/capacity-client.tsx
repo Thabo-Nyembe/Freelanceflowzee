@@ -294,6 +294,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   const [editDepartmentDialogOpen, setEditDepartmentDialogOpen] = useState(false)
   const [editStatusDialogOpen, setEditStatusDialogOpen] = useState(false)
   const [importDataDialogOpen, setImportDataDialogOpen] = useState(false)
+  const [analyticsDialogOpen, setAnalyticsDialogOpen] = useState(false)
   const [selectedDepartment, setSelectedDepartment] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<{ name: string; color: string } | null>(null)
   const [departmentSettings, setDepartmentSettings] = useState({
@@ -614,7 +615,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
         toast.info('Switched to Team View')
         break
       case 'Analytics':
-        toast.info('Opening Analytics', { description: 'Loading capacity analytics dashboard...' })
+        setAnalyticsDialogOpen(true)
         break
       case 'Schedule':
         setActiveTab('schedule')
@@ -2555,6 +2556,122 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
               <Button onClick={handleExport} aria-label="Export data">
                   <Download className="w-4 h-4 mr-2" />
                 Export
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dialog */}
+      <Dialog open={analyticsDialogOpen} onOpenChange={setAnalyticsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-purple-600" />
+              Capacity Analytics Dashboard
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="text-sm text-blue-600 dark:text-blue-400">Team Utilization</div>
+                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{stats.avgUtilization}%</div>
+                <div className="text-xs text-blue-500 dark:text-blue-400 mt-1">Avg across {stats.totalMembers} members</div>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="text-sm text-green-600 dark:text-green-400">Available Capacity</div>
+                <div className="text-2xl font-bold text-green-700 dark:text-green-300">{stats.totalAvailable}h</div>
+                <div className="text-xs text-green-500 dark:text-green-400 mt-1">Out of {stats.totalCapacity}h total</div>
+              </div>
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                <div className="text-sm text-orange-600 dark:text-orange-400">Active Projects</div>
+                <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">{stats.activeProjects}</div>
+                <div className="text-xs text-orange-500 dark:text-orange-400 mt-1">{stats.atRiskProjects} at risk</div>
+              </div>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <div className="text-sm text-red-600 dark:text-red-400">Overbooked</div>
+                <div className="text-2xl font-bold text-red-700 dark:text-red-300">{stats.overbooked}</div>
+                <div className="text-xs text-red-500 dark:text-red-400 mt-1">Team members</div>
+              </div>
+            </div>
+
+            {/* Utilization by Member */}
+            <div>
+              <h3 className="font-semibold mb-3">Team Utilization Breakdown</h3>
+              <div className="space-y-3">
+                {teamMembers.slice(0, 6).map(member => (
+                  <div key={member.id} className="flex items-center gap-3">
+                    <div className="w-24 text-sm font-medium truncate">{member.name}</div>
+                    <div className="flex-1 h-6 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${
+                          member.utilizationRate > 100 ? 'bg-red-500' :
+                          member.utilizationRate > 85 ? 'bg-orange-500' :
+                          member.utilizationRate > 70 ? 'bg-green-500' : 'bg-blue-500'
+                        }`}
+                        style={{ width: `${Math.min(member.utilizationRate, 100)}%` }}
+                      />
+                    </div>
+                    <div className={`w-14 text-sm font-medium text-right ${
+                      member.utilizationRate > 100 ? 'text-red-600' :
+                      member.utilizationRate > 85 ? 'text-orange-600' : 'text-green-600'
+                    }`}>
+                      {member.utilizationRate}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Capacity Forecast */}
+            <div>
+              <h3 className="font-semibold mb-3">6-Week Forecast</h3>
+              <div className="grid grid-cols-6 gap-2">
+                {forecast.map((week, i) => (
+                  <div key={i} className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{week.week}</div>
+                    <div className={`text-lg font-bold ${
+                      week.utilizationRate > 90 ? 'text-red-600' :
+                      week.utilizationRate > 75 ? 'text-orange-600' : 'text-green-600'
+                    }`}>
+                      {week.utilizationRate}%
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{week.available}h free</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="flex justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => {
+                const csvData = teamMembers.map(m => ({
+                  name: m.name,
+                  role: m.role,
+                  utilization: m.utilizationRate,
+                  allocated: m.allocatedHours,
+                  available: m.availableHours,
+                  status: m.status
+                }))
+                const csvContent = [
+                  Object.keys(csvData[0]).join(','),
+                  ...csvData.map(row => Object.values(row).join(','))
+                ].join('\n')
+                const blob = new Blob([csvContent], { type: 'text/csv' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `analytics-export-${new Date().toISOString().split('T')[0]}.csv`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Analytics exported')
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Analytics
+              </Button>
+              <Button onClick={() => setAnalyticsDialogOpen(false)}>
+                Close
               </Button>
             </div>
           </div>

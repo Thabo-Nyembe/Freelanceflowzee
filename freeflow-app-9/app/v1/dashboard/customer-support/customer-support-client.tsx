@@ -297,6 +297,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [showVIPSelectorDialog, setShowVIPSelectorDialog] = useState(false)
   const [showManageTeamDialog, setShowManageTeamDialog] = useState(false)
   const [showViewSegmentDialog, setShowViewSegmentDialog] = useState(false)
+  const [showResponseTimeDialog, setShowResponseTimeDialog] = useState(false)
+  const [showAnalyticsOverviewDialog, setShowAnalyticsOverviewDialog] = useState(false)
+  const [slaBreachedFilter, setSlaBreachedFilter] = useState(false)
   const [selectedIntegration, setSelectedIntegration] = useState<{ name: string; description: string } | null>(null)
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null)
   const [selectedSegment, setSelectedSegment] = useState<{ name: string; count: number } | null>(null)
@@ -369,11 +372,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       if (statusFilter !== 'all' && ticket.status !== statusFilter) return false
       if (priorityFilter !== 'all' && ticket.priority !== priorityFilter) return false
       if (channelFilter !== 'all' && ticket.channel !== channelFilter) return false
+      if (slaBreachedFilter && !ticket.slaBreached) return false
       if (searchQuery && !ticket.subject.toLowerCase().includes(searchQuery.toLowerCase()) &&
           !ticket.customer.name.toLowerCase().includes(searchQuery.toLowerCase())) return false
       return true
     })
-  }, [tickets, statusFilter, priorityFilter, channelFilter, searchQuery])
+  }, [tickets, statusFilter, priorityFilter, channelFilter, searchQuery, slaBreachedFilter])
 
   // Get stats from the hook
   const ticketStatsData = useMemo(() => getTicketStats(), [getTicketStats])
@@ -896,14 +900,18 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 {/* Quick Filters */}
                 <div className="flex gap-2 mb-4">
                   {[
-                    { label: 'My Tickets', count: 5, action: () => { setStatusFilter('all'); toast.success('Showing your assigned tickets') } },
-                    { label: 'Unassigned', count: 3, action: () => { setStatusFilter('new'); toast.success('Showing unassigned tickets') } },
-                    { label: 'SLA Breached', count: 1, action: () => toast.info('Showing SLA breached tickets') },
-                    { label: 'Awaiting Reply', count: 2, action: () => { setStatusFilter('pending'); toast.success('Showing tickets awaiting reply') } },
+                    { label: 'My Tickets', count: 5, active: statusFilter === 'all' && !slaBreachedFilter, action: () => { setStatusFilter('all'); setSlaBreachedFilter(false); toast.success('Showing your assigned tickets') } },
+                    { label: 'Unassigned', count: 3, active: statusFilter === 'new' && !slaBreachedFilter, action: () => { setStatusFilter('new'); setSlaBreachedFilter(false); toast.success('Showing unassigned tickets') } },
+                    { label: 'SLA Breached', count: tickets.filter(t => t.slaBreached).length, active: slaBreachedFilter, action: () => { setSlaBreachedFilter(!slaBreachedFilter); setStatusFilter('all'); toast.success(slaBreachedFilter ? 'Showing all tickets' : 'Filtering SLA breached tickets') } },
+                    { label: 'Awaiting Reply', count: 2, active: statusFilter === 'pending' && !slaBreachedFilter, action: () => { setStatusFilter('pending'); setSlaBreachedFilter(false); toast.success('Showing tickets awaiting reply') } },
                   ].map((filter, i) => (
                     <button
                       key={i}
-                      className="px-3 py-1.5 bg-white border rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2"
+                      className={`px-3 py-1.5 border rounded-lg text-sm flex items-center gap-2 transition-colors ${
+                        filter.active
+                          ? 'bg-blue-100 border-blue-300 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-400'
+                          : 'bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700'
+                      }`}
                       onClick={filter.action}
                     >
                       {filter.label}
@@ -1263,9 +1271,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: BarChart3, label: 'Overview', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.success('Showing analytics overview') },
+                { icon: BarChart3, label: 'Overview', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowAnalyticsOverviewDialog(true) },
                 { icon: TrendingUp, label: 'Trends', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => setShowInsightsDialog(true) },
-                { icon: Timer, label: 'Response', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('Response time analytics') },
+                { icon: Timer, label: 'Response', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setShowResponseTimeDialog(true) },
                 { icon: Star, label: 'CSAT', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => setShowRatingsDialog(true) },
                 { icon: Users, label: 'Agents', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setActiveTab('agents') },
                 { icon: Tag, label: 'Topics', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowTagsDialog(true) },
@@ -2858,6 +2866,149 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRatingsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Overview Dialog */}
+      <Dialog open={showAnalyticsOverviewDialog} onOpenChange={setShowAnalyticsOverviewDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Analytics Overview</DialogTitle>
+            <DialogDescription>
+              Comprehensive view of your support performance metrics
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-blue-600">{stats.totalTickets}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total Tickets</p>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-green-600">{stats.resolvedToday}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Resolved Today</p>
+              </div>
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-amber-600">{stats.slaCompliance}%</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">SLA Compliance</p>
+              </div>
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-purple-600">{stats.satisfactionScore}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">CSAT Score</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Ticket Distribution</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {[
+                    { status: 'Open', count: stats.openTickets, color: 'bg-blue-500' },
+                    { status: 'Pending', count: tickets.filter(t => t.status === 'pending').length, color: 'bg-yellow-500' },
+                    { status: 'Solved', count: tickets.filter(t => t.status === 'solved').length, color: 'bg-green-500' },
+                    { status: 'Closed', count: tickets.filter(t => t.status === 'closed').length, color: 'bg-gray-500' },
+                  ].map(item => (
+                    <div key={item.status} className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${item.color}`} />
+                      <span className="flex-1 text-sm">{item.status}</span>
+                      <span className="font-medium">{item.count}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Priority Breakdown</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {[
+                    { priority: 'Urgent', count: tickets.filter(t => t.priority === 'urgent').length, color: 'bg-red-500' },
+                    { priority: 'High', count: tickets.filter(t => t.priority === 'high').length, color: 'bg-orange-500' },
+                    { priority: 'Normal', count: tickets.filter(t => t.priority === 'normal').length, color: 'bg-blue-500' },
+                    { priority: 'Low', count: tickets.filter(t => t.priority === 'low').length, color: 'bg-gray-500' },
+                  ].map(item => (
+                    <div key={item.priority} className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${item.color}`} />
+                      <span className="flex-1 text-sm">{item.priority}</span>
+                      <span className="font-medium">{item.count}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnalyticsOverviewDialog(false)}>Close</Button>
+            <Button onClick={() => { setShowAnalyticsOverviewDialog(false); setActiveTab('analytics'); }}>
+              View Full Analytics
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Response Time Analytics Dialog */}
+      <Dialog open={showResponseTimeDialog} onOpenChange={setShowResponseTimeDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Response Time Analytics</DialogTitle>
+            <DialogDescription>
+              Track and analyze response time performance
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="text-center p-6 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-lg">
+              <p className="text-4xl font-bold text-red-600">{stats.avgResponseTime}m</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Average First Response Time</p>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-medium">Response Time by Priority</h4>
+              {[
+                { priority: 'Urgent', target: '15 min', avg: '12 min', status: 'on-track' },
+                { priority: 'High', target: '30 min', avg: '28 min', status: 'on-track' },
+                { priority: 'Normal', target: '1 hour', avg: '45 min', status: 'on-track' },
+                { priority: 'Low', target: '4 hours', avg: '2.5 hours', status: 'on-track' },
+              ].map(item => (
+                <div key={item.priority} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <span className="font-medium">{item.priority}</span>
+                    <p className="text-xs text-gray-500">Target: {item.target}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-medium text-green-600">{item.avg}</span>
+                    <p className="text-xs text-green-500">On Track</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <h4 className="font-medium mb-2">Quick Stats</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Fastest Response</p>
+                  <p className="font-medium">2 min</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Slowest Response</p>
+                  <p className="font-medium">45 min</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Tickets Within SLA</p>
+                  <p className="font-medium text-green-600">{100 - tickets.filter(t => t.slaBreached).length}%</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">SLA Breached</p>
+                  <p className="font-medium text-red-600">{tickets.filter(t => t.slaBreached).length}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResponseTimeDialog(false)}>Close</Button>
+            <Button onClick={() => { setShowResponseTimeDialog(false); setSlaBreachedFilter(true); setActiveTab('tickets'); }}>
+              View Breached Tickets
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
