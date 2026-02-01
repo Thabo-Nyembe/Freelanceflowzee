@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Bell,
@@ -217,7 +218,11 @@ export function ActivityFeed({
                 <TooltipContent>Mark all notifications as read</TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <Button variant="ghost" size="icon">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => toast.info('Settings', { description: 'Notification settings coming soon' })}
+            >
               <Settings className="h-4 w-4" />
             </Button>
           </div>

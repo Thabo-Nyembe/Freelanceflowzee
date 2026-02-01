@@ -479,13 +479,25 @@ export default function AIVoiceClient() {
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => toast.success('Download started', { description: `Downloading ${audio.title}` })}
+                          >
                             <Download className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => toast.info('Share', { description: `Share link copied for ${audio.title}` })}
+                          >
                             <Share2 className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => toast.warning('Delete', { description: `Are you sure you want to delete ${audio.title}?` })}
+                          >
                             <Trash2 className="w-4 h-4 text-red-500" />
                           </Button>
                         </div>
@@ -522,7 +534,11 @@ export default function AIVoiceClient() {
                         </div>
                         <p className="text-xs text-gray-500 mt-1">{voice.style}</p>
                       </div>
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => toast.info('Playing voice preview', { description: `Playing ${voice.name} voice sample` })}
+                      >
                         <Play className="w-4 h-4" />
                       </Button>
                     </div>

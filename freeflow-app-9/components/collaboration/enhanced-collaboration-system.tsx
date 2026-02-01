@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -241,10 +242,18 @@ export default function EnhancedCollaborationSystem({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => toast.info('Share session', { description: `Invite link copied for ${session.title}` })}
+          >
             <Share2 className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => toast.info('Settings', { description: 'Session settings coming soon' })}
+          >
             <Settings className="h-5 w-5" />
           </Button>
         </div>

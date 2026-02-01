@@ -65,7 +65,13 @@ export function CommentThread({
             <MessageSquare className="w-5 h-5" />
             <span className="font-medium">Comments ({comments.length})</span>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+            aria-label={isExpanded ? 'Collapse comments' : 'Expand comments'}
+          >
             {isExpanded ? <X className="w-4 h-4" /> : <MessageSquare className="w-4 h-4" />}
           </Button>
         </div>

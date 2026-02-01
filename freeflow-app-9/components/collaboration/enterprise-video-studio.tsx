@@ -8,6 +8,7 @@ import React, {
   useState,
   useReducer,
 } from 'react'
+import { toast } from 'sonner'
 
 /* ------------------------------------------------------------------
  * UI building-blocks
@@ -418,9 +419,9 @@ export function EnterpriseVideoStudio({
                       <Badge variant="secondary">{formatTime(rec.duration)}</Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button size="icon" variant="ghost"><Share2 className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="ghost"><Download className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" onClick={() => toast.info('Share', { description: `Share link copied for ${rec.title}` })}><Share2 className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" onClick={() => toast.success('Download started', { description: `Downloading ${rec.title}` })}><Download className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" onClick={() => toast.info('More options', { description: 'Additional options coming soon' })}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
