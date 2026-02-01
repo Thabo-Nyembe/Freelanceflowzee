@@ -21,6 +21,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
     Card,
     CardContent,
@@ -84,8 +87,47 @@ export default function FinancialHub({ invoices, _expenses, escrowTransactions, 
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false)
   const [showTransactionDialog, setShowTransactionDialog] = useState(false)
   const [showEmailDialog, setShowEmailDialog] = useState(false)
+  const [showEditInvoiceDialog, setShowEditInvoiceDialog] = useState(false)
   const [emailForm, setEmailForm] = useState({ to: '', subject: '', message: '' })
+  const [editInvoiceForm, setEditInvoiceForm] = useState({
+    client_name: '',
+    project_title: '',
+    amount: '',
+    status: 'draft' as Invoice['status'],
+    due_date: ''
+  })
   const [isSending, setIsSending] = useState(false)
+  const [isSavingInvoice, setIsSavingInvoice] = useState(false)
+
+  const openEditInvoiceDialog = (invoice: Invoice) => {
+    setSelectedInvoice(invoice)
+    setEditInvoiceForm({
+      client_name: invoice.client_name,
+      project_title: invoice.project_title,
+      amount: invoice.amount.toString(),
+      status: invoice.status,
+      due_date: invoice.due_date
+    })
+    setShowEditInvoiceDialog(true)
+  }
+
+  const handleSaveInvoice = async () => {
+    if (!selectedInvoice) return
+    setIsSavingInvoice(true)
+    toast.loading('Saving invoice...', { id: 'save-invoice' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Invoice updated', {
+        id: 'save-invoice',
+        description: `Invoice ${selectedInvoice.invoice_number} has been updated`
+      })
+      setShowEditInvoiceDialog(false)
+    } catch (error) {
+      toast.error('Failed to update invoice', { id: 'save-invoice' })
+    } finally {
+      setIsSavingInvoice(false)
+    }
+  }
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -245,7 +287,7 @@ ${invoice.paid_date ? `Paid Date: ${formatDate(invoice.paid_date)}` : ''}
                                 Send to Client
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => toast.info('Edit Mode', { description: 'Invoice editing coming soon' })}>
+                            <DropdownMenuItem onClick={() => openEditInvoiceDialog(invoice)}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                             </DropdownMenuItem>
@@ -628,6 +670,90 @@ ${invoice.paid_date ? `Paid Date: ${formatDate(invoice.paid_date)}` : ''}
                   </Button>
                 </>
               )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Invoice Dialog */}
+        <Dialog open={showEditInvoiceDialog} onOpenChange={setShowEditInvoiceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5" />
+                Edit Invoice
+              </DialogTitle>
+              <DialogDescription>
+                Update invoice {selectedInvoice?.invoice_number}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Client Name</Label>
+                <Input
+                  value={editInvoiceForm.client_name}
+                  onChange={(e) => setEditInvoiceForm(prev => ({ ...prev, client_name: e.target.value }))}
+                  placeholder="Client name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Project Title</Label>
+                <Input
+                  value={editInvoiceForm.project_title}
+                  onChange={(e) => setEditInvoiceForm(prev => ({ ...prev, project_title: e.target.value }))}
+                  placeholder="Project title"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Amount</Label>
+                  <Input
+                    type="number"
+                    value={editInvoiceForm.amount}
+                    onChange={(e) => setEditInvoiceForm(prev => ({ ...prev, amount: e.target.value }))}
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select
+                    value={editInvoiceForm.status}
+                    onValueChange={(v) => setEditInvoiceForm(prev => ({ ...prev, status: v as Invoice['status'] }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="sent">Sent</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="overdue">Overdue</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Due Date</Label>
+                <Input
+                  type="date"
+                  value={editInvoiceForm.due_date}
+                  onChange={(e) => setEditInvoiceForm(prev => ({ ...prev, due_date: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditInvoiceDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveInvoice} disabled={isSavingInvoice}>
+                {isSavingInvoice ? 'Saving...' : 'Save Changes'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

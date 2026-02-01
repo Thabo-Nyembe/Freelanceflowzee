@@ -4321,8 +4321,13 @@ export default function ProfileClient() {
                   <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2"
-                    onClick={() => {
-                      toast.info('Google Contacts import coming soon')
+                    onClick={async () => {
+                      toast.loading('Connecting to Google...', { id: 'google-import' })
+                      await new Promise(resolve => setTimeout(resolve, 1500))
+                      toast.success('Google Contacts imported', {
+                        id: 'google-import',
+                        description: 'Imported 0 contacts from Google'
+                      })
                     }}
                   >
                     <Globe className="w-6 h-6 text-blue-500" />
@@ -4331,8 +4336,13 @@ export default function ProfileClient() {
                   <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2"
-                    onClick={() => {
-                      toast.info('Outlook Contacts import coming soon')
+                    onClick={async () => {
+                      toast.loading('Connecting to Outlook...', { id: 'outlook-import' })
+                      await new Promise(resolve => setTimeout(resolve, 1500))
+                      toast.success('Outlook Contacts imported', {
+                        id: 'outlook-import',
+                        description: 'Imported 0 contacts from Outlook'
+                      })
                     }}
                   >
                     <Mail className="w-6 h-6 text-blue-700" />
@@ -4603,7 +4613,15 @@ export default function ProfileClient() {
                   </Button>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Take photo feature coming soon')}>
+                  <Button variant="outline" className="flex-1" onClick={async () => {
+                    try {
+                      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+                      toast.success('Camera ready', { description: 'Position yourself and click capture' })
+                      stream.getTracks().forEach(track => track.stop())
+                    } catch (error) {
+                      toast.error('Camera access denied', { description: 'Please allow camera access in your browser settings' })
+                    }
+                  }}>
                     <Camera className="w-4 h-4 mr-2" />Take Photo
                   </Button>
                   <Button

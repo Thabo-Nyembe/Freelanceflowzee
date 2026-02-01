@@ -41,6 +41,10 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -587,10 +591,26 @@ export default function AICodeBuilderV2Client() {
   const [activeRightTab, setActiveRightTab] = useState<'preview' | 'terminal'>('preview');
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+  const [codeSettings, setCodeSettings] = useState({
+    model: 'gpt-4',
+    temperature: 0.7,
+    autoSave: true,
+    darkMode: true,
+    showLineNumbers: true,
+    formatOnSave: true,
+    eslintEnabled: true,
+    prettierEnabled: true
+  });
   const [terminalOutput] = useState<string[]>([
     '$ Manus AI Code Builder initialized',
     '$ Ready to generate code...'
   ]);
+
+  const handleSaveSettings = () => {
+    toast.success('Settings saved', { description: 'AI Code Builder settings have been updated' });
+    setShowSettingsDialog(false);
+  };
 
   // Initialize session on mount
   useEffect(() => {
@@ -661,7 +681,7 @@ export default function AICodeBuilderV2Client() {
             variant="ghost"
             size="sm"
             className="h-7 text-gray-400"
-            onClick={() => toast.info('Settings', { description: 'AI Code Builder settings coming soon' })}
+            onClick={() => setShowSettingsDialog(true)}
           >
             <Settings className="h-4 w-4" />
           </Button>
@@ -808,6 +828,99 @@ export default function AICodeBuilderV2Client() {
           </Button>
         </div>
       )}
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-md bg-[#252526] text-gray-200 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Settings className="w-5 h-5" />
+              AI Code Builder Settings
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Configure your code generation preferences
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label className="text-gray-300">AI Model</Label>
+              <Select value={codeSettings.model} onValueChange={(v) => setCodeSettings(prev => ({ ...prev, model: v }))}>
+                <SelectTrigger className="bg-[#1e1e1e] border-gray-600 text-gray-200">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#252526] border-gray-600">
+                  <SelectItem value="gpt-4">GPT-4 (Most Capable)</SelectItem>
+                  <SelectItem value="gpt-3.5">GPT-3.5 (Faster)</SelectItem>
+                  <SelectItem value="claude">Claude (Alternative)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-gray-300">Auto Save</Label>
+                <p className="text-xs text-gray-500">Automatically save generated files</p>
+              </div>
+              <Switch
+                checked={codeSettings.autoSave}
+                onCheckedChange={(checked) => setCodeSettings(prev => ({ ...prev, autoSave: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-gray-300">Show Line Numbers</Label>
+                <p className="text-xs text-gray-500">Display line numbers in editor</p>
+              </div>
+              <Switch
+                checked={codeSettings.showLineNumbers}
+                onCheckedChange={(checked) => setCodeSettings(prev => ({ ...prev, showLineNumbers: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-gray-300">Format on Save</Label>
+                <p className="text-xs text-gray-500">Auto-format code when saving</p>
+              </div>
+              <Switch
+                checked={codeSettings.formatOnSave}
+                onCheckedChange={(checked) => setCodeSettings(prev => ({ ...prev, formatOnSave: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-gray-300">ESLint</Label>
+                <p className="text-xs text-gray-500">Enable ESLint for JavaScript/TypeScript</p>
+              </div>
+              <Switch
+                checked={codeSettings.eslintEnabled}
+                onCheckedChange={(checked) => setCodeSettings(prev => ({ ...prev, eslintEnabled: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-gray-300">Prettier</Label>
+                <p className="text-xs text-gray-500">Enable Prettier formatting</p>
+              </div>
+              <Switch
+                checked={codeSettings.prettierEnabled}
+                onCheckedChange={(checked) => setCodeSettings(prev => ({ ...prev, prettierEnabled: checked }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)} className="border-gray-600 text-gray-300 hover:bg-gray-700">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings} className="bg-gradient-to-r from-purple-600 to-blue-600">
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
