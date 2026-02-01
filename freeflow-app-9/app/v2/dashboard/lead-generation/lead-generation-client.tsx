@@ -794,7 +794,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   // Handle creating a new lead
   const handleSubmitNewLead = async () => {
     if (!newLeadForm.name.trim()) {
-      toast.error('Validation Error')
+      toast.error('Required Fields Missing', { description: 'Please fill in all required fields' })
       return
     }
 
@@ -809,7 +809,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
         toast.error('Failed to Create Lead')
       }
     } catch (error) {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     } finally {
       setIsSubmitting(false)
     }
@@ -824,7 +824,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   const handleSubmitEmail = async () => {
     if (!selectedLead) return
     if (!emailForm.subject.trim() || !emailForm.body.trim()) {
-      toast.error('Validation Error')
+      toast.error('Required Fields Missing', { description: 'Please fill in all required fields' })
       return
     }
 
@@ -841,7 +841,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       setIsEmailDialogOpen(false)
       setEmailForm({ subject: '', body: '' })
     } catch (error) {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     } finally {
       setIsSubmitting(false)
     }
@@ -854,7 +854,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     if (result) {
       toast.success("Call logged for " + selectedLead.firstName + " " + selectedLead.lastName)
     } else {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     }
   }
 
@@ -870,10 +870,10 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       if (result) {
         toast.success("Lead qualified")
       } else {
-        toast.error('Error')
+        toast.error('Operation Failed', { description: 'Please try again or contact support' })
       }
     } catch (error) {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     } finally {
       setIsSubmitting(false)
     }
@@ -886,10 +886,10 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       if (result) {
         toast.success("Lead converted")
       } else {
-        toast.error('Error')
+        toast.error('Operation Failed', { description: 'Please try again or contact support' })
       }
     } catch (error) {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     } finally {
       setIsSubmitting(false)
     }
@@ -910,10 +910,10 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
           setSelectedLead(null)
         }
       } else {
-        toast.error('Error')
+        toast.error('Operation Failed', { description: 'Please try again or contact support' })
       }
     } catch (error) {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     } finally {
       setIsSubmitting(false)
     }
@@ -924,7 +924,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     if (result) {
       toast.success('Score Updated')
     } else {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     }
   }
 
@@ -935,7 +935,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   const handleSubmitAssignment = async () => {
     if (!selectedLead || !selectedAssignee) {
-      toast.error('Validation Error')
+      toast.error('Required Fields Missing', { description: 'Please fill in all required fields' })
       return
     }
 
@@ -951,10 +951,10 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
         setIsAssignDialogOpen(false)
         setSelectedAssignee('')
       } else {
-        toast.error('Error')
+        toast.error('Operation Failed', { description: 'Please try again or contact support' })
       }
     } catch (error) {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     } finally {
       setIsSubmitting(false)
     }
@@ -1004,61 +1004,61 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleSmartFilter = () => {
-    toast.info('Smart Filter')
+    toast.info('Smart Filter', { description: 'AI-powered filtering to find best-fit leads' })
   }
 
   const handleSegments = () => {
-    toast.info('Segments')
+    toast.info('Lead Segments', { description: 'Group leads by industry, score, or behavior' })
   }
 
   const handleBulkTag = () => {
-    toast.info('Bulk Tag')
+    toast.info('Bulk Tag', { description: 'Select leads below to apply tags in bulk' })
   }
 
   const handleSyncCRM = () => {
-    toast.success('CRM Sync')
+    toast.success('CRM Syncing', { description: 'Synchronizing leads with your CRM...' })
   }
 
   // Quick Actions Handlers - Pipeline Tab
   const handleNewDeal = () => {
-    toast.info('New Deal')
+    toast.info('Create New Deal', { description: 'Convert a lead to a deal in your pipeline' })
   }
 
   const handleStageRules = () => {
-    toast.info('Stage Rules')
+    toast.info('Stage Rules', { description: 'Configure automated actions for stage transitions' })
   }
 
   const handleAutomation = () => {
-    toast.info('Automation')
+    toast.info('Lead Automation', { description: 'Set up automated follow-ups and nurturing sequences' })
   }
 
   const handlePipelineReport = () => {
-    toast.info('Pipeline Report')
+    toast.info('Pipeline Report', { description: 'Generate conversion and stage metrics report' })
   }
 
   const handleAssignLeads = () => {
-    toast.info('Assign Leads')
+    toast.info('Assign Leads', { description: 'Select leads to assign to team members' })
   }
 
   const handleStaleDeals = () => {
-    toast.info('Stale Deals')
+    toast.info('Stale Deals', { description: 'View deals with no activity in 30+ days' })
   }
 
   const handleForecasting = () => {
-    toast.info('Forecasting')
+    toast.info('Revenue Forecasting', { description: 'View predicted revenue based on pipeline stages' })
   }
 
   const handleRefreshView = () => {
-    toast.success('View Refreshed')
+    toast.success('View Refreshed', { description: 'Lead data has been updated' })
   }
 
   // Quick Actions Handlers - Activities Tab
   const handleLogEmail = () => {
-    toast.info('Log Email')
+    toast.info('Log Email', { description: 'Record email interaction with selected lead' })
   }
 
   const handleLogCallActivity = () => {
-    toast.info('Log Call')
+    toast.info('Log Call', { description: 'Record phone call details with selected lead' })
   }
 
   const handleLogMeeting = () => {
@@ -1077,7 +1077,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   const handleSubmitNote = async () => {
     if (!selectedLead) return
     if (!noteContent.trim()) {
-      toast.error('Validation Error')
+      toast.error('Required Fields Missing', { description: 'Please fill in all required fields' })
       return
     }
 
@@ -1096,10 +1096,10 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
         setIsNoteDialogOpen(false)
         setNoteContent('')
       } else {
-        toast.error('Error')
+        toast.error('Operation Failed', { description: 'Please try again or contact support' })
       }
     } catch (error) {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     } finally {
       setIsSubmitting(false)
     }
@@ -1224,7 +1224,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
       toast.success("Scores recalculated for " + successCount + " leads")
     } catch (error) {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     } finally {
       setIsSubmitting(false)
     }
@@ -1336,7 +1336,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   const handleSubmitEditLead = async () => {
     if (!selectedLead) return
     if (!editLeadForm.name?.trim()) {
-      toast.error('Validation Error')
+      toast.error('Required Fields Missing', { description: 'Please fill in all required fields' })
       return
     }
 
@@ -1360,10 +1360,10 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
         setIsEditLeadDialogOpen(false)
         setIsLeadDialogOpen(false)
       } else {
-        toast.error('Error')
+        toast.error('Operation Failed', { description: 'Please try again or contact support' })
       }
     } catch (error) {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     } finally {
       setIsSubmitting(false)
     }
@@ -1396,10 +1396,10 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
         toast.success('Status Updated')
         setIsStatusDialogOpen(false)
       } else {
-        toast.error('Error')
+        toast.error('Operation Failed', { description: 'Please try again or contact support' })
       }
     } catch (error) {
-      toast.error('Error')
+      toast.error('Operation Failed', { description: 'Please try again or contact support' })
     } finally {
       setIsSubmitting(false)
     }
