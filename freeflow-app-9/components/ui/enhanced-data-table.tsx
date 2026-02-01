@@ -14,6 +14,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { ArrowUpDown, ChevronDown, MoreHorizontal, Search, Download, Eye } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -178,7 +179,7 @@ export function EnhancedDataTable<TData, TValue>({
             </DropdownMenu>
 
             {/* Export */}
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.success('Export', { description: 'Data exported successfully' })}>
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>

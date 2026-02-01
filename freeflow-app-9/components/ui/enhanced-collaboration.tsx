@@ -293,7 +293,7 @@ export function EnhancedActivityFeed({
         
         {activities.length > maxItems && (
           <div className="text-center pt-2">
-            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground">
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => toast.info('Activities', { description: `Viewing all ${activities.length} activities...` })}>
               View all {activities.length} activities
             </Button>
           </div>

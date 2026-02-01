@@ -435,16 +435,16 @@ export default function ContactPage() {
                   <CardContent>
                     <nav aria-label="Quick help links">
                       <div className="space-y-3" role="list">
-                        <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" role="listitem" aria-label="Getting Started Guide">
+                        <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" role="listitem" aria-label="Getting Started Guide" onClick={() => toast.info('Getting Started', { description: 'Opening getting started guide...' })}>
                           Getting Started Guide
                         </Button>
-                        <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" role="listitem" aria-label="Payment & Billing">
+                        <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" role="listitem" aria-label="Payment & Billing" onClick={() => toast.info('Payment & Billing', { description: 'Opening billing help...' })}>
                           Payment & Billing
                         </Button>
-                        <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" role="listitem" aria-label="Technical Support">
+                        <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" role="listitem" aria-label="Technical Support" onClick={() => toast.info('Technical Support', { description: 'Opening technical support...' })}>
                           Technical Support
                         </Button>
-                        <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" role="listitem" aria-label="Feature Requests">
+                        <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" role="listitem" aria-label="Feature Requests" onClick={() => toast.info('Feature Requests', { description: 'Opening feature request form...' })}>
                           Feature Requests
                         </Button>
                       </div>
