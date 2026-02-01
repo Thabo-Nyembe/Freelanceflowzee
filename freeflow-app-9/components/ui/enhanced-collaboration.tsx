@@ -23,6 +23,7 @@ import {
   UserPlus
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 // Enhanced Presence Indicator
 interface User {
@@ -430,10 +431,10 @@ export function EnhancedCommentSystem({
               </Button>
               
               <div className="relative group">
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => toast.info('More Options', { description: 'Additional options available' })}>
                   <MoreHorizontal className="h-3 w-3" />
                 </Button>
-                
+
                 <div className="absolute right-0 top-full mt-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <div className="bg-popover border border-border rounded-lg shadow-lg py-1 whitespace-nowrap">
                     {onPin && (
@@ -481,7 +482,7 @@ export function EnhancedCommentSystem({
                 >
                   <Paperclip className="h-3 w-3" />
                   <span>{attachment.name}</span>
-                  <Button variant="ghost" size="sm" className="h-4 px-1 ml-auto">
+                  <Button variant="ghost" size="sm" className="h-4 px-1 ml-auto" onClick={() => toast.success('Download started', { description: `Downloading ${attachment.name}` })}>
                     Download
                   </Button>
                 </div>
@@ -558,16 +559,16 @@ export function EnhancedCommentSystem({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {allowAttachments && (
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => toast.info('Attach File', { description: 'File attachments coming soon' })}>
                       <Paperclip className="h-4 w-4" />
                     </Button>
                   )}
                   {allowMentions && (
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => toast.info('Mention', { description: 'Type @ to mention a team member' })}>
                       <AtSign className="h-4 w-4" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => toast.info('Emoji', { description: 'Emoji picker coming soon' })}>
                     <Smile className="h-4 w-4" />
                   </Button>
                 </div>

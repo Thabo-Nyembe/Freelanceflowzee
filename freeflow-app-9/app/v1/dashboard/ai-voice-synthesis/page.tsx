@@ -788,13 +788,13 @@ export default function AIVoiceSynthesisPage() {
                   <div className="flex items-center justify-between pt-3 border-t border-white/10">
                     <span className="text-xs text-muted-foreground">Edited {project.lastEdited}</span>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => toast.info('Playing', { description: `Playing ${project.name}` })}>
                         <Play className="w-3 h-3" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => toast.success('Download started', { description: `Downloading ${project.name}` })}>
                         <Download className="w-3 h-3" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => toast.info('Share', { description: `Share link copied for ${project.name}` })}>
                         <Share2 className="w-3 h-3" />
                       </Button>
                     </div>

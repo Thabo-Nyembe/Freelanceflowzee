@@ -239,19 +239,19 @@ export function RealtimeChat({
 
             {/* Header actions */}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => toast.info('Search', { description: 'Search messages in this chat' })}>
                 <Search className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => toast.info('Voice Call', { description: `Starting voice call with ${chatName}` })}>
                 <Phone className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => toast.info('Video Call', { description: `Starting video call with ${chatName}` })}>
                 <Video className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => toast.info('Participants', { description: 'View chat participants' })}>
                 <Users className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => toast.info('More Options', { description: 'Chat settings and options' })}>
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </div>

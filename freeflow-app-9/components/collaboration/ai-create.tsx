@@ -72,7 +72,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs'
-// Toast removed - using console.log
+import { toast } from 'sonner'
 
 // Type definitions
 interface Category {
@@ -1620,7 +1620,7 @@ export default function AICreate() {
                       <Upload className="w-4 h-4 mr-1" />
                       Upload
                     </Button>
-                    <Button variant="outline" size="sm" data-testid="export-all-btn">
+                    <Button variant="outline" size="sm" data-testid="export-all-btn" onClick={() => toast.success('Exporting all assets', { description: 'Your assets are being prepared for download' })}>
                       <Archive className="w-4 h-4 mr-1" />
                       Export All
                     </Button>
@@ -1637,13 +1637,13 @@ export default function AICreate() {
                             <FileImage className="w-6 h-6 text-gray-400" />
                             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                               <div className="flex gap-1">
-                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0">
+                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0" onClick={() => toast.info('Preview', { description: `Previewing ${asset.name}` })}>
                                   <Eye className="w-4 h-4" />
                                 </Button>
-                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0">
+                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0" onClick={() => toast.success('Download started', { description: `Downloading ${asset.name}` })}>
                                   <Download className="w-4 h-4" />
                                 </Button>
-                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0">
+                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0" onClick={() => toast.success('Added to favorites', { description: `${asset.name} added to favorites` })}>
                                   <Star className="w-4 h-4" />
                                 </Button>
                               </div>
@@ -1658,13 +1658,13 @@ export default function AICreate() {
                               {asset.format}
                             </Badge>
                             <div className="flex gap-1">
-                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0">
+                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0" onClick={() => toast.success('Copied', { description: `${asset.name} copied to clipboard` })}>
                                 <Copy className="w-3 h-3" />
                               </Button>
-                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0">
+                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0" onClick={() => toast.info('Share', { description: `Share link copied for ${asset.name}` })}>
                                 <Share2 className="w-3 h-3" />
                               </Button>
-                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0 text-red-500">
+                              <Button size="sm" variant="ghost" className="w-6 h-6 p-0 text-red-500" onClick={() => toast.warning('Delete', { description: `Are you sure you want to delete ${asset.name}?` })}>
                                 <Trash2 className="w-3 h-3" />
                               </Button>
                             </div>

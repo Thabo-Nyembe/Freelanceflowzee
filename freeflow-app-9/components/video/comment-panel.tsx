@@ -45,6 +45,7 @@ import {
 } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { CommentThread } from './comment-thread';
 import {
   formatDuration,
@@ -413,13 +414,13 @@ export function CommentPanel({
 
               {/* Action buttons */}
               <div className="absolute bottom-2 right-2 flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setShowMentions(true); toast.info('Mention', { description: 'Type @ to mention a team member' }); }}>
                   <AtSign className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.info('Attach File', { description: 'File attachments coming soon' })}>
                   <Paperclip className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.info('Voice Note', { description: 'Voice recording coming soon' })}>
                   <Mic className="h-4 w-4" />
                 </Button>
               </div>

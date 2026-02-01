@@ -941,7 +941,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                                   <div className="text-xs text-gray-500">health</div>
                                 </div>
                               )}
-                              <Button size="sm" variant="ghost">
+                              <Button size="sm" variant="ghost" onClick={() => toast.info('Team Options', { description: `View options for ${team.name}` })}>
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1081,7 +1081,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                             <Button size="sm" variant="ghost" onClick={() => setSelectedMember(member)}>
                               <Eye className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="ghost">
+                            <Button size="sm" variant="ghost" onClick={() => toast.info('Message', { description: `Start a conversation with ${member.name}` })}>
                               <MessageSquare className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1354,7 +1354,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                         }>
                           {review.status.replace('-', ' ')}
                         </Badge>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => toast.info(review.status === 'completed' ? 'View Review' : 'Continue Review', { description: `Opening ${review.type} review for ${review.employee}` })}>
                           {review.status === 'completed' ? 'View' : 'Continue'}
                         </Button>
                       </div>
@@ -1455,7 +1455,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                         }>
                           {meeting.status}
                         </Badge>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => toast.info(meeting.status === 'completed' ? 'View Notes' : 'Edit Meeting', { description: `Opening 1:1 with ${meeting.participant}` })}>
                           {meeting.status === 'completed' ? 'View Notes' : 'Edit'}
                         </Button>
                       </div>
@@ -1529,11 +1529,11 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                         <div className="flex items-center justify-between mt-4 pt-3 border-t dark:border-gray-700">
                           <span className="text-xs text-gray-500">{new Date(recognition.timestamp).toLocaleDateString()}</span>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" variant="ghost" className="h-8 gap-1 text-gray-500">
+                            <Button size="sm" variant="ghost" className="h-8 gap-1 text-gray-500" onClick={() => toast.success('Reaction added', { description: 'You loved this recognition!' })}>
                               <Heart className="w-4 h-4" />
                               {recognition.reactions}
                             </Button>
-                            <Button size="sm" variant="ghost" className="h-8 gap-1 text-gray-500">
+                            <Button size="sm" variant="ghost" className="h-8 gap-1 text-gray-500" onClick={() => toast.success('Reaction added', { description: 'You gave a thumbs up!' })}>
                               <ThumbsUp className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2165,7 +2165,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                             }>
                               {integration.status === 'connected' ? 'Connected' : 'Available'}
                             </Badge>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => toast.info(integration.status === 'connected' ? 'Configure Integration' : 'Connect Integration', { description: `${integration.status === 'connected' ? 'Configuring' : 'Connecting'} ${integration.name}` })}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>

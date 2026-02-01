@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/collapsible'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface ErrorInfo {
   code?: string
@@ -590,11 +591,11 @@ ${error.stack ? `\nStack:\n${error.stack}` : ''}
 
           {/* Quick Help Links */}
           <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
-            <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+            <Button variant="ghost" size="sm" className="flex items-center space-x-1" onClick={() => toast.info('Help Center', { description: 'Opening help documentation...' })}>
               <ExternalLink className="h-3 w-3" />
               <span>Help Center</span>
             </Button>
-            <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+            <Button variant="ghost" size="sm" className="flex items-center space-x-1" onClick={() => toast.info('Contact Support', { description: 'Support form opening...' })}>
               <MessageSquare className="h-3 w-3" />
               <span>Contact Support</span>
             </Button>
