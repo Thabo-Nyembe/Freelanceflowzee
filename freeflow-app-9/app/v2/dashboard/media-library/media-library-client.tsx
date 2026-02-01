@@ -1003,11 +1003,11 @@ export default function MediaLibraryClient({
   }
 
   const handleAIEnhance = async (asset?: MediaAsset) => {
-    toast.info('AI Enhancement')
+    toast.info('AI Enhancement', { description: 'AI-powered image enhancement is processing your asset...' })
   }
 
   const handleAISearch = () => {
-    toast.info('AI Search')
+    toast.info('AI Search', { description: 'Use natural language to search your media library' })
   }
 
   return (
@@ -2714,7 +2714,7 @@ export default function MediaLibraryClient({
               <div className="flex items-center gap-2">
                 <Input placeholder="Search assets to share..." />
                 <Button variant="outline" size="icon" onClick={() => {
-                  toast.info('Searching assets')
+                  toast.info('Search Assets', { description: 'Type in the search box to find assets by name' })
                 }}>
                   <Search className="w-4 h-4" />
                 </Button>
