@@ -2966,11 +2966,11 @@ export default function WorkflowBuilderClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                           <div><Label className="text-base text-red-700 dark:text-red-400">Clear Executions</Label><p className="text-sm text-red-600/70">Delete all execution history</p></div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700"><Trash2 className="h-4 w-4 mr-2" />Clear</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700" onClick={() => toast.warning('Clear Executions', { description: 'Are you sure? This will delete all execution history.' })}><Trash2 className="h-4 w-4 mr-2" />Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                           <div><Label className="text-base text-red-700 dark:text-red-400">Delete All Workflows</Label><p className="text-sm text-red-600/70">Permanently delete everything</p></div>
-                          <Button variant="destructive"><AlertOctagon className="h-4 w-4 mr-2" />Delete All</Button>
+                          <Button variant="destructive" onClick={() => toast.error('Delete All Workflows', { description: 'Are you sure? This action cannot be undone.' })}><AlertOctagon className="h-4 w-4 mr-2" />Delete All</Button>
                         </div>
                       </CardContent>
                     </Card>

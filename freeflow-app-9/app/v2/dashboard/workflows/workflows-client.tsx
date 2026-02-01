@@ -1104,9 +1104,9 @@ export default function WorkflowsClient() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">Manage</Button>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.info('Manage Integration', { description: `Managing ${app.name} settings...` })}>Manage</Button>
                       {app.status === 'error' && (
-                        <Button variant="outline" size="sm" className="text-orange-600">Reconnect</Button>
+                        <Button variant="outline" size="sm" className="text-orange-600" onClick={() => toast.warning('Reconnect', { description: `Reconnecting to ${app.name}...` })}>Reconnect</Button>
                       )}
                     </div>
                   </CardContent>

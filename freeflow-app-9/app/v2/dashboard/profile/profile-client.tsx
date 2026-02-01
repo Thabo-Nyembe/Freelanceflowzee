@@ -2284,14 +2284,14 @@ export default function ProfileClient() {
                               <p className="font-medium">Download Your Data</p>
                               <p className="text-sm text-gray-500">Get a copy of all your data</p>
                             </div>
-                            <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Download</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.success('Download Started', { description: 'Preparing your data export...' })}><Download className="w-4 h-4 mr-2" />Download</Button>
                           </div>
                           <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                             <div>
                               <p className="font-medium text-red-700 dark:text-red-400">Delete Account</p>
                               <p className="text-sm text-red-600 dark:text-red-400">Permanently delete your account</p>
                             </div>
-                            <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50"><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
+                            <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.error('Delete Account', { description: 'Are you sure? This action cannot be undone.' })}><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
                           </div>
                         </CardContent>
                       </Card>

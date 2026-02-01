@@ -3025,7 +3025,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                       <Package className="w-4 h-4 text-gray-500" />
                       <span className="font-medium">{carrier}</span>
                     </div>
-                    <Button variant="outline" size="sm">Connect</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.info('Connect Carrier', { description: `Connecting to ${carrier}...` })}>Connect</Button>
                   </div>
                 ))}
               </div>

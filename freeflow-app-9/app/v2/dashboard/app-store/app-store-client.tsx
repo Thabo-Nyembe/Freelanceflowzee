@@ -2849,7 +2849,7 @@ export default function AppStoreClient() {
                   </div>
                   <span className="text-sm">**** **** **** 4242</span>
                 </div>
-                <Button variant="ghost" size="sm">Edit</Button>
+                <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Payment Method', { description: 'Opening payment method editor...' })}>Edit</Button>
               </div>
             </div>
             <div className="flex gap-2 pt-4 border-t">

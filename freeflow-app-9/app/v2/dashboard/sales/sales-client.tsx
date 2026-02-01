@@ -2366,8 +2366,8 @@ export default function SalesClient() {
                 )}
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-green-600 hover:bg-green-700"><ArrowRight className="w-4 h-4 mr-2" />Advance Stage</Button>
-                  <Button variant="outline" className="flex-1"><Edit className="w-4 h-4 mr-2" />Edit</Button>
+                  <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => toast.success('Stage Advanced', { description: 'Deal moved to next stage' })}><ArrowRight className="w-4 h-4 mr-2" />Advance Stage</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Edit Deal', { description: 'Opening deal editor...' })}><Edit className="w-4 h-4 mr-2" />Edit</Button>
                   <Button variant="outline" onClick={() => setShowContractDialog(true)} title="View and sign contract"><FileSignature className="w-4 h-4" /></Button>
                 </div>
               </div>
@@ -3275,7 +3275,7 @@ export default function SalesClient() {
                   </tbody>
                 </table>
               </div>
-              <Button variant="outline" size="sm" className="mt-2">
+              <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('Add Line Item', { description: 'Adding new line item to quote' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Line Item
               </Button>

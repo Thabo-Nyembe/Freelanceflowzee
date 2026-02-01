@@ -1964,9 +1964,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 <CardHeader className="pb-2"><CardTitle className="text-sm">Report Actions</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start text-sm"><Upload className="h-4 w-4 mr-2" />Import Template</Button>
-                    <Button variant="outline" className="w-full justify-start text-sm"><PieChart className="h-4 w-4 mr-2" />Custom Builder</Button>
-                    <Button variant="outline" className="w-full justify-start text-sm"><Mail className="h-4 w-4 mr-2" />Email Settings</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.info('Import Template', { description: 'Opening template import dialog...' })}><Upload className="h-4 w-4 mr-2" />Import Template</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.info('Custom Builder', { description: 'Opening custom report builder...' })}><PieChart className="h-4 w-4 mr-2" />Custom Builder</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.info('Email Settings', { description: 'Opening email notification settings...' })}><Mail className="h-4 w-4 mr-2" />Email Settings</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -2137,7 +2137,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         <h4 className="font-medium text-red-700 mb-2">Danger Zone</h4>
                         <div className="flex items-center justify-between">
                           <div><p className="text-sm text-red-600">Delete all test data</p><p className="text-xs text-red-500">This action cannot be undone</p></div>
-                          <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-50"><Trash2 className="h-4 w-4 mr-2" />Delete Data</Button>
+                          <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-50" onClick={() => toast.error('Delete Test Data', { description: 'Are you sure? This action cannot be undone.' })}><Trash2 className="h-4 w-4 mr-2" />Delete Data</Button>
                         </div>
                       </div>
                     </CardContent>

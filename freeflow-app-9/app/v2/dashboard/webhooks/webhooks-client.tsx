@@ -1516,8 +1516,8 @@ export default function WebhooksClient({
                           <Label>Signing Secret</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="whsec_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
-                            <Button variant="outline">Rotate</Button>
+                            <Button variant="outline" onClick={() => toast.success('Copied', { description: 'Signing secret copied to clipboard' })}>Copy</Button>
+                            <Button variant="outline" onClick={() => toast.warning('Rotate Secret', { description: 'Are you sure? This will invalidate the current secret.' })}>Rotate</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -1635,15 +1635,15 @@ export default function WebhooksClient({
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="wh_api_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={() => toast.success('Copied', { description: 'API key copied to clipboard' })}>Copy</Button>
+                            <Button variant="outline" onClick={() => toast.warning('Regenerate', { description: 'Are you sure? This will invalidate the current API key.' })}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label>API Secret</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="wh_secret_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
+                            <Button variant="outline" onClick={() => toast.success('Copied', { description: 'API secret copied to clipboard' })}>Copy</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">

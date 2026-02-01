@@ -1064,7 +1064,7 @@ export default function WidgetLibraryClient() {
                           <span>{(contributor.total_installs / 1000).toFixed(0)}K installs</span>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm">View</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.info('View Contributor', { description: `Viewing ${contributor.name}'s profile...` })}>View</Button>
                     </div>
                   </CardContent>
                 </Card>

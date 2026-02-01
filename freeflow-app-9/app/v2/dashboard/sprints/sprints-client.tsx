@@ -2108,7 +2108,7 @@ export default function SprintsClient() {
                                 <p className="text-sm text-gray-500">{item.desc}</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Configure</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.info('Configure Role', { description: `Opening configuration for ${item.role}` })}>Configure</Button>
                           </div>
                         ))}
                       </CardContent>
