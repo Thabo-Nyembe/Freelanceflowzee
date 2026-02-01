@@ -1,6 +1,10 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useEffect } from 'react'
+
+// Initialize Supabase client
+const supabase = createClient()
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -2033,7 +2037,7 @@ export default function OnboardingClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Clear Analytics</p>
                             <p className="text-sm text-gray-500">Remove all analytics data</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Are you sure you want to clear all analytics? This action cannot be undone.')) { setAnalyticsData([]); setFlows(prev => prev.map(f => ({ ...f, views: 0, completions: 0, completionRate: 0, dropoffRate: 0, avgTimeToComplete: 0 }))); toast.success('Analytics cleared') } }}>Clear</Button>
+                          <Button variant="destructive" size="sm" onClick={async () => { if (confirm('Are you sure you want to clear all analytics? This action cannot be undone.')) { try { const { data: { user } } = await supabase.auth.getUser(); if (user) { await supabase.from('onboarding_analytics').delete().eq('user_id', user.id); await supabase.from('onboarding_flows').update({ views: 0, completions: 0 }).eq('user_id', user.id); } setAnalyticsData([]); setFlows(prev => prev.map(f => ({ ...f, views: 0, completions: 0, completionRate: 0, dropoffRate: 0, avgTimeToComplete: 0 }))); toast.success('Analytics cleared'); } catch { toast.error('Failed to clear analytics'); } } }}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>

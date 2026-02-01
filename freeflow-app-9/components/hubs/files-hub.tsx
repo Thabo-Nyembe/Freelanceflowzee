@@ -331,10 +331,34 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
   }
 
   const handleDownloadFile = (file: FileItem) => {
+    // If file has a URL, use it; otherwise generate demo content
+    if (file.url) {
+      const a = document.createElement('a')
+      a.href = file.url
+      a.download = file.name
+      a.click()
+    } else {
+      // Generate demo file content for download
+      const fileContent = JSON.stringify({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        createdAt: file.createdAt,
+        modifiedAt: file.modifiedAt,
+        downloadedAt: new Date().toISOString(),
+        metadata: { source: 'FreeFlow Files Hub' }
+      }, null, 2)
+      const blob = new Blob([fileContent], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = file.name.includes('.') ? file.name : `${file.name}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
     toast.success('Download started', {
       description: `${file.name} (${formatFileSize(file.size)})`
     })
-    // In production: window.open(file.url, '_blank')
   }
 
   const handlePreviewFile = (file: FileItem) => {

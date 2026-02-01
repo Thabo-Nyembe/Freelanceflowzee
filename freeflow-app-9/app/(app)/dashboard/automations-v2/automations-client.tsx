@@ -1004,7 +1004,19 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
         break
       case 'remove':
         if (confirm('Are you sure you want to remove this connection?')) {
-          toast.success('Connection removed')
+          (async () => {
+            try {
+              const { error } = await supabase
+                .from('integrations')
+                .delete()
+                .eq('id', connection.id)
+              if (error) throw error
+              toast.success('Connection removed')
+              refetch()
+            } catch (err) {
+              toast.error('Failed to remove connection')
+            }
+          })()
         }
         break
     }
@@ -2513,7 +2525,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           <code className="text-sm text-gray-600 dark:text-gray-400">mk_live_••••••••••••••••••••••••</code>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1" onClick={() => { if (confirm("Are you sure you want to regenerate your API key? This will invalidate the current key.")) { toast.success("New API key generated"); } }}>
+                          <Button variant="outline" className="flex-1" onClick={async () => { if (confirm("Are you sure you want to regenerate your API key? This will invalidate the current key.")) { try { const newKey = `mk_live_${crypto.randomUUID().replace(/-/g, '').slice(0, 24)}`; const { data: { user } } = await supabase.auth.getUser(); if (user) { await supabase.from('api_keys').upsert({ user_id: user.id, key_hash: newKey, type: 'automations' }); } toast.success("New API key generated"); } catch { toast.error("Failed to regenerate API key"); } } }}>
                             <Key className="h-4 w-4 mr-2" />
                             Regenerate Key
                           </Button>
@@ -2704,7 +2716,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                               <p className="font-medium text-red-600">Clear Execution History</p>
                               <p className="text-sm text-gray-500">Remove all past execution logs</p>
                             </div>
-                            <Button variant="destructive" size="sm" onClick={() => { if (confirm("Clear all execution history? This cannot be undone.")) { toast.success("Execution history cleared"); } }}>Clear</Button>
+                            <Button variant="destructive" size="sm" onClick={async () => { if (confirm("Clear all execution history? This cannot be undone.")) { try { const { error } = await supabase.from("automation_executions").delete().neq("id", "00000000-0000-0000-0000-000000000000"); if (error) throw error; toast.success("Execution history cleared"); } catch { toast.error("Failed to clear execution history"); } } }}>Clear</Button>
                           </div>
                         </div>
                         <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg">

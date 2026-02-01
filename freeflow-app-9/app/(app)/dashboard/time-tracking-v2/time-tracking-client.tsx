@@ -3,7 +3,11 @@
 // MIGRATED: Batch #18 - Verified database hook integration
 // Hooks used: useTimeTracking
 
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useEffect } from 'react'
+
+// Initialize Supabase client
+const supabase = createClient()
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -2285,7 +2289,7 @@ export default function TimeTrackingClient() {
                 { icon: CreditCard, label: 'Billing', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => { setSettingsTab('billing'); toast.success('Billing settings loaded'); } },
                 { icon: Sliders, label: 'Advanced', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => { setSettingsTab('advanced'); toast.success('Advanced settings loaded'); } },
                 { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => { const settingsData = { workspace: 'Acme Inc Workspace', currency: 'USD', timezone: 'EST', weekStart: 'Monday', defaultRate: 150, rounding: '15min' }; const jsonContent = JSON.stringify(settingsData, null, 2); const blob = new Blob([jsonContent], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `time_tracking_settings_${new Date().toISOString().split('T')[0]}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); toast.success('Settings exported to JSON'); } },
-                { icon: RefreshCcw, label: 'Reset', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => { if (confirm('Are you sure you want to reset all settings to defaults?')) { toast.success('Settings reset to defaults'); } } },
+                { icon: RefreshCcw, label: 'Reset', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: async () => { if (confirm('Are you sure you want to reset all settings to defaults?')) { try { const { data: { user } } = await supabase.auth.getUser(); if (user) { await supabase.from('time_tracking_settings').delete().eq('user_id', user.id); } toast.success('Settings reset to defaults'); } catch { toast.error('Failed to reset settings'); } } } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2715,7 +2719,7 @@ export default function TimeTrackingClient() {
                               <Button variant="ghost" size="sm" onClick={() => {
                               toast.promise(fetch(`/api/time-tracking/integrations/${integration.id}/sync`, { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }), { loading: `Syncing ${integration.name}...`, success: `${integration.name} synced`, error: 'Sync failed' })
                             }}><RefreshCw className="h-4 w-4" /></Button>
-                              <Button variant="ghost" size="sm" className="text-red-500" onClick={() => { if (confirm(`Disconnect ${integration.name}? This will stop syncing data.`)) { toast.success(`${integration.name} disconnected`); } }}><X className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" className="text-red-500" onClick={async () => { if (confirm(`Disconnect ${integration.name}? This will stop syncing data.`)) { try { const { error } = await supabase.from('integrations').delete().eq('id', integration.id); if (error) throw error; toast.success(`${integration.name} disconnected`); } catch { toast.error('Failed to disconnect integration'); } } }}><X className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -2730,7 +2734,7 @@ export default function TimeTrackingClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div><Label className="text-base">API Key</Label><p className="text-xs text-gray-500">For programmatic access</p></div>
-                            <Button size="sm" variant="outline" onClick={() => { if (confirm('Regenerating the API key will invalidate the current key. Continue?')) { toast.success('New API key generated - copy it now'); } }}><RefreshCw className="h-4 w-4 mr-2" />Regenerate</Button>
+                            <Button size="sm" variant="outline" onClick={async () => { if (confirm('Regenerating the API key will invalidate the current key. Continue?')) { try { const newKey = `tt_api_${crypto.randomUUID().replace(/-/g, '').slice(0, 32)}`; const { data: { user } } = await supabase.auth.getUser(); if (user) { await supabase.from('api_keys').upsert({ user_id: user.id, key_hash: newKey, type: 'time_tracking' }); } toast.success('New API key generated - copy it now'); } catch { toast.error('Failed to regenerate API key'); } } }}><RefreshCw className="h-4 w-4 mr-2" />Regenerate</Button>
                           </div>
                           <div className="flex items-center gap-2">
                             <Input type="password" defaultValue="tt_api_xxxxxxxxxxxxx" readOnly className="font-mono" />

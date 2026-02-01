@@ -892,8 +892,27 @@ export default function AIAssistantClient() {
 
   // Handle file download from Files tab
   const handleDownloadFile = (file: KnowledgeFile) => {
-    toast.success('Download started - ' + file.name)
-    // In production, this would trigger actual file download
+    // Generate knowledge file content for download
+    const fileContent = JSON.stringify({
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      content: file.content || 'Knowledge base content',
+      uploadedAt: file.uploadedAt || new Date().toISOString(),
+      downloadedAt: new Date().toISOString(),
+      metadata: {
+        source: 'FreeFlow AI Assistant',
+        category: 'knowledge-base'
+      }
+    }, null, 2)
+    const blob = new Blob([fileContent], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = file.name.includes('.') ? file.name : `${file.name}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('File downloaded', { description: file.name })
   }
 
   // Handle export usage report

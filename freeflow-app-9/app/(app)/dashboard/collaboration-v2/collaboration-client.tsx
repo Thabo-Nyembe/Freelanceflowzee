@@ -1,6 +1,10 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useCallback } from 'react'
+
+// Initialize Supabase client
+const supabase = createClient()
 import { toast } from 'sonner'
 import {
   copyToClipboard,
@@ -1247,7 +1251,7 @@ export default function CollaborationClient() {
                           <DropdownMenuItem onClick={() => { if (selectedChannel) { setMutedChannels(prev => prev.includes(selectedChannel.id) ? prev.filter(id => id !== selectedChannel.id) : [...prev, selectedChannel.id]); toast.success(mutedChannels.includes(selectedChannel.id) ? 'Channel unmuted' : 'Channel muted', { description: `Notifications ${mutedChannels.includes(selectedChannel.id) ? 'enabled' : 'disabled'} for #${selectedChannel.name}` }) } }}><BellOff className="h-4 w-4 mr-2" />{selectedChannel && mutedChannels.includes(selectedChannel.id) ? 'Unmute' : 'Mute'}</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => copyToClipboard(`#${selectedChannel?.name || 'channel'}`, 'Channel name copied')}><Copy className="h-4 w-4 mr-2" />Copy Name</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Leave #${selectedChannel?.name}? You'll need to be re-invited to rejoin.`)) { setSelectedChannel(null); toast.success('Left Channel', { description: `You've left #${selectedChannel?.name}` }) } }}><ExternalLink className="h-4 w-4 mr-2" />Leave Channel</DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600" onClick={async () => { if (confirm(`Leave #${selectedChannel?.name}? You'll need to be re-invited to rejoin.`)) { try { const { data: { user } } = await supabase.auth.getUser(); if (user && selectedChannel) { await supabase.from('channel_members').delete().eq('channel_id', selectedChannel.id).eq('user_id', user.id); } setSelectedChannel(null); toast.success('Left Channel', { description: `You've left #${selectedChannel?.name}` }); } catch { toast.error('Failed to leave channel'); } } }}><ExternalLink className="h-4 w-4 mr-2" />Leave Channel</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -1880,7 +1884,7 @@ export default function CollaborationClient() {
                               <DropdownMenuItem onClick={() => toast.promise(fetch(`/api/collaboration/automations/${automation.id}/run`, { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }), { loading: `Running "${automation.name}"...`, success: 'Automation executed successfully', error: 'Execution failed' })}><Play className="h-4 w-4 mr-2" />Run Now</DropdownMenuItem>
                               <DropdownMenuItem onClick={() => { setSelectedAutomationForEdit(automation); setShowAutomationLogsDialog(true) }}><History className="h-4 w-4 mr-2" />View Logs</DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-red-600" onClick={async () => { if (confirm(`Delete automation "${automation.name}"? This action cannot be undone.`)) { try { await fetch(`/api/collaboration/automations/${automation.id}`, { method: 'DELETE' }); toast.success('Automation Deleted', { description: `"${automation.name}" has been removed` }); } catch { toast.success('Automation Deleted', { description: `"${automation.name}" has been removed` }); } } }}><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-600" onClick={async () => { if (confirm(`Delete automation "${automation.name}"? This action cannot be undone.`)) { try { const res = await fetch(`/api/collaboration/automations/${automation.id}`, { method: 'DELETE' }); if (!res.ok) throw new Error('Failed'); toast.success('Automation Deleted', { description: `"${automation.name}" has been removed` }); } catch { toast.error('Failed to delete automation'); } } }}><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>

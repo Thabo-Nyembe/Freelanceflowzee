@@ -1,6 +1,10 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
+
+// Initialize Supabase client
+const supabase = createClient()
 import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { ColumnDef } from '@tanstack/react-table'
@@ -2164,7 +2168,7 @@ export default function ProjectsHubClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
-                                <Button variant="ghost" size="sm" onClick={() => { if (confirm('Delete this webhook?')) { setLocalWebhooks(prev => prev.filter((_, idx) => idx !== i)); toast.success('Webhook deleted') } }}>
+                                <Button variant="ghost" size="sm" onClick={async () => { if (confirm('Delete this webhook?')) { try { const { error } = await supabase.from('webhooks').delete().eq('id', webhook.id); if (error) throw error; setLocalWebhooks(prev => prev.filter((_, idx) => idx !== i)); toast.success('Webhook deleted'); } catch { toast.error('Failed to delete webhook'); } } }}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -2334,7 +2338,7 @@ export default function ProjectsHubClient() {
                               <Button variant="ghost" size="sm" onClick={() => { setSelectedCustomField(field); setCustomFieldForm({ name: field.name, type: field.type, required: field.required, appliesTo: field.appliesTo }); setShowCustomFieldDialog(true) }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => { if (confirm(`Delete custom field "${field.name}"?`)) { setLocalCustomFields(prev => prev.filter(f => f.id !== field.id)); toast.success(`Custom field "${field.name}" deleted`) } }}>
+                              <Button variant="ghost" size="sm" onClick={async () => { if (confirm(`Delete custom field "${field.name}"?`)) { try { const { error } = await supabase.from('custom_fields').delete().eq('id', field.id); if (error) throw error; setLocalCustomFields(prev => prev.filter(f => f.id !== field.id)); toast.success(`Custom field "${field.name}" deleted`); } catch { toast.error('Failed to delete custom field'); } } }}>
                                 <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
                             </div>

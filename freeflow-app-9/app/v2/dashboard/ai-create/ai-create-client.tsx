@@ -393,7 +393,28 @@ export default function AICreateClient() {
   }
 
   const handleDownloadCreation = () => {
-    toast.success('Downloading')
+    // Generate AI creation content for download
+    const creationData = {
+      type: 'ai-generated-content',
+      generatedAt: new Date().toISOString(),
+      model: selectedGeneration?.model || 'default',
+      prompt: selectedGeneration?.prompt || 'AI Generated Content',
+      style: selectedGeneration?.style || 'default',
+      quality: selectedGeneration?.quality || 'standard',
+      aspectRatio: selectedGeneration?.aspectRatio || '1:1',
+      metadata: {
+        source: 'FreeFlow AI Create',
+        version: '1.0'
+      }
+    }
+    const blob = new Blob([JSON.stringify(creationData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ai-creation-${Date.now()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Creation downloaded')
   }
 
   const handleShareCreation = () => {

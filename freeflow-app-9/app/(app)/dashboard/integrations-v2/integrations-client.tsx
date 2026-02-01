@@ -1356,7 +1356,7 @@ export default function IntegrationsClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             {task.status === 'failed' && (
-                              <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); if (confirm(`Replay task "${task.zapName}"?`)) { toast.success('Task queued for replay') } }}>
+                              <Button variant="outline" size="sm" onClick={async (e) => { e.stopPropagation(); if (confirm(`Replay task "${task.zapName}"?`)) { try { const res = await fetch(`/api/integrations/tasks/${task.id}/replay`, { method: 'POST' }); if (!res.ok) throw new Error('Failed'); toast.success('Task queued for replay'); } catch { toast.error('Failed to queue task for replay'); } } }}>
                                 <RotateCcw className="w-3 h-3 mr-1" />
                                 Replay
                               </Button>

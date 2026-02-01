@@ -1628,9 +1628,18 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                                   <Users className="h-4 w-4 mr-2" />Change Role
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-red-600" onClick={() => {
+                                <DropdownMenuItem className="text-red-600" onClick={async () => {
                                   if (confirm(`Remove ${member.name} from the team? This action cannot be undone.`)) {
-                                    toast.success(`${member.name} removed from team`)
+                                    try {
+                                      const { error } = await supabase
+                                        .from('team_members')
+                                        .delete()
+                                        .eq('id', member.id)
+                                      if (error) throw error
+                                      toast.success(`${member.name} removed from team`)
+                                    } catch (err) {
+                                      toast.error('Failed to remove team member')
+                                    }
                                   }
                                 }}>
                                   <Trash2 className="h-4 w-4 mr-2" />Remove Member
@@ -2617,7 +2626,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                             <DropdownMenuItem onClick={() => { setSelectedMember(member); setShowMemberOptionsDialog(true); }}><Edit className="h-4 w-4 mr-2" />Edit Profile</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => toast.success(`Role options for ${member.name}: Admin, Agent, Manager`)}><Users className="h-4 w-4 mr-2" />Change Role</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Remove ${member.name}?`)) toast.success(`${member.name} removed`) }}><Trash2 className="h-4 w-4 mr-2" />Remove</DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-600" onClick={async () => { if (confirm(`Remove ${member.name}?`)) { try { const { error } = await supabase.from('team_members').delete().eq('id', member.id); if (error) throw error; toast.success(`${member.name} removed`); } catch { toast.error('Failed to remove member'); } } }}><Trash2 className="h-4 w-4 mr-2" />Remove</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

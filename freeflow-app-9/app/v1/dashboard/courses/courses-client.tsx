@@ -763,8 +763,41 @@ export default function CoursesClient() {
         return
       }
 
-      // Generate certificate URL or trigger download
-      toast.success('Download started')
+      // Generate certificate content for download
+      const certificateContent = `
+=====================================
+     CERTIFICATE OF COMPLETION
+=====================================
+
+This is to certify that
+
+        ${user.email || 'Student'}
+
+has successfully completed the course
+
+        ${course.title}
+
+-------------------------------------
+Completion Date: ${new Date().toLocaleDateString()}
+Certificate ID: CERT-${course.id}-${Date.now()}
+Duration: ${course.duration || 'N/A'}
+Level: ${course.level || 'Beginner'}
+-------------------------------------
+
+Issued by: FreeFlow Learning Platform
+Verification: https://freeflow.app/verify/CERT-${course.id}
+
+=====================================
+      `.trim()
+
+      const blob = new Blob([certificateContent], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${course.title.replace(/\s+/g, '_')}_certificate.txt`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Certificate downloaded', { description: course.title })
     } catch (error) {
       toast.error('Failed to download certificate')
     }

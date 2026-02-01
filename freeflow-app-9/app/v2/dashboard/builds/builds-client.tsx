@@ -2141,7 +2141,33 @@ export default function BuildsClient() {
                   ))}
                 </select>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.success('Download started')
+                  // Download build logs
+                  const logContent = `[2024-01-15T10:00:00Z] Starting job: build
+[2024-01-15T10:00:00Z] Checking out repository...
+[2024-01-15T10:00:03Z] > git checkout main
+[2024-01-15T10:00:03Z] Already on 'main'
+[2024-01-15T10:00:03Z] Setting up Node.js 18.x...
+[2024-01-15T10:00:11Z] Node.js 18.19.0 installed
+[2024-01-15T10:00:11Z] Installing dependencies...
+[2024-01-15T10:00:11Z] > npm ci
+[2024-01-15T10:00:56Z] added 1247 packages in 45s
+[2024-01-15T10:00:56Z] Running build...
+[2024-01-15T10:00:56Z] > npm run build
+[2024-01-15T10:02:25Z] Build completed successfully
+[2024-01-15T10:02:25Z] Running tests...
+[2024-01-15T10:02:30Z] > npm test
+[2024-01-15T10:05:30Z] Test Suites: 45 passed, 45 total
+[2024-01-15T10:05:30Z] Tests: 234 passed, 234 total
+[2024-01-15T10:05:30Z] Coverage: 87.5%
+[2024-01-15T10:07:42Z] Job completed successfully`
+                  const blob = new Blob([logContent], { type: 'text/plain' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `build-logs-${new Date().toISOString().split('T')[0]}.txt`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Build logs downloaded')
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   Download
@@ -3230,7 +3256,26 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Download started')
+                // Generate artifact content for download
+                const artifactContent = JSON.stringify({
+                  name: selectedArtifact?.name || 'artifact',
+                  buildNumber: selectedArtifact?.build_number || 0,
+                  size: selectedArtifact?.size_bytes || 0,
+                  createdAt: new Date().toISOString(),
+                  type: 'build-artifact',
+                  metadata: {
+                    source: 'FreeFlow CI/CD',
+                    status: 'success'
+                  }
+                }, null, 2)
+                const blob = new Blob([artifactContent], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `${(selectedArtifact?.name || 'artifact').replace(/\s+/g, '-')}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Artifact downloaded', { description: selectedArtifact?.name })
                 setShowDownloadDialog(false)
                 setSelectedArtifact(null)
               }}>

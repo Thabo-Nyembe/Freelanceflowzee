@@ -791,7 +791,25 @@ export default function AIVoiceSynthesisPage() {
                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => toast.info('Playing', { description: `Playing ${project.name}` })}>
                         <Play className="w-3 h-3" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => toast.success('Download started', { description: `Downloading ${project.name}` })}>
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => {
+                        const projectData = JSON.stringify({
+                          name: project.name,
+                          voice: project.voice,
+                          duration: project.duration,
+                          language: project.language,
+                          lastEdited: project.lastEdited,
+                          downloadedAt: new Date().toISOString(),
+                          metadata: { source: 'FreeFlow AI Voice Synthesis' }
+                        }, null, 2)
+                        const blob = new Blob([projectData], { type: 'application/json' })
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `${project.name.replace(/\s+/g, '_')}_voice.json`
+                        a.click()
+                        URL.revokeObjectURL(url)
+                        toast.success('Download started', { description: project.name })
+                      }}>
                         <Download className="w-3 h-3" />
                       </Button>
                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => toast.info('Share', { description: `Share link copied for ${project.name}` })}>

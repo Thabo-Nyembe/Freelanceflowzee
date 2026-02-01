@@ -660,7 +660,34 @@ export default function CustomReportsClient() {
                         className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                         size="lg"
                         onClick={() => {
-                          toast.success("Download Started as " + exportFormat.toUpperCase())
+                          // Generate custom report content for download
+                          const reportContent = JSON.stringify({
+                            title: 'Custom Report',
+                            format: exportFormat,
+                            generatedAt: new Date().toISOString(),
+                            dateRange: {
+                              start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+                              end: new Date().toISOString()
+                            },
+                            sections: [
+                              { name: 'Overview', data: {} },
+                              { name: 'Analytics', data: {} },
+                              { name: 'Trends', data: {} }
+                            ],
+                            metadata: {
+                              source: 'FreeFlow Custom Reports',
+                              version: '1.0'
+                            }
+                          }, null, 2)
+                          const mimeType = exportFormat === 'json' ? 'application/json' : 'text/plain'
+                          const blob = new Blob([reportContent], { type: mimeType })
+                          const url = URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = `custom-report-${Date.now()}.${exportFormat === 'json' ? 'json' : 'txt'}`
+                          a.click()
+                          URL.revokeObjectURL(url)
+                          toast.success("Report downloaded", { description: exportFormat.toUpperCase() + " format" })
                         }}
                       >
                         <Download className="w-5 h-5 mr-2" />

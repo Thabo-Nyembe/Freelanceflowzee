@@ -2940,7 +2940,24 @@ export default function CollaborationClient() {
                   </Button>
                   <Button variant="outline" className="w-full justify-start" onClick={() => {
                     selectedFile.downloadCount++;
-                    toast.success('Download started');
+                    // Generate file content for download
+                    const fileContent = JSON.stringify({
+                      name: selectedFile.name,
+                      type: selectedFile.type,
+                      size: selectedFile.size,
+                      owner: selectedFile.owner,
+                      lastModified: selectedFile.lastModified,
+                      downloadedAt: new Date().toISOString(),
+                      metadata: { source: 'FreeFlow Collaboration' }
+                    }, null, 2)
+                    const blob = new Blob([fileContent], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = selectedFile.name.includes('.') ? selectedFile.name : `${selectedFile.name}.json`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                    toast.success('Download started', { description: selectedFile.name });
                     setShowFileOptionsDialog(false);
                   }}>
                     <Download className="h-4 w-4 mr-2" />

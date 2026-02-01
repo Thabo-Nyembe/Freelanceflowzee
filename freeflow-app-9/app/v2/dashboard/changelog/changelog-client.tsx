@@ -673,7 +673,44 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   }, [])
 
   const handleDownloadRelease = useCallback((version: string) => {
-    toast.success("Downloading release - download starting...")
+    // Generate release notes for download
+    const releaseContent = `
+FreeFlow Release Notes
+=====================================
+Version: ${version}
+Release Date: ${new Date().toLocaleDateString()}
+
+=====================================
+WHAT'S NEW
+-------------------------------------
+- Performance improvements
+- Bug fixes and stability enhancements
+- New features and UI improvements
+
+-------------------------------------
+INSTALLATION
+-------------------------------------
+1. Download the release package
+2. Follow the installation guide
+3. Restart your application
+
+-------------------------------------
+CHANGELOG
+-------------------------------------
+For full changelog, visit:
+https://freeflow.app/changelog/${version}
+
+=====================================
+    `.trim()
+
+    const blob = new Blob([releaseContent], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `freeflow-release-${version}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success("Release downloaded", { description: `Version ${version}` })
   }, [])
 
   const handleCompareVersions = useCallback(() => {

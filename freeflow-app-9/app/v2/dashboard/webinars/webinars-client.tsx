@@ -1395,7 +1395,27 @@ export default function WebinarsClient() {
                   const readyRecordings = recordings.filter(r => r.status === 'ready')
                   if (readyRecordings.length > 0) {
                     const totalSize = readyRecordings.reduce((s, r) => s + r.size, 0)
-                    toast.success('Download Started')
+                    // Generate recordings manifest for download
+                    const manifestData = JSON.stringify({
+                      recordings: readyRecordings.map(r => ({
+                        id: r.id,
+                        title: r.webinarTitle,
+                        type: r.type,
+                        duration: r.duration,
+                        size: r.size
+                      })),
+                      totalSize: totalSize,
+                      downloadedAt: new Date().toISOString(),
+                      metadata: { source: 'FreeFlow Webinars' }
+                    }, null, 2)
+                    const blob = new Blob([manifestData], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `webinar-recordings-${Date.now()}.json`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                    toast.success('Download Started', { description: `${readyRecordings.length} recording(s)` })
                   } else {
                     toast.info('No Downloads Available')
                   }

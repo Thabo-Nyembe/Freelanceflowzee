@@ -520,7 +520,42 @@ Best regards,
   ]
 
   const handleDownloadInvoice = (invoice: Invoice) => {
-    toast.success("Downloading invoice - will be ready shortly")
+    // Generate invoice PDF content
+    const invoiceContent = `
+INVOICE
+=====================================
+Invoice #: ${invoice.number || invoice.id}
+Date: ${invoice.date || new Date().toLocaleDateString()}
+Due Date: ${invoice.dueDate || 'N/A'}
+
+Customer: ${invoice.customer || invoice.clientName || 'N/A'}
+Email: ${invoice.email || 'N/A'}
+
+=====================================
+ITEMS
+-------------------------------------
+${invoice.items?.map((item: any) => `${item.description || item.name}: $${item.amount || item.price}`).join('\n') || 'No items listed'}
+
+-------------------------------------
+Subtotal: $${invoice.subtotal || invoice.amount || '0.00'}
+Tax: $${invoice.tax || '0.00'}
+TOTAL: $${invoice.total || invoice.amount || '0.00'}
+=====================================
+
+Status: ${invoice.status || 'pending'}
+Payment Terms: Net 30
+
+Thank you for your business!
+    `.trim()
+
+    const blob = new Blob([invoiceContent], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `invoice-${invoice.number || invoice.id}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success("Invoice downloaded successfully")
   }
 
   if (error) {

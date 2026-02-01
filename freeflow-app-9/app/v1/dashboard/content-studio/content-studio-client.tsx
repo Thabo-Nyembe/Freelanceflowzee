@@ -1180,7 +1180,29 @@ export default function ContentStudioClient() {
                     { icon: FolderOpen, label: 'New Folder', color: 'from-blue-500 to-cyan-500', action: () => setShowNewFolderDialog(true) },
                     { icon: Edit2, label: 'Edit Metadata', color: 'from-green-500 to-emerald-500', action: () => setShowEditMetadataDialog(true) },
                     { icon: Tags, label: 'Manage Tags', color: 'from-orange-500 to-amber-500', action: () => setShowManageTagsDialog(true) },
-                    { icon: Download, label: 'Download', color: 'from-violet-500 to-purple-500', action: () => selectedAsset ? toast.success('Download started', { description: selectedAsset.filename }) : toast.info('Select an asset to download') },
+                    { icon: Download, label: 'Download', color: 'from-violet-500 to-purple-500', action: () => {
+                      if (selectedAsset) {
+                        const assetData = JSON.stringify({
+                          filename: selectedAsset.filename,
+                          type: selectedAsset.type,
+                          url: selectedAsset.url,
+                          size: selectedAsset.size,
+                          dimensions: selectedAsset.dimensions,
+                          downloadedAt: new Date().toISOString(),
+                          metadata: { source: 'FreeFlow Content Studio' }
+                        }, null, 2)
+                        const blob = new Blob([assetData], { type: 'application/json' })
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = selectedAsset.filename.includes('.') ? selectedAsset.filename : `${selectedAsset.filename}.json`
+                        a.click()
+                        URL.revokeObjectURL(url)
+                        toast.success('Download started', { description: selectedAsset.filename })
+                      } else {
+                        toast.info('Select an asset to download')
+                      }
+                    }},
                     { icon: Copy, label: 'Copy URL', color: 'from-teal-500 to-green-500', action: () => selectedAsset ? copyToClipboard(selectedAsset.url, 'Asset URL copied') : toast.info('Select an asset first') },
                     { icon: Trash2, label: 'Delete', color: 'from-red-500 to-pink-500', action: () => setShowDeleteAssetDialog(true) },
                     { icon: RefreshCw, label: 'Reprocess', color: 'from-gray-500 to-slate-500', action: () => setShowReprocessDialog(true) },
@@ -2055,7 +2077,28 @@ export default function ContentStudioClient() {
 
                 <div className="flex gap-3">
                   <Button variant="outline" className="flex-1" onClick={() => {
-                    toast.success('Download started', { description: selectedAsset?.filename })
+                    if (selectedAsset) {
+                      const assetData = JSON.stringify({
+                        filename: selectedAsset.filename,
+                        title: selectedAsset.title,
+                        type: selectedAsset.type,
+                        url: selectedAsset.url,
+                        width: selectedAsset.width,
+                        height: selectedAsset.height,
+                        duration: selectedAsset.duration,
+                        created_at: selectedAsset.created_at,
+                        downloadedAt: new Date().toISOString(),
+                        metadata: { source: 'FreeFlow Content Studio' }
+                      }, null, 2)
+                      const blob = new Blob([assetData], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = selectedAsset.filename.includes('.') ? selectedAsset.filename : `${selectedAsset.filename}.json`
+                      a.click()
+                      URL.revokeObjectURL(url)
+                      toast.success('Download started', { description: selectedAsset.filename })
+                    }
                   }}>
                     <Download className="w-4 h-4 mr-2" />
                     Download

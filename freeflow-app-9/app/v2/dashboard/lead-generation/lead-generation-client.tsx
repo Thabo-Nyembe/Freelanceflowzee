@@ -607,6 +607,10 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Edit lead dialog state
   const [isEditLeadDialogOpen, setIsEditLeadDialogOpen] = useState(false)
+
+  // Email blast dialog state
+  const [isEmailBlastDialogOpen, setIsEmailBlastDialogOpen] = useState(false)
+  const [emailBlastForm, setEmailBlastForm] = useState({ subject: '', content: '', trackEngagement: true })
   const [editLeadForm, setEditLeadForm] = useState<LeadInput>({
     name: '',
     email: '',
@@ -1000,7 +1004,69 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleEmailBlast = () => {
-    toast.info('Email Blast')
+    setIsEmailBlastDialogOpen(true)
+  }
+
+  const handleSubmitEmailBlast = async () => {
+    if (!emailBlastForm.subject.trim()) {
+      toast.error('Subject line is required')
+      return
+    }
+    if (!emailBlastForm.content.trim()) {
+      toast.error('Email content is required')
+      return
+    }
+
+    const targetLeads = leads.filter(l => l.email)
+
+    if (targetLeads.length === 0) {
+      toast.error('No leads with email addresses found')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/email/blast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: emailBlastForm.subject,
+          content: emailBlastForm.content,
+          recipients: targetLeads.map(l => ({ id: l.id, email: l.email, name: `${l.firstName} ${l.lastName}` })),
+          trackEngagement: emailBlastForm.trackEngagement
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        toast.error('Email Blast Failed', {
+          description: result.message || 'Failed to send email blast'
+        })
+        return
+      }
+
+      // Show success with stats
+      if (result.stats.failed > 0) {
+        toast.warning('Email Blast Partially Sent', {
+          description: `${result.stats.sent} sent, ${result.stats.failed} failed, ${result.stats.skipped} skipped`
+        })
+      } else {
+        toast.success('Email Blast Sent', {
+          description: `Successfully sent to ${result.stats.sent} leads`
+        })
+      }
+
+      setIsEmailBlastDialogOpen(false)
+      setEmailBlastForm({ subject: '', content: '', trackEngagement: true })
+    } catch (error) {
+      console.error('Email blast error:', error)
+      toast.error('Email Blast Error', {
+        description: error instanceof Error ? error.message : 'An unexpected error occurred'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleSmartFilter = () => {
@@ -3629,6 +3695,77 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                   <>
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Save Changes
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Blast Dialog */}
+        <Dialog open={isEmailBlastDialogOpen} onOpenChange={setIsEmailBlastDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-purple-500" />
+                Send Email Blast
+              </DialogTitle>
+              <DialogDescription>
+                Send an email to all leads with email addresses ({leads.filter(l => l.email).length} leads)
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="email-blast-subject">Subject Line *</Label>
+                <Input
+                  id="email-blast-subject"
+                  placeholder="Enter email subject..."
+                  value={emailBlastForm.subject}
+                  onChange={(e) => setEmailBlastForm(prev => ({ ...prev, subject: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email-blast-content">Email Content *</Label>
+                <Textarea
+                  id="email-blast-content"
+                  placeholder="Enter your email message...&#10;&#10;You can use {{name}} or {{firstName}} for personalization."
+                  value={emailBlastForm.content}
+                  onChange={(e) => setEmailBlastForm(prev => ({ ...prev, content: e.target.value }))}
+                  rows={8}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Tip: Use {'{{name}}'}, {'{{firstName}}'}, or {'{{email}}'} for personalization
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="track-engagement"
+                  checked={emailBlastForm.trackEngagement}
+                  onCheckedChange={(checked) => setEmailBlastForm(prev => ({ ...prev, trackEngagement: checked }))}
+                />
+                <Label htmlFor="track-engagement" className="text-sm">
+                  Track email opens and clicks
+                </Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEmailBlastDialogOpen(false)} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white"
+                onClick={handleSubmitEmailBlast}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Blast
                   </>
                 )}
               </Button>

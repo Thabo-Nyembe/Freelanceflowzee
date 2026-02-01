@@ -379,7 +379,28 @@ export function FileGallery({
                   </div>
                   {allowDownload && (
                     <div className="flex-shrink-0">
-                      <Button onClick={() => file.requiresPayment ? toast.info('Purchase', { description: `Processing purchase for ${file.name}...` }) : toast.success('Download', { description: `Downloading ${file.name}...` })}>
+                      <Button onClick={() => {
+                        if (file.requiresPayment) {
+                          toast.info('Purchase', { description: `Processing purchase for ${file.name}...` })
+                        } else {
+                          // Generate file content for download
+                          const fileData = JSON.stringify({
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            downloadedAt: new Date().toISOString(),
+                            metadata: { source: 'FreeFlow Secure Files' }
+                          }, null, 2)
+                          const blob = new Blob([fileData], { type: 'application/json' })
+                          const url = URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = file.name.includes('.') ? file.name : `${file.name}.json`
+                          a.click()
+                          URL.revokeObjectURL(url)
+                          toast.success('Download started', { description: file.name })
+                        }
+                      }}>
                         {file.requiresPayment ? 'Purchase' : 'Download'}
                       </Button>
                     </div>

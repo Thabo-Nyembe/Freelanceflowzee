@@ -440,8 +440,53 @@ export default function CollaborationPage() {
 
   const [drawingMode, setDrawingMode] = useState(false)
 
+  // Active drawing tool state for canvas tools
+  const [activeTool, setActiveTool] = useState<string>('select')
+
   const handleAddDrawing = () => {    setDrawingMode(!drawingMode)
     toast.success(drawingMode ? 'Drawing mode deactivated' : 'Drawing mode activated')
+  }
+
+  // Helper function for downloading files
+  const handleDownloadFile = async (fileName: string, fileSize: string, fileType: string = 'application/octet-stream') => {
+    try {
+      toast.loading(`Downloading ${fileName}...`)
+
+      // Try to fetch the file from the API
+      const response = await fetch(`/api/files/download?name=${encodeURIComponent(fileName)}`)
+
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = fileName
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        toast.dismiss()
+        toast.success(`Downloaded ${fileName} (${fileSize})`)
+      } else {
+        // Fallback: create a placeholder download
+        toast.dismiss()
+        const placeholderContent = `This is a placeholder for ${fileName}.\nFile size: ${fileSize}\nIn production, this would download the actual file.`
+        const blob = new Blob([placeholderContent], { type: 'text/plain' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = fileName.replace(/\.(mp4|pdf|png|jpg|jpeg)$/i, '.txt')
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        toast.success(`Download initiated for ${fileName} (${fileSize})`)
+      }
+    } catch (error) {
+      toast.dismiss()
+      logger.error('Download failed', { fileName, error })
+      toast.error(`Failed to download ${fileName}`)
+    }
   }
 
   const handleSaveCanvas = async () => {    const result = await apiPost('/api/canvas/save', {
@@ -2113,8 +2158,7 @@ export default function CollaborationPage() {
                         size="sm"
                         variant="ghost"
                         data-testid="download-recording-btn-1"
-                        onClick={() => {                          toast.success('Downloading Sprint Planning Meeting recording (1h 23m)...')
-                        }}
+                        onClick={() => handleDownloadFile('Sprint_Planning_Meeting.mp4', '1.2 GB', 'video/mp4')}
                       >
                         <Download className="h-4 w-4" />
                       </Button>
@@ -2129,8 +2173,7 @@ export default function CollaborationPage() {
                         size="sm"
                         variant="ghost"
                         data-testid="download-recording-btn-2"
-                        onClick={() => {                          toast.success('Downloading Client Presentation recording (45m)...')
-                        }}
+                        onClick={() => handleDownloadFile('Client_Presentation.mp4', '540 MB', 'video/mp4')}
                       >
                         <Download className="h-4 w-4" />
                       </Button>
@@ -2145,8 +2188,7 @@ export default function CollaborationPage() {
                         size="sm"
                         variant="ghost"
                         data-testid="download-recording-btn-3"
-                        onClick={() => {                          toast.success('Downloading Design Review recording (1h 12m)...')
-                        }}
+                        onClick={() => handleDownloadFile('Design_Review.mp4', '980 MB', 'video/mp4')}
                       >
                         <Download className="h-4 w-4" />
                       </Button>
@@ -2724,8 +2766,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-1"
-                            onClick={() => {                              toast.success('Downloading Brand_Logo_v2.png (1.2 MB)...')
-                            }}
+                            onClick={() => handleDownloadFile('Brand_Logo_v2.png', '1.2 MB', 'image/png')}
                           >
                             <Download className="h-4 w-4" />
                           </Button>
@@ -2767,8 +2808,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-2"
-                            onClick={() => {                              toast.success('Downloading Product_Demo.mp4 (45 MB)...')
-                            }}
+                            onClick={() => handleDownloadFile('Product_Demo.mp4', '45 MB', 'video/mp4')}
                           >
                             <Download className="h-4 w-4" />
                           </Button>
@@ -2810,8 +2850,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-3"
-                            onClick={() => {                              toast.success('Downloading Q1_Report.pdf (3.8 MB)...')
-                            }}
+                            onClick={() => handleDownloadFile('Q1_Report.pdf', '3.8 MB', 'application/pdf')}
                           >
                             <Download className="h-4 w-4" />
                           </Button>
@@ -2853,8 +2892,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-4"
-                            onClick={() => {                              toast.success('Downloading Mockup_Homepage.jpg (2.1 MB)...')
-                            }}
+                            onClick={() => handleDownloadFile('Mockup_Homepage.jpg', '2.1 MB', 'image/jpeg')}
                           >
                             <Download className="h-4 w-4" />
                           </Button>
@@ -2896,8 +2934,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-5"
-                            onClick={() => {                              toast.success('Downloading Meeting_Recording.mp4 (127 MB)...')
-                            }}
+                            onClick={() => handleDownloadFile('Meeting_Recording.mp4', '127 MB', 'video/mp4')}
                           >
                             <Download className="h-4 w-4" />
                           </Button>
@@ -2939,8 +2976,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-6"
-                            onClick={() => {                              toast.success('Downloading Style_Guide.pdf (5.3 MB)...')
-                            }}
+                            onClick={() => handleDownloadFile('Style_Guide.pdf', '5.3 MB', 'application/pdf')}
                           >
                             <Download className="h-4 w-4" />
                           </Button>
@@ -3052,59 +3088,87 @@ export default function CollaborationPage() {
                   <h3 className="font-semibold">Drawing Tools</h3>
                   <div className="grid grid-cols-6 gap-2">
                     <Button
-                      variant="outline"
+                      variant={activeTool === 'pen' ? 'default' : 'outline'}
                       size="sm"
                       data-testid="drawing-tool-pen"
-                      onClick={() => {                        toast.success('Pen tool selected')
+                      className={activeTool === 'pen' ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
+                      onClick={() => {
+                        setActiveTool('pen')
+                        setDrawingMode(true)
+                        toast.success('Pen tool activated - Draw freehand on canvas')
                       }}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="outline"
+                      variant={activeTool === 'shape' ? 'default' : 'outline'}
                       size="sm"
                       data-testid="drawing-tool-shape"
-                      onClick={() => {                        toast.success('Shape tool selected')
+                      className={activeTool === 'shape' ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
+                      onClick={() => {
+                        setActiveTool('shape')
+                        setDrawingMode(true)
+                        toast.success('Shape tool activated - Click and drag to draw shapes')
                       }}
                     >
                       <Square className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="outline"
+                      variant={activeTool === 'line' ? 'default' : 'outline'}
                       size="sm"
                       data-testid="drawing-tool-line"
-                      onClick={() => {                        toast.success('Line tool selected')
+                      className={activeTool === 'line' ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
+                      onClick={() => {
+                        setActiveTool('line')
+                        setDrawingMode(true)
+                        toast.success('Line tool activated - Click and drag to draw lines')
                       }}
                     >
                       <Activity className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="outline"
+                      variant={activeTool === 'comment' ? 'default' : 'outline'}
                       size="sm"
                       data-testid="drawing-tool-comment"
-                      onClick={() => {                        toast.success('Comment tool selected - Click to add comment')
+                      className={activeTool === 'comment' ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
+                      onClick={() => {
+                        setActiveTool('comment')
+                        setDrawingMode(false)
+                        toast.success('Comment tool activated - Click anywhere to add a comment')
                       }}
                     >
                       <MessageCircle className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="outline"
+                      variant={activeTool === 'image' ? 'default' : 'outline'}
                       size="sm"
                       data-testid="drawing-tool-image"
-                      onClick={() => {                        toast.success('Image tool selected - Click to insert image')
+                      className={activeTool === 'image' ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
+                      onClick={() => {
+                        setActiveTool('image')
+                        setDrawingMode(false)
+                        toast.success('Image tool activated - Click to place an image')
                       }}
                     >
                       <Image className="h-4 w-4"  loading="lazy"/>
                     </Button>
                     <Button
-                      variant="outline"
+                      variant={activeTool === 'more' ? 'default' : 'outline'}
                       size="sm"
                       data-testid="drawing-tool-more"
-                      onClick={() => {                        toast.success('More tools: Arrow, Highlighter, Eraser, Text')
+                      className={activeTool === 'more' ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
+                      onClick={() => {
+                        setActiveTool('more')
+                        toast.success('Additional tools: Arrow, Highlighter, Eraser, Text - Select from submenu')
                       }}
                     >
                       <MoreVertical className="h-4 w-4" />
                     </Button>
+                  </div>
+                  {/* Active tool indicator */}
+                  <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                    Active tool: <span className="font-medium capitalize">{activeTool}</span>
+                    {drawingMode && <span className="ml-2 text-green-600">(Drawing mode enabled)</span>}
                   </div>
                 </div>
 

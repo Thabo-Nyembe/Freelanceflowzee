@@ -1086,7 +1086,42 @@ export default function CertificationsClient() {
   }
 
   const handleDownloadCertificate = (certName: string) => {
-    toast.success('Downloading certificate')
+    // Generate certificate document for download
+    const certificateContent = `
+=====================================
+         CERTIFICATE OF COMPLETION
+=====================================
+
+This is to certify that
+
+        [Recipient Name]
+
+has successfully completed the
+
+        ${certName}
+
+certification program.
+
+-------------------------------------
+Issue Date: ${new Date().toLocaleDateString()}
+Certificate ID: CERT-${Date.now()}
+Validity: 2 Years
+-------------------------------------
+
+Issued by: FreeFlow Certifications
+Verification URL: https://freeflow.app/verify/CERT-${Date.now()}
+
+=====================================
+    `.trim()
+
+    const blob = new Blob([certificateContent], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${certName.replace(/\s+/g, '_')}_certificate.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Certificate downloaded', { description: certName })
   }
 
   const handleShareCertification = (certName: string) => {

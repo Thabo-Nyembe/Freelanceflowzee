@@ -443,7 +443,29 @@ export default function ComponentLibraryClient() {
   const handleOpenFigma = () => toast.info('Figma')
   const handleOpenGitHub = () => toast.info('GitHub')
   const handleOpenDocs = (docType: string) => toast.info("Documentation: " + docType)
-  const handleDownload = (item: string) => toast.success("Download Started: " + item)
+  const handleDownload = (item: string) => {
+    // Generate component package for download
+    const packageContent = JSON.stringify({
+      name: item,
+      version: '1.0.0',
+      type: 'component',
+      downloadedAt: new Date().toISOString(),
+      files: ['index.tsx', 'styles.css', 'types.ts'],
+      dependencies: [],
+      metadata: {
+        source: 'FreeFlow Component Library',
+        license: 'MIT'
+      }
+    }, null, 2)
+    const blob = new Blob([packageContent], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${item.toLowerCase().replace(/\s+/g, '-')}-component.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success("Component downloaded", { description: item })
+  }
   const handleConnect = (toolName: string) => toast.info("Connect: " + toolName)
   const handleAddWebhook = () => toast.info('Add Webhook')
   const handleViewApiKey = () => toast.info('API Key')

@@ -509,7 +509,46 @@ export default function ContractsClient({ initialContracts }: { initialContracts
   }
 
   const handleDownloadContract = (contractName: string) => {
-    toast.success("Downloading contract - " + contractName + " will be downloaded")
+    // Generate contract document for download
+    const contractContent = `
+CONTRACT DOCUMENT
+=====================================
+
+Contract Name: ${contractName}
+Generated: ${new Date().toLocaleDateString()}
+Document ID: CONTRACT-${Date.now()}
+
+=====================================
+TERMS AND CONDITIONS
+-------------------------------------
+
+This is a demo contract document generated from FreeFlow.
+In production, this would contain the actual contract terms,
+signatures, and legal provisions.
+
+-------------------------------------
+PARTIES
+-------------------------------------
+Party A: [Company Name]
+Party B: [Client Name]
+
+-------------------------------------
+SIGNATURES
+-------------------------------------
+Signature Date: ${new Date().toLocaleDateString()}
+Status: Demo Document
+
+=====================================
+    `.trim()
+
+    const blob = new Blob([contractContent], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${contractName.replace(/\s+/g, '_')}_contract.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success("Contract downloaded", { description: contractName })
   }
 
   if (error) return <div className="p-8 min-h-screen bg-gray-900"><div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>

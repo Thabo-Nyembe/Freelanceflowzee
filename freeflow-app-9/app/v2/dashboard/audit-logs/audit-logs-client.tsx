@@ -2988,8 +2988,26 @@ export default function AuditLogsClient() {
               </Button>
               <Button onClick={() => {
                 const report = mockComplianceReports.find(r => r.id === showComplianceReportDialog)
+                if (report) {
+                  const reportContent = JSON.stringify({
+                    reportId: report.id,
+                    title: report.title,
+                    framework: report.framework,
+                    status: report.status,
+                    lastUpdated: report.lastUpdated,
+                    findings: report.findings,
+                    generatedAt: new Date().toISOString(),
+                  }, null, 2)
+                  const blob = new Blob([reportContent], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `compliance-report-${report.framework.toLowerCase().replace(/\s+/g, '-')}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                }
                 setShowComplianceReportDialog(null)
-                toast.success('Downloading report')
+                toast.success('Report downloaded successfully')
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Download

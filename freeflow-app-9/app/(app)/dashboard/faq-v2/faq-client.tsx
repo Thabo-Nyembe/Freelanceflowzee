@@ -1,6 +1,10 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useCallback } from 'react'
+
+// Initialize Supabase client
+const supabase = createClient()
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { useFAQs, FAQ } from '@/lib/hooks/use-faqs'
@@ -1796,7 +1800,7 @@ export default function FAQClient() {
                                 <Edit className="w-4 h-4 text-gray-500" />
                               </button>
                               {lang !== helpCenterSettings.defaultLanguage && (
-                                <button onClick={() => { if (confirm(`Remove ${lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'}? This will delete all translations.`)) { toast.success(`Language Removed: ${lang} has been removed`) } }} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
+                                <button onClick={async () => { if (confirm(`Remove ${lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'}? This will delete all translations.`)) { try { const { error } = await supabase.from('faq_translations').delete().eq('language', lang); if (error) throw error; toast.success(`Language Removed: ${lang} has been removed`); } catch { toast.error('Failed to remove language'); } } }} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
                                   <Trash2 className="w-4 h-4 text-red-500" />
                                 </button>
                               )}

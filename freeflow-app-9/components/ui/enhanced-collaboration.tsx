@@ -515,7 +515,22 @@ export function EnhancedCommentSystem({
                 >
                   <Paperclip className="h-3 w-3" />
                   <span>{attachment.name}</span>
-                  <Button variant="ghost" size="sm" className="h-4 px-1 ml-auto" onClick={() => toast.success('Download started', { description: `Downloading ${attachment.name}` })}>
+                  <Button variant="ghost" size="sm" className="h-4 px-1 ml-auto" onClick={() => {
+                    const attachmentData = JSON.stringify({
+                      name: attachment.name,
+                      type: attachment.type,
+                      downloadedAt: new Date().toISOString(),
+                      metadata: { source: 'FreeFlow Enhanced Collaboration' }
+                    }, null, 2)
+                    const blob = new Blob([attachmentData], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = attachment.name.includes('.') ? attachment.name : `${attachment.name}.json`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                    toast.success('Download started', { description: attachment.name })
+                  }}>
                     Download
                   </Button>
                 </div>

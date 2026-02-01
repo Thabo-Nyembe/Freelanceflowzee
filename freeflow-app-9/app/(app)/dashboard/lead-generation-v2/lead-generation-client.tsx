@@ -3655,6 +3655,12 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                   try {
                     // Send email blast via API
                     const targetLeads = leads.filter(l => l.email)
+
+                    if (targetLeads.length === 0) {
+                      toast.error('No leads with email addresses found')
+                      return
+                    }
+
                     const response = await fetch('/api/email/blast', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -3666,23 +3672,33 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                       })
                     })
 
+                    const result = await response.json()
+
                     if (!response.ok) {
-                      // If API doesn't exist, show success anyway for demo
-                      console.warn('Email blast API not implemented, simulating success')
+                      toast.error('Email Blast Failed', {
+                        description: result.message || 'Failed to send email blast'
+                      })
+                      return
                     }
 
-                    toast.success('Email Blast Scheduled', {
-                      description: `Email will be sent to ${targetLeads.length} leads`
-                    })
+                    // Show success with stats
+                    if (result.stats.failed > 0) {
+                      toast.warning('Email Blast Partially Sent', {
+                        description: `${result.stats.sent} sent, ${result.stats.failed} failed, ${result.stats.skipped} skipped`
+                      })
+                    } else {
+                      toast.success('Email Blast Sent', {
+                        description: `Successfully sent to ${result.stats.sent} leads`
+                      })
+                    }
+
                     setIsEmailBlastDialogOpen(false)
                     setEmailBlastForm({ subject: '', content: '', trackEngagement: true })
                   } catch (error) {
-                    // For demo purposes, show success even if API fails
-                    toast.success('Email Blast Scheduled', {
-                      description: `Email scheduled for ${leads.filter(l => l.email).length} leads`
+                    console.error('Email blast error:', error)
+                    toast.error('Email Blast Error', {
+                      description: error instanceof Error ? error.message : 'An unexpected error occurred'
                     })
-                    setIsEmailBlastDialogOpen(false)
-                    setEmailBlastForm({ subject: '', content: '', trackEngagement: true })
                   } finally {
                     setIsSubmitting(false)
                   }

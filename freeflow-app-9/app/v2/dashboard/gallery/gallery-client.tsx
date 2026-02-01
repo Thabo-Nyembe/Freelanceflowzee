@@ -403,7 +403,27 @@ export default function GalleryClient() {
 
   const handleDownloadPhoto = async (photo: Photo | GalleryItem) => {
     const title = 'title' in photo ? photo.title : ''
-    toast.success("Download started for " + title)
+
+    // Generate photo data for download
+    const photoData = JSON.stringify({
+      title: title,
+      id: photo.id,
+      type: 'image' in photo ? 'photo' : 'gallery-item',
+      downloadedAt: new Date().toISOString(),
+      metadata: {
+        source: 'FreeFlow Gallery',
+        downloadCount: ('download_count' in photo ? photo.download_count : 0) + 1
+      }
+    }, null, 2)
+    const blob = new Blob([photoData], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${title.replace(/\s+/g, '_') || 'photo'}_gallery.json`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    toast.success("Download started", { description: title })
 
     // Track download for gallery items
     if ('download_count' in photo && photo.id) {

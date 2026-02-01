@@ -1585,7 +1585,7 @@ export default function MessagingClient() {
                         </div>
                         <div className="flex gap-3 mt-4">
                           <Button variant="outline" onClick={() => toast.success('Message data exported')}>Export Data</Button>
-                          <Button variant="destructive" onClick={() => { if (confirm('Clear all cached data?')) toast.success('Cache cleared') }}>Clear Cache</Button>
+                          <Button variant="destructive" onClick={async () => { if (confirm('Clear all cached data?')) { try { const { data: { user } } = await supabase.auth.getUser(); if (user) { await supabase.from('messages').delete().eq('user_id', user.id).eq('is_cached', true); } toast.success('Cache cleared'); } catch { toast.error('Failed to clear cache'); } } }}>Clear Cache</Button>
                         </div>
                       </CardContent>
                     </Card>

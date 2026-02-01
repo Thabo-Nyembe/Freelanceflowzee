@@ -1640,7 +1640,23 @@ export default function AICreate() {
                                 <Button size="sm" variant="secondary" className="w-8 h-8 p-0" onClick={() => toast.info('Preview', { description: `Previewing ${asset.name}` })}>
                                   <Eye className="w-4 h-4" />
                                 </Button>
-                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0" onClick={() => toast.success('Download started', { description: `Downloading ${asset.name}` })}>
+                                <Button size="sm" variant="secondary" className="w-8 h-8 p-0" onClick={() => {
+                                  const assetData = JSON.stringify({
+                                    name: asset.name,
+                                    format: asset.format,
+                                    size: asset.size,
+                                    downloadedAt: new Date().toISOString(),
+                                    metadata: { source: 'FreeFlow AI Create' }
+                                  }, null, 2)
+                                  const blob = new Blob([assetData], { type: 'application/json' })
+                                  const url = URL.createObjectURL(blob)
+                                  const a = document.createElement('a')
+                                  a.href = url
+                                  a.download = `${asset.name.replace(/\s+/g, '_')}.json`
+                                  a.click()
+                                  URL.revokeObjectURL(url)
+                                  toast.success('Download started', { description: `${asset.name}` })
+                                }}>
                                   <Download className="w-4 h-4" />
                                 </Button>
                                 <Button size="sm" variant="secondary" className="w-8 h-8 p-0" onClick={() => toast.success('Added to favorites', { description: `${asset.name} added to favorites` })}>
