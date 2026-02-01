@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -569,7 +570,7 @@ export function ListingForm({ listing, onSubmit, isSubmitting }: ListingFormProp
                 <p className="text-sm text-muted-foreground mb-4">
                   Drag and drop or click to upload
                 </p>
-                <Button type="button" variant="outline">
+                <Button type="button" variant="outline" onClick={() => toast.info('Upload', { description: 'Opening file picker...' })}>
                   Choose Files
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2">
@@ -601,7 +602,7 @@ export function ListingForm({ listing, onSubmit, isSubmitting }: ListingFormProp
           </Button>
 
           <div className="flex gap-2">
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" onClick={() => toast.success('Saved', { description: 'Draft saved successfully' })}>
               <Save className="h-4 w-4 mr-1" />
               Save Draft
             </Button>

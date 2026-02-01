@@ -6,6 +6,7 @@
  */
 
 import { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { Check, Clock, RotateCcw, Plus, Minus, ShoppingCart, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -365,7 +366,7 @@ export function PackageSelector({
         </Sheet>
 
         {/* Contact Seller */}
-        <Button variant="outline" className="w-full">
+        <Button variant="outline" className="w-full" onClick={() => toast.info('Contact Seller', { description: 'Opening message composer...' })}>
           Contact Seller
         </Button>
       </CardContent>
