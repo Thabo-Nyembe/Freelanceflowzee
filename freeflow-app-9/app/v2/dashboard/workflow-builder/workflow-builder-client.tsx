@@ -1172,75 +1172,75 @@ export default function WorkflowBuilderClient() {
 
   const handleImportNode = useCallback(() => {
     setShowImportDialog(true)
-    toast.info('Import Node')
+    toast.info('Import Node', { description: 'Import nodes from JSON or another workflow' })
   }, [])
 
   const handleCustomCode = useCallback(() => {
     setSelectedCategory('action')
-    toast.success('Custom Code')
+    toast.success('Custom Code Filter Applied', { description: 'Showing custom code action nodes' })
   }, [])
 
   const handleWebhooks = useCallback(() => {
     setSelectedCategory('trigger')
-    toast.success('Webhooks')
+    toast.success('Webhooks Filter Applied', { description: 'Showing webhook trigger nodes' })
   }, [])
 
   const handleDataNodes = useCallback(() => {
     setSelectedCategory('action')
-    toast.success('Data Nodes')
+    toast.success('Data Nodes Filter Applied', { description: 'Showing data transformation nodes' })
   }, [])
 
   const handleEmailNodes = useCallback(() => {
     setSelectedCategory('action')
-    toast.success('Email Nodes')
+    toast.success('Email Nodes Filter Applied', { description: 'Showing email action nodes' })
   }, [])
 
   const handleHttpNodes = useCallback(() => {
     setSelectedCategory('action')
-    toast.success('HTTP Nodes')
+    toast.success('HTTP Nodes Filter Applied', { description: 'Showing HTTP request nodes' })
   }, [])
 
   const handleFavoriteNodes = useCallback(() => {
     setSelectedCategory('all')
     // Filter to show commonly used nodes (triggers and core actions)
-    toast.success('Favorites')
+    toast.success('Favorites Filter Applied', { description: 'Showing your most used nodes' })
   }, [])
 
   // ============== TEMPLATES TAB HANDLERS ==============
 
   const handleFeaturedTemplates = useCallback(() => {
     setTemplateFilter('featured')
-    toast.success('Featured')
+    toast.success('Featured Templates', { description: 'Showing curated featured templates' })
   }, [])
 
   const handlePopularTemplates = useCallback(() => {
     setTemplateFilter('popular')
-    toast.success('Popular')
+    toast.success('Popular Templates', { description: 'Showing most used templates' })
   }, [])
 
   const handleRecentTemplates = useCallback(() => {
     setTemplateFilter('recent')
-    toast.success('Recent')
+    toast.success('Recent Templates', { description: 'Showing recently added templates' })
   }, [])
 
   const handleEmailTemplates = useCallback(() => {
     setTemplateFilter('email')
-    toast.success('Email Templates')
+    toast.success('Email Templates', { description: 'Showing email automation templates' })
   }, [])
 
   const handleDataSyncTemplates = useCallback(() => {
     setTemplateFilter('data')
-    toast.success('Data Sync')
+    toast.success('Data Sync Templates', { description: 'Showing data synchronization templates' })
   }, [])
 
   const handleChatTemplates = useCallback(() => {
     setTemplateFilter('chat')
-    toast.success('Chat Templates')
+    toast.success('Chat Templates', { description: 'Showing chat and messaging templates' })
   }, [])
 
   const handleCreateTemplate = useCallback(async () => {
     if (!selectedWorkflow) {
-      toast.info('Select a workflow')
+      toast.info('Select a Workflow', { description: 'Please select a workflow first to create a template' })
       return
     }
 
@@ -1259,7 +1259,7 @@ export default function WorkflowBuilderClient() {
 
   const handleShareTemplate = useCallback(async () => {
     if (!selectedWorkflow) {
-      toast.info('Select a workflow')
+      toast.info('Select a Workflow', { description: 'Please select a workflow first to share as template' })
       return
     }
 
@@ -1330,12 +1330,12 @@ export default function WorkflowBuilderClient() {
 
   const handleApiKeys = useCallback(() => {
     setCredentialFilter('api_key')
-    toast.success('API Keys')
+    toast.success('API Keys Filter', { description: 'Showing API key credentials' })
   }, [])
 
   const handleOAuth = useCallback(() => {
     setCredentialFilter('oauth2')
-    toast.success('OAuth')
+    toast.success('OAuth Filter', { description: 'Showing OAuth2 credentials' })
   }, [])
 
   const handleSecuritySettings = useCallback(() => {
@@ -1346,7 +1346,7 @@ export default function WorkflowBuilderClient() {
   const handleShareCredentials = useCallback(async () => {
     const selectedCredentials = credentials.filter(c => c.isShared)
     if (selectedCredentials.length === 0) {
-      toast.info('No shared credentials')
+      toast.info('No Shared Credentials', { description: 'Enable sharing on credentials to share with team' })
       return
     }
 

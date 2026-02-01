@@ -556,7 +556,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         refetch()
       }
     } catch (err) {
-      toast.error('Error')
+      toast.error('Failed to Create Contact', { description: 'Please check your input and try again' })
       console.error('Failed to create contact:', err)
     }
   }
@@ -610,7 +610,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         refetch()
       }
     } catch (err) {
-      toast.error('Error')
+      toast.error('Failed to Update Contact', { description: 'Please check your changes and try again' })
       console.error('Failed to update contact:', err)
     }
   }
@@ -633,7 +633,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         refetch()
       }
     } catch (err) {
-      toast.error('Error')
+      toast.error('Failed to Delete Contact', { description: 'The contact could not be deleted. Please try again.' })
       console.error('Failed to delete contact:', err)
     }
   }
@@ -647,11 +647,11 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         : 'active'
       const result = await updateCustomer(customerId, { status: clientStatus })
       if (result) {
-        toast.success(`Status Updated`)
+        toast.success('Status Updated', { description: `Contact status changed to ${newStatus}` })
         refetch()
       }
     } catch (err) {
-      toast.error('Error')
+      toast.error('Failed to Update Status', { description: 'Unable to change contact status. Please try again.' })
     }
   }
 
@@ -670,11 +670,11 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
       }
       const result = await updateCustomer(customerId, { status: statusMap[newSegment] })
       if (result) {
-        toast.success(`Segment Updated segment`)
+        toast.success('Segment Updated', { description: `Contact moved to ${newSegment} segment` })
         refetch()
       }
     } catch (err) {
-      toast.error('Error')
+      toast.error('Failed to Update Segment', { description: 'Unable to change contact segment. Please try again.' })
     }
   }
 

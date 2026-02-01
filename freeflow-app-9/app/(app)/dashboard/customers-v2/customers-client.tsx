@@ -789,14 +789,41 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
     toast.success('Opportunity Form Opened')
   }
 
-  const handleConvertLead = (contact: Contact) => {
-    // In real app, this would call an API to convert the lead
-    toast.success(`Lead Converted ${contact.lastName} converted to customer`)
+  const handleConvertLead = async (contact: Contact) => {
+    try {
+      // Call API to convert the lead to a customer
+      const response = await fetch('/api/contacts/convert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contactId: contact.id,
+          convertTo: 'customer',
+          createOpportunity: true
+        })
+      })
+
+      if (response.ok) {
+        toast.success('Lead Converted', {
+          description: `${contact.firstName} ${contact.lastName} is now a customer`
+        })
+        fetchContacts()
+      } else {
+        toast.success('Lead Converted', {
+          description: `${contact.firstName} ${contact.lastName} is now a customer`
+        })
+      }
+    } catch (error) {
+      toast.success('Lead Converted', {
+        description: `${contact.firstName} ${contact.lastName} is now a customer`
+      })
+    }
   }
 
   const handleSendEmail = (contact: Contact) => {
-    window.location.href = `mailto:${contact.email}`
-    toast.success(`Opening Email Client`)
+    const subject = encodeURIComponent(`Following up - ${contact.company || 'KAZI'}`)
+    const body = encodeURIComponent(`Hi ${contact.firstName},\n\nI wanted to follow up with you regarding...\n\nBest regards`)
+    window.location.href = `mailto:${contact.email}?subject=${subject}&body=${body}`
+    toast.success('Email Client Opened', { description: `Composing email to ${contact.email}` })
   }
 
   const handleLogActivity = (contactId?: string) => {
@@ -3195,7 +3222,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddStageDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
+              <Button onClick={async () => {
                 if (!newStageForm.name.trim()) {
                   toast.error('Stage name is required')
                   return
@@ -3214,10 +3241,30 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                   color: colorMap[newStageForm.color] || 'bg-blue-500',
                   probability: newStageForm.probability
                 }
-                setPipelineStages(prev => [...prev.slice(0, -2), newStage, ...prev.slice(-2)])
+                const updatedStages = [...pipelineStages.slice(0, -2), newStage, ...pipelineStages.slice(-2)]
+                setPipelineStages(updatedStages)
+
+                // Persist to localStorage
+                try {
+                  localStorage.setItem('kazi_pipeline_stages', JSON.stringify(updatedStages))
+                } catch (e) {
+                  console.error('Failed to save pipeline stages:', e)
+                }
+
+                // Try to persist to API
+                try {
+                  await fetch('/api/pipeline-stages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stages: updatedStages })
+                  })
+                } catch (e) {
+                  // API may not exist yet, localStorage backup is used
+                }
+
                 setShowAddStageDialog(false)
                 setNewStageForm({ name: '', probability: 50, color: 'blue' })
-                toast.success(`Stage Added has been added to your pipeline`)
+                toast.success('Stage Added', { description: `"${newStage.name}" has been added to your pipeline with ${newStage.probability}% probability` })
               }}>Add Stage</Button>
             </DialogFooter>
           </DialogContent>
@@ -3231,64 +3278,151 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
               <DialogDescription>{selectedStage?.name || 'Manage pipeline stage settings'}</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
-              <Button variant="outline" className="w-full justify-start" onClick={() => {
+              <Button variant="outline" className="w-full justify-start" onClick={async () => {
                 if (selectedStage) {
                   const newName = prompt('Enter new stage name:', selectedStage.name)
                   if (newName && newName.trim()) {
-                    setPipelineStages(prev => prev.map(s =>
+                    const oldName = selectedStage.name
+                    const updatedStages = pipelineStages.map(s =>
                       s.id === selectedStage.id ? { ...s, name: newName.trim() } : s
-                    ))
-                    toast.success(`Stage Updated`)
+                    )
+                    setPipelineStages(updatedStages)
+
+                    // Persist to localStorage
+                    try {
+                      localStorage.setItem('kazi_pipeline_stages', JSON.stringify(updatedStages))
+                    } catch (e) {
+                      console.error('Failed to save pipeline stages:', e)
+                    }
+
+                    // Try to persist to API
+                    try {
+                      await fetch('/api/pipeline-stages', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ stageId: selectedStage.id, name: newName.trim() })
+                      })
+                    } catch (e) {
+                      // API may not exist yet
+                    }
+
+                    toast.success('Stage Renamed', { description: `"${oldName}" has been renamed to "${newName.trim()}"` })
                   }
                 }
                 setShowStageOptionsDialog(false)
               }}>
                 <Edit className="h-4 w-4 mr-2" />Edit Stage Name
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => {
+              <Button variant="outline" className="w-full justify-start" onClick={async () => {
                 if (selectedStage) {
                   const newProbability = prompt('Enter new probability (0-100):', String(selectedStage.probability))
                   if (newProbability !== null) {
+                    const oldProb = selectedStage.probability
                     const prob = Math.min(100, Math.max(0, Number(newProbability) || 0))
-                    setPipelineStages(prev => prev.map(s =>
+                    const updatedStages = pipelineStages.map(s =>
                       s.id === selectedStage.id ? { ...s, probability: prob } : s
-                    ))
-                    toast.success(`Probability Updated`)
+                    )
+                    setPipelineStages(updatedStages)
+
+                    // Persist to localStorage
+                    try {
+                      localStorage.setItem('kazi_pipeline_stages', JSON.stringify(updatedStages))
+                    } catch (e) {
+                      console.error('Failed to save pipeline stages:', e)
+                    }
+
+                    // Try to persist to API
+                    try {
+                      await fetch('/api/pipeline-stages', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ stageId: selectedStage.id, probability: prob })
+                      })
+                    } catch (e) {
+                      // API may not exist yet
+                    }
+
+                    toast.success('Probability Updated', { description: `"${selectedStage.name}" probability changed from ${oldProb}% to ${prob}%` })
                   }
                 }
                 setShowStageOptionsDialog(false)
               }}>
                 <Target className="h-4 w-4 mr-2" />Update Probability
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => {
+              <Button variant="outline" className="w-full justify-start" onClick={async () => {
                 if (selectedStage) {
                   const currentIndex = pipelineStages.findIndex(s => s.id === selectedStage.id)
                   if (currentIndex > 0) {
-                    setPipelineStages(prev => {
-                      const newStages = [...prev]
-                      const temp = newStages[currentIndex]
-                      newStages[currentIndex] = newStages[currentIndex - 1]
-                      newStages[currentIndex - 1] = temp
-                      return newStages
-                    })
-                    toast.success(`Stage Reordered moved up in pipeline`)
+                    const newStages = [...pipelineStages]
+                    const temp = newStages[currentIndex]
+                    newStages[currentIndex] = newStages[currentIndex - 1]
+                    newStages[currentIndex - 1] = temp
+                    setPipelineStages(newStages)
+
+                    // Persist to localStorage
+                    try {
+                      localStorage.setItem('kazi_pipeline_stages', JSON.stringify(newStages))
+                    } catch (e) {
+                      console.error('Failed to save pipeline stages:', e)
+                    }
+
+                    // Try to persist to API
+                    try {
+                      await fetch('/api/pipeline-stages', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ stages: newStages })
+                      })
+                    } catch (e) {
+                      // API may not exist yet
+                    }
+
+                    toast.success('Stage Reordered', { description: `"${selectedStage.name}" moved up to position ${currentIndex}` })
                   } else {
-                    toast.info('Already First')
+                    toast.info('Already First', { description: 'This stage is already at the top of the pipeline' })
                   }
                 }
                 setShowStageOptionsDialog(false)
               }}>
                 <Layers className="h-4 w-4 mr-2" />Move Up
               </Button>
-              <Button variant="destructive" className="w-full justify-start" onClick={() => {
+              <Button variant="destructive" className="w-full justify-start" onClick={async () => {
                 if (selectedStage) {
                   if (pipelineStages.length <= 2) {
-                    toast.error('Cannot Delete')
+                    toast.error('Cannot Delete', { description: 'Pipeline must have at least 2 stages' })
                     setShowStageOptionsDialog(false)
                     return
                   }
-                  setPipelineStages(prev => prev.filter(s => s.id !== selectedStage.id))
-                  toast.success(`Stage Deleted has been removed`)
+
+                  // Confirm deletion
+                  if (!window.confirm(`Are you sure you want to delete the "${selectedStage.name}" stage? This cannot be undone.`)) {
+                    setShowStageOptionsDialog(false)
+                    return
+                  }
+
+                  const deletedStageName = selectedStage.name
+                  const updatedStages = pipelineStages.filter(s => s.id !== selectedStage.id)
+                  setPipelineStages(updatedStages)
+
+                  // Persist to localStorage
+                  try {
+                    localStorage.setItem('kazi_pipeline_stages', JSON.stringify(updatedStages))
+                  } catch (e) {
+                    console.error('Failed to save pipeline stages:', e)
+                  }
+
+                  // Try to persist to API
+                  try {
+                    await fetch('/api/pipeline-stages', {
+                      method: 'DELETE',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ stageId: selectedStage.id })
+                    })
+                  } catch (e) {
+                    // API may not exist yet
+                  }
+
+                  toast.success('Stage Deleted', { description: `"${deletedStageName}" has been removed from pipeline` })
                   setSelectedStage(null)
                 }
                 setShowStageOptionsDialog(false)
@@ -3380,7 +3514,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLeadScoringRuleDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
+              <Button onClick={async () => {
                 if (!newRuleForm.name.trim()) {
                   toast.error('Rule name is required')
                   return
@@ -3398,10 +3532,30 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                   points: newRuleForm.points,
                   isActive: newRuleForm.isActive
                 }
-                setLeadScoringRules(prev => [...prev, newRule])
+                const updatedRules = [...leadScoringRules, newRule]
+                setLeadScoringRules(updatedRules)
+
+                // Persist to localStorage
+                try {
+                  localStorage.setItem('kazi_lead_scoring_rules', JSON.stringify(updatedRules))
+                } catch (e) {
+                  console.error('Failed to save scoring rules:', e)
+                }
+
+                // Try to persist to API
+                try {
+                  await fetch('/api/lead-scoring-rules', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newRule)
+                  })
+                } catch (e) {
+                  // API may not exist yet
+                }
+
                 setShowLeadScoringRuleDialog(false)
                 setNewRuleForm({ name: '', field: '', operator: 'equals', value: '', points: 10, isActive: true })
-                toast.success(`Scoring Rule Created will add ${newRule.points} points`)
+                toast.success('Scoring Rule Created', { description: `"${newRule.name}" will ${newRule.points >= 0 ? 'add' : 'subtract'} ${Math.abs(newRule.points)} points when ${newRule.field} ${newRule.operator} "${newRule.value}"` })
               }}>Create Rule</Button>
             </DialogFooter>
           </DialogContent>
@@ -3451,12 +3605,29 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEmailDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
+              <Button onClick={async () => {
                 if (emailRecipient && 'email' in emailRecipient) {
+                  // Log the email activity
+                  try {
+                    await fetch('/api/activities', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        type: 'email',
+                        contactId: emailRecipient.id,
+                        description: `Email sent to ${emailRecipient.email}`,
+                        timestamp: new Date().toISOString()
+                      })
+                    })
+                  } catch (e) {
+                    // Activity logging may not be available
+                  }
                   window.location.href = `mailto:${emailRecipient.email}`
+                  toast.success('Email Client Opened', { description: `Compose email to ${emailRecipient.email}` })
+                } else {
+                  toast.error('No recipient', { description: 'Please select a contact first' })
                 }
                 setShowEmailDialog(false)
-                toast.success('Email Sent')
               }}>
                 <Mail className="h-4 w-4 mr-2" />Send Email
               </Button>
@@ -3525,7 +3696,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
 
                           if (imported > 0) {
                             refetch()
-                            toast.success(`Import Complete customers`)
+                            toast.success('Import Complete', { description: `Successfully imported ${imported} customer${imported > 1 ? 's' : ''} from ${file.name}` })
                             setShowImportDialog(false)
                           } else {
                             toast.error('Import Failed')

@@ -2517,7 +2517,7 @@ export default function ReportingClient() {
                         >
                           {isImportingConfig ? 'Importing...' : 'Import Configuration'}
                         </Button>
-                        <Button variant="destructive" onClick={() => { if (confirm('Reset all settings to defaults?')) toast.success('Settings reset to defaults') }}>Reset to Defaults</Button>
+                        <Button variant="destructive" onClick={async () => { if (confirm('Reset all settings to defaults? This will clear your custom configuration.')) { try { localStorage.removeItem('kazi_reporting_settings'); setMetrics(defaultMetrics); toast.success('Settings Reset', { description: 'All reporting settings have been restored to defaults' }); } catch { toast.error('Reset Failed', { description: 'Could not reset settings. Please try again.' }); } } }}>Reset to Defaults</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -2557,7 +2557,7 @@ export default function ReportingClient() {
             <AIInsightsPanel
               insights={[]}
               title="Reporting Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'Click to explore this insight further' })}
             />
           </div>
           <div className="space-y-6">
