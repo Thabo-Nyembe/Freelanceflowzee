@@ -143,10 +143,11 @@ export function VideoBlock({
               <p>Drag & drop a video here, or click to select</p>
             )}
           </div>
-          <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('In Development', { description: 'Block video upload is being built' })}>
+          <Button variant="outline" size="sm" className="mt-2" onClick={(e) => { e.stopPropagation(); (document.querySelector(`#video-input-${id}`) as HTMLInputElement)?.click(); }}>
             <Upload className="w-4 h-4 mr-2" />
             Upload Video
           </Button>
+          <input id={`video-input-${id}`} {...getInputProps()} className="hidden" />
         </div>
       </div>
     )

@@ -68,10 +68,11 @@ export function ImageBlock({
               <p>Drag & drop an image here, or click to select</p>
             )}
           </div>
-          <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('In Development', { description: 'Block image upload is being built' })}>
+          <Button variant="outline" size="sm" className="mt-2" onClick={(e) => { e.stopPropagation(); (document.querySelector(`#image-input-${id}`) as HTMLInputElement)?.click(); }}>
             <Upload className="w-4 h-4 mr-2" />
             Upload Image
           </Button>
+          <input id={`image-input-${id}`} {...getInputProps()} className="hidden" />
         </div>
       </div>
     )

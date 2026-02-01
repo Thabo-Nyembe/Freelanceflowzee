@@ -112,10 +112,11 @@ export function FileBlock({
               <p>Drag & drop a file here, or click to select</p>
             )}
           </div>
-          <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('In Development', { description: 'Block file upload is being built' })}>
+          <Button variant="outline" size="sm" className="mt-2" onClick={(e) => { e.stopPropagation(); (document.querySelector(`#file-input-${id}`) as HTMLInputElement)?.click(); }}>
             <Upload className="w-4 h-4 mr-2" />
             Upload File
           </Button>
+          <input id={`file-input-${id}`} {...getInputProps()} className="hidden" />
         </div>
       </div>
     )
