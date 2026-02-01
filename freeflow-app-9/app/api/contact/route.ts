@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate case ID
-    const caseId = `CASE-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    const caseId = `CASE-${Date.now()}-${Math.random().toString(36).substring(2, 11).toUpperCase()}`
     const timestamp = new Date().toISOString()
 
     // Log the contact form submission (in production, send to email service or database)

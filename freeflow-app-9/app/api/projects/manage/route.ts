@@ -105,7 +105,6 @@ async function handleListProjects(filters?: any): Promise<NextResponse> {
     if (filters?.search) {
       // Post-fetch search for title/desc
       const searchLower = filters.search.toLowerCase()
-      // @ts-expect-error - formattedProjects type is inferred
       return NextResponse.json({
         success: true,
         action: 'list',
@@ -122,9 +121,7 @@ async function handleListProjects(filters?: any): Promise<NextResponse> {
       active: formattedProjects.filter((p: { status: string }) => p.status === 'active').length,
       completed: formattedProjects.filter((p: { status: string }) => p.status === 'completed').length,
       totalBudget: formattedProjects.reduce((sum: number, p: { budget?: number }) => sum + (p.budget || 0), 0),
-      // @ts-expect-error - spent property may not exist on all projects
       totalSpent: formattedProjects.reduce((sum: number, p: { spent?: number }) => sum + (p.spent || 0), 0),
-      // @ts-expect-error - progress property may not exist on all projects
       avgProgress: formattedProjects.length > 0 ? Math.round(formattedProjects.reduce((sum: number, p: { progress?: number }) => sum + (p.progress || 0), 0) / formattedProjects.length) : 0
     }
 
@@ -135,10 +132,11 @@ async function handleListProjects(filters?: any): Promise<NextResponse> {
       stats,
       message: `Found ${formattedProjects.length} projects`
     })
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to list projects'
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to list projects'
+      error: errorMessage
     }, { status: 500 })
   }
 }
@@ -148,7 +146,7 @@ async function handleUpdateStatus(projectId: string, newStatus: string): Promise
   try {
     const supabase = await getSupabase()
 
-    const updates: any = { status: newStatus, updated_at: new Date().toISOString() }
+    const updates: { status: string; updated_at: string; progress?: number } = { status: newStatus, updated_at: new Date().toISOString() }
     if (newStatus === 'completed') updates.progress = 100
 
     const { data: project, error } = await supabase

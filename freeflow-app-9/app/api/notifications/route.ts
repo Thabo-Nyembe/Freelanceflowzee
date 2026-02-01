@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
 
     switch (action) {
       case 'list': {
-        const category = searchParams.get('category') as any
-        const type = searchParams.get('type') as any
+        const category = searchParams.get('category') as string | null
+        const type = searchParams.get('type') as string | null
         const isRead = searchParams.get('isRead')
         const filter = searchParams.get('filter')
         const limit = parseInt(searchParams.get('limit') || '50')
@@ -248,11 +248,13 @@ export async function POST(request: NextRequest) {
           try {
             await supabase
               .from('notifications')
-              .update({ data: { ...data?.data, archived: true } })
+              .update({ data: { ...(data?.data || {}), archived: true } })
               .eq('id', id)
               .eq('user_id', user.id)
             count++
-          } catch {}
+          } catch (error) {
+            logger.warn('Failed to archive notification', { notificationId: id, error: error instanceof Error ? error.message : 'Unknown error' })
+          }
         }
 
         return NextResponse.json({
@@ -273,7 +275,9 @@ export async function POST(request: NextRequest) {
           try {
             await notificationService.delete(user.id, id)
             count++
-          } catch {}
+          } catch (error) {
+            logger.warn('Failed to delete notification', { notificationId: id, error: error instanceof Error ? error.message : 'Unknown error' })
+          }
         }
 
         return NextResponse.json({
@@ -310,17 +314,23 @@ export async function POST(request: NextRequest) {
               try {
                 await notificationService.markAsRead(user.id, id)
                 count++
-              } catch {}
+              } catch (error) {
+                logger.warn('Failed to mark notification as read', { notificationId: id, error: error instanceof Error ? error.message : 'Unknown error' })
+              }
             }
             break
           case 'unread':
             for (const id of notificationIds) {
-              await supabase
-                .from('notifications')
-                .update({ is_read: false, read_at: null })
-                .eq('id', id)
-                .eq('user_id', user.id)
-              count++
+              try {
+                await supabase
+                  .from('notifications')
+                  .update({ is_read: false, read_at: null })
+                  .eq('id', id)
+                  .eq('user_id', user.id)
+                count++
+              } catch (error) {
+                logger.warn('Failed to mark notification as unread', { notificationId: id, error: error instanceof Error ? error.message : 'Unknown error' })
+              }
             }
             break
           case 'delete':
@@ -328,7 +338,9 @@ export async function POST(request: NextRequest) {
               try {
                 await notificationService.delete(user.id, id)
                 count++
-              } catch {}
+              } catch (error) {
+                logger.warn('Failed to delete notification in bulk', { notificationId: id, error: error instanceof Error ? error.message : 'Unknown error' })
+              }
             }
             break
         }

@@ -32,12 +32,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'files'
-    const fileType = searchParams.get('file_type') as any
+    const fileType = searchParams.get('file_type') as string | null
     const folderId = searchParams.get('folder_id') || undefined
     const search = searchParams.get('search') || undefined
     const isStarred = searchParams.get('is_starred')
     const isShared = searchParams.get('is_shared')
-    const sortField = searchParams.get('sort') as any
+    const sortField = searchParams.get('sort') as string | null
     const sortAsc = searchParams.get('sort_asc') === 'true'
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')

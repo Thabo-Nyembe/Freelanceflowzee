@@ -49,10 +49,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         } : null
       }
     });
-  } catch (error: any) {
-    logger.error('Account GET error', { error });
+  } catch (error) {
+    logger.error('Account GET error', { error: error instanceof Error ? error.message : 'Unknown error' });
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to get account status' },
+      { success: false, error: error instanceof Error ? error.message : 'Failed to get account status' },
       { status: 500 }
     );
   }
@@ -125,10 +125,10 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Account deletion requested. You have 30 days to cancel.',
       scheduledDeletion
     });
-  } catch (error: any) {
-    logger.error('Account DELETE error', { error });
+  } catch (error) {
+    logger.error('Account DELETE error', { error: error instanceof Error ? error.message : 'Unknown error' });
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to request account deletion' },
+      { success: false, error: error instanceof Error ? error.message : 'Failed to request account deletion' },
       { status: 500 }
     );
   }
@@ -223,10 +223,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
-    logger.error('Account POST error', { error });
+  } catch (error) {
+    logger.error('Account POST error', { error: error instanceof Error ? error.message : 'Unknown error' });
     return NextResponse.json(
-      { success: false, error: error.message || 'Operation failed' },
+      { success: false, error: error instanceof Error ? error.message : 'Operation failed' },
       { status: 500 }
     );
   }

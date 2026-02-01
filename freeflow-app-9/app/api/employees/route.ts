@@ -40,8 +40,8 @@ export async function GET(request: NextRequest) {
       count,
       pagination: { limit, offset, total: count }
     })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'An error occurred' }, { status: 500 })
   }
 }
 
@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
     if (error) throw error
 
     return NextResponse.json({ data }, { status: 201 })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'An error occurred' }, { status: 500 })
   }
 }
 
@@ -105,8 +105,8 @@ export async function PATCH(request: NextRequest) {
     if (error) throw error
 
     return NextResponse.json({ data })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'An error occurred' }, { status: 500 })
   }
 }
 
@@ -139,7 +139,7 @@ export async function DELETE(request: NextRequest) {
     if (error) throw error
 
     return NextResponse.json({ success: true })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'An error occurred' }, { status: 500 })
   }
 }
