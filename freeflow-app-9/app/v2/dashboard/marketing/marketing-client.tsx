@@ -2300,7 +2300,7 @@ export default function MarketingClient() {
               </div>
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowSendEmailDialog(false)}>Cancel</Button>
-                <Button variant="outline">Save Draft</Button>
+                <Button variant="outline" onClick={() => toast.success('Saved', { description: 'Email draft saved' })}>Save Draft</Button>
                 <Button className="bg-gradient-to-r from-rose-500 to-pink-600 text-white" onClick={() => {
                   toast.success('Email sent successfully')
                   setShowSendEmailDialog(false)

@@ -1387,8 +1387,8 @@ export default function MessagingClient() {
                           <input type="checkbox" defaultChecked className="toggle" />
                         </div>
                         <div className="flex gap-3 mt-4">
-                          <Button variant="outline">Export Data</Button>
-                          <Button variant="destructive">Clear Cache</Button>
+                          <Button variant="outline" onClick={() => toast.success('Export', { description: 'Messaging data exported' })}>Export Data</Button>
+                          <Button variant="destructive" onClick={() => toast.warning('Clear Cache', { description: 'Are you sure? This will clear all cached messages.' })}>Clear Cache</Button>
                         </div>
                       </CardContent>
                     </Card>

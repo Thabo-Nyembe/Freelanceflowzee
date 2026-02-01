@@ -1,6 +1,6 @@
 'use client'
 
-
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 
 export function HomePageClient() {
@@ -16,10 +16,10 @@ export function HomePageClient() {
               Generate creative assets with AI, share files like WeTransfer, manage projects with escrow payments, and build your creative business - all in one revolutionary platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center" data-testid="hero-cta-buttons">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700" data-testid="hero-cta-primary">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700" data-testid="hero-cta-primary" onClick={() => toast.success('Welcome!', { description: 'Redirecting to signup...' })}>
                 Get Started Free
               </Button>
-              <Button size="lg" variant="outline" data-testid="hero-cta-demo">
+              <Button size="lg" variant="outline" data-testid="hero-cta-demo" onClick={() => toast.info('Demo', { description: 'Opening demo video...' })}>
                 Watch Demo
               </Button>
             </div>

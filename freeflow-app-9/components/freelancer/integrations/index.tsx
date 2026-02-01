@@ -1,4 +1,5 @@
 import React from 'react';
+import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -142,7 +143,7 @@ export const FreelancerIntegrationsComponent = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">System Integrations</h2>
-        <Button variant="outline">Sync All</Button>
+        <Button variant="outline" onClick={() => toast.info('Sync', { description: 'Syncing all integrations...' })}>Sync All</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

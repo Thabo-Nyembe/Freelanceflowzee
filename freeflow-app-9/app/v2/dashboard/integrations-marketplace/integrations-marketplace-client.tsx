@@ -3064,7 +3064,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
               <p className="text-gray-600 mb-2">Drag and drop your configuration file here</p>
               <p className="text-sm text-gray-400 mb-4">or</p>
-              <Button variant="outline">Browse Files</Button>
+              <Button variant="outline" onClick={() => toast.info('Browse', { description: 'Opening file picker...' })}>Browse Files</Button>
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>

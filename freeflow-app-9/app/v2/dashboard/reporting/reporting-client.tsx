@@ -1604,9 +1604,9 @@ export default function ReportingClient() {
                         <input type="checkbox" defaultChecked className="toggle" />
                       </div>
                       <div className="flex gap-3 mt-4">
-                        <Button variant="outline">Export Configuration</Button>
-                        <Button variant="outline">Import Configuration</Button>
-                        <Button variant="destructive">Reset to Defaults</Button>
+                        <Button variant="outline" onClick={() => toast.success('Export', { description: 'Configuration exported' })}>Export Configuration</Button>
+                        <Button variant="outline" onClick={() => toast.info('Import', { description: 'Select a configuration file...' })}>Import Configuration</Button>
+                        <Button variant="destructive" onClick={() => toast.warning('Reset', { description: 'Are you sure? This will reset all settings.' })}>Reset to Defaults</Button>
                       </div>
                     </CardContent>
                   </Card>

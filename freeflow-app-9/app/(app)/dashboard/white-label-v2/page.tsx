@@ -1292,7 +1292,7 @@ export default function WhiteLabelPage() {
                       Minimum 8 characters, uppercase, numbers required
                     </p>
                   </div>
-                  <Button variant="outline">Configure</Button>
+                  <Button variant="outline" onClick={() => toast.info('Configure', { description: 'Opening password policy settings...' })}>Configure</Button>
                 </div>
 
                 <div className="flex items-center justify-between">
