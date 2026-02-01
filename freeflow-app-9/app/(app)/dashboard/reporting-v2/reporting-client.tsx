@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -201,6 +201,133 @@ export default function ReportingClient() {
   const [filterFavorites, setFilterFavorites] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Configuration import/export
+  const configFileInputRef = useRef<HTMLInputElement>(null)
+  const [isImportingConfig, setIsImportingConfig] = useState(false)
+  const [isExportingConfig, setIsExportingConfig] = useState(false)
+
+  // Export configuration handler
+  const handleExportConfiguration = () => {
+    setIsExportingConfig(true)
+    const loadingToast = toast.loading('Exporting configuration...')
+
+    try {
+      const configurationData = {
+        version: '1.0',
+        exportedAt: new Date().toISOString(),
+        settings: {
+          general: {
+            defaultRefreshInterval: 30,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            dateFormat: 'YYYY-MM-DD',
+            numberFormat: 'en-US'
+          },
+          notifications: {
+            reportReady: true,
+            dataRefreshAlerts: true,
+            shareNotifications: true,
+            thresholdAlerts: true,
+            emailDigest: false
+          },
+          advanced: {
+            enableSqlAccess: false,
+            debugMode: false,
+            performanceLogging: true,
+            apiAccess: true
+          }
+        },
+        dashboardPreferences: {
+          viewMode,
+          filterFavorites
+        }
+      }
+
+      const blob = new Blob([JSON.stringify(configurationData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `reporting-config-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.dismiss(loadingToast)
+      toast.success('Configuration exported successfully')
+    } catch (err) {
+      toast.dismiss(loadingToast)
+      toast.error('Failed to export configuration')
+    } finally {
+      setIsExportingConfig(false)
+    }
+  }
+
+  // Import configuration handler
+  const handleImportConfiguration = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.name.endsWith('.json')) {
+      toast.error('Invalid file type', { description: 'Please select a JSON file' })
+      return
+    }
+
+    setIsImportingConfig(true)
+    const loadingToast = toast.loading('Importing configuration...')
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string
+        const configData = JSON.parse(content)
+
+        // Validate configuration structure
+        if (!configData.version || !configData.settings) {
+          throw new Error('Invalid configuration format')
+        }
+
+        // Apply dashboard preferences if present
+        if (configData.dashboardPreferences) {
+          if (configData.dashboardPreferences.viewMode) {
+            setViewMode(configData.dashboardPreferences.viewMode)
+          }
+          if (typeof configData.dashboardPreferences.filterFavorites === 'boolean') {
+            setFilterFavorites(configData.dashboardPreferences.filterFavorites)
+          }
+        }
+
+        toast.dismiss(loadingToast)
+        toast.success('Configuration imported successfully', {
+          description: `Imported from ${new Date(configData.exportedAt).toLocaleDateString()}`
+        })
+      } catch (err) {
+        toast.dismiss(loadingToast)
+        toast.error('Failed to import configuration', {
+          description: err instanceof Error ? err.message : 'Invalid configuration file'
+        })
+      } finally {
+        setIsImportingConfig(false)
+        // Reset the input
+        if (configFileInputRef.current) {
+          configFileInputRef.current.value = ''
+        }
+      }
+    }
+
+    reader.onerror = () => {
+      toast.dismiss(loadingToast)
+      toast.error('Failed to read file')
+      setIsImportingConfig(false)
+    }
+
+    reader.readAsText(file)
+  }
+
+  const triggerConfigImport = () => {
+    configFileInputRef.current?.click()
+  }
 
   // Form State - Dashboard
   const [dashboardForm, setDashboardForm] = useState({
@@ -2369,8 +2496,27 @@ export default function ReportingClient() {
                         <input type="checkbox" defaultChecked className="toggle" />
                       </div>
                       <div className="flex gap-3 mt-4">
-                        <Button variant="outline" onClick={() => toast.success('Configuration exported')}>Export Configuration</Button>
-                        <Button variant="outline" onClick={() => toast.success('Configuration imported')}>Import Configuration</Button>
+                        <input
+                          type="file"
+                          ref={configFileInputRef}
+                          accept=".json"
+                          onChange={handleImportConfiguration}
+                          className="hidden"
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={handleExportConfiguration}
+                          disabled={isExportingConfig}
+                        >
+                          {isExportingConfig ? 'Exporting...' : 'Export Configuration'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={triggerConfigImport}
+                          disabled={isImportingConfig}
+                        >
+                          {isImportingConfig ? 'Importing...' : 'Import Configuration'}
+                        </Button>
                         <Button variant="destructive" onClick={() => { if (confirm('Reset all settings to defaults?')) toast.success('Settings reset to defaults') }}>Reset to Defaults</Button>
                       </div>
                     </CardContent>

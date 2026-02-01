@@ -15,7 +15,7 @@ import {
   ArrowUpRight, ArrowDownRight, MoreHorizontal, Twitter, Github, Youtube,
   Mic, Podcast, Newspaper, Hash, Database, Terminal, Crown, ChevronRight, Play, Sliders,
   Webhook, Key, History, RefreshCw,
-  Trash2
+  Trash2, AlertTriangle, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -40,7 +40,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
@@ -460,6 +460,8 @@ export default function ProfileClient() {
   const [settings, setSettings] = useState<ProfileSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false)
   const [recommendationsCount, setRecommendationsCount] = useState(0)
   const [assessmentsPassedCount, setAssessmentsPassedCount] = useState(0)
 

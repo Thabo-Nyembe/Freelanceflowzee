@@ -331,6 +331,8 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   const [showReportDefect, setShowReportDefect] = useState(false)
   const [showCreateMilestone, setShowCreateMilestone] = useState(false)
   const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showDeleteTestDataDialog, setShowDeleteTestDataDialog] = useState(false)
 
   // Form states for create test case
   const [newTestForm, setNewTestForm] = useState({
@@ -376,6 +378,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   const [isExecutingTest, setIsExecutingTest] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [isRunningAllTests, setIsRunningAllTests] = useState(false)
+  const [isImportingTemplate, setIsImportingTemplate] = useState(false)
+  const [isDeletingTestData, setIsDeletingTestData] = useState(false)
+  const [importFile, setImportFile] = useState<File | null>(null)
 
   const { testCases: hookTestCases, stats, isLoading, refetch } = useQATestCases(initialTestCases, {
     status: status === 'all' ? undefined : status,
@@ -826,6 +831,115 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       setIsRunningAllTests(false)
     }
   }, [ executeTest, refetch])
+
+  // Handle Import Template
+  const handleImportTemplate = useCallback(async () => {
+    if (!importFile) {
+      toast.error('No file selected', { description: 'Please select a JSON or YAML template file' })
+      return
+    }
+
+    // Validate file type
+    const validExtensions = ['.json', '.yaml', '.yml']
+    const fileExtension = importFile.name.toLowerCase().substring(importFile.name.lastIndexOf('.'))
+    if (!validExtensions.includes(fileExtension)) {
+      toast.error('Invalid file type', { description: 'Please select a JSON or YAML file' })
+      return
+    }
+
+    setIsImportingTemplate(true)
+    const toastId = toast.loading('Importing template...', { description: `Processing ${importFile.name}` })
+
+    try {
+      const fileContent = await importFile.text()
+      let templateData: Record<string, unknown>
+
+      // Parse file based on extension
+      if (fileExtension === '.json') {
+        try {
+          templateData = JSON.parse(fileContent)
+        } catch {
+          throw new Error('Invalid JSON format')
+        }
+      } else {
+        // For YAML files, we'll do basic parsing or use the API
+        // Simple YAML validation - check if it looks like YAML
+        if (!fileContent.trim()) {
+          throw new Error('Empty YAML file')
+        }
+        // Send raw content to API for YAML parsing
+        templateData = { rawYaml: fileContent, format: 'yaml' }
+      }
+
+      // Send to API for processing
+      const response = await fetch('/api/qa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'import_template',
+          template: templateData,
+          fileName: importFile.name
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Import failed')
+      }
+
+      const result = await response.json()
+
+      toast.success('Template imported successfully', {
+        id: toastId,
+        description: `Imported ${result.imported || 0} test cases from ${importFile.name}`
+      })
+
+      setShowImportDialog(false)
+      setImportFile(null)
+      refetch()
+    } catch (error) {
+      toast.error('Import failed', {
+        id: toastId,
+        description: error instanceof Error ? error.message : 'Failed to import template'
+      })
+    } finally {
+      setIsImportingTemplate(false)
+    }
+  }, [importFile, refetch])
+
+  // Handle Delete All Test Data
+  const handleDeleteAllTestData = useCallback(async () => {
+    setIsDeletingTestData(true)
+    const toastId = toast.loading('Deleting all test data...', { description: 'This may take a moment' })
+
+    try {
+      const response = await fetch('/api/qa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete_all_test_data' })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Delete failed')
+      }
+
+      toast.success('All test data deleted', {
+        id: toastId,
+        description: 'Your QA test data has been permanently removed'
+      })
+
+      setShowDeleteTestDataDialog(false)
+      refetch()
+    } catch (error) {
+      toast.error('Delete failed', {
+        id: toastId,
+        description: error instanceof Error ? error.message : 'Failed to delete test data'
+      })
+    } finally {
+      setIsDeletingTestData(false)
+    }
+  }, [refetch])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -1964,7 +2078,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 <CardHeader className="pb-2"><CardTitle className="text-sm">Report Actions</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.info('Import Template', { description: 'Opening template import dialog...' })}><Upload className="h-4 w-4 mr-2" />Import Template</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => setShowImportDialog(true)}><Upload className="h-4 w-4 mr-2" />Import Template</Button>
                     <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.info('Custom Builder', { description: 'Opening custom report builder...' })}><PieChart className="h-4 w-4 mr-2" />Custom Builder</Button>
                     <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.info('Email Settings', { description: 'Opening email notification settings...' })}><Mail className="h-4 w-4 mr-2" />Email Settings</Button>
                   </div>
@@ -2137,7 +2251,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         <h4 className="font-medium text-red-700 mb-2">Danger Zone</h4>
                         <div className="flex items-center justify-between">
                           <div><p className="text-sm text-red-600">Delete all test data</p><p className="text-xs text-red-500">This action cannot be undone</p></div>
-                          <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-50" onClick={() => toast.error('Delete Test Data', { description: 'Are you sure? This action cannot be undone.' })}><Trash2 className="h-4 w-4 mr-2" />Delete Data</Button>
+                          <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-50" onClick={() => setShowDeleteTestDataDialog(true)}><Trash2 className="h-4 w-4 mr-2" />Delete Data</Button>
                         </div>
                       </div>
                     </CardContent>

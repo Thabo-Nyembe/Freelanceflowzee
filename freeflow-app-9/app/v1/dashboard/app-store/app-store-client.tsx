@@ -54,7 +54,8 @@ import {
   Terminal,
   Webhook,
   Bell,
-  Network
+  Network,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -285,9 +286,13 @@ type Activity = { id: string; user: string; action: string; target: string; time
 const emptyAppStoreActivities: Activity[] = []
 
 // Quick actions are defined inside the component to have access to state setters
-const getAppStoreQuickActions = (setActiveTab: (tab: string) => void, setSearchQuery: (query: string) => void) => [
+const getAppStoreQuickActions = (
+  setActiveTab: (tab: string) => void,
+  setSearchQuery: (query: string) => void,
+  openInstallDialog: () => void
+) => [
   { id: '1', label: 'Browse Apps', icon: 'search', action: () => { setActiveTab('discover'); setSearchQuery(''); toast.success('Browsing all available apps') }, variant: 'default' as const },
-  { id: '2', label: 'Install App', icon: 'plus', action: () => { setActiveTab('discover'); toast.info('Select an app to install from the catalog') }, variant: 'default' as const },
+  { id: '2', label: 'Install App', icon: 'plus', action: () => { setActiveTab('discover'); openInstallDialog() }, variant: 'default' as const },
   { id: '3', label: 'Manage Apps', icon: 'settings', action: () => { setActiveTab('installed'); toast.success('App management panel opened') }, variant: 'outline' as const },
 ]
 
@@ -330,6 +335,9 @@ export default function AppStoreClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [loading, setLoading] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const [showInstallDialog, setShowInstallDialog] = useState(false)
+  const [appToInstall, setAppToInstall] = useState<App | null>(null)
+  const [installLoading, setInstallLoading] = useState(false)
 
   // Fetch user on mount
   useEffect(() => {
@@ -452,6 +460,75 @@ export default function AppStoreClient() {
   const handleViewApp = (app: App) => {
     setSelectedApp(app)
     setShowAppDialog(true)
+  }
+
+  // Open install dialog - allows selecting an app to install
+  const openInstallDialog = () => {
+    // Select first available app, or show dialog for selection
+    const availableApps = apps.filter(a => a.status === 'available')
+    if (availableApps.length > 0) {
+      setAppToInstall(availableApps[0])
+      setShowInstallDialog(true)
+    } else {
+      toast.info('No apps available for installation. Browse the catalog to find apps.')
+    }
+  }
+
+  // Open install confirmation for a specific app
+  const openInstallConfirmation = (app: App) => {
+    setAppToInstall(app)
+    setShowInstallDialog(true)
+  }
+
+  // Async install handler with loading states and toasts
+  const handleConfirmInstall = async () => {
+    if (!appToInstall) return
+    if (!userId) {
+      toast.error('Please sign in to install apps')
+      return
+    }
+
+    setInstallLoading(true)
+    const toastId = toast.loading(`Installing ${appToInstall.name}...`)
+
+    try {
+      const { error } = await supabase
+        .from('installed_plugins')
+        .insert({
+          plugin_id: appToInstall.id,
+          user_id: userId,
+          installed_version: appToInstall.version,
+          is_active: true,
+          settings: {}
+        })
+
+      if (error) throw error
+
+      // Update install count
+      await supabase
+        .from('plugins')
+        .update({ install_count: appToInstall.downloadCount + 1 })
+        .eq('id', appToInstall.id)
+
+      // Record download
+      await supabase
+        .from('plugin_downloads')
+        .insert({
+          plugin_id: appToInstall.id,
+          user_id: userId,
+          version: appToInstall.version
+        })
+
+      toast.success(`${appToInstall.name} has been installed successfully!`, { id: toastId })
+      setShowInstallDialog(false)
+      setAppToInstall(null)
+      await fetchApps()
+    } catch (error) {
+      console.error('Install error:', error)
+      toast.error(`Failed to install ${appToInstall.name}. Please try again.`, { id: toastId })
+    } finally {
+      setInstallLoading(false)
+    }
   }
 
   const featuredApps = apps.filter(a => a.featured)
@@ -759,7 +836,7 @@ export default function AppStoreClient() {
   }
 
   // Generate quick actions with current state
-  const appStoreQuickActions = getAppStoreQuickActions(setActiveTab, setSearchQuery)
+  const appStoreQuickActions = getAppStoreQuickActions(setActiveTab, setSearchQuery, openInstallDialog)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
@@ -2063,6 +2140,129 @@ export default function AppStoreClient() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Install Confirmation Dialog */}
+      <Dialog open={showInstallDialog} onOpenChange={setShowInstallDialog}>
+        <DialogContent className="max-w-md">
+          {appToInstall && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xl font-bold shrink-0">
+                    {appToInstall.icon ? (
+                      <img src={appToInstall.icon} alt={appToInstall.name} className="w-full h-full rounded-2xl object-cover" />
+                    ) : (
+                      appToInstall.name.substring(0, 2).toUpperCase()
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <DialogTitle className="text-xl truncate">{appToInstall.name}</DialogTitle>
+                    <p className="text-sm text-muted-foreground truncate">{appToInstall.developer.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {getPricingBadge(appToInstall.pricing, appToInstall.price)}
+                      <span className="text-xs text-muted-foreground">v{appToInstall.version}</span>
+                    </div>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                {/* Permissions Section */}
+                <div>
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-blue-500" />
+                    Permissions Required
+                  </h4>
+                  <div className="space-y-2 bg-muted/50 rounded-lg p-3">
+                    {appToInstall.permissions && appToInstall.permissions.length > 0 ? (
+                      appToInstall.permissions.map((permission, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                          <span>{permission}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                          <span>Access to your workspace data</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                          <span>Read and write files in designated folders</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                          <span>Connect to external services</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* App Info Summary */}
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="bg-muted/50 rounded-lg p-2">
+                    <div className="flex items-center justify-center gap-1">
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      <span className="font-semibold">{appToInstall.rating.toFixed(1)}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Rating</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-2">
+                    <p className="font-semibold">{formatNumber(appToInstall.downloadCount)}</p>
+                    <p className="text-xs text-muted-foreground">Downloads</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-2">
+                    <p className="font-semibold">{formatBytes(appToInstall.size)}</p>
+                    <p className="text-xs text-muted-foreground">Size</p>
+                  </div>
+                </div>
+
+                {/* Developer verified badge */}
+                {appToInstall.developer.verified && (
+                  <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm">
+                    <Shield className="w-4 h-4 text-blue-500" />
+                    <span className="text-blue-700 dark:text-blue-300">Verified developer - {appToInstall.developer.name}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowInstallDialog(false)
+                    setAppToInstall(null)
+                  }}
+                  disabled={installLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={handleConfirmInstall}
+                  disabled={installLoading}
+                >
+                  {installLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Installing...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Install App
+                    </>
+                  )}
+                </Button>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>

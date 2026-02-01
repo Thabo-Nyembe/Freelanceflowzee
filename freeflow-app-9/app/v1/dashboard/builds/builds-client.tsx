@@ -19,7 +19,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Package,
   CheckCircle,
@@ -348,6 +352,17 @@ export default function BuildsClient() {
   const [selectedBuild, setSelectedBuild] = useState<Build | null>(null)
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
 
+  // Add Secret Dialog state
+  const [showAddSecretDialog, setShowAddSecretDialog] = useState(false)
+  const [addSecretForm, setAddSecretForm] = useState({
+    name: '',
+    value: '',
+    scope: 'repository' as 'repository' | 'environment' | 'organization',
+    environment: '',
+    description: ''
+  })
+  const [isAddingSecret, setIsAddingSecret] = useState(false)
+
   // Concurrency Settings state
   const [maxConcurrentJobs, setMaxConcurrentJobs] = useState(5)
   const [queuePendingJobs, setQueuePendingJobs] = useState(true)
@@ -484,6 +499,36 @@ export default function BuildsClient() {
 
   const handleCopySecret = async (secretName: string) => {
     toast.info(`Secret "${secretName}" value is hidden. Navigate to secret settings to view or update.`)
+  }
+
+  const handleAddSecret = async () => {
+    if (!addSecretForm.name.trim() || !addSecretForm.value.trim()) {
+      toast.error('Secret name and value are required')
+      return
+    }
+
+    setIsAddingSecret(true)
+    const loadingToast = toast.loading('Adding secret...')
+
+    try {
+      await apiPost('/api/builds/secrets', {
+        name: addSecretForm.name.toUpperCase().replace(/[^A-Z0-9_]/g, '_'),
+        value: addSecretForm.value,
+        scope: addSecretForm.scope,
+        environment: addSecretForm.scope === 'environment' ? addSecretForm.environment : undefined,
+        description: addSecretForm.description
+      }, {})
+
+      toast.dismiss(loadingToast)
+      toast.success(`Secret "${addSecretForm.name}" added successfully`)
+      setShowAddSecretDialog(false)
+      setAddSecretForm({ name: '', value: '', scope: 'repository', environment: '', description: '' })
+    } catch {
+      toast.dismiss(loadingToast)
+      toast.error('Failed to add secret')
+    } finally {
+      setIsAddingSecret(false)
+    }
   }
 
   // Concurrency Settings handlers
@@ -1375,7 +1420,7 @@ export default function BuildsClient() {
                         </div>
                       </div>
                     ))}
-                    <Button variant="outline" className="w-full mt-3" onClick={() => toast.info('Add Secret', { description: 'Configure secrets via your CI/CD provider settings or environment variables' })}>
+                    <Button variant="outline" className="w-full mt-3" onClick={() => setShowAddSecretDialog(true)}>
                       <Key className="w-4 h-4 mr-2" />
                       Add Secret
                     </Button>
@@ -1762,6 +1807,125 @@ export default function BuildsClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Secret Dialog */}
+        <Dialog open={showAddSecretDialog} onOpenChange={setShowAddSecretDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5" />
+                Add Secret
+              </DialogTitle>
+              <DialogDescription>
+                Add a new secret for your CI/CD pipelines. Secrets are encrypted and not visible after creation.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="secret-name">Secret Name</Label>
+                <Input
+                  id="secret-name"
+                  placeholder="e.g., API_TOKEN, DATABASE_URL"
+                  value={addSecretForm.name}
+                  onChange={(e) => setAddSecretForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="font-mono"
+                />
+                <p className="text-xs text-gray-500">
+                  Will be converted to uppercase with underscores (e.g., MY_SECRET_KEY)
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="secret-value">Secret Value</Label>
+                <Input
+                  id="secret-value"
+                  type="password"
+                  placeholder="Enter secret value"
+                  value={addSecretForm.value}
+                  onChange={(e) => setAddSecretForm(prev => ({ ...prev, value: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="secret-scope">Scope</Label>
+                <Select
+                  value={addSecretForm.scope}
+                  onValueChange={(value: 'repository' | 'environment' | 'organization') =>
+                    setAddSecretForm(prev => ({ ...prev, scope: value }))
+                  }
+                >
+                  <SelectTrigger id="secret-scope">
+                    <SelectValue placeholder="Select scope" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="repository">Repository</SelectItem>
+                    <SelectItem value="environment">Environment</SelectItem>
+                    <SelectItem value="organization">Organization</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {addSecretForm.scope === 'environment' && (
+                <div className="space-y-2">
+                  <Label htmlFor="secret-environment">Environment</Label>
+                  <Select
+                    value={addSecretForm.environment}
+                    onValueChange={(value) => setAddSecretForm(prev => ({ ...prev, environment: value }))}
+                  >
+                    <SelectTrigger id="secret-environment">
+                      <SelectValue placeholder="Select environment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="production">Production</SelectItem>
+                      <SelectItem value="staging">Staging</SelectItem>
+                      <SelectItem value="development">Development</SelectItem>
+                      <SelectItem value="testing">Testing</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="secret-description">Description (Optional)</Label>
+                <Input
+                  id="secret-description"
+                  placeholder="What is this secret used for?"
+                  value={addSecretForm.description}
+                  onChange={(e) => setAddSecretForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddSecretDialog(false)
+                  setAddSecretForm({ name: '', value: '', scope: 'repository', environment: '', description: '' })
+                }}
+                disabled={isAddingSecret}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddSecret}
+                disabled={isAddingSecret || !addSecretForm.name.trim() || !addSecretForm.value.trim()}
+                className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white"
+              >
+                {isAddingSecret ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <Key className="w-4 h-4 mr-2" />
+                    Add Secret
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

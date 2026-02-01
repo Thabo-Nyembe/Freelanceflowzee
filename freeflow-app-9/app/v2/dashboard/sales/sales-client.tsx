@@ -491,6 +491,17 @@ export default function SalesClient() {
   const [showImportWizardDialog, setShowImportWizardDialog] = useState(false)
   const [showContractDialog, setShowContractDialog] = useState(false)
   const [chatContact, setChatContact] = useState<Contact | null>(null)
+  const [showEditOpportunityDialog, setShowEditOpportunityDialog] = useState(false)
+  const [editOpportunityForm, setEditOpportunityForm] = useState({
+    name: '',
+    amount: 0,
+    stage: 'prospecting' as DealStage,
+    probability: 0,
+    closeDate: '',
+    nextStep: '',
+    description: ''
+  })
+  const [isEditingOpportunity, setIsEditingOpportunity] = useState(false)
 
   // Form states
   const [dealForm, setDealForm] = useState(defaultDealForm)

@@ -394,6 +394,7 @@ export default function ApiClient() {
   const [showRateLimitDialog, setShowRateLimitDialog] = useState(false)
   const [showOAuthConfigDialog, setShowOAuthConfigDialog] = useState(false)
   const [showInviteTeamMemberDialog, setShowInviteTeamMemberDialog] = useState(false)
+  const [showMonitorSettingsDialog, setShowMonitorSettingsDialog] = useState(false)
   const [selectedKeyForEdit, setSelectedKeyForEdit] = useState<ApiKey | null>(null)
   const [editKeyForm, setEditKeyForm] = useState({ name: '', description: '', rateLimit: 1000, scopes: [] as string[] })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -413,6 +414,17 @@ export default function ApiClient() {
     scopes: ['openid', 'profile', 'email']
   })
   const [inviteForm, setInviteForm] = useState({ email: '', role: 'developer', permissions: ['read', 'write'] })
+  const [monitorSettingsForm, setMonitorSettingsForm] = useState({
+    defaultInterval: 60,
+    alertThreshold: 500,
+    enableNotifications: true,
+    notificationChannels: ['email'] as string[],
+    retryAttempts: 3,
+    timeoutSeconds: 30,
+    enableSslVerification: true,
+    followRedirects: true
+  })
+  const [isSavingMonitorSettings, setIsSavingMonitorSettings] = useState(false)
 
   // Form states
   const [endpointForm, setEndpointForm] = useState<EndpointFormData>({
@@ -1098,6 +1110,35 @@ export default KaziApiClient;`
         error: 'Failed to export API documentation'
       }
     )
+  }
+
+  // Save monitor settings handler
+  const handleSaveMonitorSettings = async () => {
+    setIsSavingMonitorSettings(true)
+    const loadingToast = toast.loading('Saving monitor settings...')
+
+    try {
+      await supabase.from('monitor_settings').upsert({
+        default_interval: monitorSettingsForm.defaultInterval,
+        alert_threshold: monitorSettingsForm.alertThreshold,
+        enable_notifications: monitorSettingsForm.enableNotifications,
+        notification_channels: monitorSettingsForm.notificationChannels,
+        retry_attempts: monitorSettingsForm.retryAttempts,
+        timeout_seconds: monitorSettingsForm.timeoutSeconds,
+        enable_ssl_verification: monitorSettingsForm.enableSslVerification,
+        follow_redirects: monitorSettingsForm.followRedirects,
+        updated_at: new Date().toISOString()
+      })
+
+      toast.dismiss(loadingToast)
+      toast.success('Monitor settings saved successfully')
+      setShowMonitorSettingsDialog(false)
+    } catch {
+      toast.dismiss(loadingToast)
+      toast.error('Failed to save monitor settings')
+    } finally {
+      setIsSavingMonitorSettings(false)
+    }
   }
 
   return (
@@ -2043,7 +2084,7 @@ export default KaziApiClient;`
                     error: 'SSL check failed'
                   }
                 )},
-                { icon: Settings, label: 'Configure', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Monitor Settings') }
+                { icon: Settings, label: 'Configure', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowMonitorSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -4004,6 +4045,178 @@ export default KaziApiClient;`
               <Button onClick={handleInviteTeamMember} disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
                 Send Invitation
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Monitor Settings Dialog */}
+        <Dialog open={showMonitorSettingsDialog} onOpenChange={setShowMonitorSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Monitor Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure default settings for all API monitors
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="default-interval">Default Check Interval (seconds)</Label>
+                  <Input
+                    id="default-interval"
+                    type="number"
+                    min={10}
+                    max={3600}
+                    value={monitorSettingsForm.defaultInterval}
+                    onChange={(e) => setMonitorSettingsForm(prev => ({
+                      ...prev,
+                      defaultInterval: parseInt(e.target.value) || 60
+                    }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="alert-threshold">Alert Threshold (ms)</Label>
+                  <Input
+                    id="alert-threshold"
+                    type="number"
+                    min={100}
+                    max={30000}
+                    value={monitorSettingsForm.alertThreshold}
+                    onChange={(e) => setMonitorSettingsForm(prev => ({
+                      ...prev,
+                      alertThreshold: parseInt(e.target.value) || 500
+                    }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="retry-attempts">Retry Attempts</Label>
+                  <Input
+                    id="retry-attempts"
+                    type="number"
+                    min={0}
+                    max={10}
+                    value={monitorSettingsForm.retryAttempts}
+                    onChange={(e) => setMonitorSettingsForm(prev => ({
+                      ...prev,
+                      retryAttempts: parseInt(e.target.value) || 3
+                    }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="timeout-seconds">Timeout (seconds)</Label>
+                  <Input
+                    id="timeout-seconds"
+                    type="number"
+                    min={5}
+                    max={120}
+                    value={monitorSettingsForm.timeoutSeconds}
+                    onChange={(e) => setMonitorSettingsForm(prev => ({
+                      ...prev,
+                      timeoutSeconds: parseInt(e.target.value) || 30
+                    }))}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Notification Channels</Label>
+                <Select
+                  value={monitorSettingsForm.notificationChannels[0] || 'email'}
+                  onValueChange={(value) => setMonitorSettingsForm(prev => ({
+                    ...prev,
+                    notificationChannels: [value]
+                  }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select notification channel" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="slack">Slack</SelectItem>
+                    <SelectItem value="webhook">Webhook</SelectItem>
+                    <SelectItem value="sms">SMS</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="enable-notifications">Enable Notifications</Label>
+                    <p className="text-xs text-gray-500">Receive alerts when monitors fail</p>
+                  </div>
+                  <Switch
+                    id="enable-notifications"
+                    checked={monitorSettingsForm.enableNotifications}
+                    onCheckedChange={(checked) => setMonitorSettingsForm(prev => ({
+                      ...prev,
+                      enableNotifications: checked
+                    }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="ssl-verification">SSL Verification</Label>
+                    <p className="text-xs text-gray-500">Verify SSL certificates on requests</p>
+                  </div>
+                  <Switch
+                    id="ssl-verification"
+                    checked={monitorSettingsForm.enableSslVerification}
+                    onCheckedChange={(checked) => setMonitorSettingsForm(prev => ({
+                      ...prev,
+                      enableSslVerification: checked
+                    }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="follow-redirects">Follow Redirects</Label>
+                    <p className="text-xs text-gray-500">Automatically follow HTTP redirects</p>
+                  </div>
+                  <Switch
+                    id="follow-redirects"
+                    checked={monitorSettingsForm.followRedirects}
+                    onCheckedChange={(checked) => setMonitorSettingsForm(prev => ({
+                      ...prev,
+                      followRedirects: checked
+                    }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowMonitorSettingsDialog(false)}
+                disabled={isSavingMonitorSettings}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveMonitorSettings}
+                disabled={isSavingMonitorSettings}
+                className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white"
+              >
+                {isSavingMonitorSettings ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Save Settings
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

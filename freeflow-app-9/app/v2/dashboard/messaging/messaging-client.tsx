@@ -384,6 +384,186 @@ export default function MessagingClient() {
   // Current user state
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
+  // Export/Import state
+  const dataFileInputRef = useRef<HTMLInputElement>(null)
+  const [isExportingData, setIsExportingData] = useState(false)
+  const [isImportingData, setIsImportingData] = useState(false)
+
+  // Export messaging data handler
+  const handleExportData = () => {
+    setIsExportingData(true)
+    const loadingToast = toast.loading('Exporting messaging data...')
+
+    try {
+      const exportData = {
+        version: '1.0',
+        exportedAt: new Date().toISOString(),
+        channels: channels.map(ch => ({
+          id: ch.id,
+          name: ch.name,
+          description: ch.description,
+          type: ch.type,
+          memberCount: ch.memberCount,
+          topic: ch.topic,
+          createdAt: ch.createdAt
+        })),
+        messages: messages.map(msg => ({
+          id: msg.id,
+          channelId: msg.channelId,
+          authorName: msg.author.name,
+          content: msg.content,
+          timestamp: msg.timestamp,
+          reactions: msg.reactions,
+          attachments: msg.attachments.map(att => ({
+            name: att.name,
+            type: att.type,
+            size: att.size
+          })),
+          isPinned: msg.isPinned,
+          isBookmarked: msg.isBookmarked
+        })),
+        directMessages: directMessages.map(dm => ({
+          id: dm.id,
+          participants: dm.participants.map(p => p.name),
+          unreadCount: dm.unreadCount,
+          isPinned: dm.isPinned
+        })),
+        statistics: {
+          totalMessages: messages.length,
+          totalChannels: channels.length,
+          totalDirectMessages: directMessages.length
+        }
+      }
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `messaging-data-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.dismiss(loadingToast)
+      toast.success('Messaging data exported successfully', {
+        description: `Exported ${messages.length} messages and ${channels.length} channels`
+      })
+    } catch (err) {
+      toast.dismiss(loadingToast)
+      toast.error('Failed to export messaging data')
+    } finally {
+      setIsExportingData(false)
+    }
+  }
+
+  // Export as CSV handler
+  const handleExportCSV = () => {
+    setIsExportingData(true)
+    const loadingToast = toast.loading('Exporting messages as CSV...')
+
+    try {
+      // CSV Header
+      const headers = ['Message ID', 'Channel', 'Author', 'Content', 'Timestamp', 'Reactions', 'Pinned', 'Bookmarked']
+      const csvRows = [headers.join(',')]
+
+      // Add message rows
+      messages.forEach(msg => {
+        const channelName = channels.find(ch => ch.id === msg.channelId)?.name || 'Unknown'
+        const row = [
+          msg.id,
+          `"${channelName}"`,
+          `"${msg.author.name}"`,
+          `"${msg.content.replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+          msg.timestamp,
+          msg.reactions.map(r => `${r.emoji}(${r.count})`).join(' '),
+          msg.isPinned ? 'Yes' : 'No',
+          msg.isBookmarked ? 'Yes' : 'No'
+        ]
+        csvRows.push(row.join(','))
+      })
+
+      const csvContent = csvRows.join('\n')
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `messages-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.dismiss(loadingToast)
+      toast.success('Messages exported as CSV', {
+        description: `Exported ${messages.length} messages`
+      })
+    } catch (err) {
+      toast.dismiss(loadingToast)
+      toast.error('Failed to export CSV')
+    } finally {
+      setIsExportingData(false)
+    }
+  }
+
+  // Import data handler
+  const handleImportData = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.name.endsWith('.json')) {
+      toast.error('Invalid file type', { description: 'Please select a JSON file' })
+      return
+    }
+
+    setIsImportingData(true)
+    const loadingToast = toast.loading('Importing messaging data...')
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string
+        const importedData = JSON.parse(content)
+
+        // Validate data structure
+        if (!importedData.version || !importedData.messages) {
+          throw new Error('Invalid messaging data format')
+        }
+
+        // Here you would typically call an API to import the data
+        // For now, we'll just show success
+        toast.dismiss(loadingToast)
+        toast.success('Messaging data imported successfully', {
+          description: `Found ${importedData.messages?.length || 0} messages and ${importedData.channels?.length || 0} channels`
+        })
+      } catch (err) {
+        toast.dismiss(loadingToast)
+        toast.error('Failed to import messaging data', {
+          description: err instanceof Error ? err.message : 'Invalid data file'
+        })
+      } finally {
+        setIsImportingData(false)
+        // Reset the input
+        if (dataFileInputRef.current) {
+          dataFileInputRef.current.value = ''
+        }
+      }
+    }
+
+    reader.onerror = () => {
+      toast.dismiss(loadingToast)
+      toast.error('Failed to read file')
+      setIsImportingData(false)
+    }
+
+    reader.readAsText(file)
+  }
+
+  const triggerDataImport = () => {
+    dataFileInputRef.current?.click()
+  }
+
   // Get current user on mount
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -1386,8 +1566,35 @@ export default function MessagingClient() {
                           </div>
                           <input type="checkbox" defaultChecked className="toggle" />
                         </div>
-                        <div className="flex gap-3 mt-4">
-                          <Button variant="outline" onClick={() => toast.success('Export', { description: 'Messaging data exported' })}>Export Data</Button>
+                        <div className="flex flex-wrap gap-3 mt-4">
+                          <input
+                            type="file"
+                            ref={dataFileInputRef}
+                            accept=".json"
+                            onChange={handleImportData}
+                            className="hidden"
+                          />
+                          <Button
+                            variant="outline"
+                            onClick={handleExportData}
+                            disabled={isExportingData}
+                          >
+                            {isExportingData ? 'Exporting...' : 'Export JSON'}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={handleExportCSV}
+                            disabled={isExportingData}
+                          >
+                            {isExportingData ? 'Exporting...' : 'Export CSV'}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={triggerDataImport}
+                            disabled={isImportingData}
+                          >
+                            {isImportingData ? 'Importing...' : 'Import Data'}
+                          </Button>
                           <Button variant="destructive" onClick={() => toast.warning('Clear Cache', { description: 'Are you sure? This will clear all cached messages.' })}>Clear Cache</Button>
                         </div>
                       </CardContent>

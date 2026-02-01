@@ -14,6 +14,8 @@ import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   FileText, Plus, Search, Eye, Edit3, Copy, Trash2, Share2, Settings,
   BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown,
@@ -23,7 +25,7 @@ import {
   TrendingUp, PieChart, Activity, Target, Sparkles, Wand2, Palette,
   Layout, Grid3X3, Smartphone, Monitor, Globe, Lock, RefreshCw,
   MousePointer, CircleDot, MoreVertical, Send, Webhook, Database, GitBranch, Shuffle,
-  Timer, Gauge, Sliders, ListChecks, FileUp, Save, AlertOctagon
+  Timer, Gauge, Sliders, ListChecks, FileUp, Save, AlertOctagon, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -302,6 +304,9 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const [showApiLogsDialog, setShowApiLogsDialog] = useState(false)
   const [showFormActionsDialog, setShowFormActionsDialog] = useState(false)
   const [showCustomThemeDialog, setShowCustomThemeDialog] = useState(false)
+  const [showEditFormDialog, setShowEditFormDialog] = useState(false)
+  const [editFormData, setEditFormData] = useState<{ title: string; description: string; status: FormStatus }>({ title: '', description: '', status: 'draft' })
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false)
   const [showWebhookOptionsDialog, setShowWebhookOptionsDialog] = useState(false)
   const [showQRCodeDialog, setShowQRCodeDialog] = useState(false)
   const [selectedWebhook, setSelectedWebhook] = useState<{ url: string; events: string[]; status: string } | null>(null)
@@ -450,6 +455,48 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
       setSelectedForm(null)
     } catch (err: unknown) {
       toast.error('Error')
+    }
+  }
+
+  const handleOpenEditDialog = (form: Form) => {
+    setSelectedForm(form)
+    setEditFormData({
+      title: form.title,
+      description: form.description || '',
+      status: form.status
+    })
+    setShowEditFormDialog(true)
+  }
+
+  const handleEditForm = async () => {
+    if (!selectedForm || !editFormData.title.trim()) {
+      toast.error('Validation Error', { description: 'Form title is required' })
+      return
+    }
+
+    setIsEditSubmitting(true)
+    const toastId = toast.loading('Saving changes...')
+
+    try {
+      await updateForm(selectedForm.id, {
+        title: editFormData.title.trim(),
+        description: editFormData.description.trim() || null,
+        status: editFormData.status
+      })
+      toast.success('Form Updated', {
+        id: toastId,
+        description: `"${editFormData.title}" has been updated successfully`
+      })
+      setShowEditFormDialog(false)
+      setSelectedForm(null)
+      setEditFormData({ title: '', description: '', status: 'draft' })
+    } catch (err: unknown) {
+      toast.error('Update Failed', {
+        id: toastId,
+        description: 'Could not update form. Please try again.'
+      })
+    } finally {
+      setIsEditSubmitting(false)
     }
   }
 
@@ -1257,7 +1304,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); toast.info('Preview Form'); }}>
                             <Eye className="h-4 w-4" />
                           </button>
-                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); toast.info('Edit Form'); }}>
+                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); handleOpenEditDialog(form); }}>
                             <Edit3 className="h-4 w-4" />
                           </button>
                           <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); setSelectedForm(form); setShowAnalyticsDialog(true); }}>
@@ -2383,6 +2430,92 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                 <Button variant="ghost" size="sm" onClick={handleChangeVisibility}>Change</Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Form Dialog */}
+        <Dialog open={showEditFormDialog} onOpenChange={(open) => {
+          setShowEditFormDialog(open)
+          if (!open) {
+            setEditFormData({ title: '', description: '', status: 'draft' })
+          }
+        }}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-indigo-500" />
+                Edit Form
+              </DialogTitle>
+              <DialogDescription>Update form details and settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_form_title">Form Title *</Label>
+                <Input
+                  id="edit_form_title"
+                  placeholder="Enter form title"
+                  value={editFormData.title}
+                  onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_form_description">Description</Label>
+                <Textarea
+                  id="edit_form_description"
+                  placeholder="Describe what this form is for..."
+                  value={editFormData.description}
+                  onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_form_status">Status</Label>
+                <Select
+                  value={editFormData.status}
+                  onValueChange={(v) => setEditFormData({ ...editFormData, status: v as FormStatus })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="paused">Paused</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowEditFormDialog(false)
+                  setSelectedForm(null)
+                  setEditFormData({ title: '', description: '', status: 'draft' })
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleEditForm}
+                disabled={isEditSubmitting}
+                className="bg-indigo-600 hover:bg-indigo-700"
+              >
+                {isEditSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 

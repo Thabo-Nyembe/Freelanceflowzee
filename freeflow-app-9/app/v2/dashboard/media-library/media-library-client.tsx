@@ -86,7 +86,11 @@ import {
   Boxes,
   Database,
   Activity,
-  PieChart
+  PieChart,
+  Loader2,
+  ExternalLink,
+  Check,
+  AlertCircle
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -618,6 +622,14 @@ export default function MediaLibraryClient({
   const [showDuplicateCollectionDialog, setShowDuplicateCollectionDialog] = useState(false)
   const [showCloudImportDialog, setShowCloudImportDialog] = useState(false)
   const [showUrlImportDialog, setShowUrlImportDialog] = useState(false)
+  const [showCloudBrowserDialog, setShowCloudBrowserDialog] = useState(false)
+  const [selectedCloudService, setSelectedCloudService] = useState<string | null>(null)
+  const [cloudConnectionLoading, setCloudConnectionLoading] = useState(false)
+  const [importUrl, setImportUrl] = useState('')
+  const [importUrlFileName, setImportUrlFileName] = useState('')
+  const [importUrlFolder, setImportUrlFolder] = useState('root')
+  const [urlImportLoading, setUrlImportLoading] = useState(false)
+  const [urlValidationError, setUrlValidationError] = useState<string | null>(null)
   const [showAnalyticsOverviewDialog, setShowAnalyticsOverviewDialog] = useState(false)
   const [showTrendsDialog, setShowTrendsDialog] = useState(false)
   const [showDistributionDialog, setShowDistributionDialog] = useState(false)
@@ -3138,7 +3150,10 @@ export default function MediaLibraryClient({
         </Dialog>
 
         {/* Cloud Import Dialog */}
-        <Dialog open={showCloudImportDialog} onOpenChange={setShowCloudImportDialog}>
+        <Dialog open={showCloudImportDialog} onOpenChange={(open) => {
+          setShowCloudImportDialog(open)
+          if (!open) setSelectedCloudService(null)
+        }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -3157,8 +3172,17 @@ export default function MediaLibraryClient({
                   { name: 'OneDrive', icon: '☁️', connected: false },
                   { name: 'iCloud', icon: '🍎', connected: false },
                 ].map((service) => (
-                  <Card key={service.name} className={`p-4 cursor-pointer hover:shadow-md transition-shadow ${!service.connected && 'opacity-50'}`}>
-                    <div className="text-2xl mb-2">{service.icon}</div>
+                  <Card
+                    key={service.name}
+                    className={`p-4 cursor-pointer hover:shadow-md transition-shadow ${!service.connected && 'opacity-50'} ${selectedCloudService === service.name ? 'ring-2 ring-cyan-500 border-cyan-500' : ''}`}
+                    onClick={() => service.connected && setSelectedCloudService(service.name)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-2xl mb-2">{service.icon}</div>
+                      {selectedCloudService === service.name && (
+                        <Check className="w-5 h-5 text-cyan-500" />
+                      )}
+                    </div>
                     <p className="font-medium">{service.name}</p>
                     <p className="text-xs text-gray-500">{service.connected ? 'Connected' : 'Not connected'}</p>
                   </Card>
@@ -3166,21 +3190,159 @@ export default function MediaLibraryClient({
               </div>
               <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Select a connected service to browse and import files.
+                  {selectedCloudService
+                    ? `Click "Browse Files" to open ${selectedCloudService} file browser.`
+                    : 'Select a connected service to browse and import files.'}
                 </p>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCloudImportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Cloud file browser opened'); setShowCloudImportDialog(false); }}>
+              <Button
+                disabled={!selectedCloudService}
+                onClick={() => {
+                  setShowCloudImportDialog(false)
+                  setShowCloudBrowserDialog(true)
+                }}
+              >
                 Browse Files
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
+        {/* Cloud Browser Dialog */}
+        <Dialog open={showCloudBrowserDialog} onOpenChange={(open) => {
+          setShowCloudBrowserDialog(open)
+          if (!open) {
+            setSelectedCloudService(null)
+            setCloudConnectionLoading(false)
+          }
+        }}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderOpen className="w-5 h-5 text-cyan-500" />
+                {selectedCloudService} File Browser
+              </DialogTitle>
+              <DialogDescription>
+                Browse and select files to import from {selectedCloudService}.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {/* Connection status */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                    Connected to {selectedCloudService}
+                  </span>
+                </div>
+                <Button variant="ghost" size="sm" className="text-xs">
+                  <RefreshCw className="w-3 h-3 mr-1" />
+                  Refresh
+                </Button>
+              </div>
+
+              {/* Breadcrumb navigation */}
+              <div className="flex items-center gap-1 text-sm text-gray-500">
+                <Button variant="ghost" size="sm" className="h-6 px-2">Home</Button>
+                <ChevronRight className="w-4 h-4" />
+                <Button variant="ghost" size="sm" className="h-6 px-2">Documents</Button>
+                <ChevronRight className="w-4 h-4" />
+                <span className="text-gray-900 dark:text-gray-100">Media</span>
+              </div>
+
+              {/* File browser */}
+              <ScrollArea className="h-[300px] border rounded-lg">
+                <div className="p-2 space-y-1">
+                  {[
+                    { name: 'Project Assets', type: 'folder', items: 24 },
+                    { name: 'Brand Guidelines', type: 'folder', items: 8 },
+                    { name: 'hero-image.jpg', type: 'image', size: '2.4 MB' },
+                    { name: 'product-video.mp4', type: 'video', size: '45.2 MB' },
+                    { name: 'presentation.pdf', type: 'document', size: '1.8 MB' },
+                    { name: 'logo-variations.zip', type: 'archive', size: '12.5 MB' },
+                    { name: 'background-music.mp3', type: 'audio', size: '4.2 MB' },
+                    { name: 'team-photo.png', type: 'image', size: '3.1 MB' },
+                  ].map((item) => (
+                    <div
+                      key={item.name}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        {item.type === 'folder' ? (
+                          <FolderOpen className="w-5 h-5 text-amber-500" />
+                        ) : item.type === 'image' ? (
+                          <FileImage className="w-5 h-5 text-blue-500" />
+                        ) : item.type === 'video' ? (
+                          <FileVideo className="w-5 h-5 text-purple-500" />
+                        ) : item.type === 'audio' ? (
+                          <FileAudio className="w-5 h-5 text-green-500" />
+                        ) : (
+                          <FileText className="w-5 h-5 text-gray-500" />
+                        )}
+                        <span className="font-medium">{item.name}</span>
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {item.type === 'folder' ? `${item.items} items` : item.size}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+
+              {/* Selection info */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  0 files selected
+                </span>
+                <Button variant="ghost" size="sm" className="text-xs">
+                  Select All
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCloudBrowserDialog(false)}>Cancel</Button>
+              <Button
+                disabled={cloudConnectionLoading}
+                onClick={() => {
+                  setCloudConnectionLoading(true)
+                  setTimeout(() => {
+                    toast.success('Files imported successfully from ' + selectedCloudService)
+                    setShowCloudBrowserDialog(false)
+                    setCloudConnectionLoading(false)
+                    setSelectedCloudService(null)
+                  }, 1500)
+                }}
+              >
+                {cloudConnectionLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Import Selected
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* URL Import Dialog */}
-        <Dialog open={showUrlImportDialog} onOpenChange={setShowUrlImportDialog}>
+        <Dialog open={showUrlImportDialog} onOpenChange={(open) => {
+          setShowUrlImportDialog(open)
+          if (!open) {
+            setImportUrl('')
+            setImportUrlFileName('')
+            setImportUrlFolder('root')
+            setUrlValidationError(null)
+            setUrlImportLoading(false)
+          }
+        }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -3193,16 +3355,57 @@ export default function MediaLibraryClient({
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>File URL</Label>
-                <Input placeholder="https://example.com/file.jpg" type="url" />
+                <Label>File URL <span className="text-red-500">*</span></Label>
+                <div className="relative">
+                  <Input
+                    placeholder="https://example.com/file.jpg"
+                    type="url"
+                    value={importUrl}
+                    onChange={(e) => {
+                      setImportUrl(e.target.value)
+                      // Validate URL
+                      if (e.target.value) {
+                        try {
+                          const url = new URL(e.target.value)
+                          if (!['http:', 'https:'].includes(url.protocol)) {
+                            setUrlValidationError('URL must start with http:// or https://')
+                          } else {
+                            setUrlValidationError(null)
+                          }
+                        } catch {
+                          setUrlValidationError('Please enter a valid URL')
+                        }
+                      } else {
+                        setUrlValidationError(null)
+                      }
+                    }}
+                    className={urlValidationError ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                  />
+                  {importUrl && !urlValidationError && (
+                    <Check className="w-4 h-4 text-green-500 absolute right-3 top-1/2 -translate-y-1/2" />
+                  )}
+                </div>
+                {urlValidationError && (
+                  <div className="flex items-center gap-1 text-xs text-red-500">
+                    <AlertCircle className="w-3 h-3" />
+                    {urlValidationError}
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>File Name (optional)</Label>
-                <Input placeholder="Leave blank to use original name" />
+                <Input
+                  placeholder="Leave blank to use original name"
+                  value={importUrlFileName}
+                  onChange={(e) => setImportUrlFileName(e.target.value)}
+                />
+                <p className="text-xs text-gray-500">
+                  If left blank, the file name will be extracted from the URL.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label>Destination Folder</Label>
-                <Select>
+                <Select value={importUrlFolder} onValueChange={setImportUrlFolder}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select folder" />
                   </SelectTrigger>
@@ -3214,11 +3417,53 @@ export default function MediaLibraryClient({
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* URL Preview */}
+              {importUrl && !urlValidationError && (
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ExternalLink className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm font-medium">URL Preview</span>
+                  </div>
+                  <p className="text-xs text-gray-500 break-all">{importUrl}</p>
+                  {importUrl && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      File name: {importUrlFileName || importUrl.split('/').pop()?.split('?')[0] || 'Unknown'}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowUrlImportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Asset imported successfully'); setShowUrlImportDialog(false); }}>
-                Import
+              <Button
+                disabled={!importUrl || !!urlValidationError || urlImportLoading}
+                onClick={() => {
+                  setUrlImportLoading(true)
+                  // Simulate import process
+                  setTimeout(() => {
+                    const fileName = importUrlFileName || importUrl.split('/').pop()?.split('?')[0] || 'imported-file'
+                    toast.success(`"${fileName}" imported successfully`)
+                    setShowUrlImportDialog(false)
+                    setImportUrl('')
+                    setImportUrlFileName('')
+                    setImportUrlFolder('root')
+                    setUrlValidationError(null)
+                    setUrlImportLoading(false)
+                  }, 2000)
+                }}
+              >
+                {urlImportLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Import
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

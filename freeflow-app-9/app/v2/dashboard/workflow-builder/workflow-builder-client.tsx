@@ -557,6 +557,8 @@ export default function WorkflowBuilderClient() {
   const [variables, setVariables] = useState<WorkflowVariable[]>(mockVariables)
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [showDeleteAllWorkflowsDialog, setShowDeleteAllWorkflowsDialog] = useState(false)
+  const [isDeletingAllWorkflows, setIsDeletingAllWorkflows] = useState(false)
 
   // Edit/Delete Dialog States
   const [showEditStepDialog, setShowEditStepDialog] = useState(false)
