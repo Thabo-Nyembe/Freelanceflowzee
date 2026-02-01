@@ -52,6 +52,9 @@ interface InfiniteScrollShowcaseProps {
   onLoadMore?: () => Promise<any[]>
   hasMore?: boolean
   className?: string
+  onAddNew?: () => void
+  onAIEnhance?: () => void
+  showActions?: boolean
 }
 
 export function InfiniteScrollShowcase({
@@ -60,7 +63,10 @@ export function InfiniteScrollShowcase({
   renderItem,
   onLoadMore,
   hasMore = true,
-  className
+  className,
+  onAddNew,
+  onAIEnhance,
+  showActions = true
 }: InfiniteScrollShowcaseProps) {
   const [items, setItems] = useState(initialData)
   const [loading, setLoading] = useState(false)
@@ -95,26 +101,34 @@ export function InfiniteScrollShowcase({
       >
         <GlowEffect className="absolute -inset-2 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-purple-500/10 rounded-lg blur opacity-0 group-hover/header:opacity-100 transition-opacity duration-500" />
         <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent relative z-10">{title}</h2>
-        <div className="flex items-center gap-2 relative z-10">
-          <Button
-            variant="glass"
-            size="sm"
-            className="gap-2 relative group/btn"
-          >
-            <GlowEffect className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg blur opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
-            <Plus className="w-4 h-4 relative z-10" />
-            <span className="relative z-10">Add New</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2 relative group/btn"
-          >
-            <GlowEffect className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg blur opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
-            <Zap className="w-4 h-4 relative z-10" />
-            <span className="relative z-10">AI Enhance</span>
-          </Button>
-        </div>
+        {showActions && (
+          <div className="flex items-center gap-2 relative z-10">
+            {onAddNew && (
+              <Button
+                variant="glass"
+                size="sm"
+                className="gap-2 relative group/btn"
+                onClick={onAddNew}
+              >
+                <GlowEffect className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg blur opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+                <Plus className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">Add New</span>
+              </Button>
+            )}
+            {onAIEnhance && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 relative group/btn"
+                onClick={onAIEnhance}
+              >
+                <GlowEffect className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg blur opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+                <Zap className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">AI Enhance</span>
+              </Button>
+            )}
+          </div>
+        )}
       </motion.div>
 
       {/* Infinite Scroll Container */}
