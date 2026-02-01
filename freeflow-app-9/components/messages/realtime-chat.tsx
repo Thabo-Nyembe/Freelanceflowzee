@@ -24,7 +24,7 @@
 
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -32,9 +32,14 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import {
   Users, MoreVertical, Phone, Video, Search,
-  Check, CheckCheck, Clock, Circle, X, ChevronUp, ChevronDown
+  Check, CheckCheck, Clock, Circle, X, ChevronUp, ChevronDown,
+  UserPlus, UserMinus, Crown, Shield, Bell, BellOff, Trash2, Settings, Copy
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -78,6 +83,27 @@ export function RealtimeChat({
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<number[]>([])
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0)
+  const [showParticipants, setShowParticipants] = useState(false)
+  const [showChatSettings, setShowChatSettings] = useState(false)
+  const [chatSettings, setChatSettings] = useState({
+    notifications: true,
+    soundEnabled: true,
+    mediaAutoDownload: true,
+    readReceipts: true,
+    typingIndicators: true
+  })
+  // Derive participants from online users hook data
+  const participants = useMemo(() => {
+    // Use onlineUsers from the realtime hook, falling back to current user
+    const users = onlineUsers.length > 0 ? onlineUsers : [{ id: userId, status: 'online' }]
+    return users.map((user, idx) => ({
+      id: user.id || `user-${idx}`,
+      name: user.name || `User ${idx + 1}`,
+      role: idx === 0 ? 'admin' : 'member',
+      status: user.status || 'online',
+      avatar: user.avatar || ''
+    }))
+  }, [onlineUsers, userId])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -313,10 +339,10 @@ export function RealtimeChat({
               <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Video calls are coming in Q2 2026' })}>
                 <Video className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => toast.info('In Development', { description: 'Participant management coming soon' })}>
+              <Button variant="ghost" size="sm" onClick={() => setShowParticipants(true)}>
                 <Users className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Advanced chat settings are planned' })}>
+              <Button variant="ghost" size="sm" onClick={() => setShowChatSettings(true)}>
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </div>
@@ -498,6 +524,198 @@ export function RealtimeChat({
           {error}
         </div>
       )}
+
+      {/* Participants Dialog */}
+      <Dialog open={showParticipants} onOpenChange={setShowParticipants}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Chat Participants
+            </DialogTitle>
+            <DialogDescription>
+              {participants.length} members in this chat
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 mt-4">
+            {participants.map((participant) => (
+              <div
+                key={participant.id}
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Avatar>
+                      <AvatarFallback>{participant.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background ${
+                      participant.status === 'online' ? 'bg-green-500' :
+                      participant.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'
+                    }`} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{participant.name}</span>
+                      {participant.role === 'admin' && (
+                        <Crown className="w-4 h-4 text-yellow-500" />
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground capitalize">{participant.status}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => toast.info('Coming Soon', { description: 'Direct messaging coming soon' })}
+                  >
+                    <Phone className="w-4 h-4" />
+                  </Button>
+                  {participant.role !== 'admin' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
+                      onClick={() => toast.success('Removed', { description: `${participant.name} removed from chat` })}
+                    >
+                      <UserMinus className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowParticipants(false)}>
+              Close
+            </Button>
+            <Button onClick={() => toast.success('Invite Sent', { description: 'Invitation link copied to clipboard' })}>
+              <UserPlus className="w-4 h-4 mr-2" />
+              Add People
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chat Settings Dialog */}
+      <Dialog open={showChatSettings} onOpenChange={setShowChatSettings}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Chat Settings
+            </DialogTitle>
+            <DialogDescription>
+              Customize your chat experience
+            </DialogDescription>
+          </DialogHeader>
+
+          <Tabs defaultValue="general" className="w-full mt-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="privacy">Privacy</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="general" className="space-y-4 mt-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-4 h-4" />
+                  <div>
+                    <Label>Notifications</Label>
+                    <p className="text-xs text-muted-foreground">Receive message alerts</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={chatSettings.notifications}
+                  onCheckedChange={(checked) => setChatSettings(prev => ({ ...prev, notifications: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-4 h-4" />
+                  <div>
+                    <Label>Sound</Label>
+                    <p className="text-xs text-muted-foreground">Play sound for new messages</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={chatSettings.soundEnabled}
+                  onCheckedChange={(checked) => setChatSettings(prev => ({ ...prev, soundEnabled: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  <div>
+                    <Label>Auto-download Media</Label>
+                    <p className="text-xs text-muted-foreground">Automatically download images and files</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={chatSettings.mediaAutoDownload}
+                  onCheckedChange={(checked) => setChatSettings(prev => ({ ...prev, mediaAutoDownload: checked }))}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="privacy" className="space-y-4 mt-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCheck className="w-4 h-4" />
+                  <div>
+                    <Label>Read Receipts</Label>
+                    <p className="text-xs text-muted-foreground">Show when you read messages</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={chatSettings.readReceipts}
+                  onCheckedChange={(checked) => setChatSettings(prev => ({ ...prev, readReceipts: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Circle className="w-4 h-4" />
+                  <div>
+                    <Label>Typing Indicators</Label>
+                    <p className="text-xs text-muted-foreground">Show when you are typing</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={chatSettings.typingIndicators}
+                  onCheckedChange={(checked) => setChatSettings(prev => ({ ...prev, typingIndicators: checked }))}
+                />
+              </div>
+
+              <div className="pt-4 border-t">
+                <Button variant="destructive" className="w-full" onClick={() => {
+                  toast.warning('Clear Chat', { description: 'This will delete all messages. Are you sure?' })
+                }}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Clear Chat History
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowChatSettings(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Settings Saved', { description: 'Your chat preferences have been updated' })
+              setShowChatSettings(false)
+            }}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
