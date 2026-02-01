@@ -293,7 +293,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         payment_method: newExpenseForm.paymentMethod,
         description: newExpenseForm.notes || null,
         expense_date: new Date().toISOString().split('T')[0]
-      } as any)
+      })
       setShowNewExpenseDialog(false)
       setNewExpenseForm({ title: '', paymentMethod: 'corporate_card', notes: '', amount: 0, category: 'travel' })
       toast.success('Expense report created')
@@ -382,7 +382,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         id: expenseId,
         status: 'approved',
         approved_at: new Date().toISOString()
-      } as any)
+      })
       toast.success('Expense "' + title + '" has been approved')
       setShowReportDialog(false)
       refetch()
@@ -397,7 +397,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       await updateExpense({
         id: expenseId,
         status: 'rejected'
-      } as any)
+      })
       toast.success('Expense "' + title + '" has been rejected')
       setShowReportDialog(false)
       refetch()
@@ -414,7 +414,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         status: 'reimbursed',
         reimbursed_at: new Date().toISOString(),
         reimbursed: true
-      } as any)
+      })
       toast.success('Expense "' + title + '" has been marked as reimbursed')
       setShowReportDialog(false)
       refetch()
@@ -426,7 +426,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
   const handleDeleteExpense = async (expenseId: string, title: string) => {
     try {
-      await deleteExpense({ id: expenseId } as any)
+      await deleteExpense({ id: expenseId })
       toast.success('Expense "' + title + '" has been deleted')
       setShowReportDialog(false)
       refetch()
@@ -463,7 +463,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         id: expenseId,
         status: 'pending',
         submitted_at: new Date().toISOString()
-      } as any)
+      })
       toast.success('Report "' + title + '" submitted for approval')
       refetch()
     } catch (error) {

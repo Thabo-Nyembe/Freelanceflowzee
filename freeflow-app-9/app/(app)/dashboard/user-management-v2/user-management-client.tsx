@@ -421,7 +421,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
         custom_permissions: {},
         preferences: {},
         metadata: { sendWelcomeEmail: inviteForm.sendWelcomeEmail }
-      } as any)
+      })
 
       toast.success(`User invited successfully!`)
       setShowInviteModal(false)
@@ -496,7 +496,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
         id: user.id,
         must_change_password: true,
         password_changed_at: new Date().toISOString()
-      } as any)
+      })
 
       toast.success(`Password reset sent`)
     } catch (error) {

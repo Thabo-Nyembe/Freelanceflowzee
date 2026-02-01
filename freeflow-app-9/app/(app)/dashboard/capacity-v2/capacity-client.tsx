@@ -158,7 +158,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       // Calculate project allocations
       const projectAllocations = dbAllocations.filter(a => a.project_id === project.id || a.project_name === project.name)
       const allocatedHours = projectAllocations.reduce((sum, a) => sum + (a.allocated_hours || 0), 0)
-      const totalHours = (project.metadata as any)?.estimated_hours || 100
+      const totalHours = (project.metadata as Record<string, unknown>)?.estimated_hours || 100
 
       // Get team members for this project
       const projectMembers = projectAllocations.map(a => ({
@@ -176,7 +176,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       return {
         id: project.id,
         name: project.name,
-        client: (project.metadata as any)?.client_name || 'Internal',
+        client: (project.metadata as Record<string, unknown>)?.client_name || 'Internal',
         color: project.color || '#3B82F6',
         startDate: project.start_date || '',
         endDate: project.end_date || '',

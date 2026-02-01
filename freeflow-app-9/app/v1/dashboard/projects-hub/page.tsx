@@ -468,7 +468,7 @@ export default function ProjectsOverviewPage() {
         category: editFormData.category,
         status: editFormData.status,
         updated_at: new Date().toISOString()
-      } as any)
+      })
 
       if (error || !data) {
         logger.error('Failed to update project', { error, projectId: selectedProject.id })

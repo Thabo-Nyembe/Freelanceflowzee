@@ -1232,7 +1232,7 @@ export default function ClientZoneClient() {
         setProjects(dashData.recentProjects)
       } else {
         const filtered = await getClientProjects({
-          status: status as any,
+          status: status,
           limit: 20
         })
         setProjects(filtered)

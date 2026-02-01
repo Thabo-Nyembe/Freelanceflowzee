@@ -2397,7 +2397,7 @@ END:VCALENDAR`
                               try {
                                 // Delete all events one by one
                                 for (const event of displayEvents) {
-                                  await deleteEvent({ id: event.id } as any)
+                                  await deleteEvent({ id: event.id })
                                 }
                                 toast.dismiss()
                                 toast.success('All events cleared successfully')

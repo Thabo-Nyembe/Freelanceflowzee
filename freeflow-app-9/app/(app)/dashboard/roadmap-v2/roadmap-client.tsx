@@ -626,7 +626,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
         tags: [],
         dependencies: [],
         metadata: newInitiative.objective ? { objective: newInitiative.objective, keyResults: newInitiative.keyResults } : {},
-      } as any).then(result => {
+      }).then(result => {
         if (!result) throw new Error('Failed to create initiative')
         setShowNewInitiativeDialog(false)
         setNewInitiative({

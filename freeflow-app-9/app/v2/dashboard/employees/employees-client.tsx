@@ -361,7 +361,7 @@ export default function EmployeesClient() {
         status: 'active',
         employment_type: 'full-time',
         currency: 'USD'
-      } as any)
+      })
       setShowAddDialog(false)
       setNewEmployeeForm({ name: '', email: '', department: '', position: '', startDate: '' })
       toast.success('Employee added successfully')
@@ -401,7 +401,7 @@ export default function EmployeesClient() {
         job_title: editEmployeeForm.position || null,
         phone: editEmployeeForm.phone || null,
         status: editEmployeeForm.status as any
-      } as any, employeeToEdit.id)
+      }, employeeToEdit.id)
       setShowEditDialog(false)
       setEmployeeToEdit(null)
       toast.success('Employee updated successfully')

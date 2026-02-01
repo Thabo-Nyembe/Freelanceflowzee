@@ -50,7 +50,7 @@ const getCachedFeaturedTemplates = unstable_cache(
 // Cached function for popular templates (static data, 30 minutes cache)
 const getCachedPopularTemplates = unstable_cache(
   async (category: string | undefined, limit: number) => {
-    return getPopularTemplatesQuery(category as any, limit)
+    return getPopularTemplatesQuery(category, limit)
   },
   ['popular-templates'],
   { revalidate: 1800 } // 30 minutes
@@ -68,7 +68,7 @@ const getCachedTemplateLibraryStats = unstable_cache(
 // Cached function for templates by category (static data, 30 minutes cache)
 const getCachedTemplatesByCategory = unstable_cache(
   async (category: string) => {
-    return getTemplatesByCategory(category as any)
+    return getTemplatesByCategory(category as string)
   },
   ['templates-by-category'],
   { revalidate: 1800 } // 30 minutes

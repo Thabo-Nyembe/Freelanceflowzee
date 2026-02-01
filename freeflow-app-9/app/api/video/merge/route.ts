@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
         // Concatenate videos
         await concatenateVideos(videoPaths, outputPath, {
           format,
-          transition: body.transition as any,
+          transition: body.transition,
           transitionDuration: body.transitionDuration
         })
 

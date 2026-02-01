@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const userId = (session.user as any).authId || session.user.id
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id
     const userEmail = session.user.email
 
     // Also check for demo account emails
@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userId = (session.user as any).authId || session.user.id
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id
     const body = await request.json()
 
     const supabase = await createClient()
@@ -229,7 +229,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const userId = (session.user as any).authId || session.user.id
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id
     const body = await request.json()
     const { id, action, ...updates } = body
 
@@ -281,7 +281,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const userId = (session.user as any).authId || session.user.id
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id
     const { searchParams } = new URL(request.url)
     const expenseId = searchParams.get('id')
     const permanent = searchParams.get('permanent') === 'true'

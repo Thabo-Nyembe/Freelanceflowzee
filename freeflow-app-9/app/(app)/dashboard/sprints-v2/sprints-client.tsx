@@ -2407,7 +2407,7 @@ export default function SprintsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={[] as any[]}
+              insights={[] as unknown[]}
               title="Sprint Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
@@ -2418,7 +2418,7 @@ export default function SprintsClient() {
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={[] as any[]}
+              predictions={[] as unknown[]}
               title="Sprint Forecasts"
             />
           </div>

@@ -376,7 +376,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'save-brand-asset': {
-        const { name, asset_type, content, metadata } = data as any;
+        const { name, asset_type, content, metadata } = data as Record<string, unknown>;
 
         if (!name || !asset_type || !content) {
           return NextResponse.json(
@@ -408,7 +408,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'save-palette': {
-        const { name, colors, mood, industry } = data as any;
+        const { name, colors, mood, industry } = data as Record<string, unknown>;
 
         if (!name || !colors || !Array.isArray(colors)) {
           return NextResponse.json(

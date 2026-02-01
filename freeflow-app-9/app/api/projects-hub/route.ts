@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
         if (!status) {
           return NextResponse.json({ error: 'status parameter required' }, { status: 400 })
         }
-        const { data } = await getProjectsByStatus(user.id, status.split(',') as any)
+        const { data } = await getProjectsByStatus(user.id, status.split(',') as string[])
         return NextResponse.json({ data })
       }
 

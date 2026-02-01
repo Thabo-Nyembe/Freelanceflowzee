@@ -492,7 +492,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         has_expiry: false,
         tax_rate: 0,
         is_taxable: true
-      } as any)
+      })
 
       toast.success('Product created successfully!')
       setShowProductDialog(false)
@@ -749,7 +749,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         total_value: newQuantity * inventoryItem.unit_price,
         status: newQuantity === 0 ? 'out-of-stock' : newQuantity <= inventoryItem.reorder_point ? 'low-stock' : 'in-stock',
         updated_at: new Date().toISOString()
-      } as any)
+      })
 
       toast.success("Stock updated: " + product.title + " has been updated")
       refetch()
@@ -776,7 +776,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         is_active: false,
         deleted_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      } as any)
+      })
 
       toast.success("Product archived: " + product.title + " has been archived")
       refetch()

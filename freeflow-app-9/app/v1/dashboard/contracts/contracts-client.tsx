@@ -595,7 +595,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
       const newContract = {
         title: `${template.name} - ${new Date().toLocaleDateString()}`,
         contract_number: `CTR-${Date.now()}`,
-        contract_type: template.category.toLowerCase() as any || 'service',
+        contract_type: template.category.toLowerCase() || 'service',
         status: 'draft' as const,
         contract_value: 0,
         currency: 'USD',

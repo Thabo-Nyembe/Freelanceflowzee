@@ -107,7 +107,7 @@ export async function PATCH(
 
     // Quick status update
     if (body.status) {
-      const event = await calendarService.updateEvent(eventId, user.id, { status: body.status } as any);
+      const event = await calendarService.updateEvent(eventId, user.id, { status: body.status });
       return NextResponse.json({ event });
     }
 

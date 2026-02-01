@@ -292,8 +292,8 @@ export async function POST(request: NextRequest) {
         } = body;
 
         // Parse amount from body
-        const amount = (body as any).amount;
-        const description = (body as any).description || 'One-time payment';
+        const amount = (body as Record<string, unknown>).amount;
+        const description = (body as Record<string, unknown>).description || 'One-time payment';
 
         if (!amount || amount < 50) { // Minimum $0.50
           return NextResponse.json({

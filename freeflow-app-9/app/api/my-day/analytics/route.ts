@@ -63,7 +63,7 @@ export async function GET(request: Request) {
       energyLevel: 'medium',
       focusScore: 80,
       priority: t.priority || 'medium',
-      category: (t.project_id ? 'work' : 'personal') as any,
+      category: (t.project_id ? 'work' : 'personal'),
       actualTime: 60,
       interrupted: false,
       qualityScore: 5

@@ -245,7 +245,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
         priority: 'medium',
         currency: 'USD',
         is_taxable: true
-      } as any)
+      })
 
       toast.success('Transaction created successfully!')
       setShowNewTransactionDialog(false)
@@ -404,7 +404,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
         is_taxable: false,
         account_code: newAccountForm.code,
         record_number: "ACC-" + newAccountForm.code
-      } as any)
+      })
 
       toast.success('Account created successfully!')
       setShowNewAccountDialog(false)

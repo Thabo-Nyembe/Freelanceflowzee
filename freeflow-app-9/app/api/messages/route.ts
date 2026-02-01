@@ -300,7 +300,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
 
-    const userId = (session.user as any).authId || session.user.id;
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id;
     const userEmail = session.user.email;
 
     // Demo mode ONLY for demo account (test@kazi.dev) or when demo mode is enabled
@@ -561,7 +561,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return handleDemoAction(action, data);
     }
 
-    const userId = (session.user as any).authId || session.user.id;
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id;
 
     switch (action) {
       case 'send':

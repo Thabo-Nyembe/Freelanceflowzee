@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     const acknowledged = searchParams.get('acknowledged')
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
-    const timeWindow = (searchParams.get('time_window') || '24h') as any
+    const timeWindow = (searchParams.get('time_window') || '24h')
     const days = searchParams.get('days') ? parseInt(searchParams.get('days')!) : 7
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 100
 

@@ -418,7 +418,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'list': {
-        const type = data.type as any;
+        const type = data.type;
         const reports = await reportsService.getReports(user.id, type);
         return NextResponse.json({
           success: true,

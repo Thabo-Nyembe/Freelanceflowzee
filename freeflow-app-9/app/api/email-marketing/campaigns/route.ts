@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0')
 
     const { campaigns, total } = await campaignSenderService.getCampaignsByUser(user.id, {
-      status: status as any,
-      type: type as any,
+      status: status,
+      type: type,
       limit,
       offset
     })

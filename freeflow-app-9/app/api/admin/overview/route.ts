@@ -13,7 +13,7 @@ async function verifyAdminAccess(request: NextRequest) {
   }
 
   // Check for admin role (adjust based on your role system)
-  const userRole = (session.user as any).role || 'user'
+  const userRole = (session.user as { role?: string }).role || 'user'
   if (!['admin', 'super_admin'].includes(userRole)) {
     logger.warn('Unauthorized admin access attempt', { userId: session.user.id, role: userRole })
     return { authorized: false, error: 'Admin access required', status: 403 }

@@ -257,7 +257,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
         status: 'confirmed',
         all_day: false,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-      } as any)
+      })
       setShowNewEvent(false)
       setNewEventForm({ title: '', startTime: '', endTime: '', eventType: 'meeting', location: '', description: '' })
       toast.success('Event created')
@@ -437,7 +437,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
         end_time: editForm.endTime,
         location: editForm.location || null,
         description: editForm.description || null
-      } as any)
+      })
       toast.success('Event updated')
       setIsEditing(false)
       setSelectedEvent(null)
@@ -450,7 +450,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   // Handle deleting an event
   const handleDeleteEvent = async (event: CalendarEvent) => {
     try {
-      await deleteEvent({ id: event.id } as any)
+      await deleteEvent({ id: event.id })
       toast.success('Event deleted')
       setSelectedEvent(null)
       refetch()

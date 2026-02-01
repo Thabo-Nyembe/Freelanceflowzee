@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
           extension: file.name.split('.').pop() || '',
           size: file.size,
           url: publicUrl,
-          storage_provider: storageProvider as any,
+          storage_provider: storageProvider,
           mime_type: file.type,
           folder_id: folderId || undefined,
           status: 'active',

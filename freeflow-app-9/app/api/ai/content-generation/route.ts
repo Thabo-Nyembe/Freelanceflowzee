@@ -352,7 +352,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'save-template': {
-        const { name, description, template_content, category, variables } = data as any;
+        const { name, description, template_content, category, variables } = data as Record<string, unknown>;
 
         if (!name || !template_content) {
           return NextResponse.json(
@@ -386,7 +386,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'apply-template': {
-        const { template_id, variables: templateVars } = data as any;
+        const { template_id, variables: templateVars } = data as Record<string, unknown>;
 
         if (!template_id) {
           return NextResponse.json(

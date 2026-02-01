@@ -436,7 +436,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'save-brand-voice': {
-        const { name, description, tone_words, avoid_words, examples, personality_traits } = data as any;
+        const { name, description, tone_words, avoid_words, examples, personality_traits } = data as Record<string, unknown>;
 
         if (!name) {
           return NextResponse.json(
@@ -470,7 +470,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'save-to-swipe-file': {
-        const { title, content, category, source, tags } = data as any;
+        const { title, content, category, source, tags } = data as Record<string, unknown>;
 
         if (!title || !content) {
           return NextResponse.json(

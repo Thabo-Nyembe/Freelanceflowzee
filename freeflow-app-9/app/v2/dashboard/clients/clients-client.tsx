@@ -401,7 +401,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         website: newClientForm.website || null,
         industry: newClientForm.industry,
         status: newClientForm.status
-      } as any)
+      })
       setShowAddDialog(false)
       setNewClientForm({
         company: '',
@@ -436,7 +436,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         website: editClientForm.website || null,
         industry: editClientForm.industry,
         status: editClientForm.status
-      } as any)
+      })
       setShowEditDialog(false)
       setSelectedClient(null)
       setEditClientForm({

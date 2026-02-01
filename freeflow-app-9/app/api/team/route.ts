@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     if (session?.user) {
       const userEmail = session.user.email
       const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
-      effectiveUserId = isDemoAccount || demoMode ? DEMO_USER_ID : (session.user as any).authId || session.user.id
+      effectiveUserId = isDemoAccount || demoMode ? DEMO_USER_ID : (session.user as { authId?: string; id: string }).authId || session.user.id
     } else if (demoMode) {
       effectiveUserId = DEMO_USER_ID
     } else {
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
     if (session?.user) {
       const userEmail = session.user.email
       const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
-      effectiveUserId = isDemoAccount || demoMode ? DEMO_USER_ID : (session.user as any).authId || session.user.id
+      effectiveUserId = isDemoAccount || demoMode ? DEMO_USER_ID : (session.user as { authId?: string; id: string }).authId || session.user.id
     } else if (demoMode) {
       effectiveUserId = DEMO_USER_ID
     } else {
@@ -1437,7 +1437,7 @@ export async function PUT(request: NextRequest) {
     if (session?.user) {
       const userEmail = session.user.email
       const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
-      effectiveUserId = isDemoAccount || demoMode ? DEMO_USER_ID : (session.user as any).authId || session.user.id
+      effectiveUserId = isDemoAccount || demoMode ? DEMO_USER_ID : (session.user as { authId?: string; id: string }).authId || session.user.id
     } else if (demoMode) {
       effectiveUserId = DEMO_USER_ID
     } else {
@@ -1533,7 +1533,7 @@ export async function DELETE(request: NextRequest) {
     if (session?.user) {
       const userEmail = session.user.email
       const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
-      effectiveUserId = isDemoAccount || demoMode ? DEMO_USER_ID : (session.user as any).authId || session.user.id
+      effectiveUserId = isDemoAccount || demoMode ? DEMO_USER_ID : (session.user as { authId?: string; id: string }).authId || session.user.id
     } else if (demoMode) {
       effectiveUserId = DEMO_USER_ID
     } else {

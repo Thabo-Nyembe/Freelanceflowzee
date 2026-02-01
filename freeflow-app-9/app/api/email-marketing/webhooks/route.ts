@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     // Process webhook
     const result = await eventTrackingService.processWebhook({
-      provider: provider as any,
+      provider: provider,
       signature,
       timestamp: request.headers.get('x-webhook-timestamp') || undefined,
       events: events.map(e => ({

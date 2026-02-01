@@ -668,7 +668,7 @@ export default function CampaignsClient() {
         is_automated: false,
         requires_approval: false,
         approved: false
-      } as any)
+      })
 
       toast.success('Campaign created successfully!')
       setShowNewCampaignDialog(false)
@@ -820,7 +820,7 @@ export default function CampaignsClient() {
         is_automated: campaign.automation ? true : false,
         requires_approval: false,
         approved: false
-      } as any)
+      })
       toast.success(`Campaign duplicated: ${campaign.name} created`)
       refetch()
     } catch (error) {

@@ -459,7 +459,7 @@ export default function ProjectsHubClient() {
 
   const handleUpdateProjectStatus = async (projectId: string, status: ProjectStatus) => {
     try {
-      await updateProject(projectId, { status: status as any })
+      await updateProject(projectId, { status: status })
       toast.success('Project status updated')
     } catch (error) {
       toast.error('Failed to update status')

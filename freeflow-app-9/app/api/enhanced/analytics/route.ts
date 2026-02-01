@@ -961,8 +961,8 @@ async function analyzeClientValue(supabase: any, userId: string, clientId: strin
     getUpsellOpportunities(supabase, userId)
   ]);
 
-  const clientChurn = (churn as any).clients?.find((c: any) => c.clientId === clientId);
-  const clientUpsell = (upsell as any).opportunities?.filter((o: any) => o.clientId === clientId);
+  const clientChurn = (churn as Record<string, unknown>).clients?.find((c: any) => c.clientId === clientId);
+  const clientUpsell = (upsell as Record<string, unknown>).opportunities?.filter((o: any) => o.clientId === clientId);
 
   return {
     health,

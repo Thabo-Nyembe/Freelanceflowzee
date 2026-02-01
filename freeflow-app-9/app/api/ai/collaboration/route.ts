@@ -331,7 +331,7 @@ function parseResponse(content: string, toolType: CollaborationToolType): any {
 
     if (sentimentMatch) {
       result.sentiment = {
-        overall: sentimentMatch[1].toLowerCase() as any,
+        overall: sentimentMatch[1].toLowerCase(),
         confidence: confidenceMatch ? parseFloat(confidenceMatch[1]) / 100 : 0.8,
         breakdown: {}
       }

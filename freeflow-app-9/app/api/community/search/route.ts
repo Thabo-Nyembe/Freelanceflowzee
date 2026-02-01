@@ -787,7 +787,7 @@ export async function GET(request: NextRequest) {
 
     const filters: SearchFilters = {
       query,
-      type: type as any,
+      type: type,
       page,
       limit
     }

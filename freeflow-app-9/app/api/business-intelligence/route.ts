@@ -793,7 +793,7 @@ export async function POST(request: Request) {
         }
 
         // Update progress
-        const progress = ((currentGoal.history || []) as any[])
+        const progress = ((currentGoal.history || []) as unknown[])
         progress.push({
           date: new Date().toISOString().split('T')[0],
           value,

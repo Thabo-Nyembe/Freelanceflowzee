@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
           const result = await getCryptoPrice(currency)
           return NextResponse.json({ data: result })
         }
-        const currencies = searchParams.get('currencies')?.split(',') as any[] || undefined
+        const currencies = searchParams.get('currencies')?.split(',') || undefined
         const result = await getCryptoPrices(currencies)
         return NextResponse.json({ data: result })
       }

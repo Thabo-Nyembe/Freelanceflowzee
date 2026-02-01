@@ -291,7 +291,7 @@ const generateCsvExport = (comments: Comment[]): string => {
     updated_at: comment.updated_at || "",
     file_id: comment.file_id,
     project_id: comment.project_id,
-    position_type: (comment.position as any).type,
+    position_type: (comment.position as Record<string, unknown>).type,
     reply_count: comment.replies.length,
     assigned_to: comment.assigned_to ? "Yes" : "No",
   }))

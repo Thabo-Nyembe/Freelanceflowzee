@@ -395,7 +395,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'save-preset': {
-        const { name, description, preset_data } = data as any;
+        const { name, description, preset_data } = data as Record<string, unknown>;
 
         if (!name || !preset_data) {
           return NextResponse.json(
@@ -427,7 +427,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'create-collection': {
-        const { name, description, image_ids } = data as any;
+        const { name, description, image_ids } = data as Record<string, unknown>;
 
         if (!name) {
           return NextResponse.json(
@@ -458,7 +458,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'add-to-collection': {
-        const { collection_id, image_id } = data as any;
+        const { collection_id, image_id } = data as Record<string, unknown>;
 
         if (!collection_id || !image_id) {
           return NextResponse.json(
@@ -498,7 +498,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'toggle-favorite': {
-        const { image_id } = data as any;
+        const { image_id } = data as Record<string, unknown>;
 
         if (!image_id) {
           return NextResponse.json(

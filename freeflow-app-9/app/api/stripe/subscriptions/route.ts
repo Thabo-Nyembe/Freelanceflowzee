@@ -739,7 +739,7 @@ export async function POST(request: NextRequest) {
       // CHECK FEATURE ACCESS
       // ======================================================================
       case 'check-feature': {
-        const feature = (body as any).feature;
+        const feature = (body as Record<string, unknown>).feature;
 
         if (!userId) {
           // Return starter limits for unauthenticated users

@@ -70,9 +70,9 @@ async function handleOpenAITTS(body: VoiceSynthesisRequest, apiKey: string) {
 
     const mp3 = await openai.audio.speech.create({
       model: 'tts-1-hd',
-      voice: body.voice as any,
+      voice: body.voice,
       input: body.input || body.text || '',
-      response_format: body.response_format as any || 'mp3',
+      response_format: body.response_format || 'mp3',
       speed: body.speed || 1.0
     })
 

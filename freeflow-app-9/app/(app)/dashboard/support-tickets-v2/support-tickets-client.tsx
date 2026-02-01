@@ -983,7 +983,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           if (!selectedTicket.first_response_at) {
                             updateTicket(selectedTicket.id, {
                               first_response_at: new Date().toISOString()
-                            } as any)
+                            })
                           }
                         }}
                       />

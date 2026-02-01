@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const userRole = (session.user as any).role || 'user'
+    const userRole = (session.user as { role?: string }).role || 'user'
     if (!['admin', 'super_admin'].includes(userRole)) {
       logger.warn('Unauthorized error stats access attempt', {
         userId: session.user.id,

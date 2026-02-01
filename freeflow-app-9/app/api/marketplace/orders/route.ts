@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find selected package
-    const packages = listing.packages as any[];
+    const packages = listing.packages as unknown[];
     const selectedPackage = packages.find(
       (p: any) => p.name === validatedData.package_name
     );
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
     let deliveryModifier = 0;
 
     if (validatedData.extras && listing.extras) {
-      const listingExtras = listing.extras as any[];
+      const listingExtras = listing.extras as unknown[];
       for (const extraId of validatedData.extras) {
         const extra = listingExtras.find((e: any) => e.id === extraId);
         if (extra) {

@@ -378,11 +378,11 @@ export default function RecruitmentClient() {
         source: 'website' as SourceType,
         matchScore: app.match_score || 0,
         experienceYears: app.experience_years || 0,
-        currentCompany: (app.configuration as any)?.current_company || 'Unknown',
-        currentTitle: (app.configuration as any)?.current_title || 'Unknown',
-        location: (app.configuration as any)?.location || 'Unknown',
-        skills: (app.configuration as any)?.skills || [],
-        education: (app.configuration as any)?.education || '',
+        currentCompany: (app.configuration as Record<string, unknown>)?.current_company || 'Unknown',
+        currentTitle: (app.configuration as Record<string, unknown>)?.current_title || 'Unknown',
+        location: (app.configuration as Record<string, unknown>)?.location || 'Unknown',
+        skills: (app.configuration as Record<string, unknown>)?.skills || [],
+        education: (app.configuration as Record<string, unknown>)?.education || '',
         linkedinUrl: app.linkedin_url || undefined,
         portfolioUrl: app.portfolio_url || undefined,
         resumeUrl: app.resume_url || '',
@@ -390,8 +390,8 @@ export default function RecruitmentClient() {
         appliedDate: app.applied_date,
         lastActivity: app.updated_at,
         notes: app.notes ? [app.notes] : [],
-        rating: (app.configuration as any)?.rating || 3,
-        tags: (app.configuration as any)?.tags || []
+        rating: (app.configuration as Record<string, unknown>)?.rating || 3,
+        tags: (app.configuration as Record<string, unknown>)?.tags || []
       }
     })
   }, [dbApplications, dbJobs])

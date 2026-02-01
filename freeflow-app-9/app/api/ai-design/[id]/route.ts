@@ -167,7 +167,7 @@ export async function PUT(
 
       case 'tool': {
         if (action === 'use') {
-          const { data, error } = await incrementToolUses(id as any)
+          const { data, error } = await incrementToolUsesid
           if (error) throw error
           return NextResponse.json({ data })
         }

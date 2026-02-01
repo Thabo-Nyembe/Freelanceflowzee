@@ -1198,7 +1198,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                     </div>
                     <Button className="w-full opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => {
                       handleCreateContract({
-                        contract_type: template.category.toLowerCase() as any,
+                        contract_type: template.category.toLowerCase(),
                         title: `New ${template.name}`
                       })
                     }}>

@@ -565,12 +565,12 @@ export async function POST(request: NextRequest) {
         const savedView: MapViewConfig = {
           id: `view-${Date.now()}`,
           user_id: 'current-user',
-          name: (data as any)?.name || 'Saved View',
-          center: (data as any)?.center || { latitude: 37.7749, longitude: -122.4194 },
-          zoom: (data as any)?.zoom || 11,
-          filters: (data as any)?.filters || { types: [], statuses: [] },
-          clustering_enabled: (data as any)?.clustering_enabled ?? true,
-          show_routes: (data as any)?.show_routes ?? false,
+          name: (data as Record<string, unknown>)?.name || 'Saved View',
+          center: (data as Record<string, unknown>)?.center || { latitude: 37.7749, longitude: -122.4194 },
+          zoom: (data as Record<string, unknown>)?.zoom || 11,
+          filters: (data as Record<string, unknown>)?.filters || { types: [], statuses: [] },
+          clustering_enabled: (data as Record<string, unknown>)?.clustering_enabled ?? true,
+          show_routes: (data as Record<string, unknown>)?.show_routes ?? false,
           created_at: new Date().toISOString(),
         };
 

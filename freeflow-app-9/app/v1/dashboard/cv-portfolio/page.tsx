@@ -501,7 +501,7 @@ export default function CVPortfolioPage() {
           is_featured: false,
           category: 'web'
         })
-        if (addError) throw new Error((addError as any)?.message || 'Failed to add project')
+        if (addError) throw new Error((addError as Record<string, unknown>)?.message || 'Failed to add project')
         if (createdProject?.id) newProjectId = parseInt(createdProject.id)
       }
 
@@ -574,7 +574,7 @@ export default function CVPortfolioPage() {
           technologies,
           project_url: link || undefined
         })
-        if (updateError) throw new Error((updateError as any)?.message || 'Failed to update project')
+        if (updateError) throw new Error((updateError as Record<string, unknown>)?.message || 'Failed to update project')
       }
 
       setProjects(prev => prev.map(p =>
@@ -826,7 +826,7 @@ export default function CVPortfolioPage() {
           achievements: [],
           technologies
         })
-        if (addError) throw new Error((addError as any)?.message || 'Failed to add experience')
+        if (addError) throw new Error((addError as Record<string, unknown>)?.message || 'Failed to add experience')
         if (createdExp?.id) newExperienceId = parseInt(createdExp.id)
       }
 
@@ -900,7 +900,7 @@ export default function CVPortfolioPage() {
           position,
           description
         })
-        if (updateError) throw new Error((updateError as any)?.message || 'Failed to update experience')
+        if (updateError) throw new Error((updateError as Record<string, unknown>)?.message || 'Failed to update experience')
       }
 
       setExperience(prev => prev.map(e =>
@@ -1022,7 +1022,7 @@ export default function CVPortfolioPage() {
           grade: gpa || undefined,
           achievements: []
         })
-        if (addError) throw new Error((addError as any)?.message || 'Failed to add education')
+        if (addError) throw new Error((addError as Record<string, unknown>)?.message || 'Failed to add education')
         if (createdEdu?.id) newEducationId = parseInt(createdEdu.id)
       }
 
@@ -1089,7 +1089,7 @@ export default function CVPortfolioPage() {
           institution,
           degree
         })
-        if (updateError) throw new Error((updateError as any)?.message || 'Failed to update education')
+        if (updateError) throw new Error((updateError as Record<string, unknown>)?.message || 'Failed to update education')
       }
 
       setEducation(prev => prev.map(e =>
@@ -1599,7 +1599,7 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
         if (userId) {
           try {
             const { data: uploadResult, error: uploadError } = await uploadPortfolioImage(userId, file, 'project')
-            if (uploadError) throw new Error((uploadError as any)?.message || 'Failed to upload image')
+            if (uploadError) throw new Error((uploadError as Record<string, unknown>)?.message || 'Failed to upload image')
             if (uploadResult?.url) imageUrl = uploadResult.url
           } catch (err) {
             // Continue with local URL if upload fails

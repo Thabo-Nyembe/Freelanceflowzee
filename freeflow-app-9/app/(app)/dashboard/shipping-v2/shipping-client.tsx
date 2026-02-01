@@ -739,7 +739,7 @@ export default function ShippingClient() {
         metadata: {
           is_priority: formState.is_priority,
         },
-      } as any)
+      })
 
       setShowCreateDialog(false)
       setFormState(initialFormState)
@@ -773,7 +773,7 @@ export default function ShippingClient() {
     try {
       // Update status to label_created if pending
       if (shipment.status === 'pending') {
-        await updateShipment(shipment.id, { status: 'processing' } as any)
+        await updateShipment(shipment.id, { status: 'processing' })
       }
       toast.success(`Label ready: "${shipment.trackingNumber}" is ready to print`)
     } catch (error) {
@@ -840,7 +840,7 @@ export default function ShippingClient() {
           signature_required: false,
           labels: [],
           metadata: {},
-        } as any)
+        })
       }
 
       toast.success(`Batch shipment created: ${selectedOrders.length} orders queued for shipment`)
@@ -915,7 +915,7 @@ export default function ShippingClient() {
           ...(originalShipment.metadata || {}),
           label_generated_at: new Date().toISOString()
         }
-      } as any)
+      })
 
       // Add tracking event
       await supabase.from('shipment_tracking').insert({

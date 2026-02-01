@@ -42,7 +42,7 @@ function VerifyEmailContent() {
         if (tokenHash && type) {
           const { data, error: verifyError } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
-            type: type as any
+            type: type
           })
 
           if (verifyError) {

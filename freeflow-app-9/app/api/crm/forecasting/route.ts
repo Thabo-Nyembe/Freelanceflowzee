@@ -744,9 +744,9 @@ export async function GET(request: NextRequest) {
 
           return {
             user_id: member.user_id,
-            user_name: (member.user as any)?.name || 'Unknown',
-            user_email: (member.user as any)?.email || '',
-            user_avatar: (member.user as any)?.avatar_url || null,
+            user_name: (member.user as Record<string, unknown>)?.name || 'Unknown',
+            user_email: (member.user as Record<string, unknown>)?.email || '',
+            user_avatar: (member.user as Record<string, unknown>)?.avatar_url || null,
             quota: userQuota,
             closed_won: closedWon,
             commit,
@@ -764,7 +764,7 @@ export async function GET(request: NextRequest) {
         })
 
         // Calculate team totals
-        const team = teamMembers[0]?.team as any
+        const team = teamMembers[0]?.team as Record<string, unknown>
         const teamForecast: TeamForecast = {
           team_id: queryParams.team_id || '',
           team_name: team?.name || 'Unknown Team',
@@ -851,7 +851,7 @@ export async function GET(request: NextRequest) {
         const repStats = new Map<string, { won: number; total: number; name: string }>()
         ;(closedDeals || []).forEach(deal => {
           const key = deal.owner_id || 'unassigned'
-          const current = repStats.get(key) || { won: 0, total: 0, name: (deal.owner as any)?.name || 'Unassigned' }
+          const current = repStats.get(key) || { won: 0, total: 0, name: (deal.owner as Record<string, unknown>)?.name || 'Unassigned' }
           current.total++
           if (deal.status === 'won') current.won++
           repStats.set(key, current)
@@ -920,7 +920,7 @@ export async function GET(request: NextRequest) {
         // Group by stage
         const stageMap = new Map<string, { name: string; value: number; count: number; weighted: number }>()
         ;(deals || []).forEach(deal => {
-          const stageName = (deal.stage as any)?.name || 'Unknown'
+          const stageName = (deal.stage as Record<string, unknown>)?.name || 'Unknown'
           const current = stageMap.get(stageName) || { name: stageName, value: 0, count: 0, weighted: 0 }
           current.value += deal.value || 0
           current.count++

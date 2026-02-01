@@ -303,7 +303,7 @@ export default function DeploymentsClient() {
         requires_approval: false,
         can_rollback: true,
         auto_rollback_enabled: false,
-      } as any)
+      })
 
       toast.success(`Deployment Created: ${deploymentForm.deployment_name} v${deploymentForm.version} queued`)
       setShowCreateDialog(false)
@@ -323,7 +323,7 @@ export default function DeploymentsClient() {
         id: deployment.id,
         status: 'in_progress',
         started_at: new Date().toISOString(),
-      } as any)
+      })
 
       toast.info(`Deployment Started: ${deployment.deployment_name} is now deploying...`)
       fetchDeployments()
@@ -343,7 +343,7 @@ export default function DeploymentsClient() {
         status: success ? 'success' : 'failed',
         completed_at: new Date().toISOString(),
         duration_seconds: duration,
-      } as any)
+      })
 
       toast[success ? 'success' : 'error'](
         success ? 'Deployment Successful' : 'Deployment Failed',
@@ -366,7 +366,7 @@ export default function DeploymentsClient() {
       await updateDeploymentMutation.mutateAsync({
         id: deployment.id,
         status: 'rolled_back',
-      } as any)
+      })
 
       toast.success(`Rollback Initiated: ${deployment.deployment_name}`)
       setShowRollbackDialog(false)
@@ -382,7 +382,7 @@ export default function DeploymentsClient() {
       await updateDeploymentMutation.mutateAsync({
         id: deployment.id,
         status: 'cancelled',
-      } as any)
+      })
 
       toast.info(`Deployment Cancelled: ${deployment.deployment_name} has been cancelled`)
       fetchDeployments()

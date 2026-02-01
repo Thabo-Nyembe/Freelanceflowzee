@@ -376,7 +376,7 @@ Best regards,
         is_recurring: newInvoice.recurring.enabled,
         recurring_schedule: newInvoice.recurring.enabled ? newInvoice.recurring.frequency : null,
         issue_date: new Date().toISOString().split('T')[0]
-      } as any)
+      })
       setShowCreateModal(false)
       toast.success('Invoice created successfully')
       // Reset form
@@ -474,7 +474,7 @@ Best regards,
         notes: invoice.notes,
         terms_and_conditions: invoice.terms_and_conditions,
         issue_date: new Date().toISOString().split('T')[0]
-      } as any)
+      })
       toast.success("Invoice duplicated")
     } catch (error) {
       toast.error('Failed to duplicate invoice')

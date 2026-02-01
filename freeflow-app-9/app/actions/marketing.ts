@@ -137,18 +137,18 @@ export async function startCampaign(id: string): Promise<ActionResult<any>> {
   return updateMarketingCampaign(id, {
     status: 'active',
     start_date: new Date().toISOString()
-  } as any)
+  })
 }
 
 export async function pauseCampaign(id: string): Promise<ActionResult<any>> {
-  return updateMarketingCampaign(id, { status: 'paused' } as any)
+  return updateMarketingCampaign(id, { status: 'paused' })
 }
 
 export async function completeCampaign(id: string): Promise<ActionResult<any>> {
   return updateMarketingCampaign(id, {
     status: 'completed',
     end_date: new Date().toISOString()
-  } as any)
+  })
 }
 
 export async function updateCampaignMetrics(

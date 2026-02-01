@@ -272,7 +272,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if we have a template for this combination
-    const fieldTemplates = (ASSET_GENERATION_TEMPLATES as any)[creativeField];
+    const fieldTemplates = (ASSET_GENERATION_TEMPLATES as Record<string, unknown>)[creativeField];
     if (!fieldTemplates) {
       return NextResponse.json({
         success: false,

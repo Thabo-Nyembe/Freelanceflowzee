@@ -865,7 +865,7 @@ export default function CloudStorageClient() {
           file_path: newFilePath,
           created_at: undefined,
           updated_at: undefined
-        } as any)
+        })
 
         toast.success('File Copied', { description: `Created copy of "${file.name}"` })
         refetch()

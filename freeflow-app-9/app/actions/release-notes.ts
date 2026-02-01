@@ -108,7 +108,7 @@ export async function deleteReleaseNote(id: string): Promise<ActionResult<{ succ
 }
 
 export async function publishReleaseNote(id: string): Promise<ActionResult<any>> {
-  return updateReleaseNote(id, { status: 'published', published_at: new Date().toISOString() } as any)
+  return updateReleaseNote(id, { status: 'published', published_at: new Date().toISOString() })
 }
 
 export async function archiveReleaseNote(id: string): Promise<ActionResult<any>> {

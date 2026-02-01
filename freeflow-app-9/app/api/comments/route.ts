@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const userId = (session.user as any).authId || session.user.id
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id
 
     // Single comment fetch with thread
     if (commentId) {
@@ -318,7 +318,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const userId = (session.user as any).authId || session.user.id
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id
     const body = await request.json()
     const { action = 'create' } = body
 
@@ -382,7 +382,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const userId = (session.user as any).authId || session.user.id
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id
     const body = await request.json()
     const { id, ...updates } = body
 
@@ -491,7 +491,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const userId = (session.user as any).authId || session.user.id
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id
     const { searchParams } = new URL(request.url)
     const commentId = searchParams.get('id')
     const permanent = searchParams.get('permanent') === 'true'

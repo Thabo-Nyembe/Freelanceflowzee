@@ -198,7 +198,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
         settings: {},
         preferences: {},
         metadata: { dueDate: newGoalForm.dueDate }
-      } as any)
+      })
       toast.success('OKR created successfully!')
       setShowNewGoalModal(false)
       setNewGoalForm({ objective: '', type: 'team', keyResults: ['', '', ''], dueDate: '' })

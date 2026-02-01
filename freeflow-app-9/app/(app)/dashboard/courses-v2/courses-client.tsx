@@ -523,7 +523,7 @@ export default function CoursesClient() {
         has_live_sessions: false,
         drm_enabled: false,
         watermark_enabled: false
-      } as any)
+      })
 
       toast.success('Course created successfully')
       setShowCreateCourseDialog(false)
@@ -599,7 +599,7 @@ export default function CoursesClient() {
         meta_title: courseForm.meta_title || undefined,
         meta_description: courseForm.meta_description || undefined,
         keywords: courseForm.keywords
-      } as any)
+      })
 
       toast.success('Course updated successfully')
       setShowEditCourseDialog(false)
@@ -618,7 +618,7 @@ export default function CoursesClient() {
 
     setIsSubmitting(true)
     try {
-      await deleteCourseMutation.mutateAsync({ id: courseToDelete.id } as any)
+      await deleteCourseMutation.mutateAsync({ id: courseToDelete.id })
 
       toast.success('Course deleted')
       setShowDeleteCourseDialog(false)
@@ -644,7 +644,7 @@ export default function CoursesClient() {
         status: 'published',
         is_published: true,
         publish_date: new Date().toISOString()
-      } as any)
+      })
 
       toast.success(`Course published: ${course.course_name || course.title || 'Course'} is now live`)
       refreshCourses()
@@ -662,7 +662,7 @@ export default function CoursesClient() {
         id: course.id,
         status: 'archived',
         is_published: false
-      } as any)
+      })
 
       toast.success(`Course archived: ${course.course_name || course.title || 'Course'} has been archived`)
       refreshCourses()

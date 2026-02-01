@@ -358,7 +358,7 @@ async function handleBulkAdd(body: any, userId: string): Promise<NextResponse> {
   const embeddingsService = getEmbeddingsService()
 
   const results = {
-    successful: [] as any[],
+    successful: [] as unknown[],
     failed: [] as Array<{ document: any; error: string }>
   }
 

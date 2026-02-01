@@ -919,7 +919,7 @@ export default function CertificationsClient() {
             </div>
 
             <div className="grid gap-4">
-              {([] as any[]).map(skill => (
+              {([] as unknown[]).map(skill => (
                 <Dialog key={skill.id}>
                   <DialogTrigger asChild>
                     <div
@@ -1063,7 +1063,7 @@ export default function CertificationsClient() {
           {/* Pathways Tab */}
           <TabsContent value="pathways" className="space-y-4">
             <div className="grid gap-4">
-              {([] as any[]).map(pathway => (
+              {([] as unknown[]).map(pathway => (
                 <div key={pathway.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
                   <div className="flex items-start gap-4">
                     <div className="text-4xl">{pathway.thumbnail}</div>
@@ -1241,7 +1241,7 @@ export default function CertificationsClient() {
               <h3 className="font-semibold mb-4 dark:text-white">📋 Verification History</h3>
               <ScrollArea className="h-64">
                 <div className="space-y-3">
-                  {([] as any[]).map(record => (
+                  {([] as unknown[]).map(record => (
                     <div key={record.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                       <div className="flex items-center gap-3">
                         <span className={`px-2 py-1 rounded text-xs ${getStatusColor(record.status)}`}>
@@ -1701,7 +1701,7 @@ export default function CertificationsClient() {
                                 <p>Generated: ${new Date().toLocaleDateString()}</p>
                                 <table>
                                   <tr><th>Name</th><th>Issuer</th><th>Status</th><th>Issue Date</th><th>Expiry</th></tr>
-                                  ${([] as any[]).map(c => `<tr><td>${c.name}</td><td>${c.issuer.name}</td><td class="status-${c.status}">${c.status}</td><td>${c.issueDate}</td><td>${c.expiryDate || 'N/A'}</td></tr>`).join('')}
+                                  ${([] as unknown[]).map(c => `<tr><td>${c.name}</td><td>${c.issuer.name}</td><td class="status-${c.status}">${c.status}</td><td>${c.issueDate}</td><td>${c.expiryDate || 'N/A'}</td></tr>`).join('')}
                                 </table>
                               </body>
                               </html>

@@ -71,7 +71,7 @@ export async function GET(
       }
 
       case 'framework': {
-        const data = await getFramework(id as any)
+        const data = await getFrameworkid
         if (!data) {
           return NextResponse.json({ error: 'Framework not found' }, { status: 404 })
         }

@@ -483,7 +483,7 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
         has_expiry: false,
         tax_rate: 0,
         is_taxable: true
-      } as any)
+      })
 
       toast.success('Product created successfully!')
       setShowProductDialog(false)

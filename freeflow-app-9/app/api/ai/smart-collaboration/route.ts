@@ -270,10 +270,10 @@ async function handleDocumentProcessing(req: NextRequest, ai: SmartCollaboration
     const file = files[0];
     validateDocumentSize(file);
     
-    documentId = (metadata as any).documentId || `doc-${Date.now()}`;
+    documentId = (metadata as Record<string, unknown>).documentId || `doc-${Date.now()}`;
     documentType = determineDocumentType(file);
     content = file;
-    options = (metadata as any).options || {};
+    options = (metadata as Record<string, unknown>).options || {};
   } else {
     // Handle JSON request
     const body = await req.json();
@@ -288,7 +288,7 @@ async function handleDocumentProcessing(req: NextRequest, ai: SmartCollaboration
     
     documentId = sanitizeInput(body.documentId);
     documentType = body.documentType ? 
-      (DocumentType as any)[body.documentType] || DocumentType.TEXT : 
+      (DocumentType as Record<string, unknown>)[body.documentType] || DocumentType.TEXT : 
       DocumentType.TEXT;
     content = body.content;
     options = body.options || {};
@@ -358,7 +358,7 @@ async function handleAISuggestions(req: NextRequest, ai: SmartCollaborationAI) {
   }
   
   // Sanitize inputs
-  const contextType = (CollaborationContextType as any)[body.contextType] || CollaborationContextType.PROJECT;
+  const contextType = (CollaborationContextType as Record<string, unknown>)[body.contextType] || CollaborationContextType.PROJECT;
   const contextId = sanitizeInput(body.contextId);
   const options = body.options || {};
   

@@ -420,7 +420,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     } else {
       const userEmail = session.user.email
       const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
-      userId = isDemoAccount ? DEMO_USER_ID : ((session.user as any).authId || session.user.id)
+      userId = isDemoAccount ? DEMO_USER_ID : ((session.user as { authId?: string; id: string }).authId || session.user.id)
       isDemo = isDemoAccount || demoMode
     }
 

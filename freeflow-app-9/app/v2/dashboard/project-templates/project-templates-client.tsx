@@ -308,7 +308,7 @@ export default function ProjectTemplatesClient() {
           return headers.reduce((obj, header, i) => {
             obj[header.trim()] = values[i]?.trim()
             return obj
-          }, {} as any)
+          }, {})
         })
       }
 
