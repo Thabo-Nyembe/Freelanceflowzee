@@ -393,7 +393,7 @@ export default function ProjectsPageMigrated() {
                 />
               </div>
               <div className="flex gap-2">
-                <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as string)}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="All Status" />
                   </SelectTrigger>

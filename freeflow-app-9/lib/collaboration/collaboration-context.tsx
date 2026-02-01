@@ -338,7 +338,7 @@ export function useSharedContent<T = any>(name: string, defaultValue?: T) {
     const newValue = updater(content)
 
     doc.transact(() => {
-      Object.entries(newValue as any).forEach(([key, value]) => {
+      Object.entries(newValue as Record<string, unknown>).forEach(([key, value]) => {
         sharedMap.set(key, value)
       })
     })

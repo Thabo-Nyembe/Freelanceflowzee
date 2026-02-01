@@ -234,7 +234,7 @@ export default function AIImageGenerator() {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as string)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${
                 activeTab === tab.id
                   ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/25'

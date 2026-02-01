@@ -678,7 +678,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       await createTask.mutateAsync({
         title,
         status: 'pending',
-        priority: priority as any,
+        priority: priority as string,
         labels,
         dueDate
       })

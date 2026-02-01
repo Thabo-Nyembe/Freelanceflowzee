@@ -93,7 +93,7 @@ export function useStudentGPA(studentId?: string) {
       let totalPoints = 0
       let totalCredits = 0
       grades.forEach(g => {
-        const credits = (g.courses as any)?.credits || 3
+        const credits = (g.courses as Record<string, unknown>)?.credits || 3
         const gradePoint = g.percentage >= 90 ? 4.0 : g.percentage >= 80 ? 3.0 : g.percentage >= 70 ? 2.0 : g.percentage >= 60 ? 1.0 : 0
         totalPoints += gradePoint * credits
         totalCredits += credits

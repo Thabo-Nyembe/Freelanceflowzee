@@ -70,7 +70,7 @@ export function useFeedbackRepliesRealtime(feedbackId?: string) {
     supabase.from('feedback_replies').select('*').eq('feedback_id', feedbackId).order('created_at', { ascending: true }).then(({ data }) => setReplies(data || []))
     const channel = supabase.channel(`feedback_replies_${feedbackId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'feedback_replies', filter: `feedback_id=eq.${feedbackId}` }, (payload) => setReplies(prev => [...prev, payload.new]))
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'feedback_replies', filter: `feedback_id=eq.${feedbackId}` }, (payload) => setReplies(prev => prev.filter(r => r.id !== (payload.old as any).id)))
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'feedback_replies', filter: `feedback_id=eq.${feedbackId}` }, (payload) => setReplies(prev => prev.filter(r => r.id !== (payload.old as Record<string, unknown>).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [feedbackId])

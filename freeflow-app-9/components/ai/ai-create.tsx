@@ -586,7 +586,7 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
   const downloadResult = () => {
     if (result) {
       exportContent({
-        format: exportFormat as any,
+        format: exportFormat as string,
         title: prompt.length > 50 ? prompt.substring(0, 50) : prompt,
         content: result,
         metadata: seoAnalysis ? {

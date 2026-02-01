@@ -414,7 +414,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
       await createTicket({
         subject: formData.subject,
         description: formData.description,
-        category: formData.category as any,
+        category: formData.category as string,
         priority: formData.priority === 'medium' ? 'normal' : formData.priority as any,
         customer_name: formData.customer_name,
         customer_email: formData.customer_email
@@ -834,7 +834,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                   ].map(view => (
                     <button
                       key={view.id}
-                      onClick={() => setActiveView(view.id as any)}
+                      onClick={() => setActiveView(view.id as string)}
                       className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-2 ${
                         activeView === view.id
                           ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400'

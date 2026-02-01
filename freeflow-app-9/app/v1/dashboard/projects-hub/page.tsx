@@ -633,7 +633,7 @@ export default function ProjectsOverviewPage() {
       // Update status in Supabase
       const { data: updatedProject, error: updateError } = await updateProjectStatus(
         projectId,
-        dbStatus as any
+        dbStatus as string
       )
 
       if (updateError || !updatedProject) {

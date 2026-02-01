@@ -2592,7 +2592,7 @@ export default function DeploymentsClient() {
               </div>
               <div>
                 <Label>Target Environment</Label>
-                <Select value={quickDeployEnvironment} onValueChange={(v) => setQuickDeployEnvironment(v as any)}>
+                <Select value={quickDeployEnvironment} onValueChange={(v) => setQuickDeployEnvironment(v as string)}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
@@ -3874,7 +3874,7 @@ export default function DeploymentsClient() {
               </div>
               <div>
                 <Label>Protection Type</Label>
-                <Select value={newRuleForm.type} onValueChange={(v) => setNewRuleForm(prev => ({ ...prev, type: v as any }))}>
+                <Select value={newRuleForm.type} onValueChange={(v) => setNewRuleForm(prev => ({ ...prev, type: v as string }))}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="password">Password Protection</SelectItem>

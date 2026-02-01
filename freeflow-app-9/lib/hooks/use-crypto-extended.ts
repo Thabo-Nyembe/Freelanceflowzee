@@ -157,7 +157,7 @@ export function useCryptoTransactionsRealtime(walletId?: string) {
     supabase.from('crypto_transactions').select('*').eq('wallet_id', walletId).order('created_at', { ascending: false }).limit(50).then(({ data }) => setTransactions(data || []))
     const channel = supabase.channel(`crypto_tx_${walletId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'crypto_transactions', filter: `wallet_id=eq.${walletId}` }, (payload) => setTransactions(prev => [payload.new, ...prev].slice(0, 50)))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'crypto_transactions', filter: `wallet_id=eq.${walletId}` }, (payload) => setTransactions(prev => prev.map(tx => tx.id === (payload.new as any).id ? payload.new : tx)))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'crypto_transactions', filter: `wallet_id=eq.${walletId}` }, (payload) => setTransactions(prev => prev.map(tx => tx.id === (payload.new as Record<string, unknown>).id ? payload.new : tx)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [walletId])

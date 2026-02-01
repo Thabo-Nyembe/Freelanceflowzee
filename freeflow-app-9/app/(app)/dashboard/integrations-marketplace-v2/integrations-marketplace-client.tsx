@@ -718,7 +718,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <div className="flex items-center gap-3">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value)}
                 className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
               >
                 <option value="popular">Most Popular</option>

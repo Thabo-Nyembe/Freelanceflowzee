@@ -1569,7 +1569,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                             </div>
                             <Button variant="ghost" size="sm" onClick={(e) => {
                               e.stopPropagation()
-                              setSelectedTestCaseForOptions(test as any)
+                              setSelectedTestCaseForOptions(test as string)
                               setShowTestCaseOptionsDialog(true)
                             }}>
                               <MoreHorizontal className="w-4 h-4" />

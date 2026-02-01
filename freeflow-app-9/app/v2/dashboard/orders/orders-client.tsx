@@ -682,7 +682,7 @@ export default function OrdersClient() {
 
   // Database integration
   const { data: dbOrders, loading: ordersLoading, refetch } = useOrders({
-    status: statusFilter === 'all' ? undefined : statusFilter as any,
+    status: statusFilter === 'all' ? undefined : statusFilter as string,
     searchQuery: searchQuery || undefined
   })
 

@@ -1688,7 +1688,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                         </CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">{playbook.description}</p>
                       </div>
-                      <Badge className={getTypeColor(playbook.type as any)}>{playbook.type}</Badge>
+                      <Badge className={getTypeColor(playbook.type as string)}>{playbook.type}</Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -2824,7 +2824,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                       <h4 className="font-semibold">{playbook.name}</h4>
                       <p className="text-sm text-muted-foreground mt-1">{playbook.description}</p>
                     </div>
-                    <Badge className={getTypeColor(playbook.type as any)}>{playbook.type}</Badge>
+                    <Badge className={getTypeColor(playbook.type as string)}>{playbook.type}</Badge>
                   </div>
                   <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">

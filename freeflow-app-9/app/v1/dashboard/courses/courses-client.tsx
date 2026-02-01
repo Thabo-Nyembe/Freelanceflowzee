@@ -911,7 +911,7 @@ export default function CoursesClient() {
         </div>
 
         {/* Main Tabs */}
-        <Tabs value={activeView} onValueChange={(v) => setActiveView(v as any)} className="space-y-6">
+        <Tabs value={activeView} onValueChange={(v) => setActiveView(v as string)} className="space-y-6">
           <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-lg shadow-sm border dark:border-gray-700">
             <TabsTrigger value="courses" className="data-[state=active]:bg-indigo-100 dark:data-[state=active]:bg-indigo-900/30">
               📚 Courses
@@ -2682,7 +2682,7 @@ export default function CoursesClient() {
                 <Label htmlFor="lecture_type">Type</Label>
                 <Select
                   value={lectureForm.type}
-                  onValueChange={(value) => setLectureForm({ ...lectureForm, type: value as any })}
+                  onValueChange={(value) => setLectureForm({ ...lectureForm, type: value as string })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />

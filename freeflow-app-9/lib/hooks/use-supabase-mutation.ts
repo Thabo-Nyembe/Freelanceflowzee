@@ -69,7 +69,7 @@ export function useSupabaseMutation({
 
     // Try authId from NextAuth session (set by auth.config.ts from profiles table)
     // This is the auth.users-compatible ID for Supabase FK constraints
-    const authId = (session?.user as any)?.authId
+    const authId = (session?.user as { authId?: string })?.authId
     if (authId) {
       return authId
     }
@@ -100,7 +100,7 @@ export function useSupabaseMutation({
           // Track realtime updates
           setLastMutation({
             type: payload.eventType,
-            id: (payload.new as any)?.id || (payload.old as any)?.id,
+            id: (payload.new as Record<string, unknown>)?.id || (payload.old as Record<string, unknown>)?.id,
             timestamp: Date.now()
           })
 

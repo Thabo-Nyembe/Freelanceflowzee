@@ -450,7 +450,7 @@ export default function TimeTrackingClient() {
     name: p.name,
     client: p.client_id || 'No Client',
     color: p.color || '#3b82f6',
-    status: p.status as any,
+    status: p.status as string,
     billable: true,
     hourlyRate: 150,
     budget: p.budget || 0,
@@ -477,7 +477,7 @@ export default function TimeTrackingClient() {
     project: inv.title || '',
     amount: inv.total_amount || 0,
     hours: 0,
-    status: inv.status as any,
+    status: inv.status as string,
     dueDate: inv.due_date,
     createdAt: inv.created_at
   })), [dbInvoices])
@@ -492,7 +492,7 @@ export default function TimeTrackingClient() {
     projects: c.projects_count || 0,
     totalBilled: c.total_revenue || 0,
     outstandingBalance: 0,
-    status: c.status as any,
+    status: c.status as string,
     createdAt: c.created_at,
     color: '#3b82f6'
   })), [dbClients])
@@ -516,7 +516,7 @@ export default function TimeTrackingClient() {
     endTime: e.end_time,
     durationSeconds: e.duration_seconds || 0,
     durationHours: e.duration_hours || 0,
-    status: e.status as any,
+    status: e.status as string,
     isBillable: e.is_billable,
     billableAmount: e.billable_amount || 0,
     hourlyRate: e.hourly_rate || 0,
@@ -1344,7 +1344,7 @@ export default function TimeTrackingClient() {
                   key={idx}
                   variant="ghost"
                   onClick={action.onClick}
-                  disabled={(action as any).disabled}
+                  disabled={(action as Record<string, unknown>).disabled}
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="w-5 h-5" />

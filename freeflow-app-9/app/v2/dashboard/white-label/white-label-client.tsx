@@ -920,7 +920,7 @@ export default function WhiteLabelClient() {
                       onChange={(e) =>
                         setConfig({
                           ...config,
-                          typography: { ...config.typography, fontFamily: e.target.value as any }
+                          typography: { ...config.typography, fontFamily: e.target.value }
                         })
                       }
                       className="w-full px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -940,7 +940,7 @@ export default function WhiteLabelClient() {
                       onChange={(e) =>
                         setConfig({
                           ...config,
-                          typography: { ...config.typography, headingFontFamily: e.target.value as any }
+                          typography: { ...config.typography, headingFontFamily: e.target.value }
                         })
                       }
                       className="w-full px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"

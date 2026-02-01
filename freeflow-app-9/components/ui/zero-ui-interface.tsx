@@ -69,7 +69,7 @@ export function VoiceCommandInterface({
 
   React.useEffect(() => {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      const recognition = new (window as any).webkitSpeechRecognition()
+      const recognition = new (window as Record<string, unknown>).webkitSpeechRecognition()
       recognition.continuous = true
       recognition.interimResults = true
       recognition.lang = 'en-US'
@@ -560,7 +560,7 @@ export function BrainComputerInterface({
 
       if (pattern) {
         onBrainWave?.({
-          pattern: pattern as any,
+          pattern: pattern as string,
           intensity: attention / 100,
           duration: 1000
         })

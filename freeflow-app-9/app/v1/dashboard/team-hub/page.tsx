@@ -320,7 +320,7 @@ export default function TeamHubPage() {
         name: memberName,
         email: memberEmail,
         role: memberRole,
-        department: memberDept as any,
+        department: memberDept as string,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${memberName}`,
         timezone: 'UTC'
       })

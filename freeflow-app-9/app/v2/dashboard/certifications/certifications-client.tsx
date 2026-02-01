@@ -1171,7 +1171,7 @@ export default function CertificationsClient() {
         </div>
 
         {/* Main Tabs */}
-        <Tabs value={activeView} onValueChange={(v) => setActiveView(v as any)} className="space-y-6">
+        <Tabs value={activeView} onValueChange={(v) => setActiveView(v as string)} className="space-y-6">
           <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-lg shadow-sm border dark:border-gray-700">
             <TabsTrigger value="credentials" className="data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30">
               🏆 Credentials
@@ -2587,7 +2587,7 @@ export default function CertificationsClient() {
               <Label>Verification Method</Label>
               <Select
                 value={verifyBadgeForm.verificationMethod}
-                onValueChange={(v) => setVerifyBadgeForm({ ...verifyBadgeForm, verificationMethod: v as any })}
+                onValueChange={(v) => setVerifyBadgeForm({ ...verifyBadgeForm, verificationMethod: v as string })}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -2677,7 +2677,7 @@ export default function CertificationsClient() {
               <Label>Report Type</Label>
               <Select
                 value={exportReportForm.reportType}
-                onValueChange={(v) => setExportReportForm({ ...exportReportForm, reportType: v as any })}
+                onValueChange={(v) => setExportReportForm({ ...exportReportForm, reportType: v as string })}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -2692,7 +2692,7 @@ export default function CertificationsClient() {
               <Label>Export Format</Label>
               <Select
                 value={exportReportForm.format}
-                onValueChange={(v) => setExportReportForm({ ...exportReportForm, format: v as any })}
+                onValueChange={(v) => setExportReportForm({ ...exportReportForm, format: v as string })}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -2707,7 +2707,7 @@ export default function CertificationsClient() {
               <Label>Date Range</Label>
               <Select
                 value={exportReportForm.dateRange}
-                onValueChange={(v) => setExportReportForm({ ...exportReportForm, dateRange: v as any })}
+                onValueChange={(v) => setExportReportForm({ ...exportReportForm, dateRange: v as string })}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>

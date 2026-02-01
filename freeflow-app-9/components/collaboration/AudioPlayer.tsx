@@ -65,7 +65,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, onAddComment }) => 
     return () => {
       if (wavesurferRef.current) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (wavesurferRef.current as any).destroy();
+        (wavesurferRef.current as Record<string, unknown>).destroy();
       }
     };
   }, [audioUrl]);

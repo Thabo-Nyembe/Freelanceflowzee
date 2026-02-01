@@ -213,7 +213,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string
         session.user.image = token.picture as string
         // authId is the auth.users ID for Supabase FK constraints
-        ;(session.user as any).authId = token.authId as string
+        ;(session.user as Record<string, unknown>).authId = token.authId as string
       }
 
       return session

@@ -157,9 +157,9 @@ export function RenderingQueue() {
   // Expose addJob function to parent components
   React.useEffect(() => {
     // Store in window for access from other components
-    (window as any).addRenderJob = addJob
+    (window as Record<string, unknown>).addRenderJob = addJob
     return () => {
-      delete (window as any).addRenderJob
+      delete (window as Record<string, unknown>).addRenderJob
     }
   }, [])
 

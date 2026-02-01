@@ -717,7 +717,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             </TabsList>
 
             <div className="flex items-center gap-3">
-              <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value as any)} className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
+              <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)} className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
                 <option value="all">All Levels</option>
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>

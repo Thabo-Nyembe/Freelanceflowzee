@@ -93,7 +93,7 @@ export function OAuthProviders() {
       setLoading(provider)
 
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: provider as any,
+        provider: provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
           queryParams: {
@@ -219,7 +219,7 @@ export function OAuthProvidersWithLabels() {
       setLoading(provider)
 
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: provider as any,
+        provider: provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },

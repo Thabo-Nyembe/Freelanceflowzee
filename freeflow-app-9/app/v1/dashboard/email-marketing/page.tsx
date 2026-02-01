@@ -325,7 +325,7 @@ export default function EmailMarketingPage() {
         const { createEmailAutomation } = await import('@/lib/email-marketing-queries')
         const { data, error } = await createEmailAutomation(userId, {
           name: automationForm.name,
-          trigger: automationForm.trigger as any,
+          trigger: automationForm.trigger as string,
           trigger_label: triggerLabels[automationForm.trigger] || automationForm.trigger,
           status: 'active',
           delay_hours: parseInt(automationForm.delay) || 1,
@@ -365,7 +365,7 @@ export default function EmailMarketingPage() {
       // Update in database
       if (userId) {
         const { toggleAutomationStatus } = await import('@/lib/email-marketing-queries')
-        const { error } = await toggleAutomationStatus(String(id), newStatus as any)
+        const { error } = await toggleAutomationStatus(String(id), newStatus as string)
         if (error) throw error      }
 
       setAutomations(prev => prev.map(a =>

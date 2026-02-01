@@ -102,7 +102,7 @@ export function useProjects(initialProjects: Project[] = []) {
     }
 
     // Try authId from NextAuth session (set from profiles table)
-    const authId = (session?.user as any)?.authId
+    const authId = (session?.user as { authId?: string })?.authId
     if (authId) return authId
 
     // Fallback to session user.id
@@ -224,7 +224,7 @@ export function useProjects(initialProjects: Project[] = []) {
       console.error('Project creation failed:', err)
       // Expose the specific error for debugging
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
-      const errorDetails = (err as any)?.details || (err as any)?.hint || ''
+      const errorDetails = (err as Record<string, unknown>)?.details || (err as Record<string, unknown>)?.hint || ''
       toast.error(`Failed to create project: ${errorMessage} ${errorDetails ? `(${errorDetails})` : ''}`)
       throw err
     }
@@ -308,7 +308,7 @@ export function useProjects(initialProjects: Project[] = []) {
 
   const archiveProject = async (id: string) => {
     try {
-      const result = await updateProject(id, { archived_at: new Date().toISOString() } as any)
+      const result = await updateProject(id, { archived_at: new Date().toISOString() })
       toast.success('Project archived')
       return result
     } catch (err) {
@@ -385,7 +385,7 @@ export function useProjectTasks(projectId: string, initialTasks: ProjectTask[] =
   const getUserId = useCallback(async (): Promise<string | null> => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user?.id) return user.id
-    const authId = (session?.user as any)?.authId
+    const authId = (session?.user as { authId?: string })?.authId
     if (authId) return authId
     if (session?.user?.id) return session.user.id
     return null

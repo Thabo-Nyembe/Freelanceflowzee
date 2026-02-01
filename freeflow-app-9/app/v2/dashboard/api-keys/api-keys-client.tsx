@@ -988,8 +988,8 @@ export default function ApiKeysClient() {
     try {
       const result = await createKey({
         name: newKeyName || 'New API Key',
-        key_type: newKeyType as any,
-        environment: newKeyEnvironment as any,
+        key_type: newKeyType as string,
+        environment: newKeyEnvironment as string,
         scopes: newKeyScopes,
         expires_at: expiryDays ? new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString() : undefined
       })

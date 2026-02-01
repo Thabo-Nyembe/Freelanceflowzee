@@ -990,7 +990,7 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
           invoiceId: invoice.id,
           amount: invoice.amount_due || invoice.total,
           customerId: invoice.customer_id,
-          stripeInvoiceId: (invoice as any).stripe_invoice_id,
+          stripeInvoiceId: (invoice as Record<string, unknown>).stripe_invoice_id,
         }),
       })
 
@@ -1108,7 +1108,7 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
     try {
       await updateInvoice(invoice.id, {
         last_reminder_sent: new Date().toISOString(),
-        reminder_count: (invoice as any).reminder_count ? (invoice as any).reminder_count + 1 : 1
+        reminder_count: (invoice as Record<string, unknown>).reminder_count ? (invoice as Record<string, unknown>).reminder_count + 1 : 1
       })
       toast.success('Reminder sent', {
         description: `Payment reminder sent to ${invoice.customer_email}`
@@ -1723,7 +1723,7 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
           <TabsContent value="subscriptions" className="space-y-6">
             <div className="flex items-center gap-4 mb-4">
               {['all', 'active', 'trialing', 'past_due', 'canceled'].map(filter => (
-                <Button key={filter} variant={statusFilter === filter ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(filter as any)}>
+                <Button key={filter} variant={statusFilter === filter ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(filter as string)}>
                   {filter.charAt(0).toUpperCase() + filter.slice(1).replace('_', ' ')}
                 </Button>
               ))}

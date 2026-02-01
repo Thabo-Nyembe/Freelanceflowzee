@@ -862,7 +862,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                 </div>
                 <select
                   value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value as any)}
+                  onChange={(e) => setTypeFilter(e.target.value)}
                   className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
                 >
                   <option value="all">All Types</option>
@@ -872,7 +872,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                 </select>
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                   className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
                 >
                   <option value="all">All Status</option>

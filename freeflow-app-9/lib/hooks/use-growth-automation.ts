@@ -80,10 +80,10 @@ export function useGrowthAutomation(): UseGrowthAutomationReturn {
             setOpportunities(prev => [payload.new as MarketOpportunity, ...prev])
           } else if (payload.eventType === 'UPDATE') {
             setOpportunities(prev => prev.map(o =>
-              (o as any).id === (payload.new as any).id ? payload.new as MarketOpportunity : o
+              (o as Record<string, unknown>).id === (payload.new as Record<string, unknown>).id ? payload.new as MarketOpportunity : o
             ))
           } else if (payload.eventType === 'DELETE') {
-            setOpportunities(prev => prev.filter(o => (o as any).id !== (payload.old as any).id))
+            setOpportunities(prev => prev.filter(o => (o as Record<string, unknown>).id !== (payload.old as Record<string, unknown>).id))
           }
         }
       )

@@ -208,7 +208,7 @@ export const getVideoAnalytics = async (options: {
     if (options.assetId) filters.push(`asset_id:${options.assetId}` as any);
     if (options.playbackId) filters.push(`playback_id:${options.playbackId}` as any);
 
-    const analytics = await (mux.data.metrics as any).get('video_view', {
+    const analytics = await (mux.data.metrics as Record<string, unknown>).get('video_view', {
       timeframe: options.timeframe,
       filters,
       group_by: options.groupBy,

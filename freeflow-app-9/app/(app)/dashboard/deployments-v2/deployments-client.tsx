@@ -455,7 +455,7 @@ export default function DeploymentsClient() {
         commit_hash: deploymentForm.commit_hash || undefined,
         commit_message: deploymentForm.commit_message || undefined,
         commit_author: deploymentForm.commit_author || undefined,
-        deploy_type: deploymentForm.deploy_type as any || 'full',
+        deploy_type: deploymentForm.deploy_type as string || 'full',
         notes: deploymentForm.notes || undefined,
       })
 

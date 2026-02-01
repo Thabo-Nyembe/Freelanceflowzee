@@ -572,7 +572,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         company: newClientForm.company,
         website: newClientForm.website || undefined,
         industry: newClientForm.industry,
-        status: newClientForm.status === 'prospect' ? 'lead' : newClientForm.status as any
+        status: newClientForm.status === 'prospect' ? 'lead' : newClientForm.status as string
       })
       setShowAddDialog(false)
       setNewClientForm({
@@ -2743,7 +2743,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
-                  {(selectedClient as any).isFromDatabase && (
+                  {(selectedClient as Record<string, unknown>).isFromDatabase && (
                     <Button
                       variant="outline"
                       className="text-red-600 hover:bg-red-50"
@@ -2796,7 +2796,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   <select
                     className="w-full mt-1 p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
                     value={newClientForm.status}
-                    onChange={(e) => setNewClientForm(prev => ({ ...prev, status: e.target.value as any }))}
+                    onChange={(e) => setNewClientForm(prev => ({ ...prev, status: e.target.value }))}
                   >
                     <option value="active">Active</option>
                     <option value="prospect">Prospect</option>
@@ -2913,7 +2913,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   <select
                     className="w-full mt-1 p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
                     value={editClientForm.status}
-                    onChange={(e) => setEditClientForm(prev => ({ ...prev, status: e.target.value as any }))}
+                    onChange={(e) => setEditClientForm(prev => ({ ...prev, status: e.target.value }))}
                   >
                     <option value="active">Active</option>
                     <option value="prospect">Prospect</option>
@@ -3036,7 +3036,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
             <div className="space-y-4">
               <div>
                 <Label>Activity Type</Label>
-                <Select value={activityForm.type} onValueChange={(value) => setActivityForm(prev => ({ ...prev, type: value as any }))}>
+                <Select value={activityForm.type} onValueChange={(value) => setActivityForm(prev => ({ ...prev, type: value as string }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="call">Phone Call</SelectItem>
@@ -3226,7 +3226,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               </div>
               <div>
                 <Label>Field Type</Label>
-                <Select value={customFieldForm.type} onValueChange={(value) => setCustomFieldForm(prev => ({ ...prev, type: value as any }))}>
+                <Select value={customFieldForm.type} onValueChange={(value) => setCustomFieldForm(prev => ({ ...prev, type: value as string }))}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="text">Text</SelectItem>

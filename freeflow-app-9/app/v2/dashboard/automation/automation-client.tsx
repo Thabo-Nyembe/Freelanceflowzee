@@ -672,7 +672,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                       className="pl-10"
                     />
                   </div>
-                  <Select value={automationTypeFilter} onValueChange={(v) => setAutomationTypeFilter(v as any)}>
+                  <Select value={automationTypeFilter} onValueChange={(v) => setAutomationTypeFilter(v as string)}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Type" />
                     </SelectTrigger>
@@ -684,7 +684,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                       <SelectItem value="event">Event-driven</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                  <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as string)}>
                     <SelectTrigger className="w-[150px]">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>

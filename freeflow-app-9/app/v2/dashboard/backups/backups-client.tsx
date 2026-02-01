@@ -692,7 +692,7 @@ export default function BackupsClient() {
     try {
       await createBackup({
         name: backupData.name,
-        type: backupData.type as any,
+        type: backupData.type as string,
         description: backupData.description || null,
         status: 'scheduled',
         frequency: 'daily',

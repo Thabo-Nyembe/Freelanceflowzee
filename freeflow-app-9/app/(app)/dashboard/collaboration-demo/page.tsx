@@ -165,10 +165,10 @@ Try moving your cursor around to see it synchronized across all connected users!
       }
     }
 
-    window.addEventListener('collaboration-state-update' as any, handleStateUpdate)
+    window.addEventListener('collaboration-state-update', handleStateUpdate)
 
     return () => {
-      window.removeEventListener('collaboration-state-update' as any, handleStateUpdate)
+      window.removeEventListener('collaboration-state-update', handleStateUpdate)
     }
   }, [])
 
@@ -398,7 +398,7 @@ Try moving your cursor around to see it synchronized across all connected users!
         <div className="flex-1 overflow-y-auto p-6">
           <div className="max-w-5xl mx-auto space-y-6">
             {/* Mode selector */}
-            <Tabs value={activeMode} onValueChange={(v) => setActiveMode(v as any)}>
+            <Tabs value={activeMode} onValueChange={(v) => setActiveMode(v as string)}>
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="document">
                   <Pencil className="w-4 h-4 mr-2" />

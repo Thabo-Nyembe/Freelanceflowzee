@@ -2135,7 +2135,7 @@ export default function ReportsClient() {
                           ? 'bg-purple-50 border-purple-300 dark:bg-purple-900/20 dark:border-purple-700'
                           : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                       }`}
-                      onClick={() => setNewReportType(item.type as any)}
+                      onClick={() => setNewReportType(item.type as string)}
                     >
                       <item.icon className={`h-8 w-8 text-${item.color}-600 mb-2`} />
                       <h4 className="font-medium">{item.label}</h4>

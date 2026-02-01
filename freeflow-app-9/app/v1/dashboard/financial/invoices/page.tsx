@@ -669,7 +669,7 @@ KAZI Team
             </div>
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={(e) => setFilterStatus(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md"
             >
               <option value="all">All Status</option>
@@ -951,7 +951,7 @@ KAZI Team
                 <select
                   id="status"
                   value={formData.status}
-                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
                   className="col-span-3 px-3 py-2 border border-gray-300 rounded-md"
                   required
                 >

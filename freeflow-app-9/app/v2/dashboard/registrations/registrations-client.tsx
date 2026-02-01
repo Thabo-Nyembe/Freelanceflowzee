@@ -2492,11 +2492,11 @@ export default function RegistrationsClient() {
                           company: selectedRegistration.attendee.company || '',
                           job_title: selectedRegistration.attendee.jobTitle || '',
                           event_id: selectedRegistration.event.id,
-                          registration_type: selectedRegistration.event.type as any || 'event',
-                          ticket_type: selectedRegistration.ticketType as any || 'paid',
+                          registration_type: selectedRegistration.event.type as string || 'event',
+                          ticket_type: selectedRegistration.ticketType as string || 'paid',
                           ticket_price: selectedRegistration.ticketPrice,
-                          status: selectedRegistration.status as any || 'pending',
-                          payment_status: selectedRegistration.paymentStatus as any || 'pending'
+                          status: selectedRegistration.status as string || 'pending',
+                          payment_status: selectedRegistration.paymentStatus as string || 'pending'
                         })
                         setShowEditDialog(true)
                       }

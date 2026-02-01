@@ -103,7 +103,7 @@ export function useMessageReactions(messageIds: string[]) {
           schema: 'public',
           table: 'message_reactions',
           filter
-        } as any,
+        },
         (payload) => {
           logger.debug('Reaction event received', {
             event: payload.eventType,
@@ -255,7 +255,7 @@ export function useReadReceipts(messageIds: string[]) {
           event: 'INSERT',
           schema: 'public',
           table: 'message_read_receipts'
-        } as any,
+        },
         (payload) => {
           const receipt = payload.new as MessageReadReceipt
 

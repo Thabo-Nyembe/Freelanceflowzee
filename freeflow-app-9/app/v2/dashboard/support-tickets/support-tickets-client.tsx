@@ -506,7 +506,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                     />
                   </div>
                   <div className="flex gap-2">
-                    <Select value={priorityFilter} onValueChange={(val) => setPriorityFilter(val as any)}>
+                    <Select value={priorityFilter} onValueChange={(val) => setPriorityFilter(val as string)}>
                       <SelectTrigger className="w-[100px] h-8 text-xs">
                         <SelectValue placeholder="Priority" />
                       </SelectTrigger>
@@ -543,7 +543,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                   ].map(view => (
                     <button
                       key={view.id}
-                      onClick={() => setActiveView(view.id as any)}
+                      onClick={() => setActiveView(view.id as string)}
                       className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-2 ${activeView === view.id
                         ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400'
                         : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'

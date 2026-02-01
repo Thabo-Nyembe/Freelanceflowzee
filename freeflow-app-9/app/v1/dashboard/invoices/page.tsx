@@ -126,7 +126,7 @@ export default function InvoicesPageMigrated() {
   const { data: invoicesData, isLoading, error, refetch } = useInvoices(
     page,
     10,
-    statusFilter !== 'all' ? { status: [statusFilter as any] } : undefined
+    statusFilter !== 'all' ? { status: [statusFilter] } : undefined
   )
   const { data: stats } = useInvoiceStats()
 
@@ -261,7 +261,7 @@ export default function InvoicesPageMigrated() {
 
     markAsPaid.mutate({
       id: selectedInvoice.id,
-      payment_method: paymentMethod as any,
+      payment_method: paymentMethod as string,
       amount_paid: selectedInvoice.total
     }, {
       onSuccess: () => {

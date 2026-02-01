@@ -27,12 +27,12 @@ export function PWAInstallPrompt() {
   useEffect(() => {
     // Check if running in standalone mode
     const standalone = window.matchMedia('(display-mode: standalone)').matches ||
-                      (window.navigator as any).standalone === true
+                      (window.navigator as Record<string, unknown>).standalone === true
     setIsStandalone(standalone)
     if (standalone) return
 
     // Check if iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Record<string, unknown>).MSStream
     setIsIOS(iOS)
 
     // Check if user previously dismissed

@@ -1053,7 +1053,7 @@ export default function ClientPortalPage() {
 
                   <Select
                     value={state.filterStatus}
-                    onValueChange={(value) => dispatch({ type: 'SET_FILTER_STATUS', filterStatus: value as any })}
+                    onValueChange={(value) => dispatch({ type: 'SET_FILTER_STATUS', filterStatus: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Status" />
@@ -1069,7 +1069,7 @@ export default function ClientPortalPage() {
 
                   <Select
                     value={state.filterTier}
-                    onValueChange={(value) => dispatch({ type: 'SET_FILTER_TIER', filterTier: value as any })}
+                    onValueChange={(value) => dispatch({ type: 'SET_FILTER_TIER', filterTier: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Tier" />
@@ -1085,7 +1085,7 @@ export default function ClientPortalPage() {
 
                   <Select
                     value={state.sortBy}
-                    onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value as any })}
+                    onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Sort" />

@@ -400,7 +400,7 @@ export default function EmployeesClient() {
         position: editEmployeeForm.position || null,
         job_title: editEmployeeForm.position || null,
         phone: editEmployeeForm.phone || null,
-        status: editEmployeeForm.status as any
+        status: editEmployeeForm.status as string
       }, employeeToEdit.id)
       setShowEditDialog(false)
       setEmployeeToEdit(null)

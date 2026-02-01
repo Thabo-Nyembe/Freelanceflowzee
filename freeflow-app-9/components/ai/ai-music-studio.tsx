@@ -140,7 +140,7 @@ export default function AIMusicStudio() {
     if (!ctx) return
 
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+      audioContextRef.current = new (window.AudioContext || (window as Record<string, unknown>).webkitAudioContext)()
       analyserRef.current = audioContextRef.current.createAnalyser()
       const source = audioContextRef.current.createMediaElementSource(audio)
       source.connect(analyserRef.current)
@@ -475,7 +475,7 @@ export default function AIMusicStudio() {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as string)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${
                 activeTab === tab.id
                   ? 'bg-rose-600 text-white shadow-lg shadow-rose-500/25'

@@ -455,7 +455,7 @@ export default function BrowserExtensionPage() {
       if (userId) {
         const { createInstallation } = await import('@/lib/browser-extension-queries')
         const { data, error } = await createInstallation(userId, {
-          browser: state.currentBrowser as any,
+          browser: state.currentBrowser as string,
           browser_version: navigator.userAgent.match(/Chrome\/(\d+)/)?.[1] || '120',
           extension_version: '1.0.0',
           status: 'active',
@@ -919,7 +919,7 @@ export default function BrowserExtensionPage() {
                     value={state.sortBy}
                     onValueChange={(value) => {
                       logger.debug('Sort changed', { sortBy: value })
-                      dispatch({ type: 'SET_SORT', sortBy: value as any })
+                      dispatch({ type: 'SET_SORT', sortBy: value })
                     }}
                   >
                     <SelectTrigger className="w-[180px] bg-slate-900/50 border-gray-700">

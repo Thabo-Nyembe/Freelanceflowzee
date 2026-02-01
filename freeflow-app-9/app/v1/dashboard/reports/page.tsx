@@ -1685,7 +1685,7 @@ export default function ReportsPage() {
               {/* Type Filter */}
               <Select
                 value={state.filterType}
-                onValueChange={(value) => dispatch({ type: 'SET_FILTER_TYPE', filterType: value as any })}
+                onValueChange={(value) => dispatch({ type: 'SET_FILTER_TYPE', filterType: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Type" />
@@ -1703,7 +1703,7 @@ export default function ReportsPage() {
               {/* Status Filter */}
               <Select
                 value={state.filterStatus}
-                onValueChange={(value) => dispatch({ type: 'SET_FILTER_STATUS', filterStatus: value as any })}
+                onValueChange={(value) => dispatch({ type: 'SET_FILTER_STATUS', filterStatus: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Status" />
@@ -1721,7 +1721,7 @@ export default function ReportsPage() {
               {/* Sort */}
               <Select
                 value={state.sortBy}
-                onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value as any })}
+                onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sort" />

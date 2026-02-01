@@ -123,7 +123,7 @@ export function useAutomationRunsRealtime(automationId?: string) {
     supabase.from('automation_runs').select('*').eq('automation_id', automationId).order('started_at', { ascending: false }).limit(20).then(({ data }) => setRuns(data || []))
     const channel = supabase.channel(`automation_runs_${automationId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'automation_runs', filter: `automation_id=eq.${automationId}` }, (payload) => setRuns(prev => [payload.new, ...prev].slice(0, 20)))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'automation_runs', filter: `automation_id=eq.${automationId}` }, (payload) => setRuns(prev => prev.map(r => r.id === (payload.new as any).id ? payload.new : r)))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'automation_runs', filter: `automation_id=eq.${automationId}` }, (payload) => setRuns(prev => prev.map(r => r.id === (payload.new as Record<string, unknown>).id ? payload.new : r)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [automationId])

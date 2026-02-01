@@ -884,7 +884,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
         <select
           data-testid="sort-by-select"
           value={sortBy}
-          onChange={(e) => handleSortChange(e.target.value as any)}
+          onChange={(e) => handleSortChange(e.target.value)}
           className="px-3 py-2 border rounded-md"
         >
           <option value="date">Sort by Date</option>

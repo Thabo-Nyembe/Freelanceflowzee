@@ -321,7 +321,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     { id: '3', label: 'Create Folder', icon: 'folder', action: () => handleCreateDocument('folder'), variant: 'outline' as const },
   ]
 
-  const { data: hookDocuments, isLoading: hookLoading, error: hookError, refetch } = useDocuments({ status: statusFilter as any, type: typeFilter as any })
+  const { data: hookDocuments, isLoading: hookLoading, error: hookError, refetch } = useDocuments({ status: statusFilter as string, type: typeFilter as string })
   const {
     createDocument,
     updateDocument,
@@ -609,7 +609,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
         ownerName: doc.owner || doc.created_by || 'Unknown',
         ownerAvatar: undefined,
         status: statusMap[doc.status] || 'draft',
-        starred: (doc as any).starred || false,
+        starred: (doc as Record<string, unknown>).starred || false,
         shared: (doc.shared_with && doc.shared_with.length > 0) || doc.access_level === 'public',
         sharingType: sharingMap[doc.access_level] || 'private',
         permissions: doc.permissions ? (Array.isArray(doc.permissions) ? doc.permissions : []) : [],
@@ -1790,7 +1790,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 <div className="flex items-center gap-3">
                   <select
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as any)}
+                    onChange={(e) => setStatusFilter(e.target.value)}
                     className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
                   >
                     <option value="all">All Status</option>
@@ -1801,7 +1801,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   </select>
                   <select
                     value={typeFilter}
-                    onChange={(e) => setTypeFilter(e.target.value as any)}
+                    onChange={(e) => setTypeFilter(e.target.value)}
                     className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
                   >
                     <option value="all">All Types</option>

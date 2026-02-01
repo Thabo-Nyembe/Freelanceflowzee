@@ -1068,7 +1068,7 @@ export default function MlInsightsClient() {
             {/* Filters */}
             <select
               value={state.filterType}
-              onChange={(e) => dispatch({ type: 'SET_FILTER_TYPE', filterType: e.target.value as any })}
+              onChange={(e) => dispatch({ type: 'SET_FILTER_TYPE', filterType: e.target.value })}
               className="w-[180px] px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="all">All Types</option>
@@ -1082,7 +1082,7 @@ export default function MlInsightsClient() {
 
             <select
               value={state.filterCategory}
-              onChange={(e) => dispatch({ type: 'SET_FILTER_CATEGORY', filterCategory: e.target.value as any })}
+              onChange={(e) => dispatch({ type: 'SET_FILTER_CATEGORY', filterCategory: e.target.value })}
               className="w-[180px] px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="all">All Categories</option>
@@ -1096,7 +1096,7 @@ export default function MlInsightsClient() {
 
             <select
               value={state.sortBy}
-              onChange={(e) => dispatch({ type: 'SET_SORT', sortBy: e.target.value as any })}
+              onChange={(e) => dispatch({ type: 'SET_SORT', sortBy: e.target.value })}
               className="w-[180px] px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="priority">Priority</option>
@@ -1631,7 +1631,7 @@ export default function MlInsightsClient() {
                   <Label htmlFor="format" className="text-white">Export Format</Label>
                   <select
                     value={exportFormat}
-                    onChange={(e) => setExportFormat(e.target.value as any)}
+                    onChange={(e) => setExportFormat(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="json">JSON</option>

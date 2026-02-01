@@ -400,7 +400,7 @@ export function ActivityTrackerProvider({ children }: { children: React.ReactNod
   // Make tracking functions available globally
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      (window as any).__kaziTrack = {
+      (window as Record<string, unknown>).__kaziTrack = {
         click: trackClick,
         formSubmit: trackFormSubmit,
         featureUse: trackFeatureUse

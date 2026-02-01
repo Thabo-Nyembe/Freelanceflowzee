@@ -448,7 +448,7 @@ export default function TasksPageMigrated() {
                 />
               </div>
               <div className="flex gap-2">
-                <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as any)}>
+                <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as string)}>
                   <SelectTrigger className="w-[140px]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
@@ -459,7 +459,7 @@ export default function TasksPageMigrated() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={filterPriority} onValueChange={(v) => setFilterPriority(v as any)}>
+                <Select value={filterPriority} onValueChange={(v) => setFilterPriority(v as string)}>
                   <SelectTrigger className="w-[140px]">
                     <SelectValue placeholder="Priority" />
                   </SelectTrigger>
@@ -470,7 +470,7 @@ export default function TasksPageMigrated() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as string)}>
                   <SelectTrigger className="w-[140px]">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>

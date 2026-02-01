@@ -875,7 +875,7 @@ export async function triggerMilestoneWorkflow(
   const delayedKeys = Object.keys(workflow).filter(k => k.startsWith('day'))
   for (const key of delayedKeys) {
     const day = parseInt(key.replace('day', ''))
-    const actions = (workflow as any)[key]
+    const actions = (workflow as Record<string, unknown>)[key]
 
     setTimeout(async () => {
       for (const action of actions) {

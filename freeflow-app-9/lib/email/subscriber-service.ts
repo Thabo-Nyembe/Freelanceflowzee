@@ -644,7 +644,7 @@ class SubscriberService {
       const fieldName = condition.field.replace('custom_fields.', '');
       value = subscriber.custom_fields?.[fieldName];
     } else {
-      value = (subscriber as any)[condition.field];
+      value = (subscriber as Record<string, unknown>)[condition.field];
     }
 
     // Evaluate based on operator

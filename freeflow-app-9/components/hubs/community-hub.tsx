@@ -392,7 +392,7 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
               </div>
               <select
                 value={selectedFilter}
-                onChange={(e) => setSelectedFilter(e.target.value as any)}
+                onChange={(e) => setSelectedFilter(e.target.value)}
                 className="px-3 py-2 border rounded-md"
               >
                 <option value="all">All Posts</option>

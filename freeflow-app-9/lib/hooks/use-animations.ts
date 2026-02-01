@@ -183,7 +183,7 @@ export function useAnimations(initialAnimations: Animation[] = [], initialStats:
   }, [supabase])
 
   const startRender = useCallback(async (id: string) => {
-    return updateAnimation(id, { status: 'rendering' } as any)
+    return updateAnimation(id, { status: 'rendering' })
   }, [updateAnimation])
 
   const likeAnimation = useCallback(async (id: string) => {

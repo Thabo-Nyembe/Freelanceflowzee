@@ -96,7 +96,7 @@ export function useAnomaliesRealtime(userId?: string) {
     supabase.from('anomaly_detections').select('*').eq('user_id', userId).in('status', ['detected', 'acknowledged']).order('detected_at', { ascending: false }).limit(50).then(({ data }) => setAnomalies(data || []))
     const channel = supabase.channel(`anomalies_${userId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'anomaly_detections', filter: `user_id=eq.${userId}` }, (payload) => setAnomalies(prev => [payload.new, ...prev].slice(0, 50)))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'anomaly_detections', filter: `user_id=eq.${userId}` }, (payload) => setAnomalies(prev => prev.map(a => a.id === (payload.new as any).id ? payload.new : a)))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'anomaly_detections', filter: `user_id=eq.${userId}` }, (payload) => setAnomalies(prev => prev.map(a => a.id === (payload.new as Record<string, unknown>).id ? payload.new : a)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [userId])

@@ -509,7 +509,7 @@ export default function TransactionsPage() {
             </div>
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value as any)}
+              onChange={(e) => setFilterType(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md"
             >
               <option value="all">All Types</option>

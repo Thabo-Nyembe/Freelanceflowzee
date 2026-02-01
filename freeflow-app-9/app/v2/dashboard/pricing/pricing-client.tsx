@@ -2428,7 +2428,7 @@ export default function PricingClient({
                   <select
                     className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
                     value={couponForm.discount_type}
-                    onChange={(e) => setCouponForm({ ...couponForm, discount_type: e.target.value as any })}
+                    onChange={(e) => setCouponForm({ ...couponForm, discount_type: e.target.value })}
                   >
                     <option value="percentage">Percentage</option>
                     <option value="fixed">Fixed Amount</option>
@@ -2452,7 +2452,7 @@ export default function PricingClient({
                   <select
                     className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
                     value={couponForm.duration}
-                    onChange={(e) => setCouponForm({ ...couponForm, duration: e.target.value as any })}
+                    onChange={(e) => setCouponForm({ ...couponForm, duration: e.target.value })}
                   >
                     <option value="once">Once</option>
                     <option value="repeating">Repeating</option>

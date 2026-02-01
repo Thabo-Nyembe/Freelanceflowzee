@@ -76,7 +76,7 @@ export function SmartEmailTemplates() {
 
     try {
       const result = await generateEmail({
-        type: selectedTemplate as any,
+        type: selectedTemplate as string,
         recipient: formData.recipient,
         context: formData.context,
         tone: formData.tone
@@ -164,7 +164,7 @@ export function SmartEmailTemplates() {
                     id="tone"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     value={formData.tone}
-                    onChange={(e) => setFormData({ ...formData, tone: e.target.value as any })}
+                    onChange={(e) => setFormData({ ...formData, tone: e.target.value })}
                   >
                     <option value="professional">Professional</option>
                     <option value="friendly">Friendly</option>

@@ -126,7 +126,7 @@ export function useAchievementsRealtime(userId?: string) {
     supabase.from('user_achievements').select('*, achievements(*)').eq('user_id', userId).order('earned_at', { ascending: false }).then(({ data }) => setAchievements(data || []))
     const channel = supabase.channel(`achievements_${userId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'user_achievements', filter: `user_id=eq.${userId}` }, async (payload) => {
-        const { data: full } = await supabase.from('user_achievements').select('*, achievements(*)').eq('id', (payload.new as any).id).single()
+        const { data: full } = await supabase.from('user_achievements').select('*, achievements(*)').eq('id', (payload.new as Record<string, unknown>).id).single()
         if (full) {
           setAchievements(prev => [full, ...prev])
           setNewAchievement(full)

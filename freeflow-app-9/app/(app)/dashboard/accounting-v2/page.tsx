@@ -898,7 +898,7 @@ export default function AccountingPage() {
                 <Label>Account Type</Label>
                 <Select
                   value={newAccount.account_type}
-                  onValueChange={(v) => setNewAccount(prev => ({ ...prev, account_type: v as any }))}
+                  onValueChange={(v) => setNewAccount(prev => ({ ...prev, account_type: v as string }))}
                 >
                   <SelectTrigger>
                     <SelectValue />

@@ -735,7 +735,7 @@ Best regards,
                 <select
                   className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
                   value={dateRange}
-                  onChange={(e) => setDateRange(e.target.value as any)}
+                  onChange={(e) => setDateRange(e.target.value)}
                 >
                   <option value="all">All Time</option>
                   <option value="7days">Last 7 Days</option>
@@ -2030,7 +2030,7 @@ Best regards,
                         value={newInvoice.recurring.frequency}
                         onChange={(e) => setNewInvoice(prev => ({
                           ...prev,
-                          recurring: { ...prev.recurring, frequency: e.target.value as any }
+                          recurring: { ...prev.recurring, frequency: e.target.value }
                         }))}
                       >
                         <option value="weekly">Weekly</option>
@@ -2077,7 +2077,7 @@ Best regards,
                           value={newInvoice.lateFee.type}
                           onChange={(e) => setNewInvoice(prev => ({
                             ...prev,
-                            lateFee: { ...prev.lateFee, type: e.target.value as any }
+                            lateFee: { ...prev.lateFee, type: e.target.value }
                           }))}
                         >
                           <option value="percentage">%</option>
@@ -2123,7 +2123,7 @@ Best regards,
                           value={newInvoice.discount.type}
                           onChange={(e) => setNewInvoice(prev => ({
                             ...prev,
-                            discount: { ...prev.discount, type: e.target.value as any }
+                            discount: { ...prev.discount, type: e.target.value }
                           }))}
                         >
                           <option value="percentage">%</option>

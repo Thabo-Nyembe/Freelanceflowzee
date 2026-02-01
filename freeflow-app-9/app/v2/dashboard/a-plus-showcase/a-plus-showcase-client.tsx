@@ -949,7 +949,7 @@ export default function APlusShowcaseClient() {
               <div className="flex gap-2 flex-wrap">
                 <Select
                   value={state.filterDifficulty}
-                  onValueChange={(value) => dispatch({ type: 'SET_FILTER_DIFFICULTY', filterDifficulty: value as any })}
+                  onValueChange={(value) => dispatch({ type: 'SET_FILTER_DIFFICULTY', filterDifficulty: value })}
                 >
                   <SelectTrigger className="w-[140px] bg-slate-900/50 border-slate-700">
                     <SelectValue />
@@ -965,7 +965,7 @@ export default function APlusShowcaseClient() {
 
                 <Select
                   value={state.sortBy}
-                  onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value as any })}
+                  onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value })}
                 >
                   <SelectTrigger className="w-[140px] bg-slate-900/50 border-slate-700">
                     <SelectValue />

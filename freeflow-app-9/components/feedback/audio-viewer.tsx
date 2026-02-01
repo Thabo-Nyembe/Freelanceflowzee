@@ -144,7 +144,7 @@ export function AudioViewer({
   useEffect(() => {
     const generateWaveform = async () => {
       try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+        const audioContext = new (window.AudioContext || (window as Record<string, unknown>).webkitAudioContext)()
         const response = await fetch(src)
         const arrayBuffer = await response.arrayBuffer()
         const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)

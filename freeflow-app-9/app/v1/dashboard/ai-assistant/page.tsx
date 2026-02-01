@@ -397,7 +397,7 @@ export default function AIAssistantPage() {
         const title = firstUserMessage?.content?.slice(0, 50) || `Conversation ${new Date().toLocaleDateString()}`
 
         const { data: newConv, error } = await createConversation(userId, title, {
-          model: selectedModel as any,
+          model: selectedModel as string,
           tags: ['auto-saved'],
           metadata: { messageCount: previousMessageCount }
         })
@@ -688,7 +688,7 @@ export default function AIAssistantPage() {
       // Start speech recognition
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         try {
-          const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+          const SpeechRecognition = (window as Record<string, unknown>).webkitSpeechRecognition || (window as Record<string, unknown>).SpeechRecognition
           const recognition = new SpeechRecognition()
           recognition.continuous = false
           recognition.interimResults = false

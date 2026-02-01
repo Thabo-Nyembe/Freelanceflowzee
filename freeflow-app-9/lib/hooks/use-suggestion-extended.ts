@@ -164,7 +164,7 @@ export function useSuggestionsRealtime(userId?: string) {
     supabase.from('suggestions').select('*').eq('user_id', userId).eq('status', 'pending').order('score', { ascending: false }).limit(50).then(({ data }) => setSuggestions(data || []))
     const channel = supabase.channel(`suggestions_${userId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'suggestions', filter: `user_id=eq.${userId}` }, (payload) => {
-        if ((payload.new as any).status === 'pending') {
+        if ((payload.new as Record<string, unknown>).status === 'pending') {
           setSuggestions(prev => [payload.new, ...prev].slice(0, 50))
         }
       })
@@ -176,7 +176,7 @@ export function useSuggestionsRealtime(userId?: string) {
           setSuggestions(prev => prev.filter(s => s.id !== updated.id))
         }
       })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'suggestions', filter: `user_id=eq.${userId}` }, (payload) => setSuggestions(prev => prev.filter(s => s.id !== (payload.old as any).id)))
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'suggestions', filter: `user_id=eq.${userId}` }, (payload) => setSuggestions(prev => prev.filter(s => s.id !== (payload.old as Record<string, unknown>).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [userId])

@@ -389,7 +389,7 @@ export default function BusinessAutomationAgentSetup() {
               ].map((provider) => (
                 <button
                   key={provider.value}
-                  onClick={() => setEmailProvider(provider.value as any)}
+                  onClick={() => setEmailProvider(provider.value as string)}
                   className={cn(
                     'p-4 border-2 rounded-lg text-left transition-all hover:border-blue-500',
                     emailProvider === provider.value ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' : 'border-gray-200'
@@ -642,7 +642,7 @@ export default function BusinessAutomationAgentSetup() {
               ].map((provider) => (
                 <button
                   key={provider.value}
-                  onClick={() => setAiProvider(provider.value as any)}
+                  onClick={() => setAiProvider(provider.value as string)}
                   className={cn(
                     'p-4 border-2 rounded-lg text-left transition-all hover:border-purple-500',
                     aiProvider === provider.value ? 'border-purple-500 bg-purple-50 dark:bg-purple-950' : 'border-gray-200'

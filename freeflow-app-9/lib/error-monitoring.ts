@@ -308,7 +308,7 @@ class ErrorMonitor {
         name: err.name,
         message: err.message,
         stack: err.stack,
-        digest: (err as any).digest
+        digest: (err as Record<string, unknown>).digest
       },
       context: context || {},
       severity,

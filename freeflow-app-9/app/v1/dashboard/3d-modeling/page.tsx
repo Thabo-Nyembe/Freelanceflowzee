@@ -136,7 +136,7 @@ export default function ModelingStudioPage() {
     try {      const newObject: SceneObject = {
         id: `obj-${Date.now()}`,
         name: `${objectType.charAt(0).toUpperCase() + objectType.slice(1)} ${objects.length + 1}`,
-        type: objectType as any,
+        type: objectType as string,
         position: { x: 0, y: 0, z: 0 },
         rotation: { x: 0, y: 0, z: 0 },
         scale: { x: 1, y: 1, z: 1 },
@@ -548,7 +548,7 @@ export default function ModelingStudioPage() {
                         key={tool.id}
                         variant={selectedTool === tool.id ? "default" : "outline"}
                         size="sm"
-                        onClick={() => {                          setSelectedTool(tool.id as any)
+                        onClick={() => {                          setSelectedTool(tool.id as string)
                           toast.success(`${tool.label} Tool`)
                         }}
                         className="gap-2"

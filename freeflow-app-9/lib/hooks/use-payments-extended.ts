@@ -194,7 +194,7 @@ export function usePaymentsRealtime(userId?: string) {
     supabase.from('payments').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(50).then(({ data }) => setPayments(data || []))
     const channel = supabase.channel(`payments_${userId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'payments', filter: `user_id=eq.${userId}` }, (payload) => setPayments(prev => [payload.new, ...prev].slice(0, 50)))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'payments', filter: `user_id=eq.${userId}` }, (payload) => setPayments(prev => prev.map(p => p.id === (payload.new as any).id ? payload.new : p)))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'payments', filter: `user_id=eq.${userId}` }, (payload) => setPayments(prev => prev.map(p => p.id === (payload.new as Record<string, unknown>).id ? payload.new : p)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [userId])

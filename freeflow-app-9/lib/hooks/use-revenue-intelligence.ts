@@ -44,7 +44,7 @@ export function useRevenueIntelligence(): UseRevenueIntelligenceReturn {
         () => {
           // Invalidate report when transactions change
           if (report) {
-            setReport(prev => prev ? { ...prev, needsRefresh: true } as any : null)
+            setReport(prev => prev ? { ...prev, needsRefresh: true } : null)
           }
         }
       )
@@ -54,7 +54,7 @@ export function useRevenueIntelligence(): UseRevenueIntelligenceReturn {
         () => {
           // Invalidate forecast when invoices change
           if (forecast) {
-            setForecast(prev => prev ? { ...prev, needsRefresh: true } as any : null)
+            setForecast(prev => prev ? { ...prev, needsRefresh: true } : null)
           }
         }
       )

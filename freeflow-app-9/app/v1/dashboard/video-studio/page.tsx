@@ -587,7 +587,7 @@ export default function VideoStudioPage() {
   const handleExportVideo = (format: string) => {
     const estimatedSize = format === 'MP4' ? '~150MB' : format === 'MOV' ? '~300MB' : '~500MB'
     // Add to rendering queue via window.addRenderJob (exposed by RenderingQueue component)
-    const addRenderJob = (window as any).addRenderJob
+    const addRenderJob = (window as Record<string, unknown>).addRenderJob
     if (addRenderJob && selectedProject) {
       addRenderJob({
         id: `render_${Date.now()}`,
@@ -940,7 +940,7 @@ export default function VideoStudioPage() {
   }
 
   const handleRenderPreview = () => {    // Add preview render job to queue
-    const addRenderJob = (window as any).addRenderJob
+    const addRenderJob = (window as Record<string, unknown>).addRenderJob
     if (addRenderJob && selectedProject) {
       addRenderJob({
         id: `preview_${Date.now()}`,
@@ -1110,7 +1110,7 @@ export default function VideoStudioPage() {
         title: newProject.title,
         description: newProject.description,
         resolution: newProject.resolution,
-        format: newProject.format as any,
+        format: newProject.format as string,
         status: 'draft',
         duration: 0,
         file_size: 0,

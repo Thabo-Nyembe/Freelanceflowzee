@@ -424,7 +424,7 @@ export default function BuildsClient() {
     try {
       toast.loading(`Restarting build #${build.build_number}...`)
       mutateRetryBuild({
-        pipeline_id: (build as any).pipeline_id,
+        pipeline_id: (build as Record<string, unknown>).pipeline_id,
         build_number: build.build_number + 1,
         branch: build.branch,
         commit_hash: build.commit_hash,
@@ -921,7 +921,7 @@ export default function BuildsClient() {
               {[
                 { icon: Workflow, label: 'New Workflow', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setActiveTab('settings'); toast.success('Workflow editor ready', { description: 'Configure in Settings tab' }); } },
                 { icon: Play, label: 'Run All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => {
-                  const activeWorkflow = (databasePipelines as any[]).find(w => w.is_active)
+                  const activeWorkflow = (databasePipelines as unknown[]).find(w => w.is_active)
                   if (activeWorkflow) handleRunWorkflow(activeWorkflow)
                 }},
                 { icon: FileText, label: 'Templates', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Workflow Templates', { description: 'Browse CI/CD templates in the workflow cards below' }) },

@@ -95,7 +95,7 @@ export function useTimeOff(initialTimeOff: TimeOff[] = [], filters: TimeOffFilte
       setTimeOff(data || [])
     } catch (err) {
       // Gracefully handle missing table
-      if ((err as any)?.code === '42P01') {
+      if ((err as Record<string, unknown>)?.code === '42P01') {
         console.warn('time_off table does not exist yet. Using empty data.')
         setTimeOff([])
         setError(null)

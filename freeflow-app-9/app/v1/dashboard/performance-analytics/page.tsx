@@ -69,8 +69,8 @@ export default function PerformanceAnalyticsPage() {
 
         // Load metrics and snapshots in parallel
         const [metricsResult, snapshotsResult] = await Promise.all([
-          getPerformanceMetrics(userId, { period: timeRange as any }),
-          getPerformanceSnapshots(userId, { period: timeRange as any, limit: 10 })
+          getPerformanceMetrics(userId, { period: timeRange as string }),
+          getPerformanceSnapshots(userId, { period: timeRange as string, limit: 10 })
         ])
 
         if (metricsResult.error) throw metricsResult.error

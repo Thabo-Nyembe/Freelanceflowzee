@@ -205,7 +205,7 @@ function useNetworkStatus() {
     window.addEventListener('offline', handleOffline)
 
     // Check connection speed
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
+    const connection = (navigator as Record<string, unknown>).connection || (navigator as Record<string, unknown>).mozConnection || (navigator as Record<string, unknown>).webkitConnection
     if (connection) {
       const updateSpeed = () => {
         if (connection.effectiveType === '4g') {

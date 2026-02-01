@@ -403,7 +403,7 @@ export default function KaziWorkflowsClient() {
     await createWorkflow({
       name: `${selectedTemplate.name} (New)`,
       description: selectedTemplate.description,
-      trigger_type: selectedTemplate.trigger_type as any,
+      trigger_type: selectedTemplate.trigger_type as string,
       category: selectedTemplate.category,
       status: 'draft'
     })
@@ -1025,7 +1025,7 @@ export default function KaziWorkflowsClient() {
                   <Label>Trigger Type</Label>
                   <Select
                     value={newWorkflow.trigger_type}
-                    onValueChange={(value) => setNewWorkflow(prev => ({ ...prev, trigger_type: value as any }))}
+                    onValueChange={(value) => setNewWorkflow(prev => ({ ...prev, trigger_type: value as string }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select trigger" />
@@ -1133,7 +1133,7 @@ export default function KaziWorkflowsClient() {
                     <Label>Trigger Type</Label>
                     <Select
                       value={selectedWorkflow.trigger_type}
-                      onValueChange={(value) => setSelectedWorkflow(prev => prev ? { ...prev, trigger_type: value as any } : null)}
+                      onValueChange={(value) => setSelectedWorkflow(prev => prev ? { ...prev, trigger_type: value as string } : null)}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -1737,7 +1737,7 @@ export default function KaziWorkflowsClient() {
                     <Label>Trigger Type</Label>
                     <Select
                       value={selectedWorkflow.trigger_type}
-                      onValueChange={(value) => setSelectedWorkflow(prev => prev ? { ...prev, trigger_type: value as any } : null)}
+                      onValueChange={(value) => setSelectedWorkflow(prev => prev ? { ...prev, trigger_type: value as string } : null)}
                     >
                       <SelectTrigger>
                         <SelectValue />

@@ -730,7 +730,7 @@ export function CloudStorageSystem() {
                       variant={state.currentPlan === key ? "outline" : "default"}
                       onClick={() => {
                         if (state.currentPlan !== key) {
-                          dispatch({ type: 'UPGRADE_PLAN', plan: key as any })
+                          dispatch({ type: 'UPGRADE_PLAN', plan: key })
                           setShowSubscription(false)
                         }
                       }}

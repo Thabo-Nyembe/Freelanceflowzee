@@ -1392,7 +1392,7 @@ export default function ProfileClient() {
                     {displayExperiences.map((exp) => (
                       <div key={exp.id} className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <Avatar className="w-14 h-14">
-                          <AvatarImage src={(exp as any).companyLogo} alt="User avatar" />
+                          <AvatarImage src={(exp as Record<string, unknown>).companyLogo} alt="User avatar" />
                           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-lg">{exp.company[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -1450,7 +1450,7 @@ export default function ProfileClient() {
                     {displayEducation.map((edu) => (
                       <div key={edu.id} className="flex gap-4">
                         <Avatar className="w-12 h-12">
-                          <AvatarImage src={(edu as any).schoolLogo} alt="User avatar" />
+                          <AvatarImage src={(edu as Record<string, unknown>).schoolLogo} alt="User avatar" />
                           <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white">{edu.school[0]}</AvatarFallback>
                         </Avatar>
                         <div>

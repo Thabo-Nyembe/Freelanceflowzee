@@ -9,7 +9,7 @@ export class VoiceEnhancementService {
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      this.audioContext = new (window.AudioContext || (window as Record<string, unknown>).webkitAudioContext)()
     }
   }
 

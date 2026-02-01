@@ -862,7 +862,7 @@ export default function LeadGenerationPage() {
               />
               <select
                 value={newLead.source}
-                onChange={(e) => setNewLead({ ...newLead, source: e.target.value as any })}
+                onChange={(e) => setNewLead({ ...newLead, source: e.target.value })}
                 className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
               >
                 <option value="website">Website</option>

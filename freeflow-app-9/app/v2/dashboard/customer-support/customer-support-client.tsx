@@ -803,7 +803,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   </div>
                   <select
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as any)}
+                    onChange={(e) => setStatusFilter(e.target.value)}
                     className="px-3 py-2 border rounded-lg text-sm"
                   >
                     <option value="all">All Status</option>
@@ -814,7 +814,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   </select>
                   <select
                     value={priorityFilter}
-                    onChange={(e) => setPriorityFilter(e.target.value as any)}
+                    onChange={(e) => setPriorityFilter(e.target.value)}
                     className="px-3 py-2 border rounded-lg text-sm"
                   >
                     <option value="all">All Priority</option>

@@ -123,10 +123,10 @@ export function useDocumentEmbeddings(userId?: string): UseDocumentEmbeddingsRet
               setEmbeddings(prev => [payload.new as DocumentEmbedding, ...prev])
             } else if (payload.eventType === 'UPDATE') {
               setEmbeddings(prev => prev.map(item =>
-                (item as any).id === payload.new.id ? payload.new as DocumentEmbedding : item
+                (item as Record<string, unknown>).id === payload.new.id ? payload.new as DocumentEmbedding : item
               ))
             } else if (payload.eventType === 'DELETE') {
-              setEmbeddings(prev => prev.filter(item => (item as any).id !== payload.old.id))
+              setEmbeddings(prev => prev.filter(item => (item as Record<string, unknown>).id !== payload.old.id))
             }
           }
         )

@@ -2465,7 +2465,7 @@ export default function GrowthHubClient() {
             </div>
             <div>
               <Label>Cohort Type</Label>
-              <select className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800" value={cohortForm.type} onChange={(e) => setCohortForm(f => ({ ...f, type: e.target.value as any }))}>
+              <select className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800" value={cohortForm.type} onChange={(e) => setCohortForm(f => ({ ...f, type: e.target.value }))}>
                 <option value="behavioral">Behavioral</option>
                 <option value="property">Property-based</option>
                 <option value="computed">Computed</option>
@@ -2502,7 +2502,7 @@ export default function GrowthHubClient() {
               <select
                 className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
                 value={exportReportForm.reportType}
-                onChange={(e) => setExportReportForm(f => ({ ...f, reportType: e.target.value as any }))}
+                onChange={(e) => setExportReportForm(f => ({ ...f, reportType: e.target.value }))}
               >
                 <option value="conversion">Conversion Analytics</option>
                 <option value="retention">Retention Analysis</option>
@@ -2516,7 +2516,7 @@ export default function GrowthHubClient() {
               <select
                 className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
                 value={exportReportForm.format}
-                onChange={(e) => setExportReportForm(f => ({ ...f, format: e.target.value as any }))}
+                onChange={(e) => setExportReportForm(f => ({ ...f, format: e.target.value }))}
               >
                 <option value="csv">CSV</option>
                 <option value="xlsx">Excel (XLSX)</option>
@@ -2529,7 +2529,7 @@ export default function GrowthHubClient() {
               <select
                 className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
                 value={exportReportForm.dateRange}
-                onChange={(e) => setExportReportForm(f => ({ ...f, dateRange: e.target.value as any }))}
+                onChange={(e) => setExportReportForm(f => ({ ...f, dateRange: e.target.value }))}
               >
                 <option value="last7">Last 7 days</option>
                 <option value="last30">Last 30 days</option>
@@ -2735,7 +2735,7 @@ export default function GrowthHubClient() {
               <select
                 className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
                 value={filterForm.dateRange}
-                onChange={(e) => setFilterForm(f => ({ ...f, dateRange: e.target.value as any }))}
+                onChange={(e) => setFilterForm(f => ({ ...f, dateRange: e.target.value }))}
               >
                 <option value="last7">Last 7 days</option>
                 <option value="last30">Last 30 days</option>

@@ -62,7 +62,7 @@ export function useAuthUserId() {
     }
 
     // First try authId from NextAuth session (auth.users-compatible ID for Supabase FK constraints)
-    const authId = (session?.user as any)?.authId
+    const authId = (session?.user as { authId?: string })?.authId
     if (authId) {
       return authId
     }

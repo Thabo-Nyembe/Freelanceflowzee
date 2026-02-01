@@ -543,7 +543,7 @@ export default function ProjectsClient() {
             id: shareProjectId,
             metadata: {
               shared_with: [
-                ...((project as any).metadata?.shared_with || []),
+                ...((project as Record<string, unknown>).metadata?.shared_with || []),
                 {
                   email: shareEmail.trim(),
                   permission: sharePermission,

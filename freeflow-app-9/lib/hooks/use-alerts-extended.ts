@@ -89,8 +89,8 @@ export function useAlertsRealtime(userId?: string) {
     supabase.from('alerts').select('*').eq('user_id', userId).eq('status', 'active').order('created_at', { ascending: false }).limit(50).then(({ data }) => setAlerts(data || []))
     const channel = supabase.channel(`alerts_${userId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'alerts', filter: `user_id=eq.${userId}` }, (payload) => setAlerts(prev => [payload.new, ...prev].slice(0, 50)))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'alerts', filter: `user_id=eq.${userId}` }, (payload) => setAlerts(prev => prev.map(a => a.id === (payload.new as any).id ? payload.new : a)))
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'alerts', filter: `user_id=eq.${userId}` }, (payload) => setAlerts(prev => prev.filter(a => a.id !== (payload.old as any).id)))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'alerts', filter: `user_id=eq.${userId}` }, (payload) => setAlerts(prev => prev.map(a => a.id === (payload.new as Record<string, unknown>).id ? payload.new : a)))
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'alerts', filter: `user_id=eq.${userId}` }, (payload) => setAlerts(prev => prev.filter(a => a.id !== (payload.old as Record<string, unknown>).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [userId])

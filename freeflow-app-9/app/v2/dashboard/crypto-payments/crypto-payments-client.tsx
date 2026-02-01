@@ -1329,7 +1329,7 @@ export default function CryptoPaymentsClient() {
                     value={state.sortBy}
                     onChange={(e) => {
                       logger.debug('Sort changed', { sortBy: e.target.value })
-                      dispatch({ type: 'SET_SORT', sortBy: e.target.value as any })
+                      dispatch({ type: 'SET_SORT', sortBy: e.target.value })
                     }}
                     className="w-[180px] px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >

@@ -920,7 +920,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                   </div>
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
+                    onChange={(e) => setSortBy(e.target.value)}
                     className="px-4 py-2 border rounded-lg text-sm"
                   >
                     <option value="popular">Most Popular</option>

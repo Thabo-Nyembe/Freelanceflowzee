@@ -1681,7 +1681,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
             >
               <option value="all">All Status</option>

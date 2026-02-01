@@ -137,7 +137,7 @@ export default function EnhancedPricingPage() {
 
           {/* Pricing Toggle */}
           <div className="flex items-center justify-center mb-12">
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full max-w-md">
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as string)} className="w-full max-w-md">
               <TabsList className="grid w-full grid-cols-2 h-12">
                 <TabsTrigger value="subscription" className="text-sm">
                   <Crown className="w-4 h-4 mr-2" />

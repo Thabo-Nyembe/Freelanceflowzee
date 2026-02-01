@@ -186,7 +186,7 @@ export function generatePageSEO(page: keyof typeof SEO_TEMPLATES, customData?: P
     openGraph: {
       title: template.title,
       description: template.description,
-      type: SEO_CONFIG.site.type as any,
+      type: SEO_CONFIG.site.type as string,
       url: `${SEO_CONFIG.site.url}/${page === 'homepage' ? '' : page}`,
       siteName: SEO_CONFIG.site.name,
       locale: SEO_CONFIG.site.locale,

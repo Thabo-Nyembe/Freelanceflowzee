@@ -715,7 +715,7 @@ export default function TimeTrackingClient() {
                   key={idx}
                   variant="ghost"
                   onClick={action.onClick}
-                  disabled={(action as any).disabled}
+                  disabled={(action as Record<string, unknown>).disabled}
                   className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                 >
                   <action.icon className="w-5 h-5" />

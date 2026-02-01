@@ -616,7 +616,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
         description: newInitiative.description || null,
         quarter: newInitiative.quarter,
         year: new Date().getFullYear(),
-        priority: newInitiative.priority as any,
+        priority: newInitiative.priority as string,
         theme: newInitiative.theme || null,
         status: 'planned' as any,
         progress_percentage: 0,

@@ -395,7 +395,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const [aiPrompt, setAIPrompt] = useState('')
   const [selectedDocumentsForAction, setSelectedDocumentsForAction] = useState<string[]>([])
 
-  const { data: documents, isLoading: loading, error, refetch } = useDocuments({ status: statusFilter as any, type: typeFilter as any })
+  const { data: documents, isLoading: loading, error, refetch } = useDocuments({ status: statusFilter as string, type: typeFilter as string })
   const {
     createDocument,
     updateDocument,
@@ -1101,7 +1101,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 <div className="flex items-center gap-3">
                   <select
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as any)}
+                    onChange={(e) => setStatusFilter(e.target.value)}
                     className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
                   >
                     <option value="all">All Status</option>
@@ -1112,7 +1112,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   </select>
                   <select
                     value={typeFilter}
-                    onChange={(e) => setTypeFilter(e.target.value as any)}
+                    onChange={(e) => setTypeFilter(e.target.value)}
                     className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
                   >
                     <option value="all">All Types</option>
@@ -2598,7 +2598,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               </div>
               <div>
                 <Label className="text-sm font-medium">Export Format</Label>
-                <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as any)}>
+                <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as string)}>
                   <SelectTrigger className="mt-2">
                     <SelectValue />
                   </SelectTrigger>

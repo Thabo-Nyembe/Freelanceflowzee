@@ -168,7 +168,7 @@ export function useNanoBanana() {
 
       setProgress({ status: 'completed', progress: 100 })
 
-      const responseImages = (response.data as any)?.images || []
+      const responseImages = (response.data as Record<string, unknown>)?.images || []
       const editResult: GenerationResult = {
         images: responseImages.map((img: any) => ({
           url: img.url || img,
@@ -176,7 +176,7 @@ export function useNanoBanana() {
           height: img.height || 0,
           contentType: img.content_type || 'image/png'
         })),
-        seed: (response.data as any)?.seed || 0,
+        seed: (response.data as Record<string, unknown>)?.seed || 0,
         prompt: params.prompt
       }
 

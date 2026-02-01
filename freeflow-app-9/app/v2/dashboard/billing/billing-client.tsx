@@ -588,7 +588,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
     try {
       await updateInvoice(invoice.id, {
         last_reminder_sent: new Date().toISOString(),
-        reminder_count: (invoice as any).reminder_count ? (invoice as any).reminder_count + 1 : 1
+        reminder_count: (invoice as Record<string, unknown>).reminder_count ? (invoice as Record<string, unknown>).reminder_count + 1 : 1
       })
       toast.success("Reminder sent", { description: "Payment reminder sent to " + invoice.client_email })
     } catch (error) {
@@ -842,7 +842,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           <TabsContent value="subscriptions" className="space-y-6">
             <div className="flex items-center gap-4 mb-4">
               {['all', 'active', 'trialing', 'past_due', 'canceled'].map(filter => (
-                <Button key={filter} variant={statusFilter === filter ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(filter as any)}>
+                <Button key={filter} variant={statusFilter === filter ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(filter as string)}>
                   {filter.charAt(0).toUpperCase() + filter.slice(1).replace('_', ' ')}
                 </Button>
               ))}

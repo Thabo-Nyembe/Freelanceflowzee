@@ -753,7 +753,7 @@ export default function ShippingClient() {
   // Update shipment status using hook mutation
   const handleUpdateStatus = async (shipmentId: string, newStatus: string) => {
     try {
-      await updateShipment(shipmentId, { status: newStatus as any })
+      await updateShipment(shipmentId, { status: newStatus as string })
     } catch (error) {
       console.error('Error updating status:', error)
     }

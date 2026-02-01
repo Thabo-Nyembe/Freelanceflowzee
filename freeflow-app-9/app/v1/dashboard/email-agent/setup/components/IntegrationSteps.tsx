@@ -195,7 +195,7 @@ export function EmailIntegrationStep({ onComplete, onBack }: any) {
         {emailProviders.map((p) => (
           <button
             key={p.id}
-            onClick={() => setProvider(p.id as any)}
+            onClick={() => setProvider(p.id as string)}
             className={cn(
               'relative p-6 border-2 rounded-xl text-left transition-all hover:border-blue-500 hover:shadow-lg',
               provider === p.id
@@ -562,7 +562,7 @@ export function AIProviderStep({ onComplete, onBack }: any) {
         {aiProviders.map((p) => (
           <button
             key={p.id}
-            onClick={() => setProvider(p.id as any)}
+            onClick={() => setProvider(p.id as string)}
             className={cn(
               'relative p-6 border-2 rounded-xl text-left transition-all hover:shadow-lg',
               provider === p.id

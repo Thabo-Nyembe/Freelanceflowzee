@@ -409,7 +409,7 @@ export function estimateExportTime(format: ExportFormat, widgetCount: number): s
 export function createSampleWidget(type: string): Widget {
   return {
     id: `widget_${Math.random().toString(36).substr(2, 9)}`,
-    type: type as any,
+    type: type,
     title: 'New Widget',
     position: { x: 0, y: 0, width: 6, height: 4 },
     data: {

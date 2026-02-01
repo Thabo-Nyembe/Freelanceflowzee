@@ -816,7 +816,7 @@ export function useDocumentMutations() {
   }
 
   const starDocument = async (id: string, starred: boolean) => {
-    const result = await update(id, { starred } as any)
+    const result = await update(id, { starred })
     toast.success(starred ? 'Added to starred' : 'Removed from starred')
     return result
   }

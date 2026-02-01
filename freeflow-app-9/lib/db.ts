@@ -115,10 +115,10 @@ if (process.env.NODE_ENV === 'production') {
   prisma = createPrismaClient();
 } else {
   // In development, reuse the existing instance to avoid multiple connections
-  if (!(global as any).prisma) {
-    (global as any).prisma = createPrismaClient();
+  if (!(global as Record<string, unknown>).prisma) {
+    (global as Record<string, unknown>).prisma = createPrismaClient();
   }
-  prisma = (global as any).prisma;
+  prisma = (global as Record<string, unknown>).prisma;
 }
 
 // Helper function to execute a database operation with retries

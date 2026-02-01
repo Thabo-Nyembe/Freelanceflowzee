@@ -196,7 +196,7 @@ export class WhisperTranscriptionService {
         response_format: 'verbose_json',
         temperature: options.temperature ?? 0,
         timestamp_granularities: ['segment'],
-      }) as any;
+      });
 
       // Process segments and emit callbacks
       const totalSegments = response.segments?.length || 0;
@@ -264,7 +264,7 @@ export class WhisperTranscriptionService {
         prompt: this.buildPrompt(options),
         response_format: 'verbose_json',
         temperature: options.temperature ?? 0,
-      }) as any;
+      });
 
       const processingTime = Date.now() - startTime;
 
@@ -288,7 +288,7 @@ export class WhisperTranscriptionService {
         file,
         model: this.defaultModel,
         response_format: 'verbose_json',
-      }) as any;
+      });
 
       return {
         language: response.language || 'unknown',

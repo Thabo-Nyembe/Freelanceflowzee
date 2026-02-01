@@ -111,7 +111,7 @@ export function WorkflowCreateDialog({ open, onOpenChange, onSuccess }: Workflow
               <Label htmlFor="trigger">Trigger Type *</Label>
               <Select
                 value={formData.trigger_type}
-                onValueChange={(value) => setFormData({ ...formData, trigger_type: value as any })}
+                onValueChange={(value) => setFormData({ ...formData, trigger_type: value as string })}
                 disabled={isLoading}
               >
                 <SelectTrigger>

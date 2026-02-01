@@ -864,7 +864,7 @@ export default function MessagingClient() {
 
       if (message.id && !message.id.startsWith('msg-')) {
         await updateMessage.update(message.id, {
-          metadata: { ...((message as any).metadata || {}), is_bookmarked: !message.isBookmarked }
+          metadata: { ...((message as Record<string, unknown>).metadata || {}), is_bookmarked: !message.isBookmarked }
         })
       }
 

@@ -120,7 +120,7 @@ export default function BookingsPageMigrated() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
   const { data: bookings, isLoading, error, refetch } = useBookings(
-    statusFilter === 'all' ? undefined : [statusFilter as any]
+    statusFilter === 'all' ? undefined : [statusFilter as string]
   )
   const { data: stats } = useCalendarStats()
 

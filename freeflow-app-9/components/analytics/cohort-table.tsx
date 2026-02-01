@@ -204,7 +204,7 @@ export function CohortTable({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Select value={selectedGranularity} onValueChange={(v) => setSelectedGranularity(v as any)}>
+          <Select value={selectedGranularity} onValueChange={(v) => setSelectedGranularity(v as string)}>
             <SelectTrigger className="w-[120px]">
               <Calendar className="h-4 w-4 mr-2" />
               <SelectValue />

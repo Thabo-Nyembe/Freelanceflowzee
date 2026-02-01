@@ -1040,7 +1040,7 @@ export default function StoragePage() {
               {/* Provider Filter */}
               <Select
                 value={state.filterProvider}
-                onValueChange={(value) => dispatch({ type: 'SET_FILTER_PROVIDER', filterProvider: value as any })}
+                onValueChange={(value) => dispatch({ type: 'SET_FILTER_PROVIDER', filterProvider: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Provider" />
@@ -1058,7 +1058,7 @@ export default function StoragePage() {
               {/* Type Filter */}
               <Select
                 value={state.filterType}
-                onValueChange={(value) => dispatch({ type: 'SET_FILTER_TYPE', filterType: value as any })}
+                onValueChange={(value) => dispatch({ type: 'SET_FILTER_TYPE', filterType: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Type" />
@@ -1077,7 +1077,7 @@ export default function StoragePage() {
               {/* Sort */}
               <Select
                 value={state.sortBy}
-                onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value as any })}
+                onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sort" />

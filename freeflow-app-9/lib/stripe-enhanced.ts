@@ -183,8 +183,8 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     customerId: subscription.customer as string,
     status: subscription.status,
     priceId: subscription.items.data[0]?.price.id,
-    currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
-    currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+    currentPeriodStart: new Date((subscription as Record<string, unknown>).current_period_start * 1000),
+    currentPeriodEnd: new Date((subscription as Record<string, unknown>).current_period_end * 1000),
   })
 }
 
@@ -195,8 +195,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   // Handle subscription updates
   await updateSubscriptionRecord(subscription.id, {
     status: subscription.status,
-    currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
-    currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+    currentPeriodStart: new Date((subscription as Record<string, unknown>).current_period_start * 1000),
+    currentPeriodEnd: new Date((subscription as Record<string, unknown>).current_period_end * 1000),
   })
 }
 
@@ -207,7 +207,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   // Handle successful invoice payment
   await processInvoicePayment({
     invoiceId: invoice.id,
-    subscriptionId: (invoice as any).subscription as string,
+    subscriptionId: (invoice as Record<string, unknown>).subscription as string,
     customerId: invoice.customer as string,
     amount: invoice.amount_paid,
     paidAt: new Date(),

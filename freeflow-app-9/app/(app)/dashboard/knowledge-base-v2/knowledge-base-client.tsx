@@ -495,7 +495,7 @@ export default function KnowledgeBaseClient() {
         article_slug: slug,
         description: newPageContent.trim() || null,
         content: newPageContent.trim() || null,
-        category: newPageCategory as any,
+        category: newPageCategory as string,
         status: 'draft' as any,
       })
 

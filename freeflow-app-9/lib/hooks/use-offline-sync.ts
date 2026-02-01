@@ -348,10 +348,10 @@ export function useOfflineSync<T = any>(config: OfflineSyncConfig): UseOfflineSy
             result = await supabase.from(change.table).insert(change.data).select().single()
             break
           case 'update':
-            result = await supabase.from(change.table).update(change.data).eq('id', (change.data as any).id).select().single()
+            result = await supabase.from(change.table).update(change.data).eq('id', (change.data as Record<string, unknown>).id).select().single()
             break
           case 'delete':
-            result = await supabase.from(change.table).delete().eq('id', (change.data as any).id)
+            result = await supabase.from(change.table).delete().eq('id', (change.data as Record<string, unknown>).id)
             break
         }
 
@@ -373,7 +373,7 @@ export function useOfflineSync<T = any>(config: OfflineSyncConfig): UseOfflineSy
           const { data: remoteData } = await supabaseRef.current
             .from(change.table)
             .select('*')
-            .eq('id', (change.data as any).id)
+            .eq('id', (change.data as Record<string, unknown>).id)
             .single()
 
           const conflict: SyncConflict<T> = {

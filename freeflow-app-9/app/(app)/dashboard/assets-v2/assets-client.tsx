@@ -902,7 +902,7 @@ export default function AssetsClient({ initialAssets: _initialAssets, initialCol
       const tagsArray = assetForm.tags.split(',').map(t => t.trim()).filter(Boolean)
       await createAsset({
         asset_name: assetForm.asset_name,
-        asset_type: assetForm.asset_type as any,
+        asset_type: assetForm.asset_type as string,
         file_format: assetForm.file_format,
         file_url: '',
         file_size: 0,
@@ -910,7 +910,7 @@ export default function AssetsClient({ initialAssets: _initialAssets, initialCol
         tags: tagsArray.length > 0 ? tagsArray : [],
         metadata: { description: assetForm.description },
         version: 1,
-        status: assetForm.status as any,
+        status: assetForm.status as string,
         is_public: assetForm.is_public,
         download_count: 0,
         license_type: assetForm.license_type,
@@ -997,11 +997,11 @@ export default function AssetsClient({ initialAssets: _initialAssets, initialCol
       const tagsArray = assetForm.tags.split(',').map(t => t.trim()).filter(Boolean)
       await updateAsset(itemToEdit.id, {
         asset_name: assetForm.asset_name,
-        asset_type: assetForm.asset_type as any,
+        asset_type: assetForm.asset_type as string,
         file_format: assetForm.file_format,
         tags: tagsArray,
         metadata: { description: assetForm.description },
-        status: assetForm.status as any,
+        status: assetForm.status as string,
         is_public: assetForm.is_public,
         license_type: assetForm.license_type,
       })

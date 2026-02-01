@@ -120,9 +120,9 @@ export function useAnnouncementsRealtime() {
     if (isDemoModeEnabled()) { return }
     supabase.from('announcements').select('*').eq('status', 'published').order('is_pinned', { ascending: false }).order('created_at', { ascending: false }).limit(20).then(({ data }) => setAnnouncements(data || []))
     const channel = supabase.channel('announcements_realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'announcements' }, (payload) => { if ((payload.new as any).status === 'published') setAnnouncements(prev => [payload.new, ...prev].slice(0, 20)) })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'announcements' }, (payload) => setAnnouncements(prev => prev.map(a => a.id === (payload.new as any).id ? payload.new : a)))
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'announcements' }, (payload) => setAnnouncements(prev => prev.filter(a => a.id !== (payload.old as any).id)))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'announcements' }, (payload) => { if ((payload.new as Record<string, unknown>).status === 'published') setAnnouncements(prev => [payload.new, ...prev].slice(0, 20)) })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'announcements' }, (payload) => setAnnouncements(prev => prev.map(a => a.id === (payload.new as Record<string, unknown>).id ? payload.new : a)))
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'announcements' }, (payload) => setAnnouncements(prev => prev.filter(a => a.id !== (payload.old as Record<string, unknown>).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [])

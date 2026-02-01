@@ -108,8 +108,8 @@ export default function FinancialOverviewPage() {
         client: t.client_name,
         project: t.project_name,
         vendor: t.vendor_name,
-        status: t.status as any,
-        paymentMethod: t.payment_method as any,
+        status: t.status as string,
+        paymentMethod: t.payment_method as string,
         invoice: t.invoice_number,
         recurring: t.is_recurring,
         nextDue: t.next_due_date,
@@ -136,14 +136,14 @@ export default function FinancialOverviewPage() {
 
       const transformedInsights = (insightsResult.data || []).map(i => ({
         id: i.id,
-        type: i.type as any,
+        type: i.type as string,
         title: i.title,
         description: i.description,
-        impact: i.impact as any,
+        impact: i.impact as string,
         potentialValue: i.potential_value,
         actionable: i.is_actionable,
         confidence: i.confidence,
-        category: i.category as any
+        category: i.category as string
       }))
       setInsights(transformedInsights)
       setInvoices([])

@@ -159,8 +159,8 @@ export function useMessagesRealtime(channelId?: string) {
     supabase.from('messages').select('*, message_attachments(*)').eq('channel_id', channelId).eq('is_deleted', false).order('created_at', { ascending: true }).limit(100).then(({ data }) => setMessages(data || []))
     const channel = supabase.channel(`messages_${channelId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `channel_id=eq.${channelId}` }, (payload) => setMessages(prev => [...prev, payload.new]))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `channel_id=eq.${channelId}` }, (payload) => setMessages(prev => prev.map(m => m.id === (payload.new as any).id ? payload.new : m)))
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages', filter: `channel_id=eq.${channelId}` }, (payload) => setMessages(prev => prev.filter(m => m.id !== (payload.old as any).id)))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `channel_id=eq.${channelId}` }, (payload) => setMessages(prev => prev.map(m => m.id === (payload.new as Record<string, unknown>).id ? payload.new : m)))
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages', filter: `channel_id=eq.${channelId}` }, (payload) => setMessages(prev => prev.filter(m => m.id !== (payload.old as Record<string, unknown>).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [channelId])

@@ -563,7 +563,7 @@ export const UPSController: React.FC<UPSControllerProps> = ({
           {/* Content Area */}
           <div className="flex-1 overflow-hidden">
             {layout === 'tabs' ? (
-              <Tabs value={ui.activeView} onValueChange={(value) => integration.setActiveView(value as any)} className="h-full">
+              <Tabs value={ui.activeView} onValueChange={(value) => integration.setActiveView(value as string)} className="h-full">
                 <TabsList className="grid w-full grid-cols-5">
                   {enabledFeatures.includes('comments') && (
                     <TabsTrigger value="comments">Comments</TabsTrigger>

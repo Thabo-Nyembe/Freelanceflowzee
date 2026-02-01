@@ -988,7 +988,7 @@ export default function ARCollaborationPage() {
                     value={state.sortBy}
                     onValueChange={(value) => {
                       logger.debug('Sort changed', { sortBy: value })
-                      dispatch({ type: 'SET_SORT', sortBy: value as any })
+                      dispatch({ type: 'SET_SORT', sortBy: value })
                     }}
                   >
                     <SelectTrigger className="w-[180px] bg-slate-900/50 border-gray-700">

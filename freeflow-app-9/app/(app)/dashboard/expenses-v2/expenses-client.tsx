@@ -309,7 +309,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const { createKey: createApiKey } = useApiKeys()
 
   // Database integration - use real expenses hooks
-  const { data: hookExpenses, isLoading: hookLoading, error: hookError, refetch } = useExpenses({ status: statusFilter as any })
+  const { data: hookExpenses, isLoading: hookLoading, error: hookError, refetch } = useExpenses({ status: statusFilter as string })
   const { mutate: createExpense, isLoading: creating } = useCreateExpense()
   const { mutate: updateExpense, isLoading: updating } = useUpdateExpense()
   const { mutate: deleteExpense, isLoading: deleting } = useDeleteExpense()
@@ -1409,7 +1409,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                   </div>
                   <select
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as any)}
+                    onChange={(e) => setStatusFilter(e.target.value)}
                     className="px-3 py-2 border rounded-lg text-sm"
                   >
                     <option value="all">All Status</option>

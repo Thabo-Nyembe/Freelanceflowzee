@@ -194,7 +194,7 @@ export class VoiceSynthesisAPI {
 
   private createMockResponse(request: VoiceSynthesisRequest): VoiceSynthesisResponse {
     // Create a simple beep tone as a fallback
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const audioContext = new (window.AudioContext || (window as Record<string, unknown>).webkitAudioContext)()
     const buffer = audioContext.createBuffer(1, 44100, 44100)
     const data = buffer.getChannelData(0)
 

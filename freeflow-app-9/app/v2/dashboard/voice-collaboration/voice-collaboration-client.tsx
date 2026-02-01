@@ -1384,7 +1384,7 @@ export default function VoiceCollaborationClient() {
                         previousSort: state.sortBy,
                         newSort: e.target.value
                       })
-                      dispatch({ type: 'SET_SORT', sortBy: e.target.value as any })
+                      dispatch({ type: 'SET_SORT', sortBy: e.target.value })
                     }}
                     className="w-[180px] h-10 rounded-md border border-gray-700 bg-slate-900/50 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >

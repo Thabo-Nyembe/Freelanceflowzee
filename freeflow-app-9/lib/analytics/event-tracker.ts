@@ -394,12 +394,12 @@ export class EventTracker {
 
     // Optional navigator properties
     if ('connection' in navigator) {
-      const conn = (navigator as any).connection
+      const conn = (navigator as Record<string, unknown>).connection
       metadata.connectionType = conn?.effectiveType
     }
 
     if ('deviceMemory' in navigator) {
-      metadata.deviceMemory = (navigator as any).deviceMemory
+      metadata.deviceMemory = (navigator as Record<string, unknown>).deviceMemory
     }
 
     if ('hardwareConcurrency' in navigator) {

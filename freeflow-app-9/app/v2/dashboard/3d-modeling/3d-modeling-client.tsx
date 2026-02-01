@@ -279,8 +279,8 @@ export default function ThreeDModelingClient() {
     textures: dbModel.texture_count,
     materials: dbModel.material_count,
     size: formatFileSize(dbModel.file_size),
-    format: dbModel.file_format as any,
-    status: dbModel.status as any,
+    format: dbModel.file_format as string,
+    status: dbModel.status as string,
     thumbnail: dbModel.thumbnail_url || '/api/placeholder/200/150',
     created: new Date(dbModel.created_at).toLocaleDateString(),
     modified: new Date(dbModel.updated_at).toLocaleDateString()

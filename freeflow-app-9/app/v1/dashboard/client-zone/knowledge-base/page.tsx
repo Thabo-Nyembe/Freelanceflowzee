@@ -110,8 +110,8 @@ export default function ClientKnowledgeBase() {
 
       // Open live chat widget - integrate with Intercom, Crisp, or similar
       // For now, open support page
-      if (typeof window !== 'undefined' && (window as any).Intercom) {
-        (window as any).Intercom('show')
+      if (typeof window !== 'undefined' && (window as Record<string, unknown>).Intercom) {
+        (window as Record<string, unknown>).Intercom('show')
       } else {
         // Fallback: open support contact form
         window.location.href = '/support?chat=true'

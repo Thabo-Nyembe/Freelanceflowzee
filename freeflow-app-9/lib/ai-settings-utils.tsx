@@ -464,7 +464,7 @@ export function generateMockUsageRecords(count: number = 50, userId: string = 'u
 export function calculateUsageStats(records: UsageRecord[]): UsageStats {
   logger.debug('Calculating usage statistics', { totalRecords: records.length })
 
-  const byProvider: Record<string, ProviderUsage> = {} as any
+  const byProvider: Record<string, ProviderUsage> = {}
   const byModel: Record<string, ModelUsage> = {}
   const byPeriod: Record<UsagePeriod, PeriodUsage> = {
     hour: { requests: 0, tokens: 0, cost: 0 },
@@ -548,7 +548,7 @@ export function calculateUsageStats(records: UsageRecord[]): UsageStats {
     totalCost: records.reduce((sum, r) => sum + r.cost, 0),
     averageLatency: records.length > 0 ? totalLatency / records.length : 0,
     successRate: records.length > 0 ? (successCount / records.length) * 100 : 0,
-    byProvider: byProvider as any,
+    byProvider: byProvider as string,
     byModel,
     byPeriod,
     topFeatures,

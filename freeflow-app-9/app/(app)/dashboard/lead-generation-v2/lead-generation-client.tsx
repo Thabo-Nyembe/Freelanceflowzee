@@ -3970,7 +3970,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                     // Update the associated lead's status and value if selected
                     if (newDealForm.leadId) {
                       await updateLead(newDealForm.leadId, {
-                        status: newDealForm.stage === 'won' ? 'converted' : newDealForm.stage === 'lost' ? 'archived' : newDealForm.stage as any,
+                        status: newDealForm.stage === 'won' ? 'converted' : newDealForm.stage === 'lost' ? 'archived' : newDealForm.stage as string,
                         value_estimate: newDealForm.value,
                         notes: newDealForm.notes || undefined
                       })

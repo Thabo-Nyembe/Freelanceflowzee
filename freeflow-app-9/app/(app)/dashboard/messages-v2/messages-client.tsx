@@ -1324,7 +1324,7 @@ export default function MessagesClient() {
       status: 'ongoing',
       channelId: selectedChannel?.id || 'new',
       channelName: contactName,
-      participants: [currentUser as any],
+      participants: [currentUser as string],
       startTime: new Date().toISOString(),
       isRecorded: false
     })
@@ -2249,7 +2249,7 @@ export default function MessagesClient() {
               {[
                 { icon: Phone, label: 'Start Call', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { if (selectedChannel) { handleStartCall(selectedChannel.name) } else { toast.success('Select a contact') } } },
                 { icon: Video, label: 'Video Call', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => { if (selectedChannel) { handleStartCall(selectedChannel.name) } else { toast.success('Select a contact') } } },
-                { icon: Headphones, label: 'Huddle', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => { setActiveCall({ id: 'huddle-new', type: 'huddle', status: 'ongoing', channelId: 'huddle', channelName: 'Quick Huddle', participants: [currentUser as any], startTime: new Date().toISOString(), isRecorded: false }); toast.success('Huddle started') } },
+                { icon: Headphones, label: 'Huddle', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => { setActiveCall({ id: 'huddle-new', type: 'huddle', status: 'ongoing', channelId: 'huddle', channelName: 'Quick Huddle', participants: [currentUser as string], startTime: new Date().toISOString(), isRecorded: false }); toast.success('Huddle started') } },
                 { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { if (!activeCall) { toast.warning('Start a call first') } } },
                 { icon: Calendar, label: 'Schedule', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => window.open('/dashboard/calendar', '_blank') },
                 { icon: PlayCircle, label: 'Recordings', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const recorded = mockCalls.filter(c => c.isRecorded); toast.success(`Call recordings: ${recorded.length} recorded calls available`) } },

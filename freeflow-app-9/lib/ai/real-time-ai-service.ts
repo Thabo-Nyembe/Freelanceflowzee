@@ -14,7 +14,7 @@ export class RealTimeAIService {
   constructor() {
     this.aiService = new EnhancedAIService()
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      this.speechRecognition = new (window as any).webkitSpeechRecognition()
+      this.speechRecognition = new (window as Record<string, unknown>).webkitSpeechRecognition()
       this.setupSpeechRecognition()
     }
   }

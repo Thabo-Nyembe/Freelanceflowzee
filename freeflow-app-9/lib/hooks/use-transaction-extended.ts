@@ -127,7 +127,7 @@ export function useTransactionsRealtime(userId?: string) {
     supabase.from('transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(50).then(({ data }) => setTransactions(data || []))
     const channel = supabase.channel(`transactions_${userId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions', filter: `user_id=eq.${userId}` }, (payload) => setTransactions(prev => [payload.new, ...prev].slice(0, 50)))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'transactions', filter: `user_id=eq.${userId}` }, (payload) => setTransactions(prev => prev.map(tx => tx.id === (payload.new as any).id ? payload.new : tx)))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'transactions', filter: `user_id=eq.${userId}` }, (payload) => setTransactions(prev => prev.map(tx => tx.id === (payload.new as Record<string, unknown>).id ? payload.new : tx)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [userId])

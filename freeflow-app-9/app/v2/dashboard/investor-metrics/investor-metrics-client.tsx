@@ -2130,7 +2130,7 @@ export default function InvestorMetricsClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Category</Label>
-                <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v as any }))}>
+                <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v as string }))}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="revenue">Revenue</SelectItem>
@@ -2142,7 +2142,7 @@ export default function InvestorMetricsClient() {
               </div>
               <div>
                 <Label>Period</Label>
-                <Select value={formData.period} onValueChange={(v) => setFormData(prev => ({ ...prev, period: v as any }))}>
+                <Select value={formData.period} onValueChange={(v) => setFormData(prev => ({ ...prev, period: v as string }))}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="monthly">Monthly</SelectItem>
@@ -2307,7 +2307,7 @@ export default function InvestorMetricsClient() {
               <Label>Metrics Category</Label>
               <Select
                 value={updateMetricsForm.metricsToUpdate}
-                onValueChange={(v) => setUpdateMetricsForm(prev => ({ ...prev, metricsToUpdate: v as any }))}
+                onValueChange={(v) => setUpdateMetricsForm(prev => ({ ...prev, metricsToUpdate: v as string }))}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -2325,7 +2325,7 @@ export default function InvestorMetricsClient() {
               <Label>Data Source</Label>
               <Select
                 value={updateMetricsForm.refreshSource}
-                onValueChange={(v) => setUpdateMetricsForm(prev => ({ ...prev, refreshSource: v as any }))}
+                onValueChange={(v) => setUpdateMetricsForm(prev => ({ ...prev, refreshSource: v as string }))}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -2398,7 +2398,7 @@ export default function InvestorMetricsClient() {
                 <Label>Report Type</Label>
                 <Select
                   value={investorReportForm.reportType}
-                  onValueChange={(v) => setInvestorReportForm(prev => ({ ...prev, reportType: v as any }))}
+                  onValueChange={(v) => setInvestorReportForm(prev => ({ ...prev, reportType: v as string }))}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -2415,7 +2415,7 @@ export default function InvestorMetricsClient() {
                 <Label>Recipients</Label>
                 <Select
                   value={investorReportForm.recipientType}
-                  onValueChange={(v) => setInvestorReportForm(prev => ({ ...prev, recipientType: v as any }))}
+                  onValueChange={(v) => setInvestorReportForm(prev => ({ ...prev, recipientType: v as string }))}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -2526,7 +2526,7 @@ export default function InvestorMetricsClient() {
               <Label>Data to Export</Label>
               <Select
                 value={exportDataForm.dataType}
-                onValueChange={(v) => setExportDataForm(prev => ({ ...prev, dataType: v as any }))}
+                onValueChange={(v) => setExportDataForm(prev => ({ ...prev, dataType: v as string }))}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -2545,7 +2545,7 @@ export default function InvestorMetricsClient() {
                 <Label>Format</Label>
                 <Select
                   value={exportDataForm.format}
-                  onValueChange={(v) => setExportDataForm(prev => ({ ...prev, format: v as any }))}
+                  onValueChange={(v) => setExportDataForm(prev => ({ ...prev, format: v as string }))}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -2562,7 +2562,7 @@ export default function InvestorMetricsClient() {
                 <Label>Date Range</Label>
                 <Select
                   value={exportDataForm.dateRange}
-                  onValueChange={(v) => setExportDataForm(prev => ({ ...prev, dateRange: v as any }))}
+                  onValueChange={(v) => setExportDataForm(prev => ({ ...prev, dateRange: v as string }))}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />

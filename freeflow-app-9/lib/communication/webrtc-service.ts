@@ -436,10 +436,10 @@ export class WebRTCService extends EventEmitter {
           cursor: screenOptions.cursor,
           displaySurface: screenOptions.displaySurface,
           logicalSurface: screenOptions.logicalSurface
-        } as any,
+        },
         audio: {
           suppressLocalAudioPlayback: screenOptions.suppressLocalAudioPlayback
-        } as any
+        }
       })
 
       // Replace video track in all peer connections

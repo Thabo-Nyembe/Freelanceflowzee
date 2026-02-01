@@ -199,8 +199,8 @@ export function useSecureDeliveryRealtime(ownerId?: string) {
     supabase.from('secure_file_deliveries').select('*').eq('owner_id', ownerId).order('created_at', { ascending: false }).limit(50).then(({ data }) => setDeliveries(data || []))
     const channel = supabase.channel(`secure_deliveries_${ownerId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'secure_file_deliveries', filter: `owner_id=eq.${ownerId}` }, (payload) => setDeliveries(prev => [payload.new, ...prev].slice(0, 50)))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'secure_file_deliveries', filter: `owner_id=eq.${ownerId}` }, (payload) => setDeliveries(prev => prev.map(d => d.id === (payload.new as any).id ? payload.new : d)))
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'secure_file_deliveries', filter: `owner_id=eq.${ownerId}` }, (payload) => setDeliveries(prev => prev.filter(d => d.id !== (payload.old as any).id)))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'secure_file_deliveries', filter: `owner_id=eq.${ownerId}` }, (payload) => setDeliveries(prev => prev.map(d => d.id === (payload.new as Record<string, unknown>).id ? payload.new : d)))
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'secure_file_deliveries', filter: `owner_id=eq.${ownerId}` }, (payload) => setDeliveries(prev => prev.filter(d => d.id !== (payload.old as Record<string, unknown>).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [ownerId])

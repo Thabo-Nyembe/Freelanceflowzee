@@ -563,7 +563,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
 
   // Handle editing a customer
   const handleOpenEditDialog = (customer: Client) => {
-    setEditingCustomer(customer as any)
+    setEditingCustomer(customer as string)
     // Parse name into first/last if stored in metadata, otherwise split by space
     const nameParts = customer.name.split(' ')
     const firstName = customer.metadata?.first_name || nameParts[0] || ''
@@ -597,7 +597,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         notes: editContactForm.notes || null,
         status: editContactForm.status as 'active' | 'inactive' | 'prospect' | 'lead' | 'churned',
         metadata: {
-          ...((editingCustomer as any).metadata || {}),
+          ...((editingCustomer as Record<string, unknown>).metadata || {}),
           first_name: editContactForm.firstName,
           last_name: editContactForm.lastName,
           title: editContactForm.title || null

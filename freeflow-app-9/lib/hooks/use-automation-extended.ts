@@ -118,7 +118,7 @@ export function useAutomationLogsRealtime(workflowId?: string) {
     supabase.from('automation_logs').select('*').eq('workflow_id', workflowId).order('started_at', { ascending: false }).limit(50).then(({ data }) => setLogs(data || []))
     const channel = supabase.channel(`automation_logs_${workflowId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'automation_logs', filter: `workflow_id=eq.${workflowId}` }, (payload) => setLogs(prev => [payload.new, ...prev].slice(0, 50)))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'automation_logs', filter: `workflow_id=eq.${workflowId}` }, (payload) => setLogs(prev => prev.map(l => l.id === (payload.new as any).id ? payload.new : l)))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'automation_logs', filter: `workflow_id=eq.${workflowId}` }, (payload) => setLogs(prev => prev.map(l => l.id === (payload.new as Record<string, unknown>).id ? payload.new : l)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [workflowId])

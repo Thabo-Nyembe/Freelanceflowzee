@@ -414,7 +414,7 @@ function FilterControls({
                 id={`level-${key}`}
                 checked={filters.seller_level === key}
                 onCheckedChange={() => onUpdateFilters({
-                  seller_level: filters.seller_level === key ? undefined : key as any,
+                  seller_level: filters.seller_level === key ? undefined : key as string,
                 })}
               />
               <Label htmlFor={`level-${key}`} className="text-sm cursor-pointer">

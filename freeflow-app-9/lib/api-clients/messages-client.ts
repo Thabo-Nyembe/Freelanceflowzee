@@ -336,7 +336,7 @@ class MessagesApiClient extends BaseApiClient {
     return this.updateMessage(messageId, {
       is_read: true,
       read_at: new Date().toISOString()
-    } as any)
+    })
   }
 
   /**
@@ -581,7 +581,7 @@ class MessagesApiClient extends BaseApiClient {
       created_at: new Date().toISOString()
     })
 
-    return this.updateMessage(messageId, { reactions } as any)
+    return this.updateMessage(messageId, { reactions })
   }
 }
 

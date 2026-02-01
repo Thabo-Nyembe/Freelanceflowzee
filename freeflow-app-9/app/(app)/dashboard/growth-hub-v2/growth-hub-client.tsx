@@ -2086,7 +2086,7 @@ export default function GrowthHubClient() {
             </div>
             <div>
               <Label>Cohort Type</Label>
-              <select className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800" value={cohortForm.type} onChange={(e) => setCohortForm(f => ({ ...f, type: e.target.value as any }))}>
+              <select className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800" value={cohortForm.type} onChange={(e) => setCohortForm(f => ({ ...f, type: e.target.value }))}>
                 <option value="behavioral">Behavioral</option>
                 <option value="property">Property-based</option>
                 <option value="computed">Computed</option>

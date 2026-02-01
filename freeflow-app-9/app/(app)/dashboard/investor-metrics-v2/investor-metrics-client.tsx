@@ -2161,7 +2161,7 @@ export default function InvestorMetricsClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Category</Label>
-                <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v as any }))}>
+                <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v as string }))}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="revenue">Revenue</SelectItem>
@@ -2173,7 +2173,7 @@ export default function InvestorMetricsClient() {
               </div>
               <div>
                 <Label>Period</Label>
-                <Select value={formData.period} onValueChange={(v) => setFormData(prev => ({ ...prev, period: v as any }))}>
+                <Select value={formData.period} onValueChange={(v) => setFormData(prev => ({ ...prev, period: v as string }))}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="monthly">Monthly</SelectItem>
@@ -2422,7 +2422,7 @@ export default function InvestorMetricsClient() {
               <Label>Report Type</Label>
               <Select
                 value={reportConfig.reportType}
-                onValueChange={(v) => setReportConfig(prev => ({ ...prev, reportType: v as any }))}
+                onValueChange={(v) => setReportConfig(prev => ({ ...prev, reportType: v as string }))}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -2523,7 +2523,7 @@ export default function InvestorMetricsClient() {
                 <Label>Export Format</Label>
                 <Select
                   value={exportConfig.format}
-                  onValueChange={(v) => setExportConfig(prev => ({ ...prev, format: v as any }))}
+                  onValueChange={(v) => setExportConfig(prev => ({ ...prev, format: v as string }))}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -2540,7 +2540,7 @@ export default function InvestorMetricsClient() {
                 <Label>Date Range</Label>
                 <Select
                   value={exportConfig.dateRange}
-                  onValueChange={(v) => setExportConfig(prev => ({ ...prev, dateRange: v as any }))}
+                  onValueChange={(v) => setExportConfig(prev => ({ ...prev, dateRange: v as string }))}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />

@@ -169,8 +169,8 @@ class StripeEnhancedService {
       return {
         success: true,
         subscription,
-        clientSecret: (subscription.latest_invoice as any)?.payment_intent 
-          ? ((subscription.latest_invoice as any).payment_intent as Stripe.PaymentIntent).client_secret
+        clientSecret: (subscription.latest_invoice as Record<string, unknown>)?.payment_intent 
+          ? ((subscription.latest_invoice as Record<string, unknown>).payment_intent as Stripe.PaymentIntent).client_secret
           : null
       }
     } catch (error) {

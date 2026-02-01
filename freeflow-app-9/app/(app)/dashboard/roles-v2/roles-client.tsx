@@ -1607,7 +1607,7 @@ export default function RolesClient() {
                   { type: 'custom', count: combinedRoles.filter(r => r.type === 'custom').length, color: 'purple', icon: Shield },
                   { type: 'service', count: combinedRoles.filter(r => r.type === 'service').length, color: 'gray', icon: KeyRound },
                 ].map((item, i) => (
-                  <Card key={i} className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all ${typeFilter === item.type ? 'ring-2 ring-purple-500' : ''}`} onClick={() => setTypeFilter(item.type as any)}>
+                  <Card key={i} className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all ${typeFilter === item.type ? 'ring-2 ring-purple-500' : ''}`} onClick={() => setTypeFilter(item.type as string)}>
                     <CardContent className="p-4 text-center">
                       <item.icon className={`h-6 w-6 mx-auto mb-2 text-${item.color}-600`} />
                       <p className="text-2xl font-bold">{item.count}</p>

@@ -637,9 +637,9 @@ export const UPSNotificationSystem: React.FC<UPSNotificationSystemProps> = ({
                 typeFilter={typeFilter}
                 onTypeFilterChange={setTypeFilter}
                 dateFilter={dateFilter}
-                onDateFilterChange={(filter) => setDateFilter(filter as any)}
+                onDateFilterChange={(filter) => setDateFilter(filter as string)}
                 readFilter={readFilter}
-                onReadFilterChange={(filter) => setReadFilter(filter as any)}
+                onReadFilterChange={(filter) => setReadFilter(filter as string)}
                 searchQuery={searchQuery}
                 onSearchQueryChange={setSearchQuery}
               />

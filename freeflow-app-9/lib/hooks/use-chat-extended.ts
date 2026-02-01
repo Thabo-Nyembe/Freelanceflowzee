@@ -81,8 +81,8 @@ export function useChatMessagesRealtime(roomId?: string) {
     supabase.from('chat_messages').select('*, chat_attachments(*)').eq('room_id', roomId).order('created_at', { ascending: false }).limit(50).then(({ data }) => setMessages((data || []).reverse()))
     const channel = supabase.channel(`chat_messages_${roomId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${roomId}` }, (payload) => setMessages(prev => [...prev, payload.new]))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${roomId}` }, (payload) => setMessages(prev => prev.map(m => m.id === (payload.new as any).id ? payload.new : m)))
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${roomId}` }, (payload) => setMessages(prev => prev.filter(m => m.id !== (payload.old as any).id)))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${roomId}` }, (payload) => setMessages(prev => prev.map(m => m.id === (payload.new as Record<string, unknown>).id ? payload.new : m)))
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${roomId}` }, (payload) => setMessages(prev => prev.filter(m => m.id !== (payload.old as Record<string, unknown>).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [roomId])

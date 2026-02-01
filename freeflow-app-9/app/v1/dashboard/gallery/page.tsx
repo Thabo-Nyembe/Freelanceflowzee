@@ -336,7 +336,7 @@ export default function GalleryPage() {
                   <select
                     value={filters.type}
                     onChange={(e) =>
-                      setFilters({ ...filters, type: e.target.value as any })
+                      setFilters({ ...filters, type: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
@@ -353,7 +353,7 @@ export default function GalleryPage() {
                   <select
                     value={filters.status}
                     onChange={(e) =>
-                      setFilters({ ...filters, status: e.target.value as any })
+                      setFilters({ ...filters, status: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
@@ -370,7 +370,7 @@ export default function GalleryPage() {
                   <select
                     value={filters.sortBy}
                     onChange={(e) =>
-                      setFilters({ ...filters, sortBy: e.target.value as any })
+                      setFilters({ ...filters, sortBy: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >

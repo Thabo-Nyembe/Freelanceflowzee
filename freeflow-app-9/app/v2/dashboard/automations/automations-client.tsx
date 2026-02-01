@@ -1758,7 +1758,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </div>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
+                onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
               >
                 <option value="all">All Status</option>
@@ -3989,7 +3989,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 <select
                   className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
                   value={newWebhookForm.method}
-                  onChange={(e) => setNewWebhookForm(prev => ({ ...prev, method: e.target.value as any }))}
+                  onChange={(e) => setNewWebhookForm(prev => ({ ...prev, method: e.target.value }))}
                 >
                   <option value="GET">GET</option>
                   <option value="POST">POST</option>

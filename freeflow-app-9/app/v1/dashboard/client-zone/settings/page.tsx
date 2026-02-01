@@ -353,7 +353,7 @@ export default function SettingsPage() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as string)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === tab.id
                     ? 'bg-blue-100 text-blue-900 font-medium'

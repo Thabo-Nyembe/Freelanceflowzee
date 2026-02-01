@@ -835,7 +835,7 @@ export default function MyDayTodayPage() {
                 </label>
                 <select
                   value={newTaskPriority}
-                  onChange={(e) => setNewTaskPriority(e.target.value as any)}
+                  onChange={(e) => setNewTaskPriority(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="low">Low</option>

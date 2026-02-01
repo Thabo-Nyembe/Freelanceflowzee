@@ -110,7 +110,7 @@ export function CalendarIntegrationStep({ onComplete, onSkip, onBack }: any) {
         {calendarProviders.map((p) => (
           <button
             key={p.id}
-            onClick={() => setProvider(p.id as any)}
+            onClick={() => setProvider(p.id as string)}
             className={cn(
               'p-6 border-2 rounded-xl text-left transition-all hover:border-blue-500 hover:shadow-lg',
               provider === p.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' : 'border-gray-200'
@@ -591,7 +591,7 @@ export function CRMIntegrationStep({ onComplete, onSkip, onBack }: any) {
         {crmProviders.map((p) => (
           <button
             key={p.id}
-            onClick={() => setProvider(p.id as any)}
+            onClick={() => setProvider(p.id as string)}
             className={cn(
               'p-6 border-2 rounded-xl text-left transition-all hover:border-orange-500',
               provider === p.id ? 'border-orange-500 bg-orange-50 dark:bg-orange-950' : 'border-gray-200'

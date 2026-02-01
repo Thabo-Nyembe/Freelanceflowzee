@@ -593,7 +593,7 @@ export default function AISettingsPage() {
                       value={editedContext.aiConfig?.responseStyle || 'formal'}
                       onChange={(e) => setEditedContext(prev => ({
                         ...prev,
-                        aiConfig: { ...prev.aiConfig, responseStyle: e.target.value as any } as AIConfiguration,
+                        aiConfig: { ...prev.aiConfig, responseStyle: e.target.value } as AIConfiguration,
                       }))}
                       className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
@@ -692,7 +692,7 @@ export default function AISettingsPage() {
                     </label>
                     <select
                       value={newSource.type}
-                      onChange={(e) => setNewSource(prev => ({ ...prev, type: e.target.value as any }))}
+                      onChange={(e) => setNewSource(prev => ({ ...prev, type: e.target.value }))}
                       className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                       <option value="document">Document</option>
@@ -945,7 +945,7 @@ export default function AISettingsPage() {
                     </label>
                     <select
                       value={newPolicy.enforcement}
-                      onChange={(e) => setNewPolicy(prev => ({ ...prev, enforcement: e.target.value as any }))}
+                      onChange={(e) => setNewPolicy(prev => ({ ...prev, enforcement: e.target.value }))}
                       className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                       <option value="strict">Strict (Block)</option>

@@ -118,8 +118,8 @@ export function useDesktopNotificationsRealtime(userId?: string) {
     supabase.from('desktop_notifications').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(50).then(({ data }) => setNotifications(data || []))
     const channel = supabase.channel(`desktop_notifications_${userId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'desktop_notifications', filter: `user_id=eq.${userId}` }, (payload) => setNotifications(prev => [payload.new, ...prev].slice(0, 50)))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'desktop_notifications', filter: `user_id=eq.${userId}` }, (payload) => setNotifications(prev => prev.map(n => n.id === (payload.new as any).id ? payload.new : n)))
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'desktop_notifications', filter: `user_id=eq.${userId}` }, (payload) => setNotifications(prev => prev.filter(n => n.id !== (payload.old as any).id)))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'desktop_notifications', filter: `user_id=eq.${userId}` }, (payload) => setNotifications(prev => prev.map(n => n.id === (payload.new as Record<string, unknown>).id ? payload.new : n)))
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'desktop_notifications', filter: `user_id=eq.${userId}` }, (payload) => setNotifications(prev => prev.filter(n => n.id !== (payload.old as Record<string, unknown>).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [userId])

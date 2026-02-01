@@ -81,7 +81,7 @@ export function useHealthScoreMutations() {
   return {
     createHealthScore: createMutation.mutate,
     updateHealthScore: (id: string, data: Parameters<typeof updateHealthScore>[1]) =>
-      updateMutation.mutate({ id, ...data } as any),
+      updateMutation.mutate({ id, ...data }),
     recalculateHealthScore: recalculateMutation.mutate,
     deleteHealthScore: deleteMutation.mutate,
     isCreating: createMutation.isLoading,

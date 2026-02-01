@@ -90,7 +90,7 @@ export interface VoiceCommandContext {
 export function isSpeechRecognitionSupported(): boolean {
   return !!(
     typeof window !== 'undefined' &&
-    (window.SpeechRecognition || (window as any).webkitSpeechRecognition)
+    (window.SpeechRecognition || (window as Record<string, unknown>).webkitSpeechRecognition)
   )
 }
 
@@ -138,7 +138,7 @@ export function createVoiceInput(config: VoiceInputConfig): VoiceInputController
   }
 
   // Get SpeechRecognition constructor
-  const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition
+  const SpeechRecognition = window.SpeechRecognition || (window as Record<string, unknown>).webkitSpeechRecognition
 
   const recognition = new SpeechRecognition()
   let isListening = false

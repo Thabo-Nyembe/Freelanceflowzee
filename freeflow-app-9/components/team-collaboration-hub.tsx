@@ -435,7 +435,7 @@ export function TeamCollaborationHub() {
       </div>
 
       {/* Main Content Tabs */}
-      <Tabs value={state.currentView} onValueChange={(value) => dispatch({ type: 'SET_CURRENT_VIEW', view: value as any })}>
+      <Tabs value={state.currentView} onValueChange={(value) => dispatch({ type: 'SET_CURRENT_VIEW', view: value })}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="team">Team Members</TabsTrigger>
           <TabsTrigger value="files">Project Files</TabsTrigger>

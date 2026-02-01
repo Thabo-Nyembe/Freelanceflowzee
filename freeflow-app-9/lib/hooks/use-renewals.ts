@@ -84,7 +84,7 @@ export function useRenewalMutations() {
   return {
     createRenewal: createMutation.mutate,
     updateRenewal: (id: string, data: Parameters<typeof updateRenewal>[1]) =>
-      updateMutation.mutate({ id, ...data } as any),
+      updateMutation.mutate({ id, ...data }),
     markRenewalAtRisk: atRiskMutation.mutate,
     winRenewal: winMutation.mutate,
     loseRenewal: loseMutation.mutate,

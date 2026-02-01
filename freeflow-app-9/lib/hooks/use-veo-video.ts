@@ -192,7 +192,7 @@ export function useVeoVideo() {
 
       setProgress({ status: 'completed', progress: 100 })
 
-      const videoData = (response.data as any)?.video || response.data
+      const videoData = (response.data as Record<string, unknown>)?.video || response.data
       const generationResult: GenerationResult = {
         video: {
           url: videoData?.url || videoData,
@@ -200,9 +200,9 @@ export function useVeoVideo() {
           fileName: videoData?.file_name,
           fileSize: videoData?.file_size
         },
-        seed: (response.data as any)?.seed,
+        seed: (response.data as Record<string, unknown>)?.seed,
         prompt: enhancedPrompt,
-        timings: (response.data as any)?.timings
+        timings: (response.data as Record<string, unknown>)?.timings
       }
 
       setResult(generationResult)
@@ -249,7 +249,7 @@ export function useVeoVideo() {
 
       setProgress({ status: 'completed', progress: 100 })
 
-      const videoData = (response.data as any)?.video || response.data
+      const videoData = (response.data as Record<string, unknown>)?.video || response.data
       const result: GenerationResult = {
         video: {
           url: videoData?.url || videoData,
@@ -257,7 +257,7 @@ export function useVeoVideo() {
           fileName: videoData?.file_name,
           fileSize: videoData?.file_size
         },
-        seed: (response.data as any)?.seed,
+        seed: (response.data as Record<string, unknown>)?.seed,
         prompt: params.prompt
       }
 
@@ -299,7 +299,7 @@ export function useVeoVideo() {
 
       setProgress({ status: 'completed', progress: 100 })
 
-      const videoData = (response.data as any)?.video || response.data
+      const videoData = (response.data as Record<string, unknown>)?.video || response.data
       const result: GenerationResult = {
         video: {
           url: videoData?.url || videoData,
@@ -345,7 +345,7 @@ export function useVeoVideo() {
 
       setProgress({ status: 'completed', progress: 100 })
 
-      const videoData = (response.data as any)?.video || response.data
+      const videoData = (response.data as Record<string, unknown>)?.video || response.data
       const result: GenerationResult = {
         video: {
           url: videoData?.url || videoData,

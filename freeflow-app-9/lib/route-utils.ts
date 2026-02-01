@@ -9,7 +9,7 @@
  */
 export function prefetchOnHover(href: string) {
   if (typeof window !== 'undefined' && 'connection' in navigator) {
-    const connection = (navigator as any).connection
+    const connection = (navigator as Record<string, unknown>).connection
 
     // Don't prefetch on slow connections
     if (connection?.saveData || connection?.effectiveType === 'slow-2g') {

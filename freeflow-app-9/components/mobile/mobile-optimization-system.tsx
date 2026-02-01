@@ -296,7 +296,7 @@ function PerformanceOverlay() {
 
       // Memory usage (if available)
       if ('memory' in performance) {
-        const memory = (performance as any).memory
+        const memory = (performance as Record<string, unknown>).memory
         setMemoryUsage(Math.round((memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100))
       }
     }, 1000)

@@ -89,13 +89,13 @@ export function useStorageData() {
             setData(prev => ({
               ...prev,
               files: prev.files.map(f =>
-                (f as any).id === (payload.new as any).id ? payload.new as StorageFile : f
+                (f as Record<string, unknown>).id === (payload.new as Record<string, unknown>).id ? payload.new as StorageFile : f
               )
             }))
           } else if (payload.eventType === 'DELETE') {
             setData(prev => ({
               ...prev,
-              files: prev.files.filter(f => (f as any).id !== (payload.old as any).id)
+              files: prev.files.filter(f => (f as Record<string, unknown>).id !== (payload.old as Record<string, unknown>).id)
             }))
           }
         }
@@ -113,13 +113,13 @@ export function useStorageData() {
             setData(prev => ({
               ...prev,
               connections: prev.connections.map(c =>
-                (c as any).id === (payload.new as any).id ? payload.new as StorageConnection : c
+                (c as Record<string, unknown>).id === (payload.new as Record<string, unknown>).id ? payload.new as StorageConnection : c
               )
             }))
           } else if (payload.eventType === 'DELETE') {
             setData(prev => ({
               ...prev,
-              connections: prev.connections.filter(c => (c as any).id !== (payload.old as any).id)
+              connections: prev.connections.filter(c => (c as Record<string, unknown>).id !== (payload.old as Record<string, unknown>).id)
             }))
           }
         }

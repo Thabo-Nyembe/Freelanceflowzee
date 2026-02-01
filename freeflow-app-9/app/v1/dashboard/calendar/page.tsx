@@ -318,7 +318,7 @@ export default function CalendarPageMigrated() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
+            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as string)}>
               <TabsList>
                 <TabsTrigger value="day">Day</TabsTrigger>
                 <TabsTrigger value="week">Week</TabsTrigger>

@@ -545,7 +545,7 @@ export function UniversalPinpointFeedbackSystemEnhanced({
         setAudioStream(stream)
 
         // Set up audio analysis for waveform
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+        const audioCtx = new (window.AudioContext || (window as Record<string, unknown>).webkitAudioContext)()
         const source = audioCtx.createMediaStreamSource(stream)
         const analyserNode = audioCtx.createAnalyser()
 

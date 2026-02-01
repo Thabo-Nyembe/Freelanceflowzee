@@ -374,7 +374,7 @@ export function AIDesignAssistant({
                 variant={state.analysisMode === key ? "default" : "outline"}
                 size="sm"
                 onClick={() => {
-                  dispatch({ type: 'SET_ANALYSIS_MODE', mode: key as any })
+                  dispatch({ type: 'SET_ANALYSIS_MODE', mode: key })
                   runAnalysis(key as any)
                 }}
                 disabled={state.isAnalyzing}

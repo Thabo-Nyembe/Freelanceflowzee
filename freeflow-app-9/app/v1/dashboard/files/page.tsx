@@ -383,7 +383,7 @@ export default function FilesPageMigrated() {
                 <Filter className="h-4 w-4 text-gray-500" />
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
+                  onChange={(e) => setSortBy(e.target.value)}
                   className="px-3 py-2 border rounded-md text-sm"
                 >
                   <option value="date">Sort by Date</option>

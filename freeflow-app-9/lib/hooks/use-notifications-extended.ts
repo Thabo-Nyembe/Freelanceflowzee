@@ -129,14 +129,14 @@ export function useNotificationsRealtime(userId?: string) {
         setUnreadCount(prev => prev + 1)
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, (payload) => {
-        setNotifications(prev => prev.map(n => n.id === (payload.new as any).id ? payload.new : n))
-        if ((payload.new as any).is_read && !(payload.old as any).is_read) {
+        setNotifications(prev => prev.map(n => n.id === (payload.new as Record<string, unknown>).id ? payload.new : n))
+        if ((payload.new as Record<string, unknown>).is_read && !(payload.old as Record<string, unknown>).is_read) {
           setUnreadCount(prev => Math.max(0, prev - 1))
         }
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, (payload) => {
-        setNotifications(prev => prev.filter(n => n.id !== (payload.old as any).id))
-        if (!(payload.old as any).is_read) setUnreadCount(prev => Math.max(0, prev - 1))
+        setNotifications(prev => prev.filter(n => n.id !== (payload.old as Record<string, unknown>).id))
+        if (!(payload.old as Record<string, unknown>).is_read) setUnreadCount(prev => Math.max(0, prev - 1))
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }

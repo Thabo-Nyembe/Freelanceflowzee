@@ -126,8 +126,8 @@ export function ScreenshotViewer({ file, comments, onAddComment }: ScreenshotVie
                   key={(comment.id as string)} 
                   className="absolute w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
                   style={{
-                    left: `${(comment.position as any).x}%`,
-                    top: `${(comment.position as any).y}%`
+                    left: `${(comment.position as Record<string, unknown>).x}%`,
+                    top: `${(comment.position as Record<string, unknown>).y}%`
                   }}
                   title={(comment.content as string) || "Comment"}
                 >

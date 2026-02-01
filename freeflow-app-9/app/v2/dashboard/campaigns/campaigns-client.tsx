@@ -1150,7 +1150,7 @@ export default function CampaignsClient() {
               <div className="flex items-center gap-4">
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                   className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700"
                 >
                   <option value="all">All Status</option>
@@ -1162,7 +1162,7 @@ export default function CampaignsClient() {
                 </select>
                 <select
                   value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value as any)}
+                  onChange={(e) => setTypeFilter(e.target.value)}
                   className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700"
                 >
                   <option value="all">All Types</option>

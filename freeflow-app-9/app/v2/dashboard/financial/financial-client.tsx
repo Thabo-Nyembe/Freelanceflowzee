@@ -2510,7 +2510,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Account Type</label>
                 <select
                   value={newAccountForm.accountType}
-                  onChange={(e) => setNewAccountForm(prev => ({ ...prev, accountType: e.target.value as any }))}
+                  onChange={(e) => setNewAccountForm(prev => ({ ...prev, accountType: e.target.value }))}
                   className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                 >
                   <option value="asset">Asset</option>

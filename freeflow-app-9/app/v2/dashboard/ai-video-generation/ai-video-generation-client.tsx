@@ -860,10 +860,10 @@ export default function AiVideoGenerationClient() {
         const { data, error } = await createGeneratedVideo(userId, {
           title: genPrompt.substring(0, 50),
           prompt: genPrompt,
-          style: genStyle as any,
-          format: genFormat as any,
-          quality: genQuality as any,
-          ai_model: genModel as any,
+          style: genStyle as string,
+          format: genFormat as string,
+          quality: genQuality as string,
+          ai_model: genModel as string,
           tags: ['ai-generated', genStyle]
         })
         if (error) throw error
@@ -1223,7 +1223,7 @@ export default function AiVideoGenerationClient() {
                     {/* Status Filter */}
                     <select
                       value={state.filterStatus}
-                      onChange={(e) => dispatch({ type: 'SET_FILTER_STATUS', filterStatus: e.target.value as any })}
+                      onChange={(e) => dispatch({ type: 'SET_FILTER_STATUS', filterStatus: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                       <option value="all">All Status</option>
@@ -1235,7 +1235,7 @@ export default function AiVideoGenerationClient() {
                     {/* Quality Filter */}
                     <select
                       value={state.filterQuality}
-                      onChange={(e) => dispatch({ type: 'SET_FILTER_QUALITY', filterQuality: e.target.value as any })}
+                      onChange={(e) => dispatch({ type: 'SET_FILTER_QUALITY', filterQuality: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                       <option value="all">All Quality</option>
@@ -1248,7 +1248,7 @@ export default function AiVideoGenerationClient() {
                     {/* Sort */}
                     <select
                       value={state.sortBy}
-                      onChange={(e) => dispatch({ type: 'SET_SORT', sortBy: e.target.value as any })}
+                      onChange={(e) => dispatch({ type: 'SET_SORT', sortBy: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                       <option value="date">Newest First</option>
