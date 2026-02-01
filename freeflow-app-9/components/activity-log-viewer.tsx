@@ -148,7 +148,7 @@ export function ActivityLogViewer() {
       const newActivity: LogEntry = {
         id: Date.now().toString(),
         timestamp: new Date(),
-        level: ['info', 'warn', 'error'][Math.floor(Math.random() * 3)] as any,
+        level: ['info', 'warn', 'error'][Math.floor(Math.random() * 3)] as "info" | "warn" | "error",
         feature: ['CodeBlock', 'API-VideoIntelligence', 'ContactSystem'][Math.floor(Math.random() * 3)],
         message: 'New activity logged',
         context: { automated: true, timestamp: new Date().toISOString() }

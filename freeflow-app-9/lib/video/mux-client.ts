@@ -94,7 +94,7 @@ export const createDirectUpload = async (options: {
       timeout: options.timeout || 3600, // 1 hour default
       cors_origin: options.corsOrigin || '*',
              new_asset_settings: {
-         playback_policy: ['public'] as any,
+         playback_policy: ['public'],
          encoding_tier: 'smart',
          video_quality: 'plus',
          passthrough: options.passthrough,
@@ -205,8 +205,8 @@ export const getVideoAnalytics = async (options: {
 
   try {
     const filters: unknown[] = [];
-    if (options.assetId) filters.push(`asset_id:${options.assetId}` as any);
-    if (options.playbackId) filters.push(`playback_id:${options.playbackId}` as any);
+    if (options.assetId) filters.push(`asset_id:${options.assetId}`);
+    if (options.playbackId) filters.push(`playback_id:${options.playbackId}`);
 
     const analytics = await (mux.data.metrics as Record<string, unknown>).get('video_view', {
       timeframe: options.timeframe,
@@ -239,7 +239,7 @@ export const createLiveStream = async (options: {
 
   try {
     const liveStream = await mux.video.liveStreams.create({
-      playback_policy: (options.playbackPolicy || ['public']) as any,
+      playback_policy: (options.playbackPolicy || ['public']),
       reconnect_window: options.reconnectWindow || 300,
       reduced_latency: options.reducedLatency || false,
       passthrough: options.passthrough,

@@ -287,8 +287,8 @@ export function ContextualTooltip({
         </TooltipTrigger>
         
         <TooltipContent
-          side={actualSide as any}
-          align={actualAlign as any}
+          side={actualSide}
+          align={actualAlign}
           className={cn(
             "p-0 border-0 bg-transparent shadow-none",
             className

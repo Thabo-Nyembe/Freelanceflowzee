@@ -456,7 +456,7 @@ export function useOfflineSync<T = any>(config: OfflineSyncConfig): UseOfflineSy
 
     // Update with resolved data
     const supabase = supabaseRef.current
-    await supabase.from(conflict.table).upsert(dataToSync as any)
+    await supabase.from(conflict.table).upsert(dataToSync)
 
     // Clean up
     await dbRef.current.delete('pending_changes', conflict.changeId)

@@ -314,7 +314,7 @@ export function useNotificationsV2(options: UseNotificationsV2Options = {}) {
           filter: `user_id=eq.${userId}`
         },
         (payload) => {
-          const deleted = payload.old as any
+          const deleted = payload.old as Record<string, unknown>
           setNotifications(prev => prev.filter(n => n.id !== deleted.id))
         }
       )

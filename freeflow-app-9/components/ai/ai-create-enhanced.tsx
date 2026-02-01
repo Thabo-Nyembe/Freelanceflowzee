@@ -442,7 +442,7 @@ export function AICreateEnhanced({ onSaveKeys }: AICreateEnhancedProps) {
       }
 
       recognition.start()
-      mediaRecorderRef.current = recognition as any
+      mediaRecorderRef.current = recognition as unknown
     } catch (error) {
       console.error('Failed to start voice recording:', error)
       toast.error('Failed to start voice recording')

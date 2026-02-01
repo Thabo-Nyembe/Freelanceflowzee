@@ -772,7 +772,7 @@ export default function BackupsClient() {
   const handleScheduleBackup = async (backupId: string, schedule: { frequency: string; time?: string }) => {
     try {
       await updateBackup(backupId, {
-        frequency: schedule.frequency as any,
+        frequency: schedule.frequency,
         schedule_cron: schedule.time || null
       })
       toast.success('Backup schedule updated')

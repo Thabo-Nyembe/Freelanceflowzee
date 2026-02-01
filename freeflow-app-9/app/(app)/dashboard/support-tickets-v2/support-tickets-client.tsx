@@ -415,7 +415,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
         subject: formData.subject,
         description: formData.description,
         category: formData.category as string,
-        priority: formData.priority === 'medium' ? 'normal' : formData.priority as any,
+        priority: formData.priority === 'medium' ? 'normal' : formData.priority,
         customer_name: formData.customer_name,
         customer_email: formData.customer_email
       })

@@ -375,7 +375,7 @@ export function AIDesignAssistant({
                 size="sm"
                 onClick={() => {
                   dispatch({ type: 'SET_ANALYSIS_MODE', mode: key })
-                  runAnalysis(key as any)
+                  runAnalysis(key)
                 }}
                 disabled={state.isAnalyzing}
                 className="flex flex-col items-center gap-1 h-auto p-3"

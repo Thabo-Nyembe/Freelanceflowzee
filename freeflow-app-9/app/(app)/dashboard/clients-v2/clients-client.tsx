@@ -609,7 +609,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
           company: editClientForm.company,
           website: editClientForm.website || undefined,
           industry: editClientForm.industry,
-          status: editClientForm.status === 'prospect' ? 'lead' : editClientForm.status as any
+          status: editClientForm.status === 'prospect' ? 'lead' : editClientForm.status
         }
       })
       setShowEditDialog(false)

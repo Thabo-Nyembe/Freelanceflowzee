@@ -589,7 +589,7 @@ export function CommentExportSystem({
                           <Label htmlFor="groupBy" className="text-sm">Group By</Label>
                           <Select
                             value={exportOptions.groupBy}
-                            onValueChange={(value) => updateOptions("groupBy", value as any)}
+                            onValueChange={(value) => updateOptions("groupBy", value)}
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -608,7 +608,7 @@ export function CommentExportSystem({
                           <Label htmlFor="sortBy" className="text-sm">Sort By</Label>
                           <Select
                             value={exportOptions.sortBy}
-                            onValueChange={(value) => updateOptions("sortBy", value as any)}
+                            onValueChange={(value) => updateOptions("sortBy", value)}
                           >
                             <SelectTrigger>
                               <SelectValue />

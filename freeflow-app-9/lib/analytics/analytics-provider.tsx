@@ -151,7 +151,7 @@ export function AnalyticsProvider({
     properties?: Record<string, any>
   ) => {
     if (!isEnabled) return
-    eventTrackerRef.current?.trackInteraction(element, action as any, properties)
+    eventTrackerRef.current?.trackInteraction(element, action, properties)
     sessionTrackerRef.current?.trackEvent()
   }, [isEnabled])
 

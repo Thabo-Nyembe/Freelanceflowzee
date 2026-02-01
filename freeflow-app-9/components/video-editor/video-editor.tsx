@@ -1037,7 +1037,7 @@ export function VideoEditor({ projectId, onSave }: VideoEditorProps) {
                 }}
                 onAddFilter={(filter) => {
                   if (selectedClip) {
-                    addFilter(selectedClip.id, filter as any)
+                    addFilter(selectedClip.id, filter)
                   }
                 }}
               />

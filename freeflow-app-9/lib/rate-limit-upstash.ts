@@ -236,7 +236,7 @@ export function createRateLimiter(config: RateLimitConfig) {
       try {
         const limiter = new Ratelimit({
           redis,
-          limiter: Ratelimit.slidingWindow(config.requests, config.window as any),
+          limiter: Ratelimit.slidingWindow(config.requests, config.window),
           prefix: 'kazi:custom'
         })
 
@@ -369,7 +369,7 @@ export async function getRateLimitAnalytics(identifier?: string): Promise<{
   try {
     // This is a simplified version - Upstash provides more detailed analytics
     const analytics = await redis.get(`kazi:analytics:${identifier || 'global'}`)
-    return analytics as any || null
+    return analytics || null
   } catch (error) {
     console.error('[RateLimit] Failed to get analytics:', error)
     return null

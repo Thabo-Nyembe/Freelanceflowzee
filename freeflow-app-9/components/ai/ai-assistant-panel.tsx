@@ -691,7 +691,7 @@ export function AIAssistantPanel({
                             <div className="flex items-center gap-2 mb-1">
                               <p className="font-medium text-sm truncate">{suggestion.title}</p>
                               <Badge
-                                variant={getImpactColor(suggestion.impact) as any}
+                                variant={getImpactColor(suggestion.impact)}
                                 className="text-[10px] shrink-0"
                               >
                                 {suggestion.impact}

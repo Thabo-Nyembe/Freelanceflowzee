@@ -1323,7 +1323,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       phone: selectedLead.phone || '',
       company: selectedLead.company,
       title: selectedLead.title,
-      status: selectedLead.status === 'won' ? 'converted' : selectedLead.status === 'lost' ? 'archived' : selectedLead.status as any,
+      status: selectedLead.status === 'won' ? 'converted' : selectedLead.status === 'lost' ? 'archived' : selectedLead.status,
       score: selectedLead.score,
       source: selectedLead.source,
       notes: selectedLead.notes.map(n => n.content).join('\n'),
@@ -1388,7 +1388,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       let hookStatus: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost' | 'archived' = 'new'
       if (selectedNewStatus === 'won') hookStatus = 'converted'
       else if (selectedNewStatus === 'lost') hookStatus = 'archived'
-      else if (['new', 'contacted', 'qualified'].includes(selectedNewStatus)) hookStatus = selectedNewStatus as any
+      else if (['new', 'contacted', 'qualified'].includes(selectedNewStatus)) hookStatus = selectedNewStatus
 
       const result = await updateLead(selectedLead.id, { status: hookStatus })
 

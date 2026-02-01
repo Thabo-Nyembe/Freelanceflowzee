@@ -750,7 +750,7 @@ export function KeyboardShortcutsAccessibility({
                           <Label>Font Family</Label>
                           <Select
                             value={accessibilitySettings.fontFamily}
-                            onValueChange={(value) => updateAccessibilitySettings({ fontFamily: value as any })}
+                            onValueChange={(value) => updateAccessibilitySettings({ fontFamily: value })}
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -768,7 +768,7 @@ export function KeyboardShortcutsAccessibility({
                           <Label>Color Blind Support</Label>
                           <Select
                             value={accessibilitySettings.colorBlindSupport}
-                            onValueChange={(value) => updateAccessibilitySettings({ colorBlindSupport: value as any })}
+                            onValueChange={(value) => updateAccessibilitySettings({ colorBlindSupport: value })}
                           >
                             <SelectTrigger>
                               <SelectValue />

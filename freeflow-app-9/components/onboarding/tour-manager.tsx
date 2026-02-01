@@ -329,12 +329,12 @@ export function TourManager({
       setShowTourList(true)
     }
 
-    window.addEventListener('start-tour' as any, handleStartTour)
-    window.addEventListener('open-tour-selection' as any, handleOpenTourSelection)
+    window.addEventListener('start-tour', handleStartTour)
+    window.addEventListener('open-tour-selection', handleOpenTourSelection)
 
     return () => {
-      window.removeEventListener('start-tour' as any, handleStartTour)
-      window.removeEventListener('open-tour-selection' as any, handleOpenTourSelection)
+      window.removeEventListener('start-tour', handleStartTour)
+      window.removeEventListener('open-tour-selection', handleOpenTourSelection)
     }
   }, [tours])
 

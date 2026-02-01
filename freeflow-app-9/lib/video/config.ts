@@ -187,7 +187,7 @@ export const validateUploadFile = (file: File) => {
   }
   
   // Check file type
-  if (!uploadConfig.allowedMimeTypes.includes(file.type as any)) {
+  if (!uploadConfig.allowedMimeTypes.includes(file.type)) {
     errors.push(`File type ${file.type} is not supported`);
   }
   

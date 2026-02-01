@@ -754,17 +754,17 @@ export function BlockBasedContentEditor({
       db.name.toLowerCase().includes(state.searchQuery.toLowerCase())
   )
 
-  const CardComponent = Card as any;
-  const _CardHeaderComponent = CardHeader as any;
-  const _CardTitleComponent = CardTitle as any;
-  const _CardContentComponent = CardContent as any;
-  const ButtonComponent = Button as any;
-  const _TextareaComponent = Textarea as any;
-  const _InputComponent = Input as any;
-  const _HeadingTagComponent = 'h1' as any; // Placeholder
-  const DndContextComponent = DndContext as any;
-  const SortableContextComponent = SortableContext as any;
-  const DragOverlayComponent = DragOverlay as any;
+  const CardComponent = Card;
+  const _CardHeaderComponent = CardHeader;
+  const _CardTitleComponent = CardTitle;
+  const _CardContentComponent = CardContent;
+  const ButtonComponent = Button;
+  const _TextareaComponent = Textarea;
+  const _InputComponent = Input;
+  const _HeadingTagComponent: keyof JSX.IntrinsicElements = 'h1'; // Placeholder
+  const DndContextComponent = DndContext;
+  const SortableContextComponent = SortableContext;
+  const DragOverlayComponent = DragOverlay;
 
   return (
     <div className={`flex h-full bg-white rounded-lg shadow-lg ${className}`}>

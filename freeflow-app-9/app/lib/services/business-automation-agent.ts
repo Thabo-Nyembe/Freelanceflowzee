@@ -455,7 +455,7 @@ Return as JSON with fields: subject, message, suggestedActions (array)`;
 
         // Generate follow-ups for identified scenarios
         for (const scenario of scenarios) {
-          const followUp = await this.generateClientFollowUp(client.id, scenario as any);
+          const followUp = await this.generateClientFollowUp(client.id, scenario);
           followUps.push(followUp);
         }
       }

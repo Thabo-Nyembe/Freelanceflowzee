@@ -44,7 +44,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, onAddComment }) => 
         wavesurferRef.current = wavesurfer;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ws = wavesurfer as any;
+        const ws = wavesurfer as unknown;
         ws.on('audioprocess', (time: number) => setCurrentTime(time));
         ws.on('play', () => setIsPlaying(true));
         ws.on('pause', () => setIsPlaying(false));

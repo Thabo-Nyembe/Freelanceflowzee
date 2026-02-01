@@ -469,7 +469,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         contactName: dbClient.name || '',
         email: dbClient.email || '',
         phone: dbClient.phone || '',
-        status: dbClient.status === 'lead' || dbClient.status === 'prospect' || dbClient.status === 'churned' || dbClient.status === 'inactive' ? dbClient.status as any : 'active'
+        status: dbClient.status === 'lead' || dbClient.status === 'prospect' || dbClient.status === 'churned' || dbClient.status === 'inactive' ? dbClient.status : 'active'
       })
       setShowEditDialog(true)
     }

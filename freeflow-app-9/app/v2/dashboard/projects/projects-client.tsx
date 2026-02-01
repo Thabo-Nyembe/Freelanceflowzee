@@ -98,7 +98,7 @@ export default function ProjectsClient() {
     if (!insights || insights.length === 0) return []
     return insights.map((insight: any) => ({
       id: insight.id,
-      type: (['alert', 'recommendation', 'opportunity', 'prediction'].includes(insight.type) ? insight.type : 'alert') as any,
+      type: (['alert', 'recommendation', 'opportunity', 'prediction'].includes(insight.type) ? insight.type : 'alert'),
       title: insight.title || 'Insight',
       description: insight.description || '',
       priority: (insight.priority === 'high' || insight.priority === 'medium' || insight.priority === 'low') ? insight.priority : 'medium',
@@ -116,7 +116,7 @@ export default function ProjectsClient() {
       status: m.status === 'active' ? 'online' : 'offline',
       role: m.role || 'Member',
       lastActive: m.updated_at ? new Date(m.updated_at).toLocaleDateString() : 'Unknown'
-    })) as any[]
+    })) as unknown[]
   }, [members])
 
   const projectsActivities = useMemo(() => {
@@ -131,7 +131,7 @@ export default function ProjectsClient() {
       action: log.action || 'updated',
       target: { type: 'project', name: log.resource_name || 'Project', url: '#' },
       timestamp: new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      type: (['delete', 'comment', 'update', 'create', 'mention', 'assignment', 'status_change', 'milestone', 'integration'].includes(log.action) ? log.action : 'update') as any
+      type: (['delete', 'comment', 'update', 'create', 'mention', 'assignment', 'status_change', 'milestone', 'integration'].includes(log.action) ? log.action : 'update')
     }))
   }, [activityLogs])
 
@@ -151,7 +151,7 @@ export default function ProjectsClient() {
       predicted: g.projected_value || 0,
       confidence: g.confidence_score || 0,
       trend: (g.trend === 'up' || g.trend === 'down') ? g.trend : 'neutral'
-    })) as any[]
+    })) as unknown[]
   }, [goals])
 
 

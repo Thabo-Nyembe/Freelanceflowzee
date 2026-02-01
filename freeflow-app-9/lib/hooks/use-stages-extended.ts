@@ -133,7 +133,7 @@ export function usePipelineStats(pipelineId?: string) {
     try {
       const { data: stages } = await supabase.from('stages').select('id, name, stage_assignments(count)').eq('pipeline_id', pipelineId).order('order_index', { ascending: true })
       const itemsByStage: Record<string, number> = {}
-      stages?.forEach(s => { itemsByStage[s.name] = (s.stage_assignments as any)?.[0]?.count || 0 })
+      stages?.forEach(s => { itemsByStage[s.name] = (s.stage_assignments as unknown[])?.[0]?.count || 0 })
       setStats({ stages: stages?.length || 0, itemsByStage })
     } finally { setIsLoading(false) }
   }, [pipelineId])

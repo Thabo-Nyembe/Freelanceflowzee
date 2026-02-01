@@ -138,10 +138,10 @@ class KaziAIRouter {
     } else {
       // Browser environment - create placeholder clients that will throw helpful errors
       logger.warn('KaziAI initialized in browser - AI features require server-side processing')
-      this.anthropic = null as any
-      this.openai = null as any
-      this.google = null as any
-      this.openrouter = null as any
+      this.anthropic = null!
+      this.openai = null!
+      this.google = null!
+      this.openrouter = null!
     }
   }
 

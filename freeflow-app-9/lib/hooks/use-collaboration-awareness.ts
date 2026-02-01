@@ -282,7 +282,7 @@ export function useCollaborationAwareness(config: AwarenessConfig): UseCollabora
       const users: UserPresence[] = []
 
       Object.entries(state).forEach(([userId, presences]) => {
-        const presence = (presences as any[])[0]
+        const presence = (presences as unknown[])[0]
         if (presence && userId !== user.id) {
           users.push({
             userId,
@@ -303,7 +303,7 @@ export function useCollaborationAwareness(config: AwarenessConfig): UseCollabora
 
     // Handle user join
     channel.on('presence', { event: 'join' }, ({ key, newPresences }) => {
-      const presence = (newPresences as any[])[0]
+      const presence = (newPresences as unknown[])[0]
       if (presence && key !== user.id) {
         const newUser: UserPresence = {
           userId: key,

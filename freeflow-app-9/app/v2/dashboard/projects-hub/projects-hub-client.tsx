@@ -668,7 +668,7 @@ export default function ProjectsHubClient() {
           name: selectedProject.name,
           description: selectedProject.description,
           budget: selectedProject.budget,
-          priority: selectedProject.priority as any
+          priority: selectedProject.priority
         })
         toast.success('Project updated')
         setShowEditProjectDialog(false)
@@ -2086,7 +2086,7 @@ export default function ProjectsHubClient() {
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockProjectsAIInsights as any}
+              insights={mockProjectsAIInsights as unknown}
               onInsightAction={(insight: any) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
@@ -2094,11 +2094,11 @@ export default function ProjectsHubClient() {
           {/* Team Collaboration & Activity */}
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockProjectsCollaborators.map(c => ({ ...c, color: c.color || '#6366f1' })) as any}
+              collaborators={mockProjectsCollaborators.map(c => ({ ...c, color: c.color || '#6366f1' }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockProjectsPredictions as any}
+              predictions={mockProjectsPredictions as unknown}
             />
           </div>
         </div>
@@ -2106,11 +2106,11 @@ export default function ProjectsHubClient() {
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockProjectsActivities as any}
+            activities={mockProjectsActivities as unknown}
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockProjectsQuickActions as any}
+            actions={mockProjectsQuickActions as unknown}
           />
         </div>
 

@@ -683,7 +683,7 @@ export function TiptapCollaborativeEditor({
           field: 'prosemirror'
         }),
         CollaborationCursor.configure({
-          provider: providerRef.current as any,
+          provider: providerRef.current,
           user: user ? {
             name: user.name || user.email || 'Anonymous',
             color: generateUserColor(user.id)

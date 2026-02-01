@@ -953,7 +953,7 @@ export function AvatarUpload<
       setIsUploading(true)
       try {
         const url = await onUpload(file)
-        form.setValue(name, url as any)
+        form.setValue(name, url)
         setPreviewUrl(url)
       } catch (error) {
         console.error('Upload failed:', error)
@@ -962,7 +962,7 @@ export function AvatarUpload<
         setIsUploading(false)
       }
     } else {
-      form.setValue(name, file as any)
+      form.setValue(name, file)
     }
   }
 

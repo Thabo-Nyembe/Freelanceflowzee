@@ -381,19 +381,19 @@ export default function HelpCenterClient() {
   // Sync hook data to local state
   useEffect(() => {
     if (articlesData) {
-      setArticles(articlesData as any as Article[])
+      setArticles(articlesData as unknown as Article[])
     }
   }, [articlesData])
 
   useEffect(() => {
     if (categoriesData) {
-      setCategories(categoriesData as any as Category[])
+      setCategories(categoriesData as unknown as Category[])
     }
   }, [categoriesData])
 
   useEffect(() => {
     if (collectionsData) {
-      setCollections(collectionsData as any as Collection[])
+      setCollections(collectionsData as unknown as Collection[])
     }
   }, [collectionsData])
 

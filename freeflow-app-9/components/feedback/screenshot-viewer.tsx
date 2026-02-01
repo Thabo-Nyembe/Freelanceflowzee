@@ -121,7 +121,7 @@ export function ScreenshotViewer({ file, comments, onAddComment }: ScreenshotVie
 
             {/* Comment Pins */}
             {comments.map((comment) =>
-              (comment.position as any) ? (
+              (comment.position as Record<string, unknown>) ? (
                 <div 
                   key={(comment.id as string)} 
                   className="absolute w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold cursor-pointer transform -translate-x-1/2 -translate-y-1/2"

@@ -270,7 +270,7 @@ export function AdvancedCommentFilters({
     value: any
   ) => {
     setFilters(prev => {
-      const currentArray = prev[key] as any[]
+      const currentArray = prev[key] as unknown[]
       const newArray = currentArray.includes(value)
         ? currentArray.filter(item => item !== value)
         : [...currentArray, value]

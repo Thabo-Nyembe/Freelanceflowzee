@@ -286,7 +286,7 @@ export function useSupabaseMutation<TInput = unknown, TOutput = unknown>(
     return useSupabaseMutationWithFn<TInput, TOutput>(mutationFnOrOptions, fnOptions)
   }
   // Otherwise use object-style
-  return useSupabaseMutationWithOptions<TInput>(mutationFnOrOptions) as any
+  return useSupabaseMutationWithOptions<TInput>(mutationFnOrOptions)
 }
 
 // Function-style mutation implementation

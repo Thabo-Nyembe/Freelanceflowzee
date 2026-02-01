@@ -472,6 +472,6 @@ export function getWatermarkConfig(): WatermarkOptions {
     fontColor: process.env.WATERMARK_COLOR || 'white',
     angle: parseInt(process.env.WATERMARK_ANGLE || '-30'),
     position:
-      (process.env.WATERMARK_POSITION as any) || 'bottom-right'
+      (process.env.WATERMARK_POSITION) || 'bottom-right'
   }
 }

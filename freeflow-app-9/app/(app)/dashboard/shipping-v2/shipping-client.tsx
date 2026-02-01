@@ -883,7 +883,7 @@ export default function ShippingClient() {
   // Update shipment - uses hook mutation with proper error handling
   const handleUpdateShipment = async (shipmentId: string, updates: Record<string, unknown>) => {
     try {
-      await updateShipment(shipmentId, updates as any)
+      await updateShipment(shipmentId, updates)
       toast.success('Shipment updated successfully')
     } catch (error) {
       console.error('Error updating shipment:', error)
@@ -994,7 +994,7 @@ export default function ShippingClient() {
     try {
       toast.loading('Updating carrier...', { id: 'update-carrier' })
 
-      await updateCarrierMutation(carrierId, updates as any)
+      await updateCarrierMutation(carrierId, updates)
 
       toast.success('Carrier updated successfully', { id: 'update-carrier' })
       setShowConfigureCarrierDialog(false)

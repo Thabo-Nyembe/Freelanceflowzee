@@ -136,7 +136,7 @@ export class WhisperTranscriptionService {
       }
 
       // Build detailed result
-      const result = this.buildDetailedResult(response as any, processingTime);
+      const result = this.buildDetailedResult(response as Record<string, unknown>, processingTime);
 
       // Add speaker diarization if enabled
       if (options.enableDiarization) {

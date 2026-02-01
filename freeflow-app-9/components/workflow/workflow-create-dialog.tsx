@@ -22,7 +22,7 @@ export function WorkflowCreateDialog({ open, onOpenChange, onSuccess }: Workflow
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    trigger_type: 'manual' as any,
+    trigger_type: 'manual',
     category: 'general'
   })
 

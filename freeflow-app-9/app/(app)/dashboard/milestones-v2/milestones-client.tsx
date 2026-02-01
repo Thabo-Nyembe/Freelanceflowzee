@@ -521,7 +521,7 @@ export default function MilestonesClient() {
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
       updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString()
     }
-  ] as any[], [demoTeamMembers])
+  ] as unknown[], [demoTeamMembers])
 
   // Team and activity data hooks
   const { members: teamMembers } = useTeam()

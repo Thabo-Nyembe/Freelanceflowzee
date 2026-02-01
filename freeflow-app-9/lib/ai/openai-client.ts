@@ -115,7 +115,7 @@ export async function transcribeVideo(audioFile: File | Buffer, options: {
     }
 
     // Cast to any to access extended properties from verbose_json
-    const verboseTranscription = transcription as any;
+    const verboseTranscription = transcription as Record<string, unknown>;
 
     return {
       text: verboseTranscription.text,

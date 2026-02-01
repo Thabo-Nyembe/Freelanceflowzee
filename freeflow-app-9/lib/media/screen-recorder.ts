@@ -275,7 +275,7 @@ export class ScreenRecorder {
       const constraints: DisplayMediaStreamConstraints = {
         video: {
           ...this.getVideoConstraints(quality, frameRate),
-          cursor: 'always' as any
+          cursor: 'always'
         },
         audio: audioEnabled
       }
