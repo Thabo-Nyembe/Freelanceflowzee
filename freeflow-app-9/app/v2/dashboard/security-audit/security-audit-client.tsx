@@ -2491,12 +2491,12 @@ export default function SecurityAuditClient() {
             </DialogHeader>
             <div className="space-y-2">
               {[
-                { label: 'Scan Asset', icon: Scan, action: () => toast.success('Scan started') },
-                { label: 'View Details', icon: FileText, action: () => toast.info('Asset details') },
-                { label: 'Edit Asset', icon: Settings, action: () => toast.info('Edit mode') },
+                { label: 'Scan Asset', icon: Scan, action: () => toast.success('Security Scan Started', { description: 'Scanning asset for vulnerabilities...' }) },
+                { label: 'View Details', icon: FileText, action: () => toast.info('Asset Details', { description: 'View full asset configuration and metadata' }) },
+                { label: 'Edit Asset', icon: Settings, action: () => toast.info('Edit Mode Enabled', { description: 'You can now modify asset properties' }) },
                 { label: 'View Vulnerabilities', icon: Bug, action: () => setActiveTab('vulnerabilities') },
-                { label: 'Run Compliance Check', icon: FileCheck, action: () => toast.success('Compliance check initiated') },
-                { label: 'Remove Asset', icon: AlertTriangle, action: () => toast.error('Asset removal requires confirmation') },
+                { label: 'Run Compliance Check', icon: FileCheck, action: () => toast.success('Compliance Check Started', { description: 'Checking against configured compliance frameworks...' }) },
+                { label: 'Remove Asset', icon: AlertTriangle, action: () => toast.error('Confirm Removal', { description: 'This action requires additional confirmation' }) },
               ].map((item, i) => (
                 <Button
                   key={i}

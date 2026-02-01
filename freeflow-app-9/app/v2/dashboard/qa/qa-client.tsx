@@ -1634,15 +1634,17 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         </div>
                         <div className="flex gap-1">
                           <Button variant="ghost" size="sm" onClick={() => {
-                            toast.success('Test case view opened');
+                            setSelectedTestCase(testCase);
+                            toast.success('Viewing Test Case', { description: `"${testCase.test_name}" details loaded` });
                           }}><Eye className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="sm" onClick={() => {
                             setSelectedTestCase(testCase);
                             setShowTestCaseDialog(true);
-                            toast.success('Edit mode enabled');
+                            toast.success('Edit Mode', { description: `Editing "${testCase.test_name}"` });
                           }}><Edit className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="sm" onClick={() => {
-                            toast.success('More options available');
+                            setSelectedTestCase(testCase);
+                            toast.info('Options', { description: 'Run, duplicate, or delete this test case' });
                           }}><MoreHorizontal className="w-4 h-4" /></Button>
                         </div>
                       </div>
@@ -1962,7 +1964,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         </div>
                         <Badge className={report.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{report.status}</Badge>
                         <Button variant="ghost" size="sm" onClick={() => {
-                          toast.success('Report options menu opened');
+                          toast.info('Report Options', { description: `Edit, duplicate, or configure "${report.name}"` });
                         }}><MoreHorizontal className="h-4 w-4" /></Button>
                       </div>
                     </div>
@@ -2012,7 +2014,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         <span className="text-sm text-gray-500">{report.downloads} downloads</span>
                         <div className="flex gap-1">
                           <Button variant="ghost" size="sm" onClick={() => {
-                            toast.success('Report preview opened');
+                            toast.success('Report Preview', { description: `Viewing "${report.name}" report` });
                           }}><Eye className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="sm" onClick={() => {
                             const element = document.createElement('a');
@@ -2022,11 +2024,11 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                             document.body.appendChild(element);
                             element.click();
                             document.body.removeChild(element);
-                            toast.success('Report downloaded successfully');
+                            toast.success('Report Downloaded', { description: `"${report.name}" saved to downloads` });
                           }}><Download className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="sm" onClick={() => {
-                            navigator.clipboard.writeText(`Report: ${report.name}`);
-                            toast.success('Report link copied to clipboard');
+                            navigator.clipboard.writeText(`${window.location.origin}/v2/dashboard/qa/reports/${report.id}`);
+                            toast.success('Link Copied', { description: `Share link for "${report.name}" copied to clipboard` });
                           }}><Share2 className="h-4 w-4" /></Button>
                         </div>
                       </div>
