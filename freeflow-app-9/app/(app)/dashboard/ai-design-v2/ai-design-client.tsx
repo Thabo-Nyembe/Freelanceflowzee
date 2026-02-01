@@ -226,6 +226,15 @@ export default function AIDesignClient() {
   const [selectedQuality, setSelectedQuality] = useState<QualityLevel>('high')
   const [isGenerating, setIsGenerating] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [filterSettings, setFilterSettings] = useState({
+    styles: [] as StylePreset[],
+    models: [] as ModelType[],
+    status: 'all' as 'all' | GenerationStatus,
+    dateRange: 'all' as 'all' | 'today' | 'week' | 'month',
+    favoritesOnly: false,
+    publicOnly: false
+  })
 
   // Database state
   const [generations, setGenerations] = useState<Generation[]>([])
@@ -442,7 +451,7 @@ export default function AIDesignClient() {
     setSelectedRatio(gen.aspectRatio)
     setSelectedQuality(gen.quality)
     setActiveTab('generate')
-    toast.info('Settings loaded')
+    toast.success('Settings loaded', { description: 'Ready to regenerate with same parameters' })
   }
 
   // Create collection
@@ -477,6 +486,111 @@ export default function AIDesignClient() {
       setIsLoading(false)
     }
   }
+
+  // Shuffle prompt modifiers
+  const handleShufflePrompt = () => {
+    const modifiers = [
+      'highly detailed, cinematic lighting, 8k resolution',
+      'ethereal glow, soft focus, dreamy atmosphere',
+      'dramatic shadows, high contrast, moody',
+      'vibrant colors, ultra sharp, professional',
+      'minimalist composition, clean lines, elegant',
+      'intricate details, masterpiece quality, award winning',
+      'golden hour lighting, warm tones, atmospheric',
+      'neon accents, cyberpunk aesthetic, futuristic',
+      'watercolor texture, delicate brushstrokes, artistic',
+      'studio lighting, product photography, commercial'
+    ]
+
+    const styleModifiers: Record<StylePreset, string[]> = {
+      photorealistic: ['ultra realistic, 8k, detailed skin texture', 'hyperrealistic, DSLR quality, sharp focus'],
+      anime: ['anime style, cel shaded, vibrant', 'studio ghibli inspired, beautiful scenery'],
+      digital_art: ['digital painting, concept art, artstation', 'illustration, trending on artstation'],
+      oil_painting: ['oil on canvas, impasto technique, classical', 'renaissance style, old masters'],
+      watercolor: ['watercolor painting, soft edges, flowing', 'traditional watercolor, paper texture'],
+      sketch: ['pencil sketch, detailed linework', 'charcoal drawing, artistic'],
+      '3d_render': ['octane render, 3d, volumetric lighting', 'unreal engine 5, photorealistic 3d'],
+      neon: ['neon lights, cyberpunk, synthwave', 'glowing, retrowave, electric'],
+      vintage: ['vintage photography, film grain, nostalgic', 'retro aesthetic, faded colors'],
+      minimalist: ['minimalist, clean, simple geometry', 'modern design, white space']
+    }
+
+    const baseModifier = modifiers[Math.floor(Math.random() * modifiers.length)]
+    const styleModifier = styleModifiers[selectedStyle]?.[Math.floor(Math.random() * styleModifiers[selectedStyle].length)] || ''
+
+    if (prompt.trim()) {
+      const cleanPrompt = prompt.replace(/,\s*(highly detailed|ethereal|dramatic|vibrant|minimalist|intricate|golden hour|neon|watercolor|studio).*$/i, '')
+      setPrompt(`${cleanPrompt.trim()}, ${styleModifier}, ${baseModifier}`)
+    } else {
+      setPrompt(`${styleModifier}, ${baseModifier}`)
+    }
+
+    toast.success('Prompt enhanced', {
+      description: 'Style modifiers have been randomized'
+    })
+  }
+
+  // Apply filters
+  const handleApplyFilters = () => {
+    toast.success('Filters applied', {
+      description: `Showing ${filterSettings.styles.length > 0 ? filterSettings.styles.join(', ') : 'all styles'}`
+    })
+    setShowFilterDialog(false)
+  }
+
+  // Reset filters
+  const handleResetFilters = () => {
+    setFilterSettings({
+      styles: [],
+      models: [],
+      status: 'all',
+      dateRange: 'all',
+      favoritesOnly: false,
+      publicOnly: false
+    })
+    toast.success('Filters reset')
+  }
+
+  // Advanced filtered generations
+  const advancedFilteredGenerations = useMemo(() => {
+    return filteredGenerations.filter(gen => {
+      // Style filter
+      if (filterSettings.styles.length > 0 && !filterSettings.styles.includes(gen.style)) {
+        return false
+      }
+      // Model filter
+      if (filterSettings.models.length > 0 && !filterSettings.models.includes(gen.model)) {
+        return false
+      }
+      // Status filter
+      if (filterSettings.status !== 'all' && gen.status !== filterSettings.status) {
+        return false
+      }
+      // Favorites filter
+      if (filterSettings.favoritesOnly && !gen.isFavorite) {
+        return false
+      }
+      // Public filter
+      if (filterSettings.publicOnly && !gen.isPublic) {
+        return false
+      }
+      // Date range filter
+      if (filterSettings.dateRange !== 'all') {
+        const genDate = new Date(gen.createdAt)
+        const now = new Date()
+        if (filterSettings.dateRange === 'today') {
+          if (genDate.toDateString() !== now.toDateString()) return false
+        } else if (filterSettings.dateRange === 'week') {
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+          if (genDate < weekAgo) return false
+        } else if (filterSettings.dateRange === 'month') {
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          if (genDate < monthAgo) return false
+        }
+      }
+      return true
+    })
+  }, [filteredGenerations, filterSettings])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
@@ -911,7 +1025,7 @@ export default function AIDesignClient() {
                       <Button variant="outline" onClick={() => setPrompt('')}>
                         <RefreshCw className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" onClick={() => toast.info('Shuffle', { description: 'Randomizing prompt...' })}>
+                      <Button variant="outline" onClick={handleShufflePrompt}>
                         <Shuffle className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1168,7 +1282,7 @@ export default function AIDesignClient() {
                 >
                   <List className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => toast.info('Filter', { description: 'Opening filter options...' })}>
+                <Button variant="outline" size="sm" onClick={() => setShowFilterDialog(true)}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
@@ -1413,7 +1527,7 @@ export default function AIDesignClient() {
                             setPrompt(item.prompt)
                             setSelectedStyle(item.style)
                             setActiveTab('generate')
-                            toast.info('Prompt loaded')
+                            toast.success('Prompt loaded', { description: 'Edit and generate to create variations' })
                           }}
                         >
                           <RefreshCw className="w-4 h-4" />
@@ -2127,6 +2241,127 @@ export default function AIDesignClient() {
               <p className="text-xs text-center text-muted-foreground">
                 All plans include a 14-day money-back guarantee. Cancel anytime.
               </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white">
+                  <Filter className="w-5 h-5" />
+                </div>
+                Filter Generations
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              {/* Style Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Styles</label>
+                <div className="flex flex-wrap gap-2">
+                  {(['photorealistic', 'anime', 'digital_art', 'oil_painting', 'watercolor', 'sketch', '3d_render', 'neon', 'vintage', 'minimalist'] as StylePreset[]).map(style => (
+                    <Badge
+                      key={style}
+                      variant={filterSettings.styles.includes(style) ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setFilterSettings(prev => ({
+                          ...prev,
+                          styles: prev.styles.includes(style)
+                            ? prev.styles.filter(s => s !== style)
+                            : [...prev.styles, style]
+                        }))
+                      }}
+                    >
+                      {style.replace('_', ' ')}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Model Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Models</label>
+                <div className="flex flex-wrap gap-2">
+                  {(['midjourney_v6', 'midjourney_v5', 'dalle_3', 'stable_diffusion', 'flux_pro'] as ModelType[]).map(model => (
+                    <Badge
+                      key={model}
+                      variant={filterSettings.models.includes(model) ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setFilterSettings(prev => ({
+                          ...prev,
+                          models: prev.models.includes(model)
+                            ? prev.models.filter(m => m !== model)
+                            : [...prev.models, model]
+                        }))
+                      }}
+                    >
+                      {model.replace('_', ' ')}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Date Range Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Date Range</label>
+                <div className="flex gap-2">
+                  {[
+                    { value: 'all', label: 'All Time' },
+                    { value: 'today', label: 'Today' },
+                    { value: 'week', label: 'This Week' },
+                    { value: 'month', label: 'This Month' }
+                  ].map(option => (
+                    <Badge
+                      key={option.value}
+                      variant={filterSettings.dateRange === option.value ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                      onClick={() => setFilterSettings(prev => ({ ...prev, dateRange: option.value as typeof prev.dateRange }))}
+                    >
+                      {option.label}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Additional Filters */}
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filterSettings.favoritesOnly}
+                    onChange={(e) => setFilterSettings(prev => ({ ...prev, favoritesOnly: e.target.checked }))}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <span className="text-sm">Show favorites only</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filterSettings.publicOnly}
+                    onChange={(e) => setFilterSettings(prev => ({ ...prev, publicOnly: e.target.checked }))}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <span className="text-sm">Show public only</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="ghost" onClick={handleResetFilters}>
+                Reset All
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setShowFilterDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleApplyFilters} className="bg-gradient-to-r from-fuchsia-500 to-purple-600">
+                  Apply Filters
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>

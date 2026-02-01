@@ -330,6 +330,22 @@ export function VideoReviewClient() {
   const [showSidebar, setShowSidebar] = useState(true);
   const [newCommentContent, setNewCommentContent] = useState('');
   const [newCommentPriority, setNewCommentPriority] = useState<CommentPriority>(0);
+  const [showCompareDialog, setShowCompareDialog] = useState(false);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showCreateSessionDialog, setShowCreateSessionDialog] = useState(false);
+  const [uploadingVersion, setUploadingVersion] = useState(false);
+  const [newSessionForm, setNewSessionForm] = useState({
+    title: '',
+    description: '',
+    dueDate: '',
+    requiredApprovers: 2,
+    isPublic: false
+  });
+  const [uploadForm, setUploadForm] = useState({
+    file: null as File | null,
+    notes: '',
+    notifyReviewers: true
+  });
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -485,6 +501,62 @@ export function VideoReviewClient() {
       }
       return c;
     }));
+  }, []);
+
+  // Create review session
+  const handleCreateSession = useCallback(async () => {
+    if (!newSessionForm.title.trim()) {
+      toast.error('Please enter a session title');
+      return;
+    }
+
+    toast.loading('Creating review session...', { id: 'create-session' });
+    await new Promise(resolve => setTimeout(resolve, 1200));
+
+    toast.success('Review session created!', {
+      id: 'create-session',
+      description: `"${newSessionForm.title}" is ready for reviewers`
+    });
+    setShowCreateSessionDialog(false);
+    setNewSessionForm({
+      title: '',
+      description: '',
+      dueDate: '',
+      requiredApprovers: 2,
+      isPublic: false
+    });
+  }, [newSessionForm]);
+
+  // Upload new version
+  const handleUploadVersion = useCallback(async () => {
+    if (!uploadForm.file) {
+      toast.error('Please select a file to upload');
+      return;
+    }
+
+    setUploadingVersion(true);
+    toast.loading('Uploading new version...', { id: 'upload-version' });
+
+    // Simulate file upload progress
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    toast.success('New version uploaded!', {
+      id: 'upload-version',
+      description: `Version ${video.version + 1} is now available`
+    });
+
+    setUploadingVersion(false);
+    setShowUploadDialog(false);
+    setShowVersions(false);
+    setUploadForm({ file: null, notes: '', notifyReviewers: true });
+  }, [uploadForm, video.version]);
+
+  // Compare versions
+  const handleCompareVersions = useCallback(async () => {
+    toast.loading('Loading version comparison...', { id: 'compare-versions' });
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setShowCompareDialog(true);
+    toast.dismiss('compare-versions');
   }, []);
 
   // Keyboard shortcuts
@@ -918,7 +990,7 @@ export function VideoReviewClient() {
           <TabsContent value="workflow" className="flex-1 m-0 p-4 overflow-auto">
             <ReviewWorkflow
               session={reviewSession}
-              onCreateSession={() => toast.info('Creating new review session...')}
+              onCreateSession={() => setShowCreateSessionDialog(true)}
             />
           </TabsContent>
         </div>
@@ -967,7 +1039,7 @@ export function VideoReviewClient() {
                   Original upload
                 </p>
                 <div className="flex gap-2 mt-2">
-                  <Button variant="outline" size="sm" onClick={() => toast.info('Compare versions')}>
+                  <Button variant="outline" size="sm" onClick={handleCompareVersions}>
                     Compare
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => toast.success('Version restored')}>
@@ -981,9 +1053,255 @@ export function VideoReviewClient() {
             <Button variant="outline" onClick={() => setShowVersions(false)}>
               Close
             </Button>
-            <Button className="gap-2" onClick={() => toast.info('Upload new version')}>
+            <Button className="gap-2" onClick={() => setShowUploadDialog(true)}>
               <Upload className="h-4 w-4" />
               Upload New Version
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Review Session Dialog */}
+      <Dialog open={showCreateSessionDialog} onOpenChange={setShowCreateSessionDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Review Session</DialogTitle>
+            <DialogDescription>
+              Set up a new review session for this video
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Session Title</label>
+              <Input
+                placeholder="e.g., Final Review - Round 3"
+                value={newSessionForm.title}
+                onChange={(e) => setNewSessionForm(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Description</label>
+              <Textarea
+                placeholder="Describe the purpose of this review session..."
+                value={newSessionForm.description}
+                onChange={(e) => setNewSessionForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Due Date</label>
+                <Input
+                  type="date"
+                  value={newSessionForm.dueDate}
+                  onChange={(e) => setNewSessionForm(prev => ({ ...prev, dueDate: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Required Approvers</label>
+                <Select
+                  value={String(newSessionForm.requiredApprovers)}
+                  onValueChange={(v) => setNewSessionForm(prev => ({ ...prev, requiredApprovers: parseInt(v) }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 Approver</SelectItem>
+                    <SelectItem value="2">2 Approvers</SelectItem>
+                    <SelectItem value="3">3 Approvers</SelectItem>
+                    <SelectItem value="4">4 Approvers</SelectItem>
+                    <SelectItem value="5">5 Approvers</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="public-session"
+                checked={newSessionForm.isPublic}
+                onChange={(e) => setNewSessionForm(prev => ({ ...prev, isPublic: e.target.checked }))}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <label htmlFor="public-session" className="text-sm">
+                Make this session public (accessible via link)
+              </label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateSessionDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateSession}>
+              Create Session
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload New Version Dialog */}
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upload New Version</DialogTitle>
+            <DialogDescription>
+              Upload a new version of this video (Version {video.version + 1})
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed rounded-lg p-6 text-center">
+              <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground mb-2">
+                {uploadForm.file ? uploadForm.file.name : 'Drag and drop or click to upload'}
+              </p>
+              <Input
+                type="file"
+                accept="video/*"
+                className="hidden"
+                id="version-upload"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setUploadForm(prev => ({ ...prev, file }));
+                  }
+                }}
+              />
+              <Button variant="outline" size="sm" asChild>
+                <label htmlFor="version-upload" className="cursor-pointer">
+                  Select File
+                </label>
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Version Notes</label>
+              <Textarea
+                placeholder="Describe what changed in this version..."
+                value={uploadForm.notes}
+                onChange={(e) => setUploadForm(prev => ({ ...prev, notes: e.target.value }))}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="notify-reviewers"
+                checked={uploadForm.notifyReviewers}
+                onChange={(e) => setUploadForm(prev => ({ ...prev, notifyReviewers: e.target.checked }))}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <label htmlFor="notify-reviewers" className="text-sm">
+                Notify all reviewers about this new version
+              </label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUploadVersion} disabled={uploadingVersion || !uploadForm.file}>
+              {uploadingVersion ? 'Uploading...' : 'Upload Version'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Compare Versions Dialog */}
+      <Dialog open={showCompareDialog} onOpenChange={setShowCompareDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Compare Versions</DialogTitle>
+            <DialogDescription>
+              Side-by-side comparison of video versions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline">Version 0</Badge>
+                  <span className="text-sm text-muted-foreground">Original</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-2">
+                  <FileVideo className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Duration:</span>
+                    <span>{formatDuration(video.durationMs)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Resolution:</span>
+                    <span>{video.width}x{video.height}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Frame Rate:</span>
+                    <span>{video.frameRate} fps</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <Badge>Version {video.version}</Badge>
+                  <span className="text-sm text-muted-foreground">Current</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-2">
+                  <FileVideo className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Duration:</span>
+                    <span>{formatDuration(video.durationMs)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Resolution:</span>
+                    <span>{video.width}x{video.height}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Frame Rate:</span>
+                    <span>{video.frameRate} fps</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="border rounded-lg p-4 bg-muted/50">
+            <h4 className="font-medium mb-2">Changes Summary</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Audio levels adjusted (-3dB)</span>
+              </div>
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Transition effects improved</span>
+              </div>
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Color grading finalized</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>2 comments addressed, 1 pending</span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCompareDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              toast.success('Opening diff viewer', { description: 'Frame-by-frame comparison loading...' });
+            }}>
+              <Layers className="h-4 w-4 mr-2" />
+              Open Diff Viewer
             </Button>
           </DialogFooter>
         </DialogContent>

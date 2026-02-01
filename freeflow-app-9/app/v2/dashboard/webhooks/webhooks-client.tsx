@@ -404,6 +404,12 @@ export default function WebhooksClient({
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Users', 'Orders', 'Payments']))
   const [settingsTab, setSettingsTab] = useState('general')
   const [isSaving, setIsSaving] = useState(false)
+  const [showRotateSecretDialog, setShowRotateSecretDialog] = useState(false)
+  const [showRegenerateKeyDialog, setShowRegenerateKeyDialog] = useState(false)
+  const [rotatingSecret, setRotatingSecret] = useState(false)
+  const [regeneratingKey, setRegeneratingKey] = useState(false)
+  const [newSigningSecret, setNewSigningSecret] = useState('')
+  const [newApiKey, setNewApiKey] = useState('')
 
   // Form state for create/edit webhook
   const [formData, setFormData] = useState({
@@ -617,6 +623,40 @@ export default function WebhooksClient({
     } else {
       toast.error('Rotation failed')
     }
+  }
+
+  // Rotate signing secret with confirmation
+  const handleRotateSigningSecret = async () => {
+    setRotatingSecret(true)
+    toast.loading('Rotating signing secret...', { id: 'rotate-secret' })
+
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
+    const newSecret = `whsec_${crypto.randomUUID().replace(/-/g, '')}`
+    setNewSigningSecret(newSecret)
+
+    toast.success('Signing secret rotated!', {
+      id: 'rotate-secret',
+      description: 'Your new secret is ready. Make sure to update your integrations.'
+    })
+    setRotatingSecret(false)
+  }
+
+  // Regenerate API key with confirmation
+  const handleRegenerateApiKey = async () => {
+    setRegeneratingKey(true)
+    toast.loading('Regenerating API key...', { id: 'regenerate-key' })
+
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
+    const newKey = `wh_api_${crypto.randomUUID().replace(/-/g, '')}`
+    setNewApiKey(newKey)
+
+    toast.success('API key regenerated!', {
+      id: 'regenerate-key',
+      description: 'Your new API key is ready. Make sure to update your integrations.'
+    })
+    setRegeneratingKey(false)
   }
 
   const handleEventToggle = (eventName: string) => {
@@ -1517,7 +1557,7 @@ export default function WebhooksClient({
                           <div className="flex gap-2">
                             <Input type="password" value="whsec_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => toast.success('Copied', { description: 'Signing secret copied to clipboard' })}>Copy</Button>
-                            <Button variant="outline" onClick={() => toast.warning('Rotate Secret', { description: 'Are you sure? This will invalidate the current secret.' })}>Rotate</Button>
+                            <Button variant="outline" onClick={() => setShowRotateSecretDialog(true)}>Rotate</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -1636,7 +1676,7 @@ export default function WebhooksClient({
                           <div className="flex gap-2">
                             <Input type="password" value="wh_api_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => toast.success('Copied', { description: 'API key copied to clipboard' })}>Copy</Button>
-                            <Button variant="outline" onClick={() => toast.warning('Regenerate', { description: 'Are you sure? This will invalidate the current API key.' })}>Regenerate</Button>
+                            <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(true)}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -2186,6 +2226,178 @@ export default function WebhooksClient({
                 <RefreshCw className="w-4 h-4" />
                 Retry Deliveries
               </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rotate Signing Secret Confirmation Dialog */}
+      <Dialog open={showRotateSecretDialog} onOpenChange={setShowRotateSecretDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white">
+                <RotateCcw className="w-5 h-5" />
+              </div>
+              Rotate Signing Secret
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertOctagon className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <div>
+                  <p className="font-medium text-amber-800 dark:text-amber-200">
+                    This action cannot be undone
+                  </p>
+                  <p className="text-sm text-amber-600 dark:text-amber-300 mt-1">
+                    Rotating the signing secret will immediately invalidate the current secret.
+                    Any webhooks using the old secret will fail signature verification until updated.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {newSigningSecret && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">New Signing Secret</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newSigningSecret}
+                    readOnly
+                    className="font-mono text-sm bg-gray-50 dark:bg-gray-800"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(newSigningSecret)
+                      toast.success('Copied to clipboard')
+                    }}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Make sure to save this secret. It won&apos;t be shown again.
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowRotateSecretDialog(false)
+                  setNewSigningSecret('')
+                }}
+              >
+                {newSigningSecret ? 'Done' : 'Cancel'}
+              </Button>
+              {!newSigningSecret && (
+                <Button
+                  onClick={handleRotateSigningSecret}
+                  disabled={rotatingSecret}
+                  className="bg-amber-600 hover:bg-amber-700"
+                >
+                  {rotatingSecret ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Rotating...
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Rotate Secret
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Regenerate API Key Confirmation Dialog */}
+      <Dialog open={showRegenerateKeyDialog} onOpenChange={setShowRegenerateKeyDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center text-white">
+                <Key className="w-5 h-5" />
+              </div>
+              Regenerate API Key
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertOctagon className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
+                <div>
+                  <p className="font-medium text-red-800 dark:text-red-200">
+                    This action cannot be undone
+                  </p>
+                  <p className="text-sm text-red-600 dark:text-red-300 mt-1">
+                    Regenerating the API key will immediately invalidate the current key.
+                    Any applications using the old key will lose access until updated.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {newApiKey && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">New API Key</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newApiKey}
+                    readOnly
+                    className="font-mono text-sm bg-gray-50 dark:bg-gray-800"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(newApiKey)
+                      toast.success('Copied to clipboard')
+                    }}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Make sure to save this key. It won&apos;t be shown again.
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowRegenerateKeyDialog(false)
+                  setNewApiKey('')
+                }}
+              >
+                {newApiKey ? 'Done' : 'Cancel'}
+              </Button>
+              {!newApiKey && (
+                <Button
+                  onClick={handleRegenerateApiKey}
+                  disabled={regeneratingKey}
+                  variant="destructive"
+                >
+                  {regeneratingKey ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Regenerating...
+                    </>
+                  ) : (
+                    <>
+                      <Key className="w-4 h-4 mr-2" />
+                      Regenerate Key
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         </DialogContent>

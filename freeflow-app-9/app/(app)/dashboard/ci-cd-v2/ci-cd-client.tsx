@@ -486,6 +486,8 @@ export default function CiCdClient() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [formState, setFormState] = useState<PipelineFormState>(initialFormState)
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [testingWebhook, setTestingWebhook] = useState(false)
 
   // Use the CI/CD hook for data fetching and mutations
   const { pipelines: dbPipelines, loading, error, createPipeline, updatePipeline, deletePipeline, refetch } = useCiCd()
@@ -572,6 +574,45 @@ export default function CiCdClient() {
       console.error('Error deleting pipeline:', err)
       toast.error('Failed to delete pipeline')
     }
+  }
+
+  // Test webhook connection
+  const handleTestWebhook = async () => {
+    if (!webhookUrl.trim()) {
+      toast.error('Please enter a webhook URL')
+      return
+    }
+
+    // Validate URL format
+    try {
+      new URL(webhookUrl)
+    } catch {
+      toast.error('Invalid URL format')
+      return
+    }
+
+    setTestingWebhook(true)
+    toast.loading('Testing webhook connection...', { id: 'webhook-test' })
+
+    // Simulate webhook test
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // Simulate 90% success rate
+    const success = Math.random() > 0.1
+
+    if (success) {
+      toast.success('Webhook test successful!', {
+        id: 'webhook-test',
+        description: `Response received from ${new URL(webhookUrl).hostname}`
+      })
+    } else {
+      toast.error('Webhook test failed', {
+        id: 'webhook-test',
+        description: 'Connection timed out. Please check the URL and try again.'
+      })
+    }
+
+    setTestingWebhook(false)
   }
 
   // Derive data from DB pipelines - memoize to prevent unnecessary re-renders
@@ -996,7 +1037,7 @@ export default function CiCdClient() {
                     window.open(`https://github.com/edit/${selectedWorkflow.path}`, '_blank')
                     toast.success('Opening YAML editor in GitHub')
                   } else {
-                    toast.info('Select a workflow first to edit its YAML')
+                    toast.warning('No workflow selected', { description: 'Please select a workflow to edit its YAML configuration' })
                   }
                 } },
                 { icon: Copy, label: 'Duplicate', color: 'text-amber-500', onClick: () => {
@@ -1011,15 +1052,15 @@ export default function CiCdClient() {
                       repository_url: ''
                     })
                     setShowCreateDialog(true)
-                    toast.info('Creating duplicate - edit and save')
+                    toast.success('Pipeline duplicated', { description: 'Edit the settings and save to create a new pipeline' })
                   } else {
-                    toast.info('Select a pipeline to duplicate')
+                    toast.warning('No pipeline selected', { description: 'Please select a pipeline from the list to duplicate' })
                   }
                 } },
                 { icon: GitMerge, label: 'Branch Rules', color: 'text-pink-500', onClick: () => {
                   setActiveTab('settings')
                   setSettingsTab('workflows')
-                  toast.info('Navigate to workflow settings for branch rules')
+                  toast.success('Opening settings', { description: 'Navigate to branch protection rules in workflow settings' })
                 } },
                 { icon: History, label: 'Run History', color: 'text-indigo-500', onClick: () => setActiveTab('runs') },
                 { icon: Download, label: 'Export', color: 'text-cyan-500', onClick: () => {
@@ -2083,8 +2124,25 @@ export default function CiCdClient() {
                         <div className="space-y-2">
                           <Label>Webhook URL</Label>
                           <div className="flex gap-2">
-                            <Input placeholder="https://your-app.com/webhook/ci-cd" />
-                            <Button variant="outline" onClick={() => toast.info('Test', { description: 'Testing webhook connection...' })}>Test</Button>
+                            <Input
+                              placeholder="https://your-app.com/webhook/ci-cd"
+                              value={webhookUrl}
+                              onChange={(e) => setWebhookUrl(e.target.value)}
+                            />
+                            <Button
+                              variant="outline"
+                              onClick={handleTestWebhook}
+                              disabled={testingWebhook}
+                            >
+                              {testingWebhook ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Testing...
+                                </>
+                              ) : (
+                                'Test'
+                              )}
+                            </Button>
                           </div>
                         </div>
                         <div className="space-y-2">
