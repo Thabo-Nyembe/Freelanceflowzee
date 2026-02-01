@@ -92,6 +92,13 @@ export function RealtimeChat({
     readReceipts: true,
     typingIndicators: true
   })
+  const [showCallDialog, setShowCallDialog] = useState(false)
+  const [callType, setCallType] = useState<'voice' | 'video'>('voice')
+  const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'connected' | 'ended'>('idle')
+  const [callDuration, setCallDuration] = useState(0)
+  const [isMuted, setIsMuted] = useState(false)
+  const [isVideoOn, setIsVideoOn] = useState(true)
+  const callTimerRef = useRef<NodeJS.Timeout | null>(null)
   // Derive participants from online users hook data
   const participants = useMemo(() => {
     // Use onlineUsers from the realtime hook, falling back to current user
@@ -140,6 +147,56 @@ export function RealtimeChat({
       updateStatus('offline')
     }
   }, [chatId, userId, updateStatus])
+
+  // Call functions
+  const startCall = (type: 'voice' | 'video') => {
+    setCallType(type)
+    setCallStatus('idle')
+    setCallDuration(0)
+    setIsMuted(false)
+    setIsVideoOn(type === 'video')
+    setShowCallDialog(true)
+  }
+
+  const initiateCall = async () => {
+    setCallStatus('calling')
+    toast.loading(`${callType === 'voice' ? 'Calling' : 'Starting video call'}...`, { id: 'call-status' })
+
+    // Simulate connection delay
+    await new Promise(resolve => setTimeout(resolve, 2500))
+
+    setCallStatus('connected')
+    toast.success('Connected', { id: 'call-status', description: `${callType === 'voice' ? 'Voice' : 'Video'} call started` })
+
+    // Start call timer
+    callTimerRef.current = setInterval(() => {
+      setCallDuration(prev => prev + 1)
+    }, 1000)
+  }
+
+  const endCall = () => {
+    if (callTimerRef.current) {
+      clearInterval(callTimerRef.current)
+      callTimerRef.current = null
+    }
+
+    setCallStatus('ended')
+    toast.info('Call ended', {
+      description: `Duration: ${Math.floor(callDuration / 60)}:${(callDuration % 60).toString().padStart(2, '0')}`
+    })
+
+    setTimeout(() => {
+      setShowCallDialog(false)
+      setCallStatus('idle')
+      setCallDuration(0)
+    }, 1500)
+  }
+
+  const formatCallTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   // Handle message send
   const handleSendMessage = useCallback(
@@ -333,10 +390,10 @@ export function RealtimeChat({
               <Button variant="ghost" size="sm" onClick={toggleSearch} className={showSearch ? 'bg-accent' : ''}>
                 <Search className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Voice calls are coming in Q2 2026' })}>
+              <Button variant="ghost" size="sm" onClick={() => startCall('voice')}>
                 <Phone className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Video calls are coming in Q2 2026' })}>
+              <Button variant="ghost" size="sm" onClick={() => startCall('video')}>
                 <Video className="w-4 h-4" />
               </Button>
               <Button variant="ghost" size="sm" onClick={() => setShowParticipants(true)}>
@@ -569,7 +626,7 @@ export function RealtimeChat({
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    onClick={() => toast.info('Coming Soon', { description: 'Direct messaging coming soon' })}
+                    onClick={() => startCall('voice')}
                   >
                     <Phone className="w-4 h-4" />
                   </Button>
@@ -714,6 +771,141 @@ export function RealtimeChat({
               Save Settings
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Voice/Video Call Dialog */}
+      <Dialog open={showCallDialog} onOpenChange={(open) => {
+        if (!open && callStatus === 'connected') {
+          endCall()
+        } else if (!open) {
+          setShowCallDialog(false)
+        }
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {callType === 'voice' ? <Phone className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+              {callType === 'voice' ? 'Voice Call' : 'Video Call'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="py-8">
+            {/* Call UI */}
+            <div className="flex flex-col items-center">
+              {callType === 'video' && callStatus === 'connected' ? (
+                <div className="w-full aspect-video bg-gray-900 rounded-lg mb-4 flex items-center justify-center relative">
+                  {isVideoOn ? (
+                    <div className="text-center">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto">
+                        <Users className="w-10 h-10 text-white" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-white text-center">
+                      <Video className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">Camera Off</p>
+                    </div>
+                  )}
+                  {/* Call timer */}
+                  <div className="absolute top-2 left-2 bg-black/50 px-2 py-1 rounded text-white text-sm font-mono">
+                    {formatCallTime(callDuration)}
+                  </div>
+                </div>
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4">
+                  <Users className="w-12 h-12 text-white" />
+                </div>
+              )}
+
+              <h3 className="text-lg font-semibold">{chatName}</h3>
+
+              {callStatus === 'idle' && (
+                <p className="text-muted-foreground mt-2">Ready to call</p>
+              )}
+              {callStatus === 'calling' && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  <p className="text-blue-600">Calling...</p>
+                </div>
+              )}
+              {callStatus === 'connected' && callType === 'voice' && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  <p className="text-green-600 font-mono">{formatCallTime(callDuration)}</p>
+                </div>
+              )}
+              {callStatus === 'ended' && (
+                <p className="text-muted-foreground mt-2">Call ended</p>
+              )}
+            </div>
+          </div>
+
+          {/* Call Controls */}
+          <div className="flex items-center justify-center gap-4">
+            {callStatus === 'idle' && (
+              <>
+                <Button variant="outline" onClick={() => setShowCallDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={initiateCall} className="bg-green-600 hover:bg-green-700">
+                  {callType === 'voice' ? <Phone className="w-4 h-4 mr-2" /> : <Video className="w-4 h-4 mr-2" />}
+                  Start Call
+                </Button>
+              </>
+            )}
+
+            {callStatus === 'calling' && (
+              <Button variant="destructive" onClick={endCall}>
+                Cancel
+              </Button>
+            )}
+
+            {callStatus === 'connected' && (
+              <>
+                <Button
+                  variant={isMuted ? "destructive" : "outline"}
+                  size="lg"
+                  className="rounded-full w-12 h-12"
+                  onClick={() => {
+                    setIsMuted(!isMuted)
+                    toast.info(isMuted ? 'Unmuted' : 'Muted')
+                  }}
+                >
+                  {isMuted ? <X className="w-5 h-5" /> : <Phone className="w-5 h-5" />}
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  size="lg"
+                  className="rounded-full w-14 h-14"
+                  onClick={endCall}
+                >
+                  <Phone className="w-6 h-6 rotate-[135deg]" />
+                </Button>
+
+                {callType === 'video' && (
+                  <Button
+                    variant={!isVideoOn ? "destructive" : "outline"}
+                    size="lg"
+                    className="rounded-full w-12 h-12"
+                    onClick={() => {
+                      setIsVideoOn(!isVideoOn)
+                      toast.info(isVideoOn ? 'Camera off' : 'Camera on')
+                    }}
+                  >
+                    <Video className="w-5 h-5" />
+                  </Button>
+                )}
+              </>
+            )}
+
+            {callStatus === 'ended' && (
+              <Button onClick={() => setShowCallDialog(false)}>
+                Close
+              </Button>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

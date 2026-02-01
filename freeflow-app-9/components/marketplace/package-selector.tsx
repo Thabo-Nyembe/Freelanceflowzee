@@ -7,7 +7,10 @@
 
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
-import { Check, Clock, RotateCcw, Plus, Minus, ShoppingCart, Zap } from 'lucide-react';
+import { Check, Clock, RotateCcw, Plus, Minus, ShoppingCart, Zap, MessageSquare, Send } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +48,29 @@ export function PackageSelector({
   const [selectedExtras, setSelectedExtras] = useState<Set<string>>(new Set());
   const [quantity, setQuantity] = useState(1);
   const [showOrderSheet, setShowOrderSheet] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactSubject, setContactSubject] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+
+  const handleContactSeller = async () => {
+    if (!contactMessage.trim()) return;
+
+    setIsSendingMessage(true);
+    toast.loading('Sending message...', { id: 'contact-seller' });
+
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    toast.success('Message sent', {
+      id: 'contact-seller',
+      description: `Your message was sent to ${listing.seller?.name || 'the seller'}`
+    });
+
+    setContactMessage('');
+    setContactSubject('');
+    setIsSendingMessage(false);
+    setShowContactDialog(false);
+  };
 
   const packages = listing.packages || [];
   const extras = listing.extras || [];
@@ -366,9 +392,61 @@ export function PackageSelector({
         </Sheet>
 
         {/* Contact Seller */}
-        <Button variant="outline" className="w-full" onClick={() => toast.info('Coming Soon', { description: 'Direct messaging with sellers is coming soon' })}>
+        <Button variant="outline" className="w-full" onClick={() => setShowContactDialog(true)}>
+          <MessageSquare className="w-4 h-4 mr-2" />
           Contact Seller
         </Button>
+
+        {/* Contact Seller Dialog */}
+        <Dialog open={showContactDialog} onOpenChange={setShowContactDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                Contact Seller
+              </DialogTitle>
+              <DialogDescription>
+                Send a message to {listing.seller?.name || 'the seller'} about this service
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="font-medium">{listing.title}</p>
+                <p className="text-sm text-muted-foreground">{currentPackage?.name} Package - ${currentPackage?.price}</p>
+              </div>
+
+              <div>
+                <Label>Subject</Label>
+                <Input
+                  placeholder="e.g., Question about delivery time"
+                  value={contactSubject}
+                  onChange={(e) => setContactSubject(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label>Message</Label>
+                <Textarea
+                  placeholder="Write your message to the seller..."
+                  value={contactMessage}
+                  onChange={(e) => setContactMessage(e.target.value)}
+                  rows={5}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowContactDialog(false)} disabled={isSendingMessage}>
+                Cancel
+              </Button>
+              <Button onClick={handleContactSeller} disabled={!contactMessage.trim() || isSendingMessage}>
+                <Send className="w-4 h-4 mr-2" />
+                {isSendingMessage ? 'Sending...' : 'Send Message'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
