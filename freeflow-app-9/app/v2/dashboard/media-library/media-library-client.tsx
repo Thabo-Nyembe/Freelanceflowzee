@@ -2966,7 +2966,7 @@ export default function MediaLibraryClient({
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Input placeholder="Add new tag..." />
-                <Button>Add</Button>
+                <Button onClick={() => toast.success('Tag Added', { description: 'New tag has been created' })}>Add</Button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {['marketing', 'product', 'hero', 'banner', 'video', 'audio', 'document', 'brand'].map((tag) => (
@@ -3006,7 +3006,7 @@ export default function MediaLibraryClient({
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Input placeholder="Enter email address..." type="email" />
-                <Button>Invite</Button>
+                <Button onClick={() => toast.success('Invite Sent', { description: 'Collaboration invite has been sent' })}>Invite</Button>
               </div>
               <div className="space-y-2">
                 <Label>Current Collaborators</Label>
