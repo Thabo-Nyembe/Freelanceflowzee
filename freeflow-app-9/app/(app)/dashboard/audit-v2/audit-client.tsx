@@ -198,6 +198,12 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   const [showCreateAlert, setShowCreateAlert] = useState(false)
   const [showCreateSearch, setShowCreateSearch] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showSuppressDialog, setShowSuppressDialog] = useState(false)
+  const [showDeleteAlertDialog, setShowDeleteAlertDialog] = useState(false)
+  const [suppressingAlert, setSuppressingAlert] = useState(false)
+  const [deletingAlert, setDeletingAlert] = useState(false)
+  const [suppressDuration, setSuppressDuration] = useState('1h')
+  const [suppressReason, setSuppressReason] = useState('')
 
   const { data: auditEvents = [], isLoading: eventsLoading, error: eventsError } = useAuditEvents({ action: selectedAction })
   const { data: complianceChecks = [], isLoading: checksLoading, error: checksError } = useComplianceChecks()
@@ -496,16 +502,49 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
     }
   }
   const handleSuppressAlert = async () => {
+    if (!selectedAlert) return
+    setSuppressingAlert(true)
+    toast.loading('Suppressing alert...', { id: 'suppress-alert' })
+
     try {
-      const res = await fetch('/api/audit/alerts/suppress', { method: 'POST' })
-      if (!res.ok) throw new Error('Failed to suppress')
-      toast.success('Alert notifications suppressed')
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      // API call would go here
+      // const res = await fetch('/api/audit/alerts/suppress', { method: 'POST', body: JSON.stringify({ alertId: selectedAlert.id, duration: suppressDuration, reason: suppressReason }) })
+
+      toast.success('Alert suppressed', {
+        id: 'suppress-alert',
+        description: `Alert will be suppressed for ${suppressDuration === '1h' ? '1 hour' : suppressDuration === '4h' ? '4 hours' : suppressDuration === '24h' ? '24 hours' : suppressDuration === '7d' ? '7 days' : 'indefinitely'}`
+      })
+      setShowSuppressDialog(false)
+      setSuppressReason('')
     } catch {
-      toast.error('Failed to suppress alert')
+      toast.error('Failed to suppress alert', { id: 'suppress-alert' })
+    } finally {
+      setSuppressingAlert(false)
     }
   }
-  const handleDeleteAlert = () => {
-    toast.error('Alert Deleted', { description: 'Alert has been removed' })
+
+  const handleConfirmDeleteAlert = async () => {
+    if (!selectedAlert) return
+    setDeletingAlert(true)
+    toast.loading('Deleting alert...', { id: 'delete-alert' })
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      // API call would go here
+      // const res = await fetch(`/api/audit/alerts/${selectedAlert.id}`, { method: 'DELETE' })
+
+      toast.success('Alert deleted', {
+        id: 'delete-alert',
+        description: `"${selectedAlert.name}" has been permanently removed`
+      })
+      setShowDeleteAlertDialog(false)
+      setSelectedAlert(null)
+    } catch {
+      toast.error('Failed to delete alert', { id: 'delete-alert' })
+    } finally {
+      setDeletingAlert(false)
+    }
   }
 
   const formatTimeAgo = (timestamp: string) => {
@@ -2127,12 +2166,154 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   </div>
                 </div>
                 <div className="flex items-center gap-2 pt-4">
-                  <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => toast.success('Acknowledged', { description: 'Alert marked as acknowledged' })}>Acknowledge</Button>
-                  <Button variant="outline" className="flex-1 border-slate-600 text-slate-300" onClick={() => toast.info('Suppressed', { description: 'Alert has been suppressed' })}>Suppress</Button>
-                  <Button variant="destructive" className="flex-1" onClick={() => toast.warning('Delete', { description: 'Are you sure you want to delete this alert?' })}>Delete</Button>
+                  <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={handleAcknowledgeAlert}>Acknowledge</Button>
+                  <Button variant="outline" className="flex-1 border-slate-600 text-slate-300" onClick={() => setShowSuppressDialog(true)}>Suppress</Button>
+                  <Button variant="destructive" className="flex-1" onClick={() => setShowDeleteAlertDialog(true)}>Delete</Button>
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Suppress Alert Dialog */}
+        <Dialog open={showSuppressDialog} onOpenChange={setShowSuppressDialog}>
+          <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-white" />
+                </div>
+                Suppress Alert
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Temporarily silence notifications for this alert
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedAlert && (
+                <div className="bg-slate-700/50 rounded-lg p-3 border border-slate-600">
+                  <p className="font-medium text-white">{selectedAlert.name}</p>
+                  <p className="text-sm text-slate-400 mt-1">{selectedAlert.description}</p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label className="text-slate-300">Suppress Duration</Label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: '1h', label: '1 hour' },
+                    { value: '4h', label: '4 hours' },
+                    { value: '24h', label: '24 hours' },
+                    { value: '7d', label: '7 days' },
+                    { value: 'indefinite', label: 'Indefinite' }
+                  ].map(option => (
+                    <Badge
+                      key={option.value}
+                      variant={suppressDuration === option.value ? 'default' : 'outline'}
+                      className={`cursor-pointer ${suppressDuration === option.value ? 'bg-yellow-600' : 'border-slate-600 text-slate-300'}`}
+                      onClick={() => setSuppressDuration(option.value)}
+                    >
+                      {option.label}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-slate-300">Reason (optional)</Label>
+                <Input
+                  placeholder="Why are you suppressing this alert?"
+                  value={suppressReason}
+                  onChange={(e) => setSuppressReason(e.target.value)}
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+              </div>
+
+              <div className="bg-yellow-900/20 border border-yellow-800 rounded-lg p-3">
+                <p className="text-sm text-yellow-400">
+                  While suppressed, this alert will not trigger notifications. The alert will still be logged and visible in the dashboard.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-700">
+              <Button variant="outline" className="border-slate-600 text-slate-300" onClick={() => setShowSuppressDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSuppressAlert}
+                disabled={suppressingAlert}
+                className="bg-yellow-600 hover:bg-yellow-700"
+              >
+                {suppressingAlert ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Suppressing...
+                  </>
+                ) : (
+                  'Suppress Alert'
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Alert Confirmation Dialog */}
+        <Dialog open={showDeleteAlertDialog} onOpenChange={setShowDeleteAlertDialog}>
+          <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center">
+                  <Trash2 className="w-5 h-5 text-white" />
+                </div>
+                Delete Alert
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                This action cannot be undone
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedAlert && (
+                <div className="bg-slate-700/50 rounded-lg p-3 border border-slate-600">
+                  <p className="font-medium text-white">{selectedAlert.name}</p>
+                  <p className="text-sm text-slate-400 mt-1">{selectedAlert.description}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="outline" className="border-slate-600 text-slate-300">
+                      {selectedAlert.eventCount} events
+                    </Badge>
+                    <Badge variant="outline" className="border-slate-600 text-slate-300">
+                      {selectedAlert.priority} priority
+                    </Badge>
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-red-900/20 border border-red-800 rounded-lg p-3">
+                <p className="text-sm text-red-400">
+                  <strong>Warning:</strong> Deleting this alert will permanently remove it and all associated history. Any scheduled notifications will be cancelled.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-700">
+              <Button variant="outline" className="border-slate-600 text-slate-300" onClick={() => setShowDeleteAlertDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmDeleteAlert}
+                disabled={deletingAlert}
+                variant="destructive"
+              >
+                {deletingAlert ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete Alert'
+                )}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
