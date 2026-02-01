@@ -959,9 +959,50 @@ export default function CommunityHubClient() {
       toast.error('Failed to like post')
     }
   }
+  const [showCommentDialog, setShowCommentDialog] = useState(false)
+  const [commentContent, setCommentContent] = useState('')
+  const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null)
+
   const handleCommentOnPost = (id: string) => {
-    const post = state.posts.find(p => p.id === id)
-    toast.info('Add comment - ' + (post?.comments || 0) + ' comments - ' + (post?.likes || 0) + ' likes')
+    setActiveCommentPostId(id)
+    setCommentContent('')
+    setShowCommentDialog(true)
+  }
+
+  const handleSubmitComment = async () => {
+    if (!activeCommentPostId || !commentContent.trim()) {
+      toast.error('Please enter a comment')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'comment',
+          resourceId: activeCommentPostId,
+          data: {
+            content: commentContent,
+            authorId: userId || 'user-1'
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to post comment')
+      }
+
+      toast.success('Comment posted!')
+      setShowCommentDialog(false)
+      setCommentContent('')
+      setActiveCommentPostId(null)
+    } catch (error: any) {
+      logger.error('Failed to post comment', { error: error.message })
+      toast.error('Failed to post comment')
+    }
   }
 
   const handleSharePost = async (id: string) => {
@@ -1061,9 +1102,31 @@ export default function CommunityHubClient() {
     }
   }
 
-  const handleUnfollowMember = (id: string) => {
+  const handleUnfollowMember = async (id: string) => {
     const member = state.members.find(m => m.id === id)
-    toast.success('Unfollowed - ' + (member?.title || '') + ' - ' + ((member?.followers || 0) - 1) + ' followers remaining')
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'unfollow',
+          resourceId: id,
+          userId: userId || 'user-1'
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to unfollow member')
+      }
+
+      dispatch({ type: 'UNFOLLOW_MEMBER', payload: id })
+      toast.success('Unfollowed - ' + (member?.title || '') + ' - ' + ((member?.followers || 0) - 1) + ' followers remaining')
+    } catch (error: any) {
+      logger.error('Failed to unfollow member', { error: error.message, memberId: id })
+      toast.error('Failed to unfollow member')
+    }
   }
 
   const handleConnectWithMember = async (id: string) => {
@@ -1189,8 +1252,80 @@ export default function CommunityHubClient() {
     toast.info('Viewing profile - ' + (member?.title || '') + ' - ' + (member?.rating || 0) + ' rating - ' + (member?.totalProjects || 0) + ' projects completed')
   }
 
+  const [showEditProfileDialog, setShowEditProfileDialog] = useState(false)
+  const [editProfileForm, setEditProfileForm] = useState({
+    name: '',
+    bio: '',
+    title: '',
+    location: '',
+    skills: ''
+  })
+
   const handleEditProfile = () => {
-    toast.info('Edit your profile')
+    // Pre-fill form with current user data if available
+    if (state.currentUser) {
+      setEditProfileForm({
+        name: state.currentUser.name || '',
+        bio: state.currentUser.bio || '',
+        title: state.currentUser.title || '',
+        location: state.currentUser.location || '',
+        skills: state.currentUser.skills?.join(', ') || ''
+      })
+    }
+    setShowEditProfileDialog(true)
+  }
+
+  const handleSaveProfile = async () => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-profile',
+          resourceId: userId,
+          userId,
+          data: {
+            name: editProfileForm.name,
+            bio: editProfileForm.bio,
+            title: editProfileForm.title,
+            location: editProfileForm.location,
+            skills: editProfileForm.skills.split(',').map(s => s.trim()).filter(Boolean)
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to update profile')
+      }
+
+      // Update local state
+      if (state.currentUser) {
+        dispatch({
+          type: 'SET_CURRENT_USER',
+          payload: {
+            ...state.currentUser,
+            name: editProfileForm.name,
+            bio: editProfileForm.bio,
+            title: editProfileForm.title,
+            location: editProfileForm.location,
+            skills: editProfileForm.skills.split(',').map(s => s.trim()).filter(Boolean)
+          }
+        })
+      }
+
+      toast.success('Profile updated successfully')
+      setShowEditProfileDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to update profile', { error: error.message })
+      toast.error('Failed to update profile')
+    }
   }
 
   const handleSendEndorsement = (id: string) => {
@@ -3255,6 +3390,100 @@ export default function CommunityHubClient() {
             </Button>
             <Button onClick={handleSaveSettings}>
               Save Settings
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Comment Dialog */}
+      <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add Comment</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="comment-content">Your Comment</Label>
+              <Textarea
+                id="comment-content"
+                placeholder="Write your comment..."
+                rows={4}
+                value={commentContent}
+                onChange={(e) => setCommentContent(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowCommentDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitComment} disabled={!commentContent.trim()}>
+              Post Comment
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={showEditProfileDialog} onOpenChange={setShowEditProfileDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Community Profile</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Display Name</Label>
+              <Input
+                id="edit-name"
+                value={editProfileForm.name}
+                onChange={(e) => setEditProfileForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Your display name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Title / Role</Label>
+              <Input
+                id="edit-title"
+                value={editProfileForm.title}
+                onChange={(e) => setEditProfileForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="e.g., Full Stack Developer"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-location">Location</Label>
+              <Input
+                id="edit-location"
+                value={editProfileForm.location}
+                onChange={(e) => setEditProfileForm(prev => ({ ...prev, location: e.target.value }))}
+                placeholder="e.g., San Francisco, CA"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-bio">Bio</Label>
+              <Textarea
+                id="edit-bio"
+                value={editProfileForm.bio}
+                onChange={(e) => setEditProfileForm(prev => ({ ...prev, bio: e.target.value }))}
+                placeholder="Tell the community about yourself..."
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-skills">Skills (comma-separated)</Label>
+              <Input
+                id="edit-skills"
+                value={editProfileForm.skills}
+                onChange={(e) => setEditProfileForm(prev => ({ ...prev, skills: e.target.value }))}
+                placeholder="e.g., React, Node.js, TypeScript"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowEditProfileDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveProfile}>
+              Save Changes
             </Button>
           </div>
         </DialogContent>

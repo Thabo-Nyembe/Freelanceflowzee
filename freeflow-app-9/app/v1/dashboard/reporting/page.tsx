@@ -30,8 +30,7 @@ import {
   createReport,
   updateReport,
   createReportExport,
-  type ReportType,
-  type ExportFormat
+  type ReportType
 } from '@/lib/reports-queries'
 
 const logger = createFeatureLogger('ReportingPage')
@@ -59,6 +58,16 @@ export default function ReportingPage() {
 
   // Modal and form states
   const [showCreateReportModal, setShowCreateReportModal] = useState(false)
+  const [showSectionSettingsModal, setShowSectionSettingsModal] = useState(false)
+  const [selectedSection, setSelectedSection] = useState<any | null>(null)
+  const [sectionSettingsForm, setSectionSettingsForm] = useState({
+    title: '',
+    type: 'metric' as 'metric' | 'chart' | 'table',
+    chartType: 'bar' as string,
+    showLegend: true,
+    showGrid: true,
+    colorScheme: 'default' as string
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [newReportName, setNewReportName] = useState('')
   const [newReportDescription, setNewReportDescription] = useState('')
@@ -712,10 +721,18 @@ export default function ReportingPage() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <button
-                                  onClick={() => toast.info('Section: ' + section.title, {
-                                    description: `Type: ${section.type}${section.config.chartType ? ` | Chart: ${section.config.chartType}` : ''}`,
-                                    duration: 3000
-                                  })}
+                                  onClick={() => {
+                                    setSelectedSection(section)
+                                    setSectionSettingsForm({
+                                      title: section.title,
+                                      type: section.type,
+                                      chartType: section.config.chartType || 'bar',
+                                      showLegend: section.config.showLegend ?? true,
+                                      showGrid: section.config.showGrid ?? true,
+                                      colorScheme: section.config.colorScheme || 'default'
+                                    })
+                                    setShowSectionSettingsModal(true)
+                                  }}
                                   className="p-1 hover:bg-muted rounded"
                                 >
                                   <span className="text-gray-400">⚙️</span>
@@ -1041,6 +1058,128 @@ export default function ReportingPage() {
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
               >
                 {isSubmitting ? 'Creating...' : 'Create Report'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Section Settings Modal */}
+      {showSectionSettingsModal && selectedSection && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <h3 className="text-xl font-semibold mb-4">Section Settings</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Section Title</label>
+                <input
+                  type="text"
+                  placeholder="Enter section title"
+                  value={sectionSettingsForm.title}
+                  onChange={(e) => setSectionSettingsForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Section Type</label>
+                <select
+                  value={sectionSettingsForm.type}
+                  onChange={(e) => setSectionSettingsForm(prev => ({ ...prev, type: e.target.value as 'metric' | 'chart' | 'table' }))}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                >
+                  <option value="metric">Metric</option>
+                  <option value="chart">Chart</option>
+                  <option value="table">Table</option>
+                </select>
+              </div>
+              {sectionSettingsForm.type === 'chart' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Chart Type</label>
+                    <select
+                      value={sectionSettingsForm.chartType}
+                      onChange={(e) => setSectionSettingsForm(prev => ({ ...prev, chartType: e.target.value }))}
+                      className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                    >
+                      <option value="bar">Bar Chart</option>
+                      <option value="line">Line Chart</option>
+                      <option value="pie">Pie Chart</option>
+                      <option value="area">Area Chart</option>
+                      <option value="donut">Donut Chart</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Show Legend</label>
+                    <input
+                      type="checkbox"
+                      checked={sectionSettingsForm.showLegend}
+                      onChange={(e) => setSectionSettingsForm(prev => ({ ...prev, showLegend: e.target.checked }))}
+                      className="w-4 h-4"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Show Grid</label>
+                    <input
+                      type="checkbox"
+                      checked={sectionSettingsForm.showGrid}
+                      onChange={(e) => setSectionSettingsForm(prev => ({ ...prev, showGrid: e.target.checked }))}
+                      className="w-4 h-4"
+                    />
+                  </div>
+                </>
+              )}
+              <div>
+                <label className="block text-sm font-medium mb-2">Color Scheme</label>
+                <select
+                  value={sectionSettingsForm.colorScheme}
+                  onChange={(e) => setSectionSettingsForm(prev => ({ ...prev, colorScheme: e.target.value }))}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                >
+                  <option value="default">Default</option>
+                  <option value="blue">Blue</option>
+                  <option value="green">Green</option>
+                  <option value="purple">Purple</option>
+                  <option value="orange">Orange</option>
+                  <option value="rainbow">Rainbow</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowSectionSettingsModal(false)
+                  setSelectedSection(null)
+                }}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // Update the section with new settings
+                  setReportSections(prev => prev.map(s =>
+                    s.id === selectedSection.id
+                      ? {
+                          ...s,
+                          title: sectionSettingsForm.title,
+                          type: sectionSettingsForm.type,
+                          config: {
+                            ...s.config,
+                            chartType: sectionSettingsForm.chartType,
+                            showLegend: sectionSettingsForm.showLegend,
+                            showGrid: sectionSettingsForm.showGrid,
+                            colorScheme: sectionSettingsForm.colorScheme
+                          }
+                        }
+                      : s
+                  ))
+                  setShowSectionSettingsModal(false)
+                  setSelectedSection(null)
+                  toast.success('Section settings updated')
+                }}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                Save Changes
               </button>
             </div>
           </div>

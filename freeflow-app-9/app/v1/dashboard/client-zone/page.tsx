@@ -315,6 +315,7 @@ export default function ClientZonePage() {
   const [showDisputeDialog, setShowDisputeDialog] = useState(false)
   const [disputeInvoiceNumber, setDisputeInvoiceNumber] = useState<string | null>(null)
   const [disputeReason, setDisputeReason] = useState('')
+  const [showPendingInvoicesDialog, setShowPendingInvoicesDialog] = useState(false)
 
   // A+++ LOAD CLIENT ZONE DATA FROM DATABASE
   useEffect(() => {
@@ -985,15 +986,13 @@ export default function ClientZonePage() {
       if (response.ok) {
         toast.success('Payment reminder sent')
       } else {
-        // Navigate to invoices tab as fallback
-        setActiveTab('invoices')
-        toast.info('View pending invoices below')
+        // Show pending invoices dialog
+        setShowPendingInvoicesDialog(true)
       }
     } catch (error) {
       toast.dismiss()
-      // Navigate to invoices tab as fallback
-      setActiveTab('invoices')
-      toast.info('View pending invoices below')
+      // Show pending invoices dialog
+      setShowPendingInvoicesDialog(true)
     }
   }, [userId, invoices, dashboardData])
 
@@ -2379,6 +2378,108 @@ export default function ClientZonePage() {
             </Button>
             <Button variant="destructive" onClick={confirmInvoiceDispute}>
               Submit Dispute
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pending Invoices Dialog */}
+      <Dialog open={showPendingInvoicesDialog} onOpenChange={setShowPendingInvoicesDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Receipt className="h-5 w-5 text-orange-600" />
+              Pending Invoices
+            </DialogTitle>
+            <DialogDescription>
+              Review and pay your outstanding invoices
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4 max-h-[400px] overflow-y-auto">
+            {invoices.filter(inv => inv.status === 'pending').length === 0 ? (
+              <div className="text-center py-8">
+                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                <p className="text-lg font-semibold text-gray-900">All Caught Up!</p>
+                <p className="text-gray-600">You have no pending invoices</p>
+              </div>
+            ) : (
+              invoices.filter(inv => inv.status === 'pending').map((invoice) => (
+                <div
+                  key={invoice.id}
+                  className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{invoice.number}</h4>
+                      <p className="text-sm text-gray-600">{invoice.project}</p>
+                    </div>
+                    <Badge className="bg-orange-100 text-orange-800">Pending</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                    <div>
+                      <p className="text-gray-500">Amount</p>
+                      <p className="font-semibold text-lg">{formatCurrency(invoice.amount)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Due Date</p>
+                      <p className="font-semibold">
+                        {invoice.dueDate && new Date(invoice.dueDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  {invoice.items && invoice.items.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-500 mb-1">Items:</p>
+                      <p className="text-sm text-gray-700">{invoice.items.join(', ')}</p>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                      onClick={() => {
+                        handlePayInvoice(invoice.number, invoice.amount)
+                        setShowPendingInvoicesDialog(false)
+                      }}
+                    >
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Pay Now
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleViewInvoiceDetails(invoice.number)}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Details
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setShowPendingInvoicesDialog(false)
+                        handleInvoiceDispute(invoice.number)
+                      }}
+                    >
+                      Dispute
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPendingInvoicesDialog(false)}>
+              Close
+            </Button>
+            <Button
+              onClick={() => {
+                setActiveTab('invoices')
+                setShowPendingInvoicesDialog(false)
+              }}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+            >
+              View All Invoices
             </Button>
           </DialogFooter>
         </DialogContent>

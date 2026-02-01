@@ -29,6 +29,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -72,6 +80,7 @@ export default function GalleryPage() {
   const [selectedItems, setSelectedItems] = useState<number[]>([])
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([])
   const [deleteItem, setDeleteItem] = useState<{ id: number; name: string } | null>(null)
+  const [previewItem, setPreviewItem] = useState<GalleryItem | null>(null)
 
   // Filter State
   const [filters, setFilters] = useState<GalleryFilter>({
@@ -483,7 +492,7 @@ export default function GalleryPage() {
                               logger.info('Gallery item preview opened', {
                                 itemId: item.id
                               })
-                              toast.info('Opening preview...')
+                              setPreviewItem(item)
                             }}
                           >
                             <Eye className="h-4 w-4" />
@@ -721,6 +730,105 @@ export default function GalleryPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Preview Dialog */}
+      <Dialog open={!!previewItem} onOpenChange={() => setPreviewItem(null)}>
+        <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-600" />
+              {previewItem?.name}
+            </DialogTitle>
+            <DialogDescription>
+              {previewItem?.project} - Uploaded by {previewItem?.uploadedBy}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {/* Preview Content */}
+            <div className="bg-gray-100 rounded-lg overflow-hidden">
+              {previewItem?.type === 'image' && previewItem?.imageUrl ? (
+                <img
+                  src={previewItem.imageUrl}
+                  alt={previewItem.name}
+                  className="w-full h-auto max-h-[400px] object-contain"
+                />
+              ) : previewItem?.type === 'video' ? (
+                <div className="h-[300px] flex items-center justify-center bg-gray-900 text-white">
+                  <div className="text-center">
+                    <div className="text-6xl mb-4">📹</div>
+                    <p className="text-lg font-semibold">{previewItem.name}</p>
+                    <p className="text-sm text-gray-400 mt-2">Video preview</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-6xl mb-4">📄</div>
+                    <p className="text-lg font-semibold text-gray-700">{previewItem?.name}</p>
+                    <p className="text-sm text-gray-500 mt-2">Document preview</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* File Details */}
+            <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-gray-500">File Size</p>
+                <p className="font-semibold">{previewItem?.fileSize}</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-gray-500">Upload Date</p>
+                <p className="font-semibold">
+                  {previewItem?.uploadDate && new Date(previewItem.uploadDate).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-gray-500">Status</p>
+                <Badge className={getStatusColor(previewItem?.status || '')}>
+                  {previewItem?.status?.replace('-', ' ')}
+                </Badge>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-gray-500">Type</p>
+                <p className="font-semibold capitalize">{previewItem?.type}</p>
+              </div>
+            </div>
+
+            {/* Description */}
+            {previewItem?.description && (
+              <div className="mt-4 bg-gray-50 rounded-lg p-3">
+                <p className="text-gray-500 text-sm mb-1">Description</p>
+                <p className="text-gray-700">{previewItem.description}</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPreviewItem(null)}>
+              Close
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (previewItem) handleShare(previewItem)
+              }}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+            <Button
+              onClick={() => {
+                if (previewItem) handleDownload(previewItem)
+                setPreviewItem(null)
+              }}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

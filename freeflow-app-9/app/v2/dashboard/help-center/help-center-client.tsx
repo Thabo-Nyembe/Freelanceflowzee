@@ -2002,7 +2002,8 @@ export default function HelpCenterClient() {
                           <p className="text-xs text-muted-foreground">{formatNumber(article.views)} views</p>
                         </div>
                         <Button variant="ghost" size="sm" onClick={() => {
-                          toast.success("Opening Article")
+                          window.open(`/help/${article.title.toLowerCase().replace(/\s+/g, '-')}`, '_blank')
+                          toast.success("Opening article in new tab")
                         }}>
                           <ExternalLink className="w-4 h-4" />
                         </Button>

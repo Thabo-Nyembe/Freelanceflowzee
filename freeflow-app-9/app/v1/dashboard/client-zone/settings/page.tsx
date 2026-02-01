@@ -7,6 +7,16 @@ import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Settings as SettingsIcon,
   Bell,
@@ -17,7 +27,10 @@ import {
   User,
   Check,
   Database,
-  Zap
+  Zap,
+  Eye,
+  EyeOff,
+  Loader2
 } from 'lucide-react'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
@@ -65,6 +78,17 @@ export default function SettingsPage() {
   const [isExporting, setIsExporting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [activeTab, setActiveTab] = useState<'notifications' | 'account' | 'privacy' | 'data'>('notifications')
+
+  // PASSWORD CHANGE DIALOG STATE
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
 
   // NOTIFICATION SETTINGS
   const [notificationSettings, setNotificationSettings] = useState<NotificationSetting[]>([])
@@ -276,14 +300,84 @@ export default function SettingsPage() {
   // HANDLER 5: CHANGE PASSWORD
   // ============================================================================
 
-  const handleChangePassword = async () => {
+  const handleChangePassword = () => {
     logger.info('Password change initiated', {
       clientName: KAZI_CLIENT_DATA.clientInfo.name
     })
 
-    toast.info('Opening password change dialog...', {
-      description: 'You will be sent a verification email'
+    // Open password change dialog
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
     })
+    setShowPasswordDialog(true)
+  }
+
+  const handleSubmitPasswordChange = async () => {
+    // Validate passwords
+    if (!passwordData.currentPassword) {
+      toast.error('Please enter your current password')
+      return
+    }
+    if (!passwordData.newPassword) {
+      toast.error('Please enter a new password')
+      return
+    }
+    if (passwordData.newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters')
+      return
+    }
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+
+    try {
+      setIsChangingPassword(true)
+
+      logger.info('Submitting password change', {
+        clientName: KAZI_CLIENT_DATA.clientInfo.name
+      })
+
+      const response = await fetch('/api/user/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: KAZI_CLIENT_DATA.clientInfo.name,
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to change password')
+      }
+
+      logger.info('Password changed successfully', {
+        clientName: KAZI_CLIENT_DATA.clientInfo.name
+      })
+
+      toast.success('Password changed successfully!', {
+        description: 'A confirmation email has been sent to your email address'
+      })
+
+      setShowPasswordDialog(false)
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      })
+    } catch (error) {
+      logger.error('Failed to change password', { error })
+      toast.error('Failed to change password', {
+        description: error.message || 'Please check your current password and try again'
+      })
+    } finally {
+      setIsChangingPassword(false)
+    }
   }
 
   // ============================================================================
@@ -740,6 +834,93 @@ export default function SettingsPage() {
           </Card>
         </motion.div>
       )}
+
+      {/* Password Change Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5" />
+              Change Password
+            </DialogTitle>
+            <DialogDescription>
+              Enter your current password and choose a new secure password.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-password">Current Password</Label>
+              <div className="relative">
+                <Input
+                  id="current-password"
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={passwordData.currentPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                  placeholder="Enter current password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <div className="relative">
+                <Input
+                  id="new-password"
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                  placeholder="Enter new password (min 8 characters)"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={passwordData.confirmPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                placeholder="Confirm new password"
+              />
+            </div>
+            {passwordData.newPassword && passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword && (
+              <p className="text-sm text-red-500">Passwords do not match</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitPasswordChange}
+              disabled={isChangingPassword}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+            >
+              {isChangingPassword ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Changing...
+                </>
+              ) : (
+                'Change Password'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

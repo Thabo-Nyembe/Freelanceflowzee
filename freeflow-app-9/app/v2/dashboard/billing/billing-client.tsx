@@ -2445,15 +2445,50 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRefundDialog(false)}>Cancel</Button>
             <Button
-              onClick={() => {
-                toast.success("Refund of $" + refundForm.amount + " initiated for " + refundForm.transactionId)
-                setShowRefundDialog(false)
-                setRefundForm({ transactionId: '', amount: '', reason: 'requested_by_customer' })
+              onClick={async () => {
+                if (!refundForm.transactionId || !refundForm.amount) return
+
+                toast.loading('Processing refund...', { id: 'process-refund' })
+                try {
+                  // Create refund record in database
+                  await createRefund({
+                    transaction_id: refundForm.transactionId,
+                    amount: parseFloat(refundForm.amount),
+                    currency: 'USD',
+                    status: 'pending',
+                    reason: refundForm.reason,
+                    notes: `Refund for transaction ${refundForm.transactionId}`
+                  })
+
+                  // Call refund API
+                  const response = await fetch('/api/payments/refund', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      transactionId: refundForm.transactionId,
+                      amount: parseFloat(refundForm.amount),
+                      reason: refundForm.reason
+                    })
+                  })
+
+                  if (!response.ok) {
+                    const error = await response.json()
+                    throw new Error(error.message || 'Refund failed')
+                  }
+
+                  toast.success(`Refund of $${refundForm.amount} initiated for ${refundForm.transactionId}`, { id: 'process-refund' })
+                  setShowRefundDialog(false)
+                  setRefundForm({ transactionId: '', amount: '', reason: 'requested_by_customer' })
+                  refetchTransactions()
+                } catch (error) {
+                  console.error('Refund failed:', error)
+                  toast.error('Failed to process refund', { id: 'process-refund' })
+                }
               }}
-              disabled={!refundForm.transactionId || !refundForm.amount}
+              disabled={!refundForm.transactionId || !refundForm.amount || creatingRefund}
               className="bg-gradient-to-r from-orange-600 to-red-600"
             >
-              Process Refund
+              {creatingRefund ? 'Processing...' : 'Process Refund'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -2522,6 +2557,307 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                 </Button>
               )}
               <Button variant="outline" onClick={() => setSelectedSubscription(null)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Invoice Detail Modal */}
+      {selectedInvoice && (
+        <Dialog open={!!selectedInvoice} onOpenChange={() => setSelectedInvoice(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg">
+                  <Receipt className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <div className="font-semibold">Invoice {selectedInvoice.number}</div>
+                  <div className="text-sm text-gray-500">{selectedInvoice.customer_name}</div>
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {/* Invoice Header Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm text-gray-500">Status</span>
+                  <div className="mt-1">
+                    <Badge className={getStatusColor(selectedInvoice.status)}>{selectedInvoice.status}</Badge>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm text-gray-500">Total Amount</span>
+                  <div className="mt-1 text-lg font-bold text-gray-900 dark:text-white">
+                    {formatCurrency(selectedInvoice.total)}
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm text-gray-500">Created</span>
+                  <div className="mt-1 font-medium text-gray-900 dark:text-white">
+                    {new Date(selectedInvoice.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm text-gray-500">Due Date</span>
+                  <div className="mt-1 font-medium text-gray-900 dark:text-white">
+                    {new Date(selectedInvoice.due_date).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Info */}
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="text-sm font-medium text-gray-500 mb-2">Bill To</h4>
+                <div className="font-medium text-gray-900 dark:text-white">{selectedInvoice.customer_name}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">{selectedInvoice.customer_email}</div>
+              </div>
+
+              {/* Line Items */}
+              {selectedInvoice.line_items && selectedInvoice.line_items.length > 0 && (
+                <div className="border dark:border-gray-700 rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-800">
+                      <tr>
+                        <th className="text-left py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Description</th>
+                        <th className="text-right py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Qty</th>
+                        <th className="text-right py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedInvoice.line_items.map((item, idx) => (
+                        <tr key={idx} className="border-t dark:border-gray-700">
+                          <td className="py-2 px-4 text-gray-900 dark:text-white">{item.description}</td>
+                          <td className="py-2 px-4 text-right text-gray-600 dark:text-gray-400">{item.quantity}</td>
+                          <td className="py-2 px-4 text-right font-medium text-gray-900 dark:text-white">{formatCurrency(item.amount)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Totals */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Subtotal</span>
+                  <span className="text-gray-900 dark:text-white">{formatCurrency(selectedInvoice.subtotal)}</span>
+                </div>
+                {selectedInvoice.tax > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Tax</span>
+                    <span className="text-gray-900 dark:text-white">{formatCurrency(selectedInvoice.tax)}</span>
+                  </div>
+                )}
+                {selectedInvoice.discount && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Discount</span>
+                    <span>-{formatCurrency(selectedInvoice.discount.amount_off)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-lg pt-2 border-t dark:border-gray-700">
+                  <span className="text-gray-900 dark:text-white">Total</span>
+                  <span className="text-gray-900 dark:text-white">{formatCurrency(selectedInvoice.total)}</span>
+                </div>
+                {selectedInvoice.amount_remaining > 0 && selectedInvoice.status !== 'paid' && (
+                  <div className="flex justify-between text-sm text-red-600">
+                    <span>Amount Due</span>
+                    <span>{formatCurrency(selectedInvoice.amount_remaining)}</span>
+                  </div>
+                )}
+              </div>
+
+              {selectedInvoice.paid_at && (
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                    <ShieldCheck className="h-4 w-4" />
+                    <span className="text-sm font-medium">Paid on {new Date(selectedInvoice.paid_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter className="flex flex-wrap gap-2">
+              {selectedInvoice.status === 'open' && (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSendInvoiceReminder(selectedInvoice)}
+                    disabled={mutatingInvoice}
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    Send Reminder
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      handleRetryPayment(selectedInvoice)
+                      setSelectedInvoice(null)
+                    }}
+                    disabled={mutatingInvoice}
+                  >
+                    Retry Payment
+                  </Button>
+                </>
+              )}
+              {selectedInvoice.hosted_invoice_url && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    window.open(selectedInvoice.hosted_invoice_url, '_blank')
+                  }}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  View Online
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  // Generate proper invoice PDF
+                  const invoiceHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Invoice ${selectedInvoice.number}</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; }
+    .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+    .company { font-size: 24px; font-weight: bold; color: #4F46E5; }
+    .invoice-title { font-size: 32px; color: #111; }
+    .invoice-number { color: #666; margin-top: 5px; }
+    .info-section { display: flex; justify-content: space-between; margin-bottom: 30px; }
+    .info-box { background: #f9fafb; padding: 20px; border-radius: 8px; width: 48%; }
+    .info-label { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+    .info-value { font-size: 14px; color: #111; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th { background: #f3f4f6; padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; }
+    td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+    .text-right { text-align: right; }
+    .totals { margin-top: 20px; }
+    .totals-row { display: flex; justify-content: space-between; padding: 8px 0; }
+    .totals-row.total { font-size: 18px; font-weight: bold; border-top: 2px solid #111; padding-top: 12px; }
+    .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+    .status-paid { background: #d1fae5; color: #065f46; }
+    .status-open { background: #fef3c7; color: #92400e; }
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="company">KAZI</div>
+      <div style="color: #666; font-size: 14px;">Billing & Subscriptions</div>
+    </div>
+    <div style="text-align: right;">
+      <div class="invoice-title">INVOICE</div>
+      <div class="invoice-number">${selectedInvoice.number}</div>
+    </div>
+  </div>
+
+  <div class="info-section">
+    <div class="info-box">
+      <div class="info-label">Bill To</div>
+      <div class="info-value" style="font-weight: bold;">${selectedInvoice.customer_name}</div>
+      <div class="info-value">${selectedInvoice.customer_email}</div>
+    </div>
+    <div class="info-box">
+      <div class="info-label">Invoice Details</div>
+      <div class="info-value"><strong>Date:</strong> ${new Date(selectedInvoice.created_at).toLocaleDateString()}</div>
+      <div class="info-value"><strong>Due:</strong> ${new Date(selectedInvoice.due_date).toLocaleDateString()}</div>
+      <div class="info-value" style="margin-top: 10px;">
+        <span class="status ${selectedInvoice.status === 'paid' ? 'status-paid' : 'status-open'}">${selectedInvoice.status.toUpperCase()}</span>
+      </div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th class="text-right">Qty</th>
+        <th class="text-right">Unit Price</th>
+        <th class="text-right">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${selectedInvoice.line_items?.map(item => `
+        <tr>
+          <td>${item.description}</td>
+          <td class="text-right">${item.quantity}</td>
+          <td class="text-right">$${(item.unit_amount || item.amount / item.quantity).toFixed(2)}</td>
+          <td class="text-right">$${item.amount.toFixed(2)}</td>
+        </tr>
+      `).join('') || `
+        <tr>
+          <td>Services</td>
+          <td class="text-right">1</td>
+          <td class="text-right">$${selectedInvoice.subtotal.toFixed(2)}</td>
+          <td class="text-right">$${selectedInvoice.subtotal.toFixed(2)}</td>
+        </tr>
+      `}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <div class="totals-row">
+      <span>Subtotal</span>
+      <span>$${selectedInvoice.subtotal.toFixed(2)}</span>
+    </div>
+    ${selectedInvoice.tax > 0 ? `
+    <div class="totals-row">
+      <span>Tax</span>
+      <span>$${selectedInvoice.tax.toFixed(2)}</span>
+    </div>
+    ` : ''}
+    ${selectedInvoice.discount ? `
+    <div class="totals-row" style="color: #059669;">
+      <span>Discount</span>
+      <span>-$${selectedInvoice.discount.amount_off.toFixed(2)}</span>
+    </div>
+    ` : ''}
+    <div class="totals-row total">
+      <span>Total</span>
+      <span>$${selectedInvoice.total.toFixed(2)}</span>
+    </div>
+    ${selectedInvoice.amount_remaining > 0 && selectedInvoice.status !== 'paid' ? `
+    <div class="totals-row" style="color: #dc2626;">
+      <span>Amount Due</span>
+      <span>$${selectedInvoice.amount_remaining.toFixed(2)}</span>
+    </div>
+    ` : ''}
+  </div>
+
+  ${selectedInvoice.paid_at ? `
+  <div style="background: #d1fae5; padding: 16px; border-radius: 8px; margin-top: 20px; color: #065f46;">
+    <strong>Paid on ${new Date(selectedInvoice.paid_at).toLocaleDateString()}</strong>
+  </div>
+  ` : ''}
+
+  <div class="footer">
+    <p>Thank you for your business!</p>
+    <p>For questions about this invoice, please contact billing@kazi.app</p>
+  </div>
+</body>
+</html>`.trim()
+
+                  // Create a blob and download
+                  const blob = new Blob([invoiceHtml], { type: 'text/html' })
+                  const url = URL.createObjectURL(blob)
+
+                  // Open in new window for printing/saving as PDF
+                  const printWindow = window.open(url, '_blank')
+                  if (printWindow) {
+                    printWindow.onload = () => {
+                      printWindow.print()
+                    }
+                  }
+
+                  toast.success(`Invoice ${selectedInvoice.number} ready for download`)
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download PDF
+              </Button>
+              <Button variant="outline" onClick={() => setSelectedInvoice(null)}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3002,10 +3338,33 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditWebhookDialog(false)}>Cancel</Button>
             <Button
-              onClick={() => {
-                toast.success('Webhook endpoint updated successfully')
-                setShowEditWebhookDialog(false)
-                setSelectedWebhook(null)
+              onClick={async () => {
+                if (!selectedWebhook || !editWebhookForm.url) return
+
+                toast.loading('Updating webhook endpoint...', { id: 'update-webhook' })
+                try {
+                  const response = await fetch('/api/billing-settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'update_webhook',
+                      webhookId: selectedWebhook.id,
+                      url: editWebhookForm.url,
+                      description: editWebhookForm.description,
+                      events: editWebhookForm.events,
+                      status: editWebhookForm.status
+                    })
+                  })
+                  if (!response.ok) throw new Error('Failed to update webhook')
+
+                  toast.success('Webhook endpoint updated successfully', { id: 'update-webhook' })
+                  setShowEditWebhookDialog(false)
+                  setSelectedWebhook(null)
+                  refreshWebhooks?.()
+                } catch (error) {
+                  console.error('Failed to update webhook:', error)
+                  toast.error('Failed to update webhook', { id: 'update-webhook' })
+                }
               }}
               disabled={!editWebhookForm.url}
             >
@@ -3108,20 +3467,64 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button
               variant="outline"
               className="text-red-600 border-red-200 hover:bg-red-50"
-              onClick={() => {
-                toast.success('Tax rate deleted')
-                setShowEditTaxRateDialog(false)
-                setSelectedTaxRate(null)
+              onClick={async () => {
+                if (!selectedTaxRate) return
+
+                toast.loading('Deleting tax rate...', { id: 'delete-tax' })
+                try {
+                  const response = await fetch('/api/billing-settings', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'delete_tax_rate',
+                      taxRateId: selectedTaxRate.id
+                    })
+                  })
+                  if (!response.ok) throw new Error('Failed to delete tax rate')
+
+                  toast.success('Tax rate deleted', { id: 'delete-tax' })
+                  setShowEditTaxRateDialog(false)
+                  setSelectedTaxRate(null)
+                  refreshTaxRates?.()
+                } catch (error) {
+                  console.error('Failed to delete tax rate:', error)
+                  toast.error('Failed to delete tax rate', { id: 'delete-tax' })
+                }
               }}
             >
               Delete
             </Button>
             <Button variant="outline" onClick={() => setShowEditTaxRateDialog(false)}>Cancel</Button>
             <Button
-              onClick={() => {
-                toast.success('Tax rate updated successfully')
-                setShowEditTaxRateDialog(false)
-                setSelectedTaxRate(null)
+              onClick={async () => {
+                if (!selectedTaxRate || !editTaxRateForm.name || !editTaxRateForm.percentage) return
+
+                toast.loading('Updating tax rate...', { id: 'update-tax' })
+                try {
+                  const response = await fetch('/api/billing-settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'update_tax_rate',
+                      taxRateId: selectedTaxRate.id,
+                      name: editTaxRateForm.name,
+                      percentage: parseFloat(editTaxRateForm.percentage),
+                      country: editTaxRateForm.country,
+                      jurisdiction: editTaxRateForm.jurisdiction,
+                      inclusive: editTaxRateForm.inclusive,
+                      active: editTaxRateForm.active
+                    })
+                  })
+                  if (!response.ok) throw new Error('Failed to update tax rate')
+
+                  toast.success('Tax rate updated successfully', { id: 'update-tax' })
+                  setShowEditTaxRateDialog(false)
+                  setSelectedTaxRate(null)
+                  refreshTaxRates?.()
+                } catch (error) {
+                  console.error('Failed to update tax rate:', error)
+                  toast.error('Failed to update tax rate', { id: 'update-tax' })
+                }
               }}
               disabled={!editTaxRateForm.name || !editTaxRateForm.percentage}
             >

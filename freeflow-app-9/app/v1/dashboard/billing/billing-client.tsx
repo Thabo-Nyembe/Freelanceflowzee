@@ -493,43 +493,151 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
     toast.loading(`Generating PDF for ${invoice.number}...`, { id: 'download-invoice' })
 
     try {
-      // Generate PDF content
-      const pdfContent = `
-INVOICE
-=======
-Invoice Number: ${invoice.number}
-Date: ${new Date(invoice.created_at).toLocaleDateString()}
-Due Date: ${new Date(invoice.due_date).toLocaleDateString()}
+      // Generate proper HTML invoice for printing as PDF
+      const invoiceHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Invoice ${invoice.number}</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; }
+    .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+    .company { font-size: 24px; font-weight: bold; color: #4F46E5; }
+    .invoice-title { font-size: 32px; color: #111; }
+    .invoice-number { color: #666; margin-top: 5px; }
+    .info-section { display: flex; justify-content: space-between; margin-bottom: 30px; }
+    .info-box { background: #f9fafb; padding: 20px; border-radius: 8px; width: 48%; }
+    .info-label { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+    .info-value { font-size: 14px; color: #111; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th { background: #f3f4f6; padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; }
+    td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+    .text-right { text-align: right; }
+    .totals { margin-top: 20px; }
+    .totals-row { display: flex; justify-content: space-between; padding: 8px 0; }
+    .totals-row.total { font-size: 18px; font-weight: bold; border-top: 2px solid #111; padding-top: 12px; }
+    .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+    .status-paid { background: #d1fae5; color: #065f46; }
+    .status-open { background: #fef3c7; color: #92400e; }
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #666; font-size: 12px; }
+    @media print {
+      body { padding: 20px; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="company">KAZI</div>
+      <div style="color: #666; font-size: 14px;">Billing & Subscriptions</div>
+    </div>
+    <div style="text-align: right;">
+      <div class="invoice-title">INVOICE</div>
+      <div class="invoice-number">${invoice.number}</div>
+    </div>
+  </div>
 
-BILL TO:
-${invoice.customer_name}
-${invoice.customer_email}
+  <div class="info-section">
+    <div class="info-box">
+      <div class="info-label">Bill To</div>
+      <div class="info-value" style="font-weight: bold;">${invoice.customer_name}</div>
+      <div class="info-value">${invoice.customer_email}</div>
+    </div>
+    <div class="info-box">
+      <div class="info-label">Invoice Details</div>
+      <div class="info-value"><strong>Date:</strong> ${new Date(invoice.created_at).toLocaleDateString()}</div>
+      <div class="info-value"><strong>Due:</strong> ${new Date(invoice.due_date).toLocaleDateString()}</div>
+      <div class="info-value" style="margin-top: 10px;">
+        <span class="status ${invoice.status === 'paid' ? 'status-paid' : 'status-open'}">${invoice.status.toUpperCase()}</span>
+      </div>
+    </div>
+  </div>
 
-ITEMS:
-${invoice.line_items?.map(item =>
-  `${item.description} - Qty: ${item.quantity} - ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.amount)}`
-).join('\n') || 'No line items'}
+  <table>
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th class="text-right">Qty</th>
+        <th class="text-right">Unit Price</th>
+        <th class="text-right">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${invoice.line_items?.map(item => `
+        <tr>
+          <td>${item.description}</td>
+          <td class="text-right">${item.quantity}</td>
+          <td class="text-right">$${(item.unit_amount || item.amount / item.quantity).toFixed(2)}</td>
+          <td class="text-right">$${item.amount.toFixed(2)}</td>
+        </tr>
+      `).join('') || `
+        <tr>
+          <td>Services</td>
+          <td class="text-right">1</td>
+          <td class="text-right">$${invoice.subtotal.toFixed(2)}</td>
+          <td class="text-right">$${invoice.subtotal.toFixed(2)}</td>
+        </tr>
+      `}
+    </tbody>
+  </table>
 
-SUBTOTAL: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.subtotal)}
-TAX: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.tax)}
-TOTAL: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.total)}
+  <div class="totals">
+    <div class="totals-row">
+      <span>Subtotal</span>
+      <span>$${invoice.subtotal.toFixed(2)}</span>
+    </div>
+    ${invoice.tax > 0 ? `
+    <div class="totals-row">
+      <span>Tax</span>
+      <span>$${invoice.tax.toFixed(2)}</span>
+    </div>
+    ` : ''}
+    ${invoice.discount ? `
+    <div class="totals-row" style="color: #059669;">
+      <span>Discount</span>
+      <span>-$${invoice.discount.amount_off.toFixed(2)}</span>
+    </div>
+    ` : ''}
+    <div class="totals-row total">
+      <span>Total</span>
+      <span>$${invoice.total.toFixed(2)}</span>
+    </div>
+    ${invoice.amount_remaining > 0 && invoice.status !== 'paid' ? `
+    <div class="totals-row" style="color: #dc2626;">
+      <span>Amount Due</span>
+      <span>$${invoice.amount_remaining.toFixed(2)}</span>
+    </div>
+    ` : ''}
+  </div>
 
-STATUS: ${invoice.status.toUpperCase()}
-${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}` : ''}
-      `.trim()
+  ${invoice.paid_at ? `
+  <div style="background: #d1fae5; padding: 16px; border-radius: 8px; margin-top: 20px; color: #065f46;">
+    <strong>Paid on ${new Date(invoice.paid_at).toLocaleDateString()}</strong>
+  </div>
+  ` : ''}
 
-      const blob = new Blob([pdfContent], { type: 'text/plain' })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${invoice.number}.txt`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+  <div class="footer">
+    <p>Thank you for your business!</p>
+    <p>For questions about this invoice, please contact billing@kazi.app</p>
+  </div>
+</body>
+</html>`.trim()
 
-      toast.success(`Downloaded ${invoice.number}`, { id: 'download-invoice' })
+      // Create a blob and open in new window for printing/saving as PDF
+      const blob = new Blob([invoiceHtml], { type: 'text/html' })
+      const url = URL.createObjectURL(blob)
+
+      const printWindow = window.open(url, '_blank')
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print()
+        }
+      }
+
+      toast.success(`Invoice ${invoice.number} ready for download`, { id: 'download-invoice' })
     } catch (error) {
+      console.error('Failed to generate invoice PDF:', error)
       toast.error('Failed to generate invoice PDF', { id: 'download-invoice' })
     }
   }, [])
@@ -3603,8 +3711,12 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
                 <Button
                   variant="outline"
                   onClick={() => {
-                    window.open(selectedInvoice.hosted_invoice_url, '_blank')
-                    toast.info('Opening invoice in new tab')
+                    const newWindow = window.open(selectedInvoice.hosted_invoice_url, '_blank')
+                    if (newWindow) {
+                      toast.success(`Invoice ${selectedInvoice.number} opened in new tab`)
+                    } else {
+                      toast.error('Unable to open invoice - check popup blocker settings')
+                    }
                   }}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />

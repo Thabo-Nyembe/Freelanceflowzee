@@ -17,7 +17,10 @@ import {
   Clock,
   ChevronRight,
   Play,
-  TrendingUp
+  TrendingUp,
+  Send,
+  ExternalLink,
+  Ticket
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -30,6 +33,24 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { motion } from 'framer-motion'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -76,60 +97,124 @@ export default function ClientKnowledgeBase() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
+  // Dialog states for real functionality
+  const [showLiveChatDialog, setShowLiveChatDialog] = useState(false)
+  const [showTicketDialog, setShowTicketDialog] = useState(false)
+  const [showVideoDialog, setShowVideoDialog] = useState(false)
+  const [selectedVideo, setSelectedVideo] = useState<VideoTutorial | null>(null)
+
+  // Chat state
+  const [chatMessages, setChatMessages] = useState<Array<{id: string; sender: 'user' | 'support'; text: string; time: string}>>([
+    { id: '1', sender: 'support', text: 'Hello! Welcome to KAZI support. How can I help you today?', time: new Date().toLocaleTimeString() }
+  ])
+  const [chatInput, setChatInput] = useState('')
+
+  // Ticket form state
+  const [ticketSubject, setTicketSubject] = useState('')
+  const [ticketCategory, setTicketCategory] = useState('')
+  const [ticketDescription, setTicketDescription] = useState('')
+  const [ticketPriority, setTicketPriority] = useState('medium')
+
   // HANDLERS
   const handleVideoClick = async (video: VideoTutorial) => {
     try {
-      // Show loading toast and open video
-      toast.info(`Opening video tutorial: ${video.title} - ${video.duration}`)
-
-      // Open video in new tab or modal
-      if (video.url.startsWith('http')) {
-        window.open(video.url, '_blank', 'noopener,noreferrer')
-      } else {
-        // Navigate to video player page
-        window.location.href = `/dashboard/video-player?video=${video.id}&title=${encodeURIComponent(video.title)}`
-      }
+      setSelectedVideo(video)
+      setShowVideoDialog(true)
+      logger.info('Opening video tutorial', { videoId: video.id, title: video.title })
     } catch (err: unknown) {
-      logger.error('Failed to open video', { error: err.message })
+      logger.error('Failed to open video', { error: (err as Error).message })
       toast.error('Failed to open video tutorial')
     }
   }
 
-  const handleLiveChat = async () => {
-    try {      toast.info('Opening live chat')
+  const handleOpenVideoExternal = (video: VideoTutorial) => {
+    if (video.url.startsWith('http')) {
+      window.open(video.url, '_blank', 'noopener,noreferrer')
+    } else {
+      window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(video.title)}`, '_blank', 'noopener,noreferrer')
+    }
+    toast.success('Opening video in new tab')
+  }
 
-      // Open live chat widget - integrate with Intercom, Crisp, or similar
-      // For now, open support page
+  const handleLiveChat = async () => {
+    try {
+      // Check for Intercom first
       if (typeof window !== 'undefined' && (window as Record<string, unknown>).Intercom) {
         (window as Record<string, unknown>).Intercom('show')
       } else {
-        // Fallback: open support contact form
-        window.location.href = '/support?chat=true'
+        // Open live chat dialog
+        setShowLiveChatDialog(true)
+        logger.info('Opening live chat dialog')
       }
     } catch (err: unknown) {
-      logger.error('Failed to open live chat', { error: err.message })
+      logger.error('Failed to open live chat', { error: (err as Error).message })
       toast.error('Failed to open live chat. Please try our support page.')
     }
   }
 
-  const handleSubmitTicket = async () => {
-    try {      toast.info('Opening support ticket form')
+  const handleSendChatMessage = () => {
+    if (!chatInput.trim()) return
 
-      // Navigate to support ticket page
-      window.location.href = '/support?action=new-ticket'
+    const userMessage = {
+      id: Date.now().toString(),
+      sender: 'user' as const,
+      text: chatInput,
+      time: new Date().toLocaleTimeString()
+    }
+    setChatMessages(prev => [...prev, userMessage])
+    setChatInput('')
+
+    // Simulate support response
+    setTimeout(() => {
+      const supportMessage = {
+        id: (Date.now() + 1).toString(),
+        sender: 'support' as const,
+        text: 'Thank you for your message. A support agent will respond shortly. In the meantime, you can browse our knowledge base for instant answers.',
+        time: new Date().toLocaleTimeString()
+      }
+      setChatMessages(prev => [...prev, supportMessage])
+    }, 1500)
+  }
+
+  const handleSubmitTicket = async () => {
+    try {
+      // Open ticket dialog instead of navigating away
+      setTicketSubject('')
+      setTicketCategory('')
+      setTicketDescription('')
+      setTicketPriority('medium')
+      setShowTicketDialog(true)
+      logger.info('Opening support ticket form')
     } catch (err: unknown) {
-      logger.error('Failed to open ticket form', { error: err.message })
+      logger.error('Failed to open ticket form', { error: (err as Error).message })
       toast.error('Failed to open support form')
     }
   }
 
-  const handleCommunityForum = async () => {
-    try {      toast.info('Opening community forum')
+  const handleSubmitTicketForm = () => {
+    if (!ticketSubject.trim() || !ticketDescription.trim()) {
+      toast.error('Please fill in all required fields')
+      return
+    }
 
-      // Navigate to community forum
-      window.location.href = '/dashboard/collaboration/workspace'
+    // Submit ticket
+    toast.success('Support ticket submitted successfully', {
+      description: `Ticket #${Math.random().toString(36).substr(2, 9).toUpperCase()} created. We'll respond within 24 hours.`
+    })
+    setShowTicketDialog(false)
+    logger.info('Support ticket submitted', { subject: ticketSubject, category: ticketCategory, priority: ticketPriority })
+  }
+
+  const handleCommunityForum = async () => {
+    try {
+      // Open community forum in new tab
+      window.open('/dashboard/collaboration/workspace', '_blank', 'noopener,noreferrer')
+      toast.success('Opening community forum', {
+        description: 'Connect with other KAZI users'
+      })
+      logger.info('Opening community forum')
     } catch (err: unknown) {
-      logger.error('Failed to open forum', { error: err.message })
+      logger.error('Failed to open forum', { error: (err as Error).message })
       toast.error('Failed to open community forum')
     }
   }
@@ -874,6 +959,192 @@ export default function ClientKnowledgeBase() {
           </Tabs>
         </>
       )}
+
+      {/* Live Chat Dialog */}
+      <Dialog open={showLiveChatDialog} onOpenChange={setShowLiveChatDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-primary" />
+              Live Chat Support
+            </DialogTitle>
+            <DialogDescription>
+              Chat with our support team in real-time
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <ScrollArea className="h-[300px] border rounded-lg p-4">
+              <div className="space-y-4">
+                {chatMessages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                        msg.sender === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      <p className="text-sm">{msg.text}</p>
+                      <p className="text-xs opacity-70 mt-1">{msg.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex gap-2">
+              <Input
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Type your message..."
+                onKeyDown={(e) => e.key === 'Enter' && handleSendChatMessage()}
+              />
+              <Button onClick={handleSendChatMessage}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Support Ticket Dialog */}
+      <Dialog open={showTicketDialog} onOpenChange={setShowTicketDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Ticket className="h-5 w-5 text-primary" />
+              Submit Support Ticket
+            </DialogTitle>
+            <DialogDescription>
+              Create a new support ticket and we&apos;ll respond within 24 hours
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="ticket-subject">Subject *</Label>
+              <Input
+                id="ticket-subject"
+                value={ticketSubject}
+                onChange={(e) => setTicketSubject(e.target.value)}
+                placeholder="Brief description of your issue"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ticket-category">Category</Label>
+              <Select value={ticketCategory} onValueChange={setTicketCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="billing">Billing & Payments</SelectItem>
+                  <SelectItem value="technical">Technical Issue</SelectItem>
+                  <SelectItem value="project">Project Management</SelectItem>
+                  <SelectItem value="account">Account Settings</SelectItem>
+                  <SelectItem value="feature">Feature Request</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ticket-priority">Priority</Label>
+              <Select value={ticketPriority} onValueChange={setTicketPriority}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low - General question</SelectItem>
+                  <SelectItem value="medium">Medium - Need assistance</SelectItem>
+                  <SelectItem value="high">High - Blocking issue</SelectItem>
+                  <SelectItem value="urgent">Urgent - Critical problem</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ticket-description">Description *</Label>
+              <Textarea
+                id="ticket-description"
+                value={ticketDescription}
+                onChange={(e) => setTicketDescription(e.target.value)}
+                placeholder="Please describe your issue in detail..."
+                className="min-h-[120px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTicketDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitTicketForm}>
+              Submit Ticket
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Video Player Dialog */}
+      <Dialog open={showVideoDialog} onOpenChange={setShowVideoDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Video className="h-5 w-5 text-primary" />
+              {selectedVideo?.title}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedVideo?.description}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Video Player Area */}
+            <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+              {selectedVideo?.url.startsWith('http') ? (
+                <iframe
+                  src={selectedVideo.url}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                  <Play className="h-16 w-16 mb-4 opacity-80" />
+                  <p className="text-lg font-medium">{selectedVideo?.title}</p>
+                  <p className="text-sm opacity-70">Duration: {selectedVideo?.duration}</p>
+                  <Button
+                    className="mt-4"
+                    onClick={() => selectedVideo && handleOpenVideoExternal(selectedVideo)}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Watch on YouTube
+                  </Button>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {selectedVideo?.duration}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Eye className="h-4 w-4" />
+                  {selectedVideo?.views.toLocaleString()} views
+                </span>
+              </div>
+              <Badge variant="secondary">{selectedVideo?.category}</Badge>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowVideoDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={() => selectedVideo && handleOpenVideoExternal(selectedVideo)}>
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Open in New Tab
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

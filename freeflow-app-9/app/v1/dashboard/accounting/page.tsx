@@ -216,6 +216,142 @@ export default function AccountingPage() {
     setShowReportDialog(false);
   };
 
+  // Export report in different formats
+  const handleExportReport = (format: 'csv' | 'json' | 'pdf') => {
+    if (!currentReport) {
+      toast.error('No report to export', { description: 'Generate a report first' });
+      return;
+    }
+
+    const reportName = selectedReportType.replace('_', '-');
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `${reportName}-${timestamp}`;
+
+    try {
+      if (format === 'csv') {
+        // Generate CSV from report data
+        const reportLines = currentReport.lines || [];
+        const headers = ['Account Code', 'Account Name', 'Debit', 'Credit', 'Balance'];
+        const csvRows = [headers.join(',')];
+
+        reportLines.forEach((line: any) => {
+          csvRows.push([
+            line.account_code || '',
+            `"${(line.account_name || '').replace(/"/g, '""')}"`,
+            (line.debit || 0).toFixed(2),
+            (line.credit || 0).toFixed(2),
+            (line.balance || 0).toFixed(2)
+          ].join(','));
+        });
+
+        // Add totals
+        if (currentReport.totals) {
+          csvRows.push(['', 'TOTALS',
+            (currentReport.totals.debit || 0).toFixed(2),
+            (currentReport.totals.credit || 0).toFixed(2),
+            ''
+          ].join(','));
+        }
+
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success('Report exported', { description: `Downloaded as ${filename}.csv` });
+      } else if (format === 'json') {
+        // Export as JSON
+        const jsonContent = JSON.stringify(currentReport, null, 2);
+        const blob = new Blob([jsonContent], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success('Report exported', { description: `Downloaded as ${filename}.json` });
+      } else if (format === 'pdf') {
+        // Generate PDF-like HTML for printing
+        const reportTitle = selectedReportType.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        const reportLines = currentReport.lines || [];
+
+        const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>${reportTitle}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    h1 { text-align: center; color: #333; }
+    .date { text-align: center; color: #666; margin-bottom: 30px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 12px 8px; text-align: left; }
+    th { background-color: #f5f5f5; font-weight: bold; }
+    .number { text-align: right; }
+    .totals { font-weight: bold; background-color: #f9f9f9; }
+    @media print { body { margin: 20px; } }
+  </style>
+</head>
+<body>
+  <h1>${reportTitle}</h1>
+  <div class="date">As of ${new Date().toLocaleDateString()}</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Account Code</th>
+        <th>Account Name</th>
+        <th class="number">Debit</th>
+        <th class="number">Credit</th>
+        <th class="number">Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${reportLines.map((line: any) => `
+        <tr>
+          <td>${line.account_code || ''}</td>
+          <td>${line.account_name || ''}</td>
+          <td class="number">$${(line.debit || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td class="number">$${(line.credit || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td class="number">$${(line.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        </tr>
+      `).join('')}
+      ${currentReport.totals ? `
+        <tr class="totals">
+          <td></td>
+          <td>TOTALS</td>
+          <td class="number">$${(currentReport.totals.debit || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td class="number">$${(currentReport.totals.credit || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td></td>
+        </tr>
+      ` : ''}
+    </tbody>
+  </table>
+  <script>window.print();</script>
+</body>
+</html>`;
+
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const printWindow = window.open(url, '_blank');
+        if (printWindow) {
+          printWindow.onload = () => {
+            URL.revokeObjectURL(url);
+          };
+        }
+        toast.success('Report exported', { description: 'Opening print dialog for PDF' });
+      }
+    } catch (error) {
+      toast.error('Export failed', { description: 'An error occurred while exporting' });
+    }
+  };
+
   const addEntryLine = () => {
     setNewEntry(prev => ({
       ...prev,
@@ -857,10 +993,28 @@ export default function AccountingPage() {
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden">
                   <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
                     <h3 className="font-semibold dark:text-white">Report Results</h3>
-                    <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.success('Export', { description: 'Report exported successfully' })}>
-                      <Download className="w-4 h-4" />
-                      Export
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="gap-2">
+                          <Download className="w-4 h-4" />
+                          Export
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleExportReport('csv')}>
+                          <FileText className="w-4 h-4 mr-2" />
+                          Export as CSV
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExportReport('json')}>
+                          <FileText className="w-4 h-4 mr-2" />
+                          Export as JSON
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExportReport('pdf')}>
+                          <FileText className="w-4 h-4 mr-2" />
+                          Export as PDF
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                   <div className="p-6">
                     <pre className="text-sm bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-auto max-h-96">

@@ -32,6 +32,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -72,6 +80,8 @@ export default function CalendarPage() {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [filterStatus, setFilterStatus] = useState<'all' | 'upcoming' | 'completed' | 'cancelled'>('all')
   const [cancelMeeting, setCancelMeeting] = useState<{ id: number; title: string } | null>(null)
+  const [showAvailabilityCalendar, setShowAvailabilityCalendar] = useState(false)
+  const [showTimelineDialog, setShowTimelineDialog] = useState(false)
 
   // Load Calendar Data
   useEffect(() => {
@@ -644,7 +654,7 @@ export default function CalendarPage() {
                   className="justify-start gap-2 h-auto py-3"
                   onClick={() => {
                     logger.info('Project timeline view opened')
-                    toast.info('Loading project timeline...')
+                    setShowTimelineDialog(true)
                   }}
                 >
                   <Calendar className="h-5 w-5" />
@@ -658,7 +668,7 @@ export default function CalendarPage() {
                   className="justify-start gap-2 h-auto py-3"
                   onClick={() => {
                     logger.info('Availability calendar opened')
-                    toast.info('Opening availability calendar...')
+                    setShowAvailabilityCalendar(true)
                   }}
                 >
                   <Clock className="h-5 w-5" />
@@ -734,6 +744,142 @@ export default function CalendarPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Availability Calendar Dialog */}
+      <Dialog open={showAvailabilityCalendar} onOpenChange={setShowAvailabilityCalendar}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-blue-600" />
+              Team Availability
+            </DialogTitle>
+            <DialogDescription>
+              Find the best time for your next meeting based on team availability.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            {/* Week View */}
+            <div className="grid grid-cols-7 gap-1 text-center text-sm">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                <div key={day} className="font-semibold text-gray-600 py-2">
+                  {day}
+                </div>
+              ))}
+            </div>
+            {/* Time Slots */}
+            <div className="space-y-2">
+              {['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'].map((time) => (
+                <div key={time} className="flex items-center gap-2">
+                  <span className="w-20 text-sm text-gray-600">{time}</span>
+                  <div className="flex-1 grid grid-cols-7 gap-1">
+                    {[0, 1, 2, 3, 4, 5, 6].map((dayOffset) => {
+                      const isAvailable = Math.random() > 0.3
+                      return (
+                        <button
+                          key={dayOffset}
+                          onClick={() => {
+                            if (isAvailable) {
+                              toast.success(`Selected: ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][dayOffset]} at ${time}`)
+                              setShowAvailabilityCalendar(false)
+                            }
+                          }}
+                          className={`h-8 rounded text-xs transition-colors ${
+                            isAvailable
+                              ? 'bg-green-100 hover:bg-green-200 text-green-800 cursor-pointer'
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          {isAvailable ? 'Open' : 'Busy'}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-4 pt-4 border-t text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-green-100 rounded"></div>
+                <span>Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-gray-100 rounded"></div>
+                <span>Unavailable</span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAvailabilityCalendar(false)}>
+              Close
+            </Button>
+            <Button
+              onClick={() => {
+                handleScheduleMeeting()
+                setShowAvailabilityCalendar(false)
+              }}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+            >
+              Schedule Meeting
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Project Timeline Dialog */}
+      <Dialog open={showTimelineDialog} onOpenChange={setShowTimelineDialog}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              Project Timeline
+            </DialogTitle>
+            <DialogDescription>
+              View all project milestones and scheduled meetings.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4 max-h-[400px] overflow-y-auto">
+            {meetings.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">No scheduled events</p>
+            ) : (
+              <div className="relative pl-6 border-l-2 border-blue-200 space-y-6">
+                {meetings.map((meeting, index) => (
+                  <div key={meeting.id} className="relative">
+                    <div className="absolute -left-[25px] w-4 h-4 bg-blue-500 rounded-full border-2 border-white"></div>
+                    <div className="bg-gray-50 rounded-lg p-4 ml-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-gray-900">{meeting.title}</h4>
+                        <Badge className={meeting.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
+                          {meeting.status}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">{meeting.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(meeting.date).toLocaleDateString()}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {meeting.time} ({meeting.duration} min)
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          {meeting.attendees.length} attendees
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTimelineDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

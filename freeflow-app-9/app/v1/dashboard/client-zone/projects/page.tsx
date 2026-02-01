@@ -18,8 +18,20 @@ import {
   FolderOpen,
   ArrowLeft,
   AlertCircle,
-  Loader2
+  Loader2,
+  Send,
+  User
 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 // A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
@@ -61,6 +73,13 @@ export default function ClientZoneProjectsPage() {
   const [revisionModalOpen, setRevisionModalOpen] = useState(false)
   const [revisionProjectId, setRevisionProjectId] = useState<number | null>(null)
   const [revisionNotes, setRevisionNotes] = useState('')
+
+  // Team chat modal state
+  const [showChatDialog, setShowChatDialog] = useState(false)
+  const [chatProjectId, setChatProjectId] = useState<number | null>(null)
+  const [chatMessage, setChatMessage] = useState('')
+  const [chatMessages, setChatMessages] = useState<Array<{ id: number; sender: string; message: string; timestamp: string; isUser: boolean }>>([])
+  const [isSendingMessage, setIsSendingMessage] = useState(false)
 
   // ============================================================================
   // DATA FETCHING
@@ -395,7 +414,7 @@ export default function ClientZoneProjectsPage() {
 
   /**
    * Handler 5: Discuss Project / Contact Team
-   * Navigate to messages tab with project context
+   * Opens team chat dialog for project discussion
    */
   const handleDiscussProject = (projectId: number) => {
     const project = projects.find((p) => p.id === projectId)
@@ -405,11 +424,77 @@ export default function ClientZoneProjectsPage() {
       projectName: project?.name
     })
 
-    router.push(`/dashboard/client-zone?tab=messages&project=${projectId}`)
+    // Initialize chat with project context
+    setChatProjectId(projectId)
+    setChatMessage('')
+    setChatMessages([
+      {
+        id: 1,
+        sender: project?.team[0] || 'Team Lead',
+        message: `Welcome! I'm here to help with "${project?.name}". How can I assist you today?`,
+        timestamp: new Date().toISOString(),
+        isUser: false
+      }
+    ])
+    setShowChatDialog(true)
+  }
 
-    toast.info('Opening team chat...', {
-      description: `Discuss "${project?.name}" with your team`
-    })
+  const handleSendChatMessage = async () => {
+    if (!chatMessage.trim() || !chatProjectId) return
+
+    const project = projects.find((p) => p.id === chatProjectId)
+
+    try {
+      setIsSendingMessage(true)
+
+      // Add user message to chat
+      const userMessage = {
+        id: chatMessages.length + 1,
+        sender: 'You',
+        message: chatMessage,
+        timestamp: new Date().toISOString(),
+        isUser: true
+      }
+      setChatMessages([...chatMessages, userMessage])
+      setChatMessage('')
+
+      logger.info('Chat message sent', {
+        projectId: chatProjectId,
+        projectName: project?.name,
+        messageLength: chatMessage.length
+      })
+
+      // Simulate API call
+      const response = await fetch('/api/messages/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: chatProjectId,
+          message: chatMessage,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      // Add simulated response
+      setTimeout(() => {
+        const responseMessage = {
+          id: chatMessages.length + 2,
+          sender: project?.team[0] || 'Team Lead',
+          message: 'Thanks for your message! I\'ll review this and get back to you shortly.',
+          timestamp: new Date().toISOString(),
+          isUser: false
+        }
+        setChatMessages(prev => [...prev, responseMessage])
+      }, 1000)
+
+    } catch (error) {
+      logger.error('Failed to send message', { error, projectId: chatProjectId })
+      toast.error('Failed to send message', {
+        description: 'Please try again'
+      })
+    } finally {
+      setIsSendingMessage(false)
+    }
   }
 
   // ============================================================================
@@ -751,6 +836,83 @@ export default function ClientZoneProjectsPage() {
           </motion.div>
         </div>
       )}
+
+      {/* Team Chat Dialog */}
+      <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-blue-600" />
+              Team Chat
+            </DialogTitle>
+            <DialogDescription>
+              {chatProjectId && `Discussing: ${projects.find(p => p.id === chatProjectId)?.name}`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {/* Chat Messages */}
+            <div className="h-[300px] overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 rounded-lg">
+              {chatMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex gap-3 ${msg.isUser ? 'flex-row-reverse' : ''}`}
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className={msg.isUser ? 'bg-blue-500 text-white' : 'bg-gray-500 text-white'}>
+                      {msg.sender.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className={`max-w-[80%] ${msg.isUser ? 'text-right' : ''}`}>
+                    <p className="text-xs text-gray-500 mb-1">
+                      {msg.sender} - {new Date(msg.timestamp).toLocaleTimeString()}
+                    </p>
+                    <div
+                      className={`rounded-lg p-3 ${
+                        msg.isUser
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-white border border-gray-200 text-gray-700'
+                      }`}
+                    >
+                      <p className="text-sm">{msg.message}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Message Input */}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Type your message..."
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSendChatMessage()
+                  }
+                }}
+              />
+              <Button
+                onClick={handleSendChatMessage}
+                disabled={!chatMessage.trim() || isSendingMessage}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+              >
+                {isSendingMessage ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowChatDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

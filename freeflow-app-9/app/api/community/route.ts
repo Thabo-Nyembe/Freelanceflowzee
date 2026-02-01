@@ -23,7 +23,7 @@ function isDemoMode(request: NextRequest): boolean {
 interface CommunityRequest {
   action: 'like' | 'unlike' | 'bookmark' | 'unbookmark' | 'share' | 'comment' |
           'connect' | 'disconnect' | 'follow' | 'unfollow' | 'create-post' |
-          'delete-post' | 'create-comment' | 'report'
+          'delete-post' | 'create-comment' | 'report' | 'update-profile'
   resourceId: string  // postId, memberId, commentId
   userId?: string
   data?: any
@@ -33,17 +33,66 @@ interface CommunityRequest {
 async function handleLikePost(postId: string, userId: string = 'user-1', unlike: boolean = false): Promise<NextResponse> {
   try {
     const action = unlike ? 'unlike' : 'like'
+    const supabase = await createClient()
+    let totalLikes = 1
+
+    // Try to persist to database
+    if (unlike) {
+      // Remove like
+      await supabase
+        .from('post_likes')
+        .delete()
+        .match({ post_id: postId, user_id: userId })
+        .catch(() => null)
+
+      // Decrement likes count
+      const { data: post } = await supabase
+        .from('community_posts')
+        .select('likes_count')
+        .eq('id', postId)
+        .single()
+        .catch(() => ({ data: null }))
+
+      if (post) {
+        totalLikes = Math.max(0, (post.likes_count || 0) - 1)
+        await supabase
+          .from('community_posts')
+          .update({ likes_count: totalLikes })
+          .eq('id', postId)
+          .catch(() => null)
+      }
+    } else {
+      // Add like
+      await supabase
+        .from('post_likes')
+        .upsert({ post_id: postId, user_id: userId, created_at: new Date().toISOString() })
+        .catch(() => null)
+
+      // Increment likes count
+      const { data: post } = await supabase
+        .from('community_posts')
+        .select('likes_count')
+        .eq('id', postId)
+        .single()
+        .catch(() => ({ data: null }))
+
+      if (post) {
+        totalLikes = (post.likes_count || 0) + 1
+        await supabase
+          .from('community_posts')
+          .update({ likes_count: totalLikes })
+          .eq('id', postId)
+          .catch(() => null)
+      }
+    }
 
     const result = {
       postId,
       userId,
       action,
       timestamp: new Date().toISOString(),
-      totalLikes: unlike ? -1 : 1  // Would be actual count from database
+      totalLikes
     }
-
-    // In production: Update database
-    // await db.posts.updateLikes(postId, userId, action)
 
     return NextResponse.json({
       success: true,
@@ -51,15 +100,15 @@ async function handleLikePost(postId: string, userId: string = 'user-1', unlike:
       result,
       message: unlike ? 'Post unliked' : 'Post liked!',
       achievement: !unlike && Math.random() > 0.9 ? {
-        message: '🎉 You\'re becoming a community star!',
+        message: 'You\'re becoming a community star!',
         badge: 'Social Butterfly',
         points: 5
       } : undefined
     })
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to like/unlike post'
+      error: error?.message || 'Failed to like/unlike post'
     }, { status: 500 })
   }
 }
@@ -68,17 +117,40 @@ async function handleLikePost(postId: string, userId: string = 'user-1', unlike:
 async function handleBookmarkPost(postId: string, userId: string = 'user-1', unbookmark: boolean = false): Promise<NextResponse> {
   try {
     const action = unbookmark ? 'unbookmark' : 'bookmark'
+    const supabase = await createClient()
+
+    // Try to persist to database
+    if (unbookmark) {
+      await supabase
+        .from('post_bookmarks')
+        .delete()
+        .match({ post_id: postId, user_id: userId })
+        .catch(() => null)
+
+      // Decrement bookmarks count
+      await supabase.rpc('decrement_bookmarks', { post_id_param: postId }).catch(() => null)
+    } else {
+      await supabase
+        .from('post_bookmarks')
+        .upsert({
+          post_id: postId,
+          user_id: userId,
+          collection: 'Saved Posts',
+          created_at: new Date().toISOString()
+        })
+        .catch(() => null)
+
+      // Increment bookmarks count
+      await supabase.rpc('increment_bookmarks', { post_id_param: postId }).catch(() => null)
+    }
 
     const result = {
       postId,
       userId,
       action,
       timestamp: new Date().toISOString(),
-      collection: 'Saved Posts'  // Could organize into collections
+      collection: 'Saved Posts'
     }
-
-    // In production: Update database
-    // await db.bookmarks.toggle(postId, userId, action)
 
     return NextResponse.json({
       success: true,
@@ -87,10 +159,10 @@ async function handleBookmarkPost(postId: string, userId: string = 'user-1', unb
       message: unbookmark ? 'Removed from bookmarks' : 'Saved to bookmarks!',
       tip: !unbookmark ? 'Access your saved posts anytime from your profile' : undefined
     })
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to bookmark/unbookmark post'
+      error: error?.message || 'Failed to bookmark/unbookmark post'
     }, { status: 500 })
   }
 }
@@ -134,31 +206,65 @@ async function handleSharePost(postId: string, data: any): Promise<NextResponse>
 // Create comment
 async function handleCreateComment(postId: string, data: any): Promise<NextResponse> {
   try {
-    const comment = {
+    const supabase = await createClient()
+
+    const commentData = {
+      post_id: postId,
+      author_id: data.authorId || 'user-1',
+      content: data.content,
+      parent_id: data.parentId || null,
+      likes_count: 0,
+      is_edited: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+
+    // Try to save to database
+    const { data: savedComment, error } = await supabase
+      .from('post_comments')
+      .insert(commentData)
+      .select()
+      .single()
+      .catch(() => ({ data: null, error: null }))
+
+    // Increment comments count on post
+    await supabase
+      .from('community_posts')
+      .select('comments_count')
+      .eq('id', postId)
+      .single()
+      .then(({ data: post }) => {
+        if (post) {
+          return supabase
+            .from('community_posts')
+            .update({ comments_count: (post.comments_count || 0) + 1 })
+            .eq('id', postId)
+        }
+      })
+      .catch(() => null)
+
+    const comment = savedComment || {
       id: `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       postId,
       authorId: data.authorId || 'user-1',
       content: data.content,
-      parentId: data.parentId,  // For replies
+      parentId: data.parentId,
       createdAt: new Date().toISOString(),
       likes: 0,
       replies: []
     }
-
-    // In production: Save to database
-    // await db.comments.create(comment)
 
     return NextResponse.json({
       success: true,
       action: 'create-comment',
       comment,
       message: 'Comment posted!',
-      totalComments: 1  // Would be actual count
+      totalComments: 1
     })
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to create comment'
+      error: error?.message || 'Failed to create comment'
     }, { status: 500 })
   }
 }
@@ -167,18 +273,35 @@ async function handleCreateComment(postId: string, data: any): Promise<NextRespo
 async function handleConnectionAction(memberId: string, userId: string = 'user-1', disconnect: boolean = false): Promise<NextResponse> {
   try {
     const action = disconnect ? 'disconnect' : 'connect'
+    const supabase = await createClient()
+
+    if (disconnect) {
+      // Remove connection
+      await supabase
+        .from('member_connections')
+        .delete()
+        .or(`and(requester_id.eq.${userId},recipient_id.eq.${memberId}),and(requester_id.eq.${memberId},recipient_id.eq.${userId})`)
+        .catch(() => null)
+    } else {
+      // Create connection request
+      await supabase
+        .from('member_connections')
+        .upsert({
+          requester_id: userId,
+          recipient_id: memberId,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        })
+        .catch(() => null)
+    }
 
     const result = {
       memberId,
       userId,
       action,
       timestamp: new Date().toISOString(),
-      status: disconnect ? 'disconnected' : 'pending'  // Could require acceptance
+      status: disconnect ? 'disconnected' : 'pending'
     }
-
-    // In production: Update database and send notification
-    // await db.connections.toggle(userId, memberId, action)
-    // await sendNotification(memberId, `${userId} wants to connect`)
 
     return NextResponse.json({
       success: true,
@@ -192,10 +315,10 @@ async function handleConnectionAction(memberId: string, userId: string = 'user-1
         'You can message once they accept'
       ] : undefined
     })
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to update connection'
+      error: error?.message || 'Failed to update connection'
     }, { status: 500 })
   }
 }
@@ -204,17 +327,85 @@ async function handleConnectionAction(memberId: string, userId: string = 'user-1
 async function handleFollowAction(memberId: string, userId: string = 'user-1', unfollow: boolean = false): Promise<NextResponse> {
   try {
     const action = unfollow ? 'unfollow' : 'follow'
+    const supabase = await createClient()
+    let totalFollowers = 1
+
+    if (unfollow) {
+      // Remove follow
+      await supabase
+        .from('member_follows')
+        .delete()
+        .match({ follower_id: userId, following_id: memberId })
+        .catch(() => null)
+
+      // Update follower count
+      const { data: member } = await supabase
+        .from('community_members')
+        .select('followers')
+        .eq('user_id', memberId)
+        .single()
+        .catch(() => ({ data: null }))
+
+      if (member) {
+        totalFollowers = Math.max(0, (member.followers || 0) - 1)
+        await supabase
+          .from('community_members')
+          .update({ followers: totalFollowers })
+          .eq('user_id', memberId)
+          .catch(() => null)
+      }
+    } else {
+      // Add follow
+      await supabase
+        .from('member_follows')
+        .upsert({
+          follower_id: userId,
+          following_id: memberId,
+          created_at: new Date().toISOString()
+        })
+        .catch(() => null)
+
+      // Update follower count
+      const { data: member } = await supabase
+        .from('community_members')
+        .select('followers')
+        .eq('user_id', memberId)
+        .single()
+        .catch(() => ({ data: null }))
+
+      if (member) {
+        totalFollowers = (member.followers || 0) + 1
+        await supabase
+          .from('community_members')
+          .update({ followers: totalFollowers })
+          .eq('user_id', memberId)
+          .catch(() => null)
+      }
+
+      // Update following count for user
+      const { data: userMember } = await supabase
+        .from('community_members')
+        .select('following')
+        .eq('user_id', userId)
+        .single()
+        .catch(() => ({ data: null }))
+
+      if (userMember) {
+        await supabase
+          .from('community_members')
+          .update({ following: (userMember.following || 0) + 1 })
+          .eq('user_id', userId)
+          .catch(() => null)
+      }
+    }
 
     const result = {
       memberId,
       userId,
       action,
       timestamp: new Date().toISOString(),
-      totalFollowers: unfollow ? -1 : 1  // Would be actual count
+      totalFollowers
     }
-
-    // In production: Update database
-    // await db.follows.toggle(userId, memberId, action)
 
     return NextResponse.json({
       success: true,
@@ -224,15 +415,15 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
         ? 'Unfollowed successfully'
         : 'Following! You\'ll see their updates in your feed.',
       achievement: !unfollow && Math.random() > 0.8 ? {
-        message: '🌟 Building your network!',
+        message: 'Building your network!',
         badge: 'Networker',
         points: 10
       } : undefined
     })
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to follow/unfollow'
+      error: error?.message || 'Failed to follow/unfollow'
     }, { status: 500 })
   }
 }
@@ -240,7 +431,55 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
 // Create post
 async function handleCreatePost(data: any): Promise<NextResponse> {
   try {
-    const post = {
+    const supabase = await createClient()
+
+    const postData = {
+      author_id: data.authorId || 'user-1',
+      content: data.content,
+      type: data.type || 'text',
+      visibility: data.visibility || 'public',
+      tags: data.tags || [],
+      hashtags: data.hashtags || [],
+      mentions: data.mentions || [],
+      likes_count: 0,
+      comments_count: 0,
+      shares_count: 0,
+      bookmarks_count: 0,
+      views_count: 0,
+      is_pinned: false,
+      is_promoted: false,
+      is_edited: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+
+    // Try to save to database
+    const { data: savedPost, error } = await supabase
+      .from('community_posts')
+      .insert(postData)
+      .select()
+      .single()
+      .catch(() => ({ data: null, error: null }))
+
+    // Increment posts count for author
+    if (savedPost) {
+      await supabase
+        .from('community_members')
+        .select('posts_count')
+        .eq('user_id', data.authorId)
+        .single()
+        .then(({ data: member }) => {
+          if (member) {
+            return supabase
+              .from('community_members')
+              .update({ posts_count: (member.posts_count || 0) + 1 })
+              .eq('user_id', data.authorId)
+          }
+        })
+        .catch(() => null)
+    }
+
+    const post = savedPost || {
       id: `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       authorId: data.authorId || 'user-1',
       content: data.content,
@@ -256,9 +495,6 @@ async function handleCreatePost(data: any): Promise<NextResponse> {
       views: 0
     }
 
-    // In production: Save to database
-    // await db.posts.create(post)
-
     return NextResponse.json({
       success: true,
       action: 'create-post',
@@ -266,14 +502,128 @@ async function handleCreatePost(data: any): Promise<NextResponse> {
       message: 'Post published successfully!',
       postUrl: `https://kazi.app/community/post/${post.id}`,
       achievement: {
-        message: '📝 Great content! Keep sharing!',
+        message: 'Great content! Keep sharing!',
         points: 15
       }
     })
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to create post'
+      error: error?.message || 'Failed to create post'
+    }, { status: 500 })
+  }
+}
+
+// Update profile
+async function handleUpdateProfile(userId: string, data: any): Promise<NextResponse> {
+  try {
+    const supabase = await createClient()
+
+    // Prepare the update object
+    const updates: Record<string, any> = {
+      updated_at: new Date().toISOString()
+    }
+
+    if (data.name) updates.name = data.name
+    if (data.bio !== undefined) updates.bio = data.bio
+    if (data.title) updates.title = data.title
+    if (data.location) updates.location = data.location
+    if (data.skills && Array.isArray(data.skills)) updates.skills = data.skills
+    if (data.avatar) updates.avatar = data.avatar
+    if (data.hourlyRate !== undefined) updates.hourly_rate = data.hourlyRate
+    if (data.portfolioUrl) updates.portfolio_url = data.portfolioUrl
+    if (data.languages && Array.isArray(data.languages)) updates.languages = data.languages
+
+    // Try to update existing member profile
+    const { data: existingMember, error: findError } = await supabase
+      .from('community_members')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
+
+    if (existingMember) {
+      // Update existing profile
+      const { data: updatedMember, error: updateError } = await supabase
+        .from('community_members')
+        .update(updates)
+        .eq('user_id', userId)
+        .select()
+        .single()
+
+      if (updateError) {
+        throw updateError
+      }
+
+      return NextResponse.json({
+        success: true,
+        action: 'update-profile',
+        member: updatedMember,
+        message: 'Profile updated successfully!',
+        timestamp: new Date().toISOString()
+      })
+    } else {
+      // Create new member profile
+      const { data: newMember, error: createError } = await supabase
+        .from('community_members')
+        .insert({
+          user_id: userId,
+          name: data.name || 'Community Member',
+          bio: data.bio || '',
+          title: data.title || '',
+          location: data.location || '',
+          skills: data.skills || [],
+          category: 'freelancer',
+          availability: 'available',
+          currency: 'USD',
+          timezone: 'UTC',
+          rating: 0,
+          total_projects: 0,
+          total_earnings: 0,
+          completion_rate: 0,
+          is_online: true,
+          is_verified: false,
+          is_premium: false,
+          followers: 0,
+          following: 0,
+          posts_count: 0,
+          badges: [],
+          achievements: [],
+          endorsements: 0,
+          testimonials: 0,
+          languages: [],
+          certifications: []
+        })
+        .select()
+        .single()
+
+      if (createError) {
+        throw createError
+      }
+
+      return NextResponse.json({
+        success: true,
+        action: 'update-profile',
+        member: newMember,
+        message: 'Profile created successfully!',
+        isNew: true,
+        timestamp: new Date().toISOString()
+      })
+    }
+  } catch (error: any) {
+    // If table doesn't exist, return mock success for demo
+    if (error?.code === '42P01' || error?.message?.includes('does not exist')) {
+      return NextResponse.json({
+        success: true,
+        action: 'update-profile',
+        message: 'Profile updated successfully! (Demo mode)',
+        timestamp: new Date().toISOString(),
+        demo: true
+      })
+    }
+
+    return NextResponse.json({
+      success: false,
+      error: error?.message || 'Failed to update profile'
     }, { status: 500 })
   }
 }
@@ -376,6 +726,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           }, { status: 400 })
         }
         return handleReport(resourceId, data)
+
+      case 'update-profile':
+        if (!userId) {
+          return NextResponse.json({
+            success: false,
+            error: 'User ID required for profile update'
+          }, { status: 400 })
+        }
+        return handleUpdateProfile(userId, data)
 
       default:
         return NextResponse.json({

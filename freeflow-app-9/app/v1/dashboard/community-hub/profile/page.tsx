@@ -12,6 +12,11 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 import { User, Star, MessageSquare, Heart, Trophy, Users, BookOpen, Award, Edit } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 const logger = createFeatureLogger('CommunityProfile')
 
@@ -27,6 +32,15 @@ export default function CommunityProfilePage() {
     followers: 0,
     following: 0,
     reputation: 0
+  })
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editForm, setEditForm] = useState({
+    name: '',
+    bio: '',
+    title: '',
+    location: '',
+    skills: ''
   })
 
   useEffect(() => {
@@ -65,6 +79,75 @@ export default function CommunityProfilePage() {
 
     loadProfile()
   }, [userId, announce])
+
+  // Initialize edit form when profile loads
+  useEffect(() => {
+    if (profile) {
+      setEditForm({
+        name: profile.name || '',
+        bio: profile.bio || '',
+        title: profile.title || '',
+        location: profile.location || '',
+        skills: profile.skills?.join(', ') || ''
+      })
+    }
+  }, [profile])
+
+  const handleEditProfile = () => {
+    setShowEditDialog(true)
+  }
+
+  const handleSaveProfile = async () => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-profile',
+          resourceId: userId,
+          userId,
+          data: {
+            name: editForm.name,
+            bio: editForm.bio,
+            title: editForm.title,
+            location: editForm.location,
+            skills: editForm.skills.split(',').map(s => s.trim()).filter(Boolean)
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to update profile')
+      }
+
+      // Update local profile state
+      setProfile((prev: any) => ({
+        ...prev,
+        name: editForm.name,
+        bio: editForm.bio,
+        title: editForm.title,
+        location: editForm.location,
+        skills: editForm.skills.split(',').map(s => s.trim()).filter(Boolean)
+      }))
+
+      toast.success('Profile updated successfully')
+      setShowEditDialog(false)
+      announce('Profile updated', 'polite')
+    } catch (err) {
+      logger.error('Failed to update profile', { error: err, userId })
+      toast.error('Failed to update profile')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -107,7 +190,7 @@ export default function CommunityProfilePage() {
                     ))}
                   </div>
                   <button
-                    onClick={() => toast.info('Edit community profile')}
+                    onClick={handleEditProfile}
                     className="mt-4 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-indigo-600 hover:to-purple-600 flex items-center gap-2"
                   >
                     <Edit className="w-4 h-4" />
@@ -140,6 +223,71 @@ export default function CommunityProfilePage() {
           </div>
         </ScrollReveal>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Community Profile</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Display Name</Label>
+              <Input
+                id="name"
+                value={editForm.name}
+                onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Your display name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="title">Title / Role</Label>
+              <Input
+                id="title"
+                value={editForm.title}
+                onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="e.g., Full Stack Developer"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                value={editForm.location}
+                onChange={(e) => setEditForm(prev => ({ ...prev, location: e.target.value }))}
+                placeholder="e.g., San Francisco, CA"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                value={editForm.bio}
+                onChange={(e) => setEditForm(prev => ({ ...prev, bio: e.target.value }))}
+                placeholder="Tell the community about yourself..."
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="skills">Skills (comma-separated)</Label>
+              <Input
+                id="skills"
+                value={editForm.skills}
+                onChange={(e) => setEditForm(prev => ({ ...prev, skills: e.target.value }))}
+                placeholder="e.g., React, Node.js, TypeScript"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveProfile} disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
