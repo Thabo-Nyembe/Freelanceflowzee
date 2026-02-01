@@ -194,174 +194,7 @@ interface OnboardingStats {
   usersOnboarded: number
 }
 
-// Mock Data
-const mockFlows: Flow[] = [
-  {
-    id: '1',
-    name: 'Welcome Tour',
-    description: 'Introduction to the platform for new users',
-    type: 'onboarding',
-    status: 'active',
-    steps: [
-      { id: 's1', type: 'modal', title: 'Welcome!', content: 'Welcome to our platform', order: 1 },
-      { id: 's2', type: 'tooltip', title: 'Dashboard', content: 'This is your main dashboard', target: '#dashboard', position: 'bottom', order: 2 },
-      { id: 's3', type: 'hotspot', title: 'Quick Actions', content: 'Access common actions here', target: '#actions', position: 'right', order: 3 }
-    ],
-    trigger: { type: 'page_load', value: '/dashboard' },
-    views: 4523,
-    completions: 3892,
-    completionRate: 86.1,
-    dropoffRate: 13.9,
-    avgTimeToComplete: 145,
-    createdAt: '2024-01-15',
-    updatedAt: '2024-03-10',
-    createdBy: 'Sarah Chen'
-  },
-  {
-    id: '2',
-    name: 'Feature Discovery: Reports',
-    description: 'Guide users through the reporting features',
-    type: 'feature_adoption',
-    status: 'active',
-    steps: [
-      { id: 's1', type: 'slideout', title: 'New Reports!', content: 'Check out our new reporting features', order: 1 },
-      { id: 's2', type: 'tooltip', title: 'Create Report', content: 'Click here to create your first report', target: '#create-report', position: 'bottom', order: 2 }
-    ],
-    trigger: { type: 'event', value: 'viewed_dashboard_3_times' },
-    segmentId: 'seg1',
-    views: 2341,
-    completions: 1876,
-    completionRate: 80.1,
-    dropoffRate: 19.9,
-    avgTimeToComplete: 89,
-    createdAt: '2024-02-01',
-    updatedAt: '2024-03-12',
-    createdBy: 'Mike Johnson'
-  },
-  {
-    id: '3',
-    name: 'NPS Survey',
-    description: 'Collect feedback from active users',
-    type: 'survey',
-    status: 'active',
-    steps: [
-      { id: 's1', type: 'modal', title: 'Quick Question', content: 'How likely are you to recommend us?', order: 1 }
-    ],
-    trigger: { type: 'delay', value: '30_days', delay: 30 },
-    segmentId: 'seg2',
-    views: 1892,
-    completions: 1234,
-    completionRate: 65.2,
-    dropoffRate: 34.8,
-    avgTimeToComplete: 35,
-    createdAt: '2024-02-15',
-    updatedAt: '2024-03-08',
-    createdBy: 'Sarah Chen'
-  },
-  {
-    id: '4',
-    name: 'New Feature Announcement',
-    description: 'Announce the new AI-powered assistant',
-    type: 'announcement',
-    status: 'paused',
-    steps: [
-      { id: 's1', type: 'banner', title: 'AI Assistant', content: 'Try our new AI-powered assistant!', order: 1 }
-    ],
-    trigger: { type: 'page_load', value: '/dashboard' },
-    views: 5621,
-    completions: 4532,
-    completionRate: 80.6,
-    dropoffRate: 19.4,
-    avgTimeToComplete: 12,
-    createdAt: '2024-03-01',
-    updatedAt: '2024-03-10',
-    createdBy: 'Alex Rivera'
-  },
-  {
-    id: '5',
-    name: 'Power User Onboarding',
-    description: 'Advanced features for power users',
-    type: 'onboarding',
-    status: 'draft',
-    steps: [
-      { id: 's1', type: 'modal', title: 'Advanced Features', content: 'Unlock your full potential', order: 1 },
-      { id: 's2', type: 'tooltip', title: 'API Access', content: 'Access our developer API', target: '#api', position: 'left', order: 2 },
-      { id: 's3', type: 'tooltip', title: 'Automations', content: 'Set up automated workflows', target: '#automations', position: 'bottom', order: 3 },
-      { id: 's4', type: 'modal', title: 'All Set!', content: 'You are ready to use advanced features', order: 4 }
-    ],
-    trigger: { type: 'segment', value: 'power_users' },
-    segmentId: 'seg3',
-    views: 0,
-    completions: 0,
-    completionRate: 0,
-    dropoffRate: 0,
-    avgTimeToComplete: 0,
-    createdAt: '2024-03-12',
-    updatedAt: '2024-03-12',
-    createdBy: 'Mike Johnson'
-  }
-]
-
-const mockChecklists: Checklist[] = [
-  {
-    id: 'c1',
-    name: 'Getting Started Checklist',
-    description: 'Complete these steps to set up your account',
-    items: [
-      { id: 'i1', title: 'Complete your profile', description: 'Add your photo and bio', completed: false, order: 1, actionUrl: '/settings/profile', isRequired: true },
-      { id: 'i2', title: 'Connect your calendar', description: 'Sync your calendar for scheduling', completed: false, order: 2, actionUrl: '/integrations/calendar', isRequired: false },
-      { id: 'i3', title: 'Invite team members', description: 'Add colleagues to your workspace', completed: false, order: 3, actionUrl: '/team/invite', isRequired: true },
-      { id: 'i4', title: 'Create your first project', description: 'Set up a project to get started', completed: false, order: 4, actionUrl: '/projects/new', isRequired: true },
-      { id: 'i5', title: 'Enable notifications', description: 'Stay updated on important events', completed: false, order: 5, actionUrl: '/settings/notifications', isRequired: false }
-    ],
-    status: 'active',
-    usersStarted: 2341,
-    usersCompleted: 1892,
-    completionRate: 80.8,
-    createdAt: '2024-01-01'
-  },
-  {
-    id: 'c2',
-    name: 'Advanced Setup',
-    description: 'Take your account to the next level',
-    items: [
-      { id: 'i1', title: 'Set up integrations', description: 'Connect third-party apps', completed: false, order: 1, actionUrl: '/integrations', isRequired: false },
-      { id: 'i2', title: 'Configure workflows', description: 'Automate your processes', completed: false, order: 2, actionUrl: '/workflows', isRequired: false },
-      { id: 'i3', title: 'Add custom fields', description: 'Customize your data structure', completed: false, order: 3, actionUrl: '/settings/fields', isRequired: false }
-    ],
-    status: 'active',
-    usersStarted: 892,
-    usersCompleted: 456,
-    completionRate: 51.1,
-    createdAt: '2024-01-15'
-  }
-]
-
-const mockUsers: UserJourney[] = [
-  { userId: 'u1', userName: 'Emily Watson', userEmail: 'emily@example.com', flowsCompleted: 3, totalFlows: 3, checklistProgress: 100, lastActive: '2024-03-12', signupDate: '2024-02-01', segment: 'Power Users', status: 'active' },
-  { userId: 'u2', userName: 'David Chen', userEmail: 'david@example.com', flowsCompleted: 2, totalFlows: 3, checklistProgress: 80, lastActive: '2024-03-11', signupDate: '2024-02-15', segment: 'Enterprise', status: 'active' },
-  { userId: 'u3', userName: 'Sarah Miller', userEmail: 'sarah@example.com', flowsCompleted: 1, totalFlows: 3, checklistProgress: 40, lastActive: '2024-03-05', signupDate: '2024-03-01', segment: 'Free Trial', status: 'at_risk' },
-  { userId: 'u4', userName: 'James Wilson', userEmail: 'james@example.com', flowsCompleted: 0, totalFlows: 3, checklistProgress: 20, lastActive: '2024-02-20', signupDate: '2024-02-10', segment: 'Free Trial', status: 'churned' },
-  { userId: 'u5', userName: 'Lisa Brown', userEmail: 'lisa@example.com', flowsCompleted: 1, totalFlows: 3, checklistProgress: 60, lastActive: '2024-03-12', signupDate: '2024-03-10', segment: 'Starter', status: 'new' }
-]
-
-const mockSegments: Segment[] = [
-  { id: 'seg1', name: 'Power Users', description: 'Users with high engagement', rules: [{ property: 'sessions_count', operator: 'greater_than', value: '50' }], userCount: 1234, flowsUsing: 3, createdAt: '2024-01-01' },
-  { id: 'seg2', name: 'Active 30 Days', description: 'Users active in the last 30 days', rules: [{ property: 'last_active', operator: 'greater_than', value: '30_days_ago' }], userCount: 4567, flowsUsing: 2, createdAt: '2024-01-15' },
-  { id: 'seg3', name: 'Enterprise', description: 'Enterprise plan users', rules: [{ property: 'plan', operator: 'is', value: 'enterprise' }], userCount: 234, flowsUsing: 1, createdAt: '2024-02-01' },
-  { id: 'seg4', name: 'Free Trial', description: 'Users on free trial', rules: [{ property: 'plan', operator: 'is', value: 'trial' }], userCount: 789, flowsUsing: 2, createdAt: '2024-02-15' },
-  { id: 'seg5', name: 'New Users', description: 'Users who signed up in the last 7 days', rules: [{ property: 'signup_date', operator: 'greater_than', value: '7_days_ago' }], userCount: 156, flowsUsing: 1, createdAt: '2024-03-01' }
-]
-
-const mockAnalytics: FlowAnalytics[] = [
-  { date: '2024-03-06', views: 423, starts: 398, completions: 356 },
-  { date: '2024-03-07', views: 456, starts: 421, completions: 389 },
-  { date: '2024-03-08', views: 512, starts: 478, completions: 432 },
-  { date: '2024-03-09', views: 389, starts: 356, completions: 312 },
-  { date: '2024-03-10', views: 478, starts: 445, completions: 401 },
-  { date: '2024-03-11', views: 534, starts: 502, completions: 456 },
-  { date: '2024-03-12', views: 567, starts: 534, completions: 489 }
-]
+// Data is fetched from Supabase - no mock/hardcoded data
 
 // Helper Functions
 const getFlowStatusColor = (status: FlowStatus) => {
@@ -415,7 +248,7 @@ const formatDuration = (seconds: number) => {
 }
 
 export default function OnboardingClient() {
-  // Define adapter variables locally (removed mock data imports)
+  // Adapter variables for competitive upgrade components - fetched from API or empty
   const onboardingAIInsights: any[] = []
   const onboardingCollaborators: any[] = []
   const onboardingPredictions: any[] = []
@@ -426,11 +259,11 @@ export default function OnboardingClient() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Data state
-  const [flows, setFlows] = useState<Flow[]>(mockFlows)
-  const [checklists, setChecklists] = useState<Checklist[]>(mockChecklists)
-  const [users, setUsers] = useState<UserJourney[]>(mockUsers)
-  const [segments, setSegments] = useState<Segment[]>(mockSegments)
+  // Data state - start with empty arrays, fetch from Supabase
+  const [flows, setFlows] = useState<Flow[]>([])
+  const [checklists, setChecklists] = useState<Checklist[]>([])
+  const [users, setUsers] = useState<UserJourney[]>([])
+  const [segments, setSegments] = useState<Segment[]>([])
 
   // UI state
   const [activeTab, setActiveTab] = useState('flows')
@@ -453,7 +286,7 @@ export default function OnboardingClient() {
   const [editingChecklist, setEditingChecklist] = useState<Checklist | null>(null)
   const [completionGoal, setCompletionGoal] = useState(80)
   const [savedCompletionGoal, setSavedCompletionGoal] = useState(80)
-  const [analyticsData, setAnalyticsData] = useState<FlowAnalytics[]>(mockAnalytics)
+  const [analyticsData, setAnalyticsData] = useState<FlowAnalytics[]>([])
   const [assignedSegmentId, setAssignedSegmentId] = useState<string>('')
   const [selectedUser, setSelectedUser] = useState<UserJourney | null>(null)
   const [showUserDetailDialog, setShowUserDetailDialog] = useState(false)
@@ -548,6 +381,46 @@ export default function OnboardingClient() {
             userCount: s.user_count || 0,
             flowsUsing: s.flows_using || 0,
             createdAt: s.created_at
+          })))
+        }
+
+        // Fetch user journeys
+        const { data: usersData } = await supabase
+          .from('onboarding_user_journeys')
+          .select('*')
+          .eq('owner_id', user.id)
+          .order('last_active', { ascending: false })
+
+        if (usersData && usersData.length > 0) {
+          setUsers(usersData.map(u => ({
+            userId: u.id,
+            userName: u.user_name || 'Unknown User',
+            userEmail: u.user_email || '',
+            avatar: u.avatar,
+            flowsCompleted: u.flows_completed || 0,
+            totalFlows: u.total_flows || 0,
+            checklistProgress: u.checklist_progress || 0,
+            lastActive: u.last_active,
+            signupDate: u.signup_date,
+            segment: u.segment || 'Default',
+            status: u.status || 'new'
+          })))
+        }
+
+        // Fetch analytics data (last 7 days)
+        const { data: analyticsDbData } = await supabase
+          .from('onboarding_analytics')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+          .order('date', { ascending: true })
+
+        if (analyticsDbData && analyticsDbData.length > 0) {
+          setAnalyticsData(analyticsDbData.map(a => ({
+            date: a.date,
+            views: a.views || 0,
+            starts: a.starts || 0,
+            completions: a.completions || 0
           })))
         }
       } catch (error) {
@@ -951,7 +824,7 @@ export default function OnboardingClient() {
                 <Users className="w-4 h-4 text-pink-600" />
                 <span className="text-xs text-gray-500">Total Users</span>
               </div>
-              <p className="text-2xl font-bold">{mockUsers.length}</p>
+              <p className="text-2xl font-bold">{users.length}</p>
               <p className="text-xs text-pink-600">Active today</p>
             </CardContent>
           </Card>
@@ -1032,7 +905,62 @@ export default function OnboardingClient() {
                 { icon: Pause, label: 'Pause All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { flows.filter(f => f.status === 'active').forEach(f => handleUpdateFlowStatus(f, 'paused')) } },
                 { icon: Copy, label: 'Duplicate', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { if (selectedFlow) handleDuplicateFlow(selectedFlow); else toast.info('Please select a flow to duplicate') } },
                 { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: handleExportReport },
-                { icon: Upload, label: 'Import', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = async (e) => { const file = (e.target as HTMLInputElement).files?.[0]; if (!file) return; toast.promise(file.text().then(text => { const data = JSON.parse(text); setFlows(prev => [...prev, ...data.flows || []]); return data; }), { loading: 'Importing flows...', success: 'Flows imported successfully', error: 'Failed to import flows' }) }; input.click() } },
+                { icon: Upload, label: 'Import', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: async () => {
+                  if (!userId) { toast.error('You must be logged in'); return; }
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = '.json';
+                  input.onchange = async (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (!file) return;
+                    toast.loading('Importing flows...', { id: 'import-flows' });
+                    try {
+                      const text = await file.text();
+                      const data = JSON.parse(text);
+                      const importedFlows = data.flows || [];
+                      // Insert flows into database
+                      const flowsToInsert = importedFlows.map((f: Flow) => ({
+                        user_id: userId,
+                        name: f.name,
+                        description: f.description,
+                        flow_type: f.type,
+                        status: 'draft',
+                        steps: f.steps || [],
+                        trigger: f.trigger || { type: 'page_load', value: '/dashboard' },
+                        views: 0,
+                        completions: 0,
+                        completion_rate: 0,
+                        dropoff_rate: 0,
+                        avg_time_to_complete: 0
+                      }));
+                      const { data: insertedFlows, error } = await supabase.from('onboarding_flows').insert(flowsToInsert).select();
+                      if (error) throw error;
+                      const newFlows: Flow[] = (insertedFlows || []).map((f: any) => ({
+                        id: f.id,
+                        name: f.name,
+                        description: f.description || '',
+                        type: f.flow_type,
+                        status: f.status,
+                        steps: f.steps || [],
+                        trigger: f.trigger,
+                        views: 0,
+                        completions: 0,
+                        completionRate: 0,
+                        dropoffRate: 0,
+                        avgTimeToComplete: 0,
+                        createdAt: f.created_at,
+                        updatedAt: f.updated_at,
+                        createdBy: 'Imported'
+                      }));
+                      setFlows(prev => [...newFlows, ...prev]);
+                      toast.success(`${newFlows.length} flows imported successfully`, { id: 'import-flows' });
+                    } catch (error) {
+                      console.error('Import error:', error);
+                      toast.error('Failed to import flows', { id: 'import-flows' });
+                    }
+                  };
+                  input.click();
+                } },
                 { icon: BarChart3, label: 'Analytics', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => setActiveTab('analytics') },
                 { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => setStatusFilter('archived') },
               ].map((action, i) => (
@@ -1194,7 +1122,42 @@ export default function OnboardingClient() {
                 { icon: Plus, label: 'Create', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: handleCreateChecklist },
                 { icon: CheckSquare, label: 'Active', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { setChecklistStatusFilter('active'); toast.success('Filter applied') } },
                 { icon: Edit, label: 'Edit', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { if (selectedChecklist) setSelectedChecklist(selectedChecklist); else toast.info('Please select a checklist to edit') } },
-                { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { if (!selectedChecklist) { toast.info('Please select a checklist to duplicate'); return; } const duplicated: Checklist = { ...selectedChecklist, id: Math.random().toString(36).substr(2, 9), name: `${selectedChecklist.name} (Copy)` }; setChecklists(prev => [duplicated, ...prev]); toast.success('Checklist duplicated') } },
+                { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: async () => {
+                  if (!selectedChecklist) { toast.info('Please select a checklist to duplicate'); return; }
+                  if (!userId) { toast.error('You must be logged in'); return; }
+                  setIsSaving(true);
+                  try {
+                    const { data, error } = await supabase.from('onboarding_checklists').insert({
+                      user_id: userId,
+                      name: `${selectedChecklist.name} (Copy)`,
+                      description: selectedChecklist.description,
+                      items: selectedChecklist.items,
+                      status: 'active',
+                      users_started: 0,
+                      users_completed: 0,
+                      completion_rate: 0
+                    }).select().single();
+                    if (error) throw error;
+                    const duplicated: Checklist = {
+                      id: data.id,
+                      name: data.name,
+                      description: data.description || '',
+                      items: data.items || [],
+                      status: 'active',
+                      usersStarted: 0,
+                      usersCompleted: 0,
+                      completionRate: 0,
+                      createdAt: data.created_at
+                    };
+                    setChecklists(prev => [duplicated, ...prev]);
+                    toast.success('Checklist duplicated');
+                  } catch (error) {
+                    console.error('Error duplicating checklist:', error);
+                    toast.error('Failed to duplicate checklist');
+                  } finally {
+                    setIsSaving(false);
+                  }
+                } },
                 { icon: Users, label: 'Assign', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => { if (!selectedChecklist) { toast.info('Please select a checklist first'); return; } setShowAssignDialog(true) } },
                 { icon: BarChart3, label: 'Reports', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: handleExportReport },
@@ -1367,7 +1330,7 @@ export default function OnboardingClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockFlows.sort((a, b) => b.completionRate - a.completionRate).slice(0, 5).map((flow, index) => (
+                    {[...flows].sort((a, b) => b.completionRate - a.completionRate).slice(0, 5).map((flow, index) => (
                       <div key={flow.id} className="flex items-center gap-4">
                         <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center font-bold text-sm">
                           {index + 1}
@@ -1393,7 +1356,7 @@ export default function OnboardingClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockFlows.filter(f => f.status === 'active').map((flow) => (
+                    {flows.filter(f => f.status === 'active').map((flow) => (
                       <div key={flow.id} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">{flow.name}</span>
@@ -1418,7 +1381,7 @@ export default function OnboardingClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockFlows.filter(f => f.avgTimeToComplete > 0).map((flow) => (
+                    {flows.filter(f => f.avgTimeToComplete > 0).map((flow) => (
                       <div key={flow.id} className="flex items-center gap-4">
                         <Timer className="w-5 h-5 text-gray-400" />
                         <div className="flex-1">
@@ -1496,7 +1459,7 @@ export default function OnboardingClient() {
               </select>
               <select className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
                 <option value="all">All Segments</option>
-                {mockSegments.map(seg => (
+                {segments.map(seg => (
                   <option key={seg.id} value={seg.id}>{seg.name}</option>
                 ))}
               </select>
@@ -1589,7 +1552,7 @@ export default function OnboardingClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockSegments.length}</p>
+                    <p className="text-3xl font-bold">{segments.length}</p>
                     <p className="text-cyan-200 text-sm">Active Segments</p>
                   </div>
                 </div>
@@ -1892,19 +1855,38 @@ export default function OnboardingClient() {
                           </div>
                           <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={async () => {
                               if (integration.connected) {
-                                toast.info('Integration Settings')
+                                // Show integration details or disconnect option
+                                if (confirm(`${integration.name} is connected. Would you like to disconnect?`)) {
+                                  toast.loading(`Disconnecting ${integration.name}...`, { id: 'disconnect-integration' });
+                                  try {
+                                    if (userId) {
+                                      await supabase.from('user_integrations')
+                                        .delete()
+                                        .eq('user_id', userId)
+                                        .eq('provider', integration.name.toLowerCase());
+                                    }
+                                    toast.success(`${integration.name} disconnected`, { id: 'disconnect-integration' });
+                                  } catch (error) {
+                                    toast.error(`Failed to disconnect ${integration.name}`, { id: 'disconnect-integration' });
+                                  }
+                                }
                               } else {
-                                toast.loading(`Connecting to ${integration.name}...`, { id: 'connect-integration' })
+                                toast.loading(`Connecting to ${integration.name}...`, { id: 'connect-integration' });
                                 try {
-                                  const res = await fetch('/api/integrations', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ action: 'connect', provider: integration.name.toLowerCase() })
-                                  })
-                                  if (!res.ok) throw new Error('Connection failed')
-                                  toast.success(`${integration.name} connected successfully!`, { id: 'connect-integration' })
+                                  // Store integration in database
+                                  if (userId) {
+                                    const { error } = await supabase.from('user_integrations').upsert({
+                                      user_id: userId,
+                                      provider: integration.name.toLowerCase(),
+                                      connected: true,
+                                      connected_at: new Date().toISOString()
+                                    });
+                                    if (error && error.code !== '23505') throw error; // Ignore duplicate key error
+                                  }
+                                  toast.success(`${integration.name} connected successfully!`, { id: 'connect-integration' });
                                 } catch (error) {
-                                  toast.error(`Failed to connect ${integration.name}`, { id: 'connect-integration' })
+                                  console.error('Error connecting integration:', error);
+                                  toast.error(`Failed to connect ${integration.name}`, { id: 'connect-integration' });
                                 }
                               }
                             }}>
@@ -2014,7 +1996,7 @@ export default function OnboardingClient() {
                             </div>
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
-                              toast.info('Session Management')
+                              setShowSessionManagementDialog(true)
                             }}>Manage</Button>
                         </div>
                       </CardContent>
@@ -2030,7 +2012,20 @@ export default function OnboardingClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Reset All Flows</p>
                             <p className="text-sm text-gray-500">Delete all flow configurations</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Are you sure you want to reset all flows? This action cannot be undone.')) { setFlows([]); toast.success('All flows reset') } }}>Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={async () => {
+                            if (!confirm('Are you sure you want to reset all flows? This action cannot be undone.')) return;
+                            if (!userId) { toast.error('You must be logged in'); return; }
+                            toast.loading('Deleting all flows...', { id: 'reset-flows' });
+                            try {
+                              const { error } = await supabase.from('onboarding_flows').delete().eq('user_id', userId);
+                              if (error) throw error;
+                              setFlows([]);
+                              toast.success('All flows deleted', { id: 'reset-flows' });
+                            } catch (error) {
+                              console.error('Error resetting flows:', error);
+                              toast.error('Failed to reset flows', { id: 'reset-flows' });
+                            }
+                          }}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
                           <div>
@@ -2255,7 +2250,14 @@ export default function OnboardingClient() {
                             <Badge variant="outline" className="text-xs">Required</Badge>
                           )}
                           <Button variant="ghost" size="sm" onClick={() => {
-                              toast.info("Edit Item")
+                              setEditingChecklistItem(item);
+                              setEditItemForm({
+                                title: item.title,
+                                description: item.description,
+                                isRequired: item.isRequired,
+                                actionUrl: item.actionUrl || ''
+                              });
+                              setShowEditItemDialog(true);
                             }}>
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -2271,7 +2273,33 @@ export default function OnboardingClient() {
                     <Edit className="w-4 h-4" />
                     Edit Checklist
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => { const newItem: ChecklistItem = { id: Math.random().toString(36).substr(2, 9), title: 'New Item', description: '', completed: false, order: (selectedChecklist.items.length || 0) + 1, isRequired: false }; setChecklists(prev => prev.map(c => c.id === selectedChecklist.id ? { ...c, items: [...c.items, newItem] } : c)); setSelectedChecklist({ ...selectedChecklist, items: [...selectedChecklist.items, newItem] }); toast.success('Item added successfully') }}>
+                  <Button variant="outline" className="gap-2" onClick={async () => {
+                    if (!userId) { toast.error('You must be logged in'); return; }
+                    const newItem: ChecklistItem = {
+                      id: Math.random().toString(36).substr(2, 9),
+                      title: 'New Item',
+                      description: '',
+                      completed: false,
+                      order: (selectedChecklist.items.length || 0) + 1,
+                      isRequired: false
+                    };
+                    const updatedItems = [...selectedChecklist.items, newItem];
+                    setIsSaving(true);
+                    try {
+                      const { error } = await supabase.from('onboarding_checklists')
+                        .update({ items: updatedItems })
+                        .eq('id', selectedChecklist.id);
+                      if (error) throw error;
+                      setChecklists(prev => prev.map(c => c.id === selectedChecklist.id ? { ...c, items: updatedItems } : c));
+                      setSelectedChecklist({ ...selectedChecklist, items: updatedItems });
+                      toast.success('Item added successfully');
+                    } catch (error) {
+                      console.error('Error adding item:', error);
+                      toast.error('Failed to add item');
+                    } finally {
+                      setIsSaving(false);
+                    }
+                  }} disabled={isSaving}>
                     <Plus className="w-4 h-4" />
                     Add Item
                   </Button>
@@ -2653,6 +2681,216 @@ export default function OnboardingClient() {
                       toast.error('Failed to update checklist')
                     } finally {
                       setIsSaving(false)
+                    }
+                  }} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Session Management Dialog */}
+        <Dialog open={showSessionManagementDialog} onOpenChange={setShowSessionManagementDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <HardDrive className="w-5 h-5 text-blue-600" />
+                Session Management
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Manage user session data and recordings.
+              </p>
+              <div className="grid gap-4">
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                  <div>
+                    <p className="font-medium">Export Session Data</p>
+                    <p className="text-sm text-gray-500">Download all session recordings as CSV</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={async () => {
+                    if (!userId) { toast.error('You must be logged in'); return; }
+                    toast.loading('Exporting sessions...', { id: 'export-sessions' });
+                    try {
+                      const { data: sessions } = await supabase
+                        .from('onboarding_sessions')
+                        .select('*')
+                        .eq('user_id', userId);
+
+                      const csvContent = sessions && sessions.length > 0
+                        ? [
+                            ['Session ID', 'Flow ID', 'User ID', 'Started At', 'Completed At', 'Status'].join(','),
+                            ...(sessions || []).map(s => [s.id, s.flow_id, s.session_user_id, s.started_at, s.completed_at, s.status].join(','))
+                          ].join('\n')
+                        : 'No session data available';
+
+                      const blob = new Blob([csvContent], { type: 'text/csv' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `sessions-export-${new Date().toISOString().split('T')[0]}.csv`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      toast.success('Sessions exported', { id: 'export-sessions' });
+                    } catch (error) {
+                      console.error('Error exporting sessions:', error);
+                      toast.error('Failed to export sessions', { id: 'export-sessions' });
+                    }
+                  }}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                  <div>
+                    <p className="font-medium">Clear Old Sessions</p>
+                    <p className="text-sm text-gray-500">Remove sessions older than 90 days</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={async () => {
+                    if (!userId) { toast.error('You must be logged in'); return; }
+                    if (!confirm('Are you sure you want to clear sessions older than 90 days?')) return;
+                    toast.loading('Clearing old sessions...', { id: 'clear-sessions' });
+                    try {
+                      const cutoffDate = new Date();
+                      cutoffDate.setDate(cutoffDate.getDate() - 90);
+                      await supabase
+                        .from('onboarding_sessions')
+                        .delete()
+                        .eq('user_id', userId)
+                        .lt('started_at', cutoffDate.toISOString());
+                      toast.success('Old sessions cleared', { id: 'clear-sessions' });
+                    } catch (error) {
+                      console.error('Error clearing sessions:', error);
+                      toast.error('Failed to clear sessions', { id: 'clear-sessions' });
+                    }
+                  }}>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Clear
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                  <div>
+                    <p className="font-medium text-red-700 dark:text-red-300">Delete All Sessions</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">Permanently remove all session data</p>
+                  </div>
+                  <Button variant="destructive" size="sm" onClick={async () => {
+                    if (!userId) { toast.error('You must be logged in'); return; }
+                    if (!confirm('Are you sure you want to delete ALL sessions? This cannot be undone.')) return;
+                    toast.loading('Deleting all sessions...', { id: 'delete-sessions' });
+                    try {
+                      await supabase
+                        .from('onboarding_sessions')
+                        .delete()
+                        .eq('user_id', userId);
+                      toast.success('All sessions deleted', { id: 'delete-sessions' });
+                    } catch (error) {
+                      console.error('Error deleting sessions:', error);
+                      toast.error('Failed to delete sessions', { id: 'delete-sessions' });
+                    }
+                  }}>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete All
+                  </Button>
+                </div>
+              </div>
+              <div className="flex justify-end pt-4">
+                <Button variant="outline" onClick={() => setShowSessionManagementDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Checklist Item Dialog */}
+        <Dialog open={showEditItemDialog} onOpenChange={setShowEditItemDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-purple-600" />
+                Edit Checklist Item
+              </DialogTitle>
+            </DialogHeader>
+            {editingChecklistItem && (
+              <div className="space-y-4">
+                <div>
+                  <Label>Title</Label>
+                  <Input
+                    value={editItemForm.title}
+                    onChange={(e) => setEditItemForm(prev => ({ ...prev, title: e.target.value }))}
+                    className="mt-1.5"
+                    placeholder="Enter item title"
+                  />
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Input
+                    value={editItemForm.description}
+                    onChange={(e) => setEditItemForm(prev => ({ ...prev, description: e.target.value }))}
+                    className="mt-1.5"
+                    placeholder="Enter item description"
+                  />
+                </div>
+                <div>
+                  <Label>Action URL (optional)</Label>
+                  <Input
+                    value={editItemForm.actionUrl}
+                    onChange={(e) => setEditItemForm(prev => ({ ...prev, actionUrl: e.target.value }))}
+                    className="mt-1.5"
+                    placeholder="/settings/profile"
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">Required</p>
+                    <p className="text-sm text-gray-500">Mark this item as required</p>
+                  </div>
+                  <Switch
+                    checked={editItemForm.isRequired}
+                    onCheckedChange={(checked) => setEditItemForm(prev => ({ ...prev, isRequired: checked }))}
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    setShowEditItemDialog(false);
+                    setEditingChecklistItem(null);
+                  }}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={async () => {
+                    if (!selectedChecklist || !editingChecklistItem || !userId) {
+                      toast.error('Unable to save changes');
+                      return;
+                    }
+                    setIsSaving(true);
+                    try {
+                      const updatedItems = selectedChecklist.items.map(item =>
+                        item.id === editingChecklistItem.id
+                          ? {
+                              ...item,
+                              title: editItemForm.title,
+                              description: editItemForm.description,
+                              isRequired: editItemForm.isRequired,
+                              actionUrl: editItemForm.actionUrl || undefined
+                            }
+                          : item
+                      );
+                      const { error } = await supabase.from('onboarding_checklists')
+                        .update({ items: updatedItems })
+                        .eq('id', selectedChecklist.id);
+                      if (error) throw error;
+                      setChecklists(prev => prev.map(c =>
+                        c.id === selectedChecklist.id ? { ...c, items: updatedItems } : c
+                      ));
+                      setSelectedChecklist({ ...selectedChecklist, items: updatedItems });
+                      setShowEditItemDialog(false);
+                      setEditingChecklistItem(null);
+                      toast.success('Item updated successfully');
+                    } catch (error) {
+                      console.error('Error updating item:', error);
+                      toast.error('Failed to update item');
+                    } finally {
+                      setIsSaving(false);
                     }
                   }} disabled={isSaving}>
                     {isSaving ? 'Saving...' : 'Save Changes'}

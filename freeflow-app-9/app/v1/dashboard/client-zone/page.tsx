@@ -65,10 +65,16 @@ import {
   approveDeliverable,
   sendMessage,
   submitFeedback,
+  getFreelancerStats,
+  getActiveClients,
+  getPendingApprovals,
   type ClientProject,
   type ClientMessage,
   type ClientFile,
-  type ClientInvoice
+  type ClientInvoice,
+  type FreelancerStats,
+  type ActiveClient,
+  type PendingApproval
 } from '@/lib/client-zone-queries'
 
 // Real button handlers
@@ -308,6 +314,11 @@ export default function ClientZonePage() {
   const [files, setFiles] = useState<ClientFile[]>([])
   const [invoices, setInvoices] = useState<ClientInvoice[]>([])
 
+  // FREELANCER DASHBOARD STATE (real data from database)
+  const [freelancerStats, setFreelancerStats] = useState<FreelancerStats | null>(null)
+  const [activeClients, setActiveClients] = useState<ActiveClient[]>([])
+  const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([])
+
   // Dialog states for replacing prompt()
   const [showRevisionDialog, setShowRevisionDialog] = useState(false)
   const [revisionProjectId, setRevisionProjectId] = useState<string | null>(null)
@@ -339,12 +350,24 @@ export default function ClientZonePage() {
         setMessages(data.recentMessages)
         setInvoices(data.pendingInvoices)
 
+        // Load freelancer-specific data for dual perspective view
+        const [stats, clients, approvals] = await Promise.all([
+          getFreelancerStats().catch(() => null),
+          getActiveClients(5).catch(() => []),
+          getPendingApprovals(5).catch(() => [])
+        ])
+
+        setFreelancerStats(stats)
+        setActiveClients(clients)
+        setPendingApprovals(approvals)
+
         setIsLoading(false)
         announce('Client zone loaded successfully', 'polite')
         logger.info('Client zone data loaded', {
           projectCount: data.recentProjects.length,
           messageCount: data.recentMessages.length,
           invoiceCount: data.pendingInvoices.length,
+          freelancerStats: stats,
           userId
         })
       } catch (err) {
@@ -1439,7 +1462,7 @@ export default function ClientZonePage() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Freelancer Stats */}
+                {/* Freelancer Stats - Real data from database */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="bg-white/80 dark:bg-gray-900/50 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
                     <div className="flex items-center gap-3 mb-2">
@@ -1447,9 +1470,9 @@ export default function ClientZonePage() {
                       <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Clients</span>
                     </div>
                     <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                      <NumberFlow value={8} />
+                      <NumberFlow value={freelancerStats?.totalClients || 0} />
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">3 active this month</p>
+                    <p className="text-xs text-gray-500 mt-1">{freelancerStats?.activeClients || 0} active this month</p>
                   </div>
 
                   <div className="bg-white/80 dark:bg-gray-900/50 rounded-lg p-4 border border-green-200 dark:border-green-800">
@@ -1458,9 +1481,9 @@ export default function ClientZonePage() {
                       <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Deliverables</span>
                     </div>
                     <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                      <NumberFlow value={12} />
+                      <NumberFlow value={freelancerStats?.totalDeliverables || 0} />
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">4 pending approval</p>
+                    <p className="text-xs text-gray-500 mt-1">{freelancerStats?.pendingApprovals || 0} pending approval</p>
                   </div>
 
                   <div className="bg-white/80 dark:bg-gray-900/50 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
@@ -1469,9 +1492,9 @@ export default function ClientZonePage() {
                       <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Revenue</span>
                     </div>
                     <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                      <NumberFlow value={24500} format="currency" />
+                      <NumberFlow value={freelancerStats?.totalRevenue || 0} format="currency" />
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">$12,300 pending</p>
+                    <p className="text-xs text-gray-500 mt-1">{formatCurrency(freelancerStats?.pendingRevenue || 0)} pending</p>
                   </div>
 
                   <div className="bg-white/80 dark:bg-gray-900/50 rounded-lg p-4 border border-orange-200 dark:border-orange-800">
@@ -1479,12 +1502,17 @@ export default function ClientZonePage() {
                       <TrendingUp className="w-5 h-5 text-orange-600" />
                       <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Growth</span>
                     </div>
-                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">+23%</p>
+                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                      {freelancerStats?.monthlyGrowth !== undefined
+                        ? `${freelancerStats.monthlyGrowth >= 0 ? '+' : ''}${freelancerStats.monthlyGrowth}%`
+                        : '0%'
+                      }
+                    </p>
                     <p className="text-xs text-gray-500 mt-1">vs last month</p>
                   </div>
                 </div>
 
-                {/* Client List & Communications */}
+                {/* Client List & Communications - Real data from database */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Active Clients */}
                   <div className="space-y-3">
@@ -1493,32 +1521,46 @@ export default function ClientZonePage() {
                       Active Clients
                     </h3>
                     <div className="space-y-2">
-                      {[
-                        { name: 'Acme Corp', projects: 2, status: 'In Progress', color: 'blue' },
-                        { name: 'Tech Startup Inc', projects: 1, status: 'Review', color: 'yellow' },
-                        { name: 'Design Agency', projects: 1, status: 'Active', color: 'green' }
-                      ].map((client, idx) => (
-                        <div key={idx} className="bg-white dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white text-xs">
-                                  {client.name.substring(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{client.name}</p>
-                                <p className="text-xs text-gray-500">{client.projects} project(s)</p>
-                              </div>
-                            </div>
-                            <Badge variant="outline" className={`bg-${client.color}-100 text-${client.color}-700 border-${client.color}-300`}>
-                              {client.status}
-                            </Badge>
-                          </div>
+                      {activeClients.length === 0 ? (
+                        <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-800 text-center">
+                          <p className="text-sm text-gray-500">No active clients yet</p>
                         </div>
-                      ))}
+                      ) : (
+                        activeClients.map((client) => (
+                          <div key={client.id} className="bg-white dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
+                                  {client.avatar ? (
+                                    <AvatarImage src={client.avatar} alt={client.name} />
+                                  ) : null}
+                                  <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white text-xs">
+                                    {client.name.substring(0, 2).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{client.name}</p>
+                                  <p className="text-xs text-gray-500">{client.projectCount} project(s)</p>
+                                </div>
+                              </div>
+                              <Badge
+                                variant="outline"
+                                className={
+                                  client.status === 'active'
+                                    ? 'bg-blue-100 text-blue-700 border-blue-300'
+                                    : client.status === 'review'
+                                    ? 'bg-yellow-100 text-yellow-700 border-yellow-300'
+                                    : 'bg-green-100 text-green-700 border-green-300'
+                                }
+                              >
+                                {client.status === 'active' ? 'In Progress' : client.status === 'review' ? 'Review' : 'Completed'}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full" onClick={() => router.push('/v1/dashboard/customers')}>
                       <Users className="w-4 h-4 mr-2" />
                       View All Clients
                     </Button>
@@ -1531,27 +1573,29 @@ export default function ClientZonePage() {
                       Pending Approvals
                     </h3>
                     <div className="space-y-2">
-                      {[
-                        { project: 'Website Redesign', client: 'Acme Corp', type: 'Milestone 3', amount: 2500 },
-                        { project: 'Mobile App', client: 'Tech Startup', type: 'Final Delivery', amount: 5000 },
-                        { project: 'Brand Identity', client: 'Design Agency', type: 'Logo Design', amount: 1200 }
-                      ].map((approval, idx) => (
-                        <div key={idx} className="bg-white dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow">
-                          <div className="flex items-center justify-between mb-2">
-                            <div>
-                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{approval.project}</p>
-                              <p className="text-xs text-gray-500">{approval.client}</p>
-                            </div>
-                            <p className="text-sm font-bold text-blue-600">${approval.amount.toLocaleString()}</p>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <Badge variant="outline" className="text-xs">{approval.type}</Badge>
-                            <span className="text-xs text-gray-500">Awaiting approval</span>
-                          </div>
+                      {pendingApprovals.length === 0 ? (
+                        <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-800 text-center">
+                          <p className="text-sm text-gray-500">No pending approvals</p>
                         </div>
-                      ))}
+                      ) : (
+                        pendingApprovals.map((approval) => (
+                          <div key={approval.id} className="bg-white dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-2">
+                              <div>
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{approval.projectName}</p>
+                                <p className="text-xs text-gray-500">{approval.clientName}</p>
+                              </div>
+                              <p className="text-sm font-bold text-blue-600">{formatCurrency(approval.amount)}</p>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <Badge variant="outline" className="text-xs">{approval.deliverableType}</Badge>
+                              <span className="text-xs text-gray-500">Awaiting approval</span>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full" onClick={() => setActiveTab('projects')}>
                       <Eye className="w-4 h-4 mr-2" />
                       View All Deliverables
                     </Button>
@@ -1565,19 +1609,19 @@ export default function ClientZonePage() {
                     Quick Actions
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900" onClick={handleUploadFile}>
                       <Upload className="w-5 h-5 mb-1" />
                       <span className="text-xs">Upload Deliverable</span>
                     </Button>
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900" onClick={() => setActiveTab('messages')}>
                       <MessageSquare className="w-5 h-5 mb-1" />
                       <span className="text-xs">Message Client</span>
                     </Button>
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900" onClick={() => router.push('/v1/dashboard/invoicing')}>
                       <Receipt className="w-5 h-5 mb-1" />
                       <span className="text-xs">Create Invoice</span>
                     </Button>
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900" onClick={handleClientReports}>
                       <BarChart3 className="w-5 h-5 mb-1" />
                       <span className="text-xs">View Reports</span>
                     </Button>

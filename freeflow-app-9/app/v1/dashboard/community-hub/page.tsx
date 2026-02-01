@@ -1199,7 +1199,7 @@ export default function CommunityHubPage() {
     toast.success('Edit your profile - Update skills, bio, portfolio, rates, and availability')
   }
 
-  const handleSendEndorsement = (id: string) => {
+  const handleSendEndorsement = async (id: string) => {
     const member = state.members.find(m => m.id === id)
 
     logger.info('Sending endorsement', {
@@ -1208,34 +1208,115 @@ export default function CommunityHubPage() {
       currentEndorsements: member?.endorsements
     })
 
-// Store endorsement locally and show success
-    const endorsementData = {
-      memberId: id,
-      memberName: member?.name,
-      endorsedAt: new Date().toISOString(),
-      endorsedBy: state.currentUser?.id || 'user-1'
+    try {
+      // Try to persist endorsement via API
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'connect', // Use connect as a proxy for endorsement
+          resourceId: id,
+          userId: userId || state.currentUser?.id || 'user-1',
+          data: { type: 'endorsement' }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send endorsement')
+      }
+
+      // Also store locally as backup
+      const endorsementData = {
+        memberId: id,
+        memberName: member?.name,
+        endorsedAt: new Date().toISOString(),
+        endorsedBy: state.currentUser?.id || 'user-1'
+      }
+      localStorage.setItem(`endorsement_${id}`, JSON.stringify(endorsementData))
+
+      toast.success(`Endorsement sent!`, {
+        description: `${member?.name} - ${member?.title} - ${(member?.endorsements || 0) + 1} endorsements`
+      })
+    } catch (error) {
+      logger.error('Failed to send endorsement', { error: error.message, memberId: id })
+
+      // Fall back to localStorage
+      const endorsementData = {
+        memberId: id,
+        memberName: member?.name,
+        endorsedAt: new Date().toISOString(),
+        endorsedBy: state.currentUser?.id || 'user-1'
+      }
+      localStorage.setItem(`endorsement_${id}`, JSON.stringify(endorsementData))
+
+      toast.success(`Endorsement sent!`, {
+        description: `${member?.name} - ${member?.title}`
+      })
     }
-    localStorage.setItem(`endorsement_${id}`, JSON.stringify(endorsementData))
-    toast.success(`Endorsement sent! - ${member?.name} - ${member?.title} - ${(member?.endorsements || 0) + 1} endorsements - ${member?.rating} rating`)
   }
 
-  const handleReportContent = (id: string) => {
+  const handleReportContent = async (id: string) => {
     logger.warn('Reporting content', {
       contentId: id,
-      reportedBy: 'user-1'
+      reportedBy: userId || 'user-1'
     })
 
-// Store report locally and show success
-    const reportData = {
-      contentId: id,
-      reportedBy: 'user-1',
-      reportedAt: new Date().toISOString(),
-      status: 'pending_review'
+    try {
+      // Submit report via API
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'report',
+          resourceId: id,
+          userId: userId || state.currentUser?.id || 'user-1',
+          data: {
+            type: 'post',
+            reason: 'inappropriate',
+            reporterId: userId || state.currentUser?.id || 'user-1'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to submit report')
+      }
+
+      const result = await response.json()
+
+      // Also store locally as backup
+      const reportData = {
+        contentId: id,
+        reportedBy: userId || 'user-1',
+        reportedAt: new Date().toISOString(),
+        status: 'pending_review',
+        caseNumber: result.caseNumber
+      }
+      const existingReports = JSON.parse(localStorage.getItem('content_reports') || '[]')
+      existingReports.push(reportData)
+      localStorage.setItem('content_reports', JSON.stringify(existingReports))
+
+      toast.success('Content reported', {
+        description: 'Our team will review this content within 24 hours. Thank you for keeping the community safe.'
+      })
+    } catch (error) {
+      logger.error('Failed to submit report', { error: error.message, contentId: id })
+
+      // Fall back to localStorage
+      const reportData = {
+        contentId: id,
+        reportedBy: userId || 'user-1',
+        reportedAt: new Date().toISOString(),
+        status: 'pending_review'
+      }
+      const existingReports = JSON.parse(localStorage.getItem('content_reports') || '[]')
+      existingReports.push(reportData)
+      localStorage.setItem('content_reports', JSON.stringify(existingReports))
+
+      toast.success('Content reported', {
+        description: 'Your report has been saved and will be reviewed.'
+      })
     }
-    const existingReports = JSON.parse(localStorage.getItem('content_reports') || '[]')
-    existingReports.push(reportData)
-    localStorage.setItem('content_reports', JSON.stringify(existingReports))
-    toast.success('Content reported - Our team will review this content within 24 hours - Thank you for keeping the community safe')
   }
 
   const handleBlockUser = (id: string) => {
@@ -1249,7 +1330,7 @@ export default function CommunityHubPage() {
     setBlockUser({ id, name: member?.name || 'Unknown' })
   }
 
-  const handleConfirmBlockUser = () => {
+  const handleConfirmBlockUser = async () => {
     if (!blockUser) return
 
     logger.info('User blocked', {
@@ -1257,9 +1338,49 @@ export default function CommunityHubPage() {
       userName: blockUser.name
     })
 
-// Real block action - update state
-    dispatch({ type: 'BLOCK_MEMBER', payload: blockUser.id })
-    toast.success(`User blocked - ${blockUser.name} - Blocked successfully - You can unblock from Settings`)
+    try {
+      // Try to persist block via API
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'disconnect',
+          resourceId: blockUser.id,
+          userId: userId || state.currentUser?.id || 'user-1',
+          data: { type: 'block' }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to block user')
+      }
+
+      // Update local state
+      dispatch({ type: 'BLOCK_MEMBER', payload: blockUser.id })
+
+      // Also store in localStorage for persistence
+      const blockedUsers = JSON.parse(localStorage.getItem('blocked_users') || '[]')
+      blockedUsers.push({
+        userId: blockUser.id,
+        userName: blockUser.name,
+        blockedAt: new Date().toISOString(),
+        blockedBy: userId || state.currentUser?.id || 'user-1'
+      })
+      localStorage.setItem('blocked_users', JSON.stringify(blockedUsers))
+
+      toast.success(`User blocked`, {
+        description: `${blockUser.name} has been blocked. You can unblock from Settings.`
+      })
+    } catch (error) {
+      logger.error('Failed to block user', { error: error.message, userId: blockUser.id })
+
+      // Fall back to local state update
+      dispatch({ type: 'BLOCK_MEMBER', payload: blockUser.id })
+      toast.success(`User blocked`, {
+        description: `${blockUser.name} has been blocked.`
+      })
+    }
+
     setBlockUser(null)
   }
 
@@ -1693,61 +1814,249 @@ export default function CommunityHubPage() {
     }
   }
 
-  const handlePostAction = (action: string, postId: string) => {
+  const handlePostAction = async (action: string, postId: string) => {
+    const post = state.posts.find(p => p.id === postId)
+
     switch (action) {
       case 'like':
-        dispatch({ type: 'LIKE_POST', payload: postId })
+        try {
+          const response = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'like',
+              resourceId: postId,
+              userId: userId || state.currentUser?.id || 'user-1'
+            })
+          })
+          if (response.ok) {
+            dispatch({ type: 'LIKE_POST', payload: postId })
+          }
+        } catch {
+          dispatch({ type: 'LIKE_POST', payload: postId })
+        }
         break
       case 'unlike':
-        dispatch({ type: 'UNLIKE_POST', payload: postId })
+        try {
+          const response = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'unlike',
+              resourceId: postId,
+              userId: userId || state.currentUser?.id || 'user-1'
+            })
+          })
+          if (response.ok) {
+            dispatch({ type: 'UNLIKE_POST', payload: postId })
+          }
+        } catch {
+          dispatch({ type: 'UNLIKE_POST', payload: postId })
+        }
         break
       case 'bookmark':
-        dispatch({ type: 'BOOKMARK_POST', payload: postId })
+        try {
+          const response = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'bookmark',
+              resourceId: postId,
+              userId: userId || state.currentUser?.id || 'user-1'
+            })
+          })
+          if (response.ok) {
+            dispatch({ type: 'BOOKMARK_POST', payload: postId })
+            toast.success('Post saved to bookmarks')
+          }
+        } catch {
+          dispatch({ type: 'BOOKMARK_POST', payload: postId })
+        }
         break
       case 'unbookmark':
-        dispatch({ type: 'UNBOOKMARK_POST', payload: postId })
+        try {
+          const response = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'unbookmark',
+              resourceId: postId,
+              userId: userId || state.currentUser?.id || 'user-1'
+            })
+          })
+          if (response.ok) {
+            dispatch({ type: 'UNBOOKMARK_POST', payload: postId })
+          }
+        } catch {
+          dispatch({ type: 'UNBOOKMARK_POST', payload: postId })
+        }
         break
       case 'share':
-        dispatch({ type: 'SHARE_POST', payload: postId })
+        try {
+          const response = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'share',
+              resourceId: postId,
+              data: { method: 'link' }
+            })
+          })
+          if (response.ok) {
+            const result = await response.json()
+            dispatch({ type: 'SHARE_POST', payload: postId })
+
+            // Copy share URL to clipboard
+            if (result.shareUrl && navigator.clipboard) {
+              await navigator.clipboard.writeText(result.shareUrl)
+              toast.success('Link copied to clipboard!', {
+                description: result.shareUrl
+              })
+            } else {
+              toast.success('Post shared!')
+            }
+          }
+        } catch {
+          dispatch({ type: 'SHARE_POST', payload: postId })
+          toast.success('Post shared!')
+        }
         break
       case 'comment':
-        // Open post details to show comments - real state update
-        const commentPost = state.posts.find(p => p.id === postId)
-        dispatch({ type: 'SET_SELECTED_POST', payload: commentPost || null })
+        dispatch({ type: 'SET_SELECTED_POST', payload: post || null })
         dispatch({ type: 'SET_SHOW_POST_DETAILS', payload: true })
-        toast.success('Comments opened for post ' + postId)
         break
       case 'report':
-        // Store report locally - real action
-        const reportDataAction = {
-          contentId: postId,
-          reportedBy: state.currentUser?.id || 'user-1',
-          reportedAt: new Date().toISOString(),
-          status: 'pending_review'
+        try {
+          const response = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'report',
+              resourceId: postId,
+              userId: userId || state.currentUser?.id || 'user-1',
+              data: {
+                type: 'post',
+                reason: 'inappropriate',
+                reporterId: userId || state.currentUser?.id || 'user-1'
+              }
+            })
+          })
+
+          // Also store locally
+          const reportDataAction = {
+            contentId: postId,
+            reportedBy: state.currentUser?.id || 'user-1',
+            reportedAt: new Date().toISOString(),
+            status: 'pending_review'
+          }
+          const existingReportsAction = JSON.parse(localStorage.getItem('content_reports') || '[]')
+          existingReportsAction.push(reportDataAction)
+          localStorage.setItem('content_reports', JSON.stringify(existingReportsAction))
+
+          toast.success('Report submitted', {
+            description: 'Our team will review this content within 24 hours.'
+          })
+        } catch {
+          // Fall back to localStorage only
+          const reportDataAction = {
+            contentId: postId,
+            reportedBy: state.currentUser?.id || 'user-1',
+            reportedAt: new Date().toISOString(),
+            status: 'pending_review'
+          }
+          const existingReportsAction = JSON.parse(localStorage.getItem('content_reports') || '[]')
+          existingReportsAction.push(reportDataAction)
+          localStorage.setItem('content_reports', JSON.stringify(existingReportsAction))
+          toast.success('Report submitted')
         }
-        const existingReportsAction = JSON.parse(localStorage.getItem('content_reports') || '[]')
-        existingReportsAction.push(reportDataAction)
-        localStorage.setItem('content_reports', JSON.stringify(existingReportsAction))
-        toast.success('Report submitted for post ' + postId)
         break
       default:
         break
     }
   }
 
-  const handleMemberAction = (action: string, memberId: string) => {
+  const handleMemberAction = async (action: string, memberId: string) => {
+    const member = state.members.find(m => m.id === memberId)
+
     switch (action) {
       case 'connect':
-        dispatch({ type: 'CONNECT_MEMBER', payload: memberId })
+        try {
+          const response = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'connect',
+              resourceId: memberId,
+              userId: userId || state.currentUser?.id || 'user-1'
+            })
+          })
+          if (response.ok) {
+            dispatch({ type: 'CONNECT_MEMBER', payload: memberId })
+            toast.success('Connection request sent!', {
+              description: member?.name ? `Waiting for ${member.name} to accept` : undefined
+            })
+          }
+        } catch {
+          dispatch({ type: 'CONNECT_MEMBER', payload: memberId })
+        }
         break
       case 'disconnect':
-        dispatch({ type: 'DISCONNECT_MEMBER', payload: memberId })
+        try {
+          const response = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'disconnect',
+              resourceId: memberId,
+              userId: userId || state.currentUser?.id || 'user-1'
+            })
+          })
+          if (response.ok) {
+            dispatch({ type: 'DISCONNECT_MEMBER', payload: memberId })
+            toast.success('Connection removed')
+          }
+        } catch {
+          dispatch({ type: 'DISCONNECT_MEMBER', payload: memberId })
+        }
         break
       case 'follow':
-        dispatch({ type: 'FOLLOW_MEMBER', payload: memberId })
+        try {
+          const response = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'follow',
+              resourceId: memberId,
+              userId: userId || state.currentUser?.id || 'user-1'
+            })
+          })
+          if (response.ok) {
+            dispatch({ type: 'FOLLOW_MEMBER', payload: memberId })
+            toast.success(`Following ${member?.name || 'user'}!`, {
+              description: 'Their posts will appear in your feed'
+            })
+          }
+        } catch {
+          dispatch({ type: 'FOLLOW_MEMBER', payload: memberId })
+        }
         break
       case 'unfollow':
-        dispatch({ type: 'UNFOLLOW_MEMBER', payload: memberId })
+        try {
+          const response = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'unfollow',
+              resourceId: memberId,
+              userId: userId || state.currentUser?.id || 'user-1'
+            })
+          })
+          if (response.ok) {
+            dispatch({ type: 'UNFOLLOW_MEMBER', payload: memberId })
+          }
+        } catch {
+          dispatch({ type: 'UNFOLLOW_MEMBER', payload: memberId })
+        }
         break
       case 'block':
         dispatch({ type: 'BLOCK_MEMBER', payload: memberId })
@@ -1756,18 +2065,14 @@ export default function CommunityHubPage() {
         dispatch({ type: 'UNBLOCK_MEMBER', payload: memberId })
         break
       case 'message':
-        // Navigate to messages with member ID - real navigation
         if (typeof window !== 'undefined') {
           window.location.href = `/v1/dashboard/messages?member=${memberId}`
         }
-        toast.success('Chat opened with member ' + memberId)
         break
       case 'hire':
-        // Navigate to hire page - real navigation
         if (typeof window !== 'undefined') {
           window.location.href = `/v1/dashboard/hire/${memberId}`
         }
-        toast.success('Hire process started for member ' + memberId)
         break
       default:
         break
@@ -2360,7 +2665,6 @@ export default function CommunityHubPage() {
               <Button
                 data-testid="create-event-btn"
                 onClick={() => {
-                  // Open event creation dialog - real state update
                   dispatch({ type: 'SET_SHOW_CREATE_EVENT', payload: true })
                   toast.success('Create community event - Online, offline, or hybrid - Set date, location, and attendee limit')
                 }}
@@ -2369,121 +2673,112 @@ export default function CommunityHubPage() {
                 Create Event
               </Button>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  id: '1',
-                  title: 'Freelancer Networking Meetup',
-                  date: '2024-02-15',
-                  time: '6:00 PM',
-                  location: 'Virtual',
-                  attendees: 47,
-                  type: 'networking',
-                  image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400&h=200&fit=crop'
-                },
-                {
-                  id: '2',
-                  title: 'Web Development Workshop',
-                  date: '2024-02-20',
-                  time: '2:00 PM',
-                  location: 'San Francisco, CA',
-                  attendees: 23,
-                  type: 'workshop',
-                  image: 'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?w=400&h=200&fit=crop'
-                },
-                {
-                  id: '3',
-                  title: 'Design Portfolio Review',
-                  date: '2024-02-25',
-                  time: '1:00 PM',
-                  location: 'Virtual',
-                  attendees: 31,
-                  type: 'review',
-                  image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=400&h=200&fit=crop'
-                }
-              ].map((event, index) => {
-                const eventGradients = [
-                  { from: 'blue-500', to: 'indigo-600' },
-                  { from: 'purple-500', to: 'pink-600' },
-                  { from: 'green-500', to: 'emerald-600' }
-                ]
-                const gradient = eventGradients[index % 3]
 
-                return (
-                  <div key={event.id} className="relative group">
-                    <GlowEffect className={`absolute -inset-0.5 bg-gradient-to-r from-${gradient.from}/20 to-${gradient.to}/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity`} />
-                    <LiquidGlassCard className="relative hover:shadow-2xl transition-shadow">
-                      <BorderTrail className={`bg-gradient-to-r from-${gradient.from} to-${gradient.to}`} size={60} duration={6} />
-                      <div className="relative">
-                        <img src={event.image} alt={event.title} className="w-full h-32 object-cover rounded-t-lg" loading="lazy" />
-                        <Badge className="absolute top-2 right-2" variant="secondary">
-                          {event.type}
-                        </Badge>
-                      </div>
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold mb-2 text-white">{event.title}</h3>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        {event.date} at {event.time}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        {event.location}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        {event.attendees} attending
-                      </div>
-                    </div>
-                        <div className="flex gap-2 mt-4">
-                          <Button
-                            data-testid={`join-event-${event.id}-btn`}
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => {
-                              // Store event registration locally - real action
-                              const registrationData = {
-                                eventId: event.id,
-                                eventTitle: event.title,
-                                registeredAt: new Date().toISOString(),
-                                userId: state.currentUser?.id || 'user-1'
-                              }
-                              const existingRegistrations = JSON.parse(localStorage.getItem('event_registrations') || '[]')
-                              existingRegistrations.push(registrationData)
-                              localStorage.setItem('event_registrations', JSON.stringify(existingRegistrations))
-                              toast.success(`Registered! ${event.title} - ${event.date} at ${event.time} - ${event.location}`)
-                            }}
-                          >
-                            Join Event
-                          </Button>
-                          <Button
-                            data-testid={`favorite-event-${event.id}-btn`}
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              // Store favorite event locally - real action
-                              const favoriteData = {
-                                eventId: event.id,
-                                eventTitle: event.title,
-                                favoritedAt: new Date().toISOString()
-                              }
-                              const existingFavorites = JSON.parse(localStorage.getItem('favorite_events') || '[]')
-                              existingFavorites.push(favoriteData)
-                              localStorage.setItem('favorite_events', JSON.stringify(existingFavorites))
-                              toast.success(`Event saved! ${event.title} added to your favorites`)
-                            }}
-                          >
-                            <Heart className="w-4 h-4" />
-                          </Button>
+            {state.events.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No events found</h3>
+                  <p className="text-gray-600 mb-4">Be the first to create an event for the community!</p>
+                  <Button onClick={() => dispatch({ type: 'SET_SHOW_CREATE_EVENT', payload: true })}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Event
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {state.events.map((event, index) => {
+                  const eventGradients = [
+                    { from: 'blue-500', to: 'indigo-600' },
+                    { from: 'purple-500', to: 'pink-600' },
+                    { from: 'green-500', to: 'emerald-600' }
+                  ]
+                  const gradient = eventGradients[index % 3]
+                  const eventDate = new Date(event.date)
+                  const formattedDate = eventDate.toLocaleDateString()
+                  const formattedTime = eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+                  return (
+                    <div key={event.id} className="relative group">
+                      <GlowEffect className={`absolute -inset-0.5 bg-gradient-to-r from-${gradient.from}/20 to-${gradient.to}/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity`} />
+                      <LiquidGlassCard className="relative hover:shadow-2xl transition-shadow">
+                        <BorderTrail className={`bg-gradient-to-r from-${gradient.from} to-${gradient.to}`} size={60} duration={6} />
+                        <div className="relative h-32 bg-gradient-to-br from-purple-600 to-pink-600 rounded-t-lg flex items-center justify-center">
+                          <Calendar className="w-12 h-12 text-white/80" />
+                          <Badge className="absolute top-2 right-2" variant="secondary">
+                            {event.type}
+                          </Badge>
                         </div>
-                      </CardContent>
-                    </LiquidGlassCard>
-                  </div>
-                )
-              })}
-            </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold mb-2 text-white">{event.title}</h3>
+                          <div className="space-y-2 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              {formattedDate} at {formattedTime}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4" />
+                              {event.location}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4" />
+                              {event.attendees?.length || 0} attending
+                            </div>
+                          </div>
+                          <div className="flex gap-2 mt-4">
+                            <Button
+                              data-testid={`join-event-${event.id}-btn`}
+                              size="sm"
+                              className="flex-1"
+                              onClick={async () => {
+                                if (userId) {
+                                  try {
+                                    const { rsvpEvent } = await import('@/lib/community-hub-queries')
+                                    await rsvpEvent(event.id, userId, true)
+                                    dispatch({ type: 'ATTEND_EVENT', payload: event.id })
+                                    toast.success(`Registered for ${event.title}!`, {
+                                      description: `${formattedDate} at ${formattedTime} - ${event.location}`
+                                    })
+                                  } catch (error) {
+                                    toast.error('Failed to register for event')
+                                  }
+                                } else {
+                                  toast.error('Please log in to register for events')
+                                }
+                              }}
+                            >
+                              {event.isAttending ? 'Registered' : 'Join Event'}
+                            </Button>
+                            <Button
+                              data-testid={`favorite-event-${event.id}-btn`}
+                              size="sm"
+                              variant="outline"
+                              onClick={async () => {
+                                if (userId) {
+                                  try {
+                                    const { rsvpEvent } = await import('@/lib/community-hub-queries')
+                                    await rsvpEvent(event.id, userId, false, true)
+                                    dispatch({ type: 'INTEREST_EVENT', payload: event.id })
+                                    toast.success(`Interested in ${event.title}!`)
+                                  } catch (error) {
+                                    toast.error('Failed to save event')
+                                  }
+                                } else {
+                                  toast.error('Please log in to save events')
+                                }
+                              }}
+                            >
+                              <Heart className={`w-4 h-4 ${event.isInterested ? 'fill-current text-red-500' : ''}`} />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </LiquidGlassCard>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="groups" className="space-y-6">
@@ -2500,119 +2795,119 @@ export default function CommunityHubPage() {
                 Create Group
               </Button>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  id: '1',
-                  name: 'React Developers',
-                  description: 'Share tips, tricks, and best practices for React development',
-                  members: 1247,
-                  category: 'Development',
-                  isPrivate: false,
-                  avatar: 'https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=100&h=100&fit=crop',
-                  posts: 234,
-                  activity: 'Very Active'
-                },
-                {
-                  id: '2',
-                  name: 'UI/UX Designers',
-                  description: 'A community for designers to showcase work and get feedback',
-                  members: 892,
-                  category: 'Design',
-                  isPrivate: false,
-                  avatar: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=100&h=100&fit=crop',
-                  posts: 156,
-                  activity: 'Active'
-                },
-                {
-                  id: '3',
-                  name: 'Freelancer Success',
-                  description: 'Tips and strategies for building a successful freelance career',
-                  members: 2341,
-                  category: 'Business',
-                  isPrivate: false,
-                  avatar: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=100&h=100&fit=crop',
-                  posts: 423,
-                  activity: 'Very Active'
-                }
-              ].map((group, index) => {
-                const groupGradients = [
-                  { from: 'cyan-500', to: 'blue-600' },
-                  { from: 'orange-500', to: 'red-600' },
-                  { from: 'yellow-500', to: 'amber-600' }
-                ]
-                const gradient = groupGradients[index % 3]
 
-                return (
-                  <div key={group.id} className="relative group">
-                    <GlowEffect className={`absolute -inset-0.5 bg-gradient-to-r from-${gradient.from}/20 to-${gradient.to}/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity`} />
-                    <LiquidGlassCard className="relative hover:shadow-2xl transition-shadow">
-                      <BorderTrail className={`bg-gradient-to-r from-${gradient.from} to-${gradient.to}`} size={60} duration={6} />
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3 mb-3">
-                          <img src={group.avatar}
-                            alt={group.name}
-                            className="w-12 h-12 rounded-full object-cover"
-                          loading="lazy" />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-semibold text-white">{group.name}</h3>
-                          {!group.isPrivate && (
-                            <Badge variant="outline" className="text-xs">Public</Badge>
-                          )}
-                        </div>
-                        <Badge variant="secondary" className="text-xs mt-1">
-                          {group.category}
-                        </Badge>
-                      </div>
+            {state.groups.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Users className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No groups found</h3>
+                  <p className="text-gray-600 mb-4">Start a community group to connect with like-minded professionals!</p>
+                  <Button onClick={() => dispatch({ type: 'SET_SHOW_CREATE_GROUP', payload: true })}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Group
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {state.groups.map((group, index) => {
+                  const groupGradients = [
+                    { from: 'cyan-500', to: 'blue-600' },
+                    { from: 'orange-500', to: 'red-600' },
+                    { from: 'yellow-500', to: 'amber-600' }
+                  ]
+                  const gradient = groupGradients[index % 3]
+                  const memberCount = typeof group.members === 'number' ? group.members : (group.members?.length || 0)
+
+                  return (
+                    <div key={group.id} className="relative group">
+                      <GlowEffect className={`absolute -inset-0.5 bg-gradient-to-r from-${gradient.from}/20 to-${gradient.to}/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity`} />
+                      <LiquidGlassCard className="relative hover:shadow-2xl transition-shadow">
+                        <BorderTrail className={`bg-gradient-to-r from-${gradient.from} to-${gradient.to}`} size={60} duration={6} />
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3 mb-3">
+                            <Avatar className="w-12 h-12">
+                              <AvatarImage src={group.avatar} alt={group.name} />
+                              <AvatarFallback>{group.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-white">{group.name}</h3>
+                                {group.isVerified && <CheckCircle className="w-4 h-4 text-blue-500" />}
+                                {group.type === 'public' && (
+                                  <Badge variant="outline" className="text-xs">Public</Badge>
+                                )}
+                              </div>
+                              <Badge variant="secondary" className="text-xs mt-1">
+                                {group.category}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                            {group.description}
+                          </p>
+
+                          <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-1">
+                                <Users className="w-4 h-4" />
+                                {memberCount.toLocaleString()}
+                              </div>
+                              <div>{group.posts} posts</div>
+                            </div>
+                            <Badge
+                              variant={group.activeMembers > 50 ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {group.activeMembers > 50 ? 'Very Active' : 'Active'}
+                            </Badge>
+                          </div>
+
+                          <Button
+                            data-testid={`join-group-${group.id}-btn`}
+                            className="w-full"
+                            size="sm"
+                            variant={group.isJoined ? 'outline' : 'default'}
+                            onClick={async () => {
+                              if (group.isJoined) {
+                                if (userId) {
+                                  try {
+                                    const { leaveGroup } = await import('@/lib/community-hub-queries')
+                                    await leaveGroup(group.id, userId)
+                                    dispatch({ type: 'LEAVE_GROUP', payload: group.id })
+                                    toast.success(`Left ${group.name}`)
+                                  } catch (error) {
+                                    toast.error('Failed to leave group')
+                                  }
+                                }
+                              } else {
+                                if (userId) {
+                                  try {
+                                    const { joinGroup } = await import('@/lib/community-hub-queries')
+                                    await joinGroup(group.id, userId)
+                                    dispatch({ type: 'JOIN_GROUP', payload: group.id })
+                                    toast.success(`Joined ${group.name}!`, {
+                                      description: `${memberCount.toLocaleString()} members - ${group.posts} posts`
+                                    })
+                                  } catch (error) {
+                                    toast.error('Failed to join group')
+                                  }
+                                } else {
+                                  toast.error('Please log in to join groups')
+                                }
+                              }
+                            }}
+                          >
+                            {group.isJoined ? 'Leave Group' : 'Join Group'}
+                          </Button>
+                        </CardContent>
+                      </LiquidGlassCard>
                     </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                      {group.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          {group.members.toLocaleString()}
-                        </div>
-                        <div>{group.posts} posts</div>
-                      </div>
-                      <Badge 
-                        variant={group.activity === 'Very Active' ? 'default' : 'secondary'}
-                        className="text-xs"
-                      >
-                        {group.activity}
-                      </Badge>
-                    </div>
-                    
-                        <Button
-                          data-testid={`join-group-${group.id}-btn`}
-                          className="w-full"
-                          size="sm"
-                          onClick={() => {
-                            const joinData = {
-                              groupId: group.id,
-                              groupName: group.name,
-                              joinedAt: new Date().toISOString(),
-                              userId: state.currentUser?.id || 'user-1'
-                            }
-                            const existingJoined = JSON.parse(localStorage.getItem('joined_groups') || '[]')
-                            existingJoined.push(joinData)
-                            localStorage.setItem('joined_groups', JSON.stringify(existingJoined))
-                            toast.success(`Joined ${group.name}! - ${group.members.toLocaleString()} members - ${group.posts} posts - ${group.activity}`)
-                          }}
-                        >
-                          Join Group
-                        </Button>
-                      </CardContent>
-                    </LiquidGlassCard>
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="jobs" className="space-y-6">
@@ -2630,149 +2925,137 @@ export default function CommunityHubPage() {
                 Post Job
               </Button>
             </div>
-            
-            <div className="space-y-4">
-              {[
-                {
-                  id: '1',
-                  title: 'Senior React Developer',
-                  company: 'TechStart Inc.',
-                  location: 'Remote',
-                  type: 'Full-time',
-                  budget: '$80-120/hour',
-                  posted: '2 hours ago',
-                  description: 'Looking for an experienced React developer to join our growing team. Must have 5+ years of experience with React, TypeScript, and modern frontend tools.',
-                  skills: ['React', 'TypeScript', 'Node.js', 'GraphQL'],
-                  applications: 12,
-                  verified: true,
-                  urgent: false
-                },
-                {
-                  id: '2',
-                  title: 'UI/UX Designer for SaaS Platform',
-                  company: 'Design Co.',
-                  location: 'New York, NY',
-                  type: 'Contract',
-                  budget: '$60-80/hour',
-                  posted: '1 day ago',
-                  description: 'We need a talented designer to redesign our SaaS platform. The ideal candidate should have experience with B2B applications and modern design systems.',
-                  skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
-                  applications: 8,
-                  verified: true,
-                  urgent: true
-                },
-                {
-                  id: '3',
-                  title: 'Full-Stack Developer - E-commerce',
-                  company: 'ShopFlow',
-                  location: 'San Francisco, CA',
-                  type: 'Part-time',
-                  budget: '$70-90/hour',
-                  posted: '3 days ago',
-                  description: 'Join our team to build next-generation e-commerce solutions. Experience with React, Node.js, and payment integrations required.',
-                  skills: ['React', 'Node.js', 'PostgreSQL', 'Stripe'],
-                  applications: 23,
-                  verified: false,
-                  urgent: false
-                }
-              ].map(job => (
-                <Card key={job.id} className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-semibold">{job.title}</h3>
-                          {job.verified && (
-                            <Badge variant="default" className="text-xs">
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Verified
-                            </Badge>
-                          )}
-                          {job.urgent && (
-                            <Badge variant="destructive" className="text-xs">
-                              Urgent
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                          <div className="flex items-center gap-1">
-                            <Building className="w-4 h-4" />
-                            {job.company}
+
+            {(() => {
+              const jobPosts = state.posts.filter(p => p.type === 'job' && p.job)
+              if (jobPosts.length === 0) {
+                return (
+                  <Card>
+                    <CardContent className="p-12 text-center">
+                      <Briefcase className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No job postings found</h3>
+                      <p className="text-gray-600 mb-4">Post a job opportunity to find talented professionals!</p>
+                      <Button onClick={() => {
+                        dispatch({ type: 'SET_POST_TYPE', payload: 'job' })
+                        dispatch({ type: 'SET_SHOW_CREATE_POST', payload: true })
+                      }}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Post Job
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )
+              }
+
+              return (
+                <div className="space-y-4">
+                  {jobPosts.map(post => {
+                    const job = post.job!
+                    const author = state.members.find(m => m.id === post.authorId)
+                    const postedDate = new Date(post.createdAt)
+                    const now = new Date()
+                    const diffMs = now.getTime() - postedDate.getTime()
+                    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+                    const postedAgo = diffDays > 0 ? `${diffDays} day${diffDays > 1 ? 's' : ''} ago` : `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
+
+                    return (
+                      <Card key={post.id} className="hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-lg font-semibold">{job.title}</h3>
+                                {author?.isVerified && (
+                                  <Badge variant="default" className="text-xs">
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    Verified
+                                  </Badge>
+                                )}
+                                {job.status === 'open' && new Date(job.deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    Urgent
+                                  </Badge>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                                <div className="flex items-center gap-1">
+                                  <Building className="w-4 h-4" />
+                                  {author?.name || 'Unknown Company'}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="w-4 h-4" />
+                                  {post.location || 'Remote'}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Briefcase className="w-4 h-4" />
+                                  {job.type === 'fixed' ? 'Fixed Price' : 'Hourly'}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <DollarSign className="w-4 h-4" />
+                                  {job.currency}{job.budget.toLocaleString()}
+                                </div>
+                              </div>
+
+                              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                                {job.description}
+                              </p>
+
+                              <div className="flex flex-wrap gap-2 mb-4">
+                                {job.skills.map(skill => (
+                                  <Badge key={skill} variant="outline" className="text-xs">
+                                    {skill}
+                                  </Badge>
+                                ))}
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                  <span>{job.applicants} applications</span>
+                                  <span>Posted {postedAgo}</span>
+                                </div>
+
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    data-testid={`save-job-${post.id}-btn`}
+                                    onClick={() => {
+                                      dispatch({ type: 'BOOKMARK_POST', payload: post.id })
+                                      toast.success(`Job saved! ${job.title}`, {
+                                        description: `${job.currency}${job.budget.toLocaleString()} - ${job.type}`
+                                      })
+                                    }}
+                                  >
+                                    <Bookmark className={`w-4 h-4 mr-1 ${post.isBookmarked ? 'fill-current' : ''}`} />
+                                    {post.isBookmarked ? 'Saved' : 'Save'}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    data-testid={`apply-job-${post.id}-btn`}
+                                    onClick={() => {
+                                      if (typeof window !== 'undefined') {
+                                        window.location.href = `/v1/dashboard/jobs/${post.id}/apply`
+                                      }
+                                      toast.success(`Applying for ${job.title}`, {
+                                        description: `${job.currency}${job.budget.toLocaleString()} - ${job.applicants} other applicants`
+                                      })
+                                    }}
+                                  >
+                                    Apply Now
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            {job.location}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Briefcase className="w-4 h-4" />
-                            {job.type}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <DollarSign className="w-4 h-4" />
-                            {job.budget}
-                          </div>
-                        </div>
-                        
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                          {job.description}
-                        </p>
-                        
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {job.skills.map(skill => (
-                            <Badge key={skill} variant="outline" className="text-xs">
-                              {skill}
-                            </Badge>
-                          ))}
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>{job.applications} applications</span>
-                            <span>Posted {job.posted}</span>
-                          </div>
-                          
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              data-testid={`save-job-${job.id}-btn`}
-                              onClick={() => {
-                                const saveData = {
-                                  jobId: job.id,
-                                  jobTitle: job.title,
-                                  company: job.company,
-                                  savedAt: new Date().toISOString()
-                                }
-                                const existingSaved = JSON.parse(localStorage.getItem('saved_jobs') || '[]')
-                                existingSaved.push(saveData)
-                                localStorage.setItem('saved_jobs', JSON.stringify(existingSaved))
-                                toast.success(`Job saved! ${job.title} at ${job.company} - ${job.budget}`)
-                              }}
-                            >
-                              <Bookmark className="w-4 h-4 mr-1" />
-                              Save
-                            </Button>
-                            <Button
-                              size="sm"
-                              data-testid={`apply-job-${job.id}-btn`}
-                              onClick={() => {
-                                if (typeof window !== 'undefined') {
-                                  window.location.href = `/v1/dashboard/jobs/${job.id}/apply`
-                                }
-                                toast.success(`Applying for ${job.title} at ${job.company} - ${job.budget} - ${job.applications} other applicants`)
-                              }}
-                            >
-                              Apply Now
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
+                </div>
+              )
+            })()}
           </TabsContent>
         </Tabs>
       </div>

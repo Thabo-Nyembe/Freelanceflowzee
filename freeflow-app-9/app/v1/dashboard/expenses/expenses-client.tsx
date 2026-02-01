@@ -554,9 +554,36 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const mileage: MileageEntry[] = []
   const perDiems: PerDiem[] = []
 
+  // State for quick filter functionality
+  const [userIdFilter, setUserIdFilter] = useState<string | null>(null)
+  const [policyViolationFilter, setPolicyViolationFilter] = useState(false)
+  const [thisMonthFilter, setThisMonthFilter] = useState(false)
+
   const filteredExpenses = useMemo(() => {
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+
     return expenses.filter((expense: any) => {
+      // Status filter
       if (statusFilter !== 'all' && expense.status !== statusFilter) return false
+
+      // User ID filter (My Reports)
+      if (userIdFilter && expense.user_id !== userIdFilter && expense.submitted_by_id !== userIdFilter) return false
+
+      // Policy violations filter
+      if (policyViolationFilter) {
+        const violations = expense.policy_violations || []
+        if (!expense.is_policy_compliant === false && violations.length === 0) return false
+      }
+
+      // This month filter
+      if (thisMonthFilter) {
+        const expenseDate = new Date(expense.expense_date || expense.created_at)
+        if (expenseDate < startOfMonth || expenseDate > endOfMonth) return false
+      }
+
+      // Search query filter
       if (searchQuery) {
         const title = (expense.expense_title || '').toLowerCase()
         const merchant = (expense.merchant_name || '').toLowerCase()
@@ -566,7 +593,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       }
       return true
     })
-  }, [expenses, statusFilter, searchQuery])
+  }, [expenses, statusFilter, searchQuery, userIdFilter, policyViolationFilter, thisMonthFilter])
 
   const stats = useMemo(() => ({
     totalExpenses: expenses.reduce((sum: number, r: any) => sum + (r.total_amount || r.amount || 0), 0),
@@ -1046,28 +1073,87 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     setShowIntegrationDialog(true)
   }
 
-  const handleSaveIntegration = () => {
+  const handleSaveIntegration = async () => {
     if (!selectedIntegration) return
+
     const action = selectedIntegration.status === 'connected' ? 'configured' : 'connected'
+    const slug = selectedIntegration.name.toLowerCase().replace(/\s+/g, '-')
+
     if (selectedIntegration.status !== 'connected') {
-      // OAuth flow for new connections
-      const slug = selectedIntegration.name.toLowerCase().replace(/\s+/g, '-')
-      const oauthUrl = `/api/integrations/${slug}/oauth`
-      const popup = window.open(oauthUrl, `${selectedIntegration.name} Connection`, 'width=600,height=700')
-      if (popup) {
-        toast.info(`Complete ${selectedIntegration.name} authorization in the popup window`)
-      } else {
-        toast.error('Popup blocked', { description: 'Please allow popups to connect to this service' })
+      // For new connections, create integration record and start OAuth flow
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          toast.error('You must be logged in to connect integrations')
+          return
+        }
+
+        // Create or update integration record with pending status
+        const { error: upsertError } = await supabase.from('integrations').upsert({
+          user_id: user.id,
+          name: selectedIntegration.name,
+          slug: slug,
+          status: 'pending',
+          settings: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,slug'
+        })
+
+        if (upsertError) {
+          console.error('Failed to create integration:', upsertError)
+        }
+
+        // OAuth flow for new connections
+        const oauthUrl = `/api/integrations/${slug}/oauth`
+        const popup = window.open(oauthUrl, `${selectedIntegration.name} Connection`, 'width=600,height=700')
+
+        if (popup) {
+          toast.info(`Complete ${selectedIntegration.name} authorization in the popup window`)
+
+          // Listen for OAuth completion
+          const checkPopup = setInterval(async () => {
+            if (popup.closed) {
+              clearInterval(checkPopup)
+              // Check if connection was successful
+              const { data: integration } = await supabase
+                .from('integrations')
+                .select('status')
+                .eq('user_id', user.id)
+                .eq('slug', slug)
+                .single()
+
+              if (integration?.status === 'connected') {
+                toast.success(`${selectedIntegration.name} connected successfully!`)
+              }
+            }
+          }, 1000)
+
+          // Cleanup after 5 minutes
+          setTimeout(() => clearInterval(checkPopup), 300000)
+        } else {
+          toast.error('Popup blocked', { description: 'Please allow popups to connect to this service' })
+        }
+
+        setShowIntegrationDialog(false)
+        setSelectedIntegration(null)
+      } catch (err) {
+        console.error('Failed to start OAuth flow:', err)
+        toast.error(`Failed to connect ${selectedIntegration.name}`)
       }
-      setShowIntegrationDialog(false)
-      setSelectedIntegration(null)
     } else {
+      // Update existing integration settings
       toast.promise(
         (async () => {
+          const { data: { user } } = await supabase.auth.getUser()
+          if (!user) throw new Error('Not authenticated')
+
           const { error } = await supabase.from('integrations').update({
-            settings: { configured: true },
+            settings: { configured: true, syncEnabled: true },
             updated_at: new Date().toISOString()
-          }).eq('name', selectedIntegration.name)
+          }).eq('user_id', user.id).eq('slug', slug)
+
           if (error) throw error
           setShowIntegrationDialog(false)
           setSelectedIntegration(null)
@@ -1108,9 +1194,61 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   }
 
   // Handler for API key operations
-  const handleCopyApiKey = () => {
-    navigator.clipboard.writeText('exp_sk_live_xxxxxxxxxxxxxxxxxxxx')
-    toast.success('API key copied to clipboard')
+  const handleCopyApiKey = async () => {
+    try {
+      // Fetch the current API key from the database
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in to copy API key')
+        return
+      }
+
+      const { data: apiKeys, error } = await supabase
+        .from('api_keys')
+        .select('key_value, key_preview')
+        .eq('user_id', user.id)
+        .eq('key_type', 'api')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (error || !apiKeys) {
+        // If no key exists, create one
+        const newKey = `exp_sk_live_${crypto.randomUUID().replace(/-/g, '').slice(0, 32)}`
+        const { error: insertError } = await supabase
+          .from('api_keys')
+          .insert({
+            user_id: user.id,
+            name: 'Expenses API Key',
+            key_value: newKey,
+            key_preview: `${newKey.slice(0, 12)}...${newKey.slice(-4)}`,
+            key_type: 'api',
+            permission: 'read',
+            scopes: ['expenses:read'],
+            status: 'active'
+          })
+
+        if (insertError) {
+          console.error('Failed to create API key:', insertError)
+          toast.error('Failed to create API key')
+          return
+        }
+
+        await navigator.clipboard.writeText(newKey)
+        toast.success('New API key created and copied to clipboard!', {
+          description: 'Save this key securely - it won\'t be fully visible again.'
+        })
+        return
+      }
+
+      // Copy existing key value or preview
+      const keyToCopy = apiKeys.key_value || apiKeys.key_preview || 'Key not available'
+      await navigator.clipboard.writeText(keyToCopy)
+      toast.success('API key copied to clipboard')
+    } catch (err) {
+      console.error('Failed to copy API key:', err)
+      toast.error('Failed to copy API key')
+    }
   }
 
   const handleRegenerateApiKey = async () => {
@@ -1251,24 +1389,59 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   }
 
   // Handler for quick filter selection
-  const handleQuickFilter = (filter: string) => {
-    setActiveQuickFilter(activeQuickFilter === filter ? null : filter)
+  const handleQuickFilter = async (filter: string) => {
+    const isDeselecting = activeQuickFilter === filter
+    setActiveQuickFilter(isDeselecting ? null : filter)
+
+    if (isDeselecting) {
+      // Clear all filters
+      setStatusFilter('all')
+      setUserIdFilter(null)
+      setPolicyViolationFilter(false)
+      setThisMonthFilter(false)
+      return
+    }
+
     switch (filter) {
       case 'My Reports':
-        toast.info('Showing your reports', { description: 'Filtered to show only your submitted expense reports' })
+        // Get current user and filter by their ID
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          setUserIdFilter(user.id)
+          setStatusFilter('all')
+          setPolicyViolationFilter(false)
+          setThisMonthFilter(false)
+          toast.info('Showing your reports', { description: 'Filtered to show only your submitted expense reports' })
+        } else {
+          toast.error('Please log in to view your reports')
+        }
         break
       case 'Needs Review':
         setStatusFilter('pending')
+        setUserIdFilter(null)
+        setPolicyViolationFilter(false)
+        setThisMonthFilter(false)
         toast.info('Showing pending reviews', { description: 'Filtered to show expense reports awaiting approval' })
         break
       case 'Policy Violations':
+        setPolicyViolationFilter(true)
+        setStatusFilter('all')
+        setUserIdFilter(null)
+        setThisMonthFilter(false)
         toast.info('Showing policy violations', { description: 'Filtered to show expense reports with policy violations' })
         break
       case 'This Month':
+        setThisMonthFilter(true)
+        setStatusFilter('all')
+        setUserIdFilter(null)
+        setPolicyViolationFilter(false)
         toast.info('Showing this month', { description: 'Filtered to show expense reports from current month' })
         break
       default:
         setStatusFilter('all')
+        setUserIdFilter(null)
+        setPolicyViolationFilter(false)
+        setThisMonthFilter(false)
     }
   }
 

@@ -495,7 +495,69 @@ Best regards,
   }
 
   const handleExportInvoices = () => {
-    toast.success('Export started')
+    if (!displayInvoices || displayInvoices.length === 0) {
+      toast.error('No invoices to export')
+      return
+    }
+
+    // Generate CSV content from actual invoice data
+    const headers = [
+      'Invoice Number',
+      'Title',
+      'Client Name',
+      'Client Email',
+      'Issue Date',
+      'Due Date',
+      'Status',
+      'Currency',
+      'Subtotal',
+      'Tax Amount',
+      'Discount Amount',
+      'Total Amount',
+      'Amount Paid',
+      'Amount Due',
+      'Notes'
+    ]
+
+    const escapeCSV = (value: string | number | null | undefined) => {
+      if (value === null || value === undefined) return ''
+      const str = String(value)
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`
+      }
+      return str
+    }
+
+    const rows = displayInvoices.map(invoice => [
+      escapeCSV(invoice.invoice_number),
+      escapeCSV(invoice.title),
+      escapeCSV(invoice.client_name),
+      escapeCSV(invoice.client_email),
+      escapeCSV(invoice.issue_date),
+      escapeCSV(invoice.due_date),
+      escapeCSV(invoice.status),
+      escapeCSV(invoice.currency),
+      escapeCSV(invoice.subtotal),
+      escapeCSV(invoice.tax_amount),
+      escapeCSV(invoice.discount_amount),
+      escapeCSV(invoice.total_amount),
+      escapeCSV(invoice.amount_paid),
+      escapeCSV(invoice.amount_due),
+      escapeCSV(invoice.notes)
+    ])
+
+    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `invoices-export-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    toast.success('Export complete', { description: `${displayInvoices.length} invoices exported to CSV` })
   }
 
   const getStatusColor = (status: string) => {
@@ -520,42 +582,124 @@ Best regards,
   ]
 
   const handleDownloadInvoice = (invoice: Invoice) => {
-    // Generate invoice PDF content
+    // Generate professional invoice HTML content for PDF-like output
+    const formatDate = (dateStr: string | null) => {
+      if (!dateStr) return 'N/A'
+      try {
+        return new Date(dateStr).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      } catch {
+        return dateStr
+      }
+    }
+
+    const currencySymbol = getCurrencySymbol(invoice.currency || 'USD')
+    const formatAmount = (amount: number | null | undefined) => {
+      return `${currencySymbol}${(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    }
+
+    // Parse items safely
+    let itemsArray: Array<{ description?: string; name?: string; quantity?: number; rate?: number; amount?: number; price?: number }> = []
+    if (invoice.items) {
+      if (Array.isArray(invoice.items)) {
+        itemsArray = invoice.items
+      } else if (typeof invoice.items === 'string') {
+        try {
+          itemsArray = JSON.parse(invoice.items)
+        } catch {
+          itemsArray = []
+        }
+      }
+    }
+
+    const itemsText = itemsArray.length > 0
+      ? itemsArray.map((item, idx) => {
+          const desc = item.description || item.name || `Item ${idx + 1}`
+          const qty = item.quantity || 1
+          const rate = item.rate || item.price || 0
+          const amount = item.amount || (qty * rate)
+          return `  ${desc}\n    Qty: ${qty} x ${formatAmount(rate)} = ${formatAmount(amount)}`
+        }).join('\n\n')
+      : '  No items listed'
+
     const invoiceContent = `
-INVOICE
-=====================================
-Invoice #: ${invoice.number || invoice.id}
-Date: ${invoice.date || new Date().toLocaleDateString()}
-Due Date: ${invoice.dueDate || 'N/A'}
+╔══════════════════════════════════════════════════════════════════╗
+║                           INVOICE                                ║
+╚══════════════════════════════════════════════════════════════════╝
 
-Customer: ${invoice.customer || invoice.clientName || 'N/A'}
-Email: ${invoice.email || 'N/A'}
+Invoice Number: ${invoice.invoice_number || invoice.id}
+Issue Date:     ${formatDate(invoice.issue_date)}
+Due Date:       ${formatDate(invoice.due_date)}
+Status:         ${(invoice.status || 'pending').toUpperCase()}
 
-=====================================
+────────────────────────────────────────────────────────────────────
+BILL TO
+────────────────────────────────────────────────────────────────────
+${invoice.client_name || 'N/A'}
+${invoice.client_email || ''}
+${invoice.client_address || ''}
+${invoice.client_phone ? `Phone: ${invoice.client_phone}` : ''}
+
+────────────────────────────────────────────────────────────────────
+INVOICE DETAILS
+────────────────────────────────────────────────────────────────────
+Title: ${invoice.title || 'Invoice'}
+${invoice.description ? `Description: ${invoice.description}` : ''}
+
+────────────────────────────────────────────────────────────────────
 ITEMS
--------------------------------------
-${invoice.items?.map((item: any) => `${item.description || item.name}: $${item.amount || item.price}`).join('\n') || 'No items listed'}
+────────────────────────────────────────────────────────────────────
+${itemsText}
 
--------------------------------------
-Subtotal: $${invoice.subtotal || invoice.amount || '0.00'}
-Tax: $${invoice.tax || '0.00'}
-TOTAL: $${invoice.total || invoice.amount || '0.00'}
-=====================================
+────────────────────────────────────────────────────────────────────
+SUMMARY
+────────────────────────────────────────────────────────────────────
+Subtotal:       ${formatAmount(invoice.subtotal)}
+${invoice.tax_amount > 0 ? `Tax (${invoice.tax_rate || 0}%):     ${formatAmount(invoice.tax_amount)}` : ''}
+${invoice.discount_amount > 0 ? `Discount:       -${formatAmount(invoice.discount_amount)}` : ''}
+────────────────────────────────────────────────────────────────────
+TOTAL:          ${formatAmount(invoice.total_amount)}
+Amount Paid:    ${formatAmount(invoice.amount_paid)}
+AMOUNT DUE:     ${formatAmount(invoice.amount_due)}
 
-Status: ${invoice.status || 'pending'}
-Payment Terms: Net 30
+────────────────────────────────────────────────────────────────────
+PAYMENT INFORMATION
+────────────────────────────────────────────────────────────────────
+${invoice.payment_terms || 'Payment is due within 30 days of invoice date.'}
+${invoice.payment_method ? `Payment Method: ${invoice.payment_method}` : ''}
+${invoice.payment_reference ? `Reference: ${invoice.payment_reference}` : ''}
 
-Thank you for your business!
+${invoice.notes ? `────────────────────────────────────────────────────────────────────
+NOTES
+────────────────────────────────────────────────────────────────────
+${invoice.notes}` : ''}
+
+${invoice.terms_and_conditions ? `────────────────────────────────────────────────────────────────────
+TERMS & CONDITIONS
+────────────────────────────────────────────────────────────────────
+${invoice.terms_and_conditions}` : ''}
+
+════════════════════════════════════════════════════════════════════
+                      Thank you for your business!
+════════════════════════════════════════════════════════════════════
+Generated: ${new Date().toLocaleString()}
     `.trim()
 
-    const blob = new Blob([invoiceContent], { type: 'text/plain' })
+    const blob = new Blob([invoiceContent], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `invoice-${invoice.number || invoice.id}.txt`
+    a.download = `invoice-${invoice.invoice_number || invoice.id}-${new Date().toISOString().split('T')[0]}.txt`
+    document.body.appendChild(a)
     a.click()
+    document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success("Invoice downloaded successfully")
+    toast.success('Invoice downloaded successfully', {
+      description: `Invoice #${invoice.invoice_number || invoice.id} saved`
+    })
   }
 
   if (error) {
@@ -1587,18 +1731,62 @@ Thank you for your business!
                               const response = await fetch('/api/invoices')
                               if (!response.ok) throw new Error('Failed to fetch invoices')
                               const result = await response.json()
-                              const invoicesData = result.data?.invoices || []
-                              const csvHeaders = 'Invoice ID,Date,Client,Amount,Status'
-                              const csvRows = invoicesData.map((inv: { id: string; dueDate: string; client: string; amount: number; status: string }) =>
-                                `${inv.id},${inv.dueDate || 'N/A'},${inv.client},$${inv.amount},${inv.status}`
-                              ).join('\n')
+                              const invoicesData: Invoice[] = result.data?.invoices || []
+
+                              const escapeCSV = (value: string | number | null | undefined) => {
+                                if (value === null || value === undefined) return ''
+                                const str = String(value)
+                                if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                                  return `"${str.replace(/"/g, '""')}"`
+                                }
+                                return str
+                              }
+
+                              const csvHeaders = [
+                                'Invoice Number',
+                                'Title',
+                                'Client Name',
+                                'Client Email',
+                                'Issue Date',
+                                'Due Date',
+                                'Status',
+                                'Currency',
+                                'Subtotal',
+                                'Tax Amount',
+                                'Discount Amount',
+                                'Total Amount',
+                                'Amount Paid',
+                                'Amount Due',
+                                'Notes'
+                              ].join(',')
+
+                              const csvRows = invoicesData.map((inv: Invoice) => [
+                                escapeCSV(inv.invoice_number),
+                                escapeCSV(inv.title),
+                                escapeCSV(inv.client_name),
+                                escapeCSV(inv.client_email),
+                                escapeCSV(inv.issue_date),
+                                escapeCSV(inv.due_date),
+                                escapeCSV(inv.status),
+                                escapeCSV(inv.currency),
+                                escapeCSV(inv.subtotal),
+                                escapeCSV(inv.tax_amount),
+                                escapeCSV(inv.discount_amount),
+                                escapeCSV(inv.total_amount),
+                                escapeCSV(inv.amount_paid),
+                                escapeCSV(inv.amount_due),
+                                escapeCSV(inv.notes)
+                              ].join(',')).join('\n')
+
                               const csvData = `${csvHeaders}\n${csvRows}`
-                              const blob = new Blob([csvData], { type: 'text/csv' })
+                              const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' })
                               const url = URL.createObjectURL(blob)
                               const a = document.createElement('a')
                               a.href = url
                               a.download = `invoices-export-${new Date().toISOString().split('T')[0]}.csv`
+                              document.body.appendChild(a)
                               a.click()
+                              document.body.removeChild(a)
                               URL.revokeObjectURL(url)
                               toast.success('Export complete', { id: 'export-csv', description: `${invoicesData.length} invoices exported to CSV` })
                             } catch (error) { toast.error('Export failed', { id: 'export-csv', description: error instanceof Error ? error.message : 'Unknown error' }) }
@@ -1608,31 +1796,77 @@ Thank you for your business!
                             <span className="text-xs text-gray-500">CSV format</span>
                           </Button>
                           <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={async () => {
-                            toast.loading('Generating Excel report...', { id: 'export-excel' })
+                            toast.loading('Generating report...', { id: 'export-excel' })
                             try {
                               const response = await fetch('/api/invoices')
                               if (!response.ok) throw new Error('Failed to fetch invoices')
                               const result = await response.json()
-                              const invoicesData = result.data?.invoices || []
-                              const statsData = result.data?.stats || {}
-                              const excelData = JSON.stringify({
+                              const invoicesData: Invoice[] = result.data?.invoices || []
+
+                              // Calculate statistics from actual data
+                              const paidInvoices = invoicesData.filter((inv: Invoice) => inv.status === 'paid')
+                              const overdueInvoices = invoicesData.filter((inv: Invoice) => inv.status === 'overdue')
+                              const pendingInvoices = invoicesData.filter((inv: Invoice) => inv.status === 'pending' || inv.status === 'sent')
+
+                              const totalRevenue = paidInvoices.reduce((sum: number, inv: Invoice) => sum + (inv.total_amount || 0), 0)
+                              const totalOutstanding = pendingInvoices.reduce((sum: number, inv: Invoice) => sum + (inv.amount_due || 0), 0)
+                              const overdueAmount = overdueInvoices.reduce((sum: number, inv: Invoice) => sum + (inv.amount_due || 0), 0)
+
+                              // Calculate paid this month
+                              const now = new Date()
+                              const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+                              const paidThisMonth = paidInvoices
+                                .filter((inv: Invoice) => inv.paid_date && new Date(inv.paid_date) >= startOfMonth)
+                                .reduce((sum: number, inv: Invoice) => sum + (inv.total_amount || 0), 0)
+
+                              const reportData = {
+                                reportTitle: 'Invoice Report',
                                 generatedAt: new Date().toISOString(),
+                                generatedBy: 'FreeFlow Invoice System',
                                 summary: {
                                   totalInvoices: invoicesData.length,
-                                  totalOutstanding: statsData.totalOutstanding,
-                                  paidThisMonth: statsData.paidThisMonth,
-                                  overdueAmount: statsData.overdueAmount
+                                  paidInvoices: paidInvoices.length,
+                                  pendingInvoices: pendingInvoices.length,
+                                  overdueInvoices: overdueInvoices.length,
+                                  totalRevenue,
+                                  totalOutstanding,
+                                  overdueAmount,
+                                  paidThisMonth,
+                                  collectionRate: invoicesData.length > 0
+                                    ? ((paidInvoices.length / invoicesData.length) * 100).toFixed(1) + '%'
+                                    : '0%'
                                 },
-                                invoices: invoicesData
-                              }, null, 2)
-                              const blob = new Blob([excelData], { type: 'application/json' })
+                                invoices: invoicesData.map((inv: Invoice) => ({
+                                  invoiceNumber: inv.invoice_number,
+                                  title: inv.title,
+                                  clientName: inv.client_name,
+                                  clientEmail: inv.client_email,
+                                  status: inv.status,
+                                  currency: inv.currency,
+                                  issueDate: inv.issue_date,
+                                  dueDate: inv.due_date,
+                                  paidDate: inv.paid_date,
+                                  subtotal: inv.subtotal,
+                                  taxAmount: inv.tax_amount,
+                                  discountAmount: inv.discount_amount,
+                                  totalAmount: inv.total_amount,
+                                  amountPaid: inv.amount_paid,
+                                  amountDue: inv.amount_due,
+                                  isRecurring: inv.is_recurring,
+                                  notes: inv.notes
+                                }))
+                              }
+
+                              const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json;charset=utf-8;' })
                               const url = URL.createObjectURL(blob)
                               const a = document.createElement('a')
                               a.href = url
                               a.download = `invoice-report-${new Date().toISOString().split('T')[0]}.json`
+                              document.body.appendChild(a)
                               a.click()
+                              document.body.removeChild(a)
                               URL.revokeObjectURL(url)
-                              toast.success('Report ready', { id: 'export-excel', description: `Report with ${invoicesData.length} invoices downloaded` })
+                              toast.success('Report ready', { id: 'export-excel', description: `Full report with ${invoicesData.length} invoices downloaded` })
                             } catch (error) { toast.error('Report generation failed', { id: 'export-excel', description: error instanceof Error ? error.message : 'Unknown error' }) }
                           }}>
                             <FileSpreadsheet className="w-5 h-5 text-green-600" />
@@ -1727,7 +1961,24 @@ Thank you for your business!
                             <div className="font-medium">Delete All Data</div>
                             <p className="text-sm text-gray-500">Permanently delete all invoice data</p>
                           </div>
-                          <Button variant="destructive" onClick={() => { toast.info('Contact support') }}>
+                          <Button variant="destructive" onClick={async () => {
+                            const confirmText = prompt('This action is irreversible. Type "DELETE ALL INVOICES" to confirm:')
+                            if (confirmText !== 'DELETE ALL INVOICES') {
+                              toast.error('Deletion cancelled', { description: 'Confirmation text did not match' })
+                              return
+                            }
+                            toast.loading('Deleting all invoices...', { id: 'delete-all' })
+                            try {
+                              let deletedCount = 0
+                              for (const inv of displayInvoices) {
+                                await deleteInvoice(inv.id)
+                                deletedCount++
+                              }
+                              toast.success('All data deleted', { id: 'delete-all', description: `${deletedCount} invoices permanently removed` })
+                            } catch (error) {
+                              toast.error('Deletion failed', { id: 'delete-all', description: error instanceof Error ? error.message : 'Unknown error' })
+                            }
+                          }}>
                             Delete All Data
                           </Button>
                         </div>
@@ -1747,7 +1998,29 @@ Thank you for your business!
             <AIInsightsPanel
               insights={mockInvoicesAIInsights}
               title="Invoice Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
+              onInsightAction={(insight) => {
+                // Take action based on insight category
+                switch (insight.category) {
+                  case 'Collections':
+                    // Open send reminders dialog for overdue invoices
+                    setShowSendRemindersDialog(true)
+                    toast.info('Opening reminder dialog', { description: insight.description })
+                    break
+                  case 'Performance':
+                    // Switch to settings tab to view analytics
+                    setActiveTab('settings')
+                    setSettingsTab('advanced')
+                    toast.success('Viewing performance data', { description: insight.description })
+                    break
+                  case 'Forecast':
+                    // Show export dialog for revenue report
+                    setShowExportReportDialog(true)
+                    toast.info('Generate revenue report', { description: insight.description })
+                    break
+                  default:
+                    toast.info(insight.title, { description: insight.description })
+                }
+              }}
             />
           </div>
 
@@ -2535,7 +2808,13 @@ Thank you for your business!
       </Dialog>
 
       {/* Record Payment Dialog */}
-      <Dialog open={showRecordPaymentDialog} onOpenChange={setShowRecordPaymentDialog}>
+      <Dialog open={showRecordPaymentDialog} onOpenChange={(open) => {
+        setShowRecordPaymentDialog(open)
+        if (!open) {
+          // Reset payment form when closing
+          setSelectedInvoice(null)
+        }
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -2549,7 +2828,13 @@ Thank you for your business!
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Select Invoice</Label>
-              <Select>
+              <Select
+                value={selectedInvoice?.id || ''}
+                onValueChange={(value) => {
+                  const invoice = displayInvoices.find(inv => inv.id === value)
+                  setSelectedInvoice(invoice || null)
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select an invoice" />
                 </SelectTrigger>
@@ -2568,13 +2853,24 @@ Thank you for your business!
               <Label>Payment Amount</Label>
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">$</span>
-                <Input type="number" placeholder="0.00" />
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  id="payment-amount"
+                  defaultValue={selectedInvoice?.amount_due || selectedInvoice?.total_amount || ''}
+                  key={selectedInvoice?.id || 'no-invoice'}
+                />
               </div>
+              {selectedInvoice && (
+                <p className="text-xs text-muted-foreground">
+                  Amount due: ${selectedInvoice.amount_due?.toLocaleString() || selectedInvoice.total_amount?.toLocaleString()}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Payment Method</Label>
               <Select defaultValue="bank">
-                <SelectTrigger>
+                <SelectTrigger id="payment-method-trigger">
                   <SelectValue placeholder="Select method" />
                 </SelectTrigger>
                 <SelectContent>
@@ -2588,11 +2884,11 @@ Thank you for your business!
             </div>
             <div className="space-y-2">
               <Label>Payment Date</Label>
-              <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} />
+              <Input type="date" id="payment-date" defaultValue={new Date().toISOString().split('T')[0]} />
             </div>
             <div className="space-y-2">
               <Label>Reference / Notes (Optional)</Label>
-              <Input placeholder="Transaction ID, check number, etc." />
+              <Input placeholder="Transaction ID, check number, etc." id="payment-reference" />
             </div>
           </div>
           <DialogFooter>
@@ -2601,13 +2897,58 @@ Thank you for your business!
             </Button>
             <Button
               className="bg-emerald-600 hover:bg-emerald-700"
-              onClick={() => {
-                toast.success('Payment recorded')
-                setShowRecordPaymentDialog(false)
+              disabled={!selectedInvoice || mutating}
+              onClick={async () => {
+                if (!selectedInvoice) {
+                  toast.error('Please select an invoice')
+                  return
+                }
+
+                const amountEl = document.getElementById('payment-amount') as HTMLInputElement
+                const dateEl = document.getElementById('payment-date') as HTMLInputElement
+                const referenceEl = document.getElementById('payment-reference') as HTMLInputElement
+
+                const paymentAmount = parseFloat(amountEl?.value) || 0
+                const paymentDate = dateEl?.value || new Date().toISOString().split('T')[0]
+                const reference = referenceEl?.value || ''
+
+                if (paymentAmount <= 0) {
+                  toast.error('Please enter a valid payment amount')
+                  return
+                }
+
+                try {
+                  const currentAmountPaid = selectedInvoice.amount_paid || 0
+                  const newAmountPaid = currentAmountPaid + paymentAmount
+                  const totalAmount = selectedInvoice.total_amount
+                  const newAmountDue = Math.max(0, totalAmount - newAmountPaid)
+                  const isFullyPaid = newAmountDue === 0
+
+                  await updateInvoice(selectedInvoice.id, {
+                    amount_paid: newAmountPaid,
+                    amount_due: newAmountDue,
+                    status: isFullyPaid ? 'paid' : selectedInvoice.status,
+                    paid_date: isFullyPaid ? paymentDate : selectedInvoice.paid_date,
+                    notes: reference
+                      ? `${selectedInvoice.notes || ''}\n[Payment ${paymentDate}]: $${paymentAmount.toLocaleString()} - ${reference}`.trim()
+                      : selectedInvoice.notes
+                  })
+
+                  toast.success(
+                    isFullyPaid ? 'Invoice marked as fully paid' : 'Partial payment recorded',
+                    { description: `$${paymentAmount.toLocaleString()} recorded for invoice #${selectedInvoice.invoice_number}` }
+                  )
+                  setShowRecordPaymentDialog(false)
+                  setSelectedInvoice(null)
+                } catch (error) {
+                  toast.error('Failed to record payment', {
+                    description: error instanceof Error ? error.message : 'Unknown error'
+                  })
+                }
               }}
             >
               <CheckCircle2 className="h-4 w-4 mr-2" />
-              Record Payment
+              {mutating ? 'Recording...' : 'Record Payment'}
             </Button>
           </DialogFooter>
         </DialogContent>

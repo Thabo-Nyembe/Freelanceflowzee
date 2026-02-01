@@ -192,7 +192,10 @@ export {
   useDeleteMessage,
   useCreateConversation,
   useMessagingStats,
-  useAddReaction
+  useAddReaction,
+  useArchiveConversation,
+  usePinConversation,
+  useExportConversation
 } from './use-messages'
 
 // Files/Storage

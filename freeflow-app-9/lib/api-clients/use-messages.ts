@@ -272,3 +272,125 @@ export function useAddReaction() {
     }
   })
 }
+
+/**
+ * Archive/unarchive a conversation
+ */
+export function useArchiveConversation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ conversationId, archive = true }: { conversationId: string; archive?: boolean }) => {
+      const response = await messagesClient.archiveConversation(conversationId, archive)
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to archive conversation')
+      }
+      return response.data
+    },
+    onMutate: async ({ conversationId, archive }) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['conversations'] })
+
+      const previousConversations = queryClient.getQueryData(['conversations'])
+
+      queryClient.setQueryData(['conversations'], (old: any) => {
+        if (!old?.data) return old
+        return {
+          ...old,
+          data: old.data.map((conv: any) =>
+            conv.id === conversationId ? { ...conv, is_archived: archive } : conv
+          )
+        }
+      })
+
+      return { previousConversations }
+    },
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousConversations) {
+        queryClient.setQueryData(['conversations'], context.previousConversations)
+      }
+      toast.error(error.message)
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      toast.success(variables.archive ? 'Conversation archived' : 'Conversation unarchived')
+    }
+  })
+}
+
+/**
+ * Pin/unpin a conversation
+ */
+export function usePinConversation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ conversationId, pin = true }: { conversationId: string; pin?: boolean }) => {
+      const response = await messagesClient.pinConversation(conversationId, pin)
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to pin conversation')
+      }
+      return response.data
+    },
+    onMutate: async ({ conversationId, pin }) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['conversations'] })
+
+      const previousConversations = queryClient.getQueryData(['conversations'])
+
+      queryClient.setQueryData(['conversations'], (old: any) => {
+        if (!old?.data) return old
+        return {
+          ...old,
+          data: old.data.map((conv: any) =>
+            conv.id === conversationId ? { ...conv, is_pinned: pin } : conv
+          )
+        }
+      })
+
+      return { previousConversations }
+    },
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousConversations) {
+        queryClient.setQueryData(['conversations'], context.previousConversations)
+      }
+      toast.error(error.message)
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      toast.success(variables.pin ? 'Conversation pinned' : 'Conversation unpinned')
+    }
+  })
+}
+
+/**
+ * Export conversation messages
+ */
+export function useExportConversation() {
+  return useMutation({
+    mutationFn: async (conversationId: string) => {
+      const response = await messagesClient.exportConversation(conversationId)
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to export conversation')
+      }
+      return response.data
+    },
+    onSuccess: (data) => {
+      // Create blob and trigger download
+      const blob = new Blob([data.content], { type: data.mimeType })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = data.filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Conversation exported successfully')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    }
+  })
+}

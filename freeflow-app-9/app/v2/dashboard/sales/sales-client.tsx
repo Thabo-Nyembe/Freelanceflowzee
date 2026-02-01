@@ -1560,8 +1560,37 @@ export default function SalesClient() {
                 if (productName) {
                   const productCode = prompt('Enter product code (SKU):')
                   const productPrice = prompt('Enter product price:')
+                  const productCategory = prompt('Enter category (Subscriptions/Services/Hardware):')
+                  const productDescription = prompt('Enter product description:')
                   if (productCode && productPrice) {
-                    toast.success('Product added')
+                    const newProduct = {
+                      id: `p-${Date.now()}`,
+                      name: productName,
+                      code: productCode,
+                      price: parseFloat(productPrice) || 0,
+                      category: productCategory || 'Subscriptions',
+                      description: productDescription || '',
+                      isActive: true,
+                      createdAt: new Date().toISOString()
+                    }
+                    // Save to localStorage
+                    const existingProducts = JSON.parse(localStorage.getItem('sales_products') || '[]')
+                    existingProducts.push(newProduct)
+                    localStorage.setItem('sales_products', JSON.stringify(existingProducts))
+
+                    // Export product catalog as JSON
+                    const catalogExport = JSON.stringify([...mockProducts, newProduct], null, 2)
+                    const blob = new Blob([catalogExport], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `product-catalog-${new Date().toISOString().split('T')[0]}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+
+                    toast.success('Product added', { description: `${productName} (${productCode}) - $${productPrice}. Catalog exported.` })
                   }
                 }
               }}><Plus className="w-4 h-4 mr-2" />Add Product</Button>
@@ -1793,7 +1822,11 @@ export default function SalesClient() {
                             <Button variant="ghost" size="icon" onClick={() => {
                               const newName = prompt('Edit stage name:', stage)
                               if (newName && newName.trim() && newName !== stage) {
-                                toast.success('Stage updated')
+                                // Save stage configuration to localStorage
+                                const stageConfig = JSON.parse(localStorage.getItem('sales_pipeline_stages') || '{}')
+                                stageConfig[stage] = { name: newName, probability: (idx + 1) * 15, updatedAt: new Date().toISOString() }
+                                localStorage.setItem('sales_pipeline_stages', JSON.stringify(stageConfig))
+                                toast.success('Stage updated', { description: `"${stage}" renamed to "${newName}"` })
                               }
                             }}>
                               <Edit className="w-4 h-4" />
@@ -1803,9 +1836,37 @@ export default function SalesClient() {
                         <Button variant="outline" className="w-full" onClick={() => {
                           const stageName = prompt('Enter new stage name:')
                           if (stageName) {
-                            const stageOrder = prompt('Enter stage order (1-10):')
-                            if (stageOrder) {
-                              toast.success('Stage added')
+                            const stageProbability = prompt('Enter default probability (0-100):')
+                            if (stageProbability) {
+                              // Save new stage to localStorage
+                              const customStages = JSON.parse(localStorage.getItem('sales_custom_stages') || '[]')
+                              const newStage = {
+                                id: `stage-${Date.now()}`,
+                                name: stageName,
+                                probability: parseInt(stageProbability) || 50,
+                                order: customStages.length + 7,
+                                createdAt: new Date().toISOString()
+                              }
+                              customStages.push(newStage)
+                              localStorage.setItem('sales_custom_stages', JSON.stringify(customStages))
+
+                              // Export pipeline configuration
+                              const pipelineConfig = {
+                                defaultStages: ['Prospecting', 'Qualification', 'Needs Analysis', 'Value Proposition', 'Proposal', 'Negotiation'],
+                                customStages: customStages,
+                                exportedAt: new Date().toISOString()
+                              }
+                              const blob = new Blob([JSON.stringify(pipelineConfig, null, 2)], { type: 'application/json' })
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = `pipeline-config-${new Date().toISOString().split('T')[0]}.json`
+                              document.body.appendChild(a)
+                              a.click()
+                              document.body.removeChild(a)
+                              URL.revokeObjectURL(url)
+
+                              toast.success('Stage added', { description: `${stageName} (${stageProbability}%) - Configuration exported` })
                             }
                           }
                         }}>
@@ -2308,7 +2369,50 @@ export default function SalesClient() {
                 action: () => {
                   const taskTitle = prompt('Enter task title:')
                   if (taskTitle) {
-                    toast.success('Task created', { description: taskTitle + ' has been added to your task list' })
+                    const taskDueDate = prompt('Enter due date (YYYY-MM-DD) or leave blank for today:')
+                    const taskPriority = prompt('Enter priority (low/medium/high):')
+
+                    const newTask = {
+                      id: `task-${Date.now()}`,
+                      title: taskTitle,
+                      dueDate: taskDueDate || new Date().toISOString().split('T')[0],
+                      priority: taskPriority || 'medium',
+                      status: 'pending',
+                      createdAt: new Date().toISOString()
+                    }
+
+                    // Save task to localStorage
+                    const existingTasks = JSON.parse(localStorage.getItem('sales_tasks') || '[]')
+                    existingTasks.push(newTask)
+                    localStorage.setItem('sales_tasks', JSON.stringify(existingTasks))
+
+                    // Generate ICS for task reminder
+                    const dueDate = new Date(newTask.dueDate + 'T09:00:00')
+                    const formatICSDate = (date: Date) => date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+                    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//FreeFlow Sales//Task Reminder//EN
+BEGIN:VTODO
+DTSTAMP:${formatICSDate(new Date())}
+UID:${newTask.id}@freeflow-sales
+SUMMARY:${taskTitle}
+DUE:${formatICSDate(dueDate)}
+PRIORITY:${taskPriority === 'high' ? '1' : taskPriority === 'low' ? '9' : '5'}
+STATUS:NEEDS-ACTION
+END:VTODO
+END:VCALENDAR`
+
+                    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `task-${taskTitle.replace(/[^a-zA-Z0-9]/g, '-')}.ics`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+
+                    toast.success('Task created', { description: `${taskTitle} - reminder file downloaded. ${existingTasks.length} total tasks.` })
                   } else {
                     toast.error('Task creation cancelled')
                   }
@@ -2483,10 +2587,103 @@ export default function SalesClient() {
 
               <div className="flex gap-2">
                 <Button className="flex-1" onClick={() => {
-                  toast.success(`Quote ${selectedQuote.quoteNumber} sent successfully!`)
+                  // Generate mailto link with quote details
+                  const subject = encodeURIComponent(`Quote ${selectedQuote.quoteNumber} - ${selectedQuote.opportunityName}`)
+                  const body = encodeURIComponent(
+                    `Dear Customer,\n\nPlease find attached Quote ${selectedQuote.quoteNumber} for ${selectedQuote.opportunityName}.\n\n` +
+                    `Quote Details:\n` +
+                    `- Account: ${selectedQuote.accountName}\n` +
+                    `- Total: ${formatCurrency(selectedQuote.total)}\n` +
+                    `- Valid Until: ${selectedQuote.validUntil}\n\n` +
+                    `Line Items:\n` +
+                    selectedQuote.lineItems.map(item => `- ${item.productName}: ${item.quantity} x ${formatCurrency(item.unitPrice)} = ${formatCurrency(item.total)}`).join('\n') +
+                    `\n\nPlease let us know if you have any questions.\n\nBest regards`
+                  )
+                  window.location.href = `mailto:?subject=${subject}&body=${body}`
+                  toast.success(`Quote ${selectedQuote.quoteNumber} email opened!`)
                 }}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
                 <Button variant="outline" onClick={() => {
-                  toast.success('PDF generated! Starting download...')
+                  // Generate real PDF-like content as HTML and download
+                  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quote ${selectedQuote.quoteNumber}</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+    .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+    .header h1 { margin: 0; color: #333; }
+    .quote-info { display: flex; justify-content: space-between; margin-bottom: 30px; }
+    .quote-info div { flex: 1; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #f5f5f5; }
+    .totals { text-align: right; }
+    .totals td { border: none; }
+    .total-row { font-weight: bold; font-size: 1.2em; }
+    .footer { margin-top: 50px; font-size: 0.9em; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>QUOTE</h1>
+    <p>Quote Number: ${selectedQuote.quoteNumber}</p>
+  </div>
+  <div class="quote-info">
+    <div>
+      <strong>Account:</strong><br>${selectedQuote.accountName}<br><br>
+      <strong>Opportunity:</strong><br>${selectedQuote.opportunityName}
+    </div>
+    <div style="text-align: right;">
+      <strong>Date:</strong> ${new Date(selectedQuote.createdAt).toLocaleDateString()}<br>
+      <strong>Valid Until:</strong> ${selectedQuote.validUntil}<br>
+      <strong>Status:</strong> ${selectedQuote.status.replace('_', ' ').toUpperCase()}
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Unit Price</th>
+        <th>Discount</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${selectedQuote.lineItems.map(item => `
+        <tr>
+          <td>${item.productName}</td>
+          <td>${item.quantity}</td>
+          <td>$${item.unitPrice.toLocaleString()}</td>
+          <td>$${item.discount.toLocaleString()}</td>
+          <td>$${item.total.toLocaleString()}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+  <table class="totals">
+    <tr><td>Subtotal:</td><td>$${selectedQuote.subtotal.toLocaleString()}</td></tr>
+    <tr><td>Discount:</td><td>-$${selectedQuote.discount.toLocaleString()}</td></tr>
+    <tr><td>Tax:</td><td>$${selectedQuote.tax.toLocaleString()}</td></tr>
+    <tr class="total-row"><td>Total:</td><td>$${selectedQuote.total.toLocaleString()}</td></tr>
+  </table>
+  <div class="footer">
+    <p>Terms: Payment due within 30 days of invoice date.</p>
+    <p>Thank you for your business!</p>
+  </div>
+</body>
+</html>`
+                  const blob = new Blob([htmlContent], { type: 'text/html' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `Quote-${selectedQuote.quoteNumber}.html`
+                  document.body.appendChild(a)
+                  a.click()
+                  document.body.removeChild(a)
+                  URL.revokeObjectURL(url)
+                  toast.success('Quote downloaded successfully!')
                 }}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
                 <Button variant="outline" onClick={() => {
                   navigator.clipboard.writeText(selectedQuote.quoteNumber)
@@ -2983,8 +3180,51 @@ export default function SalesClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCallLoggerDialog(false)}>Cancel</Button>
-            <Button onClick={() => {
-              toast.success('Call logged successfully')
+            <Button onClick={async () => {
+              const contactSelect = document.querySelector('[id^="call_contact"]') as HTMLSelectElement
+              const typeSelect = document.querySelectorAll('select')[0] as HTMLSelectElement
+              const durationInput = document.getElementById('call_duration') as HTMLInputElement
+              const subjectInput = document.getElementById('call_subject') as HTMLInputElement
+              const outcomeSelect = document.querySelectorAll('select')[1] as HTMLSelectElement
+              const notesTextarea = document.getElementById('call_notes') as HTMLTextAreaElement
+
+              const callData = {
+                contact: contactSelect?.value || 'Unknown',
+                type: typeSelect?.value || 'outbound',
+                duration: durationInput?.value || '0',
+                subject: subjectInput?.value || 'Call',
+                outcome: outcomeSelect?.value || 'connected',
+                notes: notesTextarea?.value || '',
+                timestamp: new Date().toISOString()
+              }
+
+              // Store call log in localStorage for persistence
+              const existingLogs = JSON.parse(localStorage.getItem('sales_call_logs') || '[]')
+              existingLogs.push(callData)
+              localStorage.setItem('sales_call_logs', JSON.stringify(existingLogs))
+
+              // Generate downloadable call log
+              const logContent = `Call Log - ${new Date().toLocaleString()}
+================================
+Contact: ${callData.contact}
+Type: ${callData.type}
+Duration: ${callData.duration} minutes
+Subject: ${callData.subject}
+Outcome: ${callData.outcome}
+Notes: ${callData.notes}
+================================`
+
+              const blob = new Blob([logContent], { type: 'text/plain' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `call-log-${new Date().toISOString().split('T')[0]}.txt`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+
+              toast.success('Call logged and saved', { description: `${existingLogs.length} total calls logged` })
               setShowCallLoggerDialog(false)
             }}>
               <Phone className="w-4 h-4 mr-2" />
@@ -3079,10 +3319,53 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEmailComposerDialog(false)}>Cancel</Button>
             <Button variant="outline" onClick={() => {
-              toast.success('Draft saved successfully!')
+              const subjectInput = document.getElementById('email_subject') as HTMLInputElement
+              const bodyTextarea = document.getElementById('email_body') as HTMLTextAreaElement
+              const ccInput = document.getElementById('email_cc') as HTMLInputElement
+              const bccInput = document.getElementById('email_bcc') as HTMLInputElement
+
+              const draftData = {
+                id: Date.now().toString(),
+                subject: subjectInput?.value || '',
+                body: bodyTextarea?.value || '',
+                cc: ccInput?.value || '',
+                bcc: bccInput?.value || '',
+                savedAt: new Date().toISOString()
+              }
+
+              // Save draft to localStorage
+              const existingDrafts = JSON.parse(localStorage.getItem('sales_email_drafts') || '[]')
+              existingDrafts.push(draftData)
+              localStorage.setItem('sales_email_drafts', JSON.stringify(existingDrafts))
+
+              toast.success('Draft saved successfully!', { description: `Draft "${draftData.subject || 'Untitled'}" saved locally` })
             }}>Save Draft</Button>
             <Button onClick={() => {
-              toast.success('Email sent successfully')
+              const subjectInput = document.getElementById('email_subject') as HTMLInputElement
+              const bodyTextarea = document.getElementById('email_body') as HTMLTextAreaElement
+              const ccInput = document.getElementById('email_cc') as HTMLInputElement
+              const bccInput = document.getElementById('email_bcc') as HTMLInputElement
+              const toSelect = document.querySelector('[placeholder="Select recipient"]')?.closest('button')?.textContent || ''
+
+              const subject = encodeURIComponent(subjectInput?.value || 'No Subject')
+              const body = encodeURIComponent(bodyTextarea?.value || '')
+              const cc = ccInput?.value ? `&cc=${encodeURIComponent(ccInput.value)}` : ''
+              const bcc = bccInput?.value ? `&bcc=${encodeURIComponent(bccInput.value)}` : ''
+
+              // Open default email client with mailto
+              window.location.href = `mailto:${toSelect}?subject=${subject}&body=${body}${cc}${bcc}`
+
+              // Log email to localStorage
+              const emailLog = {
+                to: toSelect,
+                subject: subjectInput?.value || '',
+                sentAt: new Date().toISOString()
+              }
+              const existingLogs = JSON.parse(localStorage.getItem('sales_email_logs') || '[]')
+              existingLogs.push(emailLog)
+              localStorage.setItem('sales_email_logs', JSON.stringify(existingLogs))
+
+              toast.success('Email client opened', { description: 'Complete sending in your email application' })
               setShowEmailComposerDialog(false)
             }}>
               <Send className="w-4 h-4 mr-2" />
@@ -3178,7 +3461,75 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowMeetingSchedulerDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Meeting scheduled successfully')
+              const titleInput = document.getElementById('meeting_title') as HTMLInputElement
+              const dateInput = document.getElementById('meeting_date') as HTMLInputElement
+              const timeInput = document.getElementById('meeting_time') as HTMLInputElement
+              const locationInput = document.getElementById('meeting_location') as HTMLInputElement
+              const descriptionTextarea = document.getElementById('meeting_description') as HTMLTextAreaElement
+              const durationSelect = document.querySelectorAll('select')[2] as HTMLSelectElement
+
+              const title = titleInput?.value || 'Sales Meeting'
+              const meetingDate = dateInput?.value || new Date().toISOString().split('T')[0]
+              const meetingTime = timeInput?.value || '09:00'
+              const duration = parseInt(durationSelect?.value || '30', 10)
+              const location = locationInput?.value || 'Video Call'
+              const description = descriptionTextarea?.value || ''
+
+              // Parse date and time
+              const startDate = new Date(`${meetingDate}T${meetingTime}:00`)
+              const endDate = new Date(startDate.getTime() + duration * 60000)
+
+              // Format dates for ICS (YYYYMMDDTHHMMSS)
+              const formatICSDate = (date: Date) => {
+                return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+              }
+
+              // Generate ICS file content
+              const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//FreeFlow Sales//Meeting Scheduler//EN
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+DTSTART:${formatICSDate(startDate)}
+DTEND:${formatICSDate(endDate)}
+DTSTAMP:${formatICSDate(new Date())}
+UID:${Date.now()}@freeflow-sales
+SUMMARY:${title}
+DESCRIPTION:${description.replace(/\n/g, '\\n')}
+LOCATION:${location}
+STATUS:CONFIRMED
+SEQUENCE:0
+END:VEVENT
+END:VCALENDAR`
+
+              // Download ICS file
+              const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `${title.replace(/[^a-zA-Z0-9]/g, '-')}.ics`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+
+              // Save meeting to localStorage
+              const meetingData = {
+                id: Date.now().toString(),
+                title,
+                date: meetingDate,
+                time: meetingTime,
+                duration,
+                location,
+                description,
+                createdAt: new Date().toISOString()
+              }
+              const existingMeetings = JSON.parse(localStorage.getItem('sales_meetings') || '[]')
+              existingMeetings.push(meetingData)
+              localStorage.setItem('sales_meetings', JSON.stringify(existingMeetings))
+
+              toast.success('Meeting scheduled!', { description: 'Calendar file downloaded - import to your calendar app' })
               setShowMeetingSchedulerDialog(false)
             }}>
               <Calendar className="w-4 h-4 mr-2" />
@@ -3377,11 +3728,122 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowQuoteBuilderDialog(false)}>Cancel</Button>
             <Button variant="outline" onClick={() => {
-              toast.success('Quote draft saved!')
+              const accountSelect = document.querySelector('[placeholder="Select account"]')?.closest('button')?.textContent || 'Unknown Account'
+              const validUntilInput = document.getElementById('quote_valid') as HTMLInputElement
+              const termsTextarea = document.getElementById('quote_terms') as HTMLTextAreaElement
+
+              const draftData = {
+                id: Date.now().toString(),
+                quoteNumber: `Q-DRAFT-${Date.now()}`,
+                account: accountSelect,
+                validUntil: validUntilInput?.value || '',
+                terms: termsTextarea?.value || '',
+                lineItems: quoteLineItems,
+                savedAt: new Date().toISOString()
+              }
+
+              // Save draft to localStorage
+              const existingDrafts = JSON.parse(localStorage.getItem('sales_quote_drafts') || '[]')
+              existingDrafts.push(draftData)
+              localStorage.setItem('sales_quote_drafts', JSON.stringify(existingDrafts))
+
+              toast.success('Quote draft saved!', { description: `Draft ${draftData.quoteNumber} saved locally` })
             }}>Save Draft</Button>
             <Button onClick={() => {
-              toast.success('Quote created successfully')
+              const accountSelect = document.querySelector('[placeholder="Select account"]')?.closest('button')?.textContent || 'Unknown Account'
+              const contactSelect = document.querySelector('[placeholder="Select contact"]')?.closest('button')?.textContent || 'Unknown Contact'
+              const validUntilInput = document.getElementById('quote_valid') as HTMLInputElement
+              const termsTextarea = document.getElementById('quote_terms') as HTMLTextAreaElement
+
+              const quoteNumber = `Q-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`
+              const subtotal = quoteLineItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0)
+              const discount = quoteLineItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice * item.discount / 100), 0)
+              const taxRate = 0.08
+              const tax = (subtotal - discount) * taxRate
+              const total = subtotal - discount + tax
+
+              const quoteData = {
+                id: Date.now().toString(),
+                quoteNumber,
+                account: accountSelect,
+                contact: contactSelect,
+                validUntil: validUntilInput?.value || '',
+                terms: termsTextarea?.value || '',
+                lineItems: quoteLineItems,
+                subtotal,
+                discount,
+                tax,
+                total,
+                status: 'draft',
+                createdAt: new Date().toISOString()
+              }
+
+              // Save quote to localStorage
+              const existingQuotes = JSON.parse(localStorage.getItem('sales_quotes') || '[]')
+              existingQuotes.push(quoteData)
+              localStorage.setItem('sales_quotes', JSON.stringify(existingQuotes))
+
+              // Generate and download quote as HTML
+              const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quote ${quoteNumber}</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+    .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #f5f5f5; }
+    .totals { text-align: right; margin-top: 20px; }
+    .total-row { font-weight: bold; font-size: 1.2em; color: #22c55e; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>QUOTE ${quoteNumber}</h1>
+    <p>Account: ${accountSelect} | Contact: ${contactSelect}</p>
+    <p>Valid Until: ${quoteData.validUntil}</p>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Discount</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      ${quoteLineItems.map(item => `
+        <tr>
+          <td>${item.productName || 'Product'}</td>
+          <td>${item.quantity}</td>
+          <td>$${item.unitPrice.toLocaleString()}</td>
+          <td>${item.discount}%</td>
+          <td>$${(item.quantity * item.unitPrice * (1 - item.discount / 100)).toLocaleString()}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+  <div class="totals">
+    <p>Subtotal: $${subtotal.toLocaleString()}</p>
+    <p>Discount: -$${discount.toLocaleString()}</p>
+    <p>Tax (8%): $${tax.toFixed(2)}</p>
+    <p class="total-row">Total: $${total.toFixed(2)}</p>
+  </div>
+  ${quoteData.terms ? `<div class="terms"><h3>Terms & Conditions</h3><p>${quoteData.terms}</p></div>` : ''}
+</body>
+</html>`
+
+              const blob = new Blob([htmlContent], { type: 'text/html' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `Quote-${quoteNumber}.html`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+
+              toast.success('Quote created!', { description: `${quoteNumber} saved and downloaded` })
               setShowQuoteBuilderDialog(false)
+              setQuoteLineItems([{ productId: '', productName: '', quantity: 1, unitPrice: 0, discount: 0, total: 0 }])
             }}>
               <FileText className="w-4 h-4 mr-2" />
               Create Quote
@@ -3434,13 +3896,70 @@ export default function SalesClient() {
               </p>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.success('CSV template downloaded!')
+                  // Generate real CSV template based on import type
+                  const importTypeSelect = document.querySelector('[data-value]')?.getAttribute('data-value') || 'contacts'
+                  let csvContent = ''
+
+                  if (importTypeSelect === 'accounts') {
+                    csvContent = `name,industry,type,website,phone,address,annual_revenue,employees,owner,status,rating,tier
+"Example Company","Technology","customer","example.com","+1-555-0100","123 Main St, City, ST 12345",1000000,50,"John Doe","active","warm","mid_market"`
+                  } else if (importTypeSelect === 'deals') {
+                    csvContent = `title,company_name,contact_name,contact_email,deal_value,stage,probability,priority,expected_close_date,notes
+"Enterprise Deal","Acme Corp","Jane Smith","jane@acme.com",50000,"qualified",40,"high","2025-03-15","Initial discovery complete"`
+                  } else if (importTypeSelect === 'activities') {
+                    csvContent = `type,subject,description,related_to,owner,due_date,status,priority,duration,outcome
+"call","Follow-up call","Discuss next steps","Acme Corp","John Doe","2025-01-30","pending","high",30,""`
+                  } else {
+                    // Default to contacts
+                    csvContent = `first_name,last_name,email,phone,mobile,title,department,account_name,lead_source,status,lead_score,is_decision_maker,linkedin
+"John","Smith","john.smith@example.com","+1-555-0100","+1-555-0101","VP of Engineering","Engineering","Example Corp","Website","qualified",75,true,"linkedin.com/in/johnsmith"`
+                  }
+
+                  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `import-template-${importTypeSelect || 'contacts'}.csv`
+                  document.body.appendChild(a)
+                  a.click()
+                  document.body.removeChild(a)
+                  URL.revokeObjectURL(url)
+
+                  toast.success('CSV template downloaded!', { description: 'Fill in the template and upload to import' })
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   CSV Template
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.success('Excel template downloaded!')
+                  // Generate TSV (tab-separated) which Excel can open
+                  const importTypeSelect = document.querySelector('[data-value]')?.getAttribute('data-value') || 'contacts'
+                  let tsvContent = ''
+
+                  if (importTypeSelect === 'accounts') {
+                    tsvContent = `name\tindustry\ttype\twebsite\tphone\taddress\tannual_revenue\temployees\towner\tstatus\trating\ttier
+Example Company\tTechnology\tcustomer\texample.com\t+1-555-0100\t123 Main St, City, ST 12345\t1000000\t50\tJohn Doe\tactive\twarm\tmid_market`
+                  } else if (importTypeSelect === 'deals') {
+                    tsvContent = `title\tcompany_name\tcontact_name\tcontact_email\tdeal_value\tstage\tprobability\tpriority\texpected_close_date\tnotes
+Enterprise Deal\tAcme Corp\tJane Smith\tjane@acme.com\t50000\tqualified\t40\thigh\t2025-03-15\tInitial discovery complete`
+                  } else if (importTypeSelect === 'activities') {
+                    tsvContent = `type\tsubject\tdescription\trelated_to\towner\tdue_date\tstatus\tpriority\tduration\toutcome
+call\tFollow-up call\tDiscuss next steps\tAcme Corp\tJohn Doe\t2025-01-30\tpending\thigh\t30\t`
+                  } else {
+                    tsvContent = `first_name\tlast_name\temail\tphone\tmobile\ttitle\tdepartment\taccount_name\tlead_source\tstatus\tlead_score\tis_decision_maker\tlinkedin
+John\tSmith\tjohn.smith@example.com\t+1-555-0100\t+1-555-0101\tVP of Engineering\tEngineering\tExample Corp\tWebsite\tqualified\t75\ttrue\tlinkedin.com/in/johnsmith`
+                  }
+
+                  const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `import-template-${importTypeSelect || 'contacts'}.xls`
+                  document.body.appendChild(a)
+                  a.click()
+                  document.body.removeChild(a)
+                  URL.revokeObjectURL(url)
+
+                  toast.success('Excel template downloaded!', { description: 'Open with Excel, fill in data, and save as CSV to import' })
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   Excel Template
@@ -3468,8 +3987,69 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportWizardDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Import completed! 0 records imported.')
-              setShowImportWizardDialog(false)
+              // Create file input for actual import
+              const fileInput = document.createElement('input')
+              fileInput.type = 'file'
+              fileInput.accept = '.csv,.tsv,.txt'
+              fileInput.onchange = async (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0]
+                if (!file) {
+                  toast.error('No file selected')
+                  return
+                }
+
+                try {
+                  const text = await file.text()
+                  const lines = text.trim().split('\n')
+                  const headers = lines[0].split(/[,\t]/).map(h => h.trim().replace(/"/g, ''))
+                  const records: Record<string, string>[] = []
+
+                  for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(/[,\t]/).map(v => v.trim().replace(/"/g, ''))
+                    const record: Record<string, string> = {}
+                    headers.forEach((header, idx) => {
+                      record[header] = values[idx] || ''
+                    })
+                    records.push(record)
+                  }
+
+                  // Store imported data in localStorage based on type
+                  const importTypeSelect = document.querySelector('[data-value]')?.getAttribute('data-value') || 'contacts'
+                  const storageKey = `sales_imported_${importTypeSelect}`
+                  const existingData = JSON.parse(localStorage.getItem(storageKey) || '[]')
+                  const newData = [...existingData, ...records.map(r => ({ ...r, importedAt: new Date().toISOString() }))]
+                  localStorage.setItem(storageKey, JSON.stringify(newData))
+
+                  // Generate import report
+                  const reportContent = `Import Report - ${new Date().toLocaleString()}
+========================================
+File: ${file.name}
+Type: ${importTypeSelect}
+Records Imported: ${records.length}
+Headers Found: ${headers.join(', ')}
+
+Sample Records:
+${records.slice(0, 3).map((r, i) => `Record ${i + 1}: ${JSON.stringify(r)}`).join('\n')}
+${records.length > 3 ? `\n... and ${records.length - 3} more records` : ''}
+========================================`
+
+                  const blob = new Blob([reportContent], { type: 'text/plain' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `import-report-${new Date().toISOString().split('T')[0]}.txt`
+                  document.body.appendChild(a)
+                  a.click()
+                  document.body.removeChild(a)
+                  URL.revokeObjectURL(url)
+
+                  toast.success(`Import completed!`, { description: `${records.length} records imported from ${file.name}` })
+                  setShowImportWizardDialog(false)
+                } catch (error) {
+                  toast.error('Import failed', { description: 'Please check file format and try again' })
+                }
+              }
+              fileInput.click()
             }}>
               <Upload className="w-4 h-4 mr-2" />
               Start Import
@@ -3534,13 +4114,140 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowContractDialog(false)}>Cancel</Button>
             <Button variant="outline" onClick={() => {
-              toast.success('Contract PDF downloaded')
+              // Generate real contract document
+              const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sales Contract - ${selectedOpportunity?.name || 'Contract'}</title>
+  <style>
+    body { font-family: 'Georgia', serif; padding: 60px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+    .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 30px; margin-bottom: 40px; }
+    .header h1 { margin: 0 0 10px 0; font-size: 28px; }
+    .contract-info { display: flex; justify-content: space-between; margin-bottom: 40px; padding: 20px; background: #f9f9f9; }
+    .section { margin-bottom: 30px; }
+    .section h2 { font-size: 16px; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 15px; }
+    .terms p { margin-bottom: 15px; text-align: justify; }
+    .signature-block { margin-top: 60px; display: flex; justify-content: space-between; }
+    .signature-line { width: 45%; }
+    .signature-line .line { border-top: 1px solid #333; margin-top: 60px; padding-top: 5px; }
+    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>SALES CONTRACT</h1>
+    <p>Contract Date: ${new Date().toLocaleDateString()}</p>
+  </div>
+  <div class="contract-info">
+    <div>
+      <strong>Opportunity:</strong> ${selectedOpportunity?.name || 'N/A'}<br>
+      <strong>Account:</strong> ${selectedOpportunity?.accountName || 'N/A'}
+    </div>
+    <div style="text-align: right;">
+      <strong>Amount:</strong> $${(selectedOpportunity?.amount || 0).toLocaleString()}<br>
+      <strong>Close Date:</strong> ${selectedOpportunity?.closeDate || new Date().toLocaleDateString()}
+    </div>
+  </div>
+  <div class="section terms">
+    <h2>TERMS AND CONDITIONS</h2>
+    <p><strong>1. Payment Terms:</strong> Payment is due within 30 days of invoice date unless otherwise specified in writing.</p>
+    <p><strong>2. Delivery:</strong> Products and services will be delivered according to the agreed-upon timeline as specified in the attached Statement of Work.</p>
+    <p><strong>3. Warranty:</strong> All products are covered under manufacturer warranty for a period of 12 months from the date of delivery.</p>
+    <p><strong>4. Confidentiality:</strong> Both parties agree to maintain confidentiality of proprietary information shared during the course of this agreement.</p>
+    <p><strong>5. Limitation of Liability:</strong> Neither party shall be liable for any indirect, incidental, special, or consequential damages.</p>
+    <p><strong>6. Termination:</strong> Either party may terminate this agreement with 30 days written notice.</p>
+    <p><strong>7. Governing Law:</strong> This agreement shall be governed by and construed in accordance with applicable laws.</p>
+  </div>
+  <div class="signature-block">
+    <div class="signature-line">
+      <div class="line">Authorized Signature (Seller)</div>
+      <p>Name: _______________________</p>
+      <p>Date: _______________________</p>
+    </div>
+    <div class="signature-line">
+      <div class="line">Authorized Signature (Buyer)</div>
+      <p>Name: _______________________</p>
+      <p>Date: _______________________</p>
+    </div>
+  </div>
+  <div class="footer">
+    <p>This document is generated by FreeFlow Sales CRM</p>
+    <p>Contract ID: CONTRACT-${Date.now()}</p>
+  </div>
+</body>
+</html>`
+
+              const blob = new Blob([htmlContent], { type: 'text/html' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `Contract-${selectedOpportunity?.name?.replace(/[^a-zA-Z0-9]/g, '-') || 'Sales'}-${new Date().toISOString().split('T')[0]}.html`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+
+              toast.success('Contract downloaded!', { description: 'Print or save as PDF from your browser' })
             }}>
               <Download className="w-4 h-4 mr-2" />
               Download PDF
             </Button>
             <Button onClick={() => {
-              toast.success('Contract signed successfully!')
+              const signatureInput = document.getElementById('contract_signature') as HTMLInputElement
+              const agreeSwitch = document.getElementById('contract_agree') as HTMLInputElement
+
+              if (!signatureInput?.value) {
+                toast.error('Signature required', { description: 'Please type your full name to sign' })
+                return
+              }
+
+              if (!agreeSwitch?.checked) {
+                toast.error('Agreement required', { description: 'Please check the box to agree to terms' })
+                return
+              }
+
+              // Save signed contract to localStorage
+              const contractData = {
+                id: Date.now().toString(),
+                opportunity: selectedOpportunity?.name || 'Unknown',
+                account: selectedOpportunity?.accountName || 'Unknown',
+                amount: selectedOpportunity?.amount || 0,
+                signature: signatureInput.value,
+                signedAt: new Date().toISOString(),
+                status: 'signed'
+              }
+
+              const existingContracts = JSON.parse(localStorage.getItem('sales_contracts') || '[]')
+              existingContracts.push(contractData)
+              localStorage.setItem('sales_contracts', JSON.stringify(existingContracts))
+
+              // Generate signed contract confirmation
+              const confirmationContent = `
+CONTRACT SIGNING CONFIRMATION
+=============================
+Contract ID: CONTRACT-${contractData.id}
+Opportunity: ${contractData.opportunity}
+Account: ${contractData.account}
+Amount: $${contractData.amount.toLocaleString()}
+
+Signed by: ${contractData.signature}
+Signed at: ${new Date(contractData.signedAt).toLocaleString()}
+
+This electronic signature is legally binding.
+=============================`
+
+              const blob = new Blob([confirmationContent], { type: 'text/plain' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `Contract-Confirmation-${contractData.id}.txt`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+
+              toast.success('Contract signed!', { description: `Signed by ${contractData.signature}. Confirmation downloaded.` })
               setShowContractDialog(false)
             }}>
               <FileSignature className="w-4 h-4 mr-2" />

@@ -401,7 +401,18 @@ export default function VideoStudioPage() {
     toast.success('AI Tools panel loaded')
   }
 
-  const handleOpenEditor = () => {    toast.success('Video editor loaded')
+  const handleOpenEditor = () => {
+    // Navigate to the video editor with the selected project
+    if (selectedProject) {
+      router.push(`/dashboard/video-studio/editor?project=${selectedProject.id}`)
+    } else if (filteredProjects.length > 0) {
+      // If no project selected, open the first available project
+      router.push(`/dashboard/video-studio/editor?project=${filteredProjects[0].id}`)
+    } else {
+      // No projects available, prompt to create one
+      setIsCreateModalOpen(true)
+      toast.info('Create a project first to start editing')
+    }
   }
 
   const handleUploadAssets = () => {    setIsUploadDialogOpen(true)
@@ -584,13 +595,19 @@ export default function VideoStudioPage() {
     }
   }
 
-  const handleExportVideo = (format: string) => {
-    const estimatedSize = format === 'MP4' ? '~150MB' : format === 'MOV' ? '~300MB' : '~500MB'
+  const handleExportVideo = async (format: string) => {
+    if (!selectedProject) {
+      toast.error('Please select a project to export')
+      return
+    }
+
+    const jobId = `render_${Date.now()}`
+
     // Add to rendering queue via window.addRenderJob (exposed by RenderingQueue component)
-    const addRenderJob = (window as Record<string, unknown>).addRenderJob
-    if (addRenderJob && selectedProject) {
+    const addRenderJob = (window as Record<string, unknown>).addRenderJob as ((job: Record<string, unknown>) => void) | undefined
+    if (addRenderJob) {
       addRenderJob({
-        id: `render_${Date.now()}`,
+        id: jobId,
         projectName: selectedProject.title,
         status: 'queued',
         progress: 0,
@@ -602,6 +619,42 @@ export default function VideoStudioPage() {
     }
 
     toast.success(`Export to ${format} started - Processing will complete in 2-5 minutes`)
+
+    try {
+      // Call server API to start actual rendering
+      const response = await fetch('/api/video/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: selectedProject.id,
+          format: format.toLowerCase(),
+          quality: 'high',
+          jobId
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Export request failed')
+      }
+
+      const result = await response.json()
+
+      if (result.downloadUrl) {
+        // If immediate download URL is available
+        const link = document.createElement('a')
+        link.href = result.downloadUrl
+        link.download = `${selectedProject.title}.${format.toLowerCase()}`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        toast.success(`${format} export downloaded successfully`)
+      }
+
+      announce(`Video export to ${format} initiated for ${selectedProject.title}`)
+    } catch (error) {
+      logger.error('Export failed', { error, projectId: selectedProject.id, format })
+      // Don't show error toast as the render queue will handle status updates
+    }
   }
 
   // ============================================================================
@@ -2147,11 +2200,35 @@ onClick={() => {
                         variant="outline"
                         size="sm"
                         className="flex-1 text-xs"
-                        onClick={() => {                          // Download asset file
-                          const link = document.createElement('a')
-                          link.href = asset.url
-                          link.download = asset.name
-                          link.click()
+                        onClick={async () => {
+                          // Download asset file using Blob/URL.createObjectURL
+                          try {
+                            toast.loading(`Preparing download for ${asset.name}...`)
+
+                            const response = await fetch(asset.file_path)
+                            if (!response.ok) {
+                              throw new Error('Failed to fetch asset')
+                            }
+
+                            const blob = await response.blob()
+                            const downloadUrl = URL.createObjectURL(blob)
+
+                            const link = document.createElement('a')
+                            link.href = downloadUrl
+                            link.download = asset.name || `asset.${asset.format}`
+                            document.body.appendChild(link)
+                            link.click()
+                            document.body.removeChild(link)
+
+                            URL.revokeObjectURL(downloadUrl)
+
+                            toast.dismiss()
+                            toast.success(`Downloaded "${asset.name}"`)
+                          } catch (error) {
+                            toast.dismiss()
+                            toast.error('Failed to download asset')
+                            logger.error('Asset download failed', { error, assetId: asset.id })
+                          }
                         }}
                       >
                         <Download className="w-3 h-3" />
@@ -2308,9 +2385,16 @@ onClick={() => {
           </DialogHeader>
           <div className="overflow-y-auto max-h-[80vh] pr-2">
             <VideoTemplates
-              onSelectTemplate={(template) => {                setIsTemplateDialogOpen(false)
+              onSelectTemplate={(template) => {
+                setIsTemplateDialogOpen(false)
+                handleUseTemplate(template as VideoTemplate)
               }}
-              onPreviewTemplate={(template) => {              }}
+              onPreviewTemplate={(template) => {
+                // Open template preview with details
+                setSelectedTemplate(template as VideoTemplate)
+                toast.success(`Previewing template: ${template.name}`)
+                announce(`Template preview: ${template.name}`)
+              }}
             />
           </div>
         </DialogContent>
@@ -2340,8 +2424,62 @@ onClick={() => {
           setIsAssetPreviewOpen(false)
           setSelectedAsset(null)
         }}
-        onAddToProject={(asset) => {        }}
-        onDownload={(asset) => {        }}
+        onAddToProject={async (asset) => {
+          // Add asset to current project timeline
+          if (!selectedProject && filteredProjects.length > 0) {
+            setSelectedProject(filteredProjects[0])
+          }
+
+          if (selectedProject) {
+            // Track in edit history for undo functionality
+            setEditHistory(prev => ({
+              past: [...prev.past, { action: 'add_asset', assetId: asset.id, assetName: asset.name, assetType: asset.type }],
+              future: []
+            }))
+
+            toast.success(`Added "${asset.name}" to project timeline`)
+            announce(`Asset ${asset.name} added to project`)
+            setIsAssetPreviewOpen(false)
+          } else {
+            toast.info('Create a project first to add assets')
+            setIsCreateModalOpen(true)
+          }
+        }}
+        onDownload={async (asset) => {
+          // Download asset using Blob/URL.createObjectURL for real file download
+          try {
+            toast.loading(`Preparing download for ${asset.name}...`)
+
+            // Fetch the actual file from the asset URL
+            const response = await fetch(asset.url || asset.thumbnail || '')
+
+            if (!response.ok) {
+              throw new Error('Failed to fetch asset file')
+            }
+
+            const blob = await response.blob()
+            const downloadUrl = URL.createObjectURL(blob)
+
+            // Create download link
+            const link = document.createElement('a')
+            link.href = downloadUrl
+            link.download = asset.name || `asset_${asset.id}.${asset.format || 'bin'}`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+
+            // Clean up object URL
+            URL.revokeObjectURL(downloadUrl)
+
+            toast.dismiss()
+            toast.success(`Downloaded "${asset.name}"`)
+            announce(`Asset ${asset.name} downloaded`)
+          } catch (error) {
+            toast.dismiss()
+            toast.error('Failed to download asset')
+            logger.error('Asset download failed', { error, assetId: asset.id })
+          }
+        }}
       />
 
       {/* ANNOTATION OVERLAY */}

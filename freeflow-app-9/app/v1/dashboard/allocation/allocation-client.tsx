@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAllocations, useAllocationMutations } from '@/lib/hooks/use-allocations'
+import { useTimeTracking } from '@/lib/hooks/use-time-tracking'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -61,7 +62,8 @@ import {
   Plane,
   HeartPulse,
   Home,
-  Loader2
+  Loader2,
+  Download
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -346,6 +348,9 @@ export default function AllocationClient() {
     isDeleting
   } = useAllocationMutations()
 
+  // Time tracking hook for time entries
+  const { createEntry: createTimeEntry, loading: isCreatingTimeEntry } = useTimeTracking()
+
   const [activeTab, setActiveTab] = useState('allocations')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AllocationStatus | 'all'>('all')
@@ -430,7 +435,7 @@ export default function AllocationClient() {
         billable_rate: formData.billable_rate,
         notes: formData.notes,
       })
-      toast.success(`${formData.employee_name} allocated to ${formData.project_name}`)
+      toast.success(`${formData.resource_name} allocated to ${formData.project_name}`)
       setShowCreateDialog(false)
       setFormData(initialFormState)
       refetch()
@@ -532,25 +537,61 @@ export default function AllocationClient() {
 
   const handleExportAllocations = async () => {
     try {
+      // Use database allocations if available, otherwise fallback to local data
+      const dataToExport = dbAllocations && dbAllocations.length > 0 ? dbAllocations : allocations
+
+      if (dataToExport.length === 0) {
+        toast.error('No allocation data to export')
+        return
+      }
+
       const exportData = {
         exportedAt: new Date().toISOString(),
-        allocations: allocations.map(a => ({
-          member: a.member_name,
-          project: a.project_name,
-          type: a.allocation_type,
+        exportFormat: 'JSON',
+        version: '1.0',
+        allocations: dataToExport.map(a => ({
+          id: a.id,
+          allocationCode: a.allocation_code,
+          resourceName: a.resource_name,
+          resourceRole: a.resource_role,
+          projectName: a.project_name,
+          projectId: a.project_id,
+          allocationType: a.allocation_type,
           status: a.status,
+          priority: a.priority,
           hoursPerWeek: a.hours_per_week,
           allocatedHours: a.allocated_hours,
+          utilization: a.utilization,
+          weeksRemaining: a.weeks_remaining,
           startDate: a.start_date,
           endDate: a.end_date,
           billableRate: a.billable_rate,
-          notes: a.notes
+          projectValue: a.project_value,
+          currency: a.currency,
+          managerName: a.manager_name,
+          managerEmail: a.manager_email,
+          skills: a.skills,
+          notes: a.notes,
+          createdAt: a.created_at,
+          updatedAt: a.updated_at
         })),
         summary: {
-          totalAllocations: allocations.length,
-          totalHours: allocations.reduce((sum, a) => sum + (a.allocated_hours || 0), 0),
-          byStatus: allocations.reduce((acc, a) => {
+          totalAllocations: dataToExport.length,
+          totalHours: dataToExport.reduce((sum, a) => sum + (a.allocated_hours || 0), 0),
+          totalValue: dataToExport.reduce((sum, a) => sum + (a.project_value || 0), 0),
+          avgUtilization: dataToExport.length > 0
+            ? dataToExport.reduce((sum, a) => sum + (a.utilization || 0), 0) / dataToExport.length
+            : 0,
+          byStatus: dataToExport.reduce((acc, a) => {
             acc[a.status] = (acc[a.status] || 0) + 1
+            return acc
+          }, {} as Record<string, number>),
+          byPriority: dataToExport.reduce((acc, a) => {
+            acc[a.priority] = (acc[a.priority] || 0) + 1
+            return acc
+          }, {} as Record<string, number>),
+          byType: dataToExport.reduce((acc, a) => {
+            acc[a.allocation_type] = (acc[a.allocation_type] || 0) + 1
             return acc
           }, {} as Record<string, number>)
         }
@@ -566,9 +607,9 @@ export default function AllocationClient() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast.success('Allocation report downloaded')
+      toast.success(`Exported ${dataToExport.length} allocations to JSON`)
     } catch (error) {
-      toast.error('Export failed', { description: error.message })
+      toast.error('Export failed', { description: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 
@@ -582,6 +623,81 @@ export default function AllocationClient() {
       }
     )
   }
+
+  // Export report data as CSV
+  const handleExportReportCSV = useCallback(() => {
+    try {
+      // Use database allocations if available, otherwise use local data
+      const dataToExport = dbAllocations && dbAllocations.length > 0 ? dbAllocations : allocations
+
+      if (dataToExport.length === 0) {
+        toast.error('No data to export')
+        return
+      }
+
+      // CSV Headers
+      const headers = [
+        'Resource Name',
+        'Resource Role',
+        'Project Name',
+        'Allocation Type',
+        'Status',
+        'Priority',
+        'Hours/Week',
+        'Allocated Hours',
+        'Utilization %',
+        'Start Date',
+        'End Date',
+        'Billable Rate',
+        'Project Value',
+        'Notes'
+      ]
+
+      // CSV Rows
+      const rows = dataToExport.map(a => [
+        a.resource_name || '',
+        a.resource_role || '',
+        a.project_name || '',
+        a.allocation_type || '',
+        a.status || '',
+        a.priority || '',
+        a.hours_per_week?.toString() || '0',
+        a.allocated_hours?.toString() || '0',
+        a.utilization?.toString() || '0',
+        a.start_date || '',
+        a.end_date || '',
+        a.billable_rate?.toString() || '0',
+        a.project_value?.toString() || '0',
+        (a.notes || '').replace(/"/g, '""') // Escape quotes in notes
+      ])
+
+      // Build CSV content
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n')
+
+      // Add summary section
+      const summary = `\n\n"Summary"\n"Total Allocations",${dataToExport.length}\n"Active",${dataToExport.filter(a => a.status === 'active').length}\n"Pending",${dataToExport.filter(a => a.status === 'pending').length}\n"Completed",${dataToExport.filter(a => a.status === 'completed').length}\n"Total Hours",${dataToExport.reduce((sum, a) => sum + (a.hours_per_week || 0), 0)}\n"Total Value","${formatCurrency(dataToExport.reduce((sum, a) => sum + (a.project_value || 0), 0))}"\n"Generated","${new Date().toISOString()}"`
+
+      const fullCsv = csvContent + summary
+
+      // Create and download file
+      const blob = new Blob([fullCsv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `allocation-report-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success(`Exported ${dataToExport.length} allocations to CSV`)
+    } catch (error) {
+      toast.error('Export failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }, [dbAllocations, allocations])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-fuchsia-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -598,6 +714,10 @@ export default function AllocationClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={handleExportAllocations}>
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
             <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
               {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
               Refresh
@@ -1257,7 +1377,7 @@ export default function AllocationClient() {
                 { icon: Briefcase, label: 'Projects', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('schedule') },
                 { icon: DollarSign, label: 'Billing', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setActiveTab('settings') },
                 { icon: Calendar, label: 'Schedule', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setActiveTab('schedule') },
-                { icon: ArrowUpRight, label: 'Export', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => { toast.success('Exporting report data...'); const blob = new Blob(['Report Data Export'], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'allocation-report.txt'; a.click() } },
+                { icon: ArrowUpRight, label: 'Export', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: handleExportReportCSV },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2144,17 +2264,42 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTimeEntryDialog(false)}>Cancel</Button>
               <Button
-                onClick={() => {
+                onClick={async () => {
                   if (timeEntryData.hours > 0 && timeEntryData.date) {
-                    toast.success(`Time Entry Logged: ${timeEntryData.hours} hours recorded for ${timeEntryData.date}`)
-                    setTimeEntryData({ hours: 0, description: '', date: '' })
-                    setShowTimeEntryDialog(false)
+                    try {
+                      // Create a proper time entry with start/end times calculated from hours
+                      const startDate = new Date(timeEntryData.date)
+                      startDate.setHours(9, 0, 0, 0) // Default start at 9 AM
+                      const endDate = new Date(startDate.getTime() + timeEntryData.hours * 60 * 60 * 1000)
+                      const durationSeconds = timeEntryData.hours * 3600
+
+                      await createTimeEntry({
+                        title: formData.resource_name ? `Time for ${formData.resource_name}` : 'Allocation Time Entry',
+                        description: timeEntryData.description || 'Logged via Allocation module',
+                        entry_type: 'manual',
+                        start_time: startDate.toISOString(),
+                        end_time: endDate.toISOString(),
+                        duration_seconds: durationSeconds,
+                        duration_hours: timeEntryData.hours,
+                        status: 'stopped',
+                        is_billable: true,
+                        notes: timeEntryData.description,
+                        category: 'allocation'
+                      })
+
+                      toast.success(`Time Entry Logged: ${timeEntryData.hours} hours recorded for ${timeEntryData.date}`)
+                      setTimeEntryData({ hours: 0, description: '', date: '' })
+                      setShowTimeEntryDialog(false)
+                    } catch (error) {
+                      toast.error('Failed to log time entry', { description: error instanceof Error ? error.message : 'Unknown error' })
+                    }
                   } else {
                     toast.error('Please enter hours and date')
                   }
                 }}
+                disabled={isCreatingTimeEntry}
               >
-                <Clock className="w-4 h-4 mr-2" />
+                {isCreatingTimeEntry ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Clock className="w-4 h-4 mr-2" />}
                 Log Time
               </Button>
             </DialogFooter>
@@ -2277,16 +2422,40 @@ export default function AllocationClient() {
               <Button
                 onClick={async () => {
                   if (formData.resource_name && transferData.targetProject) {
-                    toast.success(`Allocation Transferred: moved to ${transferData.targetProject}`)
-                    setTransferData({ targetProject: '', notes: '' })
-                    setFormData(initialFormState)
-                    setShowTransferDialog(false)
+                    try {
+                      // Find the allocation to transfer
+                      const allocationToTransfer = allocations.find(a => a.resource_name === formData.resource_name && a.status === 'active')
+
+                      if (allocationToTransfer) {
+                        // Update the allocation with the new project
+                        await updateAllocation({
+                          id: allocationToTransfer.id,
+                          updates: {
+                            project_name: transferData.targetProject,
+                            notes: transferData.notes
+                              ? `${allocationToTransfer.notes || ''}\n\n[Transfer Note]: ${transferData.notes}`
+                              : allocationToTransfer.notes
+                          }
+                        })
+
+                        toast.success(`Allocation Transferred: ${formData.resource_name} moved to ${transferData.targetProject}`)
+                        setTransferData({ targetProject: '', notes: '' })
+                        setFormData(initialFormState)
+                        setShowTransferDialog(false)
+                        refetch()
+                      } else {
+                        toast.error('Could not find the selected allocation')
+                      }
+                    } catch (error) {
+                      toast.error('Failed to transfer allocation', { description: error instanceof Error ? error.message : 'Unknown error' })
+                    }
                   } else {
                     toast.error('Please select allocation and target project')
                   }
                 }}
+                disabled={isUpdating}
               >
-                <GitBranch className="w-4 h-4 mr-2" />
+                {isUpdating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <GitBranch className="w-4 h-4 mr-2" />}
                 Transfer
               </Button>
             </DialogFooter>

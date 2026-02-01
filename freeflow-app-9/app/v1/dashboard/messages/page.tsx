@@ -32,7 +32,8 @@ import {
   Trash2,
   Clock,
   Upload,
-  Pin
+  Pin,
+  Download
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -47,7 +48,10 @@ import {
   useSendMessage,
   useMarkConversationAsRead,
   useDeleteMessage,
-  useMessagingStats
+  useMessagingStats,
+  useArchiveConversation,
+  usePinConversation,
+  useExportConversation
 } from '@/lib/api-clients'
 
 const logger = createFeatureLogger('ClientZoneMessages')
@@ -55,12 +59,15 @@ const logger = createFeatureLogger('ClientZoneMessages')
 // Simplified message interface (adapts from API)
 interface DisplayMessage {
   id: string
+  conversationId: string
   sender: string
   role: string
   message: string
   timestamp: string
   avatar: string
   unread: boolean
+  isArchived: boolean
+  isPinned: boolean
 }
 
 export default function MessagesPageMigrated() {
@@ -74,6 +81,9 @@ export default function MessagesPageMigrated() {
   const sendMessage = useSendMessage()
   const markAsRead = useMarkConversationAsRead()
   const deleteMsg = useDeleteMessage()
+  const archiveConversation = useArchiveConversation()
+  const pinConversation = usePinConversation()
+  const exportConversation = useExportConversation()
 
   // Get messaging stats
   const { data: stats } = useMessagingStats()
@@ -87,12 +97,15 @@ export default function MessagesPageMigrated() {
   const messages: DisplayMessage[] = conversationsData?.items.flatMap(conv =>
     conv.last_message ? [{
       id: conv.last_message.id,
+      conversationId: conv.id,
       sender: conv.participants?.[0]?.name || 'Team Member',
       role: conv.participants?.[0]?.role || 'Team',
       message: conv.last_message.content,
       timestamp: new Date(conv.last_message.created_at).toLocaleString(),
       avatar: '/avatars/default.jpg',
-      unread: conv.unread_count > 0
+      unread: conv.unread_count > 0,
+      isArchived: conv.is_archived || false,
+      isPinned: conv.is_pinned || false
     }] : []
   ) || []
 
@@ -440,24 +453,39 @@ export default function MessagesPageMigrated() {
                         variant="outline"
                         className="flex-1"
                         onClick={() => {
-                          // Archive functionality would use a hook here
-                          logger.info('Archive clicked')
+                          archiveConversation.mutate({
+                            conversationId: selectedMessage.conversationId,
+                            archive: !selectedMessage.isArchived
+                          })
                         }}
+                        disabled={archiveConversation.isPending}
                       >
                         <Archive className="h-3 w-3 mr-1" />
-                        Archive
+                        {archiveConversation.isPending ? 'Archiving...' : (selectedMessage.isArchived ? 'Unarchive' : 'Archive')}
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         className="flex-1"
                         onClick={() => {
-                          // Pin functionality would use a hook here
-                          logger.info('Pin clicked')
+                          pinConversation.mutate({
+                            conversationId: selectedMessage.conversationId,
+                            pin: !selectedMessage.isPinned
+                          })
                         }}
+                        disabled={pinConversation.isPending}
                       >
                         <Pin className="h-3 w-3 mr-1" />
-                        Pin
+                        {pinConversation.isPending ? 'Pinning...' : (selectedMessage.isPinned ? 'Unpin' : 'Pin')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => exportConversation.mutate(selectedMessage.conversationId)}
+                        className="text-green-600 hover:text-green-700"
+                        disabled={exportConversation.isPending}
+                      >
+                        <Download className="h-3 w-3" />
                       </Button>
                       <Button
                         size="sm"

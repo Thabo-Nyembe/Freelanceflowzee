@@ -926,16 +926,39 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     }
   }
 
-  // Calculate comprehensive stats
+  // Calculate comprehensive stats including storage breakdown from actual data
   const stats = useMemo(() => {
     const totalDocs = documentFiles.length
     const sharedDocs = documentFiles.filter(d => d.shared).length
     const starredDocs = documentFiles.filter(d => d.starred).length
     const draftDocs = documentFiles.filter(d => d.status === 'draft').length
     const reviewDocs = documentFiles.filter(d => d.status === 'review').length
+    const archivedDocs = documentFiles.filter(d => d.status === 'archived').length
     const totalComments = documentFiles.reduce((sum, d) => sum + d.comments, 0)
     const totalFolders = dbFolders.length
-    const storageUsedGB = documentFiles.reduce((sum, d) => sum + d.size, 0) / (1024 * 1024 * 1024)
+    const totalStorageBytes = documentFiles.reduce((sum, d) => sum + d.size, 0)
+    const storageUsedGB = totalStorageBytes / (1024 * 1024 * 1024)
+
+    // Calculate storage breakdown by file type from actual data
+    const storageBreakdown = documentFiles.reduce((acc, doc) => {
+      const size = doc.size || 0
+      const ext = (doc.extension || '').toLowerCase()
+      if (['doc', 'docx', 'pdf', 'txt', 'rtf', 'odt', 'xls', 'xlsx', 'ppt', 'pptx', 'csv'].includes(ext)) {
+        acc.documents += size
+      } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(ext)) {
+        acc.images += size
+      } else if (['mp4', 'mov', 'avi', 'mkv', 'webm', 'mp3', 'wav', 'ogg'].includes(ext)) {
+        acc.media += size
+      } else {
+        acc.other += size
+      }
+      return acc
+    }, { documents: 0, images: 0, media: 0, other: 0 })
+
+    // Calculate trash size (archived documents)
+    const trashSize = documentFiles
+      .filter(d => d.status === 'archived')
+      .reduce((sum, d) => sum + d.size, 0)
 
     return {
       totalDocs,
@@ -943,9 +966,13 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
       starredDocs,
       draftDocs,
       reviewDocs,
+      archivedDocs,
       totalComments,
       totalFolders,
+      totalStorageBytes,
       storageUsedGB: storageUsedGB.toFixed(1),
+      storageBreakdown,
+      trashSize
     }
   }, [documentFiles, dbFolders])
 
@@ -996,18 +1023,41 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     }
   }
 
-  // Copy API token to clipboard
+  // API token state - fetched from Supabase
+  const [apiToken, setApiToken] = useState<string | null>(null)
+
+  // Fetch API token on mount
+  useEffect(() => {
+    const fetchApiToken = async () => {
+      if (isDemoAccount) {
+        setApiToken('demo_doc_token_xxxxxxxxxxxxxxxxxxxxx')
+        return
+      }
+      try {
+        const response = await fetch('/api/documents/token')
+        if (response.ok) {
+          const data = await response.json()
+          setApiToken(data.token || null)
+        }
+      } catch (error) {
+        console.error('Failed to fetch API token:', error)
+      }
+    }
+    fetchApiToken()
+  }, [isDemoAccount])
+
+  // Copy API token to clipboard - Uses real token from state
   const handleCopyApiToken = async () => {
-    const token = 'doc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+    const tokenToCopy = apiToken || 'No token available - generate one first'
     try {
-      await navigator.clipboard.writeText(token)
+      await navigator.clipboard.writeText(tokenToCopy)
       toast.success('Token copied', { description: 'API token copied to clipboard' })
     } catch (error) {
       toast.error('Copy failed', { description: 'Could not copy token to clipboard' })
     }
   }
 
-  // Regenerate API token - REAL API CALL
+  // Regenerate API token - REAL API CALL with state update
   const handleRegenerateToken = async () => {
     toast.promise(
       (async () => {
@@ -1017,23 +1067,54 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
           body: JSON.stringify({ action: 'regenerate' })
         })
         if (!response.ok) throw new Error('Failed to regenerate token')
-        return await response.json()
+        const data = await response.json()
+        // Update the token state with the new token
+        if (data.token) {
+          setApiToken(data.token)
+        }
+        return data
       })(),
       {
-        loading: 'Regenerating API token...',
-        success: 'New API token generated',
-        error: 'Failed to regenerate token'
+        loading: apiToken ? 'Regenerating API token...' : 'Generating API token...',
+        success: apiToken ? 'New API token generated' : 'API token generated',
+        error: 'Failed to generate token'
       }
     )
   }
 
-  // Export all documents - REAL DOWNLOAD
+  // Export all documents - REAL DOWNLOAD with actual database data
   const handleExportAll = async () => {
     toast.loading('Preparing export...')
     try {
-      // Create a text file with document list as JSON
-      const exportData = JSON.stringify(documentFiles, null, 2)
-      const blob = new Blob([exportData], { type: 'application/json' })
+      // Use actual documents data from Supabase hooks (documents contains the real DB data)
+      const exportData = {
+        version: '1.0',
+        exportedAt: new Date().toISOString(),
+        documentCount: documents?.length || 0,
+        documents: documents?.map(doc => ({
+          id: doc.id,
+          title: doc.document_title,
+          type: doc.document_type,
+          status: doc.status,
+          accessLevel: doc.access_level,
+          version: doc.version,
+          versionNumber: doc.version_number,
+          fileExtension: doc.file_extension,
+          fileSizeBytes: doc.file_size_bytes,
+          isEncrypted: doc.is_encrypted,
+          isArchived: doc.is_archived,
+          owner: doc.owner,
+          createdBy: doc.created_by,
+          tags: doc.tags,
+          sharedWith: doc.shared_with,
+          parentFolderId: doc.parent_folder_id,
+          commentCount: doc.comment_count,
+          createdAt: doc.created_at,
+          updatedAt: doc.updated_at,
+          lastAccessedAt: doc.last_accessed_at
+        })) || []
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -1043,34 +1124,101 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       toast.dismiss()
-      toast.success('Export complete', { description: 'Download started' })
+      toast.success('Export complete', { description: `Exported ${documents?.length || 0} documents` })
     } catch (error) {
       toast.dismiss()
       toast.error('Export failed', { description: 'Could not export documents' })
     }
   }
 
-  // Download backup
+  // Download backup - REAL DATA from Supabase
   const handleDownloadBackup = async () => {
     toast.loading('Preparing backup...')
     try {
+      // Calculate storage breakdown from actual document data
+      const storageBreakdown = (documents || []).reduce((acc, doc) => {
+        const size = doc.file_size_bytes || 0
+        const ext = (doc.file_extension || '').toLowerCase()
+        if (['doc', 'docx', 'pdf', 'txt', 'rtf', 'odt', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) {
+          acc.documents += size
+        } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) {
+          acc.images += size
+        } else if (['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)) {
+          acc.videos += size
+        } else {
+          acc.other += size
+        }
+        return acc
+      }, { documents: 0, images: 0, videos: 0, other: 0 })
+
       const backupData = {
-        documents: documentFiles,
-        folders: folders,
-        templates: templates,
-        exportedAt: new Date().toISOString()
+        version: '1.0',
+        backupType: 'full',
+        exportedAt: new Date().toISOString(),
+        summary: {
+          totalDocuments: documents?.length || 0,
+          totalFolders: dbFolders.length,
+          totalStorageBytes: (documents || []).reduce((sum, d) => sum + (d.file_size_bytes || 0), 0),
+          storageBreakdown
+        },
+        documents: documents?.map(doc => ({
+          id: doc.id,
+          title: doc.document_title,
+          type: doc.document_type,
+          status: doc.status,
+          accessLevel: doc.access_level,
+          version: doc.version,
+          versionNumber: doc.version_number,
+          fileExtension: doc.file_extension,
+          fileSizeBytes: doc.file_size_bytes,
+          filePath: doc.file_path,
+          fileUrl: doc.file_url,
+          mimeType: doc.mime_type,
+          isEncrypted: doc.is_encrypted,
+          isArchived: doc.is_archived,
+          owner: doc.owner,
+          createdBy: doc.created_by,
+          tags: doc.tags,
+          categories: doc.categories,
+          sharedWith: doc.shared_with,
+          permissions: doc.permissions,
+          parentFolderId: doc.parent_folder_id,
+          folderPath: doc.folder_path,
+          commentCount: doc.comment_count,
+          viewCount: doc.view_count,
+          downloadCount: doc.download_count,
+          shareCount: doc.share_count,
+          createdAt: doc.created_at,
+          updatedAt: doc.updated_at,
+          lastAccessedAt: doc.last_accessed_at
+        })) || [],
+        folders: dbFolders.map(folder => ({
+          id: folder.id,
+          name: folder.name,
+          description: folder.description,
+          color: folder.color,
+          icon: folder.icon,
+          parentId: folder.parent_id,
+          path: folder.path,
+          depth: folder.depth,
+          isShared: folder.is_shared,
+          documentCount: folder.document_count,
+          totalSize: folder.total_size,
+          createdAt: folder.created_at,
+          updatedAt: folder.updated_at
+        }))
       }
       const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `backup-${new Date().toISOString().split('T')[0]}.json`
+      a.download = `freeflow-documents-backup-${new Date().toISOString().split('T')[0]}.json`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       toast.dismiss()
-      toast.success('Backup ready', { description: 'Download started' })
+      toast.success('Backup ready', { description: `Backed up ${documents?.length || 0} documents and ${dbFolders.length} folders` })
     } catch (error) {
       toast.dismiss()
       toast.error('Backup failed', { description: 'Could not prepare backup' })
@@ -2412,26 +2560,26 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex justify-between text-sm mb-2">
                             <span className="text-gray-900 dark:text-white font-medium">Storage Used</span>
-                            <span className="text-gray-600 dark:text-gray-400">{formatBytes(storageInfo.used)} / {formatBytes(storageInfo.total)}</span>
+                            <span className="text-gray-600 dark:text-gray-400">{formatBytes(stats.totalStorageBytes)} / {formatBytes(storageInfo.total)}</span>
                           </div>
-                          <Progress value={(storageInfo.used / storageInfo.total) * 100} className="h-2" />
+                          <Progress value={(stats.totalStorageBytes / storageInfo.total) * 100} className="h-2" />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                           <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <p className="text-sm text-gray-500">Documents</p>
-                            <p className="text-lg font-semibold text-gray-900 dark:text-white">4.2 GB</p>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatBytes(stats.storageBreakdown.documents)}</p>
                           </div>
                           <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <p className="text-sm text-gray-500">Images</p>
-                            <p className="text-lg font-semibold text-gray-900 dark:text-white">2.8 GB</p>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatBytes(stats.storageBreakdown.images)}</p>
                           </div>
                           <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <p className="text-sm text-gray-500">Trash</p>
-                            <p className="text-lg font-semibold text-gray-900 dark:text-white">512 MB</p>
+                            <p className="text-sm text-gray-500">Trash ({stats.archivedDocs} items)</p>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatBytes(stats.trashSize)}</p>
                           </div>
                           <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <p className="text-sm text-gray-500">Other</p>
-                            <p className="text-lg font-semibold text-gray-900 dark:text-white">1.5 GB</p>
+                            <p className="text-sm text-gray-500">Media & Other</p>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatBytes(stats.storageBreakdown.media + stats.storageBreakdown.other)}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -2731,18 +2879,18 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
-                            <Button variant="outline" size="sm" onClick={() => handleCopyApiToken()}>
+                            <Button variant="outline" size="sm" onClick={() => handleCopyApiToken()} disabled={!apiToken}>
                               <Copy className="h-4 w-4 mr-2" />
                               Copy
                             </Button>
                           </div>
-                          <code className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded block font-mono">
-                            doc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          <code className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded block font-mono break-all">
+                            {apiToken || 'No token generated - click Regenerate Token'}
                           </code>
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => handleRegenerateToken()}>
                           <RefreshCw className="h-4 w-4 mr-2" />
-                          Regenerate Token
+                          {apiToken ? 'Regenerate Token' : 'Generate Token'}
                         </Button>
                       </CardContent>
                     </Card>

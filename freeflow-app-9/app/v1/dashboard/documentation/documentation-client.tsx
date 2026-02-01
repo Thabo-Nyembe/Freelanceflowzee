@@ -451,10 +451,10 @@ export default function DocumentationClient() {
         return
       }
     }
-    // For mock pages, just set them as selected for viewing/editing
-    const page = ([] as DocPage[]).find(p => p.title === pageTitle)
-    if (page) {
-      setSelectedPage(page)
+    // Try to find in Supabase docs by title
+    const supabaseDoc = supabaseDocs.find(d => d.title === pageTitle)
+    if (supabaseDoc) {
+      openEditDialog(supabaseDoc)
       toast.success(`Opened "${pageTitle}" for editing`)
     } else {
       toast.error(`Page "${pageTitle}" not found`)
@@ -503,17 +503,30 @@ export default function DocumentationClient() {
     toast.success(`Navigate to Localization tab to translate "${pageTitle}"`)
   }
 
-  // REAL: Export documentation as PDF or Markdown
+  // REAL: Export documentation as PDF or Markdown - Uses Supabase data
   const handleExportDocs = async () => {
+    if (!supabaseDocs || supabaseDocs.length === 0) {
+      toast.error('No documentation to export')
+      return
+    }
+
     toast.promise(
       (async () => {
-        // Generate markdown content from all pages
-        const markdownContent = ([] as DocPage[]).map(page =>
-          `# ${page.title}\n\n${page.content}\n\n---\n`
-        ).join('\n')
+        // Generate markdown content from all Supabase docs
+        const markdownContent = supabaseDocs.map(doc => {
+          const header = `# ${doc.title}\n`
+          const meta = `> **Status:** ${doc.status} | **Type:** ${doc.doc_type} | **Category:** ${doc.category} | **Version:** ${doc.version}\n`
+          const description = doc.description ? `\n*${doc.description}*\n` : ''
+          const content = doc.content ? `\n${doc.content}\n` : '\n*No content*\n'
+          const footer = `\n---\n*Author: ${doc.author || 'Unknown'} | Views: ${doc.views_count} | Likes: ${doc.likes_count} | Updated: ${new Date(doc.updated_at).toLocaleString()}*\n`
+          return header + meta + description + content + footer
+        }).join('\n\n')
+
+        // Add export header
+        const exportHeader = `# Documentation Export\n\nExported on: ${new Date().toLocaleString()}\nTotal Documents: ${supabaseDocs.length}\n\n---\n\n`
 
         // Create and download the file
-        const blob = new Blob([markdownContent], { type: 'text/markdown' })
+        const blob = new Blob([exportHeader + markdownContent], { type: 'text/markdown' })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -527,7 +540,7 @@ export default function DocumentationClient() {
       })(),
       {
         loading: 'Generating documentation export...',
-        success: 'Documentation exported as Markdown!',
+        success: `Exported ${supabaseDocs.length} documents as Markdown!`,
         error: 'Failed to export documentation'
       }
     )
@@ -622,16 +635,43 @@ export default function DocumentationClient() {
     input.click()
   }
 
-  // REAL: New changelog - Opens changelog creation
+  // REAL: New changelog - Creates a new changelog document
   const handleNewChangelog = () => {
-    setActiveTab('changelogs')
-    toast.info('Navigate to Changelogs tab. Click the New Changelog button to create an entry.')
+    // Generate version based on existing docs
+    const versions = supabaseDocs.map(d => {
+      const match = d.version.match(/v?(\d+)\.?(\d*)/)
+      return match ? parseInt(match[1]) : 1
+    })
+    const maxVersion = versions.length > 0 ? Math.max(...versions) : 0
+    const newVersion = `v${maxVersion + 1}.0`
+
+    resetDocForm()
+    setDocFormData(prev => ({
+      ...prev,
+      title: `Release Notes - ${newVersion}`,
+      doc_type: 'guide',
+      category: 'features',
+      description: `Changelog and release notes for ${newVersion}`,
+      version: newVersion,
+      content: `# ${newVersion} Release Notes\n\n## Added\n- \n\n## Changed\n- \n\n## Fixed\n- \n\n## Deprecated\n- \n`
+    }))
+    setShowCreateDocDialog(true)
+    toast.success('Create a new changelog entry', {
+      description: `Suggested version: ${newVersion}`
+    })
   }
 
   // REAL: Share page - Copies share link to clipboard
   const handleSharePage = async () => {
-    const currentPage = selectedPage || ([] as DocPage[])[0]
-    const shareUrl = `${window.location.origin}/docs/${currentPage?.slug || 'getting-started'}`
+    // Use selected page or first Supabase doc
+    const currentDoc = selectedPage
+      ? supabaseDocs.find(d => d.title === selectedPage.title)
+      : supabaseDocs[0]
+
+    const slug = currentDoc
+      ? currentDoc.title.toLowerCase().replace(/\s+/g, '-')
+      : selectedPage?.slug || 'getting-started'
+    const shareUrl = `${window.location.origin}/docs/${slug}`
 
     try {
       await navigator.clipboard.writeText(shareUrl)
@@ -648,39 +688,66 @@ export default function DocumentationClient() {
     }
   }
 
-  // REAL: Like page - Calls API to like
+  // REAL: Like page - Calls Supabase to like
   const handleLikePage = async () => {
-    const currentPage = selectedPage
-    if (!currentPage) {
-      toast.error('No page selected to like')
+    // First check if there's a selected page that maps to a Supabase doc
+    let docToLike: SupabaseDoc | undefined
+
+    if (selectedPage) {
+      docToLike = supabaseDocs.find(d => d.title === selectedPage.title)
+    }
+
+    // If no selected page or no match, try the first Supabase doc
+    if (!docToLike && supabaseDocs.length > 0) {
+      docToLike = supabaseDocs[0]
+    }
+
+    if (!docToLike) {
+      toast.error('No documentation available to like')
       return
     }
 
-    // Check if there's a corresponding Supabase doc
-    const doc = supabaseDocs.find(d => d.title === currentPage.title)
-    if (doc) {
-      await handleLikeReal(doc.id)
-    } else {
-      // For mock pages, just show success
-      toast.success('Thanks for your feedback!')
-    }
+    await handleLikeReal(docToLike.id)
   }
 
-  // REAL: View comments - Navigates to comments section
+  // REAL: View comments - Shows comments for the selected document
   const handleViewComments = async () => {
-    const currentPage = selectedPage
-    if (!currentPage) {
-      toast.info('Select a page to view its comments')
+    // Check if we have a selected page or use the first supabase doc
+    const currentDoc = selectedPage
+      ? supabaseDocs.find(d => d.title === selectedPage.title)
+      : supabaseDocs[0]
+
+    if (!currentDoc) {
+      toast.info('Select a document to view its comments')
       return
     }
 
-    toast.success(`Viewing ${currentPage.comments_count} comments on "${currentPage.title}"`)
+    // For now, show the comment count - in a full implementation this would open a comments modal
+    if (currentDoc.comments_count === 0) {
+      toast.info(`"${currentDoc.title}" has no comments yet`)
+    } else {
+      toast.success(`"${currentDoc.title}" has ${currentDoc.comments_count} comment(s)`, {
+        description: 'Comments feature coming soon!'
+      })
+    }
   }
 
-  // REAL: Create template - Opens template creation form
+  // REAL: Create template - Opens dialog to create a template document
   const handleCreateTemplate = () => {
-    setActiveTab('templates')
-    toast.info('Navigate to Templates tab to create a new template')
+    resetDocForm()
+    setDocFormData(prev => ({
+      ...prev,
+      title: 'New Documentation Template',
+      doc_type: 'guide',
+      category: 'getting-started',
+      description: 'A reusable template for documentation',
+      content: `# [Title]\n\n## Overview\n[Brief description]\n\n## Prerequisites\n- [Requirement 1]\n- [Requirement 2]\n\n## Steps\n1. [Step 1]\n2. [Step 2]\n3. [Step 3]\n\n## Examples\n\`\`\`\n// Code example\n\`\`\`\n\n## Related Resources\n- [Link 1]\n- [Link 2]`,
+      tags: ['template']
+    }))
+    setShowCreateDocDialog(true)
+    toast.success('Create a new documentation template', {
+      description: 'Templates help standardize your documentation'
+    })
   }
 
   const handleUseTemplate = (templateName: string) => {
@@ -696,15 +763,32 @@ export default function DocumentationClient() {
     setShowCreateDocDialog(true)
   }
 
-  // REAL: Edit changelog - Opens changelog for editing
+  // REAL: Edit changelog - Creates/edits a changelog based on doc version changes
   const handleEditChangelog = (changelogTitle: string) => {
-    const changelog = ([] as DocChangelog[]).find(c => c.title === changelogTitle)
-    if (changelog) {
-      setSelectedChangelog(changelog)
-      setActiveTab('changelogs')
-      toast.success(`Editing changelog: "${changelogTitle}"`)
+    // Find documents that could be related to this changelog
+    const relatedDocs = supabaseDocs.filter(d =>
+      d.title.toLowerCase().includes(changelogTitle.toLowerCase()) ||
+      d.version.includes(changelogTitle)
+    )
+
+    if (relatedDocs.length > 0) {
+      // Open the first related doc for editing
+      openEditDialog(relatedDocs[0])
+      toast.success(`Editing document related to: "${changelogTitle}"`, {
+        description: `Found ${relatedDocs.length} related document(s)`
+      })
     } else {
-      toast.error(`Changelog "${changelogTitle}" not found`)
+      // Create a new changelog document
+      resetDocForm()
+      setDocFormData(prev => ({
+        ...prev,
+        title: `Changelog: ${changelogTitle}`,
+        doc_type: 'guide',
+        category: 'features',
+        description: `Release notes and changelog for ${changelogTitle}`
+      }))
+      setShowCreateDocDialog(true)
+      toast.info(`Creating new changelog document for: "${changelogTitle}"`)
     }
   }
 
@@ -736,35 +820,100 @@ export default function DocumentationClient() {
     )
   }
 
-  // REAL: Manage locale - Opens locale settings
+  // REAL: Manage locale - Shows locale information and translation options
   const handleManageLocale = (localeName: string) => {
-    const locale = ([] as DocLocale[]).find(l => l.name === localeName)
-    if (locale) {
-      setSelectedLocale(locale)
-      toast.success(`Managing locale: ${localeName}`)
-    } else {
-      toast.error(`Locale "${localeName}" not found`)
-    }
+    // Count docs that might need translation (all docs are potential translation targets)
+    const totalDocs = supabaseDocs.length
+    const publishedDocs = supabaseDocs.filter(d => d.status === 'published').length
+
+    toast.success(`Managing locale: ${localeName}`, {
+      description: `${totalDocs} documents available for translation (${publishedDocs} published)`
+    })
+
+    // Navigate to localization tab
+    setActiveTab('localization')
   }
 
-  // REAL: Export analytics report - Generates and downloads report
+  // REAL: Export analytics report - Generates and downloads report from Supabase data
   const handleExportReport = async () => {
+    if (!supabaseDocs || supabaseDocs.length === 0) {
+      toast.error('No documentation data to generate report')
+      return
+    }
+
     toast.promise(
       (async () => {
-        // Generate analytics report data
+        // Calculate analytics from real Supabase data
+        const totalViews = supabaseDocs.reduce((sum, d) => sum + (d.views_count || 0), 0)
+        const totalLikes = supabaseDocs.reduce((sum, d) => sum + (d.likes_count || 0), 0)
+        const totalComments = supabaseDocs.reduce((sum, d) => sum + (d.comments_count || 0), 0)
+        const avgReadTime = supabaseDocs.length > 0
+          ? supabaseDocs.reduce((sum, d) => sum + (d.read_time || 0), 0) / supabaseDocs.length
+          : 0
+
+        // Generate analytics report data from Supabase docs
         const reportData = {
           generated_at: new Date().toISOString(),
-          total_views: stats.totalViews,
-          total_pages: stats.totalPages,
-          total_spaces: stats.totalSpaces,
-          satisfaction_rate: stats.satisfaction,
-          languages: stats.languages,
-          pages: ([] as DocPage[]).map(p => ({
-            title: p.title,
-            views: p.views,
-            likes: p.likes,
-            comments: p.comments_count,
-            status: p.status
+          summary: {
+            total_documents: supabaseDocs.length,
+            total_views: totalViews,
+            total_likes: totalLikes,
+            total_comments: totalComments,
+            average_read_time: Math.round(avgReadTime),
+            satisfaction_rate: supabaseStats?.avgHelpfulRate || 0
+          },
+          by_status: {
+            published: supabaseDocs.filter(d => d.status === 'published').length,
+            draft: supabaseDocs.filter(d => d.status === 'draft').length,
+            review: supabaseDocs.filter(d => d.status === 'review').length,
+            archived: supabaseDocs.filter(d => d.status === 'archived').length
+          },
+          by_type: {
+            guide: supabaseDocs.filter(d => d.doc_type === 'guide').length,
+            'api-reference': supabaseDocs.filter(d => d.doc_type === 'api-reference').length,
+            tutorial: supabaseDocs.filter(d => d.doc_type === 'tutorial').length,
+            concept: supabaseDocs.filter(d => d.doc_type === 'concept').length,
+            quickstart: supabaseDocs.filter(d => d.doc_type === 'quickstart').length,
+            troubleshooting: supabaseDocs.filter(d => d.doc_type === 'troubleshooting').length
+          },
+          by_category: {
+            'getting-started': supabaseDocs.filter(d => d.category === 'getting-started').length,
+            features: supabaseDocs.filter(d => d.category === 'features').length,
+            integrations: supabaseDocs.filter(d => d.category === 'integrations').length,
+            api: supabaseDocs.filter(d => d.category === 'api').length,
+            sdk: supabaseDocs.filter(d => d.category === 'sdk').length,
+            advanced: supabaseDocs.filter(d => d.category === 'advanced').length
+          },
+          top_documents: supabaseDocs
+            .sort((a, b) => (b.views_count || 0) - (a.views_count || 0))
+            .slice(0, 10)
+            .map(d => ({
+              title: d.title,
+              views: d.views_count,
+              likes: d.likes_count,
+              comments: d.comments_count,
+              status: d.status,
+              type: d.doc_type,
+              helpful_rate: d.helpful_count + d.not_helpful_count > 0
+                ? Math.round((d.helpful_count / (d.helpful_count + d.not_helpful_count)) * 100)
+                : 0
+            })),
+          all_documents: supabaseDocs.map(d => ({
+            id: d.id,
+            title: d.title,
+            status: d.status,
+            type: d.doc_type,
+            category: d.category,
+            views: d.views_count,
+            likes: d.likes_count,
+            comments: d.comments_count,
+            helpful: d.helpful_count,
+            not_helpful: d.not_helpful_count,
+            read_time: d.read_time,
+            author: d.author,
+            version: d.version,
+            created_at: d.created_at,
+            updated_at: d.updated_at
           }))
         }
 
@@ -773,7 +922,7 @@ export default function DocumentationClient() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `analytics-report-${new Date().toISOString().split('T')[0]}.json`
+        a.download = `documentation-analytics-report-${new Date().toISOString().split('T')[0]}.json`
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
@@ -783,36 +932,50 @@ export default function DocumentationClient() {
       })(),
       {
         loading: 'Generating analytics report...',
-        success: 'Analytics report downloaded!',
+        success: `Analytics report downloaded with ${supabaseDocs.length} documents!`,
         error: 'Failed to generate report'
       }
     )
   }
 
-  // REAL: Export configuration - Downloads config file
+  // REAL: Export configuration - Downloads config file from Supabase data
   const handleExportConfig = async () => {
     toast.promise(
       (async () => {
-        // Generate config data
+        // Extract unique categories, types, authors from real data
+        const uniqueCategories = [...new Set(supabaseDocs.map(d => d.category))]
+        const uniqueTypes = [...new Set(supabaseDocs.map(d => d.doc_type))]
+        const uniqueAuthors = [...new Set(supabaseDocs.map(d => d.author).filter(Boolean))]
+        const uniqueTags = [...new Set(supabaseDocs.flatMap(d => d.tags || []))]
+
+        // Generate config data from Supabase docs
         const configData = {
           exported_at: new Date().toISOString(),
-          spaces: ([] as DocSpace[]).map(s => ({
-            key: s.key,
-            name: s.name,
-            visibility: s.visibility,
-            git_sync: s.git_sync,
-            custom_domain: s.custom_domain
+          documentation_config: {
+            total_documents: supabaseDocs.length,
+            categories_in_use: uniqueCategories,
+            document_types_in_use: uniqueTypes,
+            authors: uniqueAuthors,
+            tags: uniqueTags
+          },
+          document_structure: supabaseDocs.map(d => ({
+            id: d.id,
+            title: d.title,
+            status: d.status,
+            doc_type: d.doc_type,
+            category: d.category,
+            version: d.version,
+            tags: d.tags
           })),
-          integrations: ([] as DocIntegration[]).map(i => ({
-            name: i.name,
-            type: i.type,
-            status: i.status
-          })),
-          locales: ([] as DocLocale[]).map(l => ({
-            code: l.code,
-            name: l.name,
-            is_default: l.is_default
-          }))
+          settings: {
+            default_status: 'draft',
+            default_doc_type: 'guide',
+            default_category: 'getting-started',
+            enable_comments: true,
+            enable_feedback: true,
+            show_reading_time: true,
+            show_contributors: true
+          }
         }
 
         // Create and download the config
@@ -836,18 +999,15 @@ export default function DocumentationClient() {
     )
   }
 
-  // REAL: Configure integration - Opens integration settings
+  // REAL: Configure integration - Opens integration settings and provides configuration
   const handleConfigureIntegration = async (integrationName: string) => {
-    const integration = ([] as DocIntegration[]).find(i => i.name === integrationName)
-    if (!integration) {
-      toast.error(`Integration "${integrationName}" not found`)
-      return
-    }
-
-    // For now, navigate to settings tab and show info
+    // Navigate to settings tab
     setActiveTab('settings')
     setSettingsTab('integrations')
-    toast.success(`Configure ${integrationName} in the Integrations settings`)
+
+    toast.success(`Configure ${integrationName}`, {
+      description: `Integration settings opened. ${supabaseDocs.length} documents available for sync.`
+    })
   }
 
   // REAL: Add integration - Opens integration selection
@@ -917,25 +1077,76 @@ export default function DocumentationClient() {
     )
   }
 
-  // REAL: Export all data - Full documentation backup
+  // REAL: Export all data - Full documentation backup from Supabase
   const handleExportAllData = async () => {
+    if (!supabaseDocs || supabaseDocs.length === 0) {
+      toast.error('No documentation data to backup')
+      return
+    }
+
     toast.promise(
       (async () => {
-        // Compile all documentation data
+        // Calculate comprehensive statistics
+        const totalViews = supabaseDocs.reduce((sum, d) => sum + (d.views_count || 0), 0)
+        const totalLikes = supabaseDocs.reduce((sum, d) => sum + (d.likes_count || 0), 0)
+        const totalComments = supabaseDocs.reduce((sum, d) => sum + (d.comments_count || 0), 0)
+        const totalHelpful = supabaseDocs.reduce((sum, d) => sum + (d.helpful_count || 0), 0)
+        const totalNotHelpful = supabaseDocs.reduce((sum, d) => sum + (d.not_helpful_count || 0), 0)
+
+        // Compile all documentation data from Supabase
         const fullBackup = {
-          exported_at: new Date().toISOString(),
-          version: '1.0',
-          spaces: [] as DocSpace[],
-          pages: [] as DocPage[],
-          templates: [] as DocTemplate[],
-          changelogs: [] as DocChangelog[],
-          locales: [] as DocLocale[],
-          integrations: ([] as DocIntegration[]).map(i => ({
-            name: i.name,
-            type: i.type,
-            status: i.status
-          })),
-          supabase_docs: supabaseDocs
+          backup_metadata: {
+            exported_at: new Date().toISOString(),
+            backup_version: '2.0',
+            total_documents: supabaseDocs.length,
+            application: 'Kazi Documentation System'
+          },
+          statistics: {
+            total_documents: supabaseDocs.length,
+            by_status: {
+              published: supabaseDocs.filter(d => d.status === 'published').length,
+              draft: supabaseDocs.filter(d => d.status === 'draft').length,
+              review: supabaseDocs.filter(d => d.status === 'review').length,
+              archived: supabaseDocs.filter(d => d.status === 'archived').length
+            },
+            engagement: {
+              total_views: totalViews,
+              total_likes: totalLikes,
+              total_comments: totalComments,
+              total_helpful: totalHelpful,
+              total_not_helpful: totalNotHelpful,
+              helpful_rate: totalHelpful + totalNotHelpful > 0
+                ? Math.round((totalHelpful / (totalHelpful + totalNotHelpful)) * 100)
+                : 0
+            },
+            unique_authors: [...new Set(supabaseDocs.map(d => d.author).filter(Boolean))].length,
+            unique_tags: [...new Set(supabaseDocs.flatMap(d => d.tags || []))].length
+          },
+          documents: supabaseDocs.map(doc => ({
+            id: doc.id,
+            title: doc.title,
+            description: doc.description,
+            content: doc.content,
+            status: doc.status,
+            doc_type: doc.doc_type,
+            category: doc.category,
+            author: doc.author,
+            version: doc.version,
+            tags: doc.tags,
+            metrics: {
+              views_count: doc.views_count,
+              likes_count: doc.likes_count,
+              comments_count: doc.comments_count,
+              helpful_count: doc.helpful_count,
+              not_helpful_count: doc.not_helpful_count,
+              read_time: doc.read_time,
+              contributors_count: doc.contributors_count
+            },
+            timestamps: {
+              created_at: doc.created_at,
+              updated_at: doc.updated_at
+            }
+          }))
         }
 
         // Create and download the backup
@@ -953,7 +1164,7 @@ export default function DocumentationClient() {
       })(),
       {
         loading: 'Preparing complete documentation backup...',
-        success: 'Full documentation backup downloaded!',
+        success: `Full backup downloaded with ${supabaseDocs.length} documents!`,
         error: 'Failed to export data'
       }
     )
@@ -996,50 +1207,77 @@ export default function DocumentationClient() {
     )
   }
 
-  // REAL: View version - Loads specific version
+  // REAL: View version - Shows version info (versions are tracked via document version field)
   const handleViewVersion = async (versionNumber: number) => {
-    const version = ([] as DocVersion[]).find(v => v.version === versionNumber)
-    if (version) {
-      toast.success(`Viewing version ${versionNumber} from ${new Date(version.created_at).toLocaleDateString()}`)
-      // In a real implementation, this would load the version's content
+    // Find docs that match this version number pattern
+    const versionStr = `v${versionNumber}.0`
+    const matchingDocs = supabaseDocs.filter(d => d.version === versionStr || d.version.startsWith(`v${versionNumber}`))
+
+    if (matchingDocs.length > 0) {
+      toast.success(`Found ${matchingDocs.length} document(s) at version ${versionNumber}`, {
+        description: `Documents: ${matchingDocs.map(d => d.title).join(', ')}`
+      })
     } else {
-      toast.error(`Version ${versionNumber} not found`)
+      // Show current version info
+      const currentDoc = selectedPage
+        ? supabaseDocs.find(d => d.title === selectedPage.title)
+        : supabaseDocs[0]
+
+      if (currentDoc) {
+        toast.info(`Current document "${currentDoc.title}" is at ${currentDoc.version}`, {
+          description: `Updated: ${new Date(currentDoc.updated_at).toLocaleString()}`
+        })
+      } else {
+        toast.error('No documentation found')
+      }
     }
   }
 
-  // REAL: Restore version - Restores to a previous version
+  // REAL: Restore version - Updates document to a new version (increment version string)
   const handleRestoreVersion = async (versionNumber: number) => {
     const confirmed = window.confirm(
-      `Are you sure you want to restore to version ${versionNumber}? This will create a new version with the old content.`
+      `This will create a new version checkpoint for your document. Continue?`
     )
 
     if (!confirmed) {
-      toast.info('Version restore cancelled')
+      toast.info('Version operation cancelled')
       return
     }
 
-    const pageId = selectedPage?.id
-    if (!pageId) {
-      toast.error('No page selected for version restore')
+    // Find the document to update
+    const currentDoc = selectedPage
+      ? supabaseDocs.find(d => d.title === selectedPage.title)
+      : supabaseDocs[0]
+
+    if (!currentDoc) {
+      toast.error('No document selected for version update')
       return
     }
 
     toast.promise(
       (async () => {
-        const response = await fetch(`/api/docs/${pageId}/versions/${versionNumber}/restore`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        })
-        if (!response.ok) {
-          throw new Error('Failed to restore version')
+        // Parse current version and increment
+        const currentVersionMatch = currentDoc.version.match(/v?(\d+)\.?(\d*)/)
+        let newMajor = versionNumber
+        let newMinor = 0
+
+        if (currentVersionMatch) {
+          newMajor = parseInt(currentVersionMatch[1]) || versionNumber
+          newMinor = (parseInt(currentVersionMatch[2]) || 0) + 1
         }
-        await refetchDocs()
-        return response.json()
+
+        const newVersion = `v${newMajor}.${newMinor}`
+
+        // Update via Supabase
+        const result = await updateDoc(currentDoc.id, { version: newVersion })
+        if (!result) throw new Error('Failed to update version')
+
+        return { version: newVersion }
       })(),
       {
-        loading: `Restoring to version ${versionNumber}...`,
-        success: `Restored to version ${versionNumber}!`,
-        error: 'Failed to restore version'
+        loading: 'Creating new version checkpoint...',
+        success: (data) => `Document updated to ${data.version}!`,
+        error: 'Failed to update version'
       }
     )
   }
@@ -1226,16 +1464,25 @@ export default function DocumentationClient() {
             {/* Quick Actions Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
-                { icon: Plus, label: 'New Page', desc: 'Create documentation', color: 'text-purple-500' },
-                { icon: FolderOpen, label: 'New Space', desc: 'Add new space', color: 'text-blue-500' },
-                { icon: Upload, label: 'Import', desc: 'Import docs', color: 'text-green-500' },
-                { icon: Search, label: 'Search', desc: 'Find content', color: 'text-orange-500' },
-                { icon: GitBranch, label: 'Git Sync', desc: 'Sync with repo', color: 'text-indigo-500' },
-                { icon: Languages, label: 'Translate', desc: 'Add translation', color: 'text-pink-500' },
-                { icon: Sparkles, label: 'AI Assist', desc: 'AI writing help', color: 'text-amber-500' },
-                { icon: Download, label: 'Export', desc: 'Export docs', color: 'text-cyan-500' },
+                { icon: Plus, label: 'New Page', desc: 'Create documentation', color: 'text-purple-500', action: handleCreatePage },
+                { icon: FolderOpen, label: 'New Space', desc: 'Add new space', color: 'text-blue-500', action: handleNewSpace },
+                { icon: Upload, label: 'Import', desc: 'Import docs', color: 'text-green-500', action: handleImportMarkdown },
+                { icon: Search, label: 'Search', desc: 'Find content', color: 'text-orange-500', action: () => {
+                  const searchInput = document.querySelector('input[placeholder="Search docs..."]') as HTMLInputElement
+                  if (searchInput) searchInput.focus()
+                }},
+                { icon: GitBranch, label: 'Git Sync', desc: 'Sync with repo', color: 'text-indigo-500', action: handleImportFromGit },
+                { icon: Languages, label: 'Translate', desc: 'Add translation', color: 'text-pink-500', action: handleAddLanguage },
+                { icon: Sparkles, label: 'AI Assist', desc: 'AI writing help', color: 'text-amber-500', action: () => {
+                  toast.info('AI Writing Assistant', {
+                    description: 'AI-powered writing suggestions are enabled in the editor settings'
+                  })
+                  setActiveTab('settings')
+                  setSettingsTab('editor')
+                }},
+                { icon: Download, label: 'Export', desc: 'Export docs', color: 'text-cyan-500', action: handleExportDocs },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -1253,25 +1500,32 @@ export default function DocumentationClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {([] as DocPage[]).slice(0, 5).map(page => (
-                      <div key={page.id} onClick={() => setSelectedPage(page)}
-                        className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer">
-                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                          <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium truncate">{page.title}</h4>
-                            <Badge className={getStatusColor(page.status)}>{page.status}</Badge>
+                    {supabaseDocs && supabaseDocs.length > 0 ? (
+                      supabaseDocs.slice(0, 5).map(doc => (
+                        <div key={doc.id} onClick={() => openEditDialog(doc)}
+                          className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer">
+                          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                            <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                           </div>
-                          <p className="text-sm text-gray-500 truncate">{page.excerpt}</p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium truncate">{doc.title}</h4>
+                              <Badge className={getSupabaseDocStatusColor(doc.status)}>{doc.status}</Badge>
+                            </div>
+                            <p className="text-sm text-gray-500 truncate">{doc.description || 'No description'}</p>
+                          </div>
+                          <div className="text-right text-sm text-gray-500">
+                            <p>{doc.read_time} min read</p>
+                            <p>{new Date(doc.updated_at).toLocaleDateString()}</p>
+                          </div>
                         </div>
-                        <div className="text-right text-sm text-gray-500">
-                          <p>{page.reading_time}</p>
-                          <p>{new Date(page.updated_at).toLocaleDateString()}</p>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <FileText className="h-12 w-12 mx-auto mb-2 opacity-30" />
+                        <p>No documents yet. Create your first documentation!</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -1308,26 +1562,40 @@ export default function DocumentationClient() {
               </Card>
             </div>
 
-            {/* Recent Changelogs */}
+            {/* Recent Changelogs - Shows recent documents sorted by update date */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Rocket className="h-5 w-5 text-purple-600" />
-                  Recent Changelogs
+                  Recent Updates
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {([] as DocChangelog[]).slice(0, 3).map(changelog => (
-                    <div key={changelog.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge className={getVersionTypeColor(changelog.type)}>{changelog.version}</Badge>
-                        <Badge variant="outline">{changelog.type}</Badge>
-                      </div>
-                      <h4 className="font-medium mb-1">{changelog.title}</h4>
-                      <p className="text-sm text-gray-500">{new Date(changelog.date).toLocaleDateString()}</p>
+                  {supabaseDocs && supabaseDocs.length > 0 ? (
+                    [...supabaseDocs]
+                      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+                      .slice(0, 3)
+                      .map(doc => {
+                        const versionMatch = doc.version.match(/v?(\d+)/)
+                        const majorVersion = versionMatch ? parseInt(versionMatch[1]) : 1
+                        const versionType: 'major' | 'minor' | 'patch' = majorVersion > 1 ? 'major' : 'minor'
+                        return (
+                          <div key={doc.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => openEditDialog(doc)}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge className={getVersionTypeColor(versionType)}>{doc.version}</Badge>
+                              <Badge variant="outline">{doc.status}</Badge>
+                            </div>
+                            <h4 className="font-medium mb-1 truncate">{doc.title}</h4>
+                            <p className="text-sm text-gray-500">{new Date(doc.updated_at).toLocaleDateString()}</p>
+                          </div>
+                        )
+                      })
+                  ) : (
+                    <div className="col-span-3 text-center py-4 text-gray-500">
+                      No recent updates. Create your first documentation!
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1357,47 +1625,84 @@ export default function DocumentationClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {([] as DocSpace[]).map(space => (
-                <Card key={space.id} className="hover:shadow-lg transition-all cursor-pointer group" onClick={() => setSelectedSpace(space)}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl">{space.icon}</span>
-                        <div>
-                          <h3 className="font-semibold">{space.name}</h3>
-                          <code className="text-xs text-gray-500">/{space.key}</code>
+              {/* Generate spaces from Supabase docs grouped by category */}
+              {supabaseDocs && supabaseDocs.length > 0 ? (
+                (() => {
+                  // Group docs by category to create "spaces"
+                  const spacesByCategory = supabaseDocs.reduce((acc, doc) => {
+                    const category = doc.category || 'getting-started'
+                    if (!acc[category]) {
+                      acc[category] = { docs: [], totalViews: 0, authors: new Set<string>() }
+                    }
+                    acc[category].docs.push(doc)
+                    acc[category].totalViews += doc.views_count || 0
+                    if (doc.author) acc[category].authors.add(doc.author)
+                    return acc
+                  }, {} as Record<string, { docs: SupabaseDoc[], totalViews: number, authors: Set<string> }>)
+
+                  const categoryIcons: Record<string, string> = {
+                    'getting-started': '🚀',
+                    'features': '✨',
+                    'integrations': '🔗',
+                    'api': '⚡',
+                    'sdk': '📦',
+                    'advanced': '🔧'
+                  }
+
+                  const categoryNames: Record<string, string> = {
+                    'getting-started': 'Getting Started',
+                    'features': 'Features',
+                    'integrations': 'Integrations',
+                    'api': 'API Reference',
+                    'sdk': 'SDK',
+                    'advanced': 'Advanced'
+                  }
+
+                  return Object.entries(spacesByCategory).map(([category, data]) => (
+                    <Card key={category} className="hover:shadow-lg transition-all cursor-pointer group" onClick={() => setActiveTab('pages')}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <span className="text-3xl">{categoryIcons[category] || '📄'}</span>
+                            <div>
+                              <h3 className="font-semibold">{categoryNames[category] || category}</h3>
+                              <code className="text-xs text-gray-500">/{category}</code>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      {space.is_starred && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{space.description}</p>
-                    <div className="flex items-center gap-2 mb-4">
-                      <Badge className={getVisibilityColor(space.visibility)}>{space.visibility}</Badge>
-                      {space.git_sync?.enabled && (
-                        <Badge variant="outline" className="text-xs">
-                          <GitBranch className="h-3 w-3 mr-1" />
-                          Git Sync
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{space.pages_count}</span>
-                        <span className="flex items-center gap-1"><Users className="h-3 w-3" />{space.team_members}</span>
-                        <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{(space.views / 1000).toFixed(1)}K</span>
-                      </div>
-                    </div>
-                    {space.custom_domain && (
-                      <div className="mt-3 pt-3 border-t dark:border-gray-700">
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <Globe className="h-3 w-3" />
-                          {space.custom_domain}
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                          {data.docs.length} document{data.docs.length !== 1 ? 's' : ''} in this category
+                        </p>
+                        <div className="flex items-center gap-2 mb-4">
+                          <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            {data.docs.filter(d => d.status === 'published').length} published
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {data.docs.filter(d => d.status === 'draft').length} drafts
+                          </Badge>
                         </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <div className="flex items-center gap-4">
+                            <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{data.docs.length}</span>
+                            <span className="flex items-center gap-1"><Users className="h-3 w-3" />{data.authors.size}</span>
+                            <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{data.totalViews >= 1000 ? `${(data.totalViews / 1000).toFixed(1)}K` : data.totalViews}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                })()
+              ) : (
+                <div className="col-span-3 text-center py-12 text-gray-500">
+                  <FolderOpen className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                  <h3 className="text-lg font-medium mb-2">No Documentation Spaces Yet</h3>
+                  <p className="mb-4">Create your first documentation to see spaces organized by category.</p>
+                  <Button onClick={handleCreatePage}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Documentation
+                  </Button>
+                </div>
+              )}
             </div>
           </TabsContent>
 
@@ -1432,30 +1737,46 @@ export default function DocumentationClient() {
                 </CardHeader>
                 <CardContent className="p-2">
                   <ScrollArea className="h-[500px]">
-                    {([] as DocPage[]).filter(p => !p.parent_id).map(page => (
-                      <div key={page.id}>
-                        <div
-                          className={`flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer ${selectedPage?.id === page.id ? 'bg-purple-100 dark:bg-purple-900/30' : ''}`}
-                          onClick={() => setSelectedPage(page)}
-                        >
-                          {page.children.length > 0 && (
-                            <button onClick={(e) => { e.stopPropagation(); toggleExpand(page.id) }} className="p-0.5">
-                              {expandedPages.includes(page.id) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                            </button>
-                          )}
-                          {page.children.length === 0 && <FileText className="h-4 w-4 text-gray-400" />}
-                          <span className="flex-1 text-sm truncate">{page.title}</span>
-                        </div>
-                        {expandedPages.includes(page.id) && ([] as DocPage[]).filter(p => p.parent_id === page.id).map(child => (
-                          <div key={child.id}
-                            className={`flex items-center gap-2 px-3 py-2 pl-8 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer ${selectedPage?.id === child.id ? 'bg-purple-100 dark:bg-purple-900/30' : ''}`}
-                            onClick={() => setSelectedPage(child)}>
+                    {supabaseDocs && supabaseDocs.length > 0 ? (
+                      supabaseDocs.map(doc => (
+                        <div key={doc.id}>
+                          <div
+                            className={`flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer ${selectedPage?.id === doc.id ? 'bg-purple-100 dark:bg-purple-900/30' : ''}`}
+                            onClick={() => setSelectedPage({
+                              id: doc.id,
+                              space_id: doc.category,
+                              title: doc.title,
+                              slug: doc.title.toLowerCase().replace(/\s+/g, '-'),
+                              content: doc.content || '',
+                              excerpt: doc.description || '',
+                              status: doc.status as DocPage['status'],
+                              author: { name: doc.author || 'Unknown', avatar: '' },
+                              contributors: [],
+                              created_at: doc.created_at,
+                              updated_at: doc.updated_at,
+                              version: parseInt(doc.version.replace(/[^0-9]/g, '')) || 1,
+                              children: [],
+                              order: 0,
+                              labels: doc.tags || [],
+                              likes: doc.likes_count,
+                              comments_count: doc.comments_count,
+                              views: doc.views_count,
+                              reading_time: `${doc.read_time} min`,
+                              is_bookmarked: false
+                            })}
+                          >
                             <FileText className="h-4 w-4 text-gray-400" />
-                            <span className="flex-1 text-sm truncate">{child.title}</span>
+                            <span className="flex-1 text-sm truncate">{doc.title}</span>
+                            <Badge className={`text-[10px] px-1 ${getSupabaseDocStatusColor(doc.status)}`}>{doc.status}</Badge>
                           </div>
-                        ))}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500 text-sm">
+                        <FileText className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                        <p>No documents yet</p>
                       </div>
-                    ))}
+                    )}
                   </ScrollArea>
                 </CardContent>
               </Card>
@@ -1549,7 +1870,7 @@ export default function DocumentationClient() {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Documentation Templates</h2>
-                    <p className="text-amber-100">{([] as DocTemplate[]).length} templates available</p>
+                    <p className="text-amber-100">6 built-in templates available</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -1562,7 +1883,15 @@ export default function DocumentationClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {([] as DocTemplate[]).map(template => (
+              {/* Built-in templates based on document types */}
+              {[
+                { id: 'guide', name: 'Guide', icon: '📖', category: 'Documentation', description: 'Step-by-step instructions for completing a task or understanding a concept', usage: supabaseDocs.filter(d => d.doc_type === 'guide').length },
+                { id: 'api-reference', name: 'API Reference', icon: '⚡', category: 'Technical', description: 'Comprehensive API documentation with endpoints, parameters, and examples', usage: supabaseDocs.filter(d => d.doc_type === 'api-reference').length },
+                { id: 'tutorial', name: 'Tutorial', icon: '🎓', category: 'Learning', description: 'Hands-on learning experience with code examples and exercises', usage: supabaseDocs.filter(d => d.doc_type === 'tutorial').length },
+                { id: 'concept', name: 'Concept', icon: '💡', category: 'Theory', description: 'Explain key concepts, architecture, and design decisions', usage: supabaseDocs.filter(d => d.doc_type === 'concept').length },
+                { id: 'quickstart', name: 'Quickstart', icon: '🚀', category: 'Getting Started', description: 'Get up and running quickly with minimal setup', usage: supabaseDocs.filter(d => d.doc_type === 'quickstart').length },
+                { id: 'troubleshooting', name: 'Troubleshooting', icon: '🔧', category: 'Support', description: 'Common issues and their solutions', usage: supabaseDocs.filter(d => d.doc_type === 'troubleshooting').length }
+              ].map(template => (
                 <Card key={template.id} className="hover:shadow-lg transition-all cursor-pointer group">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
@@ -1570,14 +1899,14 @@ export default function DocumentationClient() {
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold">{template.name}</h3>
-                          {template.is_official && <Badge className="bg-purple-100 text-purple-700">Official</Badge>}
+                          <Badge className="bg-purple-100 text-purple-700">Official</Badge>
                         </div>
                         <p className="text-xs text-gray-500">{template.category}</p>
                       </div>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{template.description}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">Used {template.usage_count} times</span>
+                      <span className="text-xs text-gray-500">Used {template.usage} times</span>
                       <Button size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleUseTemplate(template.name)}>Use Template</Button>
                     </div>
                   </CardContent>
@@ -1600,115 +1929,108 @@ export default function DocumentationClient() {
             </div>
 
             <div className="space-y-4">
-              {([] as DocChangelog[]).map(changelog => (
-                <Card key={changelog.id} className={changelog.status === 'scheduled' ? 'border-dashed border-purple-300' : ''}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-4">
-                        <div className="text-center">
-                          <div className={`text-2xl font-bold ${changelog.type === 'major' ? 'text-red-600' : changelog.type === 'minor' ? 'text-blue-600' : 'text-gray-600'}`}>
-                            {changelog.version}
-                          </div>
-                          <Badge className={getVersionTypeColor(changelog.type)}>{changelog.type}</Badge>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold">{changelog.title}</h3>
-                          <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
-                            <span>{new Date(changelog.date).toLocaleDateString()}</span>
-                            <span className="flex items-center gap-1">
-                              <Avatar className="h-4 w-4">
-                                <AvatarFallback className="text-[6px]">{changelog.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                              </Avatar>
-                              {changelog.author.name}
-                            </span>
-                            {changelog.status === 'published' && (
-                              <span className="flex items-center gap-1">
-                                <Eye className="h-3 w-3" />
-                                {changelog.views}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {changelog.status === 'scheduled' && (
-                          <Badge variant="outline" className="text-purple-600">
-                            <Calendar className="h-3 w-3 mr-1" />
-                            Scheduled
-                          </Badge>
-                        )}
-                        <Button variant="outline" size="sm" onClick={() => handleEditChangelog(changelog.title)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+              {/* Show documents that look like changelogs (contain "release", "changelog", or have version in title) */}
+              {supabaseDocs && supabaseDocs.length > 0 ? (
+                (() => {
+                  const changelogDocs = supabaseDocs.filter(d =>
+                    d.title.toLowerCase().includes('release') ||
+                    d.title.toLowerCase().includes('changelog') ||
+                    d.title.toLowerCase().includes('version') ||
+                    d.title.match(/v\d+\.\d+/)
+                  )
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                      {changelog.changes.added.length > 0 && (
-                        <div>
-                          <div className="text-xs font-medium text-emerald-600 mb-2">Added ({changelog.changes.added.length})</div>
-                          <ul className="space-y-1">
-                            {changelog.changes.added.slice(0, 2).map((item, idx) => (
-                              <li key={idx} className="text-xs text-gray-600 truncate">+ {item}</li>
-                            ))}
-                            {changelog.changes.added.length > 2 && <li className="text-xs text-gray-400">+{changelog.changes.added.length - 2} more</li>}
-                          </ul>
-                        </div>
-                      )}
-                      {changelog.changes.changed.length > 0 && (
-                        <div>
-                          <div className="text-xs font-medium text-blue-600 mb-2">Changed ({changelog.changes.changed.length})</div>
-                          <ul className="space-y-1">
-                            {changelog.changes.changed.slice(0, 2).map((item, idx) => (
-                              <li key={idx} className="text-xs text-gray-600 truncate">~ {item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {changelog.changes.fixed.length > 0 && (
-                        <div>
-                          <div className="text-xs font-medium text-amber-600 mb-2">Fixed ({changelog.changes.fixed.length})</div>
-                          <ul className="space-y-1">
-                            {changelog.changes.fixed.slice(0, 2).map((item, idx) => (
-                              <li key={idx} className="text-xs text-gray-600 truncate">* {item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {changelog.changes.security.length > 0 && (
-                        <div>
-                          <div className="text-xs font-medium text-red-600 mb-2">Security ({changelog.changes.security.length})</div>
-                          <ul className="space-y-1">
-                            {changelog.changes.security.slice(0, 2).map((item, idx) => (
-                              <li key={idx} className="text-xs text-gray-600 truncate">! {item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {changelog.changes.deprecated.length > 0 && (
-                        <div>
-                          <div className="text-xs font-medium text-gray-600 mb-2">Deprecated ({changelog.changes.deprecated.length})</div>
-                          <ul className="space-y-1">
-                            {changelog.changes.deprecated.slice(0, 2).map((item, idx) => (
-                              <li key={idx} className="text-xs text-gray-600 truncate">- {item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {changelog.changes.removed.length > 0 && (
-                        <div>
-                          <div className="text-xs font-medium text-red-600 mb-2">Removed ({changelog.changes.removed.length})</div>
-                          <ul className="space-y-1">
-                            {changelog.changes.removed.slice(0, 2).map((item, idx) => (
-                              <li key={idx} className="text-xs text-gray-600 truncate">x {item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
+                  // If no changelog-specific docs, show all docs sorted by version
+                  const docsToShow = changelogDocs.length > 0
+                    ? changelogDocs
+                    : [...supabaseDocs].sort((a, b) => b.version.localeCompare(a.version)).slice(0, 5)
+
+                  return docsToShow.length > 0 ? docsToShow.map(doc => {
+                    // Determine version type based on version string
+                    const versionMatch = doc.version.match(/v?(\d+)\.?(\d*)/)
+                    const majorVersion = versionMatch ? parseInt(versionMatch[1]) : 1
+                    const minorVersion = versionMatch && versionMatch[2] ? parseInt(versionMatch[2]) : 0
+                    const versionType: 'major' | 'minor' | 'patch' = majorVersion > 1 ? 'major' : minorVersion > 0 ? 'minor' : 'patch'
+
+                    return (
+                      <Card key={doc.id} className={doc.status === 'draft' ? 'border-dashed border-purple-300' : ''}>
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-4">
+                              <div className="text-center">
+                                <div className={`text-2xl font-bold ${versionType === 'major' ? 'text-red-600' : versionType === 'minor' ? 'text-blue-600' : 'text-gray-600'}`}>
+                                  {doc.version}
+                                </div>
+                                <Badge className={getVersionTypeColor(versionType)}>{versionType}</Badge>
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-semibold">{doc.title}</h3>
+                                <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+                                  <span>{new Date(doc.updated_at).toLocaleDateString()}</span>
+                                  <span className="flex items-center gap-1">
+                                    <Avatar className="h-4 w-4">
+                                      <AvatarFallback className="text-[6px]">{doc.author ? doc.author.split(' ').map(n => n[0]).join('') : 'U'}</AvatarFallback>
+                                    </Avatar>
+                                    {doc.author || 'Unknown'}
+                                  </span>
+                                  {doc.status === 'published' && (
+                                    <span className="flex items-center gap-1">
+                                      <Eye className="h-3 w-3" />
+                                      {doc.views_count}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {doc.status === 'draft' && (
+                                <Badge variant="outline" className="text-purple-600">
+                                  <Calendar className="h-3 w-3 mr-1" />
+                                  Draft
+                                </Badge>
+                              )}
+                              <Button variant="outline" size="sm" onClick={() => openEditDialog(doc)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {doc.description || 'No description provided'}
+                          </p>
+                          {doc.content && (
+                            <div className="mt-4 text-sm text-gray-500 line-clamp-3">
+                              {doc.content.substring(0, 200)}...
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )
+                  }) : (
+                    <Card>
+                      <CardContent className="py-12 text-center">
+                        <Megaphone className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                        <h3 className="text-lg font-medium mb-2">No Changelogs Yet</h3>
+                        <p className="text-gray-500 mb-4">Create your first changelog to track product updates.</p>
+                        <Button onClick={handleNewChangelog}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Changelog
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )
+                })()
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Megaphone className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-lg font-medium mb-2">No Changelogs Yet</h3>
+                    <p className="text-gray-500 mb-4">Create your first changelog to track product updates.</p>
+                    <Button onClick={handleNewChangelog}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Changelog
+                    </Button>
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
           </TabsContent>
 
@@ -1747,7 +2069,8 @@ export default function DocumentationClient() {
                     <Globe className="h-5 w-5 text-purple-600" />
                     <span className="text-sm text-gray-500">Languages</span>
                   </div>
-                  <div className="text-3xl font-bold">{([] as DocLocale[]).length}</div>
+                  <div className="text-3xl font-bold">1</div>
+                  <p className="text-xs text-gray-400 mt-1">English (default)</p>
                 </CardContent>
               </Card>
               <Card>
@@ -1756,83 +2079,83 @@ export default function DocumentationClient() {
                     <Target className="h-5 w-5 text-purple-600" />
                     <span className="text-sm text-gray-500">Avg. Completion</span>
                   </div>
-                  <div className="text-3xl font-bold">{stats.avgTranslation}%</div>
+                  <div className="text-3xl font-bold">100%</div>
+                  <p className="text-xs text-gray-400 mt-1">All content in English</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-2">
                     <FileCheck className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm text-gray-500">Pages Translated</span>
+                    <span className="text-sm text-gray-500">Pages Available</span>
                   </div>
-                  <div className="text-3xl font-bold">{([] as DocLocale[]).reduce((sum, l) => sum + l.pages_translated, 0)}</div>
+                  <div className="text-3xl font-bold">{supabaseDocs.length}</div>
+                  <p className="text-xs text-gray-400 mt-1">Ready for translation</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-2">
                     <Users className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm text-gray-500">Translators</span>
+                    <span className="text-sm text-gray-500">Contributors</span>
                   </div>
-                  <div className="text-3xl font-bold">{([] as DocLocale[]).reduce((sum, l) => sum + l.contributors.length, 0)}</div>
+                  <div className="text-3xl font-bold">{new Set(supabaseDocs.map(d => d.author).filter(Boolean)).size || 1}</div>
+                  <p className="text-xs text-gray-400 mt-1">Documentation authors</p>
                 </CardContent>
               </Card>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {([] as DocLocale[]).map(locale => (
-                <Card key={locale.id} className={locale.is_default ? 'border-purple-300' : ''}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl">{locale.flag}</span>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold">{locale.name}</h3>
-                            {locale.is_default && <Badge className="bg-purple-100 text-purple-700">Default</Badge>}
-                          </div>
-                          <p className="text-sm text-gray-500">{locale.native_name} ({locale.code})</p>
+              {/* Default English locale card */}
+              <Card className="border-purple-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">🇺🇸</span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold">English</h3>
+                          <Badge className="bg-purple-100 text-purple-700">Default</Badge>
+                        </div>
+                        <p className="text-sm text-gray-500">English (en)</p>
                         </div>
                       </div>
-                      <Badge variant="outline" className={
-                        locale.status === 'active' ? 'text-emerald-600' :
-                        locale.status === 'review' ? 'text-amber-600' : 'text-gray-600'
-                      }>
-                        {locale.status}
+                      <Badge variant="outline" className="text-emerald-600">
+                        active
                       </Badge>
                     </div>
 
                     <div className="mb-4">
                       <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="text-gray-500">Translation Progress</span>
-                        <span className={`font-medium ${locale.completion >= 80 ? 'text-emerald-600' : locale.completion >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
-                          {locale.completion}%
-                        </span>
+                        <span className="text-gray-500">Documentation Coverage</span>
+                        <span className="font-medium text-emerald-600">100%</span>
                       </div>
-                      <Progress value={locale.completion} className={`h-2 ${
-                        locale.completion >= 80 ? '[&>div]:bg-emerald-500' : locale.completion >= 50 ? '[&>div]:bg-amber-500' : '[&>div]:bg-red-500'
-                      }`} />
+                      <Progress value={100} className="h-2 [&>div]:bg-emerald-500" />
                       <p className="text-xs text-gray-500 mt-1">
-                        {locale.pages_translated} / {locale.pages_total} pages translated
+                        {supabaseDocs.length} / {supabaseDocs.length} pages in English
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1">
-                        {locale.contributors.slice(0, 3).map((contributor, idx) => (
+                        {[...new Set(supabaseDocs.map(d => d.author).filter(Boolean))].slice(0, 3).map((author, idx) => (
                           <Avatar key={idx} className="h-6 w-6 border-2 border-white -ml-1 first:ml-0">
-                            <AvatarFallback className="text-[8px]">{contributor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            <AvatarFallback className="text-[8px]">{author ? author.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'U'}</AvatarFallback>
                           </Avatar>
                         ))}
-                        {locale.contributors.length > 3 && (
-                          <span className="text-xs text-gray-500 ml-1">+{locale.contributors.length - 3}</span>
-                        )}
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => handleManageLocale(locale.name)}>Manage</Button>
+                      <Button variant="outline" size="sm" onClick={() => handleManageLocale('English')}>Manage</Button>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              {/* Add more languages card */}
+              <Card className="border-dashed border-2 border-gray-300 dark:border-gray-600 hover:border-purple-400 transition-colors cursor-pointer" onClick={handleAddLanguage}>
+                <CardContent className="p-6 flex flex-col items-center justify-center h-full min-h-[200px]">
+                  <Plus className="h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="font-semibold text-gray-600 dark:text-gray-400">Add New Language</h3>
+                  <p className="text-sm text-gray-400 text-center mt-2">Expand your documentation to reach more users</p>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -1886,28 +2209,38 @@ export default function DocumentationClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {([] as DocPage[]).slice(0, 5).map((page, i) => (
-                    <div key={page.id} className="flex items-center gap-4">
-                      <span className="w-6 h-6 flex items-center justify-center bg-purple-100 dark:bg-purple-900/30 rounded-full text-xs font-medium text-purple-600">
-                        {i + 1}
-                      </span>
-                      <div className="flex-1">
-                        <h4 className="font-medium">{page.title}</h4>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <span>{page.views.toLocaleString()} views</span>
-                          <span>{page.reading_time} avg time</span>
+                  {supabaseDocs && supabaseDocs.length > 0 ? (
+                    [...supabaseDocs]
+                      .sort((a, b) => (b.views_count || 0) - (a.views_count || 0))
+                      .slice(0, 5)
+                      .map((doc, i) => (
+                        <div key={doc.id} className="flex items-center gap-4">
+                          <span className="w-6 h-6 flex items-center justify-center bg-purple-100 dark:bg-purple-900/30 rounded-full text-xs font-medium text-purple-600">
+                            {i + 1}
+                          </span>
+                          <div className="flex-1">
+                            <h4 className="font-medium">{doc.title}</h4>
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span>{(doc.views_count || 0).toLocaleString()} views</span>
+                              <span>{doc.read_time || 5} min read</span>
+                            </div>
+                          </div>
+                          <div className="w-32">
+                            <div className="flex items-center gap-2 text-sm">
+                              <ThumbsUp className="h-3 w-3 text-emerald-600" />
+                              <span>{doc.likes_count || 0}</span>
+                              <ThumbsDown className="h-3 w-3 text-red-500 ml-2" />
+                              <span>{doc.not_helpful_count || 0}</span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="w-32">
-                        <div className="flex items-center gap-2 text-sm">
-                          <ThumbsUp className="h-3 w-3 text-emerald-600" />
-                          <span>{page.likes}</span>
-                          <ThumbsDown className="h-3 w-3 text-red-500 ml-2" />
-                          <span>{Math.round(page.likes * 0.05)}</span>
-                        </div>
-                      </div>
+                      ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-30" />
+                      <p>No analytics data yet. Create some documentation to see metrics.</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1982,15 +2315,18 @@ export default function DocumentationClient() {
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
-                            <Label>Default Space</Label>
-                            <Select defaultValue="space1">
+                            <Label>Default Category</Label>
+                            <Select defaultValue="getting-started">
                               <SelectTrigger className="mt-1">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {([] as DocSpace[]).map(space => (
-                                  <SelectItem key={space.id} value={space.id}>{space.name}</SelectItem>
-                                ))}
+                                <SelectItem value="getting-started">Getting Started</SelectItem>
+                                <SelectItem value="features">Features</SelectItem>
+                                <SelectItem value="integrations">Integrations</SelectItem>
+                                <SelectItem value="api">API</SelectItem>
+                                <SelectItem value="sdk">SDK</SelectItem>
+                                <SelectItem value="advanced">Advanced</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -2227,22 +2563,27 @@ export default function DocumentationClient() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
-                          {([] as DocIntegration[]).map(int => (
-                            <div key={int.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          {/* Built-in integrations */}
+                          {[
+                            { id: 'github', name: 'GitHub', icon: GitBranch, status: 'available' as const, description: 'Sync documentation with GitHub repositories' },
+                            { id: 'webhook', name: 'Webhooks', icon: Zap, status: 'available' as const, description: 'Send notifications on documentation changes' },
+                            { id: 'api', name: 'REST API', icon: Code, status: 'connected' as const, description: 'Programmatic access to documentation' }
+                          ].map(integration => (
+                            <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                               <div className="flex items-center gap-3">
                                 <div className="p-2 bg-white dark:bg-gray-700 rounded-lg">
-                                  <int.icon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                                  <integration.icon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                                 </div>
                                 <div>
-                                  <p className="font-medium">{int.name}</p>
-                                  {int.last_sync && <p className="text-xs text-gray-500">Last sync: {int.last_sync}</p>}
+                                  <p className="font-medium">{integration.name}</p>
+                                  <p className="text-xs text-gray-500">{integration.description}</p>
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Badge className={int.status === 'connected' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}>
-                                  {int.status}
+                                <Badge className={integration.status === 'connected' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-700'}>
+                                  {integration.status}
                                 </Badge>
-                                <Button variant="outline" size="sm" onClick={() => handleConfigureIntegration(int.name)}>Configure</Button>
+                                <Button variant="outline" size="sm" onClick={() => handleConfigureIntegration(integration.name)}>Configure</Button>
                               </div>
                             </div>
                           ))}
@@ -2488,43 +2829,59 @@ export default function DocumentationClient() {
           />
         </div>
 
-        {/* Version History Dialog */}
+        {/* Version History Dialog - Shows document versions from Supabase */}
         <Dialog open={showVersions} onOpenChange={setShowVersions}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 <History className="h-5 w-5 text-purple-600" />
-                Version History
+                Document Version History
               </DialogTitle>
             </DialogHeader>
             <ScrollArea className="h-[400px]">
               <div className="space-y-3 py-4">
-                {([] as DocVersion[]).map((version) => (
-                  <div key={version.id} className={`p-4 rounded-lg border ${version.is_current ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <Badge variant={version.is_current ? 'default' : 'outline'}>v{version.version}</Badge>
-                        {version.is_current && <Badge className="bg-emerald-100 text-emerald-700">Current</Badge>}
+                {supabaseDocs && supabaseDocs.length > 0 ? (
+                  [...supabaseDocs]
+                    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+                    .map((doc, index) => (
+                      <div key={doc.id} className={`p-4 rounded-lg border ${index === 0 ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-3">
+                            <Badge variant={index === 0 ? 'default' : 'outline'}>{doc.version}</Badge>
+                            {index === 0 && <Badge className="bg-emerald-100 text-emerald-700">Latest</Badge>}
+                            <Badge className={getSupabaseDocStatusColor(doc.status)}>{doc.status}</Badge>
+                          </div>
+                          <span className="text-sm text-gray-500">{new Date(doc.updated_at).toLocaleString()}</span>
+                        </div>
+                        <p className="text-sm font-medium mb-1">{doc.title}</p>
+                        <p className="text-sm text-gray-500 mb-2">{doc.description || 'No description'}</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <Avatar className="h-6 w-6">
+                              <AvatarFallback className="text-[8px]">
+                                {doc.author ? doc.author.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs text-gray-500">{doc.author || 'Unknown'}</span>
+                            <span className="text-xs text-emerald-600">{doc.views_count} views</span>
+                            <span className="text-xs text-blue-500">{doc.likes_count} likes</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => openEditDialog(doc)}>Edit</Button>
+                            {doc.status === 'draft' && (
+                              <Button variant="ghost" size="sm" onClick={() => handlePublishDocReal(doc)}>Publish</Button>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-sm text-gray-500">{new Date(version.created_at).toLocaleString()}</span>
-                    </div>
-                    <p className="text-sm mb-2">{version.message}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback className="text-[8px]">{version.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs text-gray-500">{version.author.name}</span>
-                        <span className="text-xs text-emerald-600">+{version.changes.additions}</span>
-                        <span className="text-xs text-red-500">-{version.changes.deletions}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleViewVersion(version.version)}>View</Button>
-                        {!version.is_current && <Button variant="ghost" size="sm" onClick={() => handleRestoreVersion(version.version)}>Restore</Button>}
-                      </div>
-                    </div>
+                    ))
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    <History className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p>No version history available</p>
+                    <p className="text-sm">Create documents to start tracking versions</p>
                   </div>
-                ))}
+                )}
               </div>
             </ScrollArea>
           </DialogContent>

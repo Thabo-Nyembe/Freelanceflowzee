@@ -78,6 +78,7 @@ type NotificationAction =
   | { type: 'MARK_AS_READ'; payload: string }
   | { type: 'MARK_ALL_READ' }
   | { type: 'ARCHIVE_NOTIFICATION'; payload: string }
+  | { type: 'UNARCHIVE_NOTIFICATION'; payload: string }
   | { type: 'DELETE_NOTIFICATION'; payload: string }
   | { type: 'SET_FILTER'; payload: NotificationState['filter'] }
   | { type: 'SET_SEARCH'; payload: string }
@@ -115,6 +116,13 @@ function notificationReducer(state: NotificationState, action: NotificationActio
         ...state,
         notifications: state.notifications.map(n =>
           n.id === action.payload ? { ...n, archived: true } : n
+        )
+      }
+    case 'UNARCHIVE_NOTIFICATION':
+      return {
+        ...state,
+        notifications: state.notifications.map(n =>
+          n.id === action.payload ? { ...n, archived: false } : n
         )
       }
     case 'DELETE_NOTIFICATION':
@@ -527,7 +535,13 @@ export default function NotificationsPage() {
   }
 
   const handleUnarchive = async (id: string) => {
-    logger.info('Unarchiving notification', { notificationId: id })
+    const notification = state.notifications.find(n => n.id === id)
+
+    logger.info('Unarchiving notification', {
+      notificationId: id,
+      title: notification?.title,
+      type: notification?.type
+    })
 
     try {
       // Call API to unarchive (update the archived flag)
@@ -535,27 +549,91 @@ export default function NotificationsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'archive',
-          data: {
-            notificationId: id,
-            archived: false // Unarchive
-          }
+          action: 'unarchive',
+          notificationId: id
         })
       })
 
-      if (response.ok) {
-        toast.success('Notification unarchived')
+      if (!response.ok) {
+        throw new Error('Failed to unarchive notification')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Update local state
+        dispatch({ type: 'UNARCHIVE_NOTIFICATION', payload: id })
+
+        logger.info('Notification unarchived successfully', { notificationId: id })
+
+        // Show success message
+        toast.success(`${notification?.title || 'Notification'} moved to inbox`)
       }
     } catch (error) {
-      logger.error('Failed to unarchive notification', { error: error instanceof Error ? error.message : String(error) })
-      toast.error('Failed to unarchive notification')
+      logger.error('Failed to unarchive notification', {
+        notificationId: id,
+        error: error instanceof Error ? error.message : String(error)
+      })
+      toast.error('Failed to unarchive notification', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
     }
   }
 
   const handleFilterAll = () => { logger.debug('Filtering all notifications'); dispatch({ type: 'SET_FILTER', payload: 'all' }) }
   const handleFilterUnread = () => { logger.debug('Filtering unread notifications'); dispatch({ type: 'SET_FILTER', payload: 'unread' }) }
   const handleFilterRead = () => { logger.debug('Filtering read notifications'); dispatch({ type: 'SET_FILTER', payload: 'read' }) }
-  const handleExportNotifications = () => { const count = state.notifications.length; logger.info('Exporting notifications', { count }); toast.success('Exporting notifications...') }
+  const handleExportNotifications = async () => {
+    const count = state.notifications.length
+    logger.info('Exporting notifications', { count })
+
+    if (count === 0) {
+      toast.error('No notifications to export')
+      return
+    }
+
+    try {
+      // Generate CSV content from real notification data
+      const headers = ['ID', 'Title', 'Message', 'Type', 'Category', 'Priority', 'Read', 'Archived', 'Timestamp']
+      const csvRows = [headers.join(',')]
+
+      state.notifications.forEach(notification => {
+        const row = [
+          notification.id,
+          `"${notification.title.replace(/"/g, '""')}"`,
+          `"${notification.message.replace(/"/g, '""')}"`,
+          notification.type,
+          notification.category,
+          notification.priority,
+          notification.read ? 'Yes' : 'No',
+          notification.archived ? 'Yes' : 'No',
+          notification.timestamp.toISOString()
+        ]
+        csvRows.push(row.join(','))
+      })
+
+      const csvContent = csvRows.join('\n')
+
+      // Create blob and trigger download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.setAttribute('href', url)
+      link.setAttribute('download', `notifications-export-${new Date().toISOString().split('T')[0]}.csv`)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      logger.info('Notifications exported successfully', { count })
+      toast.success(`Exported ${count} notifications to CSV`)
+    } catch (error) {
+      logger.error('Failed to export notifications', { error: error instanceof Error ? error.message : String(error) })
+      toast.error('Failed to export notifications', {
+        description: 'Please try again'
+      })
+    }
+  }
   const handleClearAll = () => { const count = state.notifications.length; logger.info('Clearing all notifications initiated', { count }); setShowClearAllConfirm(true) }
 
   const handleConfirmClearAll = async () => {
@@ -784,6 +862,9 @@ export default function NotificationsPage() {
 
     return matchesSearch && matchesFilter && !notification.archived
   })
+
+  // Get archived notifications for the Archive tab
+  const archivedNotifications = state.notifications.filter(notification => notification.archived)
 
   const unreadCount = state.notifications.filter(n => !n.read && !n.archived).length
 
@@ -1156,17 +1237,83 @@ export default function NotificationsPage() {
 
           <TabsContent value="archive" className="space-y-6">
             <LiquidGlassCard>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <TextShimmer className="text-xl font-bold" duration={2}>
                   Archived Notifications
                 </TextShimmer>
+                {archivedNotifications.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExportNotifications}
+                  >
+                    Export Archive
+                  </Button>
+                )}
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <Archive className="w-12 h-12 mx-auto mb-4 text-gray-500" />
-                  <h3 className="text-lg font-medium text-white mb-2">No archived notifications</h3>
-                  <p className="text-gray-400">Archived notifications will appear here</p>
-                </div>
+                {archivedNotifications.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Archive className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+                    <h3 className="text-lg font-medium text-white mb-2">No archived notifications</h3>
+                    <p className="text-gray-400">Archived notifications will appear here</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {archivedNotifications.map((notification) => {
+                      const TypeIcon = getTypeIcon(notification.type)
+                      const typeColor = getTypeColor(notification.type)
+
+                      return (
+                        <div
+                          key={notification.id}
+                          className="flex items-start gap-4 p-4 border border-slate-700 rounded-lg bg-slate-800/30"
+                        >
+                          <div className={`p-2 rounded-full ${typeColor}`}>
+                            <TypeIcon className="w-5 h-5" />
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="font-medium text-gray-300">
+                                {notification.title}
+                              </h3>
+                              <span className="text-xs text-gray-500">{formatTimestamp(notification.timestamp)}</span>
+                            </div>
+
+                            <p className="text-sm text-gray-400 mb-3">{notification.message}</p>
+
+                            <div className="flex items-center justify-between">
+                              <Badge variant="outline" className="text-xs">
+                                {notification.category}
+                              </Badge>
+
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-2 text-xs"
+                                  onClick={() => handleUnarchive(notification.id)}
+                                >
+                                  <RefreshCw className="w-3 h-3 mr-1" />
+                                  Unarchive
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0 text-red-400 hover:text-red-300"
+                                  onClick={() => handleDelete(notification.id)}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </CardContent>
             </LiquidGlassCard>
           </TabsContent>

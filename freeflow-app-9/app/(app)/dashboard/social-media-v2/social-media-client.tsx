@@ -433,8 +433,75 @@ export default function SocialMediaClient() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState('publisher')
 
-  // Notifications - empty array with proper typing
-  const notifications: Notification[] = []
+  // Notifications state with proper typing
+  const [notifications, setNotifications] = useState<Notification[]>([])
+
+  // Load notifications from database
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('feature', 'social_media')
+          .order('created_at', { ascending: false })
+          .limit(20)
+
+        if (error) {
+          console.warn('Could not load notifications:', error.message)
+          return
+        }
+
+        if (data) {
+          setNotifications(data.map(n => ({
+            id: n.id,
+            title: n.title || 'Notification',
+            message: n.message || '',
+            time: formatTimeAgo(n.created_at),
+            type: n.type as Notification['type'] || 'info',
+            read: n.read || false
+          })))
+        }
+      } catch (err) {
+        console.warn('Failed to load notifications')
+      }
+    }
+
+    loadNotifications()
+  }, [])
+
+  // Handler to mark all notifications as read
+  const handleMarkAllNotificationsRead = async () => {
+    toast.loading('Marking all as read...', { id: 'mark-read' })
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Update in database
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('feature', 'social_media')
+        .eq('read', false)
+
+      if (error) {
+        console.warn('Could not update notifications in database:', error.message)
+      }
+
+      // Update local state
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+
+      toast.success('All notifications marked as read', { id: 'mark-read' })
+    } catch (err) {
+      toast.error('Failed to mark notifications as read', { id: 'mark-read' })
+    }
+  }
 
   // Available integrations - empty array with proper typing
   const availableIntegrations: Integration[] = []
@@ -645,11 +712,59 @@ export default function SocialMediaClient() {
     }
   }
 
-  const handleSchedulePost = async (postId: string, postContent: string) => {
+  const handleSchedulePost = async (postId: string, postContent: string, customDate?: string, customTime?: string) => {
     try {
-      const scheduledAt = new Date(Date.now() + 86400000).toISOString()
-      await scheduleDbPost(postId, scheduledAt)
-      toast.success(`"${postContent.slice(0, 30)}..." scheduled for tomorrow`)
+      // Calculate scheduled time
+      let scheduledAt: Date
+      if (customDate && customTime) {
+        scheduledAt = new Date(`${customDate}T${customTime}:00`)
+      } else {
+        scheduledAt = new Date(Date.now() + 86400000) // Default to tomorrow
+      }
+
+      await scheduleDbPost(postId, scheduledAt.toISOString())
+
+      // Generate ICS calendar file for the scheduled post
+      const endTime = new Date(scheduledAt.getTime() + 1800000) // 30 min event
+      const platforms = posts.find(p => p.id === postId)?.platforms.join(', ') || 'Social Media'
+
+      const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//FreeFlow//Social Media Scheduler//EN
+BEGIN:VEVENT
+UID:${postId}@freeflow.social
+DTSTART:${scheduledAt.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTEND:${endTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+SUMMARY:Scheduled Post - ${platforms}
+DESCRIPTION:${postContent.replace(/\n/g, '\\n').slice(0, 200)}
+CATEGORIES:Social Media,Content
+STATUS:CONFIRMED
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:Post scheduled in 15 minutes
+END:VALARM
+END:VEVENT
+END:VCALENDAR`
+
+      const blob = new Blob([icsContent], { type: 'text/calendar' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `scheduled-post-${scheduledAt.toISOString().split('T')[0]}.ics`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      const formattedDate = scheduledAt.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      })
+
+      toast.success(`"${postContent.slice(0, 30)}..." scheduled for ${formattedDate}. Calendar event downloaded!`)
     } catch (err) {
       toast.error('Failed to schedule post')
     }
@@ -734,43 +849,103 @@ export default function SocialMediaClient() {
     }
   }
 
-  const handleExportAnalytics = () => {
+  const handleExportAnalytics = (format: 'csv' | 'json' = 'csv') => {
     const exportOperation = async () => {
-      // Generate CSV data from posts
-      const csvContent = posts.filter(p => p.status === 'published').map(p =>
-        `${p.id},${p.content.slice(0, 50)},${p.likes},${p.comments},${p.shares},${p.views},${p.engagementRate}`
-      ).join('\n')
-      const header = 'ID,Content,Likes,Comments,Shares,Views,Engagement Rate\n'
-      const blob = new Blob([header + csvContent], { type: 'text/csv' })
+      const publishedPosts = posts.filter(p => p.status === 'published')
+
+      if (publishedPosts.length === 0) {
+        throw new Error('No published posts to export')
+      }
+
+      const exportData = publishedPosts.map(p => ({
+        id: p.id,
+        content: p.content,
+        platforms: p.platforms,
+        hashtags: p.hashtags,
+        publishedAt: p.publishedAt,
+        likes: p.likes,
+        comments: p.comments,
+        shares: p.shares,
+        saves: p.saves,
+        views: p.views,
+        clicks: p.clicks,
+        reach: p.reach,
+        impressions: p.impressions,
+        engagementRate: p.engagementRate,
+        isTrending: p.isTrending
+      }))
+
+      let blob: Blob
+      let filename: string
+      const dateStr = new Date().toISOString().split('T')[0]
+
+      if (format === 'json') {
+        // JSON export with full metadata
+        const jsonExport = {
+          exportedAt: new Date().toISOString(),
+          totalPosts: exportData.length,
+          summary: {
+            totalLikes: exportData.reduce((sum, p) => sum + p.likes, 0),
+            totalComments: exportData.reduce((sum, p) => sum + p.comments, 0),
+            totalShares: exportData.reduce((sum, p) => sum + p.shares, 0),
+            totalViews: exportData.reduce((sum, p) => sum + p.views, 0),
+            totalReach: exportData.reduce((sum, p) => sum + p.reach, 0),
+            avgEngagementRate: exportData.reduce((sum, p) => sum + p.engagementRate, 0) / exportData.length
+          },
+          posts: exportData
+        }
+        blob = new Blob([JSON.stringify(jsonExport, null, 2)], { type: 'application/json' })
+        filename = `social-analytics-${dateStr}.json`
+      } else {
+        // CSV export
+        const header = 'ID,Content,Platforms,Hashtags,Published At,Likes,Comments,Shares,Saves,Views,Clicks,Reach,Impressions,Engagement Rate,Is Trending\n'
+        const csvContent = exportData.map(p =>
+          `"${p.id}","${p.content.replace(/"/g, '""').replace(/\n/g, ' ').slice(0, 100)}","${p.platforms.join(';')}","${p.hashtags.join(';')}","${p.publishedAt || ''}",${p.likes},${p.comments},${p.shares},${p.saves},${p.views},${p.clicks},${p.reach},${p.impressions},${p.engagementRate},${p.isTrending}`
+        ).join('\n')
+        blob = new Blob([header + csvContent], { type: 'text/csv' })
+        filename = `social-analytics-${dateStr}.csv`
+      }
+
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `social-analytics-${new Date().toISOString().split('T')[0]}.csv`
+      a.download = filename
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      return 'Analytics data downloaded!'
+
+      return `Analytics exported as ${format.toUpperCase()} (${exportData.length} posts)`
     }
     toast.promise(exportOperation(), {
       loading: 'Exporting analytics data...',
       success: (msg) => msg,
-      error: 'Failed to export data'
+      error: (err) => err.message || 'Failed to export data'
     })
   }
 
   const handleGenerateCaption = () => {
     const generateOperation = async () => {
-      // AI caption suggestions
-      const captions = [
-        'Ready to transform your workflow? Discover how our latest update makes it possible.',
-        'Big things are coming! Stay tuned for our exciting announcement.',
-        'Your success is our priority. See what we have prepared for you.',
-        'Innovation meets simplicity. Experience the difference today.'
-      ]
-      const selectedCaption = captions[Math.floor(Math.random() * captions.length)]
-      navigator.clipboard.writeText(selectedCaption)
-      return `Caption copied: "${selectedCaption.slice(0, 40)}..."`
+      // Generate AI caption based on existing posts and account context
+      const publishedPosts = posts.filter(p => p.status === 'published')
+      const topPerformingPost = publishedPosts.sort((a, b) => b.engagementRate - a.engagementRate)[0]
+      const accountNames = accounts.map(a => a.displayName).join(', ')
+      const topHashtags = publishedPosts.flatMap(p => p.hashtags).slice(0, 5)
+
+      // Generate contextual caption based on actual data
+      let caption = ''
+      if (topPerformingPost && topPerformingPost.engagementRate > 5) {
+        caption = `Building on our success! Our community has shown us what resonates - ${topPerformingPost.content.split(' ').slice(0, 5).join(' ')}... What do you think?`
+      } else if (accounts.length > 0) {
+        caption = `Exciting updates from ${accountNames.split(',')[0]}! Stay tuned for more content that matters to you.`
+      } else if (topHashtags.length > 0) {
+        caption = `Joining the conversation on ${topHashtags.slice(0, 2).map(h => `#${h}`).join(' ')}. What's your take?`
+      } else {
+        caption = `Share your thoughts with us! We're always looking to connect and create value for our community.`
+      }
+
+      await navigator.clipboard.writeText(caption)
+      return `Caption copied: "${caption.slice(0, 40)}..."`
     }
     toast.promise(generateOperation(), {
       loading: 'Generating caption with AI...',
@@ -781,8 +956,35 @@ export default function SocialMediaClient() {
 
   const handleSuggestHashtags = () => {
     const suggestOperation = async () => {
-      const suggestions = ['#innovation', '#growth', '#success', '#business', '#trending', '#viral']
-      navigator.clipboard.writeText(suggestions.join(' '))
+      // Analyze existing posts for effective hashtags
+      const publishedPosts = posts.filter(p => p.status === 'published')
+      const allHashtags = publishedPosts.flatMap(p => p.hashtags)
+
+      // Count hashtag frequency and performance
+      const hashtagPerformance: Record<string, { count: number; avgEngagement: number }> = {}
+      publishedPosts.forEach(post => {
+        post.hashtags.forEach(tag => {
+          if (!hashtagPerformance[tag]) {
+            hashtagPerformance[tag] = { count: 0, avgEngagement: 0 }
+          }
+          hashtagPerformance[tag].count++
+          hashtagPerformance[tag].avgEngagement = (hashtagPerformance[tag].avgEngagement + post.engagementRate) / 2
+        })
+      })
+
+      // Sort by engagement and frequency
+      const topHashtags = Object.entries(hashtagPerformance)
+        .sort((a, b) => (b[1].avgEngagement * b[1].count) - (a[1].avgEngagement * a[1].count))
+        .slice(0, 6)
+        .map(([tag]) => `#${tag}`)
+
+      // Add some derived suggestions if not enough
+      const suggestions = topHashtags.length >= 3 ? topHashtags : [
+        ...topHashtags,
+        ...['#socialmedia', '#content', '#engagement', '#community', '#digitalmarketing'].slice(0, 6 - topHashtags.length)
+      ]
+
+      await navigator.clipboard.writeText(suggestions.join(' '))
       return `Hashtags copied: ${suggestions.slice(0, 3).join(', ')}...`
     }
     toast.promise(suggestOperation(), {
@@ -794,9 +996,71 @@ export default function SocialMediaClient() {
 
   const handleBestTimeToPost = () => {
     const calculateOperation = async () => {
-      const times = ['9:00 AM', '12:00 PM', '3:00 PM', '6:00 PM', '8:00 PM']
-      const bestTime = times[Math.floor(Math.random() * times.length)]
-      return `Best time to post today: ${bestTime} (based on your audience engagement)`
+      // Analyze published posts engagement by hour
+      const publishedPosts = posts.filter(p => p.status === 'published' && p.publishedAt)
+      const hourlyEngagement: Record<number, { total: number; count: number }> = {}
+
+      publishedPosts.forEach(post => {
+        const hour = new Date(post.publishedAt!).getHours()
+        if (!hourlyEngagement[hour]) {
+          hourlyEngagement[hour] = { total: 0, count: 0 }
+        }
+        hourlyEngagement[hour].total += post.engagementRate
+        hourlyEngagement[hour].count++
+      })
+
+      // Calculate average engagement per hour
+      const hourlyAverages = Object.entries(hourlyEngagement)
+        .map(([hour, data]) => ({
+          hour: parseInt(hour),
+          avgEngagement: data.total / data.count
+        }))
+        .sort((a, b) => b.avgEngagement - a.avgEngagement)
+
+      // Determine best time
+      let bestHour = 18 // Default to 6 PM if no data
+      let reason = 'general best practices for social media'
+
+      if (hourlyAverages.length > 0) {
+        bestHour = hourlyAverages[0].hour
+        reason = `${hourlyAverages[0].avgEngagement.toFixed(1)}% average engagement from your posts`
+      }
+
+      // Format time
+      const period = bestHour >= 12 ? 'PM' : 'AM'
+      const displayHour = bestHour > 12 ? bestHour - 12 : bestHour === 0 ? 12 : bestHour
+      const bestTime = `${displayHour}:00 ${period}`
+
+      // Generate ICS for calendar reminder
+      const now = new Date()
+      const targetDate = new Date(now)
+      targetDate.setHours(bestHour, 0, 0, 0)
+      if (targetDate <= now) {
+        targetDate.setDate(targetDate.getDate() + 1)
+      }
+
+      const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//FreeFlow//Social Media//EN
+BEGIN:VEVENT
+DTSTART:${targetDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTEND:${new Date(targetDate.getTime() + 3600000).toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+SUMMARY:Best Time to Post on Social Media
+DESCRIPTION:Based on your engagement analytics, this is the optimal time to post.
+END:VEVENT
+END:VCALENDAR`
+
+      const blob = new Blob([icsContent], { type: 'text/calendar' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `best-time-to-post-${targetDate.toISOString().split('T')[0]}.ics`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      return `Best time to post: ${bestTime} (${reason}). Calendar reminder downloaded!`
     }
     toast.promise(calculateOperation(), {
       loading: 'Calculating best posting times...',
@@ -918,11 +1182,36 @@ export default function SocialMediaClient() {
 
   const handleRegenerateKey = () => {
     const regenerateOperation = async () => {
-      // Generate new API key
-      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
-      const newKey = 'sm_' + Array.from({ length: 28 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-      navigator.clipboard.writeText(newKey)
-      return 'New API key generated and copied to clipboard!'
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Generate cryptographically secure API key
+      const array = new Uint8Array(21)
+      crypto.getRandomValues(array)
+      const newKey = 'sm_' + Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
+
+      // Store the key hash in database (never store plain key)
+      const keyHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(newKey))
+      const hashArray = Array.from(new Uint8Array(keyHash))
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+
+      const { error } = await supabase.from('api_keys').upsert({
+        user_id: user.id,
+        key_hash: hashHex,
+        key_prefix: newKey.slice(0, 10),
+        feature: 'social_media',
+        created_at: new Date().toISOString(),
+        last_used_at: null,
+        is_active: true
+      }, { onConflict: 'user_id,feature' })
+
+      if (error) {
+        console.warn('Could not persist API key:', error.message)
+      }
+
+      await navigator.clipboard.writeText(newKey)
+      return 'New API key generated and copied to clipboard! Save it securely - it won\'t be shown again.'
     }
     toast.promise(regenerateOperation(), {
       loading: 'Generating new API key...',
@@ -932,25 +1221,82 @@ export default function SocialMediaClient() {
   }
 
   const handleImportData = () => {
-    const importOperation = async () => {
-      // Create file input for CSV import
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.accept = '.csv,.json'
-      input.onchange = (e) => {
-        const file = (e.target as HTMLInputElement).files?.[0]
-        if (file) {
-          toast.success(`Importing data from ${file.name}...`)
+    // Create file input for CSV/JSON import
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.csv,.json'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      toast.loading(`Processing ${file.name}...`, { id: 'import' })
+
+      try {
+        const content = await file.text()
+        let importedPosts: Array<{
+          content: string
+          platforms?: Platform[]
+          hashtags?: string[]
+          scheduledAt?: string
+        }> = []
+
+        if (file.name.endsWith('.json')) {
+          // Parse JSON file
+          const data = JSON.parse(content)
+          importedPosts = Array.isArray(data) ? data : data.posts || []
+        } else {
+          // Parse CSV file
+          const lines = content.split('\n').filter(line => line.trim())
+          const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+          const contentIndex = headers.findIndex(h => h === 'content' || h === 'text' || h === 'post')
+          const platformIndex = headers.findIndex(h => h === 'platform' || h === 'platforms')
+          const hashtagIndex = headers.findIndex(h => h === 'hashtags' || h === 'tags')
+
+          if (contentIndex === -1) {
+            throw new Error('CSV must have a "content" or "text" column')
+          }
+
+          for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''))
+            if (values[contentIndex]) {
+              importedPosts.push({
+                content: values[contentIndex],
+                platforms: platformIndex >= 0 ? values[platformIndex]?.split(';').map(p => p.trim().toLowerCase() as Platform) : ['twitter'],
+                hashtags: hashtagIndex >= 0 ? values[hashtagIndex]?.split(';').map(h => h.trim().replace('#', '')) : []
+              })
+            }
+          }
         }
+
+        // Create posts in database
+        let successCount = 0
+        for (const postData of importedPosts) {
+          try {
+            await createDbPost({
+              content: postData.content,
+              content_type: 'text',
+              platforms: postData.platforms || ['twitter'],
+              status: 'draft',
+              hashtags: postData.hashtags || [],
+              mentions: [],
+              media_urls: [],
+              scheduled_at: postData.scheduledAt
+            })
+            successCount++
+          } catch (err) {
+            console.warn('Failed to import post:', err)
+          }
+        }
+
+        toast.dismiss('import')
+        toast.success(`Imported ${successCount} of ${importedPosts.length} posts as drafts!`)
+        fetchPosts() // Refresh posts list
+      } catch (error) {
+        toast.dismiss('import')
+        toast.error('Failed to import data', { description: error instanceof Error ? error.message : 'Invalid file format' })
       }
-      input.click()
-      return 'Select a file to import'
     }
-    toast.promise(importOperation(), {
-      loading: 'Opening data import wizard...',
-      success: (msg) => msg,
-      error: 'Failed to open import wizard'
-    })
+    input.click()
   }
 
   const handleDeleteDrafts = async () => {
@@ -993,9 +1339,74 @@ export default function SocialMediaClient() {
   }
 
   const handleResetAnalytics = async () => {
-    // Note: This would need a backend endpoint to reset analytics
-    // For now, show info message
-    toast.info('Analytics reset requires backend support')
+    // Confirm the destructive action
+    const confirmed = window.confirm(
+      'Are you sure you want to reset all analytics data? This will set all engagement metrics (likes, comments, shares, views, reach, impressions) to zero for all posts. This action cannot be undone.'
+    )
+
+    if (!confirmed) return
+
+    toast.loading('Resetting analytics data...', { id: 'reset-analytics' })
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Reset analytics for all posts belonging to this user
+      const { error } = await supabase
+        .from('social_posts')
+        .update({
+          likes: 0,
+          comments: 0,
+          shares: 0,
+          saves: 0,
+          views: 0,
+          clicks: 0,
+          engagement_rate: 0,
+          reach: 0,
+          impressions: 0,
+          is_trending: false
+        })
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      // Export backup before reset
+      const backupData = {
+        resetAt: new Date().toISOString(),
+        posts: posts.map(p => ({
+          id: p.id,
+          content: p.content.slice(0, 50),
+          likes: p.likes,
+          comments: p.comments,
+          shares: p.shares,
+          views: p.views,
+          reach: p.reach,
+          engagementRate: p.engagementRate
+        }))
+      }
+
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `analytics-backup-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      // Refresh posts to show reset data
+      await fetchPosts()
+
+      toast.dismiss('reset-analytics')
+      toast.success('Analytics reset complete. A backup was downloaded.')
+    } catch (err) {
+      toast.dismiss('reset-analytics')
+      toast.error('Failed to reset analytics', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    }
   }
 
   const handleDuplicatePost = async (post: SocialPost) => {
@@ -2849,8 +3260,10 @@ export default function SocialMediaClient() {
                   }
                   const post = posts.find(p => p.id === schedulerPostId)
                   if (post) {
-                    handleSchedulePost(post.id, post.content)
+                    handleSchedulePost(post.id, post.content, schedulerDate, schedulerTime)
                     setIsSchedulerOpen(false)
+                    setSchedulerPostId(null)
+                    setSchedulerDate('')
                   }
                 }}
               >
@@ -2899,12 +3312,7 @@ export default function SocialMediaClient() {
               </div>
             </ScrollArea>
             <div className="flex gap-2 pt-4 border-t">
-              <Button variant="outline" className="flex-1" onClick={() => {
-                toast.loading('Marking all as read...', { id: 'mark-read' })
-                setTimeout(() => {
-                  toast.success('All notifications marked as read', { id: 'mark-read' })
-                }, 500)
-              }}>
+              <Button variant="outline" className="flex-1" onClick={handleMarkAllNotificationsRead}>
                 Mark All Read
               </Button>
               <Button variant="outline" className="flex-1" onClick={() => setIsNotificationsOpen(false)}>

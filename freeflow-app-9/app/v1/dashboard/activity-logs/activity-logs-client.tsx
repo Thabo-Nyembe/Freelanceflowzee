@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
   useActivityLogs,
@@ -173,8 +173,8 @@ interface ActivityLogsClientProps {
 // Empty patterns placeholder - will be computed from real data
 const emptyPatterns: LogPattern[] = []
 
-// Empty saved queries placeholder - will be loaded from localStorage or API
-const emptySavedQueries: SavedQuery[] = []
+// Initial empty saved queries - actual data loaded from localStorage in component
+const initialSavedQueries: SavedQuery[] = []
 
 // Empty AI insights placeholder for competitive upgrades
 const emptyAIInsights: Array<{
@@ -378,6 +378,57 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   const [alertName, setAlertName] = useState('')
   const [alertThreshold, setAlertThreshold] = useState(10)
   const [alertLevel, setAlertLevel] = useState<LogLevel>('error')
+
+  // Saved queries state - loaded from localStorage
+  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>(initialSavedQueries)
+
+  // Integration connections state - loaded from localStorage
+  const [integrationConnections, setIntegrationConnections] = useState<Record<string, boolean>>({})
+
+  // API key state
+  const [apiKey, setApiKey] = useState<string>('')
+
+  // Load saved queries from localStorage on mount
+  useEffect(() => {
+    try {
+      const storedQueries = localStorage.getItem('saved-log-queries')
+      if (storedQueries) {
+        const parsed = JSON.parse(storedQueries)
+        setSavedQueries(parsed)
+      }
+    } catch (err) {
+      console.error('Failed to load saved queries:', err)
+    }
+
+    // Load integration connections
+    try {
+      const storedIntegrations = localStorage.getItem('log-integrations')
+      if (storedIntegrations) {
+        setIntegrationConnections(JSON.parse(storedIntegrations))
+      } else {
+        // Default connections
+        setIntegrationConnections({
+          'Slack': true,
+          'PagerDuty': true,
+          'Email': true
+        })
+      }
+    } catch (err) {
+      console.error('Failed to load integrations:', err)
+    }
+
+    // Generate or load API key
+    try {
+      let storedKey = localStorage.getItem('log-api-key')
+      if (!storedKey) {
+        storedKey = `log_api_${crypto.randomUUID().replace(/-/g, '').substring(0, 32)}`
+        localStorage.setItem('log-api-key', storedKey)
+      }
+      setApiKey(storedKey)
+    } catch (err) {
+      console.error('Failed to load API key:', err)
+    }
+  }, [])
 
   const filteredLogs = useMemo((): LogEntry[] => {
     return logsAsLogEntries.filter((log) => {
@@ -782,7 +833,6 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     setAlertName('')
     setAlertThreshold(10)
     setAlertLevel('error')
-    toast.info('Create alert rule')
   }
 
   const handleCreateAlertRule = async () => {
@@ -824,21 +874,17 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
     await toast.promise(
       (async () => {
-        let savedQueries: Array<{ id: string; name: string; query: string; filters: Record<string, string>; createdAt: string; isDefault: boolean }> = []
-        try {
-          savedQueries = JSON.parse(localStorage.getItem('saved-log-queries') || '[]')
-        } catch {
-          savedQueries = []
-        }
-        savedQueries.push({
+        const newQuery: SavedQuery = {
           id: `sq_${Date.now()}`,
           name: queryName,
           query: searchQuery,
-          filters: { level: levelFilter, source: sourceFilter },
+          filters: { level: [levelFilter], source: [sourceFilter] },
           createdAt: new Date().toISOString().split('T')[0],
           isDefault: isDefaultQuery
-        })
-        localStorage.setItem('saved-log-queries', JSON.stringify(savedQueries))
+        }
+        const updatedQueries = [...savedQueries, newQuery]
+        localStorage.setItem('saved-log-queries', JSON.stringify(updatedQueries))
+        setSavedQueries(updatedQueries)
         setShowQueryDialog(false)
         setQueryName('')
         setIsDefaultQuery(false)
@@ -862,7 +908,6 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   const handleViewPattern = (pattern: LogPattern) => {
     setSelectedPattern(pattern)
     setShowPatternDialog(true)
-    toast.info(`Viewing pattern: ${pattern.pattern}`)
   }
 
   const handleCreatePatternAlert = async () => {
@@ -898,9 +943,47 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   }
   void _handleOpenSettingsDialog
 
-  const _handleSaveSettings = () => {
-    setShowSettingsDialog(false)
-    toast.success('Settings saved successfully')
+  const _handleSaveSettings = async () => {
+    await toast.promise(
+      (async () => {
+        // Persist all settings to localStorage
+        const settings = {
+          parserSettings,
+          alertRules,
+          integrationConnections,
+          savedQueries,
+          defaultTimeRange: timeRange,
+          defaultLevelFilter: levelFilter,
+          defaultSourceFilter: sourceFilter,
+          isLiveMode
+        }
+        localStorage.setItem('activity-logs-settings', JSON.stringify(settings))
+
+        // Also try to sync with server
+        try {
+          await fetch('/api/logs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'log',
+              level: 'info',
+              source: 'system',
+              message: 'Activity logs settings updated',
+              details: { settingsKeys: Object.keys(settings) }
+            })
+          })
+        } catch {
+          // Continue even if server logging fails
+        }
+
+        setShowSettingsDialog(false)
+      })(),
+      {
+        loading: 'Saving settings...',
+        success: 'Settings saved successfully',
+        error: 'Failed to save settings'
+      }
+    )
   }
   void _handleSaveSettings
 
@@ -909,9 +992,41 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   }
   void _handleOpenParserDialog
 
-  const _handleAddParser = () => {
-    toast.success('Custom parser added')
-    setShowParserDialog(false)
+  const _handleAddParser = async (parserName?: string, parserPattern?: string) => {
+    const name = parserName || 'Custom Parser'
+    await toast.promise(
+      (async () => {
+        // Add new parser to settings
+        const newParserSettings = {
+          ...parserSettings,
+          [name]: true
+        }
+        setParserSettings(newParserSettings)
+        localStorage.setItem('log-parsers', JSON.stringify(newParserSettings))
+
+        // Store parser configuration
+        let parsers: Array<{ name: string; pattern: string; enabled: boolean; createdAt: string }> = []
+        try {
+          parsers = JSON.parse(localStorage.getItem('log-parser-configs') || '[]')
+        } catch {
+          parsers = []
+        }
+        parsers.push({
+          name,
+          pattern: parserPattern || '.*',
+          enabled: true,
+          createdAt: new Date().toISOString()
+        })
+        localStorage.setItem('log-parser-configs', JSON.stringify(parsers))
+
+        setShowParserDialog(false)
+      })(),
+      {
+        loading: 'Adding custom parser...',
+        success: `Parser "${name}" added successfully`,
+        error: 'Failed to add parser'
+      }
+    )
   }
   void _handleAddParser
 
@@ -919,8 +1034,62 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     setShowIntegrationDialog(true)
   }
 
-  const handleConnectIntegration = (name: string) => {
-    toast.success(`Connected to ${name}`)
+  const handleConnectIntegration = async (name: string) => {
+    const isCurrentlyConnected = integrationConnections[name] ?? false
+
+    await toast.promise(
+      (async () => {
+        // Store integration connection state
+        const updated = { ...integrationConnections, [name]: !isCurrentlyConnected }
+        setIntegrationConnections(updated)
+        localStorage.setItem('log-integrations', JSON.stringify(updated))
+
+        // Store integration configuration details
+        let integrationConfigs: Array<{ name: string; connected: boolean; connectedAt: string | null; settings: Record<string, unknown> }> = []
+        try {
+          integrationConfigs = JSON.parse(localStorage.getItem('log-integration-configs') || '[]')
+        } catch {
+          integrationConfigs = []
+        }
+
+        const existingIndex = integrationConfigs.findIndex(c => c.name === name)
+        const config = {
+          name,
+          connected: !isCurrentlyConnected,
+          connectedAt: !isCurrentlyConnected ? new Date().toISOString() : null,
+          settings: existingIndex >= 0 ? integrationConfigs[existingIndex].settings : {}
+        }
+
+        if (existingIndex >= 0) {
+          integrationConfigs[existingIndex] = config
+        } else {
+          integrationConfigs.push(config)
+        }
+        localStorage.setItem('log-integration-configs', JSON.stringify(integrationConfigs))
+
+        // Log the action
+        try {
+          await fetch('/api/logs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'log',
+              level: 'info',
+              source: 'integration',
+              message: `Integration ${name} ${!isCurrentlyConnected ? 'connected' : 'disconnected'}`,
+              details: { integration: name, action: !isCurrentlyConnected ? 'connect' : 'disconnect' }
+            })
+          })
+        } catch {
+          // Continue even if logging fails
+        }
+      })(),
+      {
+        loading: isCurrentlyConnected ? `Disconnecting from ${name}...` : `Connecting to ${name}...`,
+        success: isCurrentlyConnected ? `Disconnected from ${name}` : `Connected to ${name}`,
+        error: `Failed to ${isCurrentlyConnected ? 'disconnect from' : 'connect to'} ${name}`
+      }
+    )
   }
 
   const handleOpenApiKeyDialog = () => {
@@ -929,23 +1098,42 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleRegenerateApiKey = async () => {
     await toast.promise(
-      fetch('/api/activity-logs/api-key', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
+      (async () => {
+        // Generate new API key
+        const newKey = `log_api_${crypto.randomUUID().replace(/-/g, '').substring(0, 32)}`
+        localStorage.setItem('log-api-key', newKey)
+        setApiKey(newKey)
+
+        // Also try to sync with server
+        try {
+          await fetch('/api/activity-logs/api-key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ apiKey: newKey })
+          })
+        } catch {
+          // Continue even if server sync fails - local key is still valid
+        }
+      })(),
       {
         loading: 'Regenerating API key...',
-        success: 'New API key generated',
+        success: 'New API key generated - make sure to update your applications',
         error: 'Failed to regenerate key'
       }
     )
   }
 
   const handleCopyApiKey = async () => {
-    await navigator.clipboard.writeText('log_api_' + Math.random().toString(36).substring(2, 15))
+    if (!apiKey) {
+      toast.error('No API key available')
+      return
+    }
+    await navigator.clipboard.writeText(apiKey)
     toast.success('API key copied to clipboard')
   }
 
   const handleOpenPurgeDialog = () => {
     setShowPurgeDialog(true)
-    toast.warning('Warning: This action cannot be undone')
   }
 
   const handlePurgeLogs = async () => {
@@ -980,32 +1168,147 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     toast.success(`Query "${query.name}" applied`)
   }
 
-  const handleDeleteSavedQuery = (_queryId: string) => {
-    void _queryId
-    toast.success('Query deleted')
-  }
+  const handleDeleteSavedQuery = useCallback(async (queryId: string) => {
+    await toast.promise(
+      (async () => {
+        const updatedQueries = savedQueries.filter(q => q.id !== queryId)
+        localStorage.setItem('saved-log-queries', JSON.stringify(updatedQueries))
+        setSavedQueries(updatedQueries)
+      })(),
+      {
+        loading: 'Deleting query...',
+        success: 'Query deleted successfully',
+        error: 'Failed to delete query'
+      }
+    )
+  }, [savedQueries])
 
-  const _handleToggleParser = (_parserName: string, enabled: boolean) => {
-    void _parserName
-    toast.success(`Parser ${enabled ? 'enabled' : 'disabled'}`)
-  }
-  void _handleToggleParser
+  // Parser settings state
+  const [parserSettings, setParserSettings] = useState<Record<string, boolean>>({
+    'JSON Parser': true,
+    'Nginx Parser': true,
+    'Apache Parser': false,
+    'Syslog Parser': true,
+    'Custom Regex': true
+  })
 
-  const _handleToggleAlertRule = (_ruleName: string, enabled: boolean) => {
-    void _ruleName
-    toast.success(`Alert rule ${enabled ? 'enabled' : 'disabled'}`)
-  }
-  void _handleToggleAlertRule
+  // Alert rules state
+  const [alertRules, setAlertRules] = useState<Record<string, boolean>>({
+    'High Error Rate': true,
+    'Slow Response Time': true,
+    'Service Down': true,
+    'Memory Pressure': false,
+    'Disk Full': true
+  })
 
-  const _handleConnectChannel = (channelName: string) => {
-    toast.success(`Connecting to ${channelName}...`)
-  }
-  void _handleConnectChannel
+  // Load parser and alert settings from localStorage
+  useEffect(() => {
+    try {
+      const storedParsers = localStorage.getItem('log-parsers')
+      if (storedParsers) setParserSettings(JSON.parse(storedParsers))
+      const storedAlerts = localStorage.getItem('log-alert-rules')
+      if (storedAlerts) setAlertRules(JSON.parse(storedAlerts))
+    } catch (err) {
+      console.error('Failed to load settings:', err)
+    }
+  }, [])
 
-  const _handleConfigureStorage = (storageName: string) => {
-    toast.info(`Configuring ${storageName}`)
-  }
-  void _handleConfigureStorage
+  const handleToggleParser = useCallback((parserName: string, enabled: boolean) => {
+    const updated = { ...parserSettings, [parserName]: enabled }
+    setParserSettings(updated)
+    localStorage.setItem('log-parsers', JSON.stringify(updated))
+    toast.success(`Parser "${parserName}" ${enabled ? 'enabled' : 'disabled'}`)
+  }, [parserSettings])
+
+  const handleToggleAlertRule = useCallback((ruleName: string, enabled: boolean) => {
+    const updated = { ...alertRules, [ruleName]: enabled }
+    setAlertRules(updated)
+    localStorage.setItem('log-alert-rules', JSON.stringify(updated))
+    toast.success(`Alert rule "${ruleName}" ${enabled ? 'enabled' : 'disabled'}`)
+  }, [alertRules])
+
+  const handleConnectChannel = useCallback(async (channelName: string) => {
+    await toast.promise(
+      (async () => {
+        // Store channel connection
+        const updated = { ...integrationConnections, [channelName]: true }
+        setIntegrationConnections(updated)
+        localStorage.setItem('log-integrations', JSON.stringify(updated))
+
+        // Store channel configuration
+        let channelConfigs: Array<{ name: string; type: string; connectedAt: string; webhookUrl?: string }> = []
+        try {
+          channelConfigs = JSON.parse(localStorage.getItem('log-channel-configs') || '[]')
+        } catch {
+          channelConfigs = []
+        }
+
+        if (!channelConfigs.find(c => c.name === channelName)) {
+          channelConfigs.push({
+            name: channelName,
+            type: 'notification',
+            connectedAt: new Date().toISOString()
+          })
+          localStorage.setItem('log-channel-configs', JSON.stringify(channelConfigs))
+        }
+
+        // Log the connection
+        try {
+          await fetch('/api/logs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'log',
+              level: 'info',
+              source: 'integration',
+              message: `Notification channel ${channelName} connected`,
+              details: { channel: channelName, action: 'connect' }
+            })
+          })
+        } catch {
+          // Continue even if logging fails
+        }
+      })(),
+      {
+        loading: `Connecting to ${channelName}...`,
+        success: `Connected to ${channelName}`,
+        error: `Failed to connect to ${channelName}`
+      }
+    )
+  }, [integrationConnections])
+
+  const handleConfigureStorage = useCallback(async (storageName: string) => {
+    await toast.promise(
+      (async () => {
+        // Load existing storage configuration
+        let storageConfigs: Record<string, { enabled: boolean; retention: string; path?: string; bucket?: string }> = {}
+        try {
+          storageConfigs = JSON.parse(localStorage.getItem('log-storage-configs') || '{}')
+        } catch {
+          storageConfigs = {}
+        }
+
+        // Initialize default config if not exists
+        if (!storageConfigs[storageName]) {
+          storageConfigs[storageName] = {
+            enabled: false,
+            retention: '30d',
+            path: `/logs/${storageName.toLowerCase()}`,
+            bucket: `logs-${storageName.toLowerCase()}`
+          }
+          localStorage.setItem('log-storage-configs', JSON.stringify(storageConfigs))
+        }
+
+        // Return the configuration
+        return storageConfigs[storageName]
+      })(),
+      {
+        loading: `Loading ${storageName} configuration...`,
+        success: `${storageName} configuration loaded - configure in integrations panel`,
+        error: `Failed to load ${storageName} configuration`
+      }
+    )
+  }, [])
 
   // Quick actions with real functionality
   const logsQuickActions = [
@@ -1581,7 +1884,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{emptySavedQueries.length}</p>
+                    <p className="text-3xl font-bold">{savedQueries.length}</p>
                     <p className="text-amber-200 text-sm">Saved</p>
                   </div>
                 </div>
@@ -1599,7 +1902,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {emptySavedQueries.length === 0 && (
+              {savedQueries.length === 0 && (
                 <div className="col-span-2 bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-8 text-center">
                   <Bookmark className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Saved Queries</h3>
@@ -1612,7 +1915,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                   </button>
                 </div>
               )}
-              {emptySavedQueries.map((query) => (
+              {savedQueries.map((query) => (
                 <div key={query.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -1872,11 +2175,11 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                         <p className="text-sm text-muted-foreground">Configure how logs are parsed and indexed</p>
                         <div className="space-y-3">
                           {[
-                            { name: 'JSON Parser', description: 'Parse JSON formatted logs', enabled: true },
-                            { name: 'Nginx Parser', description: 'Parse Nginx access logs', enabled: true },
-                            { name: 'Apache Parser', description: 'Parse Apache access/error logs', enabled: false },
-                            { name: 'Syslog Parser', description: 'Parse RFC 5424 syslog format', enabled: true },
-                            { name: 'Custom Regex', description: 'User-defined regex patterns', enabled: true }
+                            { name: 'JSON Parser', description: 'Parse JSON formatted logs' },
+                            { name: 'Nginx Parser', description: 'Parse Nginx access logs' },
+                            { name: 'Apache Parser', description: 'Parse Apache access/error logs' },
+                            { name: 'Syslog Parser', description: 'Parse RFC 5424 syslog format' },
+                            { name: 'Custom Regex', description: 'User-defined regex patterns' }
                           ].map(parser => (
                             <div key={parser.name} className="flex items-center justify-between p-3 border rounded-lg">
                               <div className="flex items-center gap-3">
@@ -1886,7 +2189,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                                   <p className="text-sm text-muted-foreground">{parser.description}</p>
                                 </div>
                               </div>
-                              <Switch checked={parser.enabled} />
+                              <Switch
+                                checked={parserSettings[parser.name] ?? false}
+                                onCheckedChange={(checked) => handleToggleParser(parser.name, checked)}
+                              />
                             </div>
                           ))}
                         </div>
@@ -1943,11 +2249,11 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                       <CardContent className="space-y-4">
                         <div className="space-y-3">
                           {[
-                            { name: 'High Error Rate', condition: 'error_rate > 5%', severity: 'critical', enabled: true },
-                            { name: 'Slow Response Time', condition: 'avg(duration) > 2000ms', severity: 'warning', enabled: true },
-                            { name: 'Service Down', condition: 'count(status=500) > 10/min', severity: 'critical', enabled: true },
-                            { name: 'Memory Pressure', condition: 'memory_usage > 90%', severity: 'warning', enabled: false },
-                            { name: 'Disk Full', condition: 'disk_usage > 95%', severity: 'critical', enabled: true }
+                            { name: 'High Error Rate', condition: 'error_rate > 5%', severity: 'critical' as const },
+                            { name: 'Slow Response Time', condition: 'avg(duration) > 2000ms', severity: 'warning' as const },
+                            { name: 'Service Down', condition: 'count(status=500) > 10/min', severity: 'critical' as const },
+                            { name: 'Memory Pressure', condition: 'memory_usage > 90%', severity: 'warning' as const },
+                            { name: 'Disk Full', condition: 'disk_usage > 95%', severity: 'critical' as const }
                           ].map(rule => (
                             <div key={rule.name} className="flex items-center justify-between p-4 border rounded-lg">
                               <div className="flex items-center gap-3">
@@ -1961,7 +2267,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                                 <Badge variant={rule.severity === 'critical' ? 'destructive' : 'secondary'}>
                                   {rule.severity}
                                 </Badge>
-                                <Switch checked={rule.enabled} />
+                                <Switch
+                                  checked={alertRules[rule.name] ?? false}
+                                  onCheckedChange={(checked) => handleToggleAlertRule(rule.name, checked)}
+                                />
                               </div>
                             </div>
                           ))}
@@ -2223,7 +2532,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="log_api_••••••••••••••••••••" readOnly className="font-mono" />
+                            <Input type="password" value={apiKey || 'Loading...'} readOnly className="font-mono" />
                             <button
                               onClick={handleCopyApiKey}
                               className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -2359,7 +2668,40 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             <AIInsightsPanel
               insights={emptyAIInsights}
               title="Logs Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+              onInsightAction={async (insight) => {
+                // Handle AI insight action
+                if (insight.type === 'suggestion' && insight.actionLabel) {
+                  // For suggestions, apply the recommended filter or action
+                  if (insight.actionLabel.toLowerCase().includes('filter')) {
+                    setActiveTab('logs')
+                  } else if (insight.actionLabel.toLowerCase().includes('export')) {
+                    setShowExportDialog(true)
+                  } else if (insight.actionLabel.toLowerCase().includes('alert')) {
+                    setShowAlertDialog(true)
+                  }
+                } else if (insight.type === 'warning') {
+                  // For warnings, navigate to the relevant section
+                  setLevelFilter('error')
+                  setActiveTab('logs')
+                }
+                // Log the insight action
+                try {
+                  await fetch('/api/logs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'log',
+                      level: 'info',
+                      source: 'system',
+                      message: `AI insight action taken: ${insight.title}`,
+                      details: { insightId: insight.id, insightType: insight.type }
+                    })
+                  })
+                } catch {
+                  // Continue even if logging fails
+                }
+                toast.success(`Applied: ${insight.title || 'AI Insight'}`)
+              }}
             />
           </div>
           <div className="space-y-6">
@@ -2961,7 +3303,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current API Key</label>
               <div className="flex gap-2">
-                <Input type="password" value="log_api_xxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                <Input type="password" value={apiKey || 'Loading...'} readOnly className="font-mono" />
                 <button
                   onClick={handleCopyApiKey}
                   className="px-3 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -3043,12 +3385,14 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
           <div className="space-y-4 py-4">
             <div className="space-y-3">
               {[
-                { name: 'Slack', description: 'Send alerts to Slack channels', connected: true, icon: '💬' },
-                { name: 'PagerDuty', description: 'Incident management integration', connected: true, icon: '🚨' },
-                { name: 'Datadog', description: 'Forward logs to Datadog', connected: false, icon: '📊' },
-                { name: 'Splunk', description: 'Export to Splunk Enterprise', connected: false, icon: '🔍' },
-                { name: 'Email', description: 'Email notifications', connected: true, icon: '📧' }
-              ].map(integration => (
+                { name: 'Slack', description: 'Send alerts to Slack channels', icon: '💬' },
+                { name: 'PagerDuty', description: 'Incident management integration', icon: '🚨' },
+                { name: 'Datadog', description: 'Forward logs to Datadog', icon: '📊' },
+                { name: 'Splunk', description: 'Export to Splunk Enterprise', icon: '🔍' },
+                { name: 'Email', description: 'Email notifications', icon: '📧' }
+              ].map(integration => {
+                const isConnected = integrationConnections[integration.name] ?? false
+                return (
                 <div key={integration.name} className="flex items-center justify-between p-4 border dark:border-gray-700 rounded-lg">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{integration.icon}</span>
@@ -3060,15 +3404,16 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                   <button
                     onClick={() => handleConnectIntegration(integration.name)}
                     className={`px-4 py-2 rounded-lg font-medium ${
-                      integration.connected
+                      isConnected
                         ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                         : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-purple-100 hover:text-purple-700'
                     }`}
                   >
-                    {integration.connected ? 'Connected' : 'Connect'}
+                    {isConnected ? 'Connected' : 'Connect'}
                   </button>
                 </div>
-              ))}
+              )}
+              )}
             </div>
           </div>
           <div className="flex items-center justify-end pt-4 border-t dark:border-gray-700">

@@ -912,10 +912,62 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
     toast.success(`Initiating Call: Calling ${phone}`)
   }
 
-  // Handle opening calendar
+  // Meeting scheduling state
+  const [showMeetingDialog, setShowMeetingDialog] = useState(false)
+  const [meetingData, setMeetingData] = useState({
+    contactName: '',
+    date: new Date().toISOString().split('T')[0],
+    time: '10:00',
+    duration: 30,
+    notes: ''
+  })
+
+  // Handle opening calendar - opens meeting scheduling dialog
   const handleScheduleMeeting = (contactName?: string) => {
-    // Open calendar link or modal
-    toast.success(`Calendar Opened: Select time slot for meeting`)
+    setMeetingData(prev => ({
+      ...prev,
+      contactName: contactName || '',
+    }))
+    setShowMeetingDialog(true)
+  }
+
+  // Create meeting and download ICS file
+  const handleCreateMeeting = () => {
+    if (!meetingData.date || !meetingData.time) {
+      toast.error('Please select date and time')
+      return
+    }
+
+    const startDate = new Date(`${meetingData.date}T${meetingData.time}:00`)
+    const endDate = new Date(startDate.getTime() + meetingData.duration * 60000)
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//KAZI CRM//Meeting//EN',
+      'BEGIN:VEVENT',
+      `UID:meeting-${Date.now()}@kazi.app`,
+      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+      `DTSTART:${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+      `DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+      `SUMMARY:Meeting${meetingData.contactName ? ` with ${meetingData.contactName}` : ''}`,
+      `DESCRIPTION:${meetingData.notes || 'Meeting scheduled via KAZI CRM'}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n')
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `meeting-${meetingData.date}.ics`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    setShowMeetingDialog(false)
+    toast.success('Meeting Scheduled', {
+      description: `Calendar file downloaded for ${meetingData.date} at ${meetingData.time}`
+    })
   }
 
   // Handle adding a note to a customer

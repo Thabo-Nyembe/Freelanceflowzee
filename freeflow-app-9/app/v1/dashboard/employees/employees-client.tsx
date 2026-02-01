@@ -2080,16 +2080,19 @@ export default function EmployeesClient() {
                         <div className="flex gap-3">
                           <Button variant="outline" className="flex-1" onClick={() => {
                             const allData = {
-                              employees: [],
-                              timeOffRequests: [],
-                              reviews: [],
-                              onboardingTasks: [],
-                              courses: [],
-                              documents: [],
-                              benefits: [],
-                              goals: [],
-                              surveys: [],
-                              teamMetrics: [],
+                              employees: dbEmployees?.map(emp => ({
+                                id: emp.id,
+                                name: emp.employee_name,
+                                email: emp.email,
+                                department: emp.department,
+                                position: emp.position || emp.job_title,
+                                status: emp.status,
+                                hireDate: emp.hire_date || emp.start_date,
+                                phone: emp.phone,
+                                salary: emp.salary
+                              })) || [],
+                              stats: dbStats,
+                              departments: dbDepartments,
                               exportDate: new Date().toISOString()
                             }
                             const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' })
@@ -2108,10 +2111,49 @@ export default function EmployeesClient() {
                             const input = document.createElement('input')
                             input.type = 'file'
                             input.accept = '.json,.csv'
-                            input.onchange = (e) => {
+                            input.onchange = async (e) => {
                               const file = (e.target as HTMLInputElement).files?.[0]
                               if (file) {
-                                toast.success(`Selected ${file.name} for import`)
+                                try {
+                                  const content = await file.text()
+                                  let data: any
+                                  if (file.name.endsWith('.json')) {
+                                    data = JSON.parse(content)
+                                  } else if (file.name.endsWith('.csv')) {
+                                    const lines = content.split('\n')
+                                    const headers = lines[0].split(',').map(h => h.trim())
+                                    data = { employees: lines.slice(1).filter(l => l.trim()).map(line => {
+                                      const values = line.split(',')
+                                      return headers.reduce((obj, header, i) => {
+                                        obj[header] = values[i]?.trim() || ''
+                                        return obj
+                                      }, {} as Record<string, string>)
+                                    })}
+                                  }
+                                  // Import employees if data contains employees array
+                                  if (data?.employees?.length > 0) {
+                                    let imported = 0
+                                    for (const emp of data.employees) {
+                                      const result = await createEmployee({
+                                        employee_name: emp.name || emp.employee_name || '',
+                                        email: emp.email || '',
+                                        department: emp.department || null,
+                                        position: emp.position || null,
+                                        job_title: emp.position || emp.job_title || null,
+                                        status: 'active',
+                                        employment_type: 'full-time',
+                                        currency: 'USD'
+                                      })
+                                      if (result) imported++
+                                    }
+                                    toast.success(`Imported ${imported} employees from ${file.name}`)
+                                    refetch()
+                                  } else {
+                                    toast.error('No employee data found in file')
+                                  }
+                                } catch (err) {
+                                  toast.error('Failed to parse import file')
+                                }
                               }
                             }
                             input.click()
@@ -2155,13 +2197,19 @@ export default function EmployeesClient() {
                         <Button variant="outline" className="w-full" onClick={() => {
                           const complianceData = {
                             generatedAt: new Date().toISOString(),
-                            totalEmployees: [].length,
-                            activeEmployees: [].filter(e => e.status === 'active').length,
+                            totalEmployees: dbStats.total,
+                            activeEmployees: dbStats.active,
+                            onboardingEmployees: dbStats.onboarding,
+                            terminatedEmployees: dbStats.terminated,
+                            departments: dbDepartments,
                             gdprCompliant: true,
                             dataEncryption: true,
                             auditLogging: true,
                             documentRetention: '7 years',
-                            lastAuditDate: new Date().toISOString()
+                            lastAuditDate: new Date().toISOString(),
+                            averagePerformance: dbStats.avgPerformance,
+                            averageTenure: dbStats.avgTenure,
+                            totalPayroll: dbStats.totalPayroll
                           }
                           const blob = new Blob([JSON.stringify(complianceData, null, 2)], { type: 'application/json' })
                           const url = URL.createObjectURL(blob)

@@ -583,6 +583,151 @@ class MessagesApiClient extends BaseApiClient {
 
     return this.updateMessage(messageId, { reactions })
   }
+
+  /**
+   * Archive a conversation
+   */
+  async archiveConversation(conversationId: string, archive: boolean = true) {
+    const supabase = createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return {
+        success: false,
+        error: 'User not authenticated',
+        data: null
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('conversations')
+      .update({
+        is_archived: archive,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', conversationId)
+      .select()
+      .single()
+
+    if (error) {
+      return {
+        success: false,
+        error: error.message,
+        data: null
+      }
+    }
+
+    return {
+      success: true,
+      data: data as Conversation,
+      error: null
+    }
+  }
+
+  /**
+   * Pin/unpin a conversation
+   */
+  async pinConversation(conversationId: string, pin: boolean = true) {
+    const supabase = createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return {
+        success: false,
+        error: 'User not authenticated',
+        data: null
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('conversations')
+      .update({
+        is_pinned: pin,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', conversationId)
+      .select()
+      .single()
+
+    if (error) {
+      return {
+        success: false,
+        error: error.message,
+        data: null
+      }
+    }
+
+    return {
+      success: true,
+      data: data as Conversation,
+      error: null
+    }
+  }
+
+  /**
+   * Export conversation messages as text file
+   */
+  async exportConversation(conversationId: string) {
+    const supabase = createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return {
+        success: false,
+        error: 'User not authenticated',
+        data: null
+      }
+    }
+
+    // Get conversation details
+    const { data: conversation } = await supabase
+      .from('conversations')
+      .select('name, type, created_at')
+      .eq('id', conversationId)
+      .single()
+
+    // Get all messages
+    const { data: messages, error } = await supabase
+      .from('messages')
+      .select('sender_name, content, created_at, message_type')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      return {
+        success: false,
+        error: error.message,
+        data: null
+      }
+    }
+
+    // Format as text export
+    const conversationName = conversation?.name || 'Conversation'
+    const exportLines: string[] = [
+      `=== ${conversationName} ===`,
+      `Exported on: ${new Date().toLocaleString()}`,
+      `Total messages: ${messages?.length || 0}`,
+      '---',
+      ''
+    ]
+
+    for (const msg of messages || []) {
+      const timestamp = new Date(msg.created_at).toLocaleString()
+      exportLines.push(`[${timestamp}] ${msg.sender_name}: ${msg.content}`)
+    }
+
+    const content = exportLines.join('\n')
+
+    return {
+      success: true,
+      data: {
+        content,
+        filename: `${conversationName.replace(/[^a-z0-9]/gi, '_')}_export_${Date.now()}.txt`,
+        mimeType: 'text/plain'
+      },
+      error: null
+    }
+  }
 }
 
 export const messagesClient = new MessagesApiClient()

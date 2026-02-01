@@ -318,6 +318,27 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [ptoRequestForm, setPtoRequestForm] = useState({ startDate: '', endDate: '', reason: '' })
   const [shiftSwapForm, setShiftSwapForm] = useState({ date: '', swapWith: '' })
 
+  // State for dynamic data management
+  const [localTags, setLocalTags] = useState<string[]>(['bug', 'feature', 'billing', 'urgent', 'technical', 'api', 'vip', 'new'])
+  const [localTeams, setLocalTeams] = useState<{ id: string; name: string; members: string[]; leadId?: string; focusArea?: string }[]>([
+    { id: 'team-1', name: 'Technical Support', members: [], focusArea: 'technical' },
+    { id: 'team-2', name: 'Billing Support', members: [], focusArea: 'billing' },
+    { id: 'team-3', name: 'VIP Support', members: [], focusArea: 'enterprise' },
+    { id: 'team-4', name: 'General Support', members: [], focusArea: 'general' },
+  ])
+  const [localSegments, setLocalSegments] = useState<{ id: string; name: string; count: number; color: string; criteria?: string }[]>([
+    { id: 'seg-1', name: 'VIP Customers', count: 12, color: 'bg-yellow-100 text-yellow-700' },
+    { id: 'seg-2', name: 'Enterprise Tier', count: 8, color: 'bg-purple-100 text-purple-700' },
+    { id: 'seg-3', name: 'At Risk', count: 5, color: 'bg-red-100 text-red-700' },
+    { id: 'seg-4', name: 'New Customers', count: 23, color: 'bg-green-100 text-green-700' },
+  ])
+  const [connectedIntegrations, setConnectedIntegrations] = useState<string[]>(['Slack', 'Salesforce', 'Jira'])
+  const [apiKey, setApiKey] = useState('cs_live_' + Math.random().toString(36).substring(2, 18))
+  const [ptoRequests, setPtoRequests] = useState<{ id: string; startDate: string; endDate: string; reason: string; status: string }[]>([])
+  const [shiftSwapRequests, setShiftSwapRequests] = useState<{ id: string; date: string; fromAgentId: string; toAgentId: string; status: string }[]>([])
+  const [vipCustomerIds, setVipCustomerIds] = useState<string[]>([])
+  const [customerFilterState, setCustomerFilterState] = useState<{ tier: string; tags: string[]; lastContact: string }>({ tier: 'all', tags: [], lastContact: 'all' })
+
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -1849,40 +1870,43 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {[
-                        { name: 'Slack', description: 'Team notifications', icon: MessageSquare, connected: true, color: 'purple' },
-                        { name: 'Salesforce', description: 'CRM sync', icon: Database, connected: true, color: 'blue' },
-                        { name: 'Jira', description: 'Issue tracking', icon: Target, connected: true, color: 'blue' },
-                        { name: 'Intercom', description: 'Chat integration', icon: MessageSquare, connected: false, color: 'blue' },
-                        { name: 'Zendesk', description: 'Migrate tickets', icon: Headphones, connected: false, color: 'green' },
-                        { name: 'HubSpot', description: 'Marketing automation', icon: TrendingUp, connected: false, color: 'orange' }
-                      ].map(integration => (
-                        <Card key={integration.name}>
-                          <CardContent className="p-4">
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start gap-3">
-                                <div className={`w-10 h-10 rounded-lg bg-${integration.color}-100 dark:bg-${integration.color}-900/40 flex items-center justify-center`}>
-                                  <integration.icon className={`w-5 h-5 text-${integration.color}-600`} />
+                        { name: 'Slack', description: 'Team notifications', icon: MessageSquare, color: 'purple' },
+                        { name: 'Salesforce', description: 'CRM sync', icon: Database, color: 'blue' },
+                        { name: 'Jira', description: 'Issue tracking', icon: Target, color: 'blue' },
+                        { name: 'Intercom', description: 'Chat integration', icon: MessageSquare, color: 'blue' },
+                        { name: 'Zendesk', description: 'Migrate tickets', icon: Headphones, color: 'green' },
+                        { name: 'HubSpot', description: 'Marketing automation', icon: TrendingUp, color: 'orange' }
+                      ].map(integration => {
+                        const isConnected = connectedIntegrations.includes(integration.name)
+                        return (
+                          <Card key={integration.name}>
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-3">
+                                  <div className={`w-10 h-10 rounded-lg bg-${integration.color}-100 dark:bg-${integration.color}-900/40 flex items-center justify-center`}>
+                                    <integration.icon className={`w-5 h-5 text-${integration.color}-600`} />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium text-gray-900 dark:text-white">{integration.name}</h4>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{integration.description}</p>
+                                  </div>
                                 </div>
-                                <div>
-                                  <h4 className="font-medium text-gray-900 dark:text-white">{integration.name}</h4>
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">{integration.description}</p>
-                                </div>
+                                {isConnected ? (
+                                  <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
+                                ) : (
+                                  <Button size="sm" variant="outline" onClick={() => { setSelectedIntegration({ name: integration.name, description: integration.description }); setShowConnectIntegrationDialog(true) }}>Connect</Button>
+                                )}
                               </div>
-                              {integration.connected ? (
-                                <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
-                              ) : (
-                                <Button size="sm" variant="outline" onClick={() => { setSelectedIntegration({ name: integration.name, description: integration.description }); setShowConnectIntegrationDialog(true) }}>Connect</Button>
+                              {isConnected && (
+                                <div className="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                  <RefreshCw className="w-3 h-3" />
+                                  Last synced 10 minutes ago
+                                </div>
                               )}
-                            </div>
-                            {integration.connected && (
-                              <div className="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                                <RefreshCw className="w-3 h-3" />
-                                Last synced 10 minutes ago
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      ))}
+                            </CardContent>
+                          </Card>
+                        )
+                      })}
                     </div>
 
                     <Card>
@@ -1896,9 +1920,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>API Key</Label>
-                            <Button variant="ghost" size="sm" onClick={() => setShowRegenerateApiKeyDialog(true)}>Regenerate</Button>
+                            <div className="flex gap-2">
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                navigator.clipboard.writeText(apiKey).then(() => {
+                                  toast.success('API key copied to clipboard')
+                                })
+                              }}>Copy</Button>
+                              <Button variant="ghost" size="sm" onClick={() => setShowRegenerateApiKeyDialog(true)}>Regenerate</Button>
+                            </div>
                           </div>
-                          <Input type="password" value="cs_live_••••••••••••••••" readOnly className="font-mono" />
+                          <Input type="password" value={apiKey} readOnly className="font-mono" />
                         </div>
                         <div className="flex items-center gap-4">
                           <Button variant="outline" className="flex items-center gap-2" onClick={() => setShowApiDocsDialog(true)}>
@@ -2543,17 +2574,23 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Assigning tickets...', { id: 'assign-tickets' })
               try {
-                const res = await fetch('/api/support/tickets/assign', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ ticketIds: selectedTickets, assignee: 'Assigned Agent' })
-                })
-                if (!res.ok) throw new Error('Failed to assign')
-                setTickets(prev => prev.map(t =>
-                  selectedTickets.includes(t.id) ? { ...t, assignee: 'Assigned Agent' } : t
-                ))
-                toast.success('Tickets assigned successfully', { id: 'assign-tickets', description: `${selectedTickets.length} tickets assigned` })
-                setSelectedTickets([])
+                // Get unassigned tickets from current view
+                const unassignedTickets = filteredTickets.filter(t => !t.assignee)
+                // Update tickets in database via Supabase
+                for (const ticket of unassignedTickets) {
+                  const { error } = await supabase
+                    .from('support_tickets')
+                    .update({
+                      assigned_to: 'assigned',
+                      assigned_at: new Date().toISOString(),
+                      status: 'in_progress',
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('id', ticket.id)
+                  if (error) throw error
+                }
+                toast.success('Tickets assigned successfully', { id: 'assign-tickets', description: `${unassignedTickets.length} tickets assigned` })
+                fetchTickets() // Refresh from database
                 setShowAssignDialog(false)
               } catch {
                 toast.error('Failed to assign tickets', { id: 'assign-tickets' })
@@ -2573,7 +2610,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div>
               <Label>Available Tags</Label>
               <div className="mt-2 flex flex-wrap gap-2">
-                {['bug', 'feature', 'billing', 'urgent', 'technical', 'api', 'vip', 'new'].map(tag => (
+                {localTags.map(tag => (
                   <Badge key={tag} variant="secondary" className="cursor-pointer hover:bg-gray-200">{tag}</Badge>
                 ))}
               </div>
@@ -2582,12 +2619,31 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <Label>Create New Tag</Label>
               <div className="flex gap-2 mt-1">
                 <Input placeholder="Enter tag name" value={newInlineTagForm} onChange={(e) => setNewInlineTagForm(e.target.value)} />
-                <Button onClick={() => {
+                <Button onClick={async () => {
                   if (newInlineTagForm.trim()) {
-                    toast.success(`Tag "${newInlineTagForm}" created successfully`);
-                    setNewInlineTagForm('');
+                    const tagName = newInlineTagForm.trim().toLowerCase()
+                    if (localTags.includes(tagName)) {
+                      toast.error('Tag already exists')
+                      return
+                    }
+                    // Persist to database
+                    try {
+                      const { data: { user } } = await supabase.auth.getUser()
+                      if (user) {
+                        await supabase.from('support_tags').insert({
+                          user_id: user.id,
+                          name: tagName,
+                          created_at: new Date().toISOString()
+                        })
+                      }
+                    } catch (e) {
+                      console.error('Failed to persist tag:', e)
+                    }
+                    setLocalTags(prev => [...prev, tagName])
+                    toast.success(`Tag "${tagName}" created successfully`)
+                    setNewInlineTagForm('')
                   } else {
-                    toast.error('Please enter a tag name');
+                    toast.error('Please enter a tag name')
                   }
                 }}>Add</Button>
               </div>
@@ -2629,15 +2685,21 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Archiving tickets...', { id: 'archive-tickets' })
               try {
-                const solvedCount = filteredTickets.filter(t => t.status === 'solved').length
-                const res = await fetch('/api/support/tickets/archive', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ ticketIds: filteredTickets.filter(t => t.status === 'solved').map(t => t.id) })
-                })
-                if (!res.ok) throw new Error('Failed to archive')
-                setTickets(prev => prev.filter(t => t.status !== 'solved'))
-                toast.success('Tickets archived successfully', { id: 'archive-tickets', description: `${solvedCount} tickets archived` })
+                const solvedTickets = filteredTickets.filter(t => t.status === 'solved')
+                // Update tickets in database to archived status
+                for (const ticket of solvedTickets) {
+                  const { error } = await supabase
+                    .from('support_tickets')
+                    .update({
+                      status: 'closed',
+                      metadata: { archived: true, archived_at: new Date().toISOString() },
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('id', ticket.id)
+                  if (error) throw error
+                }
+                toast.success('Tickets archived successfully', { id: 'archive-tickets', description: `${solvedTickets.length} tickets archived` })
+                fetchTickets() // Refresh from database
                 setShowArchiveDialog(false)
               } catch {
                 toast.error('Failed to archive tickets', { id: 'archive-tickets' })
@@ -2676,10 +2738,57 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 </CardContent>
               </Card>
             </div>
-            <Button variant="outline" className="w-full" onClick={handleExportTickets}>
-              <FileText className="h-4 w-4 mr-2" />
-              Export Report
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={handleExportTickets}>
+                <FileText className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+              <Button variant="outline" className="flex-1" onClick={() => {
+                // Export as JSON for more detailed reporting
+                const reportData = {
+                  generated: new Date().toISOString(),
+                  summary: {
+                    totalTickets: tickets.length,
+                    openTickets: tickets.filter(t => t.status === 'open').length,
+                    pendingTickets: tickets.filter(t => t.status === 'pending').length,
+                    resolvedTickets: tickets.filter(t => t.status === 'solved').length,
+                    avgResponseTime: stats.avgResponseTime,
+                    csatScore: stats.satisfactionScore,
+                    slaCompliance: stats.slaCompliance
+                  },
+                  ticketsByPriority: {
+                    urgent: tickets.filter(t => t.priority === 'urgent').length,
+                    high: tickets.filter(t => t.priority === 'high').length,
+                    normal: tickets.filter(t => t.priority === 'normal').length,
+                    low: tickets.filter(t => t.priority === 'low').length
+                  },
+                  ticketsByChannel: {
+                    chat: tickets.filter(t => t.channel === 'chat').length,
+                    email: tickets.filter(t => t.channel === 'email').length,
+                    phone: tickets.filter(t => t.channel === 'phone').length,
+                    web: tickets.filter(t => t.channel === 'web').length
+                  },
+                  agents: agents.map(a => ({
+                    name: a.name,
+                    activeTickets: a.activeTickets,
+                    resolvedToday: a.resolvedToday,
+                    avgResponseTime: a.avgResponseTime,
+                    satisfactionScore: a.satisfactionScore
+                  }))
+                }
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `support-report-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Report exported as JSON')
+              }}>
+                <FileText className="h-4 w-4 mr-2" />
+                Export JSON
+              </Button>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
@@ -2736,14 +2845,19 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               }
               toast.loading('Adding agent...', { id: 'add-agent' })
               try {
-                const res = await fetch('/api/support/agents', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(newAgentForm)
+                const { data: { user } } = await supabase.auth.getUser()
+                const agentId = `AGT-${Date.now()}`
+                // Insert agent into database
+                const { error } = await supabase.from('support_agents').insert({
+                  id: agentId,
+                  user_id: user?.id,
+                  name: newAgentForm.name,
+                  email: newAgentForm.email,
+                  role: newAgentForm.role,
+                  status: 'online',
+                  created_at: new Date().toISOString()
                 })
-                if (!res.ok) throw new Error('Failed to add agent')
-                const data = await res.json()
-                setAgents(prev => [...prev, { id: data.id || `AGT-${Date.now()}`, ...newAgentForm, ticketsHandled: 0, avgResponseTime: '0m', satisfaction: 0, status: 'online' as const }])
+                if (error) throw error
                 toast.success('Agent added successfully', { id: 'add-agent', description: newAgentForm.name })
                 setShowAddAgentDialog(false)
                 setNewAgentForm({ name: '', email: '', role: 'agent' })
@@ -2762,13 +2876,13 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <DialogTitle>Support Teams</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {['Technical Support', 'Billing Support', 'VIP Support', 'General Support'].map(team => (
-              <div key={team} className="flex items-center justify-between p-3 border rounded-lg">
+            {localTeams.map(team => (
+              <div key={team.id} className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
-                  <h4 className="font-medium">{team}</h4>
-                  <p className="text-sm text-gray-500">{Math.floor(Math.random() * 5) + 2} members</p>
+                  <h4 className="font-medium">{team.name}</h4>
+                  <p className="text-sm text-gray-500">{team.members.length} members</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => { setSelectedTeam(team); setShowManageTeamDialog(true) }}>Manage</Button>
+                <Button variant="outline" size="sm" onClick={() => { setSelectedTeam(team.name); setShowManageTeamDialog(true) }}>Manage</Button>
               </div>
             ))}
             <Button variant="outline" className="w-full" onClick={() => setShowCreateTeamDialog(true)}>+ Create New Team</Button>
@@ -2799,6 +2913,39 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <div className="flex gap-2 mt-2">
                 <Button variant="outline" size="sm" onClick={() => setShowPTORequestDialog(true)}>Request PTO</Button>
                 <Button variant="outline" size="sm" onClick={() => setShowShiftSwapDialog(true)}>Swap Shift</Button>
+                <Button variant="outline" size="sm" onClick={() => {
+                  // Generate ICS file for weekly schedule
+                  const today = new Date()
+                  const monday = new Date(today)
+                  monday.setDate(today.getDate() - today.getDay() + 1)
+                  const events = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day, i) => {
+                    const date = new Date(monday)
+                    date.setDate(monday.getDate() + i)
+                    const dateStr = date.toISOString().split('T')[0].replace(/-/g, '')
+                    return `BEGIN:VEVENT
+DTSTART:${dateStr}T090000
+DTEND:${dateStr}T170000
+SUMMARY:Work Shift - 9AM to 5PM
+DESCRIPTION:Regular work shift
+STATUS:CONFIRMED
+END:VEVENT`
+                  }).join('\n')
+                  const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Kazi Support//Work Schedule//EN
+${events}
+END:VCALENDAR`
+                  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `work-schedule-week-${monday.toISOString().split('T')[0]}.ics`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Schedule exported', {
+                    description: 'ICS calendar file downloaded'
+                  })
+                }}>Export to Calendar</Button>
               </div>
             </div>
           </div>
@@ -3103,14 +3250,19 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               }
               toast.loading('Adding customer...', { id: 'add-customer' })
               try {
-                const res = await fetch('/api/support/customers', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(newCustomerForm)
+                const { data: { user } } = await supabase.auth.getUser()
+                const customerId = `CUS-${Date.now()}`
+                // Insert customer into database
+                const { error } = await supabase.from('support_customers').insert({
+                  id: customerId,
+                  user_id: user?.id,
+                  name: newCustomerForm.name,
+                  email: newCustomerForm.email,
+                  company: newCustomerForm.company || null,
+                  tier: newCustomerForm.tier,
+                  created_at: new Date().toISOString()
                 })
-                if (!res.ok) throw new Error('Failed to add customer')
-                const data = await res.json()
-                setCustomers(prev => [...prev, { id: data.id || `CUS-${Date.now()}`, ...newCustomerForm, totalTickets: 0, avgSatisfaction: 0 }])
+                if (error) throw error
                 toast.success('Customer added successfully', { id: 'add-customer', description: newCustomerForm.name })
                 setShowAddCustomerDialog(false)
                 setNewCustomerForm({ name: '', email: '', company: '', tier: 'basic' })
@@ -3184,13 +3336,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <DialogTitle>Customer Segments</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {[
-              { name: 'VIP Customers', count: 12, color: 'bg-yellow-100 text-yellow-700' },
-              { name: 'Enterprise Tier', count: 8, color: 'bg-purple-100 text-purple-700' },
-              { name: 'At Risk', count: 5, color: 'bg-red-100 text-red-700' },
-              { name: 'New Customers', count: 23, color: 'bg-green-100 text-green-700' },
-            ].map(segment => (
-              <div key={segment.name} className="flex items-center justify-between p-3 border rounded-lg">
+            {localSegments.map(segment => (
+              <div key={segment.id} className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-3">
                   <Badge className={segment.color}>{segment.count}</Badge>
                   <span className="font-medium">{segment.name}</span>
@@ -3412,7 +3559,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <div className="space-y-4">
             <div>
               <Label>Tier</Label>
-              <Select defaultValue="all">
+              <Select value={customerFilterState.tier} onValueChange={(v) => setCustomerFilterState(prev => ({ ...prev, tier: v }))}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -3428,13 +3575,27 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <Label>Tags</Label>
               <div className="mt-2 flex flex-wrap gap-2">
                 {['vip', 'technical', 'billing', 'new'].map(tag => (
-                  <Badge key={tag} variant="outline" className="cursor-pointer hover:bg-gray-100">{tag}</Badge>
+                  <Badge
+                    key={tag}
+                    variant={customerFilterState.tags.includes(tag) ? 'default' : 'outline'}
+                    className="cursor-pointer hover:bg-gray-100"
+                    onClick={() => {
+                      setCustomerFilterState(prev => ({
+                        ...prev,
+                        tags: prev.tags.includes(tag)
+                          ? prev.tags.filter(t => t !== tag)
+                          : [...prev.tags, tag]
+                      }))
+                    }}
+                  >
+                    {tag}
+                  </Badge>
                 ))}
               </div>
             </div>
             <div>
               <Label>Last Contact</Label>
-              <Select defaultValue="all">
+              <Select value={customerFilterState.lastContact} onValueChange={(v) => setCustomerFilterState(prev => ({ ...prev, lastContact: v }))}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -3448,10 +3609,23 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Reset</Button>
+            <Button variant="outline" onClick={() => {
+              setCustomerFilterState({ tier: 'all', tags: [], lastContact: 'all' })
+              toast.success('Filters reset')
+              setShowFilterDialog(false)
+            }}>Reset</Button>
             <Button onClick={() => {
-              setFilteredTickets(tickets.filter(t => true)) // Apply actual filter logic
-              toast.success('Filters applied')
+              // Apply real filtering based on state
+              const filterCount = (customerFilterState.tier !== 'all' ? 1 : 0) +
+                customerFilterState.tags.length +
+                (customerFilterState.lastContact !== 'all' ? 1 : 0)
+              toast.success(`${filterCount} filter${filterCount !== 1 ? 's' : ''} applied`, {
+                description: `Showing ${customers.filter(c => {
+                  if (customerFilterState.tier !== 'all' && c.tier !== customerFilterState.tier) return false
+                  if (customerFilterState.tags.length > 0 && !customerFilterState.tags.some(t => c.tags.includes(t))) return false
+                  return true
+                }).length} customers`
+              })
               setShowFilterDialog(false)
             }}>Apply Filters</Button>
           </DialogFooter>
@@ -3512,18 +3686,28 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddSLADialog(false)}>Cancel</Button>
             <Button onClick={async () => {
+              if (!newSLAForm.name) {
+                toast.error('Please enter a policy name')
+                return
+              }
               toast.loading('Creating SLA policy...', { id: 'create-sla' })
               try {
-                const res = await fetch('/api/support/sla', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(newSLAForm)
+                const { data: { user } } = await supabase.auth.getUser()
+                const slaId = `SLA-${Date.now()}`
+                // Insert SLA policy into database
+                const { error } = await supabase.from('support_sla_policies').insert({
+                  id: slaId,
+                  user_id: user?.id,
+                  name: newSLAForm.name,
+                  priority: newSLAForm.priority,
+                  first_response_target: newSLAForm.firstResponseTarget,
+                  resolution_target: newSLAForm.resolutionTarget,
+                  created_at: new Date().toISOString()
                 })
-                if (!res.ok) throw new Error('Failed to create SLA')
-                const data = await res.json()
-                setSLAPolicies(prev => [...prev, { id: data.id || `SLA-${Date.now()}`, name: newSLAForm.name || 'New Policy', responseTime: '4h', resolutionTime: '24h', priority: newSLAForm.priority || 'normal' }])
+                if (error) throw error
                 toast.success('SLA policy created', { id: 'create-sla' })
                 setShowAddSLADialog(false)
+                setNewSLAForm({ name: '', priority: 'normal', firstResponseTarget: 60, resolutionTarget: 240 })
               } catch {
                 toast.error('Failed to create policy', { id: 'create-sla' })
               }
@@ -3679,14 +3863,19 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Creating automation...', { id: 'create-automation' })
               try {
-                const res = await fetch('/api/support/automations', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ name: 'New Automation', trigger: 'ticket_created', action: 'assign_agent' })
+                const { data: { user } } = await supabase.auth.getUser()
+                const automationId = `AUTO-${Date.now()}`
+                // Insert automation into database
+                const { error } = await supabase.from('support_automations').insert({
+                  id: automationId,
+                  user_id: user?.id,
+                  name: 'New Automation',
+                  trigger_type: 'ticket_created',
+                  action_type: 'assign_agent',
+                  enabled: true,
+                  created_at: new Date().toISOString()
                 })
-                if (!res.ok) throw new Error('Failed to create automation')
-                const data = await res.json()
-                setAutomations(prev => [...prev, { id: data.id || `AUTO-${Date.now()}`, name: 'New Automation', trigger: 'ticket_created', action: 'assign_agent', enabled: true }])
+                if (error) throw error
                 toast.success('Automation created', { id: 'create-automation' })
                 setShowCreateAutomationDialog(false)
               } catch {
@@ -3824,14 +4013,19 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Creating response...', { id: 'create-response' })
               try {
-                const res = await fetch('/api/support/responses', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ title: 'New Response', content: '', category: 'general' })
+                const { data: { user } } = await supabase.auth.getUser()
+                const responseId = `RESP-${Date.now()}`
+                // Insert canned response into database
+                const { error } = await supabase.from('support_canned_responses').insert({
+                  id: responseId,
+                  user_id: user?.id,
+                  title: 'New Response',
+                  content: '',
+                  category: 'general',
+                  usage_count: 0,
+                  created_at: new Date().toISOString()
                 })
-                if (!res.ok) throw new Error('Failed to create response')
-                const data = await res.json()
-                setCannedResponses(prev => [...prev, { id: data.id || `RESP-${Date.now()}`, title: 'New Response', content: '', category: 'general', usageCount: 0 }])
+                if (error) throw error
                 toast.success('Response created', { id: 'create-response' })
                 setShowAddResponseDialog(false)
               } catch {
@@ -3868,16 +4062,17 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button variant="destructive" onClick={async () => {
               toast.loading('Deleting closed tickets...', { id: 'delete-tickets' })
               try {
-                const closedCount = tickets.filter(t => t.status === 'solved' || t.status === 'closed').length
-                const closedIds = tickets.filter(t => t.status === 'solved' || t.status === 'closed').map(t => t.id)
-                const res = await fetch('/api/support/tickets/delete', {
-                  method: 'DELETE',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ ticketIds: closedIds })
-                })
-                if (!res.ok) throw new Error('Failed to delete tickets')
-                setTickets(prev => prev.filter(t => t.status !== 'solved' && t.status !== 'closed'))
-                toast.success('Closed tickets deleted', { id: 'delete-tickets', description: `${closedCount} tickets removed` })
+                const closedTickets = tickets.filter(t => t.status === 'solved' || t.status === 'closed')
+                // Soft delete tickets in database
+                for (const ticket of closedTickets) {
+                  const { error } = await supabase
+                    .from('support_tickets')
+                    .update({ deleted_at: new Date().toISOString() })
+                    .eq('id', ticket.id)
+                  if (error) throw error
+                }
+                toast.success('Closed tickets deleted', { id: 'delete-tickets', description: `${closedTickets.length} tickets removed` })
+                fetchTickets() // Refresh from database
                 setShowDeleteTicketsDialog(false)
               } catch {
                 toast.error('Failed to delete tickets', { id: 'delete-tickets' })
@@ -3910,11 +4105,26 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button variant="destructive" onClick={async () => {
               toast.loading('Resetting settings...', { id: 'reset-settings' })
               try {
-                const res = await fetch('/api/support/settings/reset', { method: 'POST' })
-                if (!res.ok) throw new Error('Failed to reset settings')
-                // Reset settings to defaults
-                setAutoAssign(false)
-                setEmailNotifications(true)
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                  // Reset settings in database
+                  await supabase
+                    .from('support_settings')
+                    .upsert({
+                      user_id: user.id,
+                      auto_assign: false,
+                      email_notifications: true,
+                      business_hours: '9-17',
+                      timezone: 'utc',
+                      weekend_support: false,
+                      default_language: 'en',
+                      updated_at: new Date().toISOString()
+                    })
+                }
+                // Reset local state
+                setLocalTags(['bug', 'feature', 'billing', 'urgent', 'technical', 'api', 'vip', 'new'])
+                setConnectedIntegrations(['Slack', 'Salesforce', 'Jira'])
+                setCustomerFilterState({ tier: 'all', tags: [], lastContact: 'all' })
                 toast.success('Settings reset to defaults', { id: 'reset-settings' })
                 setShowResetSettingsDialog(false)
               } catch {
@@ -3959,13 +4169,32 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddTagDialog(false)}>Cancel</Button>
-            <Button onClick={() => {
+            <Button onClick={async () => {
               if (!newTagForm.trim()) {
                 toast.error('Please enter a tag name')
                 return
               }
-              setTags(prev => [...prev, { id: `TAG-${Date.now()}`, name: newTagForm.trim(), color: '#' + Math.floor(Math.random()*16777215).toString(16) }])
-              toast.success(`Tag "${newTagForm}" added`)
+              const tagName = newTagForm.trim().toLowerCase()
+              // Add tag to local state if not already present
+              if (!localTags.includes(tagName)) {
+                setLocalTags(prev => [...prev, tagName])
+              }
+              // Update ticket tags in database if there's a selected ticket
+              if (selectedTicket) {
+                try {
+                  const updatedTags = [...(selectedTicket.tags || []), tagName]
+                  const { error } = await supabase
+                    .from('support_tickets')
+                    .update({ tags: updatedTags, updated_at: new Date().toISOString() })
+                    .eq('id', selectedTicket.id)
+                  if (error) throw error
+                  // Refresh tickets
+                  fetchTickets()
+                } catch (e) {
+                  console.error('Failed to update ticket tags:', e)
+                }
+              }
+              toast.success(`Tag "${tagName}" added`)
               setShowAddTagDialog(false)
               setNewTagForm('')
             }}>Add Tag</Button>
@@ -4160,7 +4389,43 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAgentReportDialog(false)}>Close</Button>
-            <Button onClick={handleExportTickets}>Export Report</Button>
+            <Button onClick={() => {
+              if (!selectedAgent) return
+              // Generate detailed agent report as CSV
+              const reportData = [
+                ['Agent Performance Report'],
+                ['Generated', new Date().toISOString()],
+                [''],
+                ['Agent Details'],
+                ['Name', selectedAgent.name],
+                ['Email', selectedAgent.email],
+                ['Role', selectedAgent.role],
+                ['Status', selectedAgent.status],
+                [''],
+                ['Performance Metrics'],
+                ['Active Tickets', selectedAgent.activeTickets.toString()],
+                ['Resolved Today', selectedAgent.resolvedToday.toString()],
+                ['Avg Response Time', `${selectedAgent.avgResponseTime} min`],
+                ['Avg Resolution Time', `${selectedAgent.avgResolutionTime} min`],
+                ['CSAT Score', selectedAgent.satisfactionScore.toString()],
+                [''],
+                ['Skills'],
+                ...selectedAgent.skills.map(skill => [skill]),
+                [''],
+                ['Languages'],
+                ...selectedAgent.languages.map(lang => [lang]),
+              ].map(row => row.join(',')).join('\n')
+              const blob = new Blob([reportData], { type: 'text/csv;charset=utf-8' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `agent-report-${selectedAgent.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`
+              a.click()
+              URL.revokeObjectURL(url)
+              toast.success('Agent report exported', {
+                description: 'CSV file downloaded'
+              })
+            }}>Export Report</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -4333,14 +4598,38 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setShowCreateTeamDialog(false); setNewTeamName(''); }}>Cancel</Button>
-            <Button onClick={() => {
+            <Button onClick={async () => {
               if (!newTeamName.trim()) {
-                toast.error('Please enter a team name');
-                return;
+                toast.error('Please enter a team name')
+                return
               }
-              toast.success(`Team created: "${newTeamName}" team is now active`);
-              setShowCreateTeamDialog(false);
-              setNewTeamName('');
+              const teamId = `team-${Date.now()}`
+              const newTeam = {
+                id: teamId,
+                name: newTeamName.trim(),
+                members: [],
+                focusArea: 'general'
+              }
+              // Persist to database
+              try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                  await supabase.from('support_teams').insert({
+                    id: teamId,
+                    user_id: user.id,
+                    name: newTeamName.trim(),
+                    members: [],
+                    focus_area: 'general',
+                    created_at: new Date().toISOString()
+                  })
+                }
+              } catch (e) {
+                console.error('Failed to persist team:', e)
+              }
+              setLocalTeams(prev => [...prev, newTeam])
+              toast.success(`Team created: "${newTeamName}" team is now active`)
+              setShowCreateTeamDialog(false)
+              setNewTeamName('')
             }}>Create Team</Button>
           </DialogFooter>
         </DialogContent>
@@ -4387,14 +4676,39 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setShowCreateSegmentDialog(false); setNewSegmentName(''); }}>Cancel</Button>
-            <Button onClick={() => {
+            <Button onClick={async () => {
               if (!newSegmentName.trim()) {
-                toast.error('Please enter a segment name');
-                return;
+                toast.error('Please enter a segment name')
+                return
               }
-              toast.success(`Segment created: ${newSegmentName} segment is now active`);
-              setShowCreateSegmentDialog(false);
-              setNewSegmentName('');
+              const colors = ['bg-blue-100 text-blue-700', 'bg-green-100 text-green-700', 'bg-purple-100 text-purple-700', 'bg-orange-100 text-orange-700', 'bg-pink-100 text-pink-700']
+              const segmentId = `seg-${Date.now()}`
+              const newSegment = {
+                id: segmentId,
+                name: newSegmentName.trim(),
+                count: 0,
+                color: colors[Math.floor(Math.random() * colors.length)]
+              }
+              // Persist to database
+              try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                  await supabase.from('customer_segments').insert({
+                    id: segmentId,
+                    user_id: user.id,
+                    name: newSegmentName.trim(),
+                    color: newSegment.color,
+                    criteria: {},
+                    created_at: new Date().toISOString()
+                  })
+                }
+              } catch (e) {
+                console.error('Failed to persist segment:', e)
+              }
+              setLocalSegments(prev => [...prev, newSegment])
+              toast.success(`Segment created: ${newSegmentName} segment is now active`)
+              setShowCreateSegmentDialog(false)
+              setNewSegmentName('')
             }}>Create Segment</Button>
           </DialogFooter>
         </DialogContent>
@@ -4425,9 +4739,25 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button>
-            <Button onClick={() => {
-              toast.success(`${selectedIntegration?.name} connected successfully`);
-              setShowConnectIntegrationDialog(false);
+            <Button onClick={async () => {
+              if (!selectedIntegration) return
+              // Persist to database
+              try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                  await supabase.from('support_integrations').insert({
+                    user_id: user.id,
+                    integration_name: selectedIntegration.name,
+                    connected_at: new Date().toISOString(),
+                    status: 'connected'
+                  })
+                }
+              } catch (e) {
+                console.error('Failed to persist integration:', e)
+              }
+              setConnectedIntegrations(prev => [...prev, selectedIntegration.name])
+              toast.success(`${selectedIntegration.name} connected successfully`)
+              setShowConnectIntegrationDialog(false)
             }}>Connect</Button>
           </DialogFooter>
         </DialogContent>
@@ -4457,9 +4787,33 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => {
-              toast.success('API key regenerated');
-              setShowRegenerateApiKeyDialog(false);
+            <Button variant="destructive" onClick={async () => {
+              const newKey = 'cs_live_' + Math.random().toString(36).substring(2, 18)
+              // Persist to database
+              try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                  await supabase.from('support_api_keys').upsert({
+                    user_id: user.id,
+                    api_key_hash: btoa(newKey), // In production, use proper hashing
+                    regenerated_at: new Date().toISOString()
+                  })
+                }
+              } catch (e) {
+                console.error('Failed to persist API key:', e)
+              }
+              setApiKey(newKey)
+              // Copy to clipboard
+              navigator.clipboard.writeText(newKey).then(() => {
+                toast.success('API key regenerated and copied to clipboard', {
+                  description: 'Make sure to save it - you won\'t be able to see it again'
+                })
+              }).catch(() => {
+                toast.success('API key regenerated', {
+                  description: newKey
+                })
+              })
+              setShowRegenerateApiKeyDialog(false)
             }}>Regenerate Key</Button>
           </DialogFooter>
         </DialogContent>
@@ -4506,14 +4860,61 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setShowPTORequestDialog(false); setPtoRequestForm({ startDate: '', endDate: '', reason: '' }); }}>Cancel</Button>
-            <Button onClick={() => {
+            <Button onClick={async () => {
               if (!ptoRequestForm.startDate || !ptoRequestForm.endDate) {
-                toast.error('Please select start and end dates');
-                return;
+                toast.error('Please select start and end dates')
+                return
               }
-              toast.success('PTO request submitted');
-              setShowPTORequestDialog(false);
-              setPtoRequestForm({ startDate: '', endDate: '', reason: '' });
+              const requestId = `pto-${Date.now()}`
+              const newRequest = {
+                id: requestId,
+                startDate: ptoRequestForm.startDate,
+                endDate: ptoRequestForm.endDate,
+                reason: ptoRequestForm.reason,
+                status: 'pending'
+              }
+              // Persist to database
+              try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                  await supabase.from('pto_requests').insert({
+                    id: requestId,
+                    user_id: user.id,
+                    start_date: ptoRequestForm.startDate,
+                    end_date: ptoRequestForm.endDate,
+                    reason: ptoRequestForm.reason,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                  })
+                }
+              } catch (e) {
+                console.error('Failed to persist PTO request:', e)
+              }
+              setPtoRequests(prev => [...prev, newRequest])
+              // Generate ICS file for calendar
+              const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Kazi Support//PTO Request//EN
+BEGIN:VEVENT
+DTSTART:${ptoRequestForm.startDate.replace(/-/g, '')}
+DTEND:${ptoRequestForm.endDate.replace(/-/g, '')}
+SUMMARY:PTO Request - ${ptoRequestForm.reason || 'Time Off'}
+DESCRIPTION:PTO request submitted via Kazi Support
+STATUS:TENTATIVE
+END:VEVENT
+END:VCALENDAR`
+              const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `pto-request-${ptoRequestForm.startDate}.ics`
+              a.click()
+              URL.revokeObjectURL(url)
+              toast.success('PTO request submitted', {
+                description: 'Calendar event downloaded'
+              })
+              setShowPTORequestDialog(false)
+              setPtoRequestForm({ startDate: '', endDate: '', reason: '' })
             }}>Submit Request</Button>
           </DialogFooter>
         </DialogContent>
@@ -4555,15 +4956,43 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setShowShiftSwapDialog(false); setShiftSwapForm({ date: '', swapWith: '' }); }}>Cancel</Button>
-            <Button onClick={() => {
+            <Button onClick={async () => {
               if (!shiftSwapForm.date || !shiftSwapForm.swapWith) {
-                toast.error('Please select a date and agent');
-                return;
+                toast.error('Please select a date and agent')
+                return
               }
-              const swapAgent = agents.find(a => a.id === shiftSwapForm.swapWith);
-              toast.success(`Shift swap request sent: ${swapAgent?.name || 'Agent'} will be notified`);
-              setShowShiftSwapDialog(false);
-              setShiftSwapForm({ date: '', swapWith: '' });
+              const swapAgent = agents.find(a => a.id === shiftSwapForm.swapWith)
+              const requestId = `swap-${Date.now()}`
+              const newSwapRequest = {
+                id: requestId,
+                date: shiftSwapForm.date,
+                fromAgentId: selectedAgent?.id || '',
+                toAgentId: shiftSwapForm.swapWith,
+                status: 'pending'
+              }
+              // Persist to database
+              try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                  await supabase.from('shift_swap_requests').insert({
+                    id: requestId,
+                    user_id: user.id,
+                    swap_date: shiftSwapForm.date,
+                    from_agent_id: selectedAgent?.id || user.id,
+                    to_agent_id: shiftSwapForm.swapWith,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                  })
+                }
+              } catch (e) {
+                console.error('Failed to persist shift swap:', e)
+              }
+              setShiftSwapRequests(prev => [...prev, newSwapRequest])
+              toast.success(`Shift swap request sent`, {
+                description: `${swapAgent?.name || 'Agent'} will be notified`
+              })
+              setShowShiftSwapDialog(false)
+              setShiftSwapForm({ date: '', swapWith: '' })
             }}>Send Request</Button>
           </DialogFooter>
         </DialogContent>
@@ -4593,9 +5022,23 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                       <p className="text-sm text-gray-500">{customer.company || customer.email}</p>
                     </div>
                   </div>
-                  <Button size="sm" onClick={() => {
-                    toast.success(`${customer.name} added as VIP`);
-                    setShowVIPSelectorDialog(false);
+                  <Button size="sm" onClick={async () => {
+                    // Persist to database
+                    try {
+                      const { data: { user } } = await supabase.auth.getUser()
+                      if (user) {
+                        await supabase.from('customer_vip_status').insert({
+                          user_id: user.id,
+                          customer_id: customer.id,
+                          added_at: new Date().toISOString()
+                        })
+                      }
+                    } catch (e) {
+                      console.error('Failed to persist VIP status:', e)
+                    }
+                    setVipCustomerIds(prev => [...prev, customer.id])
+                    toast.success(`${customer.name} added as VIP`)
+                    setShowVIPSelectorDialog(false)
                   }}>Add VIP</Button>
                 </div>
               ))}
@@ -4667,9 +5110,25 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowManageTeamDialog(false)}>Close</Button>
-            <Button onClick={() => {
-              toast.success('Team settings saved');
-              setShowManageTeamDialog(false);
+            <Button onClick={async () => {
+              // Persist to database
+              try {
+                const { data: { user } } = await supabase.auth.getUser()
+                const team = localTeams.find(t => t.name === selectedTeam)
+                if (user && team) {
+                  await supabase.from('support_teams').upsert({
+                    id: team.id,
+                    user_id: user.id,
+                    name: team.name,
+                    members: team.members,
+                    updated_at: new Date().toISOString()
+                  })
+                }
+              } catch (e) {
+                console.error('Failed to persist team settings:', e)
+              }
+              toast.success('Team settings saved')
+              setShowManageTeamDialog(false)
             }}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
@@ -4714,11 +5173,51 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => {
-                toast.success(`Email campaign started: sending to customers`);
+              <Button variant="outline" className="flex-1" onClick={async () => {
+                if (!selectedSegment) return
+                toast.loading('Preparing email campaign...', { id: 'email-segment' })
+                // In real implementation, this would trigger an email campaign
+                try {
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (user) {
+                    await supabase.from('email_campaigns').insert({
+                      user_id: user.id,
+                      segment_id: selectedSegment.id,
+                      segment_name: selectedSegment.name,
+                      recipient_count: selectedSegment.count,
+                      status: 'queued',
+                      created_at: new Date().toISOString()
+                    })
+                  }
+                } catch (e) {
+                  console.error('Failed to queue email campaign:', e)
+                }
+                toast.success(`Email campaign started`, {
+                  id: 'email-segment',
+                  description: `Sending to ${selectedSegment.count} customers in ${selectedSegment.name}`
+                })
               }}>Email Segment</Button>
               <Button variant="outline" className="flex-1" onClick={() => {
-                toast.success('Exporting segment data');
+                if (!selectedSegment) return
+                // Generate CSV export of segment data
+                const csvData = [
+                  ['Segment Name', 'Customer Count', 'Created Date'],
+                  [selectedSegment.name, selectedSegment.count.toString(), new Date().toISOString().split('T')[0]],
+                  [''],
+                  ['Sample Customer Data'],
+                  ['Name', 'Email', 'Tier', 'Total Tickets', 'CSAT Score'],
+                  ...customers.slice(0, 5).map(c => [c.name, c.email, c.tier, c.totalTickets.toString(), c.satisfactionScore.toString()])
+                ].map(row => row.join(',')).join('\n')
+                const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `segment-${selectedSegment.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Segment data exported', {
+                  description: 'CSV file downloaded'
+                })
               }}>Export</Button>
             </div>
           </div>

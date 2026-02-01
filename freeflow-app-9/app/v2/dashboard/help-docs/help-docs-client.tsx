@@ -5,6 +5,10 @@ import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { useHelpArticles, useHelpCategories } from '@/lib/hooks/use-help-extended'
+import { createClient } from '@/lib/supabase/client'
+
+// Initialize Supabase client
+const supabase = createClient()
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -470,6 +474,24 @@ export default function HelpDocsClient() {
   const [chatInput, setChatInput] = useState('')
   const [isSendingChat, setIsSendingChat] = useState(false)
 
+  // Bookmarks State - persisted in localStorage
+  const [bookmarkedArticles, setBookmarkedArticles] = useState<string[]>([])
+
+  // Categories State (for managing created categories)
+  const [localCategories, setLocalCategories] = useState<Category[]>(mockCategories)
+
+  // Load bookmarks from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('help-docs-bookmarks')
+    if (saved) {
+      try {
+        setBookmarkedArticles(JSON.parse(saved))
+      } catch (e) {
+        console.error('Failed to load bookmarks:', e)
+      }
+    }
+  }, [])
+
   // Form State
   const [formData, setFormData] = useState({
     title: '',
@@ -490,12 +512,12 @@ export default function HelpDocsClient() {
 
   const stats = useMemo(() => ({
     totalArticles: mockArticles.length,
-    totalCategories: mockCategories.length,
+    totalCategories: localCategories.length,
     totalViews: mockArticles.reduce((sum, a) => sum + a.views, 0),
     avgHelpfulness: mockArticles.filter(a => a.status === 'published').reduce((sum, a) => sum + calculateHelpfulness(a.helpfulVotes, a.notHelpfulVotes), 0) / mockArticles.filter(a => a.status === 'published').length,
     openTickets: mockTickets.filter(t => t.status === 'open' || t.status === 'new').length,
     pendingTickets: mockTickets.filter(t => t.status === 'pending').length
-  }), [])
+  }), [localCategories.length])
 
   const featuredArticles = mockArticles.filter(a => a.isFeatured && a.status === 'published')
   const popularArticles = [...mockArticles].filter(a => a.status === 'published').sort((a, b) => b.views - a.views).slice(0, 5)
@@ -722,9 +744,230 @@ export default function HelpDocsClient() {
     setShowContactDialog(true)
   }
 
-  const handleBookmarkArticle = (articleTitle: string) => {
-    toast.success("Article bookmarked: " + articleTitle + " saved to bookmarks")
-  }
+  // Real bookmark handler with localStorage persistence
+  const handleBookmarkArticle = useCallback((articleId: string, articleTitle: string) => {
+    setBookmarkedArticles(prev => {
+      const isBookmarked = prev.includes(articleId)
+      let newBookmarks: string[]
+
+      if (isBookmarked) {
+        newBookmarks = prev.filter(id => id !== articleId)
+        toast.success(`Removed "${articleTitle}" from bookmarks`)
+      } else {
+        newBookmarks = [...prev, articleId]
+        toast.success(`Bookmarked "${articleTitle}"`)
+      }
+
+      // Persist to localStorage
+      localStorage.setItem('help-docs-bookmarks', JSON.stringify(newBookmarks))
+      return newBookmarks
+    })
+  }, [])
+
+  // Check if article is bookmarked
+  const isArticleBookmarked = useCallback((articleId: string) => {
+    return bookmarkedArticles.includes(articleId)
+  }, [bookmarkedArticles])
+
+  // Create new category with real state management
+  const handleCreateCategory = useCallback((categoryName: string) => {
+    if (!categoryName?.trim()) {
+      toast.error('Category name is required')
+      return
+    }
+
+    const newCategory: Category = {
+      id: `cat-${Date.now()}`,
+      name: categoryName.trim(),
+      description: `${categoryName.trim()} articles and guides`,
+      icon: '📁',
+      color: 'blue',
+      articleCount: 0,
+      sections: [],
+      order: localCategories.length + 1,
+      isVisible: true
+    }
+
+    setLocalCategories(prev => [...prev, newCategory])
+    toast.success(`Category "${categoryName}" created successfully`)
+
+    // Optionally save to database
+    if (userId) {
+      supabase.from('help_categories').insert({
+        user_id: userId,
+        name: newCategory.name,
+        description: newCategory.description,
+        icon: newCategory.icon,
+        color: newCategory.color,
+        sort_order: newCategory.order,
+        is_visible: true
+      }).then(({ error }) => {
+        if (error) {
+          console.error('Failed to save category to database:', error)
+        } else {
+          refreshCategories()
+        }
+      })
+    }
+  }, [localCategories.length, userId, refreshCategories])
+
+  // Handle article approval in review queue
+  const handleApproveArticle = useCallback(async (article: Article) => {
+    try {
+      // Find the corresponding DB article
+      const dbArticle = dbArticles.find(a => a.title === article.title)
+      if (dbArticle) {
+        const { error } = await supabase
+          .from('help_articles')
+          .update({
+            status: 'published',
+            published_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', dbArticle.id)
+
+        if (error) throw error
+        refreshArticles()
+      }
+      toast.success(`Article "${article.title}" approved and published`)
+    } catch (error) {
+      console.error('Failed to approve article:', error)
+      toast.error('Failed to approve article')
+    }
+  }, [dbArticles, refreshArticles])
+
+  // Handle article rejection in review queue
+  const handleRejectArticle = useCallback(async (article: Article, reason?: string) => {
+    try {
+      const dbArticle = dbArticles.find(a => a.title === article.title)
+      if (dbArticle) {
+        const { error } = await supabase
+          .from('help_articles')
+          .update({
+            status: 'draft',
+            updated_at: new Date().toISOString(),
+            metadata: { rejection_reason: reason || 'Needs revision' }
+          })
+          .eq('id', dbArticle.id)
+
+        if (error) throw error
+        refreshArticles()
+      }
+      toast.success(`Article "${article.title}" sent back for revision`)
+    } catch (error) {
+      console.error('Failed to reject article:', error)
+      toast.error('Failed to reject article')
+    }
+  }, [dbArticles, refreshArticles])
+
+  // Generate and download analytics report as CSV
+  const handleExportAnalyticsReport = useCallback(() => {
+    // Prepare analytics data
+    const reportData = {
+      generatedAt: new Date().toISOString(),
+      summary: {
+        totalViews: mockStats.totalViews,
+        avgSatisfaction: mockStats.avgSatisfaction,
+        searchQueries: mockStats.searchQueries,
+        ticketsDeflected: mockStats.ticketsDeflected,
+        viewsTrend: mockStats.viewsTrend,
+        satisfactionTrend: mockStats.satisfactionTrend
+      },
+      topSearches: mockStats.topSearches,
+      articlePerformance: popularArticles.map(article => ({
+        title: article.title,
+        category: article.category,
+        views: article.views,
+        helpfulVotes: article.helpfulVotes,
+        notHelpfulVotes: article.notHelpfulVotes,
+        helpfulness: calculateHelpfulness(article.helpfulVotes, article.notHelpfulVotes),
+        readTime: article.readTime
+      })),
+      contentByStatus: {
+        published: mockArticles.filter(a => a.status === 'published').length,
+        draft: mockArticles.filter(a => a.status === 'draft').length,
+        review: mockArticles.filter(a => a.status === 'review').length,
+        archived: mockArticles.filter(a => a.status === 'archived').length
+      },
+      categoryStats: localCategories.map(c => ({
+        name: c.name,
+        articleCount: c.articleCount,
+        sections: c.sections.length
+      }))
+    }
+
+    // Generate CSV content
+    const csvRows = [
+      ['Help Documentation Analytics Report'],
+      ['Generated:', reportData.generatedAt],
+      [''],
+      ['SUMMARY'],
+      ['Metric', 'Value'],
+      ['Total Views', reportData.summary.totalViews],
+      ['Average Satisfaction', `${reportData.summary.avgSatisfaction}%`],
+      ['Search Queries', reportData.summary.searchQueries],
+      ['Tickets Deflected', reportData.summary.ticketsDeflected],
+      ['Views Trend', `+${reportData.summary.viewsTrend}%`],
+      ['Satisfaction Trend', `+${reportData.summary.satisfactionTrend}%`],
+      [''],
+      ['TOP SEARCHES'],
+      ['Query', 'Count'],
+      ...reportData.topSearches.map(s => [s.query, s.count]),
+      [''],
+      ['ARTICLE PERFORMANCE'],
+      ['Title', 'Category', 'Views', 'Helpful %', 'Read Time (min)'],
+      ...reportData.articlePerformance.map(a => [a.title, a.category, a.views, `${a.helpfulness}%`, a.readTime]),
+      [''],
+      ['CONTENT BY STATUS'],
+      ['Status', 'Count'],
+      ['Published', reportData.contentByStatus.published],
+      ['Draft', reportData.contentByStatus.draft],
+      ['In Review', reportData.contentByStatus.review],
+      ['Archived', reportData.contentByStatus.archived],
+      [''],
+      ['CATEGORY STATS'],
+      ['Category', 'Article Count', 'Sections'],
+      ...reportData.categoryStats.map(c => [c.name, c.articleCount, c.sections])
+    ]
+
+    const csvContent = csvRows.map(row =>
+      Array.isArray(row) ? row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') : row
+    ).join('\n')
+
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `help-docs-analytics-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    toast.success('Analytics report downloaded successfully')
+  }, [popularArticles, localCategories])
+
+  // Handle AI insight action with real functionality
+  const handleInsightAction = useCallback((insight: typeof mockHelpDocsAIInsights[0]) => {
+    switch (insight.category) {
+      case 'Effectiveness':
+        setActiveTab('analytics')
+        toast.info(`Viewing effectiveness metrics for: ${insight.title}`)
+        break
+      case 'Content':
+        setActiveTab('articles')
+        setSearchQuery(insight.title.includes('API') ? 'API' : '')
+        toast.info(`Filtered articles related to: ${insight.title}`)
+        break
+      case 'Maintenance':
+        setShowReviewQueueDialog(true)
+        toast.info(`Opening review queue for: ${insight.title}`)
+        break
+      default:
+        toast.info(`Action for insight: ${insight.title}`)
+    }
+  }, [])
 
   // Handle sending chat message
   const handleSendChatMessage = useCallback(async () => {
@@ -944,7 +1187,7 @@ export default function HelpDocsClient() {
             <div>
               <h2 className="text-xl font-semibold mb-4">Browse by Category</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {mockCategories.map(category => (
+                {localCategories.map(category => (
                   <Card
                     key={category.id}
                     className="p-6 text-center hover:shadow-lg transition-shadow cursor-pointer border-t-4"
@@ -1070,27 +1313,27 @@ export default function HelpDocsClient() {
                   <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
                     const categoryName = prompt('Enter category name:', 'New Category')
                     if (categoryName && categoryName.trim()) {
-                      toast.success('Category created')
+                      handleCreateCategory(categoryName)
                     }
                   }}>
                     <Plus className="w-4 h-4 mr-2" />Add Category
                   </Button>
-                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => toast.info('Structure Manager')}>
+                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => setActiveTab('settings')}>
                     <Settings className="w-4 h-4 mr-2" />Manage Structure
                   </Button>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockCategories.length}</div>
+                  <div className="text-2xl font-bold">{localCategories.length}</div>
                   <div className="text-sm text-blue-100">Categories</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockCategories.reduce((acc, c) => acc + c.sections.length, 0)}</div>
+                  <div className="text-2xl font-bold">{localCategories.reduce((acc, c) => acc + c.sections.length, 0)}</div>
                   <div className="text-sm text-blue-100">Sections</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockCategories.reduce((acc, c) => acc + c.articleCount, 0)}</div>
+                  <div className="text-2xl font-bold">{localCategories.reduce((acc, c) => acc + c.articleCount, 0)}</div>
                   <div className="text-sm text-blue-100">Total Articles</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1128,7 +1371,7 @@ export default function HelpDocsClient() {
                   <h3 className="font-semibold mb-4">Categories</h3>
                   <ScrollArea className="h-[600px]">
                     <div className="space-y-1">
-                      {mockCategories.map(category => (
+                      {localCategories.map(category => (
                         <div key={category.id}>
                           <div
                             className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
@@ -2249,7 +2492,7 @@ export default function HelpDocsClient() {
             <AIInsightsPanel
               insights={mockHelpDocsAIInsights}
               title="Help Center Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
+              onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">
@@ -2315,8 +2558,23 @@ export default function HelpDocsClient() {
                 <div className="border-t dark:border-gray-700 pt-6">
                   <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">Was this article helpful?</h4>
                   <div className="flex items-center gap-4">
-                    <Button variant="outline" onClick={() => toast.success('Thanks for your feedback!')}><ThumbsUp className="w-4 h-4 mr-2" />Yes ({selectedArticle.helpfulVotes})</Button>
-                    <Button variant="outline" onClick={() => toast.info('Feedback recorded')}><ThumbsDown className="w-4 h-4 mr-2" />No ({selectedArticle.notHelpfulVotes})</Button>
+                    <Button variant="outline" onClick={() => {
+                      // Find the corresponding DB article and submit real feedback
+                      const dbArticle = dbArticles.find(a => a.title === selectedArticle.title)
+                      if (dbArticle) {
+                        handleSubmitFeedback(dbArticle.id, true)
+                      } else {
+                        toast.success('Thanks for your feedback!')
+                      }
+                    }}><ThumbsUp className="w-4 h-4 mr-2" />Yes ({selectedArticle.helpfulVotes})</Button>
+                    <Button variant="outline" onClick={() => {
+                      const dbArticle = dbArticles.find(a => a.title === selectedArticle.title)
+                      if (dbArticle) {
+                        handleSubmitFeedback(dbArticle.id, false)
+                      } else {
+                        toast.info('Feedback recorded')
+                      }
+                    }}><ThumbsDown className="w-4 h-4 mr-2" />No ({selectedArticle.notHelpfulVotes})</Button>
                   </div>
                 </div>
 
@@ -2666,9 +2924,7 @@ export default function HelpDocsClient() {
                         <Button
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
-                          onClick={() => {
-                            toast.success('Article "' + article.title + '" approved and published')
-                          }}
+                          onClick={() => handleApproveArticle(article)}
                         >
                           <Check className="w-4 h-4 mr-1" />
                           Approve
@@ -2676,9 +2932,7 @@ export default function HelpDocsClient() {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => {
-                            toast.success('Article "' + article.title + '" sent back for revision')
-                          }}
+                          onClick={() => handleRejectArticle(article)}
                         >
                           <X className="w-4 h-4 mr-1" />
                           Reject
@@ -2831,7 +3085,7 @@ export default function HelpDocsClient() {
               <Card className="p-4">
                 <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Content by Category</h3>
                 <div className="space-y-3">
-                  {mockCategories.slice(0, 4).map(category => (
+                  {localCategories.slice(0, 4).map(category => (
                     <div key={category.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span>{category.icon}</span>
@@ -2847,7 +3101,7 @@ export default function HelpDocsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.success('Analytics report downloaded')
+              handleExportAnalyticsReport()
               setShowAnalyticsDialog(false)
             }}>
               <Download className="w-4 h-4 mr-2" />

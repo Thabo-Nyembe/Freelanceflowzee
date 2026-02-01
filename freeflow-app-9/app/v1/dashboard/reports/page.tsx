@@ -29,7 +29,8 @@ import {
   Wallet,
   Target,
   Award,
-  Zap
+  Zap,
+  Copy
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -814,41 +815,186 @@ export default function ReportsPage() {
     try {
       setIsSaving(true)
 
-      const response = await fetch('/api/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'export',
-          reportId: state.selectedReport.id,
-          exportFormat
+      // Generate export content based on format
+      const report = state.selectedReport
+      let content: string
+      let mimeType: string
+      let fileExtension: string
+
+      switch (exportFormat) {
+        case 'csv': {
+          // Generate CSV content from report data
+          const rows: string[] = []
+          rows.push('Field,Value')
+          rows.push(`"Name","${report.name.replace(/"/g, '""')}"`)
+          rows.push(`"Description","${(report.description || '').replace(/"/g, '""')}"`)
+          rows.push(`"Type","${report.type}"`)
+          rows.push(`"Status","${report.status}"`)
+          rows.push(`"Created","${new Date(report.createdAt).toLocaleDateString()}"`)
+          rows.push(`"Updated","${new Date(report.updatedAt).toLocaleDateString()}"`)
+          rows.push(`"Data Points","${report.dataPoints}"`)
+          rows.push(`"File Size","${formatFileSize(report.fileSize)}"`)
+          rows.push(`"Frequency","${report.frequency}"`)
+          rows.push(`"Created By","${report.createdBy}"`)
+          if (report.recipients.length > 0) {
+            rows.push(`"Recipients","${report.recipients.join(', ')}"`)
+          }
+          if (report.tags.length > 0) {
+            rows.push(`"Tags","${report.tags.join(', ')}"`)
+          }
+          rows.push(`"Date Range Start","${new Date(report.dateRange.start).toLocaleDateString()}"`)
+          rows.push(`"Date Range End","${new Date(report.dateRange.end).toLocaleDateString()}"`)
+          content = rows.join('\n')
+          mimeType = 'text/csv'
+          fileExtension = 'csv'
+          break
+        }
+
+        case 'json': {
+          // Generate JSON content
+          const jsonData = {
+            exported_at: new Date().toISOString(),
+            report: {
+              id: report.id,
+              name: report.name,
+              description: report.description,
+              type: report.type,
+              status: report.status,
+              createdAt: report.createdAt,
+              updatedAt: report.updatedAt,
+              createdBy: report.createdBy,
+              dateRange: report.dateRange,
+              frequency: report.frequency,
+              nextRun: report.nextRun,
+              dataPoints: report.dataPoints,
+              fileSize: report.fileSize,
+              recipients: report.recipients,
+              tags: report.tags
+            }
+          }
+          content = JSON.stringify(jsonData, null, 2)
+          mimeType = 'application/json'
+          fileExtension = 'json'
+          break
+        }
+
+        case 'excel': {
+          // Generate tab-separated values for Excel
+          const rows: string[] = []
+          rows.push('Report Export')
+          rows.push('')
+          rows.push('Field\tValue')
+          rows.push(`Name\t${report.name}`)
+          rows.push(`Description\t${report.description || ''}`)
+          rows.push(`Type\t${report.type}`)
+          rows.push(`Status\t${report.status}`)
+          rows.push(`Created\t${new Date(report.createdAt).toLocaleDateString()}`)
+          rows.push(`Updated\t${new Date(report.updatedAt).toLocaleDateString()}`)
+          rows.push(`Data Points\t${report.dataPoints}`)
+          rows.push(`File Size\t${formatFileSize(report.fileSize)}`)
+          rows.push(`Frequency\t${report.frequency}`)
+          rows.push(`Created By\t${report.createdBy}`)
+          rows.push(`Recipients\t${report.recipients.join(', ')}`)
+          rows.push(`Tags\t${report.tags.join(', ')}`)
+          rows.push(`Date Range\t${new Date(report.dateRange.start).toLocaleDateString()} - ${new Date(report.dateRange.end).toLocaleDateString()}`)
+          content = rows.join('\n')
+          mimeType = 'application/vnd.ms-excel'
+          fileExtension = 'xls'
+          break
+        }
+
+        case 'pdf':
+        default: {
+          // Generate HTML for PDF printing
+          content = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${report.name} - Report Export</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #1a1a1a; }
+    h1 { color: #7c3aed; border-bottom: 2px solid #7c3aed; padding-bottom: 10px; }
+    .meta { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .meta-item { display: flex; margin-bottom: 10px; }
+    .meta-label { font-weight: 600; width: 150px; color: #6b7280; }
+    .meta-value { flex: 1; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; margin-right: 8px; }
+    .badge-type { background: #e0e7ff; color: #4338ca; }
+    .badge-status { background: #d1fae5; color: #065f46; }
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #9ca3af; font-size: 12px; text-align: center; }
+    @media print { body { padding: 20px; } }
+  </style>
+</head>
+<body>
+  <h1>${report.name}</h1>
+  <div class="meta">
+    <div class="meta-item"><span class="meta-label">Description</span><span class="meta-value">${report.description || 'No description'}</span></div>
+    <div class="meta-item"><span class="meta-label">Type</span><span class="meta-value"><span class="badge badge-type">${report.type}</span></span></div>
+    <div class="meta-item"><span class="meta-label">Status</span><span class="meta-value"><span class="badge badge-status">${report.status}</span></span></div>
+    <div class="meta-item"><span class="meta-label">Created</span><span class="meta-value">${new Date(report.createdAt).toLocaleDateString()}</span></div>
+    <div class="meta-item"><span class="meta-label">Last Updated</span><span class="meta-value">${new Date(report.updatedAt).toLocaleDateString()}</span></div>
+    <div class="meta-item"><span class="meta-label">Created By</span><span class="meta-value">${report.createdBy}</span></div>
+    <div class="meta-item"><span class="meta-label">Data Points</span><span class="meta-value">${report.dataPoints.toLocaleString()}</span></div>
+    <div class="meta-item"><span class="meta-label">File Size</span><span class="meta-value">${formatFileSize(report.fileSize)}</span></div>
+    <div class="meta-item"><span class="meta-label">Frequency</span><span class="meta-value">${report.frequency}</span></div>
+    <div class="meta-item"><span class="meta-label">Date Range</span><span class="meta-value">${new Date(report.dateRange.start).toLocaleDateString()} - ${new Date(report.dateRange.end).toLocaleDateString()}</span></div>
+    ${report.recipients.length > 0 ? `<div class="meta-item"><span class="meta-label">Recipients</span><span class="meta-value">${report.recipients.join(', ')}</span></div>` : ''}
+    ${report.tags.length > 0 ? `<div class="meta-item"><span class="meta-label">Tags</span><span class="meta-value">${report.tags.join(', ')}</span></div>` : ''}
+  </div>
+  <div class="footer"><p>Generated on ${new Date().toLocaleString()} | KAZI Reports</p></div>
+  <script>window.print();</script>
+</body>
+</html>`
+          mimeType = 'text/html'
+          fileExtension = 'html'
+          break
+        }
+      }
+
+      // Create blob and trigger download
+      const blob = new Blob([content], { type: `${mimeType};charset=utf-8` })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${report.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.${fileExtension}`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      // Log export to API
+      try {
+        await fetch('/api/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'export',
+            reportId: state.selectedReport.id,
+            exportFormat
+          })
         })
+      } catch (apiError) {
+        logger.warn('Failed to log export to API', { error: apiError })
+      }
+
+      logger.info('Report exported successfully', {
+        reportId: state.selectedReport.id,
+        name: state.selectedReport.name,
+        format: exportFormat,
+        fileSize: blob.size
       })
 
-      const result = await response.json()
-      logger.debug('Export API response received', { success: result.success })
+      toast.success(`Report exported as ${exportFormat.toUpperCase()}`, {
+        description: `${state.selectedReport.name} - Download started`
+      })
+      setIsExportModalOpen(false)
+      announce(`Report exported as ${exportFormat}`, 'polite')
 
-      if (result.success) {
-        const fileSizeMB = result.fileSize ? (result.fileSize / (1024 * 1024)).toFixed(2) : '0'
-
-        logger.info('Report exported successfully', {
-          reportId: state.selectedReport.id,
-          name: state.selectedReport.name,
-          format: exportFormat,
-          fileSize: result.fileSize
-        })
-
-        toast.success(`Report exported as ${exportFormat.toUpperCase()}`, {
-          description: `${state.selectedReport.name} - ${state.selectedReport.type} - ${fileSizeMB} MB - ${result.downloadUrl ? 'Download started' : 'Export completed'}`
-        })
-        setIsExportModalOpen(false)
-
-      } else {
-        throw new Error(result.error || 'Failed to export report')
-      }
     } catch (error) {
       logger.error('Failed to export report', { error: error instanceof Error ? error.message : String(error) })
       toast.error('Failed to export report', {
-        description: error.message || 'Please try again later'
+        description: error instanceof Error ? error.message : 'Please try again later'
       })
     } finally {
       setIsSaving(false)
@@ -970,34 +1116,57 @@ export default function ReportsPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Please log in to delete reports')
+      return
+    }
+
     const selectedCount = state.selectedReports.length
+    const selectedReportIds = [...state.selectedReports]
+
     logger.info('Deleting selected reports', {
       count: selectedCount,
-      reportIds: state.selectedReports.map(r => r.id)
+      reportIds: selectedReportIds
     })
 
     toast.promise(
-      new Promise<void>(async (resolve, reject) => {
-        try {
-          const { deleteReport } = await import('@/lib/reports-queries')
+      (async () => {
+        const { deleteReport } = await import('@/lib/reports-queries')
 
-          // Delete all selected reports
-          await Promise.all(
-            state.selectedReports.map(report => deleteReport(report.id, 'user-id'))
-          )
+        // Delete all selected reports
+        const results = await Promise.allSettled(
+          selectedReportIds.map(reportId => deleteReport(reportId, userId))
+        )
 
-          dispatch({ type: 'DELETE_SELECTED_REPORTS' })
-          announce(`${selectedCount} reports deleted`, 'polite')
-          resolve()
-        } catch (err: unknown) {
-          logger.error('Bulk delete failed', { error: err.message })
-          reject(err)
+        // Check for failures
+        const failures = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success))
+        if (failures.length > 0) {
+          logger.warn('Some reports failed to delete', { failureCount: failures.length })
         }
-      }),
+
+        // Remove successfully deleted reports from state
+        const successfulDeletes = selectedReportIds.filter((_, index) => {
+          const result = results[index]
+          return result.status === 'fulfilled' && result.value.success
+        })
+
+        successfulDeletes.forEach(reportId => {
+          dispatch({ type: 'DELETE_REPORT', reportId })
+        })
+
+        // Clear selection
+        dispatch({ type: 'CLEAR_SELECTED_REPORTS' })
+
+        announce(`${successfulDeletes.length} reports deleted`, 'polite')
+
+        if (failures.length > 0) {
+          throw new Error(`${failures.length} report(s) failed to delete`)
+        }
+      })(),
       {
         loading: `Deleting ${selectedCount} report${selectedCount > 1 ? 's' : ''}...`,
         success: `${selectedCount} report${selectedCount > 1 ? 's' : ''} deleted successfully`,
-        error: 'Failed to delete reports'
+        error: (err) => err.message || 'Failed to delete reports'
       }
     )
   }
@@ -1029,7 +1198,7 @@ export default function ReportsPage() {
         }
       )
     } catch (err: unknown) {
-      logger.error('Failed to open editor', { error: err.message })
+      logger.error('Failed to open editor', { error: err instanceof Error ? err.message : String(err) })
     }
   }
 
@@ -1098,6 +1267,11 @@ export default function ReportsPage() {
   }
 
   const handleDuplicateReport = async (report: Report) => {
+    if (!userId) {
+      toast.error('Please log in to duplicate reports')
+      return
+    }
+
     logger.info('Duplicating report', {
       reportId: report.id,
       name: report.name
@@ -1105,22 +1279,50 @@ export default function ReportsPage() {
 
     toast.promise(
       (async () => {
-        const { createReport } = await import('@/lib/reports-queries')
+        const { duplicateReport } = await import('@/lib/reports-queries')
 
-        const duplicatedReport = {
-          ...report,
-          name: `${report.name} (Copy)`,
-          status: 'draft' as ReportStatus
+        const { data: newReport, error } = await duplicateReport(report.id, userId)
+
+        if (error) {
+          throw new Error(error.message || 'Failed to duplicate report')
         }
 
-        await createReport('user-id', duplicatedReport)
+        if (newReport) {
+          // Transform database format to UI format
+          const transformedReport: Report = {
+            id: newReport.id,
+            name: newReport.name,
+            type: newReport.type,
+            status: newReport.status,
+            description: newReport.description || '',
+            createdAt: newReport.created_at,
+            updatedAt: newReport.updated_at,
+            createdBy: newReport.created_by || 'Unknown',
+            dateRange: {
+              start: newReport.date_range_start || new Date().toISOString(),
+              end: newReport.date_range_end || new Date().toISOString()
+            },
+            frequency: newReport.frequency,
+            nextRun: newReport.next_run_at,
+            dataPoints: newReport.data_points,
+            fileSize: newReport.file_size,
+            recipients: newReport.recipients,
+            tags: newReport.tags
+          }
 
-        announce('Report duplicated successfully', 'polite')
+          dispatch({ type: 'ADD_REPORT', report: transformedReport })
+          announce('Report duplicated successfully', 'polite')
+
+          logger.info('Report duplicated successfully', {
+            originalId: report.id,
+            newId: newReport.id
+          })
+        }
       })(),
       {
         loading: `Duplicating "${report.name}"...`,
         success: `Created copy of "${report.name}"`,
-        error: 'Failed to duplicate report'
+        error: (err) => err.message || 'Failed to duplicate report'
       }
     )
   }
@@ -1827,8 +2029,16 @@ export default function ReportsPage() {
                                   <Calendar className="h-4 w-4 mr-2" />
                                   Schedule
                                 </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleShareReport(report)}>
+                                  <Share2 className="h-4 w-4 mr-2" />
+                                  Share
+                                </DropdownMenuItem>
                               </>
                             )}
+                            <DropdownMenuItem onClick={() => handleDuplicateReport(report)}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Duplicate
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
                                 dispatch({ type: 'SELECT_REPORT', report })

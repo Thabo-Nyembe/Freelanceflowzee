@@ -1485,3 +1485,259 @@ export async function searchClientZone(query: string): Promise<{
     files: filesData.data || []
   }
 }
+
+// ============================================================================
+// FREELANCER DASHBOARD QUERIES
+// ============================================================================
+
+export interface FreelancerStats {
+  totalClients: number
+  activeClients: number
+  totalDeliverables: number
+  pendingApprovals: number
+  totalRevenue: number
+  pendingRevenue: number
+  monthlyGrowth: number
+}
+
+export interface ActiveClient {
+  id: string
+  name: string
+  email: string
+  projectCount: number
+  status: 'active' | 'review' | 'completed'
+  avatar?: string
+}
+
+export interface PendingApproval {
+  id: string
+  projectName: string
+  clientName: string
+  deliverableType: string
+  amount: number
+  dueDate: string
+}
+
+/**
+ * Get freelancer dashboard statistics
+ */
+export async function getFreelancerStats(): Promise<FreelancerStats> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  // Get all projects for this freelancer
+  const { data: projects, error: projectsError } = await supabase
+    .from('client_projects')
+    .select('id, client_id, status, budget, spent')
+    .eq('user_id', user.id)
+
+  if (projectsError) throw projectsError
+
+  // Get unique clients
+  const clientIds = [...new Set((projects || []).map(p => p.client_id))]
+  const activeClientIds = [...new Set((projects || [])
+    .filter(p => p.status === 'in-progress' || p.status === 'review')
+    .map(p => p.client_id))]
+
+  // Get deliverables count
+  const projectIds = (projects || []).map(p => p.id)
+  const { count: deliverablesCount, error: deliverablesError } = await supabase
+    .from('project_deliverables')
+    .select('*', { count: 'exact', head: true })
+    .in('project_id', projectIds.length > 0 ? projectIds : [''])
+
+  if (deliverablesError) throw deliverablesError
+
+  // Get pending approvals count
+  const { count: pendingCount, error: pendingError } = await supabase
+    .from('project_deliverables')
+    .select('*', { count: 'exact', head: true })
+    .in('project_id', projectIds.length > 0 ? projectIds : [''])
+    .eq('requires_approval', true)
+    .is('approved_by', null)
+    .neq('status', 'completed')
+
+  if (pendingError) throw pendingError
+
+  // Calculate revenue from paid invoices
+  const { data: paidInvoices, error: paidError } = await supabase
+    .from('client_invoices')
+    .select('total')
+    .in('project_id', projectIds.length > 0 ? projectIds : [''])
+    .eq('status', 'paid')
+
+  if (paidError) throw paidError
+
+  // Calculate pending revenue from unpaid invoices
+  const { data: pendingInvoices, error: unpaidError } = await supabase
+    .from('client_invoices')
+    .select('total')
+    .in('project_id', projectIds.length > 0 ? projectIds : [''])
+    .in('status', ['sent', 'draft'])
+
+  if (unpaidError) throw unpaidError
+
+  const totalRevenue = (paidInvoices || []).reduce((sum, inv) => sum + (inv.total || 0), 0)
+  const pendingRevenue = (pendingInvoices || []).reduce((sum, inv) => sum + (inv.total || 0), 0)
+
+  // Calculate monthly growth (compare this month vs last month)
+  const now = new Date()
+  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
+
+  const { data: thisMonthInvoices } = await supabase
+    .from('client_invoices')
+    .select('total')
+    .in('project_id', projectIds.length > 0 ? projectIds : [''])
+    .eq('status', 'paid')
+    .gte('paid_date', thisMonthStart.toISOString())
+
+  const { data: lastMonthInvoices } = await supabase
+    .from('client_invoices')
+    .select('total')
+    .in('project_id', projectIds.length > 0 ? projectIds : [''])
+    .eq('status', 'paid')
+    .gte('paid_date', lastMonthStart.toISOString())
+    .lte('paid_date', lastMonthEnd.toISOString())
+
+  const thisMonthRevenue = (thisMonthInvoices || []).reduce((sum, inv) => sum + (inv.total || 0), 0)
+  const lastMonthRevenue = (lastMonthInvoices || []).reduce((sum, inv) => sum + (inv.total || 0), 0)
+  const monthlyGrowth = lastMonthRevenue > 0
+    ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
+    : (thisMonthRevenue > 0 ? 100 : 0)
+
+  return {
+    totalClients: clientIds.length,
+    activeClients: activeClientIds.length,
+    totalDeliverables: deliverablesCount || 0,
+    pendingApprovals: pendingCount || 0,
+    totalRevenue,
+    pendingRevenue,
+    monthlyGrowth: Math.round(monthlyGrowth)
+  }
+}
+
+/**
+ * Get active clients for freelancer dashboard
+ */
+export async function getActiveClients(limit: number = 5): Promise<ActiveClient[]> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  // Get projects grouped by client
+  const { data: projects, error: projectsError } = await supabase
+    .from('client_projects')
+    .select('client_id, status')
+    .eq('user_id', user.id)
+
+  if (projectsError) throw projectsError
+
+  // Group projects by client
+  const clientMap = new Map<string, { projectCount: number; statuses: Set<string> }>()
+  for (const project of projects || []) {
+    if (!clientMap.has(project.client_id)) {
+      clientMap.set(project.client_id, { projectCount: 0, statuses: new Set() })
+    }
+    const client = clientMap.get(project.client_id)!
+    client.projectCount++
+    client.statuses.add(project.status)
+  }
+
+  // Get client details from profiles
+  const clientIds = [...clientMap.keys()].slice(0, limit)
+  if (clientIds.length === 0) return []
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from('profiles')
+    .select('id, full_name, email, avatar_url')
+    .in('id', clientIds)
+
+  if (profilesError) throw profilesError
+
+  return (profiles || []).map(profile => {
+    const clientData = clientMap.get(profile.id)!
+    let status: 'active' | 'review' | 'completed' = 'completed'
+    if (clientData.statuses.has('in-progress')) status = 'active'
+    else if (clientData.statuses.has('review')) status = 'review'
+
+    return {
+      id: profile.id,
+      name: profile.full_name || profile.email || 'Unknown Client',
+      email: profile.email || '',
+      projectCount: clientData.projectCount,
+      status,
+      avatar: profile.avatar_url
+    }
+  })
+}
+
+/**
+ * Get pending approvals for freelancer dashboard
+ */
+export async function getPendingApprovals(limit: number = 5): Promise<PendingApproval[]> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  // Get user's projects
+  const { data: projects, error: projectsError } = await supabase
+    .from('client_projects')
+    .select('id, name, client_id')
+    .eq('user_id', user.id)
+
+  if (projectsError) throw projectsError
+
+  const projectIds = (projects || []).map(p => p.id)
+  if (projectIds.length === 0) return []
+
+  // Get pending deliverables
+  const { data: deliverables, error: deliverablesError } = await supabase
+    .from('project_deliverables')
+    .select('id, project_id, name, due_date')
+    .in('project_id', projectIds)
+    .eq('requires_approval', true)
+    .is('approved_by', null)
+    .neq('status', 'completed')
+    .order('due_date', { ascending: true })
+    .limit(limit)
+
+  if (deliverablesError) throw deliverablesError
+
+  // Get milestone payments for amounts
+  const deliverableIds = (deliverables || []).map(d => d.id)
+  const { data: milestones } = await supabase
+    .from('milestone_payments')
+    .select('id, amount, milestone_name')
+    .in('id', deliverableIds.length > 0 ? deliverableIds : [''])
+    .eq('status', 'pending')
+
+  const milestoneMap = new Map((milestones || []).map(m => [m.id, m]))
+
+  // Get client names
+  const clientIds = [...new Set((projects || []).map(p => p.client_id))]
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, full_name, email')
+    .in('id', clientIds.length > 0 ? clientIds : [''])
+
+  const profileMap = new Map((profiles || []).map(p => [p.id, p]))
+  const projectMap = new Map((projects || []).map(p => [p.id, p]))
+
+  return (deliverables || []).map(deliverable => {
+    const project = projectMap.get(deliverable.project_id)
+    const client = project ? profileMap.get(project.client_id) : null
+    const milestone = milestoneMap.get(deliverable.id)
+
+    return {
+      id: deliverable.id,
+      projectName: project?.name || 'Unknown Project',
+      clientName: client?.full_name || client?.email || 'Unknown Client',
+      deliverableType: deliverable.name,
+      amount: milestone?.amount || 0,
+      dueDate: deliverable.due_date || new Date().toISOString()
+    }
+  })
+}
