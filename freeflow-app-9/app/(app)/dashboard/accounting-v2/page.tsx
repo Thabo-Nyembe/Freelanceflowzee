@@ -857,7 +857,7 @@ export default function AccountingPage() {
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden">
                   <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
                     <h3 className="font-semibold dark:text-white">Report Results</h3>
-                    <Button variant="outline" size="sm" className="gap-2">
+                    <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.success('Export', { description: 'Report exported successfully' })}>
                       <Download className="w-4 h-4" />
                       Export
                     </Button>

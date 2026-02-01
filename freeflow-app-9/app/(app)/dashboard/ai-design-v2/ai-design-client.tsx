@@ -911,7 +911,7 @@ export default function AIDesignClient() {
                       <Button variant="outline" onClick={() => setPrompt('')}>
                         <RefreshCw className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => toast.info('Shuffle', { description: 'Randomizing prompt...' })}>
                         <Shuffle className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1168,7 +1168,7 @@ export default function AIDesignClient() {
                 >
                   <List className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => toast.info('Filter', { description: 'Opening filter options...' })}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>

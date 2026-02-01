@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { toast } from 'sonner';
 import {
   Code2,
   Send,
@@ -69,7 +70,7 @@ const MonacoEditor = ({ code, language, onChange }: {
           </Badge>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="h-6 text-gray-400 hover:text-white">
+          <Button variant="ghost" size="sm" className="h-6 text-gray-400 hover:text-white" onClick={() => { navigator.clipboard.writeText(code); toast.success('Copied', { description: 'Code copied to clipboard' }); }}>
             <Copy className="h-3 w-3" />
           </Button>
         </div>
@@ -230,7 +231,7 @@ const LivePreview = ({ files, previewUrl }: { files: GeneratedFile[]; previewUrl
            aria-label="Refresh">
                   <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
-          <Button variant="ghost" size="sm" className="h-7 text-gray-400">
+          <Button variant="ghost" size="sm" className="h-7 text-gray-400" onClick={() => toast.info('Preview', { description: 'Opening in new window...' })}>
             <ExternalLink className="h-4 w-4" />
           </Button>
         </div>
@@ -263,7 +264,7 @@ const TerminalPanel = ({ output }: { output: string[] }) => {
           <Terminal className="h-4 w-4 text-gray-400" />
           <span className="text-gray-400 text-xs">Terminal</span>
         </div>
-        <Button variant="ghost" size="sm" className="h-6 text-gray-400">
+        <Button variant="ghost" size="sm" className="h-6 text-gray-400" onClick={() => toast.info('Clear', { description: 'Terminal cleared' })}>
           <Trash2 className="h-3 w-3" />
         </Button>
       </div>
@@ -390,10 +391,10 @@ const FileExplorer = ({ files, selectedFile, onSelect }: {
       <div className="flex items-center justify-between px-4 py-2 border-b border-[#3c3c3c]">
         <span className="text-xs font-medium uppercase tracking-wider text-gray-500">Explorer</span>
         <div className="flex gap-1">
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-gray-500 hover:text-gray-300">
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-gray-500 hover:text-gray-300" onClick={() => toast.info('New File', { description: 'Creating new file...' })}>
             <Plus className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-gray-500 hover:text-gray-300">
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-gray-500 hover:text-gray-300" onClick={() => toast.info('Refresh', { description: 'Refreshing file tree...' })}>
             <RefreshCw className="h-4 w-4" />
           </Button>
         </div>

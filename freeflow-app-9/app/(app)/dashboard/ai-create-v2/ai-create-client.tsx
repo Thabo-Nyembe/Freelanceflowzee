@@ -2574,10 +2574,10 @@ export default function AICreateClient() {
               <div className="space-y-2">
                 <Label>Date Range</Label>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">Today</Button>
-                  <Button variant="outline" size="sm">This Week</Button>
-                  <Button variant="outline" size="sm">This Month</Button>
-                  <Button variant="outline" size="sm">All Time</Button>
+                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter: Today')}>Today</Button>
+                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter: This Week')}>This Week</Button>
+                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter: This Month')}>This Month</Button>
+                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter: All Time')}>All Time</Button>
                 </div>
               </div>
               <div className="flex justify-end gap-2">
