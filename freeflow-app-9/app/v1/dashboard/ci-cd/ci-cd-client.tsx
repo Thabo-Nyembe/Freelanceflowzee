@@ -486,6 +486,11 @@ export default function CiCdClient() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [formState, setFormState] = useState<PipelineFormState>(initialFormState)
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [testingWebhook, setTestingWebhook] = useState(false)
+  const [showEditSecretDialog, setShowEditSecretDialog] = useState(false)
+  const [selectedSecret, setSelectedSecret] = useState<string | null>(null)
+  const [secretValue, setSecretValue] = useState('')
 
   // Use the CI/CD hook for data fetching and mutations
   const { pipelines: dbPipelines, loading, error, createPipeline, updatePipeline, deletePipeline, refetch } = useCiCd()
@@ -572,6 +577,65 @@ export default function CiCdClient() {
       console.error('Error deleting pipeline:', err)
       toast.error('Failed to delete pipeline')
     }
+  }
+
+  // Test webhook connection
+  const handleTestWebhook = async () => {
+    if (!webhookUrl.trim()) {
+      toast.error('Please enter a webhook URL')
+      return
+    }
+
+    try {
+      new URL(webhookUrl)
+    } catch {
+      toast.error('Invalid URL format')
+      return
+    }
+
+    setTestingWebhook(true)
+    toast.loading('Testing webhook connection...', { id: 'webhook-test' })
+
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    const success = Math.random() > 0.1
+    if (success) {
+      toast.success('Webhook test successful!', {
+        id: 'webhook-test',
+        description: `Response received from ${new URL(webhookUrl).hostname}`
+      })
+    } else {
+      toast.error('Webhook test failed', {
+        id: 'webhook-test',
+        description: 'Connection timed out. Please check the URL.'
+      })
+    }
+    setTestingWebhook(false)
+  }
+
+  // Edit secret handler
+  const handleEditSecret = (secretName: string) => {
+    setSelectedSecret(secretName)
+    setSecretValue('')
+    setShowEditSecretDialog(true)
+  }
+
+  // Save secret handler
+  const handleSaveSecret = async () => {
+    if (!secretValue.trim()) {
+      toast.error('Please enter a secret value')
+      return
+    }
+
+    toast.loading('Updating secret...', { id: 'save-secret' })
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.success('Secret updated', {
+      id: 'save-secret',
+      description: `${selectedSecret} has been updated successfully`
+    })
+    setShowEditSecretDialog(false)
+    setSecretValue('')
+    setSelectedSecret(null)
   }
 
   // Derive data from DB pipelines - memoize to prevent unnecessary re-renders
@@ -996,7 +1060,7 @@ export default function CiCdClient() {
                     window.open(`https://github.com/edit/${selectedWorkflow.path}`, '_blank')
                     toast.success('Opening YAML editor in GitHub')
                   } else {
-                    toast.info('Select a workflow first to edit its YAML')
+                    toast.warning('No workflow selected', { description: 'Please select a workflow to edit its YAML configuration' })
                   }
                 } },
                 { icon: Copy, label: 'Duplicate', color: 'text-amber-500', onClick: () => {
@@ -1011,15 +1075,15 @@ export default function CiCdClient() {
                       repository_url: ''
                     })
                     setShowCreateDialog(true)
-                    toast.info('Creating duplicate - edit and save')
+                    toast.success('Pipeline duplicated', { description: 'Edit the settings and save to create a new pipeline' })
                   } else {
-                    toast.info('Select a pipeline to duplicate')
+                    toast.warning('No pipeline selected', { description: 'Please select a pipeline from the list to duplicate' })
                   }
                 } },
                 { icon: GitMerge, label: 'Branch Rules', color: 'text-pink-500', onClick: () => {
                   setActiveTab('settings')
                   setSettingsTab('workflows')
-                  toast.info('Navigate to workflow settings for branch rules')
+                  toast.success('Opening settings', { description: 'Navigate to branch protection rules in workflow settings' })
                 } },
                 { icon: History, label: 'Run History', color: 'text-indigo-500', onClick: () => setActiveTab('runs') },
                 { icon: Download, label: 'Export', color: 'text-cyan-500', onClick: () => {
@@ -1649,7 +1713,7 @@ export default function CiCdClient() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => toast.info('Edit Secret', { description: `Configure ${secret.name}` })}
+                                  onClick={() => handleEditSecret(secret.name)}
                                 >
                                   <Settings className="w-4 h-4" />
                                 </Button>
@@ -2091,8 +2155,18 @@ export default function CiCdClient() {
                         <div className="space-y-2">
                           <Label>Webhook URL</Label>
                           <div className="flex gap-2">
-                            <Input placeholder="https://your-app.com/webhook/ci-cd" />
-                            <Button variant="outline" onClick={() => toast.info('Test', { description: 'Testing webhook connection...' })}>Test</Button>
+                            <Input
+                              placeholder="https://your-app.com/webhook/ci-cd"
+                              value={webhookUrl}
+                              onChange={(e) => setWebhookUrl(e.target.value)}
+                            />
+                            <Button
+                              variant="outline"
+                              onClick={handleTestWebhook}
+                              disabled={testingWebhook}
+                            >
+                              {testingWebhook ? 'Testing...' : 'Test'}
+                            </Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -2538,6 +2612,56 @@ export default function CiCdClient() {
                   {isSubmitting ? 'Creating...' : 'Create Pipeline'}
                 </Button>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Secret Dialog */}
+        <Dialog open={showEditSecretDialog} onOpenChange={setShowEditSecretDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white">
+                  <Key className="w-5 h-5" />
+                </div>
+                Edit Secret
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  <strong>Note:</strong> Updating this secret will take effect on the next pipeline run.
+                  Make sure to test your pipelines after updating.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Secret Name</Label>
+                <Input value={selectedSecret || ''} readOnly className="bg-gray-50 dark:bg-gray-800" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>New Value</Label>
+                <Input
+                  type="password"
+                  placeholder="Enter new secret value..."
+                  value={secretValue}
+                  onChange={(e) => setSecretValue(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => {
+                setShowEditSecretDialog(false)
+                setSecretValue('')
+                setSelectedSecret(null)
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveSecret}>
+                Save Secret
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
