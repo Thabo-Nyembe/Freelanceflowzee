@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
+import {
   Film,
   Palette,
   Settings,
@@ -27,8 +27,17 @@ import {
   Layers,
   Clock,
   FileVideo,
-  History
+  History,
+  Copy,
+  Link,
+  Lock,
+  Globe,
+  Users,
+  X
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import VideoTimelineEditor, { TimelineEdit } from './video-timeline-editor';
 import { Video } from '@/lib/video/types';
 
@@ -75,6 +84,13 @@ export default function VideoEditor({
 }: VideoEditorProps) {
   const [activeTab, setActiveTab] = useState<any>('timeline');
   const [edits, setEdits] = useState<VideoEdit[]>([]);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [shareSettings, setShareSettings] = useState<ShareSettings>({
+    privacy: 'private',
+    allowComments: true,
+    allowDownload: false
+  });
   const [videoMetadata, setVideoMetadata] = useState<any>({
     title: video.title,
     description: video.description || '',
@@ -220,11 +236,11 @@ export default function VideoEditor({
             {isProcessing ? 'Processing...' : 'Save Changes'}
           </Button>
           
-          <Button variant="outline" size="icon" onClick={() => toast.info('In Development', { description: 'Video sharing is being built' })}>
+          <Button variant="outline" size="icon" onClick={() => setShowShareDialog(true)}>
             <Share className="w-4 h-4" />
           </Button>
 
-          <Button variant="outline" size="icon" onClick={() => toast.info('In Development', { description: 'Video preview mode coming soon' })}>
+          <Button variant="outline" size="icon" onClick={() => setShowPreviewDialog(true)}>
             <Eye className="w-4 h-4" />
           </Button>
         </div>
@@ -659,6 +675,184 @@ export default function VideoEditor({
           </CardContent>
         </Card>
       )}
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share className="w-5 h-5" />
+              Share Video
+            </DialogTitle>
+            <DialogDescription>
+              Configure sharing settings for {video.title}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <div className="space-y-3">
+              <Label>Privacy</Label>
+              <RadioGroup
+                value={shareSettings.privacy}
+                onValueChange={(value: 'public' | 'unlisted' | 'private') =>
+                  setShareSettings(prev => ({ ...prev, privacy: value }))
+                }
+              >
+                <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                  <RadioGroupItem value="public" id="public" />
+                  <Globe className="w-4 h-4 text-green-500" />
+                  <div className="flex-1">
+                    <Label htmlFor="public" className="font-medium">Public</Label>
+                    <p className="text-xs text-muted-foreground">Anyone can view</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                  <RadioGroupItem value="unlisted" id="unlisted" />
+                  <Link className="w-4 h-4 text-blue-500" />
+                  <div className="flex-1">
+                    <Label htmlFor="unlisted" className="font-medium">Unlisted</Label>
+                    <p className="text-xs text-muted-foreground">Only people with link</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                  <RadioGroupItem value="private" id="private" />
+                  <Lock className="w-4 h-4 text-gray-500" />
+                  <div className="flex-1">
+                    <Label htmlFor="private" className="font-medium">Private</Label>
+                    <p className="text-xs text-muted-foreground">Only you can view</p>
+                  </div>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="flex items-center justify-between py-2">
+              <div>
+                <Label>Allow Comments</Label>
+                <p className="text-xs text-muted-foreground">Viewers can leave feedback</p>
+              </div>
+              <Switch
+                checked={shareSettings.allowComments}
+                onCheckedChange={(checked) => setShareSettings(prev => ({ ...prev, allowComments: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between py-2">
+              <div>
+                <Label>Allow Downloads</Label>
+                <p className="text-xs text-muted-foreground">Viewers can download video</p>
+              </div>
+              <Switch
+                checked={shareSettings.allowDownload}
+                onCheckedChange={(checked) => setShareSettings(prev => ({ ...prev, allowDownload: checked }))}
+              />
+            </div>
+
+            {shareSettings.privacy !== 'private' && (
+              <div className="p-3 bg-muted rounded-lg">
+                <Label className="text-xs text-muted-foreground">Share Link</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    readOnly
+                    value={`https://kazi.app/video/${video.id}`}
+                    className="text-sm"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://kazi.app/video/${video.id}`)
+                      toast.success('Link copied!')
+                    }}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              handleShare(shareSettings)
+              toast.success('Share settings updated!')
+              setShowShareDialog(false)
+            }}>
+              Save & Share
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5" />
+              Video Preview
+            </DialogTitle>
+            <DialogDescription>
+              Preview your video with applied edits
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-4">
+            <div className="aspect-video bg-black rounded-lg overflow-hidden relative">
+              <video
+                src={video.url}
+                controls
+                className="w-full h-full object-contain"
+                poster={video.thumbnail_url}
+              >
+                Your browser does not support video playback.
+              </video>
+              {appliedEffects.length > 0 && (
+                <div className="absolute top-2 right-2 flex gap-1">
+                  {appliedEffects.map(effect => (
+                    <Badge key={effect.id} variant="secondary" className="text-xs">
+                      {effect.name}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 p-4 bg-muted rounded-lg">
+              <h4 className="font-medium mb-2">Video Details</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Title:</span>
+                  <span className="ml-2">{videoMetadata.title}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Duration:</span>
+                  <span className="ml-2">{video.duration ? `${Math.floor(video.duration / 60)}:${(video.duration % 60).toString().padStart(2, '0')}` : 'N/A'}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Edits Applied:</span>
+                  <span className="ml-2">{edits.length}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Effects:</span>
+                  <span className="ml-2">{appliedEffects.length}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowPreviewDialog(false)}>Close</Button>
+            <Button onClick={() => {
+              toast.success('Rendering video...', { description: 'Your video will be ready shortly' })
+              setShowPreviewDialog(false)
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Export Video
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

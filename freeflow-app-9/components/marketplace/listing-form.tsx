@@ -93,7 +93,59 @@ interface ListingFormProps {
 export function ListingForm({ listing, onSubmit, isSubmitting }: ListingFormProps) {
   const [step, setStep] = useState(1);
   const [tagInput, setTagInput] = useState('');
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const { categories } = useServiceCategories();
+
+  const handleSaveDraft = async () => {
+    setIsSavingDraft(true);
+    const formData = form.getValues();
+
+    // Store draft in localStorage
+    const draftKey = listing?.id ? `listing-draft-${listing.id}` : 'listing-draft-new';
+    const draft = {
+      data: formData,
+      step,
+      savedAt: new Date().toISOString()
+    };
+
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(draft));
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate save
+
+      setLastSaved(new Date());
+      toast.success('Draft saved', {
+        description: 'Your listing has been saved as a draft'
+      });
+    } catch (error) {
+      toast.error('Failed to save draft', {
+        description: 'Please try again'
+      });
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
+
+  const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newFiles = Array.from(files).filter(file => {
+      const isImage = file.type.startsWith('image/');
+      const isUnder5MB = file.size < 5 * 1024 * 1024;
+      return isImage && isUnder5MB;
+    });
+
+    if (newFiles.length < (files.length || 0)) {
+      toast.warning('Some files were skipped', {
+        description: 'Only images under 5MB are allowed'
+      });
+    }
+
+    setGalleryFiles(prev => [...prev, ...newFiles].slice(0, 10)); // Max 10 images
+    toast.success(`${newFiles.length} image(s) added`);
+  };
 
   const form = useForm<ListingFormData>({
     resolver: zodResolver(listingSchema),
@@ -565,17 +617,51 @@ export function ListingForm({ listing, onSubmit, isSubmitting }: ListingFormProp
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <input
+                  type="file"
+                  id="gallery-upload"
+                  multiple
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  className="hidden"
+                  onChange={handleGalleryUpload}
+                />
                 <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="font-semibold mb-2">Upload Images</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Drag and drop or click to upload
                 </p>
-                <Button type="button" variant="outline" onClick={() => toast.info('In Development', { description: 'File upload integration is being built' })}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('gallery-upload')?.click()}
+                >
                   Choose Files
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2">
                   PNG, JPG up to 5MB. Recommended: 1280x720px
                 </p>
+
+                {/* Display uploaded files */}
+                {galleryFiles.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                    {galleryFiles.map((file, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="w-20 h-20 object-cover rounded-md"
+                        />
+                        <button
+                          type="button"
+                          className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => setGalleryFiles(prev => prev.filter((_, i) => i !== index))}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -602,10 +688,22 @@ export function ListingForm({ listing, onSubmit, isSubmitting }: ListingFormProp
           </Button>
 
           <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={() => toast.info('Coming Soon', { description: 'Draft saving will be available soon' })}>
-              <Save className="h-4 w-4 mr-1" />
-              Save Draft
-            </Button>
+            <div className="flex items-center gap-2">
+              {lastSaved && (
+                <span className="text-xs text-muted-foreground">
+                  Saved {lastSaved.toLocaleTimeString()}
+                </span>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleSaveDraft}
+                disabled={isSavingDraft}
+              >
+                <Save className="h-4 w-4 mr-1" />
+                {isSavingDraft ? 'Saving...' : 'Save Draft'}
+              </Button>
+            </div>
 
             {step < totalSteps ? (
               <Button type="button" onClick={() => setStep(s => s + 1)}>

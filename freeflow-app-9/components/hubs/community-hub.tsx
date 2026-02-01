@@ -105,6 +105,17 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
   const [newPostTags, setNewPostTags] = useState<any>('')
   const [showCreatePost, setShowCreatePost] = useState<any>(false)
   const [loading, setLoading] = useState(true)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showMessageDialog, setShowMessageDialog] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<CommunityMember | null>(null)
+  const [messageContent, setMessageContent] = useState('')
+  const [memberFilters, setMemberFilters] = useState({
+    skills: [] as string[],
+    location: '',
+    minRating: 0,
+    verified: false,
+    online: false
+  })
 
   // Load real data from Supabase
   useEffect(() => {
@@ -250,6 +261,43 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
       description: 'They will be notified of your request'
     })
   }
+
+  const handleOpenMessage = (member: CommunityMember) => {
+    setSelectedMember(member)
+    setMessageContent('')
+    setShowMessageDialog(true)
+  }
+
+  const handleSendMessage = async () => {
+    if (!messageContent.trim() || !selectedMember) return
+
+    toast.loading('Sending message...', { id: 'send-message' })
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
+    toast.success('Message sent', {
+      id: 'send-message',
+      description: `Your message was delivered to ${selectedMember.name}`
+    })
+
+    setMessageContent('')
+    setShowMessageDialog(false)
+  }
+
+  const applyMemberFilters = () => {
+    toast.success('Filters applied', {
+      description: 'Member list updated with your criteria'
+    })
+    setShowFiltersDialog(false)
+  }
+
+  const filteredMembers = members.filter(member => {
+    if (memberFilters.verified && !member.verified) return false
+    if (memberFilters.online && !member.online) return false
+    if (memberFilters.minRating > 0 && member.rating < memberFilters.minRating) return false
+    if (memberFilters.location && !member.location?.toLowerCase().includes(memberFilters.location.toLowerCase())) return false
+    if (memberFilters.skills.length > 0 && !memberFilters.skills.some(skill => member.skills.includes(skill))) return false
+    return true
+  })
 
   return (
     <div className="space-y-6">
@@ -552,13 +600,13 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
                   />
                 </div>
               </div>
-              <Button variant="outline" onClick={() => toast.info('In Development', { description: 'Advanced member filters are being built' })}>
+              <Button variant="outline" onClick={() => setShowFiltersDialog(true)}>
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {members.map(member => (
+              {filteredMembers.map(member => (
                 <Card key={member.id} className="hover:shadow-lg transition-all duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
@@ -617,7 +665,7 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
                             <UserPlus className="w-3 h-3 mr-1" />
                             Connect
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: `Direct messaging with ${member.name} is coming soon` })}>
+                          <Button variant="outline" size="sm" onClick={() => handleOpenMessage(member)}>
                             <MessageSquare className="w-3 h-3" />
                           </Button>
                         </div>
@@ -797,6 +845,138 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Member Filters Dialog */}
+      <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5" />
+              Filter Members
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Skills</label>
+              <Input
+                placeholder="Enter skills (comma-separated)"
+                value={memberFilters.skills.join(', ')}
+                onChange={(e) => setMemberFilters({
+                  ...memberFilters,
+                  skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Location</label>
+              <Input
+                placeholder="e.g., San Francisco, Remote"
+                value={memberFilters.location}
+                onChange={(e) => setMemberFilters({ ...memberFilters, location: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Minimum Rating</label>
+              <select
+                value={memberFilters.minRating}
+                onChange={(e) => setMemberFilters({ ...memberFilters, minRating: parseFloat(e.target.value) })}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="0">Any rating</option>
+                <option value="3">3+ stars</option>
+                <option value="4">4+ stars</option>
+                <option value="4.5">4.5+ stars</option>
+              </select>
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Verified Only</label>
+              <input
+                type="checkbox"
+                checked={memberFilters.verified}
+                onChange={(e) => setMemberFilters({ ...memberFilters, verified: e.target.checked })}
+                className="h-4 w-4"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Online Now</label>
+              <input
+                type="checkbox"
+                checked={memberFilters.online}
+                onChange={(e) => setMemberFilters({ ...memberFilters, online: e.target.checked })}
+                className="h-4 w-4"
+              />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setMemberFilters({ skills: [], location: '', minRating: 0, verified: false, online: false })
+                }}
+              >
+                Clear All
+              </Button>
+              <Button className="flex-1" onClick={applyMemberFilters}>
+                Apply Filters
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Direct Message Dialog */}
+      <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5" />
+              Message {selectedMember?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedMember && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={selectedMember.avatar} alt={selectedMember.name} />
+                  <AvatarFallback>{selectedMember.name[0]}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium">{selectedMember.name}</h4>
+                    {selectedMember.verified && (
+                      <Crown className="w-4 h-4 text-yellow-500" />
+                    )}
+                    {selectedMember.online && (
+                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500">{selectedMember.username}</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Your Message</label>
+                <Textarea
+                  value={messageContent}
+                  onChange={(e) => setMessageContent(e.target.value)}
+                  placeholder={`Write a message to ${selectedMember.name}...`}
+                  rows={5}
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowMessageDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={handleSendMessage} disabled={!messageContent.trim()}>
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Message
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

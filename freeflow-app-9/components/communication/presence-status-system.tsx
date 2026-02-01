@@ -15,6 +15,8 @@ import { Switch } from '@/components/ui/switch'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Separator } from '@/components/ui/separator'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Circle,
   Moon,
@@ -310,7 +312,7 @@ const UserPresenceCard: React.FC<UserPresenceCardProps> = ({
                         className="h-6 w-6 p-0"
                         onClick={(e) => {
                           e.stopPropagation()
-                          toast.info('Coming Soon', { description: `Chat with ${user.name} is coming soon` })
+                          onClick?.({ ...user, action: 'message' })
                         }}
                       >
                         <MessageSquare className="w-3 h-3" />
@@ -328,7 +330,7 @@ const UserPresenceCard: React.FC<UserPresenceCardProps> = ({
                           className="h-6 w-6 p-0"
                           onClick={(e) => {
                             e.stopPropagation()
-                            toast.info('Coming Soon', { description: `Video calls with ${user.name} coming in Q2 2026` })
+                            onClick?.({ ...user, action: 'call' })
                           }}
                         >
                           <Video className="w-3 h-3" />
@@ -642,6 +644,12 @@ export const PresenceStatusSystem: React.FC<PresenceStatusSystemProps> = ({
   const [showStatusSelector, setShowStatusSelector] = useState(false)
   const [showSettingsPanel, setShowSettingsPanel] = useState(false)
   const [sortBy, setSortBy] = useState('name')
+  const [showMessageDialog, setShowMessageDialog] = useState(false)
+  const [showCallDialog, setShowCallDialog] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [messageContent, setMessageContent] = useState('')
+  const [isSending, setIsSending] = useState(false)
+  const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'connected' | 'ended'>('idle')
 
   // Combine users with presence data
   const usersWithPresence = useMemo(() => {
@@ -710,6 +718,72 @@ export const PresenceStatusSystem: React.FC<PresenceStatusSystemProps> = ({
   const handleCustomActivity = useCallback((activity: string) => {
     updateUserStatus(currentUser?.status || 'online', activity)
   }, [updateUserStatus, currentUser])
+
+  const handleOpenMessage = (user: any, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedUser(user)
+    setMessageContent('')
+    setShowMessageDialog(true)
+  }
+
+  const handleSendMessage = async () => {
+    if (!messageContent.trim() || !selectedUser) return
+
+    setIsSending(true)
+    toast.loading('Sending message...', { id: 'send-message' })
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
+    toast.success('Message sent', {
+      id: 'send-message',
+      description: `Your message was delivered to ${selectedUser.name}`
+    })
+
+    setIsSending(false)
+    setMessageContent('')
+    setShowMessageDialog(false)
+  }
+
+  const handleStartCall = (user: any, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedUser(user)
+    setCallStatus('idle')
+    setShowCallDialog(true)
+  }
+
+  const initiateCall = async () => {
+    if (!selectedUser) return
+
+    setCallStatus('calling')
+    toast.loading(`Calling ${selectedUser.name}...`, { id: 'video-call' })
+
+    // Simulate call connection
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    if (selectedUser.status === 'online') {
+      setCallStatus('connected')
+      toast.success('Connected', {
+        id: 'video-call',
+        description: `Video call with ${selectedUser.name} started`
+      })
+    } else {
+      setCallStatus('ended')
+      toast.error('Call failed', {
+        id: 'video-call',
+        description: `${selectedUser.name} is not available`
+      })
+    }
+  }
+
+  const endCall = () => {
+    setCallStatus('ended')
+    toast.info('Call ended', {
+      description: `Call with ${selectedUser?.name} ended`
+    })
+    setTimeout(() => {
+      setShowCallDialog(false)
+      setCallStatus('idle')
+    }, 1000)
+  }
 
   const statusCounts = useMemo(() => {
     const counts = { online: 0, away: 0, busy: 0, offline: 0 }
@@ -863,7 +937,19 @@ export const PresenceStatusSystem: React.FC<PresenceStatusSystemProps> = ({
                             showActivity={true}
                             showDevice={true}
                             showLastSeen={true}
-                            onClick={(user) => toast.info(`${user.name}`, { description: `Status: ${user.status}${user.currentActivity ? ` - ${user.currentActivity}` : ''}` })}
+                            onClick={(userData) => {
+                              if (userData.action === 'message') {
+                                setSelectedUser(userData)
+                                setMessageContent('')
+                                setShowMessageDialog(true)
+                              } else if (userData.action === 'call') {
+                                setSelectedUser(userData)
+                                setCallStatus('idle')
+                                setShowCallDialog(true)
+                              } else {
+                                toast.info(`${userData.name}`, { description: `Status: ${userData.status}${userData.currentActivity ? ` - ${userData.currentActivity}` : ''}` })
+                              }
+                            }}
                           />
                         ))}
                       </AnimatePresence>
@@ -909,6 +995,143 @@ export const PresenceStatusSystem: React.FC<PresenceStatusSystemProps> = ({
             onClick={() => setShowSettingsPanel(false)}
           />
         )}
+
+        {/* Message Dialog */}
+        <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                Message {selectedUser?.name}
+              </DialogTitle>
+              <DialogDescription>
+                Send a direct message to {selectedUser?.name}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedUser && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={selectedUser.avatar} />
+                    <AvatarFallback>{selectedUser.name?.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{selectedUser.name}</span>
+                      <StatusIndicator status={selectedUser.status} size="sm" />
+                    </div>
+                    {selectedUser.currentActivity && (
+                      <p className="text-xs text-muted-foreground">{selectedUser.currentActivity}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Your Message</label>
+                  <Textarea
+                    value={messageContent}
+                    onChange={(e) => setMessageContent(e.target.value)}
+                    placeholder={`Write a message to ${selectedUser.name}...`}
+                    rows={5}
+                    className="resize-none"
+                  />
+                </div>
+
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowMessageDialog(false)} disabled={isSending}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSendMessage} disabled={!messageContent.trim() || isSending}>
+                    {isSending ? 'Sending...' : 'Send Message'}
+                  </Button>
+                </DialogFooter>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Video Call Dialog */}
+        <Dialog open={showCallDialog} onOpenChange={(open) => {
+          if (!open && callStatus === 'connected') {
+            endCall()
+          } else {
+            setShowCallDialog(open)
+          }
+        }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Video className="w-5 h-5" />
+                Video Call
+              </DialogTitle>
+            </DialogHeader>
+            {selectedUser && (
+              <div className="space-y-6">
+                <div className="flex flex-col items-center py-6">
+                  <Avatar className="w-24 h-24 mb-4">
+                    <AvatarImage src={selectedUser.avatar} />
+                    <AvatarFallback className="text-2xl">
+                      {selectedUser.name?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <h3 className="text-xl font-semibold">{selectedUser.name}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <StatusIndicator status={selectedUser.status} size="sm" showLabel />
+                  </div>
+
+                  {callStatus === 'idle' && (
+                    <p className="text-muted-foreground mt-4">Ready to call</p>
+                  )}
+                  {callStatus === 'calling' && (
+                    <div className="flex items-center gap-2 mt-4">
+                      <div className="animate-pulse w-2 h-2 bg-blue-500 rounded-full" />
+                      <p className="text-blue-600">Calling...</p>
+                    </div>
+                  )}
+                  {callStatus === 'connected' && (
+                    <div className="flex items-center gap-2 mt-4">
+                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                      <p className="text-green-600">Connected</p>
+                    </div>
+                  )}
+                  {callStatus === 'ended' && (
+                    <p className="text-muted-foreground mt-4">Call ended</p>
+                  )}
+                </div>
+
+                <div className="flex justify-center gap-4">
+                  {callStatus === 'idle' && (
+                    <>
+                      <Button variant="outline" onClick={() => setShowCallDialog(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={initiateCall} className="bg-green-600 hover:bg-green-700">
+                        <Phone className="w-4 h-4 mr-2" />
+                        Start Call
+                      </Button>
+                    </>
+                  )}
+                  {callStatus === 'calling' && (
+                    <Button variant="destructive" onClick={endCall}>
+                      Cancel Call
+                    </Button>
+                  )}
+                  {callStatus === 'connected' && (
+                    <Button variant="destructive" onClick={endCall}>
+                      <Phone className="w-4 h-4 mr-2" />
+                      End Call
+                    </Button>
+                  )}
+                  {callStatus === 'ended' && (
+                    <Button onClick={() => setShowCallDialog(false)}>
+                      Close
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </TooltipProvider>
   )

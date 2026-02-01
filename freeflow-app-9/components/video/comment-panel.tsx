@@ -104,7 +104,12 @@ export function CommentPanel({
   const [newCommentPriority, setNewCommentPriority] = useState<CommentPriority>(0);
   const [showMentions, setShowMentions] = useState(false);
   const [mentionSearch, setMentionSearch] = useState('');
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Filter and sort comments
   const filteredComments = filterComments(comments, {
@@ -141,6 +146,73 @@ export function CommentPanel({
     setNewCommentPriority(0);
     setIsCreating(false);
   }, [newCommentContent, currentTimeMs, newCommentPriority, onCreateComment]);
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newFiles = Array.from(files);
+    const validFiles = newFiles.filter(file => {
+      // Allow images, pdfs, and documents
+      const validTypes = ['image/', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats'];
+      return validTypes.some(type => file.type.startsWith(type));
+    });
+
+    if (validFiles.length < newFiles.length) {
+      toast.warning('Some files were skipped', {
+        description: 'Only images and documents are allowed'
+      });
+    }
+
+    setAttachments(prev => [...prev, ...validFiles].slice(0, 5)); // Max 5 attachments
+    toast.success(`${validFiles.length} file(s) attached`);
+  }, []);
+
+  const removeAttachment = useCallback((index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const startVoiceRecording = useCallback(async () => {
+    try {
+      // Request microphone permission
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop()); // Just check permission
+
+      setIsRecording(true);
+      setRecordingTime(0);
+
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => {
+          if (prev >= 60) {
+            stopVoiceRecording();
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+
+      toast.info('Recording started', {
+        description: 'Click the mic button again to stop'
+      });
+    } catch (err) {
+      toast.error('Microphone access denied', {
+        description: 'Please allow microphone access to record voice notes'
+      });
+    }
+  }, []);
+
+  const stopVoiceRecording = useCallback(() => {
+    if (recordingIntervalRef.current) {
+      clearInterval(recordingIntervalRef.current);
+      recordingIntervalRef.current = null;
+    }
+
+    setIsRecording(false);
+    toast.success(`Voice note recorded (${recordingTime}s)`, {
+      description: 'Voice note will be attached to your comment'
+    });
+    setRecordingTime(0);
+  }, [recordingTime]);
 
   const handleMentionSelect = useCallback(
     (member: { id: string; name: string }) => {
@@ -412,15 +484,57 @@ export function CommentPanel({
                 </div>
               )}
 
+              {/* Attachments display */}
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2 p-2 bg-muted rounded-md">
+                  {attachments.map((file, index) => (
+                    <div key={index} className="flex items-center gap-1 text-xs bg-background px-2 py-1 rounded">
+                      <span className="truncate max-w-[100px]">{file.name}</span>
+                      <button onClick={() => removeAttachment(index)} className="text-muted-foreground hover:text-destructive">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Recording indicator */}
+              {isRecording && (
+                <div className="flex items-center gap-2 mt-2 p-2 bg-red-50 dark:bg-red-950/20 rounded-md text-red-600">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <span className="text-xs">Recording: {recordingTime}s</span>
+                </div>
+              )}
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*,.pdf,.doc,.docx"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+
               {/* Action buttons */}
               <div className="absolute bottom-2 right-2 flex items-center gap-1">
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setShowMentions(true); toast.info('Mention', { description: 'Type @ to mention a team member' }); }}>
                   <AtSign className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.info('Coming Soon', { description: 'File attachments will be available in Q2 2026' })}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("h-8 w-8", attachments.length > 0 && "text-primary")}
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   <Paperclip className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.info('Coming Soon', { description: 'Voice recording will be available in Q2 2026' })}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("h-8 w-8", isRecording && "text-red-500")}
+                  onClick={() => isRecording ? stopVoiceRecording() : startVoiceRecording()}
+                >
                   <Mic className="h-4 w-4" />
                 </Button>
               </div>

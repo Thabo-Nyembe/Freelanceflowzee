@@ -349,6 +349,39 @@ export function EnhancedCommentSystem({
   const [replyContent, setReplyContent] = React.useState('')
   const [mentions, setMentions] = React.useState<string[]>([])
   const [attachments, setAttachments] = React.useState<File[]>([])
+  const [showEmojiPicker, setShowEmojiPicker] = React.useState(false)
+  const [showMentionHint, setShowMentionHint] = React.useState(false)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  const commonEmojis = ['👍', '❤️', '😊', '🎉', '🔥', '👀', '💯', '🚀', '✨', '👏']
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+
+    const validFiles = Array.from(files).filter(file => file.size < 10 * 1024 * 1024) // 10MB max
+    if (validFiles.length < files.length) {
+      toast.warning('Some files were skipped', { description: 'Maximum file size is 10MB' })
+    }
+
+    setAttachments(prev => [...prev, ...validFiles].slice(0, 5))
+    toast.success(`${validFiles.length} file(s) attached`)
+  }
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleMentionClick = () => {
+    setNewComment(prev => prev + '@')
+    setShowMentionHint(true)
+    setTimeout(() => setShowMentionHint(false), 3000)
+  }
+
+  const insertEmoji = (emoji: string) => {
+    setNewComment(prev => prev + emoji)
+    setShowEmojiPicker(false)
+  }
 
   const handleSubmitComment = () => {
     if (newComment.trim() && onAddComment) {
@@ -556,21 +589,83 @@ export function EnhancedCommentSystem({
                 className="min-h-[80px]"
               />
               
+              {/* Attached files display */}
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {attachments.map((file, index) => (
+                    <div key={index} className="flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded">
+                      <Paperclip className="h-3 w-3" />
+                      <span className="truncate max-w-[120px]">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeAttachment(index)}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {allowAttachments && (
-                    <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'File attachments will be available in Q2 2026' })}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className={attachments.length > 0 ? 'text-primary' : ''}
+                    >
                       <Paperclip className="h-4 w-4" />
                     </Button>
                   )}
                   {allowMentions && (
-                    <Button variant="ghost" size="sm" onClick={() => toast.info('In Development', { description: 'Type @ to mention - feature being refined' })}>
-                      <AtSign className="h-4 w-4" />
-                    </Button>
+                    <div className="relative">
+                      <Button variant="ghost" size="sm" onClick={handleMentionClick}>
+                        <AtSign className="h-4 w-4" />
+                      </Button>
+                      {showMentionHint && (
+                        <div className="absolute left-0 top-full mt-1 bg-popover border rounded-md px-2 py-1 text-xs shadow-md whitespace-nowrap z-10">
+                          Type @ to mention someone
+                        </div>
+                      )}
+                    </div>
                   )}
-                  <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Emoji picker will be available soon' })}>
-                    <Smile className="h-4 w-4" />
-                  </Button>
+                  <div className="relative">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    >
+                      <Smile className="h-4 w-4" />
+                    </Button>
+                    {showEmojiPicker && (
+                      <div className="absolute left-0 top-full mt-1 bg-popover border rounded-lg p-2 shadow-lg z-10">
+                        <div className="flex gap-1 flex-wrap w-[180px]">
+                          {commonEmojis.map((emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              className="text-lg hover:bg-muted rounded p-1 transition-colors"
+                              onClick={() => insertEmoji(emoji)}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <Button
