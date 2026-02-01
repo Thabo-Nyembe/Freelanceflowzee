@@ -432,6 +432,11 @@ export default function AICreateClient() {
   const [archivedItems, setArchivedItems] = useState<string[]>([])
   const [importedFile, setImportedFile] = useState<File | null>(null)
   const [templateForm, setTemplateForm] = useState({ name: '', description: '', prompt: '', style: 'realistic' })
+  const [advancedFilters, setAdvancedFilters] = useState({
+    type: 'all',
+    style: 'all',
+    dateRange: 'all'
+  })
 
   // Fetch generations on component mount
   useEffect(() => {
@@ -2524,8 +2529,35 @@ export default function AICreateClient() {
                 <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>Cancel</Button>
                 <Button
                   disabled={!templateForm.name || !templateForm.prompt}
-                  onClick={() => {
-                    toast.success(`Template created! "${templateForm.name}" saved to your templates`)
+                  onClick={async () => {
+                    toast.promise(
+                      (async () => {
+                        const { data: { user } } = await supabase.auth.getUser()
+                        if (!user) throw new Error('Not authenticated')
+
+                        // Save template to database
+                        const { error } = await supabase.from('ai_templates').insert({
+                          user_id: user.id,
+                          name: templateForm.name,
+                          description: templateForm.description,
+                          prompt: templateForm.prompt,
+                          style: templateForm.style,
+                          settings: {
+                            style: templateForm.style,
+                            quality: 'high'
+                          },
+                          is_public: false
+                        })
+
+                        if (error) throw error
+                        return { name: templateForm.name }
+                      })(),
+                      {
+                        loading: 'Creating template...',
+                        success: (data) => `Template "${data.name}" saved successfully!`,
+                        error: 'Failed to create template'
+                      }
+                    )
                     setShowTemplateDialog(false)
                     setTemplateForm({ name: '', description: '', prompt: '', style: 'realistic' })
                   }}
@@ -2550,43 +2582,100 @@ export default function AICreateClient() {
               <div className="space-y-2">
                 <Label>Generation Type</Label>
                 <div className="flex flex-wrap gap-2">
-                  {['All', 'Image', 'Video', 'Audio', 'Text'].map((type) => (
-                    <Button key={type} variant="outline" size="sm" onClick={() => toast.info(`Filter: ${type}`)}>{type}</Button>
+                  {[
+                    { value: 'all', label: 'All' },
+                    { value: 'image', label: 'Image' },
+                    { value: 'video', label: 'Video' },
+                    { value: 'audio', label: 'Audio' },
+                    { value: 'text', label: 'Text' }
+                  ].map(({ value, label }) => (
+                    <Button
+                      key={value}
+                      variant={advancedFilters.type === value ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setAdvancedFilters(prev => ({ ...prev, type: value }))}
+                    >
+                      {label}
+                    </Button>
                   ))}
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Status</Label>
                 <div className="flex flex-wrap gap-2">
-                  {['All', 'Completed', 'Processing', 'Failed'].map((status) => (
-                    <Button key={status} variant="outline" size="sm" onClick={() => toast.info(`Filter: ${status}`)}>{status}</Button>
+                  {[
+                    { value: 'all', label: 'All' },
+                    { value: 'completed', label: 'Completed' },
+                    { value: 'processing', label: 'Processing' },
+                    { value: 'failed', label: 'Failed' }
+                  ].map(({ value, label }) => (
+                    <Button
+                      key={value}
+                      variant={statusFilter === value ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setStatusFilter(value as GenerationStatus | 'all')}
+                    >
+                      {label}
+                    </Button>
                   ))}
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Style</Label>
                 <div className="flex flex-wrap gap-2">
-                  {['Realistic', 'Anime', 'Digital Art', 'Fantasy'].map((style) => (
-                    <Button key={style} variant="outline" size="sm" onClick={() => toast.info(`Filter: ${style}`)}>{style}</Button>
+                  {[
+                    { value: 'all', label: 'All' },
+                    { value: 'realistic', label: 'Realistic' },
+                    { value: 'anime', label: 'Anime' },
+                    { value: 'digital-art', label: 'Digital Art' },
+                    { value: 'fantasy', label: 'Fantasy' }
+                  ].map(({ value, label }) => (
+                    <Button
+                      key={value}
+                      variant={advancedFilters.style === value ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setAdvancedFilters(prev => ({ ...prev, style: value }))}
+                    >
+                      {label}
+                    </Button>
                   ))}
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Date Range</Label>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter: Today')}>Today</Button>
-                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter: This Week')}>This Week</Button>
-                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter: This Month')}>This Month</Button>
-                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter: All Time')}>All Time</Button>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: 'today', label: 'Today' },
+                    { value: 'week', label: 'This Week' },
+                    { value: 'month', label: 'This Month' },
+                    { value: 'all', label: 'All Time' }
+                  ].map(({ value, label }) => (
+                    <Button
+                      key={value}
+                      variant={advancedFilters.dateRange === value ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setAdvancedFilters(prev => ({ ...prev, dateRange: value }))}
+                    >
+                      {label}
+                    </Button>
+                  ))}
                 </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => {
-                  toast.info('Filters cleared')
+                  setAdvancedFilters({ type: 'all', style: 'all', dateRange: 'all' })
+                  setStatusFilter('all')
+                  setSearchQuery('')
+                  toast.success('Filters cleared')
                   setShowFilterDialog(false)
                 }}>Clear All</Button>
                 <Button onClick={() => {
-                  toast.success('Filters applied')
+                  const activeFilters = []
+                  if (advancedFilters.type !== 'all') activeFilters.push(advancedFilters.type)
+                  if (advancedFilters.style !== 'all') activeFilters.push(advancedFilters.style)
+                  if (advancedFilters.dateRange !== 'all') activeFilters.push(advancedFilters.dateRange)
+                  if (statusFilter !== 'all') activeFilters.push(statusFilter)
+                  toast.success(activeFilters.length > 0 ? `Filters applied: ${activeFilters.join(', ')}` : 'Showing all results')
                   setShowFilterDialog(false)
                 }}>Apply Filters</Button>
               </div>
@@ -2606,11 +2695,11 @@ export default function AICreateClient() {
             <div className="py-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {[
-                  { name: 'DALL-E 3', speed: 'Fast', quality: 'Excellent', cost: '$0.04/img', strengths: 'Text rendering, Accuracy' },
-                  { name: 'Midjourney v6', speed: 'Medium', quality: 'Outstanding', cost: '$0.05/img', strengths: 'Artistic style, Aesthetics' },
-                  { name: 'Stable Diffusion XL', speed: 'Fast', quality: 'Great', cost: '$0.02/img', strengths: 'Control, Customization' }
+                  { id: '1', name: 'DALL-E 3', speed: 'Fast', quality: 'Excellent', cost: '$0.04/img', strengths: 'Text rendering, Accuracy' },
+                  { id: '2', name: 'Midjourney v6', speed: 'Medium', quality: 'Outstanding', cost: '$0.05/img', strengths: 'Artistic style, Aesthetics' },
+                  { id: '3', name: 'Stable Diffusion XL', speed: 'Fast', quality: 'Great', cost: '$0.02/img', strengths: 'Control, Customization' }
                 ].map((model) => (
-                  <Card key={model.name} className="p-4">
+                  <Card key={model.id} className={cn("p-4", selectedModel === model.id && "ring-2 ring-primary")}>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <h4 className="font-semibold">{model.name}</h4>
@@ -2633,12 +2722,14 @@ export default function AICreateClient() {
                       <Button
                         className="w-full"
                         size="sm"
+                        variant={selectedModel === model.id ? 'default' : 'outline'}
                         onClick={() => {
-                          toast.success(`${model.name} selected as default`)
+                          setSelectedModel(model.id)
+                          toast.success(`${model.name} selected as your AI model`)
                           setShowModelCompareDialog(false)
                         }}
                       >
-                        Select Model
+                        {selectedModel === model.id ? 'Selected' : 'Select Model'}
                       </Button>
                     </div>
                   </Card>

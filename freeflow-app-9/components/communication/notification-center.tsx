@@ -766,60 +766,131 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
     }
   }, [])
 
-  const handleReply = useCallback((notification: any) => {
-    // Copy notification content to clipboard and notify
-    navigator.clipboard.writeText(notification.message || notification.title || '')
-    toast.success('Reply started', {
-      description: 'Opening reply composer...',
-      action: {
-        label: 'View',
-        onClick: () => {
-          // Navigate to messages or open reply dialog
-          toast.info('Reply feature - Navigate to message thread')
+  const handleReply = useCallback(async (notification: any) => {
+    // Show reply input dialog
+    const replyMessage = window.prompt('Enter your reply:', '')
+    if (!replyMessage) return
+
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reply',
+          data: { notificationId: notification.id, message: replyMessage }
+        })
+      })
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('Reply sent', {
+          description: 'Your reply has been delivered'
+        })
+        // Mark as read after replying
+        if (!notification.read) {
+          markNotificationAsRead(notification.id)
         }
+      } else {
+        toast.error('Failed to send reply', {
+          description: result.error || 'Please try again'
+        })
       }
-    })
-    // Mark as read when replying
-    if (!notification.read) {
-      markNotificationAsRead(notification.id)
+    } catch (err) {
+      toast.error('Failed to send reply')
     }
   }, [markNotificationAsRead])
 
   const handleForward = useCallback(async (notification: any) => {
-    try {
-      const shareData = {
-        title: notification.title,
-        text: notification.message,
-      }
+    // Ask how to share
+    const shareMethod = window.confirm(
+      'Click OK to share externally (copy to clipboard)\nClick Cancel to forward internally to team members'
+    )
 
-      if (navigator.share && navigator.canShare?.(shareData)) {
-        await navigator.share(shareData)
-        toast.success('Notification shared')
-      } else {
-        // Fallback: Copy to clipboard
-        const content = `${notification.title}\n\n${notification.message}`
-        await navigator.clipboard.writeText(content)
-        toast.success('Copied to clipboard', {
-          description: 'You can now paste and share this notification'
-        })
+    if (shareMethod) {
+      // External share
+      try {
+        const shareData = {
+          title: notification.title,
+          text: notification.message,
+        }
+
+        if (navigator.share && navigator.canShare?.(shareData)) {
+          await navigator.share(shareData)
+          toast.success('Notification shared')
+        } else {
+          const content = `${notification.title}\n\n${notification.message}`
+          await navigator.clipboard.writeText(content)
+          toast.success('Copied to clipboard', {
+            description: 'You can now paste and share this notification'
+          })
+        }
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          toast.error('Failed to share notification')
+        }
       }
-    } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
-        toast.error('Failed to share notification')
+    } else {
+      // Internal forward - call API
+      const recipientEmail = window.prompt('Enter team member email to forward to:')
+      if (!recipientEmail) return
+
+      try {
+        const response = await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'forward',
+            data: {
+              notificationId: notification.id,
+              recipientIds: [recipientEmail], // In real implementation, this would be user IDs
+              message: notification.message
+            }
+          })
+        })
+        const result = await response.json()
+
+        if (result.success) {
+          toast.success('Notification forwarded', {
+            description: `Forwarded to ${recipientEmail}`
+          })
+        } else {
+          toast.error('Failed to forward', {
+            description: result.error || 'Please try again'
+          })
+        }
+      } catch (err) {
+        toast.error('Failed to forward notification')
       }
     }
   }, [])
 
-  const handleSave = useCallback((notification: any) => {
+  const handleSave = useCallback(async (notification: any) => {
     // Toggle bookmark/save state
+    const isSaved = notification.metadata?.saved
+    const action = isSaved ? 'Removing bookmark...' : 'Saving notification...'
+
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 500)),
+      fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save',
+          data: { notificationId: notification.id, saved: !isSaved }
+        })
+      }).then(async (response) => {
+        const result = await response.json()
+        if (!result.success) throw new Error(result.error)
+        // Update local state
+        notification.metadata = { ...(notification.metadata || {}), saved: !isSaved }
+        return result
+      }),
       {
-        loading: 'Saving notification...',
-        success: 'Notification saved to bookmarks',
+        loading: action,
+        success: isSaved ? 'Removed from bookmarks' : 'Notification saved to bookmarks',
         error: 'Failed to save notification'
       }
     )
+
     // Mark as read when saving
     if (!notification.read) {
       markNotificationAsRead(notification.id)

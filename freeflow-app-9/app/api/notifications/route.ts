@@ -267,6 +267,176 @@ export async function POST(request: NextRequest) {
         })
       }
 
+      case 'save':
+      case 'bookmark': {
+        const notificationId = data?.notificationId
+        const isSaved = data?.saved !== false // Default to saving
+
+        if (!notificationId) {
+          return NextResponse.json({ error: 'Notification ID required' }, { status: 400 })
+        }
+
+        // Get current notification to preserve existing metadata
+        const { data: notification } = await supabase
+          .from('notifications')
+          .select('metadata')
+          .eq('id', notificationId)
+          .eq('user_id', user.id)
+          .single()
+
+        const currentMetadata = notification?.metadata || {}
+
+        // Update metadata with saved status
+        const { error } = await supabase
+          .from('notifications')
+          .update({
+            metadata: {
+              ...currentMetadata,
+              saved: isSaved,
+              saved_at: isSaved ? new Date().toISOString() : null
+            }
+          })
+          .eq('id', notificationId)
+          .eq('user_id', user.id)
+
+        if (error) {
+          logger.warn('Failed to save notification', { notificationId, error: error.message })
+          return NextResponse.json({ error: 'Failed to save notification' }, { status: 500 })
+        }
+
+        return NextResponse.json({
+          success: true,
+          action: isSaved ? 'save' : 'unsave',
+          notificationId,
+          saved: isSaved,
+          message: isSaved ? 'Notification saved to bookmarks' : 'Notification removed from bookmarks'
+        })
+      }
+
+      case 'forward': {
+        const notificationId = data?.notificationId
+        const recipientIds = data?.recipientIds || []
+        const message = data?.message
+
+        if (!notificationId) {
+          return NextResponse.json({ error: 'Notification ID required' }, { status: 400 })
+        }
+
+        // Get the original notification
+        const { data: originalNotification, error: fetchError } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('id', notificationId)
+          .eq('user_id', user.id)
+          .single()
+
+        if (fetchError || !originalNotification) {
+          return NextResponse.json({ error: 'Notification not found' }, { status: 404 })
+        }
+
+        // Forward to each recipient by creating new notifications
+        let forwardedCount = 0
+        for (const recipientId of recipientIds) {
+          try {
+            await notificationService.send({
+              userId: recipientId,
+              title: `Fwd: ${originalNotification.title}`,
+              message: message || originalNotification.message,
+              type: originalNotification.type || 'info',
+              category: originalNotification.category || 'general',
+              channels: ['in_app'],
+              priority: 'normal',
+              data: {
+                forwarded_from: user.id,
+                original_notification_id: notificationId,
+                forwarded_at: new Date().toISOString()
+              }
+            })
+            forwardedCount++
+          } catch (err) {
+            logger.warn('Failed to forward to recipient', { recipientId, error: err instanceof Error ? err.message : 'Unknown' })
+          }
+        }
+
+        return NextResponse.json({
+          success: true,
+          action: 'forward',
+          notificationId,
+          forwardedTo: forwardedCount,
+          message: `Notification forwarded to ${forwardedCount} recipient(s)`
+        })
+      }
+
+      case 'reply': {
+        const notificationId = data?.notificationId
+        const replyMessage = data?.message
+
+        if (!notificationId || !replyMessage) {
+          return NextResponse.json({ error: 'Notification ID and message required' }, { status: 400 })
+        }
+
+        // Get the original notification to find sender
+        const { data: originalNotification, error: fetchError } = await supabase
+          .from('notifications')
+          .select('*, metadata')
+          .eq('id', notificationId)
+          .eq('user_id', user.id)
+          .single()
+
+        if (fetchError || !originalNotification) {
+          return NextResponse.json({ error: 'Notification not found' }, { status: 404 })
+        }
+
+        // Get sender info from metadata or related fields
+        const senderId = originalNotification.metadata?.sender_id ||
+                        originalNotification.related_id
+
+        if (senderId) {
+          // Create a reply notification for the original sender
+          await notificationService.send({
+            userId: senderId,
+            title: `Reply: ${originalNotification.title}`,
+            message: replyMessage,
+            type: 'message',
+            category: 'message',
+            channels: ['in_app'],
+            priority: 'normal',
+            data: {
+              reply_to: notificationId,
+              reply_from: user.id,
+              replied_at: new Date().toISOString()
+            }
+          })
+        }
+
+        // Also create a message in the messages table if it exists
+        try {
+          await supabase.from('messages').insert({
+            sender_id: user.id,
+            recipient_id: senderId,
+            content: replyMessage,
+            type: 'notification_reply',
+            metadata: {
+              original_notification_id: notificationId
+            }
+          })
+        } catch (err) {
+          // Messages table might not exist or have different schema, that's ok
+          logger.info('Could not create message record', { error: err instanceof Error ? err.message : 'Unknown' })
+        }
+
+        // Mark original notification as read
+        await notificationService.markAsRead(user.id, notificationId)
+
+        return NextResponse.json({
+          success: true,
+          action: 'reply',
+          notificationId,
+          repliedTo: senderId,
+          message: 'Reply sent successfully'
+        })
+      }
+
       case 'delete': {
         const notificationIds = data?.notificationIds || [data?.notificationId]
         let count = 0
@@ -552,6 +722,33 @@ function handleMockAction(action: string, data: any): NextResponse {
           'Changes take effect immediately',
           'You can always update preferences later',
         ],
+      })
+
+    case 'save':
+    case 'bookmark':
+      return NextResponse.json({
+        success: true,
+        action: data?.saved !== false ? 'save' : 'unsave',
+        notificationId: data?.notificationId,
+        saved: data?.saved !== false,
+        message: data?.saved !== false ? 'Notification saved to bookmarks' : 'Notification removed from bookmarks'
+      })
+
+    case 'forward':
+      return NextResponse.json({
+        success: true,
+        action: 'forward',
+        notificationId: data?.notificationId,
+        forwardedTo: data?.recipientIds?.length || 0,
+        message: `Notification forwarded to ${data?.recipientIds?.length || 0} recipient(s)`
+      })
+
+    case 'reply':
+      return NextResponse.json({
+        success: true,
+        action: 'reply',
+        notificationId: data?.notificationId,
+        message: 'Reply sent successfully'
       })
 
     default:

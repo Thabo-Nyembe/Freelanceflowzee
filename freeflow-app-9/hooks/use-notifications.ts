@@ -160,6 +160,68 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     }
   }, [])
 
+  const saveNotification = useCallback(async (notificationId: string, save: boolean = true) => {
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save',
+          data: { notificationId, saved: save }
+        })
+      })
+      const result = await response.json()
+      if (result.success) {
+        setNotifications(prev => prev.map(n =>
+          n.id === notificationId
+            ? { ...n, metadata: { ...(n.metadata || {}), saved: save, saved_at: save ? new Date().toISOString() : null } }
+            : n
+        ))
+      }
+      return result
+    } catch (err) {
+      return { success: false, error: 'Failed to save notification' }
+    }
+  }, [])
+
+  const forwardNotification = useCallback(async (notificationId: string, recipientIds: string[], message?: string) => {
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'forward',
+          data: { notificationId, recipientIds, message }
+        })
+      })
+      const result = await response.json()
+      return result
+    } catch (err) {
+      return { success: false, error: 'Failed to forward notification' }
+    }
+  }, [])
+
+  const replyToNotification = useCallback(async (notificationId: string, message: string) => {
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reply',
+          data: { notificationId, message }
+        })
+      })
+      const result = await response.json()
+      if (result.success) {
+        // Mark as read after replying
+        await markAsRead(notificationId)
+      }
+      return result
+    } catch (err) {
+      return { success: false, error: 'Failed to send reply' }
+    }
+  }, [markAsRead])
+
   const deleteNotification = useCallback(async (notificationId: string) => {
     try {
       await fetch(`/api/notifications/${notificationId}`, { method: 'DELETE' })
@@ -267,12 +329,14 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     return grouped
   }, [notifications])
   const recentNotifications = useMemo(() => [...notifications].filter(n => !n.isArchived).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 10), [notifications])
+  const savedNotifications = useMemo(() => notifications.filter(n => n.metadata?.saved), [notifications])
   const categories: NotificationCategory[] = ['general', 'project', 'task', 'message', 'invoice', 'calendar', 'security', 'marketing']
 
   return {
-    notifications, preferences, stats, unreadNotifications, priorityNotifications, archivedNotifications, unreadCount, notificationsByCategory, recentNotifications, categories,
+    notifications, preferences, stats, unreadNotifications, priorityNotifications, archivedNotifications, savedNotifications, unreadCount, notificationsByCategory, recentNotifications, categories,
     isLoading, error, filter,
-    refresh, fetchNotifications, markAsRead, markAllAsRead, archiveNotification, deleteNotification, clearAll, executeAction, updatePreferences, requestPushPermission, setFilter
+    refresh, fetchNotifications, markAsRead, markAllAsRead, archiveNotification, deleteNotification, clearAll, executeAction, updatePreferences, requestPushPermission, setFilter,
+    saveNotification, forwardNotification, replyToNotification
   }
 }
 

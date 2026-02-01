@@ -14,6 +14,7 @@ import {
 
 import * as React from 'react'
 import { useMemo, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -158,6 +159,7 @@ const advancedMicroFeaturesActivities = [
 export default function AdvancedMicroFeaturesClient() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
+  const router = useRouter()
 
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
@@ -373,13 +375,13 @@ export default function AdvancedMicroFeaturesClient() {
   }), [])
 
   const mockQuickActions = useMemo(() => [
-    { id: '1', label: 'New Project', icon: Zap, onClick: () => {}, variant: 'primary' as const, shortcut: '⌘N' },
-    { id: '2', label: 'Upload Files', icon: Download, onClick: () => {}, badge: '5' },
-    { id: '3', label: 'Team Chat', icon: MessageSquare, onClick: () => {}, badge: 3 },
-    { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => {} },
-    { id: '5', label: 'Settings', icon: Settings, onClick: () => {} },
-    { id: '6', label: 'Share', icon: Share2, onClick: () => {}, disabled: true }
-  ], [])
+    { id: '1', label: 'New Project', icon: Zap, onClick: () => { setNewItemDialogOpen(true); setNewItemForm(prev => ({ ...prev, type: 'project' })) }, variant: 'primary' as const, shortcut: '⌘N' },
+    { id: '2', label: 'Upload Files', icon: Download, onClick: () => router.push('/v2/dashboard/media-library?action=upload'), badge: '5' },
+    { id: '3', label: 'Team Chat', icon: MessageSquare, onClick: () => router.push('/v2/dashboard/messaging'), badge: 3 },
+    { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => router.push('/v2/dashboard/analytics') },
+    { id: '5', label: 'Settings', icon: Settings, onClick: () => setSettingsDialogOpen(true) },
+    { id: '6', label: 'Share', icon: Share2, onClick: () => toast.info('Share feature coming soon'), disabled: true }
+  ], [router])
 
   const mockNotifications = useMemo(() => [
     {
@@ -389,8 +391,8 @@ export default function AdvancedMicroFeaturesClient() {
       type: 'info' as const,
       timestamp: new Date(Date.now() - 5 * 60 * 1000),
       actions: [
-        { label: 'View Project', onClick: () => {}, variant: 'primary' as const },
-        { label: 'Dismiss', onClick: () => {} }
+        { label: 'View Project', onClick: () => router.push('/v2/dashboard/projects'), variant: 'primary' as const },
+        { label: 'Dismiss', onClick: () => toast.success('Notification dismissed') }
       ]
     },
     {
