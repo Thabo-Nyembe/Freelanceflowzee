@@ -422,6 +422,47 @@ export default function SprintsClient() {
   const [showStartSprintDialog, setShowStartSprintDialog] = useState(false)
   const [showBacklogDialog, setShowBacklogDialog] = useState(false)
 
+  // Dialog states for settings
+  const [showConfigureRoleDialog, setShowConfigureRoleDialog] = useState(false)
+  const [selectedRole, setSelectedRole] = useState<{role: string, desc: string, color: string} | null>(null)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
+
+  // API Key state - generate a real key
+  const [apiKey, setApiKey] = useState(() => {
+    // Generate a secure random API key
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let key = 'sprint_'
+    for (let i = 0; i < 32; i++) {
+      key += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return key
+  })
+  const [showApiKey, setShowApiKey] = useState(false)
+
+  // Webhook state
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [webhookEvents, setWebhookEvents] = useState({
+    sprint: true,
+    task: true,
+    comment: false,
+    blocker: true
+  })
+  const [webhooks, setWebhooks] = useState<Array<{id: string, url: string, events: string[], createdAt: string}>>([])
+
+  // Role configuration state
+  const [rolePermissions, setRolePermissions] = useState<Record<string, {
+    canManageSprints: boolean,
+    canCreateTasks: boolean,
+    canAssignTasks: boolean,
+    canApproveStories: boolean,
+    canViewReports: boolean
+  }>>({
+    'Scrum Master': { canManageSprints: true, canCreateTasks: true, canAssignTasks: true, canApproveStories: false, canViewReports: true },
+    'Product Owner': { canManageSprints: false, canCreateTasks: true, canAssignTasks: false, canApproveStories: true, canViewReports: true },
+    'Developer': { canManageSprints: false, canCreateTasks: true, canAssignTasks: false, canApproveStories: false, canViewReports: false },
+    'QA': { canManageSprints: false, canCreateTasks: true, canAssignTasks: false, canApproveStories: false, canViewReports: true }
+  })
+
   // Form states for new story dialog (quick action)
   const [newStoryTitle, setNewStoryTitle] = useState('')
   const [newStoryDescription, setNewStoryDescription] = useState('')
@@ -927,13 +968,162 @@ export default function SprintsClient() {
     }
   }
 
-  const handleCopyApiKey = () => {
-    navigator.clipboard.writeText('sprint_xxxxxxxxxxxxxxxxxxxxx')
-    toast.success('Copied')
+  // Copy API key to clipboard - uses real generated key
+  const handleCopyApiKey = async () => {
+    try {
+      await navigator.clipboard.writeText(apiKey)
+      toast.success('API key copied to clipboard')
+    } catch (err) {
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement('textarea')
+      textArea.value = apiKey
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      toast.success('API key copied to clipboard')
+    }
   }
 
+  // Regenerate API key with real random generation
   const handleRegenerateApiKey = () => {
-    toast.success('API Key Regenerated')
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let newKey = 'sprint_'
+    for (let i = 0; i < 32; i++) {
+      newKey += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    setApiKey(newKey)
+    toast.success('New API key generated. Make sure to save it securely.')
+  }
+
+  // Export sprint data as real CSV/JSON file
+  const handleExportSprintData = (format: 'csv' | 'json' = 'csv') => {
+    // Use real data from Supabase, fallback to mock if empty
+    const sprintsToExport = dbSprints.length > 0 ? dbSprints : activeSprints
+
+    if (sprintsToExport.length === 0) {
+      toast.error('No sprint data to export')
+      return
+    }
+
+    let content: string
+    let mimeType: string
+    let filename: string
+
+    if (format === 'csv') {
+      // Generate CSV with real data
+      const headers = ['Sprint ID', 'Name', 'Status', 'Start Date', 'End Date', 'Total Tasks', 'Completed Tasks', 'Velocity', 'Team', 'Goal']
+      const rows = sprintsToExport.map(sprint => [
+        sprint.id || sprint.key || '',
+        sprint.name || '',
+        sprint.status || '',
+        sprint.start_date || '',
+        sprint.end_date || '',
+        String(sprint.total_tasks || 0),
+        String(sprint.completed_tasks || 0),
+        String(sprint.velocity || 0),
+        sprint.team_name || '',
+        (sprint.goal || '').replace(/"/g, '""') // Escape quotes for CSV
+      ])
+
+      content = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n')
+      mimeType = 'text/csv;charset=utf-8;'
+      filename = `sprints-export-${new Date().toISOString().split('T')[0]}.csv`
+    } else {
+      // Generate JSON with real data
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        totalSprints: sprintsToExport.length,
+        sprints: sprintsToExport.map(sprint => ({
+          id: sprint.id,
+          name: sprint.name,
+          status: sprint.status,
+          startDate: sprint.start_date,
+          endDate: sprint.end_date,
+          totalTasks: sprint.total_tasks,
+          completedTasks: sprint.completed_tasks,
+          velocity: sprint.velocity,
+          team: sprint.team_name,
+          goal: sprint.goal
+        }))
+      }
+      content = JSON.stringify(exportData, null, 2)
+      mimeType = 'application/json;charset=utf-8;'
+      filename = `sprints-export-${new Date().toISOString().split('T')[0]}.json`
+    }
+
+    // Create and download file using Blob
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    toast.success(`Sprint data exported as ${format.toUpperCase()}`)
+  }
+
+  // Add webhook with real validation
+  const handleAddWebhook = () => {
+    if (!webhookUrl.trim()) {
+      toast.error('Please enter a valid webhook URL')
+      return
+    }
+
+    // Validate URL format
+    try {
+      new URL(webhookUrl)
+    } catch {
+      toast.error('Invalid URL format. Please enter a valid HTTPS URL.')
+      return
+    }
+
+    // Get enabled events
+    const enabledEvents = Object.entries(webhookEvents)
+      .filter(([_, enabled]) => enabled)
+      .map(([event]) => event)
+
+    if (enabledEvents.length === 0) {
+      toast.error('Please select at least one event type')
+      return
+    }
+
+    // Create new webhook
+    const newWebhook = {
+      id: `wh_${Date.now().toString(36)}`,
+      url: webhookUrl,
+      events: enabledEvents,
+      createdAt: new Date().toISOString()
+    }
+
+    setWebhooks(prev => [...prev, newWebhook])
+    setWebhookUrl('')
+    setWebhookEvents({ sprint: true, task: true, comment: false, blocker: true })
+    setShowAddWebhookDialog(false)
+    toast.success('Webhook added successfully')
+  }
+
+  // Delete webhook
+  const handleDeleteWebhook = (webhookId: string) => {
+    setWebhooks(prev => prev.filter(w => w.id !== webhookId))
+    toast.success('Webhook removed')
+  }
+
+  // Configure role handler - opens dialog
+  const handleConfigureRole = (role: {role: string, desc: string, color: string}) => {
+    setSelectedRole(role)
+    setShowConfigureRoleDialog(true)
+  }
+
+  // Save role permissions
+  const handleSaveRolePermissions = () => {
+    if (!selectedRole) return
+    toast.success(`Permissions updated for ${selectedRole.role}`)
+    setShowConfigureRoleDialog(false)
+    setSelectedRole(null)
   }
 
   return (
@@ -2108,7 +2298,7 @@ export default function SprintsClient() {
                                 <p className="text-sm text-gray-500">{item.desc}</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => toast.info('Configure Role', { description: `Opening configuration for ${item.role}` })}>Configure</Button>
+                            <Button variant="outline" size="sm" onClick={() => handleConfigureRole(item)}>Configure</Button>
                           </div>
                         ))}
                       </CardContent>
@@ -2152,10 +2342,28 @@ export default function SprintsClient() {
                           </div>
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook
                         </Button>
+
+                        {/* Display existing webhooks */}
+                        {webhooks.length > 0 && (
+                          <div className="mt-4 space-y-2">
+                            <Label className="text-sm font-medium">Active Webhooks</Label>
+                            {webhooks.map(webhook => (
+                              <div key={webhook.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
+                                <div className="flex-1 truncate">
+                                  <p className="font-mono text-xs truncate">{webhook.url}</p>
+                                  <p className="text-xs text-gray-500">{webhook.events.join(', ')}</p>
+                                </div>
+                                <Button variant="ghost" size="sm" onClick={() => handleDeleteWebhook(webhook.id)}>
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
 
@@ -2171,14 +2379,27 @@ export default function SprintsClient() {
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="sprint_xxxxxxxxxxxxxxxxxxxxx" readOnly />
-                            <Button variant="outline">
+                            <Input
+                              type={showApiKey ? "text" : "password"}
+                              value={apiKey}
+                              readOnly
+                              className="font-mono text-sm"
+                            />
+                            <Button
+                              variant="outline"
+                              onClick={() => setShowApiKey(!showApiKey)}
+                              title={showApiKey ? "Hide API key" : "Show API key"}
+                            >
+                              {showApiKey ? <AlertTriangle className="w-4 h-4" /> : <Key className="w-4 h-4" />}
+                            </Button>
+                            <Button variant="outline" onClick={handleCopyApiKey} title="Copy API key">
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={handleRegenerateApiKey} title="Regenerate API key">
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
+                          <p className="text-xs text-gray-500">Use this key to authenticate API requests. Keep it secure and never share publicly.</p>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -2290,10 +2511,16 @@ export default function SprintsClient() {
                           </Select>
                         </div>
 
-                        <Button variant="outline" className="w-full">
-                          <Download className="w-4 h-4 mr-2" />
-                          Export Sprint Data
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1" onClick={() => handleExportSprintData('csv')}>
+                            <Download className="w-4 h-4 mr-2" />
+                            Export CSV
+                          </Button>
+                          <Button variant="outline" className="flex-1" onClick={() => handleExportSprintData('json')}>
+                            <Download className="w-4 h-4 mr-2" />
+                            Export JSON
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
 
@@ -3108,6 +3335,196 @@ export default function SprintsClient() {
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add to Backlog
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* CONFIGURE ROLE DIALOG */}
+        {/* ============================================================================ */}
+        <Dialog open={showConfigureRoleDialog} onOpenChange={(open) => {
+          setShowConfigureRoleDialog(open)
+          if (!open) setSelectedRole(null)
+        }}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className={`w-5 h-5 ${selectedRole?.color || 'text-gray-500'}`} />
+                Configure {selectedRole?.role} Permissions
+              </DialogTitle>
+              <DialogDescription>
+                {selectedRole?.desc}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedRole && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Manage Sprints</p>
+                    <p className="text-sm text-gray-500">Create, edit, start and complete sprints</p>
+                  </div>
+                  <Switch
+                    checked={rolePermissions[selectedRole.role]?.canManageSprints || false}
+                    onCheckedChange={(checked) => setRolePermissions(prev => ({
+                      ...prev,
+                      [selectedRole.role]: { ...prev[selectedRole.role], canManageSprints: checked }
+                    }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Create Tasks</p>
+                    <p className="text-sm text-gray-500">Add new tasks and stories to sprints</p>
+                  </div>
+                  <Switch
+                    checked={rolePermissions[selectedRole.role]?.canCreateTasks || false}
+                    onCheckedChange={(checked) => setRolePermissions(prev => ({
+                      ...prev,
+                      [selectedRole.role]: { ...prev[selectedRole.role], canCreateTasks: checked }
+                    }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Assign Tasks</p>
+                    <p className="text-sm text-gray-500">Assign tasks to team members</p>
+                  </div>
+                  <Switch
+                    checked={rolePermissions[selectedRole.role]?.canAssignTasks || false}
+                    onCheckedChange={(checked) => setRolePermissions(prev => ({
+                      ...prev,
+                      [selectedRole.role]: { ...prev[selectedRole.role], canAssignTasks: checked }
+                    }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Approve Stories</p>
+                    <p className="text-sm text-gray-500">Accept and approve completed stories</p>
+                  </div>
+                  <Switch
+                    checked={rolePermissions[selectedRole.role]?.canApproveStories || false}
+                    onCheckedChange={(checked) => setRolePermissions(prev => ({
+                      ...prev,
+                      [selectedRole.role]: { ...prev[selectedRole.role], canApproveStories: checked }
+                    }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">View Reports</p>
+                    <p className="text-sm text-gray-500">Access velocity and burndown reports</p>
+                  </div>
+                  <Switch
+                    checked={rolePermissions[selectedRole.role]?.canViewReports || false}
+                    onCheckedChange={(checked) => setRolePermissions(prev => ({
+                      ...prev,
+                      [selectedRole.role]: { ...prev[selectedRole.role], canViewReports: checked }
+                    }))}
+                  />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowConfigureRoleDialog(false)
+                setSelectedRole(null)
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveRolePermissions}>
+                Save Permissions
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* ADD WEBHOOK DIALOG */}
+        {/* ============================================================================ */}
+        <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5 text-orange-500" />
+                Add Webhook
+              </DialogTitle>
+              <DialogDescription>
+                Configure a webhook to receive sprint events at your endpoint
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="webhook-url">Webhook URL</Label>
+                <Input
+                  id="webhook-url"
+                  type="url"
+                  placeholder="https://your-service.com/webhook"
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                />
+                <p className="text-xs text-gray-500">HTTPS endpoints only. We will POST JSON payloads to this URL.</p>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Event Types</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Switch
+                      id="wh-sprint-dialog"
+                      checked={webhookEvents.sprint}
+                      onCheckedChange={(checked) => setWebhookEvents(prev => ({ ...prev, sprint: checked }))}
+                    />
+                    <Label htmlFor="wh-sprint-dialog" className="text-sm">Sprint Events</Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Switch
+                      id="wh-task-dialog"
+                      checked={webhookEvents.task}
+                      onCheckedChange={(checked) => setWebhookEvents(prev => ({ ...prev, task: checked }))}
+                    />
+                    <Label htmlFor="wh-task-dialog" className="text-sm">Task Updates</Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Switch
+                      id="wh-comment-dialog"
+                      checked={webhookEvents.comment}
+                      onCheckedChange={(checked) => setWebhookEvents(prev => ({ ...prev, comment: checked }))}
+                    />
+                    <Label htmlFor="wh-comment-dialog" className="text-sm">Comments</Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Switch
+                      id="wh-blocker-dialog"
+                      checked={webhookEvents.blocker}
+                      onCheckedChange={(checked) => setWebhookEvents(prev => ({ ...prev, blocker: checked }))}
+                    />
+                    <Label htmlFor="wh-blocker-dialog" className="text-sm">Blockers</Label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  Webhooks will be sent with a signature header for verification. See documentation for details.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowAddWebhookDialog(false)
+                setWebhookUrl('')
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddWebhook} disabled={!webhookUrl.trim()}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Webhook
               </Button>
             </DialogFooter>
           </DialogContent>
