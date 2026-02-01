@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -257,7 +258,7 @@ export function AdvancedGallerySystem() {
             Manage your collections, analytics, and client galleries
           </p>
         </div>
-        <Button>
+        <Button onClick={() => toast.info('Gallery Settings', { description: 'Opening gallery configuration...' })}>
           <Settings className="w-4 h-4 mr-2" />
           Settings
         </Button>

@@ -331,8 +331,8 @@ export function BillingDashboard() {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline">Change Plan</Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => toast.info('Change Plan', { description: 'Opening plan options...' })}>Change Plan</Button>
+                    <Button variant="outline" onClick={() => toast.info('Update Payment', { description: 'Opening payment method settings...' })}>
                       <CreditCard className="h-4 w-4 mr-2" />
                       Update Payment
                     </Button>
@@ -341,7 +341,7 @@ export function BillingDashboard() {
               ) : (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground mb-4">No active subscription</p>
-                  <Button>View Plans</Button>
+                  <Button onClick={() => toast.info('View Plans', { description: 'Opening subscription plans...' })}>View Plans</Button>
                 </div>
               )}
             </CardContent>

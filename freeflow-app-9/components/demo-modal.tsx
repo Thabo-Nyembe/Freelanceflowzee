@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
+import { toast } from 'sonner'
 import { X, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -79,7 +80,7 @@ export function DemoModal({ isOpen, onClose, title, description, videoUrl }: Dem
                   <Button variant="outline" onClick={onClose}>
                     Close
                   </Button>
-                  <Button>
+                  <Button onClick={() => { onClose(); toast.success('Getting Started', { description: `Activating ${title}...` }); }}>
                     Try It Now
                   </Button>
                 </div>

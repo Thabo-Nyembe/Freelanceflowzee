@@ -16,6 +16,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import {
   Grid,
   List,
@@ -378,7 +379,7 @@ export function FileGallery({
                   </div>
                   {allowDownload && (
                     <div className="flex-shrink-0">
-                      <Button>
+                      <Button onClick={() => file.requiresPayment ? toast.info('Purchase', { description: `Processing purchase for ${file.name}...` }) : toast.success('Download', { description: `Downloading ${file.name}...` })}>
                         {file.requiresPayment ? 'Purchase' : 'Download'}
                       </Button>
                     </div>

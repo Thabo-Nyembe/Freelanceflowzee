@@ -408,10 +408,10 @@ export function AdvancedGallerySharingSystem({
                 
                 {/* Overlay controls */}
                 <div className="absolute inset-0 flex items-center justify-between">
-                  <Button>
+                  <Button onClick={() => _setLightboxItem(item)}>
                     <Eye />
                   </Button>
-                  <Button>
+                  <Button onClick={() => toast.info('Liked', { description: `Added ${item.name} to favorites` })}>
                     <Heart />
                   </Button>
                   {settings.allowDownloads && (

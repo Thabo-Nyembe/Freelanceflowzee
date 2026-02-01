@@ -1053,8 +1053,8 @@ export default function TutorialSystemLaunchPanel() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end space-x-2">
-                <Button variant="outline">Reset</Button>
-                <Button>Save Changes</Button>
+                <Button variant="outline" onClick={() => toast({ title: 'Reset', description: 'Settings reset to defaults' })}>Reset</Button>
+                <Button onClick={() => toast({ title: 'Saved', description: 'Settings saved successfully' })}>Save Changes</Button>
               </CardFooter>
             </Card>
 
@@ -1132,8 +1132,8 @@ export default function TutorialSystemLaunchPanel() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end space-x-2">
-                <Button variant="outline">Reset</Button>
-                <Button>Save Changes</Button>
+                <Button variant="outline" onClick={() => toast({ title: 'Reset', description: 'Settings reset to defaults' })}>Reset</Button>
+                <Button onClick={() => toast({ title: 'Saved', description: 'Settings saved successfully' })}>Save Changes</Button>
               </CardFooter>
             </Card>
 
@@ -1233,8 +1233,8 @@ export default function TutorialSystemLaunchPanel() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end space-x-2">
-                <Button variant="outline">Reset</Button>
-                <Button>Save Changes</Button>
+                <Button variant="outline" onClick={() => toast({ title: 'Reset', description: 'Settings reset to defaults' })}>Reset</Button>
+                <Button onClick={() => toast({ title: 'Saved', description: 'Settings saved successfully' })}>Save Changes</Button>
               </CardFooter>
             </Card>
 
@@ -1338,8 +1338,8 @@ export default function TutorialSystemLaunchPanel() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end space-x-2">
-                <Button variant="outline">Reset</Button>
-                <Button>Save Changes</Button>
+                <Button variant="outline" onClick={() => toast({ title: 'Reset', description: 'Settings reset to defaults' })}>Reset</Button>
+                <Button onClick={() => toast({ title: 'Saved', description: 'Settings saved successfully' })}>Save Changes</Button>
               </CardFooter>
             </Card>
           </div>

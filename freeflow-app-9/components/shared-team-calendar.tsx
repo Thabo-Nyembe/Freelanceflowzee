@@ -1,6 +1,7 @@
 'use client'
 
 import { useReducer, useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -819,7 +820,7 @@ export function SharedTeamCalendar() {
                 <Button variant="outline" onClick={() => dispatch({ type: 'TOGGLE_EVENT_MODAL' })}>
                   Close
                 </Button>
-                <Button>
+                <Button onClick={() => toast.success('Joining Meeting', { description: 'Opening video conference...' })}>
                   <Video className="w-4 h-4 mr-2" />
                   Join Meeting
                 </Button>

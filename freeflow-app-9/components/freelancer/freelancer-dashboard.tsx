@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react';
+import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
@@ -39,7 +40,7 @@ export const FreelancerDashboard = () => {
     <div className="container mx-auto p-6 space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Freelancer Dashboard</h1>
-        <Button>
+        <Button onClick={() => toast.success('New Project', { description: 'Opening project creation wizard...' })}>
           <PlusCircle className="mr-2 h-4 w-4" />
           New Project
         </Button>

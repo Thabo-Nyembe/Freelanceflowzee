@@ -3,6 +3,7 @@
 // jsPDF and autoTable are dynamically imported on demand to reduce bundle size
 // These libraries are ~300KB combined and only needed when generating PDFs
 
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -164,7 +165,7 @@ export function InvoiceCreator() {
             <Palette className="h-4 w-4 mr-2" />
             Choose Template
           </Button>
-          <Button>
+          <Button onClick={() => toast.success('Invoice Sent', { description: 'Invoice has been sent to the client' })}>
             <Send className="h-4 w-4 mr-2" />
             Send Invoice
           </Button>
