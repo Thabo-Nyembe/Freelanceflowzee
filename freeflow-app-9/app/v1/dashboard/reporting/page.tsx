@@ -712,7 +712,10 @@ export default function ReportingPage() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <button
-                                  onClick={() => toast.info('Section settings')}
+                                  onClick={() => toast.info('Section: ' + section.title, {
+                                    description: `Type: ${section.type}${section.config.chartType ? ` | Chart: ${section.config.chartType}` : ''}`,
+                                    duration: 3000
+                                  })}
                                   className="p-1 hover:bg-muted rounded"
                                 >
                                   <span className="text-gray-400">⚙️</span>
