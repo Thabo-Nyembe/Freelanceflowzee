@@ -4,6 +4,20 @@ import colors from "tailwindcss/colors";
 import flattenColorPalette from "tailwindcss/lib/util/flattenColorPalette";
 import tailwindcssAnimate from "tailwindcss-animate";
 
+// Custom plugin for bg-dot-thick utility
+const bgDotThickPlugin = ({ matchUtilities, theme }: { matchUtilities: any; theme: any }) => {
+    matchUtilities(
+        {
+            "bg-dot-thick": (value: string) => ({
+                backgroundImage: `url("${svgToDataUri(
+                    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none"><circle fill="${value}" id="pattern-circle" cx="10" cy="10" r="2.5"></circle></svg>`
+                )}")`
+            })
+        },
+        { values: flattenColorPalette(theme("backgroundColor")), type: "color" }
+    );
+};
+
 const config: Config = {
     darkMode: ["class", "[data-theme='dark']"], // Disabled - light mode only
     content: [
@@ -123,10 +137,11 @@ const config: Config = {
                 md: 'calc(var(--radius) - 2px)',
                 sm: 'calc(var(--radius) - 4px)'
             },
-            'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
-            'scroll': 'scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite',
-        },
-        keyframes: {
+            animation: {
+                'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
+                'scroll': 'scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite',
+            },
+            keyframes: {
             'accordion-down': {
                 from: {
                     height: '0'
@@ -166,23 +181,11 @@ const config: Config = {
                     transform: 'translate(calc(-50% - 0.5rem))'
                 }
             }
-        },
-    }
-},
+        }
+    },
     plugins: [
         tailwindcssAnimate,
-        ({ matchUtilities, theme }: { matchUtilities: any; theme: any }) => {
-            matchUtilities(
-                {
-                    "bg-dot-thick": (value: string) => ({
-                        backgroundImage: `url("${svgToDataUri(
-                            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none"><circle fill="${value}" id="pattern-circle" cx="10" cy="10" r="2.5"></circle></svg>`
-                        )}")`,
-                    }),
-                },
-                { values: flattenColorPalette(theme("backgroundColor")), type: "color" }
-            );
-        },
+        bgDotThickPlugin,
     ],
 };
 
