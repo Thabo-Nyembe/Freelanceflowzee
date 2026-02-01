@@ -1,6 +1,6 @@
 'use client'
 
-
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
@@ -555,6 +555,7 @@ const mockCoursesActivities = [
 // Quick actions will be defined inside the component to access state setters
 
 export default function CoursesClient() {
+  const supabase = createClient()
   const [activeView, setActiveView] = useState<'courses' | 'curriculum' | 'students' | 'analytics' | 'reviews'>('courses')
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -664,6 +665,25 @@ export default function CoursesClient() {
 
   const resetLectureForm = () => {
     setLectureForm({ title: '', type: 'video', duration: 0, isPreview: false })
+  }
+
+  // Quiz form state
+  const [quizForm, setQuizForm] = useState({
+    title: '',
+    description: '',
+    passing_score: 70,
+    time_limit: 30,
+    quiz_type: 'multiple_choice' as 'multiple_choice' | 'true_false' | 'short_answer' | 'mixed'
+  })
+
+  const resetQuizForm = () => {
+    setQuizForm({
+      title: '',
+      description: '',
+      passing_score: 70,
+      time_limit: 30,
+      quiz_type: 'multiple_choice'
+    })
   }
 
   // Stats
@@ -2988,6 +3008,8 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
               <Input
                 id="quiz_title"
                 placeholder="e.g., Module 1 Assessment"
+                value={quizForm.title}
+                onChange={(e) => setQuizForm({ ...quizForm, title: e.target.value })}
               />
             </div>
             <div className="space-y-2">
@@ -2996,6 +3018,8 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                 id="quiz_description"
                 placeholder="Describe what this quiz covers..."
                 rows={3}
+                value={quizForm.description}
+                onChange={(e) => setQuizForm({ ...quizForm, description: e.target.value })}
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -3005,7 +3029,8 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                   id="passing_score"
                   type="number"
                   placeholder="70"
-                  defaultValue={70}
+                  value={quizForm.passing_score}
+                  onChange={(e) => setQuizForm({ ...quizForm, passing_score: parseInt(e.target.value) || 70 })}
                 />
               </div>
               <div className="space-y-2">
@@ -3014,12 +3039,17 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                   id="time_limit"
                   type="number"
                   placeholder="30"
+                  value={quizForm.time_limit}
+                  onChange={(e) => setQuizForm({ ...quizForm, time_limit: parseInt(e.target.value) || 30 })}
                 />
               </div>
             </div>
             <div className="space-y-2">
               <Label>Quiz Type</Label>
-              <Select defaultValue="multiple_choice">
+              <Select
+                value={quizForm.quiz_type}
+                onValueChange={(value) => setQuizForm({ ...quizForm, quiz_type: value as any })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select quiz type" />
                 </SelectTrigger>
@@ -3036,11 +3066,54 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
             <Button variant="outline" onClick={() => setShowCreateQuizDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={() => {
-              toast.success('Quiz created successfully')
-              setShowCreateQuizDialog(false)
-            }}>
-              <Plus className="w-4 h-4 mr-2" />
+            <Button
+              disabled={isSubmitting || !quizForm.title}
+              onClick={async () => {
+                if (!quizForm.title) {
+                  toast.error('Please enter a quiz title')
+                  return
+                }
+
+                if (!selectedCourse) {
+                  toast.error('Please select a course first')
+                  return
+                }
+
+                setIsSubmitting(true)
+                try {
+                  const { data: { user } } = await supabase.auth.getUser()
+
+                  if (!user) {
+                    toast.error('You must be logged in')
+                    return
+                  }
+
+                  const { error } = await supabase.from('course_quizzes').insert({
+                    course_id: selectedCourse.id,
+                    title: quizForm.title,
+                    description: quizForm.description || null,
+                    passing_score: quizForm.passing_score,
+                    time_limit_minutes: quizForm.time_limit,
+                    quiz_type: quizForm.quiz_type,
+                    is_active: true,
+                    created_by: user.id,
+                    created_at: new Date().toISOString()
+                  })
+
+                  if (error) throw error
+
+                  toast.success('Quiz created successfully')
+                  setShowCreateQuizDialog(false)
+                  resetQuizForm()
+                  refreshCourses()
+                } catch (error) {
+                  toast.error('Failed to create quiz')
+                } finally {
+                  setIsSubmitting(false)
+                }
+              }}
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
               Create Quiz
             </Button>
           </DialogFooter>

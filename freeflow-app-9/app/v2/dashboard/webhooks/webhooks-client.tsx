@@ -530,9 +530,26 @@ export default function WebhooksClient({
 
   // CRUD Handlers with Supabase integration
   const handleSaveWebhook = async () => {
-    if (!formData.name || !formData.url) {
-      toast.error('Validation Error')
+    if (!formData.name.trim()) {
+      toast.error('Name required', { description: 'Please enter a webhook name' })
       return
+    }
+
+    if (!formData.url.trim()) {
+      toast.error('URL required', { description: 'Please enter a webhook endpoint URL' })
+      return
+    }
+
+    // Validate URL format
+    try {
+      new URL(formData.url)
+    } catch {
+      toast.error('Invalid URL', { description: 'Please enter a valid URL starting with http:// or https://' })
+      return
+    }
+
+    if (formData.events.length === 0) {
+      toast.warning('No events selected', { description: 'Consider selecting at least one event to subscribe to' })
     }
 
     setIsSaving(true)
@@ -600,12 +617,29 @@ export default function WebhooksClient({
   }
 
   const handleTestWebhookDelivery = async (id: string) => {
-    toast.info('Testing webhook')
+    const webhook = webhooks.find(w => w.id === id)
+    const webhookName = webhook?.name || 'webhook'
+
+    const toastId = toast.loading(`Testing ${webhookName}...`, {
+      description: 'Sending test payload to endpoint'
+    })
+
     const result = await testWebhook(id)
+
+    toast.dismiss(toastId)
+
     if (result.success) {
-      toast.success('Test sent')
+      const data = result.data as { responseStatus?: number; responseTime?: number }
+      toast.success(`Test delivery successful`, {
+        description: data?.responseStatus
+          ? `HTTP ${data.responseStatus} in ${data.responseTime}ms`
+          : 'Webhook endpoint responded successfully'
+      })
     } else {
-      toast.error('Test failed')
+      const data = result.data as { error?: string; responseStatus?: number }
+      toast.error('Test delivery failed', {
+        description: data?.error || result.error || 'Unable to deliver test payload'
+      })
     }
     setShowTestDialog(false)
   }
@@ -2117,20 +2151,51 @@ export default function WebhooksClient({
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Event</label>
-              <select className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg dark:text-white">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Webhook</label>
+              <select
+                id="test-webhook-select"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg dark:text-white"
+              >
+                {webhooks.filter(w => w.status === 'active').length === 0 ? (
+                  <option value="">No active webhooks available</option>
+                ) : (
+                  webhooks.filter(w => w.status === 'active').map(webhook => (
+                    <option key={webhook.id} value={webhook.id}>{webhook.name} - {webhook.url}</option>
+                  ))
+                )}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Event Type</label>
+              <select
+                id="test-event-select"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg dark:text-white"
+              >
                 {mockEventTypes.map(event => (
-                  <option key={event.id} value={event.name}>{event.name}</option>
+                  <option key={event.id} value={event.name}>{event.name} - {event.description}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Payload</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test Payload Preview</label>
               <textarea
+                id="test-payload-preview"
                 rows={6}
+                readOnly
                 className="w-full px-3 py-2 bg-gray-900 text-gray-100 border dark:border-gray-600 rounded-lg font-mono text-sm"
-                defaultValue={JSON.stringify({ event: 'test.event', data: { id: 'test_123' } }, null, 2)}
+                defaultValue={JSON.stringify({
+                  id: `test-${Date.now()}`,
+                  event: 'test',
+                  timestamp: new Date().toISOString(),
+                  data: {
+                    test: true,
+                    message: 'This is a test webhook delivery from FreeFlow'
+                  }
+                }, null, 2)}
               />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                This test payload will be sent with HMAC signature for verification.
+              </p>
             </div>
             <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
               <button
@@ -2139,7 +2204,21 @@ export default function WebhooksClient({
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2">
+              <button
+                onClick={async () => {
+                  const webhookSelect = document.getElementById('test-webhook-select') as HTMLSelectElement
+                  const selectedWebhookId = webhookSelect?.value
+
+                  if (!selectedWebhookId) {
+                    toast.error('Please select a webhook to test')
+                    return
+                  }
+
+                  await handleTestWebhookDelivery(selectedWebhookId)
+                }}
+                disabled={webhooks.filter(w => w.status === 'active').length === 0}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <Send className="w-4 h-4" />
                 Send Test
               </button>
@@ -2217,8 +2296,38 @@ export default function WebhooksClient({
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  toast.success('Retrying')
+                onClick={async () => {
+                  const failedWebhooks = webhooks.filter(w => w.status === 'failed')
+                  if (failedWebhooks.length === 0) {
+                    toast.info('No failed webhooks to retry')
+                    setShowRetryFailedDialog(false)
+                    return
+                  }
+
+                  const toastId = toast.loading(`Retrying ${failedWebhooks.length} failed deliveries...`)
+
+                  let successCount = 0
+                  let failCount = 0
+
+                  for (const webhook of failedWebhooks) {
+                    const result = await testWebhook(webhook.id)
+                    if (result.success) {
+                      successCount++
+                    } else {
+                      failCount++
+                    }
+                  }
+
+                  toast.dismiss(toastId)
+
+                  if (successCount > 0 && failCount === 0) {
+                    toast.success(`Successfully retried ${successCount} deliveries`)
+                  } else if (successCount > 0 && failCount > 0) {
+                    toast.warning(`Retried deliveries: ${successCount} succeeded, ${failCount} failed`)
+                  } else {
+                    toast.error(`All ${failCount} retry attempts failed`)
+                  }
+
                   setShowRetryFailedDialog(false)
                 }}
                 className="px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 flex items-center gap-2"

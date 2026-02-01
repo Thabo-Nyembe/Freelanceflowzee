@@ -1893,32 +1893,65 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook URL</Label>
                           <div className="flex gap-2">
-                            <Input placeholder="https://your-webhook-url.com/endpoint" className="flex-1" />
+                            <Input placeholder="https://your-webhook-url.com/endpoint" className="flex-1" id="custom-webhook-url-input" />
                             <Button
                               variant="outline"
                               onClick={async () => {
-                                const input = document.querySelector('input[placeholder="https://your-webhook-url.com/endpoint"]') as HTMLInputElement
-                                const webhookUrl = input?.value
+                                const input = document.getElementById('custom-webhook-url-input') as HTMLInputElement
+                                const webhookUrl = input?.value?.trim()
                                 if (!webhookUrl) {
                                   toast.error('Please enter a webhook URL')
                                   return
                                 }
-                                toast.loading('Testing webhook...')
+
+                                // Validate URL format
                                 try {
-                                  await fetch('/api/webhooks/test', {
+                                  new URL(webhookUrl)
+                                } catch {
+                                  toast.error('Invalid URL format', { description: 'Please enter a valid URL starting with http:// or https://' })
+                                  return
+                                }
+
+                                const toastId = toast.loading('Testing webhook...', { description: `Sending test payload to ${webhookUrl}` })
+
+                                try {
+                                  const response = await fetch('/api/webhooks/test', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ url: webhookUrl })
                                   })
-                                  toast.dismiss()
-                                  toast.success('Webhook test sent', { description: 'Check your endpoint for the test payload' })
-                                } catch {
-                                  toast.dismiss()
-                                  toast.success('Webhook test sent', { description: 'Check your endpoint' })
+
+                                  const result = await response.json()
+
+                                  toast.dismiss(toastId)
+
+                                  if (result.success) {
+                                    toast.success('Webhook test successful', {
+                                      description: `Response: HTTP ${result.responseStatus} in ${result.responseTime}ms`
+                                    })
+                                  } else if (result.error) {
+                                    toast.error('Webhook test failed', {
+                                      description: result.error || 'The endpoint did not respond successfully'
+                                    })
+                                  } else {
+                                    toast.warning('Webhook test completed', {
+                                      description: result.responseStatus
+                                        ? `HTTP ${result.responseStatus} - Check your endpoint logs`
+                                        : 'Unable to verify delivery - check your endpoint'
+                                    })
+                                  }
+                                } catch (err) {
+                                  toast.dismiss(toastId)
+                                  toast.error('Failed to test webhook', {
+                                    description: err instanceof Error ? err.message : 'Network error occurred'
+                                  })
                                 }
                               }}
                             >Test</Button>
                           </div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            Test payload will be sent with event type &quot;test&quot; and includes signature headers for verification.
+                          </p>
                         </div>
                       </div>
                     </div>

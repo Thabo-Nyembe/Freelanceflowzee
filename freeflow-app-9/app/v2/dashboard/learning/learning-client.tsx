@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 import { useLearning, useCourses, useUserProgress, useCollections } from '@/lib/hooks/use-learning'
 import {
   GraduationCap,
@@ -543,6 +544,7 @@ const mockLearningActivities = [
 // ============================================================================
 
 export default function LearningClient() {
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('my-learning')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | 'all'>('all')
@@ -714,17 +716,141 @@ export default function LearningClient() {
     }
   }
 
-  const handleDownloadCertificate = async () => {
-    toast.success('Certificate download started')
+  const handleDownloadCertificate = async (course: Course) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in')
+        return
+      }
+
+      // Check if user has completed the course
+      const courseProgress = progress.find(p => p.courseId === course.id)
+      if (!courseProgress || courseProgress.progress < 100) {
+        toast.error('You must complete the course to download the certificate')
+        return
+      }
+
+      // Generate certificate ID and save to database
+      const certificateId = `CERT-${course.id}-${Date.now()}`
+
+      // Save certificate record to database
+      await supabase.from('learning_certificates').upsert({
+        user_id: user.id,
+        course_id: course.id,
+        certificate_id: certificateId,
+        issued_at: new Date().toISOString(),
+        course_title: course.title,
+        completion_date: courseProgress.completedAt || new Date().toISOString()
+      })
+
+      // Update progress with certificate URL
+      await updateProgress({
+        course_id: course.id,
+        certificate_url: `/certificates/${certificateId}`
+      })
+
+      // Generate certificate content for download
+      const certificateContent = `
+=====================================
+     CERTIFICATE OF COMPLETION
+=====================================
+
+This is to certify that
+
+        ${user.email || 'Student'}
+
+has successfully completed the course
+
+        ${course.title}
+
+-------------------------------------
+Completion Date: ${new Date(courseProgress.completedAt || Date.now()).toLocaleDateString()}
+Certificate ID: ${certificateId}
+Duration: ${formatDuration(course.totalDuration)}
+Level: ${course.level.charAt(0).toUpperCase() + course.level.slice(1)}
+-------------------------------------
+
+Issued by: FreeFlow Learning Platform
+Verification: https://freeflow.app/verify/${certificateId}
+
+=====================================
+      `.trim()
+
+      const blob = new Blob([certificateContent], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${course.title.replace(/\s+/g, '_')}_certificate.txt`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success('Certificate downloaded', { description: course.title })
+    } catch (error) {
+      toast.error('Failed to download certificate')
+    }
   }
 
-  const handleShareProgress = async () => {
-    toast.success('Progress shared')
+  const handleShareProgress = async (course: Course) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in')
+        return
+      }
+
+      const courseProgress = progress.find(p => p.courseId === course.id)
+
+      // Create share record in database
+      await supabase.from('learning_shares').insert({
+        user_id: user.id,
+        course_id: course.id,
+        progress_percent: courseProgress?.progress || 0,
+        shared_at: new Date().toISOString()
+      })
+
+      // Copy share link to clipboard
+      const shareUrl = `${window.location.origin}/shared/progress/${user.id}/${course.id}`
+      await navigator.clipboard.writeText(shareUrl)
+
+      toast.success('Progress shared! Link copied to clipboard')
+    } catch (error) {
+      toast.error('Failed to share progress')
+    }
   }
 
   const handleEnrollCourse = async (courseId: string, courseName: string) => {
     try {
-      await updateProgress({ course_id: courseId, progress: 0, lessons_completed: 0, last_accessed_at: new Date().toISOString() })
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in to enroll')
+        return
+      }
+
+      // Create enrollment in course_enrollments table
+      const { error: enrollError } = await supabase.from('course_enrollments').insert({
+        user_id: user.id,
+        course_id: courseId,
+        status: 'active',
+        progress_percent: 0,
+        enrolled_at: new Date().toISOString()
+      })
+
+      if (enrollError) throw enrollError
+
+      // Also create learning progress record
+      await updateProgress({
+        course_id: courseId,
+        progress: 0,
+        lessons_completed: 0,
+        total_lessons: courses.find(c => c.id === courseId)?.lessonsCount || 0,
+        time_spent: 0,
+        last_accessed_at: new Date().toISOString()
+      })
+
       toast.success('Enrolled in ' + courseName)
     } catch (err) {
       toast.error('Failed to enroll in course')
@@ -732,7 +858,124 @@ export default function LearningClient() {
   }
 
   const handleBookmarkLesson = async (lessonId: string, lessonName: string) => {
-    toast.success(lessonName + ' saved to bookmarks')
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in')
+        return
+      }
+
+      // Save bookmark to database
+      const { error } = await supabase.from('learning_bookmarks').upsert({
+        user_id: user.id,
+        lesson_id: lessonId,
+        lesson_name: lessonName,
+        bookmarked_at: new Date().toISOString()
+      })
+
+      if (error) throw error
+
+      toast.success(lessonName + ' saved to bookmarks')
+    } catch (error) {
+      toast.error('Failed to bookmark lesson')
+    }
+  }
+
+  const handleSubmitQuiz = async (quizId: string, courseId: string, answers: Record<string, string>, totalQuestions: number) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in')
+        return null
+      }
+
+      // Calculate score (in a real app, this would validate against correct answers from the database)
+      const answeredQuestions = Object.keys(answers).length
+      const score = Math.round((answeredQuestions / totalQuestions) * 100)
+
+      // Save quiz submission to database
+      const { data, error } = await supabase.from('quiz_submissions').insert({
+        user_id: user.id,
+        quiz_id: quizId,
+        course_id: courseId,
+        answers: answers,
+        score: score,
+        total_questions: totalQuestions,
+        submitted_at: new Date().toISOString(),
+        passed: score >= 70
+      }).select().single()
+
+      if (error) throw error
+
+      // Update course progress based on quiz completion
+      const courseProgress = progress.find(p => p.courseId === courseId)
+      if (courseProgress) {
+        const newLessonsCompleted = courseProgress.lessonsCompleted + 1
+        const newProgress = Math.round((newLessonsCompleted / courseProgress.totalLessons) * 100)
+        await updateProgress({
+          course_id: courseId,
+          lessons_completed: newLessonsCompleted,
+          progress: newProgress,
+          last_accessed_at: new Date().toISOString(),
+          completed_at: newProgress >= 100 ? new Date().toISOString() : null
+        })
+      }
+
+      toast.success(`Quiz submitted! Score: ${score}%`, {
+        description: score >= 70 ? 'Congratulations, you passed!' : 'Keep learning and try again!'
+      })
+
+      return { score, passed: score >= 70 }
+    } catch (error) {
+      toast.error('Failed to submit quiz')
+      return null
+    }
+  }
+
+  const handleUpdateLessonProgress = async (courseId: string, lessonId: string, completed: boolean) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in')
+        return
+      }
+
+      // Update lesson progress in database
+      await supabase.from('lesson_progress').upsert({
+        user_id: user.id,
+        course_id: courseId,
+        lesson_id: lessonId,
+        completed: completed,
+        completed_at: completed ? new Date().toISOString() : null,
+        last_accessed_at: new Date().toISOString()
+      })
+
+      // Update overall course progress
+      const courseProgress = progress.find(p => p.courseId === courseId)
+      if (courseProgress && completed) {
+        const newLessonsCompleted = courseProgress.lessonsCompleted + 1
+        const newProgress = Math.round((newLessonsCompleted / courseProgress.totalLessons) * 100)
+        await updateProgress({
+          course_id: courseId,
+          lessons_completed: newLessonsCompleted,
+          progress: Math.min(newProgress, 100),
+          time_spent: courseProgress.timeSpent + 5, // Add estimated time
+          last_accessed_at: new Date().toISOString(),
+          completed_at: newProgress >= 100 ? new Date().toISOString() : null
+        })
+
+        if (newProgress >= 100) {
+          toast.success('Course completed! Your certificate is now available.')
+        } else {
+          toast.success('Lesson completed!')
+        }
+      }
+    } catch (error) {
+      toast.error('Failed to update progress')
+    }
   }
 
   const handleCreatePath = async () => {
@@ -2121,7 +2364,7 @@ export default function LearningClient() {
                         <Bookmark className="w-5 h-5" />
                       </button>
                       <button
-                        onClick={handleShareProgress}
+                        onClick={() => handleShareProgress(selectedCourse)}
                         className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                       >
                         <Share2 className="w-5 h-5" />
@@ -2499,7 +2742,7 @@ export default function LearningClient() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={handleDownloadCertificate}
+                          onClick={() => handleDownloadCertificate(course)}
                           className="flex items-center gap-2"
                         >
                           <Download className="w-4 h-4" />

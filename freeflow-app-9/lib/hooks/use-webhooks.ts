@@ -259,7 +259,7 @@ export function useWebhooks(initialWebhooks: Webhook[] = [], initialStats?: Webh
     return updateWebhook(id, { status })
   }, [updateWebhook])
 
-  // Test webhook
+  // Test webhook - makes actual HTTP request to the webhook URL
   const testWebhook = useCallback(async (id: string) => {
     setLoading(true)
     setError(null)
@@ -268,22 +268,160 @@ export function useWebhooks(initialWebhooks: Webhook[] = [], initialStats?: Webh
       const webhook = webhooks.find(w => w.id === id)
       if (!webhook) throw new Error('Webhook not found')
 
-      // Create a test delivery
-      const { data, error: testError } = await supabase
+      // Create test payload
+      const testPayload = {
+        id: `test-${Date.now()}`,
+        event: 'test',
+        timestamp: new Date().toISOString(),
+        data: {
+          test: true,
+          message: 'This is a test webhook delivery from FreeFlow',
+          webhook_id: id,
+          webhook_name: webhook.name
+        }
+      }
+
+      // Create a pending delivery record first
+      const { data: deliveryRecord, error: insertError } = await supabase
         .from('webhook_deliveries')
         .insert({
           webhook_id: id,
           event_type: 'test',
-          event_id: `test-${Date.now()}`,
-          payload: { test: true, timestamp: new Date().toISOString() },
-          status: 'pending'
+          event_id: testPayload.id,
+          payload: testPayload,
+          status: 'pending',
+          attempts: 1,
+          max_attempts: 1
         })
         .select()
         .single()
 
-      if (testError) throw testError
+      if (insertError) throw insertError
 
-      return { success: true, data }
+      // Make actual HTTP request to the webhook URL
+      const startTime = Date.now()
+      let responseStatus = 0
+      let responseBody = ''
+      let deliveryError: string | null = null
+      let deliveryStatus: 'success' | 'failed' = 'failed'
+
+      try {
+        // Generate signature if secret exists
+        const body = JSON.stringify(testPayload)
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          'X-Webhook-Event': 'test',
+          'X-Webhook-Delivery': deliveryRecord.id,
+          'User-Agent': 'FreeFlow-Webhook/1.0',
+          ...(webhook.custom_headers || {})
+        }
+
+        // Add signature header if secret exists
+        if (webhook.secret) {
+          const timestamp = Date.now()
+          const signedPayload = `${timestamp}.${body}`
+          // Use Web Crypto API for client-side signing
+          const encoder = new TextEncoder()
+          const keyData = encoder.encode(webhook.secret)
+          const messageData = encoder.encode(signedPayload)
+
+          const cryptoKey = await crypto.subtle.importKey(
+            'raw',
+            keyData,
+            { name: 'HMAC', hash: 'SHA-256' },
+            false,
+            ['sign']
+          )
+          const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData)
+          const signatureHex = Array.from(new Uint8Array(signature))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('')
+
+          headers['X-Webhook-Signature'] = `t=${timestamp},v1=${signatureHex}`
+        }
+
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), webhook.timeout_ms || 30000)
+
+        const response = await fetch(webhook.url, {
+          method: 'POST',
+          headers,
+          body,
+          signal: controller.signal
+        })
+
+        clearTimeout(timeoutId)
+
+        responseStatus = response.status
+        responseBody = await response.text().catch(() => '')
+        deliveryStatus = response.ok ? 'success' : 'failed'
+
+        if (!response.ok) {
+          deliveryError = `HTTP ${response.status}: ${response.statusText}`
+        }
+      } catch (fetchError) {
+        deliveryError = fetchError instanceof Error ? fetchError.message : 'Request failed'
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          deliveryError = 'Request timeout'
+        }
+      }
+
+      const responseTime = Date.now() - startTime
+
+      // Update the delivery record with the result
+      await supabase
+        .from('webhook_deliveries')
+        .update({
+          status: deliveryStatus,
+          response_status_code: responseStatus || null,
+          response_body: responseBody.slice(0, 1000) || null,
+          response_time_ms: responseTime,
+          error_message: deliveryError,
+          delivered_at: deliveryStatus === 'success' ? new Date().toISOString() : null
+        })
+        .eq('id', deliveryRecord.id)
+
+      // Update webhook stats
+      if (deliveryStatus === 'success') {
+        await supabase
+          .from('webhooks')
+          .update({
+            total_deliveries: webhook.total_deliveries + 1,
+            successful_deliveries: webhook.successful_deliveries + 1,
+            last_delivery_at: new Date().toISOString(),
+            last_success_at: new Date().toISOString(),
+            consecutive_failures: 0,
+            avg_response_time_ms: Math.round((webhook.avg_response_time_ms * webhook.total_deliveries + responseTime) / (webhook.total_deliveries + 1)),
+            success_rate: Math.round(((webhook.successful_deliveries + 1) / (webhook.total_deliveries + 1)) * 10000) / 100
+          })
+          .eq('id', id)
+      } else {
+        await supabase
+          .from('webhooks')
+          .update({
+            total_deliveries: webhook.total_deliveries + 1,
+            failed_deliveries: webhook.failed_deliveries + 1,
+            last_delivery_at: new Date().toISOString(),
+            last_failure_at: new Date().toISOString(),
+            consecutive_failures: webhook.consecutive_failures + 1,
+            success_rate: Math.round((webhook.successful_deliveries / (webhook.total_deliveries + 1)) * 10000) / 100
+          })
+          .eq('id', id)
+      }
+
+      // Refresh webhooks to get updated stats
+      await fetchWebhooks()
+
+      return {
+        success: deliveryStatus === 'success',
+        data: {
+          deliveryId: deliveryRecord.id,
+          status: deliveryStatus,
+          responseStatus,
+          responseTime,
+          error: deliveryError
+        }
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to test webhook'
       setError(message)
@@ -291,7 +429,7 @@ export function useWebhooks(initialWebhooks: Webhook[] = [], initialStats?: Webh
     } finally {
       setLoading(false)
     }
-  }, [supabase, webhooks])
+  }, [supabase, webhooks, fetchWebhooks])
 
   // Real-time subscription
   useEffect(() => {

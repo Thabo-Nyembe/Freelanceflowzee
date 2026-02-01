@@ -1,7 +1,7 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
-import { useContracts, type Contract } from '@/lib/hooks/use-contracts'
+import { useContracts, useContractMutations, type Contract } from '@/lib/hooks/use-contracts'
 import {
   FileText, Send, Eye, CheckCircle2, CheckCircle, Clock, Users,
   FileSignature, Download, Copy, MoreVertical, Search, Filter,
@@ -206,6 +206,21 @@ export default function ContractsClient({ initialContracts }: { initialContracts
 
   const { contracts, loading, error, createContract, updateContract, deleteContract, mutating } = useContracts({ status: 'all' })
   const display = (contracts && contracts.length > 0) ? contracts : (initialContracts || [])
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Enhanced contract mutations for signatures, versions, and sharing
+  const {
+    recordSignature,
+    getContractSignatures,
+    createVersion,
+    getContractVersions,
+    restoreVersion,
+    shareContract,
+    getContractShares,
+    sendForSignature,
+    uploadContractDocument,
+    downloadContract
+  } = useContractMutations()
 
   // Mock envelopes
   const envelopes: Envelope[] = [
@@ -417,22 +432,46 @@ export default function ContractsClient({ initialContracts }: { initialContracts
 
   const handleSignContract = async (contractId: string, contractName: string) => {
     try {
+      // Record the signature in the database
+      await recordSignature(contractId, {
+        signerName: 'Current User', // In production, get from auth context
+        signerEmail: 'user@example.com', // In production, get from auth context
+        signerRole: 'party_a',
+        signatureType: 'digital',
+        signatureContent: `Digitally signed by Current User on ${new Date().toISOString()}`
+      })
+
+      // Update contract status
       await updateContract(contractId, {
         status: 'active' as const,
         signed_date: new Date().toISOString(),
         effective_date: new Date().toISOString()
       })
+
+      // Create a version record for the signed state
+      await createVersion(contractId, 'Contract signed and activated')
+
       toast.success("Contract Signed - " + contractName + " has been signed and is now active.")
     } catch (err) {
       toast.error('Failed to sign contract')
     }
   }
 
-  const handleSendForSignature = async (contractId: string, contractName: string) => {
+  const handleSendForSignature = async (contractId: string, contractName: string, recipients?: Array<{ name: string; email: string; role: 'party_a' | 'party_b' }>) => {
     try {
-      await updateContract(contractId, {
-        status: 'pending-signature' as const
-      })
+      // If recipients provided, use full send for signature flow
+      if (recipients && recipients.length > 0) {
+        await sendForSignature(contractId, recipients)
+      } else {
+        // Simple status update for quick send
+        await updateContract(contractId, {
+          status: 'pending-signature' as const
+        })
+      }
+
+      // Create a version record for the sent state
+      await createVersion(contractId, 'Sent for signature')
+
       toast.success("Sent for Signature - " + contractName + " has been sent to recipients for signature.")
     } catch (err) {
       toast.error('Failed to send contract')
@@ -453,6 +492,9 @@ export default function ContractsClient({ initialContracts }: { initialContracts
 
   const handleRenewContract = async (contract: Contract) => {
     try {
+      // Create version record for original contract before renewal
+      await createVersion(contract.id, 'Contract renewed - creating new version')
+
       const renewedContract = {
         title: `${contract.title} (Renewed)`,
         contract_number: `CTR-${Date.now()}`,
@@ -508,9 +550,13 @@ export default function ContractsClient({ initialContracts }: { initialContracts
     }
   }
 
-  const handleDownloadContract = (contractName: string) => {
-    // Generate contract document for download
-    const contractContent = `
+  const handleDownloadContract = async (contractId: string, contractName: string) => {
+    try {
+      // Try to download from storage first
+      await downloadContract(contractId)
+    } catch (err) {
+      // Fallback: Generate contract document for download if no file attached
+      const contractContent = `
 CONTRACT DOCUMENT
 =====================================
 
@@ -522,9 +568,9 @@ Document ID: CONTRACT-${Date.now()}
 TERMS AND CONDITIONS
 -------------------------------------
 
-This is a demo contract document generated from FreeFlow.
-In production, this would contain the actual contract terms,
-signatures, and legal provisions.
+This contract document was generated from FreeFlow.
+For the full contract with all terms and signatures,
+please ensure a document file is attached to the contract.
 
 -------------------------------------
 PARTIES
@@ -536,19 +582,53 @@ Party B: [Client Name]
 SIGNATURES
 -------------------------------------
 Signature Date: ${new Date().toLocaleDateString()}
-Status: Demo Document
+Status: Generated Document
 
 =====================================
-    `.trim()
+      `.trim()
 
-    const blob = new Blob([contractContent], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${contractName.replace(/\s+/g, '_')}_contract.txt`
-    a.click()
-    URL.revokeObjectURL(url)
-    toast.success("Contract downloaded", { description: contractName })
+      const blob = new Blob([contractContent], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${contractName.replace(/\s+/g, '_')}_contract.txt`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success("Contract downloaded", { description: contractName })
+    }
+  }
+
+  // Handle file upload for contract document
+  const handleContractDocumentUpload = async (contractId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+
+    const file = files[0]
+    try {
+      await uploadContractDocument(contractId, file)
+      // Create a version record for the document upload
+      await createVersion(contractId, `Document "${file.name}" uploaded`)
+    } catch (err) {
+      toast.error('Failed to upload document')
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  // Handle sharing a contract
+  const handleShareContract = async (contractId: string, email: string, permissionLevel: 'view' | 'comment' | 'edit' | 'sign' = 'view') => {
+    try {
+      await shareContract(contractId, {
+        email,
+        permissionLevel,
+        createPublicLink: true
+      })
+    } catch (err) {
+      toast.error('Failed to share contract')
+    }
   }
 
   if (error) return <div className="p-8 min-h-screen bg-gray-900"><div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
@@ -761,7 +841,7 @@ Status: Demo Document
                       <p className="text-sm text-gray-500 mb-2">Completed {new Date(envelope.completed_at!).toLocaleDateString()}</p>
                       <div className="flex items-center gap-2">
                         <Button size="sm" variant="outline" onClick={() => {
-                          handleDownloadContract(envelope.name)
+                          handleDownloadContract(envelope.id, envelope.name)
                         }}>
                           <Download className="h-4 w-4 mr-1" />
                           Download
@@ -1043,7 +1123,7 @@ Status: Demo Document
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="icon" onClick={(e) => {
                           e.stopPropagation()
-                          handleDownloadContract(envelope.name)
+                          handleDownloadContract(envelope.id, envelope.name)
                         }}>
                           <Download className="h-4 w-4" />
                         </Button>
@@ -2093,14 +2173,18 @@ Status: Demo Document
                   </Button>
                   <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => {
                     if (selectedEnvelope) {
-                      handleDownloadContract(selectedEnvelope.name)
+                      handleDownloadContract(selectedEnvelope.id, selectedEnvelope.name)
                     }
                   }}>
                     <Download className="h-5 w-5 text-purple-600" />
                     <span>Download</span>
                   </Button>
                   <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => {
-                    setShowShareDialog(true)
+                    if (selectedEnvelope && shareEmail) {
+                      handleShareContract(selectedEnvelope.id, shareEmail, 'view')
+                    } else {
+                      setShowShareDialog(true)
+                    }
                   }}>
                     <Share2 className="h-5 w-5 text-purple-600" />
                     <span>Share</span>
@@ -2385,12 +2469,24 @@ Status: Demo Document
               <Button variant="outline" onClick={() => setShowSendForSigningDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => {
-                toast.success('Contract sent for signing')
+              <Button onClick={async () => {
+                // Get selected contract from display list (in production, use state to track selected)
+                const selectedContract = display.find(c => c.status === 'draft')
+                if (selectedContract && newRecipientEmail) {
+                  await handleSendForSignature(
+                    selectedContract.id,
+                    selectedContract.title,
+                    [{ name: newRecipientName || 'Recipient', email: newRecipientEmail, role: 'party_b' }]
+                  )
+                  setNewRecipientName('')
+                  setNewRecipientEmail('')
+                } else {
+                  toast.error('Please select a contract and enter recipient email')
+                }
                 setShowSendForSigningDialog(false)
-              }}>
+              }} disabled={mutating}>
                 <Send className="h-4 w-4 mr-2" />
-                Send for Signing
+                {mutating ? 'Sending...' : 'Send for Signing'}
               </Button>
             </div>
           </div>

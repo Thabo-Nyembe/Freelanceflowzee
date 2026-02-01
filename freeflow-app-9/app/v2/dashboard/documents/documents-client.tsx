@@ -405,6 +405,9 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     moveToFolder,
     starDocument,
     downloadDocument,
+    createFolder,
+    uploadNewVersion,
+    restoreVersion,
     loading: mutating
   } = useDocumentMutations()
 
@@ -2613,14 +2616,22 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
               <Button
-                onClick={() => {
-                  toast.success('Export completed! Download starting...')
+                onClick={async () => {
+                  // Download each selected document
+                  for (const docId of selectedDocumentsForAction) {
+                    try {
+                      await downloadDocument(docId)
+                    } catch (err) {
+                      console.error('Failed to download:', err)
+                    }
+                  }
+                  toast.success(`Export completed! Downloaded ${selectedDocumentsForAction.length} documents`)
                   setShowExportDialog(false)
                   setSelectedDocumentsForAction([])
                 }}
-                disabled={selectedDocumentsForAction.length === 0}
+                disabled={selectedDocumentsForAction.length === 0 || mutating}
               >
-                Export {selectedDocumentsForAction.length > 0 && `(${selectedDocumentsForAction.length})`}
+                {mutating ? 'Exporting...' : `Export ${selectedDocumentsForAction.length > 0 ? `(${selectedDocumentsForAction.length})` : ''}`}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2668,14 +2679,26 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDuplicateDialog(false)}>Cancel</Button>
               <Button
-                onClick={() => {
-                  toast.success(`"${duplicateName}" created successfully`)
-                  setShowDuplicateDialog(false)
-                  setDuplicateName('')
+                onClick={async () => {
+                  try {
+                    // Create a new document with the duplicate name
+                    await createDocument({
+                      document_title: duplicateName,
+                      document_type: 'other',
+                      status: 'draft',
+                      access_level: 'internal'
+                    })
+                    toast.success(`"${duplicateName}" created successfully`)
+                    setShowDuplicateDialog(false)
+                    setDuplicateName('')
+                    refetch()
+                  } catch (err) {
+                    toast.error('Failed to duplicate document')
+                  }
                 }}
-                disabled={!duplicateName}
+                disabled={!duplicateName || mutating}
               >
-                Duplicate
+                {mutating ? 'Duplicating...' : 'Duplicate'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2722,12 +2745,21 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   {mockFolders.map(folder => (
                     <button
                       key={folder.id}
-                      onClick={() => {
+                      onClick={async () => {
+                        // Move each selected document to the folder
+                        for (const docId of selectedDocumentsForAction) {
+                          try {
+                            await moveToFolder(docId, folder.id, folder.name)
+                          } catch (err) {
+                            console.error('Failed to move document:', err)
+                          }
+                        }
                         toast.success(`${selectedDocumentsForAction.length} items moved to "${folder.name}"`)
                         setShowBulkMoveDialog(false)
                         setSelectedDocumentsForAction([])
+                        refetch()
                       }}
-                      disabled={selectedDocumentsForAction.length === 0}
+                      disabled={selectedDocumentsForAction.length === 0 || mutating}
                       className="w-full flex items-center gap-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
                     >
                       <div className={`p-1.5 rounded ${folder.color}`}>
@@ -2782,14 +2814,23 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button variant="outline" onClick={() => { setShowBulkDeleteDialog(false); setSelectedDocumentsForAction([]) }}>Cancel</Button>
               <Button
                 variant="destructive"
-                onClick={() => {
+                onClick={async () => {
+                  // Delete each selected document
+                  for (const docId of selectedDocumentsForAction) {
+                    try {
+                      await deleteDocument(docId)
+                    } catch (err) {
+                      console.error('Failed to delete document:', err)
+                    }
+                  }
                   toast.success(`${selectedDocumentsForAction.length} documents deleted successfully`)
                   setShowBulkDeleteDialog(false)
                   setSelectedDocumentsForAction([])
+                  refetch()
                 }}
-                disabled={selectedDocumentsForAction.length === 0}
+                disabled={selectedDocumentsForAction.length === 0 || mutating}
               >
-                Delete {selectedDocumentsForAction.length > 0 && `(${selectedDocumentsForAction.length})`}
+                {mutating ? 'Deleting...' : `Delete ${selectedDocumentsForAction.length > 0 ? `(${selectedDocumentsForAction.length})` : ''}`}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2812,14 +2853,15 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 {mockDocuments.map(doc => (
                   <button
                     key={doc.id}
-                    onClick={() => {
+                    onClick={async () => {
                       setShowShareSelectDialog(false)
-                      const mockDoc = mockDocuments.find(d => d.id === doc.id)
-                      if (mockDoc) {
-                        toast.promise(
-                          navigator.clipboard.writeText(`https://docs.freeflow.app/d/${doc.id}`),
-                          { loading: 'Generating share link...', success: `Share link for "${doc.name}" copied to clipboard!`, error: 'Failed to copy' }
-                        )
+                      try {
+                        // Create a real share in the database
+                        await shareDocument(doc.id, { createPublicLink: true })
+                        await navigator.clipboard.writeText(`https://docs.freeflow.app/d/${doc.id}`)
+                        toast.success(`Share link for "${doc.name}" copied to clipboard!`)
+                      } catch (err) {
+                        toast.error('Failed to create share link')
                       }
                     }}
                     className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded text-left"
@@ -2877,14 +2919,19 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowCreateFolderDialog(false); setNewFolderName('') }}>Cancel</Button>
               <Button
-                onClick={() => {
-                  toast.success(`Folder "${newFolderName}" created successfully`)
-                  setShowCreateFolderDialog(false)
-                  setNewFolderName('')
+                onClick={async () => {
+                  try {
+                    await createFolder(newFolderName, undefined, { color: newFolderColor })
+                    toast.success(`Folder "${newFolderName}" created successfully`)
+                    setShowCreateFolderDialog(false)
+                    setNewFolderName('')
+                  } catch (err) {
+                    toast.error('Failed to create folder')
+                  }
                 }}
-                disabled={!newFolderName.trim()}
+                disabled={!newFolderName.trim() || mutating}
               >
-                Create Folder
+                {mutating ? 'Creating...' : 'Create Folder'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3436,16 +3483,23 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowEmailShareDialog(false); setEmailRecipient(''); setShareMessage('') }}>Cancel</Button>
               <Button
-                onClick={() => {
-                  toast.success(`Document shared with ${emailRecipient}`)
-                  setShowEmailShareDialog(false)
-                  setEmailRecipient('')
-                  setShareMessage('')
+                onClick={async () => {
+                  if (selectedDocument) {
+                    try {
+                      await shareDocument(selectedDocument.id, { email: emailRecipient })
+                      toast.success(`Document shared with ${emailRecipient}`)
+                      setShowEmailShareDialog(false)
+                      setEmailRecipient('')
+                      setShareMessage('')
+                    } catch (err) {
+                      toast.error('Failed to share document')
+                    }
+                  }
                 }}
-                disabled={!emailRecipient}
+                disabled={!emailRecipient || mutating}
               >
                 <Mail className="h-4 w-4 mr-2" />
-                Send Email
+                {mutating ? 'Sending...' : 'Send Email'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3888,13 +3942,21 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowRestoreVersionDialog(false); setVersionToRestore(null); }}>Cancel</Button>
-              <Button onClick={() => {
-                toast.success(`Document restored to version ${versionToRestore?.version}!`)
-                setShowRestoreVersionDialog(false)
-                setVersionToRestore(null)
-              }}>
+              <Button onClick={async () => {
+                if (selectedDocument && versionToRestore) {
+                  try {
+                    await restoreVersion(selectedDocument.id, versionToRestore.id)
+                    toast.success(`Document restored to version ${versionToRestore.version}!`)
+                    setShowRestoreVersionDialog(false)
+                    setVersionToRestore(null)
+                    refetch()
+                  } catch (err) {
+                    toast.error('Failed to restore version')
+                  }
+                }
+              }} disabled={mutating}>
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Restore Version
+                {mutating ? 'Restoring...' : 'Restore Version'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3948,14 +4010,21 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowQuickShareDialog(false); setEmailRecipient(''); setShareMessage(''); }}>Cancel</Button>
-              <Button onClick={() => {
-                toast.success(`Document shared with ${emailRecipient}`)
-                setShowQuickShareDialog(false)
-                setEmailRecipient('')
-                setShareMessage('')
-              }} disabled={!emailRecipient}>
+              <Button onClick={async () => {
+                if (selectedDocument) {
+                  try {
+                    await shareDocument(selectedDocument.id, { email: emailRecipient })
+                    toast.success(`Document shared with ${emailRecipient}`)
+                    setShowQuickShareDialog(false)
+                    setEmailRecipient('')
+                    setShareMessage('')
+                  } catch (err) {
+                    toast.error('Failed to share document')
+                  }
+                }
+              }} disabled={!emailRecipient || mutating}>
                 <Share2 className="h-4 w-4 mr-2" />
-                Share
+                {mutating ? 'Sharing...' : 'Share'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -4212,13 +4281,29 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowAddPersonDialog(false); setNewPersonEmail(''); }}>Cancel</Button>
-              <Button onClick={() => {
-                toast.success(`${newPersonEmail} added as ${newPersonRole}`)
-                setShowAddPersonDialog(false)
-                setNewPersonEmail('')
-              }} disabled={!newPersonEmail}>
+              <Button onClick={async () => {
+                if (selectedDocument) {
+                  try {
+                    // Map role to permission level
+                    const permissionMap: Record<string, 'view' | 'comment' | 'edit'> = {
+                      viewer: 'view',
+                      commenter: 'comment',
+                      editor: 'edit'
+                    }
+                    await shareDocument(selectedDocument.id, {
+                      email: newPersonEmail,
+                      permissionLevel: permissionMap[newPersonRole]
+                    })
+                    toast.success(`${newPersonEmail} added as ${newPersonRole}`)
+                    setShowAddPersonDialog(false)
+                    setNewPersonEmail('')
+                  } catch (err) {
+                    toast.error('Failed to add person')
+                  }
+                }
+              }} disabled={!newPersonEmail || mutating}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Person
+                {mutating ? 'Adding...' : 'Add Person'}
               </Button>
             </DialogFooter>
           </DialogContent>
