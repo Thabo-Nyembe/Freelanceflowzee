@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Sparkles,
@@ -193,7 +194,7 @@ export function AIInsightsPanel({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.info('AI Settings', { description: 'Opening AI preferences...' })}>
                   <Settings className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>

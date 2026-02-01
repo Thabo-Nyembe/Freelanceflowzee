@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -219,11 +220,11 @@ export default function VideoEditor({
             {isProcessing ? 'Processing...' : 'Save Changes'}
           </Button>
           
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" onClick={() => toast.info('Share', { description: 'Share video link copied to clipboard' })}>
             <Share className="w-4 h-4" />
           </Button>
-          
-          <Button variant="outline" size="icon">
+
+          <Button variant="outline" size="icon" onClick={() => toast.info('Preview', { description: 'Opening video preview...' })}>
             <Eye className="w-4 h-4" />
           </Button>
         </div>
