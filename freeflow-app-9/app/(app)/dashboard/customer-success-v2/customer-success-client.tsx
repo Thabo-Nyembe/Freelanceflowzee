@@ -1644,7 +1644,7 @@ export default function CustomerSuccessClient() {
                           <label className="block text-sm font-medium mb-2">API Key</label>
                           <div className="flex gap-2">
                             <Input value="cs_••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={() => toast.warning('Regenerate', { description: 'Are you sure? This will invalidate the current API key.' })}>Regenerate</Button>
                           </div>
                         </div>
                       </CardContent>

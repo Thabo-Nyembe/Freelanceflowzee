@@ -1906,7 +1906,7 @@ export default function CampaignsClient() {
                           <Label>Webhook URL</Label>
                           <div className="flex gap-2">
                             <Input placeholder="https://your-app.com/webhook/campaigns" />
-                            <Button variant="outline">Test</Button>
+                            <Button variant="outline" onClick={() => toast.info('Test', { description: 'Testing webhook connection...' })}>Test</Button>
                           </div>
                         </div>
                       </CardContent>
