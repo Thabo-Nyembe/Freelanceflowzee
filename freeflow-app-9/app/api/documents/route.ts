@@ -95,8 +95,8 @@ export async function GET(request: NextRequest) {
           date_from: searchParams.get('date_from') || undefined,
           date_to: searchParams.get('date_to') || undefined,
           query: searchParams.get('q') || undefined,
-          sort_by: (searchParams.get('sort_by') as any) || 'created_at',
-          sort_order: (searchParams.get('sort_order') as any) || 'desc',
+          sort_by: (searchParams.get('sort_by') as string | null) || 'created_at',
+          sort_order: (searchParams.get('sort_order') as string | null) || 'desc',
           limit: parseInt(searchParams.get('limit') || '50'),
           offset: parseInt(searchParams.get('offset') || '0'),
         };

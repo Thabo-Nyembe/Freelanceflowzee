@@ -47,16 +47,16 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'completions'
-    const language = searchParams.get('language') as any
-    const status = searchParams.get('status') as any
-    const model = searchParams.get('model') as any
-    const category = searchParams.get('category') as any
+    const language = searchParams.get('language') as string | null
+    const status = searchParams.get('status') as string | null
+    const model = searchParams.get('model') as string | null
+    const category = searchParams.get('category') as string | null
     const isPublic = searchParams.get('is_public')
     const search = searchParams.get('search')
     const tags = searchParams.get('tags')
     const analysisId = searchParams.get('analysis_id')
-    const analysisType = searchParams.get('analysis_type') as any
-    const suggestionType = searchParams.get('suggestion_type') as any
+    const analysisType = searchParams.get('analysis_type') as string | null
+    const suggestionType = searchParams.get('suggestion_type') as string | null
     const days = searchParams.get('days') ? parseInt(searchParams.get('days')!) : 30
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
 

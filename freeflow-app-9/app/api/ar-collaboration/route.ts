@@ -37,11 +37,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'sessions'
     const sessionId = searchParams.get('session_id')
-    const status = searchParams.get('status') as any
-    const environment = searchParams.get('environment') as any
-    const participantStatus = searchParams.get('participant_status') as any
-    const objectType = searchParams.get('object_type') as any
-    const interactionType = searchParams.get('interaction_type') as any
+    const status = searchParams.get('status') as string | null
+    const environment = searchParams.get('environment') as string | null
+    const participantStatus = searchParams.get('participant_status') as string | null
+    const objectType = searchParams.get('object_type') as string | null
+    const interactionType = searchParams.get('interaction_type') as string | null
     const isVisible = searchParams.get('is_visible')
     const isPublic = searchParams.get('is_public')
     const search = searchParams.get('search')

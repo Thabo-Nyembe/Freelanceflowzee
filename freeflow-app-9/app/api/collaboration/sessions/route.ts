@@ -129,8 +129,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
       default: {
         // List user's sessions
-        const status = searchParams.get('status') as any;
-        const documentType = searchParams.get('documentType') as any;
+        const status = searchParams.get('status') as string | null;
+        const documentType = searchParams.get('documentType') as string | null;
         const sessions = await collaborationService.getUserSessions(user.id, status, documentType);
         return NextResponse.json({
           success: true,

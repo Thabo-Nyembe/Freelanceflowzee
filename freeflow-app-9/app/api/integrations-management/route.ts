@@ -50,10 +50,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'templates'
     const category = searchParams.get('category')
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const integrationId = searchParams.get('integration_id')
     const endpoint = searchParams.get('endpoint')
-    const period = searchParams.get('period') as any
+    const period = searchParams.get('period') as string | null
     const search = searchParams.get('search')
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
 

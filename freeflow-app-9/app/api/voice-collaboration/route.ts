@@ -33,9 +33,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'rooms'
     const roomId = searchParams.get('room_id')
-    const status = searchParams.get('status') as any
-    const roomType = searchParams.get('room_type') as any
-    const participantStatus = searchParams.get('participant_status') as any
+    const status = searchParams.get('status') as string | null
+    const roomType = searchParams.get('room_type') as string | null
+    const participantStatus = searchParams.get('participant_status') as string | null
     const isPublic = searchParams.get('is_public')
 
     switch (type) {

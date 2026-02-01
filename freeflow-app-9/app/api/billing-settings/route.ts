@@ -53,10 +53,10 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'subscription'
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const daysAhead = searchParams.get('days_ahead') ? parseInt(searchParams.get('days_ahead')!) : 7
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
-    const metric = searchParams.get('metric') as any
+    const metric = searchParams.get('metric') as string | null
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
 

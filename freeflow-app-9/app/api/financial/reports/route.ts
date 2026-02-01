@@ -34,7 +34,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'list': {
-        const reportType = searchParams.get('reportType') as any;
+        const reportType = searchParams.get('reportType') as string | null;
         const reports = await reportsService.getReports(user.id, reportType);
         return NextResponse.json({ success: true, reports });
       }

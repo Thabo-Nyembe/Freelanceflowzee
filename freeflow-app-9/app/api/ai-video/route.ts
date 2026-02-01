@@ -38,9 +38,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'videos'
-    const status = searchParams.get('status') as any
-    const style = searchParams.get('style') as any
-    const category = searchParams.get('category') as any
+    const status = searchParams.get('status') as string | null
+    const style = searchParams.get('style') as string | null
+    const category = searchParams.get('category') as string | null
     const isPublic = searchParams.get('is_public')
     const search = searchParams.get('search')
     const tags = searchParams.get('tags')?.split(',').filter(Boolean)

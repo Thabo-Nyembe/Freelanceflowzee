@@ -86,16 +86,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'templates'
     const templateId = searchParams.get('template_id')
-    const category = searchParams.get('category') as any
-    const templateType = searchParams.get('template_type') as any
-    const complexity = searchParams.get('complexity') as any
+    const category = searchParams.get('category') as string | null
+    const templateType = searchParams.get('template_type') as string | null
+    const complexity = searchParams.get('complexity') as string | null
     const minRating = searchParams.get('min_rating') ? parseFloat(searchParams.get('min_rating')!) : undefined
     const maxPrice = searchParams.get('max_price') ? parseFloat(searchParams.get('max_price')!) : undefined
     const tags = searchParams.get('tags')?.split(',').filter(Boolean)
     const search = searchParams.get('search')
     const isFeatured = searchParams.get('is_featured') === 'true'
     const isPopular = searchParams.get('is_popular') === 'true'
-    const sortBy = searchParams.get('sort_by') as any || 'recent'
+    const sortBy = searchParams.get('sort_by') as string | null || 'recent'
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
 
     switch (type) {

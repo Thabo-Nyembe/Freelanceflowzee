@@ -41,10 +41,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'workflows'
     const workflowId = searchParams.get('workflow_id')
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const category = searchParams.get('category') || undefined
     const search = searchParams.get('search') || undefined
-    const complexity = searchParams.get('complexity') as any
+    const complexity = searchParams.get('complexity') as string | null
     const limit = parseInt(searchParams.get('limit') || '20')
 
     switch (type) {

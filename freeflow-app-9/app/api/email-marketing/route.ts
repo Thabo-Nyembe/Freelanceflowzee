@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'campaigns'
-    const status = searchParams.get('status') as any
-    const campaignType = searchParams.get('campaign_type') as any
+    const status = searchParams.get('status') as string | null
+    const campaignType = searchParams.get('campaign_type') as string | null
     const category = searchParams.get('category')
 
     switch (type) {

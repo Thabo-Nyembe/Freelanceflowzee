@@ -49,11 +49,11 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'resources'
-    const resourceType = searchParams.get('resource_type') as any
+    const resourceType = searchParams.get('resource_type') as string | null
     const categoryId = searchParams.get('category_id')
-    const format = searchParams.get('format') as any
-    const license = searchParams.get('license') as any
-    const accessLevel = searchParams.get('access_level') as any
+    const format = searchParams.get('format') as string | null
+    const license = searchParams.get('license') as string | null
+    const accessLevel = searchParams.get('access_level') as string | null
     const resourceId = searchParams.get('resource_id')
     const collectionId = searchParams.get('collection_id')
     const tagSlug = searchParams.get('tag_slug')

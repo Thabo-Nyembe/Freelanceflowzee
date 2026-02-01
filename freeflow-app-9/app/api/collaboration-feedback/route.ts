@@ -34,9 +34,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'feedback'
     const feedbackId = searchParams.get('feedback_id')
-    const category = searchParams.get('category') as any
-    const priority = searchParams.get('priority') as any
-    const status = searchParams.get('status') as any
+    const category = searchParams.get('category') as string | null
+    const priority = searchParams.get('priority') as string | null
+    const status = searchParams.get('status') as string | null
     const isStarred = searchParams.get('is_starred')
     const assignedTo = searchParams.get('assigned_to')
     const search = searchParams.get('search')

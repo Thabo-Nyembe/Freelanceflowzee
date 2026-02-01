@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search')
     const isStarred = searchParams.get('is_starred')
     const isPinned = searchParams.get('is_pinned')
-    const sortField = searchParams.get('sort_field') as any
+    const sortField = searchParams.get('sort_field') as string | null
     const sortDirection = searchParams.get('sort_direction') as 'asc' | 'desc'
     const limit = parseInt(searchParams.get('limit') || '20')
     const offset = parseInt(searchParams.get('offset') || '0')

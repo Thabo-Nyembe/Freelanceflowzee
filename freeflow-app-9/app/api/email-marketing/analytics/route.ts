@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') || 'overview'
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
-    const granularity = searchParams.get('granularity') as any || 'day'
+    const granularity = searchParams.get('granularity') as string | null || 'day'
     const campaignId = searchParams.get('campaignId')
 
     // Default to last 30 days if not specified
@@ -46,8 +46,8 @@ export async function GET(request: NextRequest) {
 
       case 'campaigns': {
         const limit = parseInt(searchParams.get('limit') || '50')
-        const orderBy = searchParams.get('orderBy') as any || 'date'
-        const order = searchParams.get('order') as any || 'desc'
+        const orderBy = searchParams.get('orderBy') as string | null || 'date'
+        const order = searchParams.get('order') as string | null || 'desc'
 
         const campaigns = await emailAnalyticsService.getCampaignPerformance(user.id, {
           dateRange,

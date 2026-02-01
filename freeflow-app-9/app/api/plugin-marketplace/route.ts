@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'plugins'
-    const category = searchParams.get('category') as any
+    const category = searchParams.get('category') as string | null
     const authorId = searchParams.get('author_id')
     const pluginId = searchParams.get('plugin_id')
     const search = searchParams.get('search')

@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'voices'
     const language = searchParams.get('language')
-    const gender = searchParams.get('gender') as any
+    const gender = searchParams.get('gender') as string | null
     const isPremium = searchParams.get('is_premium')
     const isPublic = searchParams.get('is_public')
     const search = searchParams.get('search')
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     const voiceId = searchParams.get('voice_id')
     const projectId = searchParams.get('project_id')
     const isFavorite = searchParams.get('is_favorite')
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50

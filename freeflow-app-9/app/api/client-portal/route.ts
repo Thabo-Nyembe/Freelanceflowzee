@@ -46,13 +46,13 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'clients'
-    const status = searchParams.get('status') as any
-    const tier = searchParams.get('tier') as any
-    const healthStatus = searchParams.get('health_status') as any
-    const category = searchParams.get('category') as any
+    const status = searchParams.get('status') as string | null
+    const tier = searchParams.get('tier') as string | null
+    const healthStatus = searchParams.get('health_status') as string | null
+    const category = searchParams.get('category') as string | null
     const clientId = searchParams.get('client_id')
-    const invoiceStatus = searchParams.get('invoice_status') as any
-    const communicationType = searchParams.get('communication_type') as any
+    const invoiceStatus = searchParams.get('invoice_status') as string | null
+    const communicationType = searchParams.get('communication_type') as string | null
     const search = searchParams.get('search')
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')

@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('start_date') || undefined
     const endDate = searchParams.get('end_date') || undefined
     const projectId = searchParams.get('project_id') || undefined
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const isBillable = searchParams.get('is_billable')
     const date = searchParams.get('date') || undefined
     const weekStart = searchParams.get('week_start') || undefined

@@ -42,11 +42,11 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'insights'
-    const insightType = searchParams.get('insight_type') as any
-    const category = searchParams.get('category') as any
-    const algorithm = searchParams.get('algorithm') as any
-    const severity = searchParams.get('severity') as any
-    const frequency = searchParams.get('frequency') as any
+    const insightType = searchParams.get('insight_type') as string | null
+    const category = searchParams.get('category') as string | null
+    const algorithm = searchParams.get('algorithm') as string | null
+    const severity = searchParams.get('severity') as string | null
+    const frequency = searchParams.get('frequency') as string | null
     const modelId = searchParams.get('model_id')
     const recommendationId = searchParams.get('recommendation_id')
     const resolved = searchParams.get('resolved')

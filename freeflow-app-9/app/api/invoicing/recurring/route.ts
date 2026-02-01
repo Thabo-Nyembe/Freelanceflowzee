@@ -180,7 +180,7 @@ export async function GET(request: NextRequest) {
       isActive: searchParams.get('active') === 'true' ? true :
                 searchParams.get('active') === 'false' ? false : undefined,
       clientId: searchParams.get('clientId') || undefined,
-      billingCycle: searchParams.get('billingCycle') as any,
+      billingCycle: searchParams.get('billingCycle') as string | null,
       limit: parseInt(searchParams.get('limit') || '50'),
       offset: parseInt(searchParams.get('offset') || '0')
     }

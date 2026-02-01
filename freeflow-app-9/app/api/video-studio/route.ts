@@ -128,8 +128,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
       default: {
         // List all videos
-        const status = searchParams.get('status') as any;
-        const visibility = searchParams.get('visibility') as any;
+        const status = searchParams.get('status') as string | null;
+        const visibility = searchParams.get('visibility') as string | null;
         const folderId = searchParams.get('folderId') || undefined;
         const search = searchParams.get('search') || undefined;
         const page = parseInt(searchParams.get('page') || '1');

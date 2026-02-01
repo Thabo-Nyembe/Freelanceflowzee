@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       }
 
       default: {
-        const type = searchParams.get('type') as any;
+        const type = searchParams.get('type') as string | null;
         const reports = await reportsService.getReports(user.id, type);
         return NextResponse.json({
           success: true,

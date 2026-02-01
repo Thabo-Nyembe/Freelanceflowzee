@@ -32,10 +32,10 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'conversations'
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const search = searchParams.get('search') || undefined
-    const category = searchParams.get('category') as any
-    const priority = searchParams.get('priority') as any
+    const category = searchParams.get('category') as string | null
+    const priority = searchParams.get('priority') as string | null
 
     switch (type) {
       case 'conversations': {

@@ -53,9 +53,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'widgets'
-    const widgetType = searchParams.get('widget_type') as any
-    const category = searchParams.get('category') as any
-    const size = searchParams.get('size') as any
+    const widgetType = searchParams.get('widget_type') as string | null
+    const category = searchParams.get('category') as string | null
+    const size = searchParams.get('size') as string | null
     const widgetId = searchParams.get('widget_id')
     const userId = searchParams.get('user_id')
     const visibleOnly = searchParams.get('visible_only') === 'true'

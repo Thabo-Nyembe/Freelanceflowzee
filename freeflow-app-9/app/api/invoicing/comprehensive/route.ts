@@ -53,7 +53,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         }
 
         const search = searchParams.get('search') || undefined;
-        const status = searchParams.get('status') as any;
+        const status = searchParams.get('status') as string | null;
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '20');
 
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'stats': {
-        const period = searchParams.get('period') as any;
+        const period = searchParams.get('period') as string | null;
         const stats = await invoicingService.getInvoiceStats(user.id, period);
         return NextResponse.json({ success: true, stats });
       }
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
       default: {
         // List all invoices
-        const status = searchParams.get('status') as any;
+        const status = searchParams.get('status') as string | null;
         const clientId = searchParams.get('clientId') || undefined;
         const search = searchParams.get('search') || undefined;
         const startDate = searchParams.get('startDate');

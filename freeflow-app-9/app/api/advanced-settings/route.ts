@@ -39,11 +39,11 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'stats'
-    const exportType = searchParams.get('export_type') as any
-    const exportStatus = searchParams.get('export_status') as any
-    const backupType = searchParams.get('backup_type') as any
+    const exportType = searchParams.get('export_type') as string | null
+    const exportStatus = searchParams.get('export_status') as string | null
+    const backupType = searchParams.get('backup_type') as string | null
     const isAutomatic = searchParams.get('is_automatic')
-    const syncStatus = searchParams.get('sync_status') as any
+    const syncStatus = searchParams.get('sync_status') as string | null
     const deviceId = searchParams.get('device_id')
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
 

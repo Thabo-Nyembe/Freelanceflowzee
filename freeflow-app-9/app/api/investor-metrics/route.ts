@@ -44,11 +44,11 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'metrics'
-    const period = searchParams.get('period') as any || 'monthly'
+    const period = searchParams.get('period') as string | null || 'monthly'
     const startDate = searchParams.get('start_date') || undefined
     const endDate = searchParams.get('end_date') || undefined
     const cohortName = searchParams.get('cohort_name') || undefined
-    const marketPosition = searchParams.get('market_position') as any
+    const marketPosition = searchParams.get('market_position') as string | null
     const limit = parseInt(searchParams.get('limit') || '10')
 
     switch (type) {

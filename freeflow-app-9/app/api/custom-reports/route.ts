@@ -41,8 +41,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'reports'
     const reportId = searchParams.get('report_id')
-    const reportType = searchParams.get('report_type') as any
-    const status = searchParams.get('status') as any
+    const reportType = searchParams.get('report_type') as string | null
+    const status = searchParams.get('status') as string | null
     const isFavorite = searchParams.get('is_favorite')
     const category = searchParams.get('category')
     const isPublic = searchParams.get('is_public')

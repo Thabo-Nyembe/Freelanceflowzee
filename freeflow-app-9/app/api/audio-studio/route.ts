@@ -43,10 +43,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'projects'
     const isPublic = searchParams.get('is_public')
-    const format = searchParams.get('format') as any
+    const format = searchParams.get('format') as string | null
     const projectId = searchParams.get('project_id') || undefined
     const trackId = searchParams.get('track_id') || undefined
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
 
     switch (type) {
       case 'projects': {

@@ -59,9 +59,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'devices'
-    const category = searchParams.get('category') as any
-    const platform = searchParams.get('platform') as any
-    const status = searchParams.get('status') as any
+    const category = searchParams.get('category') as string | null
+    const platform = searchParams.get('platform') as string | null
+    const status = searchParams.get('status') as string | null
     const screenType = searchParams.get('screen_type') || undefined
     const testType = searchParams.get('test_type') || undefined
     const screenId = searchParams.get('screen_id') || undefined

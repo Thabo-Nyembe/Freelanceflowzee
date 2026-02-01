@@ -53,11 +53,11 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'projects'
-    const os = searchParams.get('os') as any
-    const framework = searchParams.get('framework') as any
+    const os = searchParams.get('os') as string | null
+    const framework = searchParams.get('framework') as string | null
     const status = searchParams.get('status') || undefined
-    const buildType = searchParams.get('build_type') as any
-    const channel = searchParams.get('channel') as any
+    const buildType = searchParams.get('build_type') as string | null
+    const channel = searchParams.get('channel') as string | null
     const projectId = searchParams.get('project_id') || undefined
     const buildId = searchParams.get('build_id') || undefined
     const limit = parseInt(searchParams.get('limit') || '20')

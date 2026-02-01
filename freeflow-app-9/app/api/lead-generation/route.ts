@@ -37,8 +37,8 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'leads'
-    const status = searchParams.get('status') as any
-    const source = searchParams.get('source') as any
+    const status = searchParams.get('status') as string | null
+    const source = searchParams.get('source') as string | null
     const formId = searchParams.get('form_id') || undefined
 
     switch (type) {

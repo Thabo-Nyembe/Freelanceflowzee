@@ -38,9 +38,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'logs'
-    const activityType = searchParams.get('activity_type') as any
-    const entityType = searchParams.get('entity_type') as any
-    const severity = searchParams.get('severity') as any
+    const activityType = searchParams.get('activity_type') as string | null
+    const entityType = searchParams.get('entity_type') as string | null
+    const severity = searchParams.get('severity') as string | null
     const entityId = searchParams.get('entity_id')
     const reportId = searchParams.get('report_id')
     const search = searchParams.get('search')

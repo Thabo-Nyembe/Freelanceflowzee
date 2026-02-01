@@ -65,8 +65,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           return NextResponse.json({ success: true, generation });
         }
 
-        const type = searchParams.get('type') as any;
-        const status = searchParams.get('status') as any;
+        const type = searchParams.get('type') as string | null;
+        const status = searchParams.get('status') as string | null;
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '20');
 

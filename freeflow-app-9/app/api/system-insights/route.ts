@@ -52,9 +52,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'dashboard'
-    const metricType = searchParams.get('metric_type') as any
-    const severity = searchParams.get('severity') as any
-    const resourceType = searchParams.get('resource_type') as any
+    const metricType = searchParams.get('metric_type') as string | null
+    const severity = searchParams.get('severity') as string | null
+    const resourceType = searchParams.get('resource_type') as string | null
     const operation = searchParams.get('operation')
     const endpoint = searchParams.get('endpoint')
     const resolved = searchParams.get('resolved')

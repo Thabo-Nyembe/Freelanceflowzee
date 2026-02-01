@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'installations'
-    const captureType = searchParams.get('capture_type') as any
+    const captureType = searchParams.get('capture_type') as string | null
     const tags = searchParams.get('tags')?.split(',')
     const search = searchParams.get('search')
     const startDate = searchParams.get('start_date')

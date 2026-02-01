@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'tasks'
     const date = searchParams.get('date') || new Date().toISOString().split('T')[0]
-    const goalType = searchParams.get('goal_type') as any
+    const goalType = searchParams.get('goal_type') as string | null
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
 

@@ -34,7 +34,7 @@ export async function GET(
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'log'
-    const entityType = searchParams.get('entity_type') as any
+    const entityType = searchParams.get('entity_type') as string | null
     const limit = parseInt(searchParams.get('limit') || '50')
 
     switch (type) {

@@ -45,9 +45,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'customizations'
-    const customizationType = searchParams.get('customization_type') as any
-    const presetCategory = searchParams.get('preset_category') as any
-    const schemeType = searchParams.get('scheme_type') as any
+    const customizationType = searchParams.get('customization_type') as string | null
+    const presetCategory = searchParams.get('preset_category') as string | null
+    const schemeType = searchParams.get('scheme_type') as string | null
     const isActive = searchParams.get('is_active')
     const isEnabled = searchParams.get('is_enabled')
     const isPublic = searchParams.get('is_public')

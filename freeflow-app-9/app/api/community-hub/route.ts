@@ -39,12 +39,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'members'
-    const category = searchParams.get('category') as any
-    const availability = searchParams.get('availability') as any
-    const postType = searchParams.get('post_type') as any
-    const visibility = searchParams.get('visibility') as any
-    const groupType = searchParams.get('group_type') as any
-    const eventType = searchParams.get('event_type') as any
+    const category = searchParams.get('category') as string | null
+    const availability = searchParams.get('availability') as string | null
+    const postType = searchParams.get('post_type') as string | null
+    const visibility = searchParams.get('visibility') as string | null
+    const groupType = searchParams.get('group_type') as string | null
+    const eventType = searchParams.get('event_type') as string | null
     const postId = searchParams.get('post_id')
     const memberId = searchParams.get('member_id')
     const authorId = searchParams.get('author_id')

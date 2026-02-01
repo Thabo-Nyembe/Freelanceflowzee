@@ -40,8 +40,8 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'metrics'
-    const period = searchParams.get('period') as any || 'monthly'
-    const category = searchParams.get('category') as any
+    const period = searchParams.get('period') as string | null || 'monthly'
+    const category = searchParams.get('category') as string | null
     const startDate = searchParams.get('start_date') || undefined
     const endDate = searchParams.get('end_date') || undefined
     const isRead = searchParams.get('is_read')

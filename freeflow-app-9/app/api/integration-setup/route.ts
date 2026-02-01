@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'sessions'
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const sessionId = searchParams.get('session_id')
     const integrationId = searchParams.get('integration_id')
     const validationType = searchParams.get('validation_type')

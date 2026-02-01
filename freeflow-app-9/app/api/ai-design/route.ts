@@ -43,10 +43,10 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'projects'
-    const toolType = searchParams.get('tool_type') as any
-    const status = searchParams.get('status') as any
-    const model = searchParams.get('model') as any
-    const category = searchParams.get('category') as any
+    const toolType = searchParams.get('tool_type') as string | null
+    const status = searchParams.get('status') as string | null
+    const model = searchParams.get('model') as string | null
+    const category = searchParams.get('category') as string | null
     const aiReady = searchParams.get('ai_ready')
     const isPremium = searchParams.get('is_premium')
     const search = searchParams.get('search') || undefined

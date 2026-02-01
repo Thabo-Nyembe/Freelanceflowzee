@@ -42,11 +42,11 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'wallets'
-    const currency = searchParams.get('currency') as any
-    const walletType = searchParams.get('wallet_type') as any
+    const currency = searchParams.get('currency') as string | null
+    const walletType = searchParams.get('wallet_type') as string | null
     const walletId = searchParams.get('wallet_id')
-    const transactionType = searchParams.get('transaction_type') as any
-    const status = searchParams.get('status') as any
+    const transactionType = searchParams.get('transaction_type') as string | null
+    const status = searchParams.get('status') as string | null
     const isActive = searchParams.get('is_active')
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined
     const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : undefined

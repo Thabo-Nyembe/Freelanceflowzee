@@ -40,9 +40,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'stats'
-    const activityType = searchParams.get('activity_type') as any
-    const platform = searchParams.get('platform') as any
-    const period = searchParams.get('period') as any
+    const activityType = searchParams.get('activity_type') as string | null
+    const platform = searchParams.get('platform') as string | null
+    const period = searchParams.get('period') as string | null
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
 
     switch (type) {

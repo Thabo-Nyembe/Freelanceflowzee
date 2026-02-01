@@ -38,10 +38,10 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'members'
-    const department = searchParams.get('department') as any
-    const status = searchParams.get('status') as any
-    const availability = searchParams.get('availability') as any
-    const roleLevel = searchParams.get('role_level') as any
+    const department = searchParams.get('department') as string | null
+    const status = searchParams.get('status') as string | null
+    const availability = searchParams.get('availability') as string | null
+    const roleLevel = searchParams.get('role_level') as string | null
     const search = searchParams.get('search') || undefined
     const limit = parseInt(searchParams.get('limit') || '10')
 

@@ -51,9 +51,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'progress'
-    const integrationType = searchParams.get('integration_type') as any
+    const integrationType = searchParams.get('integration_type') as string | null
     const integrationId = searchParams.get('integration_id')
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
 
     switch (type) {
       case 'progress': {

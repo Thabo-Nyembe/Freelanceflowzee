@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'media'
-    const mediaType = searchParams.get('media_type') as any
+    const mediaType = searchParams.get('media_type') as string | null
     const isFavorite = searchParams.get('is_favorite')
     const tags = searchParams.get('tags')
     const search = searchParams.get('search')

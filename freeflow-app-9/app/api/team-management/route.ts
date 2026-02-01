@@ -37,11 +37,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'roles'
     const teamId = searchParams.get('team_id')
-    const roleName = searchParams.get('role_name') as any
+    const roleName = searchParams.get('role_name') as string | null
     const resourceType = searchParams.get('resource_type')
     const isActive = searchParams.get('is_active')
     const targetUserId = searchParams.get('target_user_id')
-    const action = searchParams.get('action') as any
+    const action = searchParams.get('action') as string | null
     const resourceId = searchParams.get('resource_id')
 
     switch (type) {

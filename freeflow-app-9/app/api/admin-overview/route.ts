@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'dashboard-stats'
     const days = parseInt(searchParams.get('days') || '30')
-    const stage = searchParams.get('stage') as any
+    const stage = searchParams.get('stage') as string | null
     const minValue = searchParams.get('min_value') ? parseFloat(searchParams.get('min_value')!) : undefined
     const minScore = searchParams.get('min_score') ? parseInt(searchParams.get('min_score')!) : undefined
     const includeAll = searchParams.get('include_all') === 'true'

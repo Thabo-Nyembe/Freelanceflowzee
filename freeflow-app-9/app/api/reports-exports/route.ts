@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'reports'
-    const reportType = searchParams.get('report_type') as any
+    const reportType = searchParams.get('report_type') as string | null
     const isTemplate = searchParams.get('is_template')
     const search = searchParams.get('search')
     const status = searchParams.get('status')

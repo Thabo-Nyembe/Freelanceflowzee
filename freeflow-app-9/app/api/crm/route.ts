@@ -36,9 +36,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'contacts'
-    const contactType = searchParams.get('contact_type') as any
-    const status = searchParams.get('status') as any
-    const stage = searchParams.get('stage') as any
+    const contactType = searchParams.get('contact_type') as string | null
+    const status = searchParams.get('status') as string | null
+    const stage = searchParams.get('stage') as string | null
     const assignedTo = searchParams.get('assigned_to') || undefined
     const contactId = searchParams.get('contact_id') || undefined
     const dealId = searchParams.get('deal_id') || undefined

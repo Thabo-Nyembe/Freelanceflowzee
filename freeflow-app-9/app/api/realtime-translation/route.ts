@@ -46,10 +46,10 @@ export async function GET(request: NextRequest) {
     const requestId = searchParams.get('request_id')
     const sessionId = searchParams.get('session_id')
     const glossaryId = searchParams.get('glossary_id')
-    const status = searchParams.get('status') as any
-    const sessionStatus = searchParams.get('session_status') as any
-    const sourceLanguage = searchParams.get('source_language') as any
-    const targetLanguage = searchParams.get('target_language') as any
+    const status = searchParams.get('status') as string | null
+    const sessionStatus = searchParams.get('session_status') as string | null
+    const sourceLanguage = searchParams.get('source_language') as string | null
+    const targetLanguage = searchParams.get('target_language') as string | null
 
     switch (type) {
       case 'requests': {

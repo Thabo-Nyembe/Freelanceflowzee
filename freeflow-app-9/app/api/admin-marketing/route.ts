@@ -44,9 +44,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'dashboard'
-    const status = searchParams.get('status') as any
-    const source = searchParams.get('source') as any
-    const campaignType = searchParams.get('campaign_type') as any
+    const status = searchParams.get('status') as string | null
+    const source = searchParams.get('source') as string | null
+    const campaignType = searchParams.get('campaign_type') as string | null
     const campaignId = searchParams.get('campaign_id')
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
 

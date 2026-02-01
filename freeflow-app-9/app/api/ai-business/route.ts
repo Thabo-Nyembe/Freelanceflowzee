@@ -45,10 +45,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'stats'
     const projectId = searchParams.get('project_id')
-    const insightType = searchParams.get('insight_type') as any
-    const forecastType = searchParams.get('forecast_type') as any
+    const insightType = searchParams.get('insight_type') as string | null
+    const forecastType = searchParams.get('forecast_type') as string | null
     const sessionId = searchParams.get('session_id')
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
 
     switch (type) {

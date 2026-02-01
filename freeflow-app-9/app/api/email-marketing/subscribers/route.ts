@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
           tags: searchParams.get('tags')?.split(',') || undefined,
           search: searchParams.get('search') || searchParams.get('q') || undefined,
           sort_by: searchParams.get('sort_by') || undefined,
-          sort_order: (searchParams.get('sort_order') as any) || 'desc',
+          sort_order: (searchParams.get('sort_order') as string | null) || 'desc',
           limit: parseInt(searchParams.get('limit') || '50'),
           offset: parseInt(searchParams.get('offset') || '0'),
         };

@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     const folderId = searchParams.get('folder_id')
     const parentFolderId = searchParams.get('parent_folder_id')
     const fileId = searchParams.get('file_id')
-    const visibility = searchParams.get('visibility') as any
+    const visibility = searchParams.get('visibility') as string | null
     const isFavorite = searchParams.get('is_favorite')
     const fileType = searchParams.get('file_type')
     const tags = searchParams.get('tags')?.split(',').filter(Boolean)

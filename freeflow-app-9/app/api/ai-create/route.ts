@@ -38,11 +38,11 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'assets'
-    const creativeField = searchParams.get('creative_field') as any
-    const assetType = searchParams.get('asset_type') as any
+    const creativeField = searchParams.get('creative_field') as string | null
+    const assetType = searchParams.get('asset_type') as string | null
     const isFavorite = searchParams.get('is_favorite')
     const search = searchParams.get('search') || undefined
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const limit = parseInt(searchParams.get('limit') || '20')
 
     switch (type) {

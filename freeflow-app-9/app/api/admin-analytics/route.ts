@@ -42,12 +42,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'dashboard'
-    const period = searchParams.get('period') as any
-    const category = searchParams.get('category') as any
-    const metricType = searchParams.get('metric_type') as any
-    const status = searchParams.get('status') as any
-    const source = searchParams.get('source') as any
-    const stage = searchParams.get('stage') as any
+    const period = searchParams.get('period') as string | null
+    const category = searchParams.get('category') as string | null
+    const metricType = searchParams.get('metric_type') as string | null
+    const status = searchParams.get('status') as string | null
+    const source = searchParams.get('source') as string | null
+    const stage = searchParams.get('stage') as string | null
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50

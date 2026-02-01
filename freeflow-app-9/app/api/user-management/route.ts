@@ -48,9 +48,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'users'
-    const role = searchParams.get('role') as any
-    const status = searchParams.get('status') as any
-    const activityType = searchParams.get('activity_type') as any
+    const role = searchParams.get('role') as string | null
+    const status = searchParams.get('status') as string | null
+    const activityType = searchParams.get('activity_type') as string | null
     const search = searchParams.get('search')
     const days = parseInt(searchParams.get('days') || '30')
     const months = parseInt(searchParams.get('months') || '6')

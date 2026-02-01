@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'stats'
-    const groupType = searchParams.get('group_type') as any
+    const groupType = searchParams.get('group_type') as string | null
     const notificationId = searchParams.get('notification_id')
     const includeReactivated = searchParams.get('include_reactivated') === 'true'
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50

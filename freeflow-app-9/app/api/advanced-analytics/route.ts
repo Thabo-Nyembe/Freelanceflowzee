@@ -47,18 +47,18 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'metrics'
-    const metricType = searchParams.get('metric_type') as any
-    const timeRange = searchParams.get('time_range') as any
+    const metricType = searchParams.get('metric_type') as string | null
+    const timeRange = searchParams.get('time_range') as string | null
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
     const dashboardId = searchParams.get('dashboard_id')
-    const reportType = searchParams.get('report_type') as any
+    const reportType = searchParams.get('report_type') as string | null
     const funnelName = searchParams.get('funnel_name')
     const metricDate = searchParams.get('metric_date')
-    const insightType = searchParams.get('insight_type') as any
-    const insightImpact = searchParams.get('insight_impact') as any
+    const insightType = searchParams.get('insight_type') as string | null
+    const insightImpact = searchParams.get('insight_impact') as string | null
     const isRead = searchParams.get('is_read')
-    const goalStatus = searchParams.get('goal_status') as any
+    const goalStatus = searchParams.get('goal_status') as string | null
     const isPublic = searchParams.get('is_public')
 
     switch (type) {

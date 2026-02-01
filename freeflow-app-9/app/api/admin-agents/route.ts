@@ -45,10 +45,10 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'agents'
-    const agentType = searchParams.get('agent_type') as any
-    const status = searchParams.get('status') as any
-    const executionStatus = searchParams.get('execution_status') as any
-    const logLevel = searchParams.get('log_level') as any
+    const agentType = searchParams.get('agent_type') as string | null
+    const status = searchParams.get('status') as string | null
+    const executionStatus = searchParams.get('execution_status') as string | null
+    const logLevel = searchParams.get('log_level') as string | null
     const maxHealthScore = searchParams.get('max_health_score') ? parseInt(searchParams.get('max_health_score')!) : 70
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
 

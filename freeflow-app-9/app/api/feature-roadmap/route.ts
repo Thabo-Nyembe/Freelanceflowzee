@@ -48,9 +48,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'features'
-    const status = searchParams.get('status') as any
-    const category = searchParams.get('category') as any
-    const requestStatus = searchParams.get('request_status') as any
+    const status = searchParams.get('status') as string | null
+    const category = searchParams.get('category') as string | null
+    const requestStatus = searchParams.get('request_status') as string | null
     const featureId = searchParams.get('feature_id')
     const requestId = searchParams.get('request_id')
     const sortBy = (searchParams.get('sort_by') || 'recent') as 'recent' | 'popular' | 'priority'

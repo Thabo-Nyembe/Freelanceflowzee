@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') || 'providers'
     const providerId = searchParams.get('provider_id')
     const modelId = searchParams.get('model_id')
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
 

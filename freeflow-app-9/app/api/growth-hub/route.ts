@@ -43,12 +43,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'strategies'
-    const status = searchParams.get('status') as any
-    const userType = searchParams.get('user_type') as any
-    const goalType = searchParams.get('goal_type') as any
+    const status = searchParams.get('status') as string | null
+    const userType = searchParams.get('user_type') as string | null
+    const goalType = searchParams.get('goal_type') as string | null
     const strategyId = searchParams.get('strategy_id') || undefined
     const planId = searchParams.get('plan_id') || undefined
-    const priority = searchParams.get('priority') as any
+    const priority = searchParams.get('priority') as string | null
     const completed = searchParams.get('completed')
 
     switch (type) {

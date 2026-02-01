@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
         switch (action) {
           case 'list': {
-            const triggerType = searchParams.get('triggerType') as any
+            const triggerType = searchParams.get('triggerType') as string | null
             const isActive = searchParams.get('isActive')
             const tags = searchParams.get('tags')?.split(',').filter(Boolean)
             const limit = parseInt(searchParams.get('limit') || '50')
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
 
     switch (action) {
       case 'list': {
-        const triggerType = searchParams.get('triggerType') as any
+        const triggerType = searchParams.get('triggerType') as string | null
         const isActive = searchParams.get('isActive')
         const tags = searchParams.get('tags')?.split(',').filter(Boolean)
         const limit = parseInt(searchParams.get('limit') || '50')
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
 
       case 'executions': {
         const workflowId = searchParams.get('workflowId')
-        const status = searchParams.get('status') as any
+        const status = searchParams.get('status') as string | null
         const limit = parseInt(searchParams.get('limit') || '50')
         const offset = parseInt(searchParams.get('offset') || '0')
 

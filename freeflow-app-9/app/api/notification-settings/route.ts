@@ -48,13 +48,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'preferences'
     const category = searchParams.get('category')
-    const channel = searchParams.get('channel') as any
+    const channel = searchParams.get('channel') as string | null
     const isEnabled = searchParams.get('is_enabled')
     const isActive = searchParams.get('is_active')
-    const templateType = searchParams.get('template_type') as any
+    const templateType = searchParams.get('template_type') as string | null
     const isPublic = searchParams.get('is_public')
     const isSystem = searchParams.get('is_system')
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const platform = searchParams.get('platform')
     const email = searchParams.get('email')
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50

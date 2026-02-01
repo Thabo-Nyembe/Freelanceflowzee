@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'articles'
     const categoryId = searchParams.get('category_id') || undefined
-    const status = searchParams.get('status') as any
-    const difficulty = searchParams.get('difficulty') as any
+    const status = searchParams.get('status') as string | null
+    const difficulty = searchParams.get('difficulty') as string | null
     const isFeatured = searchParams.get('is_featured')
     const isPopular = searchParams.get('is_popular')
     const tags = searchParams.get('tags')?.split(',') || undefined
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
       }
 
       case 'suggestions': {
-        const suggestionStatus = searchParams.get('suggestion_status') as any
+        const suggestionStatus = searchParams.get('suggestion_status') as string | null
         const data = await getSuggestedTopics({
           status: suggestionStatus,
           limit

@@ -50,13 +50,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'stats'
     const includeUsed = searchParams.get('include_used') === 'true'
-    const status = searchParams.get('status') as any
+    const status = searchParams.get('status') as string | null
     const email = searchParams.get('email')
-    const eventType = searchParams.get('event_type') as any
+    const eventType = searchParams.get('event_type') as string | null
     const isSuspicious = searchParams.get('is_suspicious')
     const minRiskScore = searchParams.get('min_risk_score') ? parseInt(searchParams.get('min_risk_score')!) : 70
-    const trustStatus = searchParams.get('trust_status') as any
-    const severity = searchParams.get('severity') as any
+    const trustStatus = searchParams.get('trust_status') as string | null
+    const severity = searchParams.get('severity') as string | null
     const isRead = searchParams.get('is_read')
     const minutes = searchParams.get('minutes') ? parseInt(searchParams.get('minutes')!) : 15
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 20
