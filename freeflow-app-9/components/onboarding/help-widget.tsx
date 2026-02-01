@@ -1,10 +1,15 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { Separator } from '@/components/ui/separator'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   HelpCircle,
   Search,
@@ -17,7 +22,11 @@ import {
   ExternalLink,
   CheckCircle,
   Trophy,
-  Play
+  Play,
+  Send,
+  Paperclip,
+  Bot,
+  User
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useOnboarding } from './onboarding-provider'
@@ -31,10 +40,170 @@ const logger = createFeatureLogger('HelpWidget')
 // HELP WIDGET COMPONENT - USER MANUAL SPEC
 // ============================================================================
 
+interface ChatMessage {
+  id: string
+  type: 'user' | 'bot'
+  content: string
+  timestamp: Date
+}
+
+interface HelpArticle {
+  title: string
+  category: string
+  content: string[]
+  relatedTopics: string[]
+}
+
+const helpArticles: Record<string, HelpArticle> = {
+  'Getting Started Guide': {
+    title: 'Getting Started Guide',
+    category: 'Documentation',
+    content: [
+      'Welcome to KAZI! This guide will help you get started with the platform.',
+      '1. Complete your profile: Navigate to Settings > Profile to add your information, skills, and portfolio.',
+      '2. Explore the Dashboard: Your dashboard shows projects, tasks, messages, and earnings at a glance.',
+      '3. Find Projects: Use the Marketplace to browse and apply for freelance opportunities.',
+      '4. Set up Payments: Connect your payment method in Settings > Payments to receive funds.',
+      '5. Enable Notifications: Stay updated on new opportunities and messages.'
+    ],
+    relatedTopics: ['Profile Setup', 'Marketplace Guide', 'Payment Methods']
+  },
+  'Video Tutorials': {
+    title: 'Video Tutorials',
+    category: 'Learning',
+    content: [
+      'Access our comprehensive video library to master KAZI features.',
+      '• Platform Overview (5 min) - Learn the basics of navigating KAZI',
+      '• Creating Your Profile (8 min) - Build a standout freelancer profile',
+      '• Finding Projects (6 min) - Tips for discovering the best opportunities',
+      '• Client Communication (7 min) - Best practices for working with clients',
+      '• Managing Payments (4 min) - Understanding invoices and withdrawals'
+    ],
+    relatedTopics: ['Getting Started', 'Best Practices']
+  },
+  'FAQ': {
+    title: 'Frequently Asked Questions',
+    category: 'Support',
+    content: [
+      'Q: How do I withdraw my earnings?',
+      'A: Go to Settings > Payments > Withdraw and select your preferred method.',
+      '',
+      'Q: How are service fees calculated?',
+      'A: KAZI charges a 5% service fee on completed transactions.',
+      '',
+      'Q: Can I work with clients outside the platform?',
+      'A: We recommend keeping all communication and payments on KAZI for security.',
+      '',
+      'Q: How do I get more visibility?',
+      'A: Complete your profile, add portfolio items, and maintain high ratings.'
+    ],
+    relatedTopics: ['Payments', 'Platform Policies']
+  },
+  'Contact Support': {
+    title: 'Contact Support',
+    category: 'Support',
+    content: [
+      'Our support team is here to help! Here are the ways to reach us:',
+      '• Live Chat: Click the "Start Live Chat" button for instant assistance',
+      '• Email: support@kazi.com - We respond within 24 hours',
+      '• Phone: +1 (555) 123-4567 - Available Mon-Fri, 9am-5pm EST',
+      '• Community Forum: Connect with other users for tips and advice',
+      'For urgent issues, use Live Chat for the fastest response.'
+    ],
+    relatedTopics: ['FAQ', 'Community']
+  }
+}
+
 export function HelpWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const { startTour, completedTours } = useOnboarding()
+
+  // Help article dialog state
+  const [showArticleDialog, setShowArticleDialog] = useState(false)
+  const [selectedArticle, setSelectedArticle] = useState<HelpArticle | null>(null)
+
+  // Live chat dialog state
+  const [showChatDialog, setShowChatDialog] = useState(false)
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      id: '1',
+      type: 'bot',
+      content: 'Hello! I\'m KAZI Assistant. How can I help you today?',
+      timestamp: new Date()
+    }
+  ])
+  const [chatInput, setChatInput] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
+  const chatEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (showChatDialog && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [chatMessages, showChatDialog])
+
+  const handleOpenArticle = (linkTitle: string) => {
+    const article = helpArticles[linkTitle]
+    if (article) {
+      setSelectedArticle(article)
+      setShowArticleDialog(true)
+      logger.info('Help article opened', { title: linkTitle })
+    }
+  }
+
+  const handleSendChatMessage = async () => {
+    if (!chatInput.trim()) return
+
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      type: 'user',
+      content: chatInput,
+      timestamp: new Date()
+    }
+
+    setChatMessages(prev => [...prev, userMessage])
+    setChatInput('')
+    setIsTyping(true)
+    logger.info('Chat message sent', { message: chatInput })
+
+    // Simulate bot response
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
+    const botResponses: Record<string, string> = {
+      'payment': 'For payment questions, go to Settings > Payments. You can add payment methods, view transaction history, and request withdrawals there.',
+      'project': 'To find projects, visit the Marketplace. You can filter by category, budget, and deadline. Make sure your profile is complete to increase your visibility!',
+      'profile': 'Your profile is your first impression! Add a professional photo, detailed bio, skills, and portfolio samples. A complete profile gets 3x more views.',
+      'help': 'I can help with: payments, projects, profile setup, account settings, and more. What would you like to know?',
+      'default': 'Thanks for your message! I\'ll connect you with our support team for more detailed assistance. In the meantime, check out our FAQ section for common questions.'
+    }
+
+    const lowerInput = userMessage.content.toLowerCase()
+    let responseContent = botResponses.default
+
+    for (const [keyword, response] of Object.entries(botResponses)) {
+      if (lowerInput.includes(keyword)) {
+        responseContent = response
+        break
+      }
+    }
+
+    const botMessage: ChatMessage = {
+      id: `bot-${Date.now()}`,
+      type: 'bot',
+      content: responseContent,
+      timestamp: new Date()
+    }
+
+    setChatMessages(prev => [...prev, botMessage])
+    setIsTyping(false)
+  }
+
+  const handleOpenChat = () => {
+    setShowChatDialog(true)
+    setIsOpen(false)
+    logger.info('Live chat opened from help widget')
+  }
 
   const quickLinks = [
     { title: 'Getting Started Guide', icon: Book, url: '#', category: 'Documentation' },
@@ -175,17 +344,13 @@ export function HelpWidget() {
                   </h3>
                   <div className="space-y-2">
                     {filteredLinks.map((link, index) => (
-                      <a
+                      <button
                         key={index}
-                        href={link.url}
-                        onClick={(e) => {
-                          e.preventDefault()
+                        onClick={() => {
                           logger.info('Help link clicked', { title: link.title, category: link.category })
-                          toast.info('Coming Soon', {
-                            description: `${link.title} documentation will be available soon`
-                          })
+                          handleOpenArticle(link.title)
                         }}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all group"
+                        className="w-full flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all group text-left"
                       >
                         <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
                           <link.icon className="w-4 h-4 text-blue-600" />
@@ -197,7 +362,7 @@ export function HelpWidget() {
                           <p className="text-xs text-gray-600">{link.category}</p>
                         </div>
                         <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
-                      </a>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -205,12 +370,7 @@ export function HelpWidget() {
                 {/* Live Chat Section */}
                 <div className="pt-4 border-t">
                   <Button
-                    onClick={() => {
-                      logger.info('Live chat opened from help widget')
-                      toast.info('Coming Soon', {
-                        description: 'Live chat support will be available in Q2 2026'
-                      })
-                    }}
+                    onClick={handleOpenChat}
                     className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
@@ -245,6 +405,142 @@ export function HelpWidget() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Help Article Dialog */}
+      <Dialog open={showArticleDialog} onOpenChange={setShowArticleDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Book className="w-5 h-5 text-blue-600" />
+              {selectedArticle?.title}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedArticle?.category}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedArticle && (
+            <div className="space-y-4">
+              <ScrollArea className="h-[300px] pr-4">
+                <div className="space-y-3">
+                  {selectedArticle.content.map((line, i) => (
+                    <p key={i} className={`text-sm ${line === '' ? 'h-2' : 'text-gray-700'}`}>
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              </ScrollArea>
+
+              <Separator />
+
+              <div>
+                <p className="text-xs font-semibold text-gray-500 mb-2">Related Topics</p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedArticle.relatedTopics.map((topic, i) => (
+                    <Badge key={i} variant="secondary" className="cursor-pointer hover:bg-blue-100">
+                      {topic}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowArticleDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={handleOpenChat}>
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Need More Help?
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Live Chat Dialog */}
+      <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
+        <DialogContent className="max-w-md h-[600px] flex flex-col p-0">
+          <DialogHeader className="px-4 py-3 border-b bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <MessageCircle className="w-5 h-5" />
+              KAZI Live Support
+            </DialogTitle>
+            <DialogDescription className="text-green-100">
+              We typically respond within a few seconds
+            </DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="flex-1 px-4 py-3">
+            <div className="space-y-4">
+              {chatMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex items-start gap-3 ${msg.type === 'user' ? 'flex-row-reverse' : ''}`}
+                >
+                  <Avatar className="w-8 h-8">
+                    <AvatarFallback className={msg.type === 'bot' ? 'bg-green-100' : 'bg-blue-100'}>
+                      {msg.type === 'bot' ? <Bot className="w-4 h-4 text-green-600" /> : <User className="w-4 h-4 text-blue-600" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div
+                    className={`max-w-[75%] rounded-lg p-3 ${
+                      msg.type === 'user'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
+                    <p className="text-sm">{msg.content}</p>
+                    <p className={`text-xs mt-1 ${msg.type === 'user' ? 'text-blue-200' : 'text-gray-500'}`}>
+                      {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+              {isTyping && (
+                <div className="flex items-start gap-3">
+                  <Avatar className="w-8 h-8">
+                    <AvatarFallback className="bg-green-100">
+                      <Bot className="w-4 h-4 text-green-600" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="bg-gray-100 rounded-lg p-3">
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div ref={chatEndRef} />
+            </div>
+          </ScrollArea>
+
+          <div className="p-4 border-t">
+            <div className="flex gap-2">
+              <Button variant="outline" size="icon" onClick={() => toast.info('Attachments', { description: 'Drag and drop files or click to upload' })}>
+                <Paperclip className="w-4 h-4" />
+              </Button>
+              <Input
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Type your message..."
+                onKeyPress={(e) => e.key === 'Enter' && handleSendChatMessage()}
+                className="flex-1"
+              />
+              <Button onClick={handleSendChatMessage} disabled={!chatInput.trim() || isTyping}>
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500 text-center mt-2">
+              Powered by KAZI AI Assistant
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

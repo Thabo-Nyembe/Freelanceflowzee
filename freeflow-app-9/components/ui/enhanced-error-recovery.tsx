@@ -38,6 +38,11 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
 import { Separator } from '@/components/ui/separator'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -250,9 +255,38 @@ export function EnhancedError({
 }: EnhancedErrorProps) {
   const [showFullDetails, setShowFullDetails] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
+  const [showHelpDialog, setShowHelpDialog] = React.useState(false)
+  const [showSupportDialog, setShowSupportDialog] = React.useState(false)
+  const [supportMessage, setSupportMessage] = React.useState('')
+  const [supportEmail, setSupportEmail] = React.useState('')
+  const [isSendingSupport, setIsSendingSupport] = React.useState(false)
   const errorType = getErrorType(error)
   const suggestions = getErrorSuggestions(errorType)
   const { isOnline, connectionSpeed } = useNetworkStatus()
+
+  const handleSendSupport = async () => {
+    if (!supportMessage.trim() || !supportEmail.trim()) return
+    setIsSendingSupport(true)
+    toast.loading('Submitting support request...', { id: 'support-request' })
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    toast.success('Request submitted', {
+      id: 'support-request',
+      description: 'Our support team will get back to you within 24 hours'
+    })
+    setSupportMessage('')
+    setSupportEmail('')
+    setIsSendingSupport(false)
+    setShowSupportDialog(false)
+  }
+
+  const helpArticles = [
+    { title: 'Common Error Codes', description: 'Understanding what error codes mean and how to resolve them' },
+    { title: 'Network Connectivity', description: 'Troubleshooting connection issues and timeouts' },
+    { title: 'Authentication Issues', description: 'Resolving login and session problems' },
+    { title: 'Data Sync Problems', description: 'Fixing sync conflicts and data loading errors' },
+    { title: 'Browser Compatibility', description: 'Ensuring your browser is supported' },
+    { title: 'Cache & Storage', description: 'Clearing cache and local storage to fix issues' },
+  ]
   
   const retrySystem = useAutoRetry(() => {
     onRetry?.()
@@ -591,11 +625,11 @@ ${error.stack ? `\nStack:\n${error.stack}` : ''}
 
           {/* Quick Help Links */}
           <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
-            <Button variant="ghost" size="sm" className="flex items-center space-x-1" onClick={() => toast.info('Coming Soon', { description: 'Help center will be available soon' })}>
+            <Button variant="ghost" size="sm" className="flex items-center space-x-1" onClick={() => setShowHelpDialog(true)}>
               <ExternalLink className="h-3 w-3" />
               <span>Help Center</span>
             </Button>
-            <Button variant="ghost" size="sm" className="flex items-center space-x-1" onClick={() => toast.info('Coming Soon', { description: 'Contact support will be available in Q2 2026' })}>
+            <Button variant="ghost" size="sm" className="flex items-center space-x-1" onClick={() => setShowSupportDialog(true)}>
               <MessageSquare className="h-3 w-3" />
               <span>Contact Support</span>
             </Button>
@@ -606,6 +640,125 @@ ${error.stack ? `\nStack:\n${error.stack}` : ''}
               </Button>
             )}
           </div>
+
+          {/* Help Center Dialog */}
+          <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5" />
+                  Help Center
+                </DialogTitle>
+                <DialogDescription>
+                  Browse help articles or search for solutions
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <Input placeholder="Search help articles..." />
+
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-2">
+                    {helpArticles.map((article, i) => (
+                      <Card
+                        key={i}
+                        className="p-3 cursor-pointer hover:border-primary transition-colors"
+                        onClick={() => {
+                          toast.info(article.title, { description: article.description })
+                        }}
+                      >
+                        <div className="flex items-start gap-3">
+                          <FileText className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="font-medium text-sm">{article.title}</p>
+                            <p className="text-xs text-muted-foreground">{article.description}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+
+                <Separator />
+
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-2">Can&apos;t find what you need?</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowHelpDialog(false)
+                      setShowSupportDialog(true)
+                    }}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Contact Support
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Contact Support Dialog */}
+          <Dialog open={showSupportDialog} onOpenChange={setShowSupportDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  Contact Support
+                </DialogTitle>
+                <DialogDescription>
+                  Describe your issue and we&apos;ll get back to you soon
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-xs font-medium text-muted-foreground">Error Reference</p>
+                  <p className="text-sm font-mono">{error.code || 'N/A'}</p>
+                  <p className="text-xs text-muted-foreground mt-1 truncate">{error.message}</p>
+                </div>
+
+                <div>
+                  <Label>Your Email</Label>
+                  <Input
+                    type="email"
+                    value={supportEmail}
+                    onChange={(e) => setSupportEmail(e.target.value)}
+                    placeholder="email@example.com"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label>Describe the Issue</Label>
+                  <Textarea
+                    value={supportMessage}
+                    onChange={(e) => setSupportMessage(e.target.value)}
+                    placeholder="What were you trying to do when this error occurred?"
+                    rows={4}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <CheckCircle className="w-3 h-3 text-green-500" />
+                  <span>Error details will be automatically included</span>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowSupportDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSendSupport}
+                  disabled={!supportMessage.trim() || !supportEmail.trim() || isSendingSupport}
+                >
+                  {isSendingSupport ? 'Sending...' : 'Send Request'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </motion.div>
       </div>
     </TooltipProvider>

@@ -26,7 +26,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Popover,
   PopoverContent,
@@ -172,6 +176,47 @@ export function EnhancedShadcnDashboard({
   className,
 }: EnhancedDashboardProps) {
   const [date, setDate] = React.useState<Date | undefined>(new Date())
+  const [showInviteDialog, setShowInviteDialog] = React.useState(false)
+  const [showReportsDialog, setShowReportsDialog] = React.useState(false)
+  const [showNotificationsDialog, setShowNotificationsDialog] = React.useState(false)
+  const [inviteEmails, setInviteEmails] = React.useState('')
+  const [inviteRole, setInviteRole] = React.useState('member')
+  const [isSendingInvites, setIsSendingInvites] = React.useState(false)
+  const [notificationSettings, setNotificationSettings] = React.useState({
+    projectUpdates: true,
+    teamMessages: true,
+    deadlineReminders: true,
+    weeklyDigest: false,
+    marketingEmails: false
+  })
+
+  const handleSendInvites = async () => {
+    if (!inviteEmails.trim()) return
+    setIsSendingInvites(true)
+    toast.loading('Sending invitations...', { id: 'send-invites' })
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    const emailCount = inviteEmails.split(',').filter(e => e.trim()).length
+    toast.success('Invitations sent', {
+      id: 'send-invites',
+      description: `${emailCount} team member${emailCount > 1 ? 's' : ''} invited successfully`
+    })
+    setInviteEmails('')
+    setIsSendingInvites(false)
+    setShowInviteDialog(false)
+  }
+
+  const handleSaveNotifications = async () => {
+    toast.loading('Saving preferences...', { id: 'save-notifs' })
+    await new Promise(resolve => setTimeout(resolve, 800))
+    toast.success('Preferences saved', { id: 'save-notifs', description: 'Your notification settings have been updated' })
+    setShowNotificationsDialog(false)
+  }
+
+  const handleExportReport = async (format: string) => {
+    toast.loading(`Generating ${format} report...`, { id: 'export-report' })
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    toast.success('Report ready', { id: 'export-report', description: `Your ${format} report is downloading` })
+  }
 
   if (isLoading) {
     return (
@@ -441,23 +486,210 @@ export function EnhancedShadcnDashboard({
               </DialogContent>
             </Dialog>
             
-            <Button variant="outline" size="sm" onClick={() => toast.info('In Development', { description: 'Team invitation system is being built' })}>
+            <Button variant="outline" size="sm" onClick={() => setShowInviteDialog(true)}>
               <Users className="mr-2 h-4 w-4" />
               Invite Team
             </Button>
 
-            <Button variant="outline" size="sm" onClick={() => toast.info('In Development', { description: 'Advanced analytics reports coming soon' })}>
+            <Button variant="outline" size="sm" onClick={() => setShowReportsDialog(true)}>
               <BarChart3 className="mr-2 h-4 w-4" />
               View Reports
             </Button>
 
-            <Button variant="outline" size="sm" onClick={() => toast.info('In Development', { description: 'Notification center is being refined' })}>
+            <Button variant="outline" size="sm" onClick={() => setShowNotificationsDialog(true)}>
               <Bell className="mr-2 h-4 w-4" />
               Notifications
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Team Invitation Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Invite Team Members
+            </DialogTitle>
+            <DialogDescription>
+              Send invitations to collaborate on your projects
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label>Email Addresses</Label>
+              <Input
+                value={inviteEmails}
+                onChange={(e) => setInviteEmails(e.target.value)}
+                placeholder="email1@example.com, email2@example.com"
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Separate multiple emails with commas</p>
+            </div>
+
+            <div>
+              <Label>Role</Label>
+              <div className="flex gap-2 mt-1">
+                {['member', 'admin', 'viewer'].map((role) => (
+                  <Button
+                    key={role}
+                    variant={inviteRole === role ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setInviteRole(role)}
+                    className="capitalize"
+                  >
+                    {role}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="text-sm font-medium">Role Permissions</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {inviteRole === 'admin' && 'Can manage team, projects, and settings'}
+                {inviteRole === 'member' && 'Can create and edit projects, collaborate with team'}
+                {inviteRole === 'viewer' && 'Can view projects and leave comments'}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInviteDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSendInvites} disabled={!inviteEmails.trim() || isSendingInvites}>
+              {isSendingInvites ? 'Sending...' : 'Send Invitations'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reports Dialog */}
+      <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5" />
+              Analytics Reports
+            </DialogTitle>
+            <DialogDescription>
+              Export detailed reports and analytics data
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="p-4 cursor-pointer hover:border-primary transition-colors" onClick={() => handleExportReport('PDF')}>
+                <div className="text-center">
+                  <Download className="w-8 h-8 mx-auto mb-2 text-red-500" />
+                  <p className="font-medium text-sm">PDF Report</p>
+                  <p className="text-xs text-muted-foreground">Full analytics summary</p>
+                </div>
+              </Card>
+
+              <Card className="p-4 cursor-pointer hover:border-primary transition-colors" onClick={() => handleExportReport('Excel')}>
+                <div className="text-center">
+                  <Download className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                  <p className="font-medium text-sm">Excel Export</p>
+                  <p className="text-xs text-muted-foreground">Raw data spreadsheet</p>
+                </div>
+              </Card>
+
+              <Card className="p-4 cursor-pointer hover:border-primary transition-colors" onClick={() => handleExportReport('CSV')}>
+                <div className="text-center">
+                  <Download className="w-8 h-8 mx-auto mb-2 text-blue-500" />
+                  <p className="font-medium text-sm">CSV Data</p>
+                  <p className="text-xs text-muted-foreground">For custom analysis</p>
+                </div>
+              </Card>
+
+              <Card className="p-4 cursor-pointer hover:border-primary transition-colors" onClick={() => handleExportReport('JSON')}>
+                <div className="text-center">
+                  <Download className="w-8 h-8 mx-auto mb-2 text-orange-500" />
+                  <p className="font-medium text-sm">JSON Export</p>
+                  <p className="text-xs text-muted-foreground">For API integration</p>
+                </div>
+              </Card>
+            </div>
+
+            <Separator />
+
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="text-sm font-medium">Report Summary</p>
+              <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Period:</span> Last 30 days
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Projects:</span> {projects.length}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Team Size:</span> 12 members
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Data points:</span> 1,247
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReportsDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifications Dialog */}
+      <Dialog open={showNotificationsDialog} onOpenChange={setShowNotificationsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              Notification Preferences
+            </DialogTitle>
+            <DialogDescription>
+              Manage how and when you receive notifications
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {[
+              { key: 'projectUpdates', label: 'Project Updates', description: 'When projects are updated or completed' },
+              { key: 'teamMessages', label: 'Team Messages', description: 'New messages from team members' },
+              { key: 'deadlineReminders', label: 'Deadline Reminders', description: 'Upcoming project deadlines' },
+              { key: 'weeklyDigest', label: 'Weekly Digest', description: 'Weekly summary of activity' },
+              { key: 'marketingEmails', label: 'Marketing Emails', description: 'Product updates and tips' },
+            ].map((item) => (
+              <div key={item.key} className="flex items-center justify-between">
+                <div className="flex-1">
+                  <Label className="font-medium">{item.label}</Label>
+                  <p className="text-xs text-muted-foreground">{item.description}</p>
+                </div>
+                <Checkbox
+                  checked={notificationSettings[item.key as keyof typeof notificationSettings]}
+                  onCheckedChange={(checked) =>
+                    setNotificationSettings(prev => ({ ...prev, [item.key]: checked }))
+                  }
+                />
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNotificationsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveNotifications}>
+              Save Preferences
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

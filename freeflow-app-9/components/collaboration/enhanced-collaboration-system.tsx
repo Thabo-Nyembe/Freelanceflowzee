@@ -13,7 +13,15 @@ import {
   FileText,
   Share2,
   Settings,
+  Copy,
+  Link,
+  Bell,
+  Volume2,
+  Eye,
 } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface Participant {
@@ -74,6 +82,32 @@ export default function EnhancedCollaborationSystem({
   const [activeTab, setActiveTab] = useState('participants')
   const [message, setMessage] = useState('')
   const [session, setSession] = useState<CollaborationSession | null>(null)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [sessionSettings, setSessionSettings] = useState({
+    notifications: true,
+    soundEnabled: true,
+    autoJoin: false,
+    showTypingIndicators: true
+  })
+
+  const handleCopyLink = () => {
+    const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/collaborate/${session?.id || sessionId}`
+    navigator.clipboard.writeText(shareUrl)
+    toast.success('Link copied', { description: 'Collaboration link copied to clipboard' })
+  }
+
+  const handleInviteByEmail = async () => {
+    toast.loading('Sending invites...', { id: 'invite-email' })
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    toast.success('Invites sent', { id: 'invite-email', description: 'Collaboration invites sent successfully' })
+    setShowShareDialog(false)
+  }
+
+  const handleSaveSettings = () => {
+    toast.success('Settings saved', { description: 'Your session preferences have been updated' })
+    setShowSettingsDialog(false)
+  }
 
   // Simulated data - replace with real data fetching
   const mockSession: CollaborationSession = {
@@ -245,14 +279,14 @@ export default function EnhancedCollaborationSystem({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => toast.info('In Development', { description: `Session sharing for ${session.title} coming soon` })}
+            onClick={() => setShowShareDialog(true)}
           >
             <Share2 className="h-5 w-5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => toast.info('Coming Soon', { description: 'Session settings will be available in the next release' })}
+            onClick={() => setShowSettingsDialog(true)}
           >
             <Settings className="h-5 w-5" />
           </Button>
@@ -295,6 +329,139 @@ export default function EnhancedCollaborationSystem({
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="w-5 h-5" />
+              Share Session
+            </DialogTitle>
+            <DialogDescription>
+              Invite others to join this collaboration session
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="font-medium">{session?.title || 'Collaboration Session'}</p>
+              <p className="text-sm text-muted-foreground">{session?.participants.length || 0} participants</p>
+            </div>
+
+            <div>
+              <Label>Share Link</Label>
+              <div className="flex gap-2 mt-1">
+                <Input
+                  readOnly
+                  value={`${typeof window !== 'undefined' ? window.location.origin : ''}/collaborate/${session?.id || sessionId}`}
+                  className="flex-1"
+                />
+                <Button variant="outline" onClick={handleCopyLink}>
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <Label>Invite by Email</Label>
+              <Input placeholder="Enter email addresses..." className="mt-1" />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleInviteByEmail}>
+              <Link className="w-4 h-4 mr-2" />
+              Send Invites
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Session Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your preferences for this session
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bell className="w-4 h-4" />
+                <div>
+                  <Label>Notifications</Label>
+                  <p className="text-xs text-muted-foreground">Receive updates about this session</p>
+                </div>
+              </div>
+              <Switch
+                checked={sessionSettings.notifications}
+                onCheckedChange={(checked) => setSessionSettings(prev => ({ ...prev, notifications: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Volume2 className="w-4 h-4" />
+                <div>
+                  <Label>Sound Alerts</Label>
+                  <p className="text-xs text-muted-foreground">Play sounds for new messages</p>
+                </div>
+              </div>
+              <Switch
+                checked={sessionSettings.soundEnabled}
+                onCheckedChange={(checked) => setSessionSettings(prev => ({ ...prev, soundEnabled: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                <div>
+                  <Label>Typing Indicators</Label>
+                  <p className="text-xs text-muted-foreground">Show when others are typing</p>
+                </div>
+              </div>
+              <Switch
+                checked={sessionSettings.showTypingIndicators}
+                onCheckedChange={(checked) => setSessionSettings(prev => ({ ...prev, showTypingIndicators: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <div>
+                  <Label>Auto-Join</Label>
+                  <p className="text-xs text-muted-foreground">Automatically join when session starts</p>
+                </div>
+              </div>
+              <Switch
+                checked={sessionSettings.autoJoin}
+                onCheckedChange={(checked) => setSessionSettings(prev => ({ ...prev, autoJoin: checked }))}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 } 

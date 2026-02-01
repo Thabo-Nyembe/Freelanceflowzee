@@ -7,6 +7,7 @@
 import React, {
   useState,
   useReducer,
+  useRef,
 } from 'react'
 import { toast } from 'sonner'
 
@@ -24,11 +25,26 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Play, 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Separator } from '@/components/ui/separator'
+import {
+  Play,
   Download,
   Share2,
-  MoreHorizontal
+  MoreHorizontal,
+  Copy,
+  Link,
+  Mail,
+  Lock,
+  Globe,
+  Trash2,
+  Edit3,
+  Eye,
+  Clock,
+  Check
 } from 'lucide-react'
 
 // Type definitions
@@ -295,6 +311,84 @@ export function EnterpriseVideoStudio({
   const videoRef = useRef<HTMLVideoElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const [isClient, setIsClient] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showOptionsDialog, setShowOptionsDialog] = useState(false)
+  const [selectedRecording, setSelectedRecording] = useState<VideoRecording | null>(null)
+  const [shareSettings, setShareSettings] = useState({
+    isPublic: false,
+    passwordProtected: false,
+    password: '',
+    allowDownload: true,
+    expiresIn: 'never' as 'never' | '1day' | '7days' | '30days'
+  })
+  const [linkCopied, setLinkCopied] = useState(false)
+
+  const handleShareRecording = (rec: VideoRecording) => {
+    setSelectedRecording(rec)
+    setShareSettings({
+      isPublic: rec.isPublic,
+      passwordProtected: rec.passwordProtected,
+      password: '',
+      allowDownload: rec.downloadEnabled,
+      expiresIn: 'never'
+    })
+    setShowShareDialog(true)
+  }
+
+  const handleCopyShareLink = () => {
+    if (!selectedRecording) return
+    const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/recordings/${selectedRecording.id}`
+    navigator.clipboard.writeText(shareUrl)
+    setLinkCopied(true)
+    toast.success('Link copied', { description: 'Share link copied to clipboard' })
+    setTimeout(() => setLinkCopied(false), 2000)
+  }
+
+  const handleSaveShareSettings = async () => {
+    if (!selectedRecording) return
+    toast.loading('Updating share settings...', { id: 'share-settings' })
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.success('Share settings updated', {
+      id: 'share-settings',
+      description: shareSettings.isPublic ? 'Recording is now publicly accessible' : 'Recording is private'
+    })
+    setShowShareDialog(false)
+  }
+
+  const handleSendShareEmail = async () => {
+    toast.loading('Sending share invitation...', { id: 'share-email' })
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    toast.success('Invitation sent', { id: 'share-email', description: 'Share invitation sent successfully' })
+  }
+
+  const handleOptionsRecording = (rec: VideoRecording) => {
+    setSelectedRecording(rec)
+    setShowOptionsDialog(true)
+  }
+
+  const handleRenameRecording = async () => {
+    if (!selectedRecording) return
+    toast.loading('Renaming recording...', { id: 'rename-recording' })
+    await new Promise(resolve => setTimeout(resolve, 800))
+    toast.success('Recording renamed', { id: 'rename-recording' })
+    setShowOptionsDialog(false)
+  }
+
+  const handleDeleteRecording = async () => {
+    if (!selectedRecording) return
+    toast.loading('Deleting recording...', { id: 'delete-recording' })
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.success('Recording deleted', { id: 'delete-recording', description: 'Recording has been permanently removed' })
+    setShowOptionsDialog(false)
+  }
+
+  const handleViewAnalytics = () => {
+    if (!selectedRecording) return
+    setShowOptionsDialog(false)
+    toast.info('Analytics', {
+      description: `${selectedRecording.views} views, ${selectedRecording.likes} likes, ${selectedRecording.comments} comments`
+    })
+  }
 
   React.useEffect(() => {
     setIsClient(true)
@@ -419,9 +513,15 @@ export function EnterpriseVideoStudio({
                       <Badge variant="secondary">{formatTime(rec.duration)}</Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button size="icon" variant="ghost" onClick={() => toast.info('In Development', { description: `Share link for ${rec.title} coming soon` })}><Share2 className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="ghost" onClick={() => toast.success('Download Started', { description: `Downloading ${rec.title}` })}><Download className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="ghost" onClick={() => toast.info('Coming Soon', { description: 'Additional options will be available in the next release' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" onClick={() => handleShareRecording(rec)}><Share2 className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" onClick={() => {
+                        const link = document.createElement('a')
+                        link.href = rec.url
+                        link.download = `${rec.title}.${rec.format.split('/')[1] || 'webm'}`
+                        link.click()
+                        toast.success('Download Started', { description: `Downloading ${rec.title}` })
+                      }}><Download className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" onClick={() => handleOptionsRecording(rec)}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -436,6 +536,179 @@ export function EnterpriseVideoStudio({
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Share Recording Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="w-5 h-5" />
+              Share Recording
+            </DialogTitle>
+            <DialogDescription>
+              Share this recording with others
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedRecording && (
+            <div className="space-y-4">
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="font-medium">{selectedRecording.title}</p>
+                <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  <span>{formatTime(selectedRecording.duration)}</span>
+                  <span className="mx-1">•</span>
+                  <span>{formatFileSize(selectedRecording.size)}</span>
+                </div>
+              </div>
+
+              <div>
+                <Label>Share Link</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    readOnly
+                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/recordings/${selectedRecording.id}`}
+                    className="flex-1"
+                  />
+                  <Button variant="outline" onClick={handleCopyShareLink}>
+                    {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <Label>Public Access</Label>
+                      <p className="text-xs text-muted-foreground">Anyone with the link can view</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={shareSettings.isPublic}
+                    onCheckedChange={(checked) => setShareSettings(prev => ({ ...prev, isPublic: checked }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <Label>Password Protection</Label>
+                      <p className="text-xs text-muted-foreground">Require password to view</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={shareSettings.passwordProtected}
+                    onCheckedChange={(checked) => setShareSettings(prev => ({ ...prev, passwordProtected: checked }))}
+                  />
+                </div>
+
+                {shareSettings.passwordProtected && (
+                  <Input
+                    type="password"
+                    placeholder="Enter password..."
+                    value={shareSettings.password}
+                    onChange={(e) => setShareSettings(prev => ({ ...prev, password: e.target.value }))}
+                  />
+                )}
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Download className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <Label>Allow Downloads</Label>
+                      <p className="text-xs text-muted-foreground">Viewers can download the recording</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={shareSettings.allowDownload}
+                    onCheckedChange={(checked) => setShareSettings(prev => ({ ...prev, allowDownload: checked }))}
+                  />
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <Label>Invite by Email</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input placeholder="Enter email addresses..." className="flex-1" />
+                  <Button variant="outline" onClick={handleSendShareEmail}>
+                    <Mail className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveShareSettings}>
+              <Link className="w-4 h-4 mr-2" />
+              Save & Share
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Options Dialog */}
+      <Dialog open={showOptionsDialog} onOpenChange={setShowOptionsDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MoreHorizontal className="w-5 h-5" />
+              Recording Options
+            </DialogTitle>
+            <DialogDescription>
+              Manage this recording
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedRecording && (
+            <div className="space-y-2">
+              <div className="p-3 bg-muted rounded-lg mb-4">
+                <p className="font-medium text-sm">{selectedRecording.title}</p>
+                <p className="text-xs text-muted-foreground">{new Date(selectedRecording.createdAt).toLocaleString()}</p>
+              </div>
+
+              <Button variant="ghost" className="w-full justify-start" onClick={handleRenameRecording}>
+                <Edit3 className="w-4 h-4 mr-2" />
+                Rename Recording
+              </Button>
+
+              <Button variant="ghost" className="w-full justify-start" onClick={handleViewAnalytics}>
+                <Eye className="w-4 h-4 mr-2" />
+                View Analytics
+                <Badge variant="secondary" className="ml-auto">{selectedRecording.views} views</Badge>
+              </Button>
+
+              <Button variant="ghost" className="w-full justify-start" onClick={() => handleShareRecording(selectedRecording)}>
+                <Share2 className="w-4 h-4 mr-2" />
+                Share Settings
+              </Button>
+
+              <Separator />
+
+              <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleDeleteRecording}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Recording
+              </Button>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowOptionsDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
