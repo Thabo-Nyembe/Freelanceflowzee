@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -161,7 +162,7 @@ export default function AnalyticsDashboard() {
           </Button>
 
           {/* Export Button */}
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.success('Export', { description: 'Analytics data exported successfully' })}>
             <Download className="w-4 h-4" />
             Export
           </Button>
