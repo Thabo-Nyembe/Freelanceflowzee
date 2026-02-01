@@ -32,8 +32,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import {
   Users, MoreVertical, Phone, Video, Search,
-  Check, CheckCheck, Clock, Circle
+  Check, CheckCheck, Clock, Circle, X, ChevronUp, ChevronDown
 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -73,8 +74,13 @@ export function RealtimeChat({
   className = ''
 }: RealtimeChatProps) {
   const [messageText, setMessageText] = useState('')
+  const [showSearch, setShowSearch] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<number[]>([])
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Real-time chat features
   const {
@@ -158,6 +164,65 @@ export function RealtimeChat({
     [handleTyping]
   )
 
+  // Search messages functionality
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query)
+    if (!query.trim()) {
+      setSearchResults([])
+      setCurrentSearchIndex(0)
+      return
+    }
+
+    const results: number[] = []
+    messages.forEach((message, index) => {
+      if (message.text?.toLowerCase().includes(query.toLowerCase())) {
+        results.push(index)
+      }
+    })
+
+    setSearchResults(results)
+    setCurrentSearchIndex(0)
+
+    if (results.length > 0) {
+      // Scroll to first result
+      setTimeout(() => {
+        const element = document.getElementById(`message-${results[0]}`)
+        element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
+    }
+  }, [messages])
+
+  // Navigate to next search result
+  const nextSearchResult = useCallback(() => {
+    if (searchResults.length === 0) return
+    const newIndex = (currentSearchIndex + 1) % searchResults.length
+    setCurrentSearchIndex(newIndex)
+    // Scroll to the message
+    const element = document.getElementById(`message-${searchResults[newIndex]}`)
+    element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [searchResults, currentSearchIndex])
+
+  // Navigate to previous search result
+  const prevSearchResult = useCallback(() => {
+    if (searchResults.length === 0) return
+    const newIndex = currentSearchIndex === 0 ? searchResults.length - 1 : currentSearchIndex - 1
+    setCurrentSearchIndex(newIndex)
+    // Scroll to the message
+    const element = document.getElementById(`message-${searchResults[newIndex]}`)
+    element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [searchResults, currentSearchIndex])
+
+  // Toggle search panel
+  const toggleSearch = useCallback(() => {
+    setShowSearch(!showSearch)
+    if (!showSearch) {
+      setTimeout(() => searchInputRef.current?.focus(), 100)
+    } else {
+      setSearchQuery('')
+      setSearchResults([])
+    }
+  }, [showSearch])
+
   // Get message status icon
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -239,7 +304,7 @@ export function RealtimeChat({
 
             {/* Header actions */}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => toast.info('In Development', { description: 'Message search will be available soon' })}>
+              <Button variant="ghost" size="sm" onClick={toggleSearch} className={showSearch ? 'bg-accent' : ''}>
                 <Search className="w-4 h-4" />
               </Button>
               <Button variant="ghost" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Voice calls are coming in Q2 2026' })}>
@@ -259,6 +324,47 @@ export function RealtimeChat({
         </CardHeader>
       </Card>
 
+      {/* Search Bar */}
+      <AnimatePresence>
+        {showSearch && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="border-b bg-muted/50"
+          >
+            <div className="p-2 flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  ref={searchInputRef}
+                  placeholder="Search messages..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="pl-9 pr-4"
+                />
+              </div>
+              {searchResults.length > 0 && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {currentSearchIndex + 1} / {searchResults.length}
+                  </span>
+                  <Button variant="ghost" size="sm" onClick={prevSearchResult} className="h-8 w-8 p-0">
+                    <ChevronUp className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={nextSearchResult} className="h-8 w-8 p-0">
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              <Button variant="ghost" size="sm" onClick={toggleSearch} className="h-8 w-8 p-0">
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Messages Area */}
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-4">
@@ -267,6 +373,20 @@ export function RealtimeChat({
               const isOwnMessage = message.sender_id === userId
               const messageReactions = reactions.filter(r => r.message_id === message.id)
               const messageReceipts = readReceipts.filter(r => r.message_id === message.id)
+              const isSearchResult = searchResults.includes(index)
+              const isCurrentSearchResult = isSearchResult && searchResults[currentSearchIndex] === index
+
+              // Highlight search text in message
+              const highlightText = (text: string) => {
+                if (!searchQuery || !isSearchResult) return text
+                const regex = new RegExp(`(${searchQuery})`, 'gi')
+                const parts = text.split(regex)
+                return parts.map((part, i) =>
+                  regex.test(part) ? (
+                    <mark key={i} className="bg-yellow-300 text-black rounded px-0.5">{part}</mark>
+                  ) : part
+                )
+              }
 
               return (
                 <motion.div
@@ -276,6 +396,7 @@ export function RealtimeChat({
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: index * 0.02 }}
                   className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
+                  id={`message-${index}`}
                 >
                   <div className={`max-w-[70%] ${isOwnMessage ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
                     {/* Message bubble */}
@@ -284,9 +405,9 @@ export function RealtimeChat({
                         isOwnMessage
                           ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white'
                           : 'bg-muted'
-                      }`}
+                      } ${isCurrentSearchResult ? 'ring-2 ring-yellow-400 ring-offset-2' : ''} ${isSearchResult && !isCurrentSearchResult ? 'ring-1 ring-yellow-200' : ''}`}
                     >
-                      <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                      <p className="text-sm whitespace-pre-wrap">{highlightText(message.text || '')}</p>
 
                       {/* Reactions */}
                       {messageReactions.length > 0 && (

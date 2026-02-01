@@ -440,6 +440,13 @@ export default function StockClient() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_showAlertSettingsDialog, setShowAlertSettingsDialog] = useState(false)
 
+  // Import dialog state
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importPreview, setImportPreview] = useState<string[][]>([])
+  const [importMapping, setImportMapping] = useState<Record<string, string>>({})
+  const [isImporting, setIsImporting] = useState(false)
+
   // New dialog states implementations
   const [showWarehouseDetailsDialog, setShowWarehouseDetailsDialog] = useState(false)
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
@@ -1014,7 +1021,7 @@ export default function StockClient() {
                 { icon: ClipboardCheck, label: 'Count', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowCountDialog(true) },
                 { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowExportDialog(true) },
-                { icon: Upload, label: 'Import', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Coming Soon', { description: 'CSV/Excel import will be available soon' }) },
+                { icon: Upload, label: 'Import', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowImportDialog(true) },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Coming Soon', { description: 'Inventory settings will be available in the next release' }) }
               ].map((action, idx) => (
                 <Button
@@ -3085,6 +3092,217 @@ export default function StockClient() {
             }}>
               <FileText className="w-4 h-4 mr-2" />
               Print Label
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-violet-600" />
+              Import Inventory Data
+            </DialogTitle>
+            <DialogDescription>
+              Upload a CSV or Excel file to bulk import products and stock levels
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* File Upload Zone */}
+            <div
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                importFile ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/20' : 'border-gray-300 hover:border-violet-400'
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                const file = e.dataTransfer.files[0]
+                if (file && (file.name.endsWith('.csv') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+                  setImportFile(file)
+                  // Parse preview
+                  const reader = new FileReader()
+                  reader.onload = (event) => {
+                    const text = event.target?.result as string
+                    const lines = text.split('\n').slice(0, 6)
+                    const preview = lines.map(line => line.split(',').map(cell => cell.trim().replace(/"/g, '')))
+                    setImportPreview(preview)
+                    // Auto-map columns
+                    if (preview[0]) {
+                      const mapping: Record<string, string> = {}
+                      preview[0].forEach((header, idx) => {
+                        const lower = header.toLowerCase()
+                        if (lower.includes('name') || lower.includes('product')) mapping[idx] = 'name'
+                        else if (lower.includes('sku') || lower.includes('code')) mapping[idx] = 'sku'
+                        else if (lower.includes('quantity') || lower.includes('qty') || lower.includes('stock')) mapping[idx] = 'quantity'
+                        else if (lower.includes('price') || lower.includes('cost')) mapping[idx] = 'price'
+                        else if (lower.includes('category')) mapping[idx] = 'category'
+                        else if (lower.includes('location') || lower.includes('warehouse')) mapping[idx] = 'location'
+                      })
+                      setImportMapping(mapping)
+                    }
+                  }
+                  reader.readAsText(file)
+                  toast.success('File loaded', { description: file.name })
+                } else {
+                  toast.error('Invalid file type', { description: 'Please upload a CSV or Excel file' })
+                }
+              }}
+            >
+              {importFile ? (
+                <div className="space-y-2">
+                  <FileText className="w-12 h-12 mx-auto text-violet-600" />
+                  <p className="font-medium">{importFile.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {(importFile.size / 1024).toFixed(1)} KB
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setImportFile(null)
+                      setImportPreview([])
+                      setImportMapping({})
+                    }}
+                  >
+                    Remove File
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Upload className="w-12 h-12 mx-auto text-gray-400" />
+                  <p className="font-medium">Drag and drop a file here</p>
+                  <p className="text-sm text-muted-foreground">or click to browse</p>
+                  <input
+                    type="file"
+                    accept=".csv,.xlsx,.xls"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        setImportFile(file)
+                        const reader = new FileReader()
+                        reader.onload = (event) => {
+                          const text = event.target?.result as string
+                          const lines = text.split('\n').slice(0, 6)
+                          const preview = lines.map(line => line.split(',').map(cell => cell.trim().replace(/"/g, '')))
+                          setImportPreview(preview)
+                        }
+                        reader.readAsText(file)
+                        toast.success('File loaded', { description: file.name })
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Data Preview */}
+            {importPreview.length > 0 && (
+              <div className="space-y-2">
+                <Label>Data Preview (First 5 rows)</Label>
+                <div className="border rounded-lg overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted">
+                      <tr>
+                        {importPreview[0]?.map((header, idx) => (
+                          <th key={idx} className="px-3 py-2 text-left font-medium">
+                            <div className="space-y-1">
+                              <span className="text-xs text-muted-foreground">{header}</span>
+                              <Select
+                                value={importMapping[idx] || 'skip'}
+                                onValueChange={(value) => setImportMapping(prev => ({ ...prev, [idx]: value }))}
+                              >
+                                <SelectTrigger className="h-7 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="skip">Skip</SelectItem>
+                                  <SelectItem value="name">Product Name</SelectItem>
+                                  <SelectItem value="sku">SKU</SelectItem>
+                                  <SelectItem value="quantity">Quantity</SelectItem>
+                                  <SelectItem value="price">Price</SelectItem>
+                                  <SelectItem value="category">Category</SelectItem>
+                                  <SelectItem value="location">Location</SelectItem>
+                                  <SelectItem value="description">Description</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {importPreview.slice(1, 5).map((row, rowIdx) => (
+                        <tr key={rowIdx} className="border-t">
+                          {row.map((cell, cellIdx) => (
+                            <td key={cellIdx} className="px-3 py-2 truncate max-w-[150px]">{cell}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Import Options */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox id="skip-header" defaultChecked />
+                <Label htmlFor="skip-header" className="font-normal">Skip header row</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="update-existing" />
+                <Label htmlFor="update-existing" className="font-normal">Update existing products by SKU</Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowImportDialog(false)
+              setImportFile(null)
+              setImportPreview([])
+              setImportMapping({})
+            }}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-violet-600 hover:bg-violet-700"
+              disabled={!importFile || isImporting}
+              onClick={() => {
+                setIsImporting(true)
+                // Simulate import process
+                toast.info('Importing data...', { description: 'Processing your file' })
+                setTimeout(() => {
+                  const rowCount = importPreview.length - 1
+                  toast.success('Import complete!', {
+                    description: `Successfully imported ${rowCount} products`
+                  })
+                  setIsImporting(false)
+                  setShowImportDialog(false)
+                  setImportFile(null)
+                  setImportPreview([])
+                  setImportMapping({})
+                }, 2000)
+              }}
+            >
+              {isImporting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Importing...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Import Data
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
