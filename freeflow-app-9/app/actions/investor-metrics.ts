@@ -60,7 +60,7 @@ export async function createInvestorMetric(input: InvestorMetricInput): Promise<
     logger.info('Investor metric created successfully', { metricId: data.id })
     revalidatePath('/dashboard/investor-metrics-v2')
     return actionSuccess(data, 'Investor metric created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating investor metric', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -112,7 +112,7 @@ export async function updateInvestorMetric(id: string, updates: Partial<Investor
     logger.info('Investor metric updated successfully', { metricId: id })
     revalidatePath('/dashboard/investor-metrics-v2')
     return actionSuccess(data, 'Investor metric updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating investor metric', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -141,7 +141,7 @@ export async function deleteInvestorMetric(id: string): Promise<ActionResult<{ s
     logger.info('Investor metric deleted successfully', { metricId: id })
     revalidatePath('/dashboard/investor-metrics-v2')
     return actionSuccess({ success: true }, 'Investor metric deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting investor metric', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -169,7 +169,7 @@ export async function getInvestorMetrics(): Promise<ActionResult<any[]>> {
 
     logger.info('Investor metrics fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Investor metrics fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting investor metrics', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -198,7 +198,7 @@ export async function getMetricsByCategory(category: string): Promise<ActionResu
 
     logger.info('Metrics by category fetched successfully', { category, count: data?.length || 0 })
     return actionSuccess(data || [], 'Metrics fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting metrics by category', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -664,7 +664,7 @@ export default function TimeTrackingPage() {
       setTimeEntries([])
       toast.success("All Entries Deleted - " + result.deletedCount + " entries removed")
       announce('All time entries deleted', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || 'Failed to delete entries')
     } finally {
       setIsDeleting(false)

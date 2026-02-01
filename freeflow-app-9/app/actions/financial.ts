@@ -27,7 +27,7 @@ export async function createFinancialRecord(data: any): Promise<ActionResult<any
     revalidatePath('/dashboard/financial-v2')
     logger.info('Financial record created successfully', { recordId: record.id })
     return actionSuccess(record, 'Financial record created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating financial record', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -55,7 +55,7 @@ export async function updateFinancialRecord(id: string, data: any): Promise<Acti
     revalidatePath('/dashboard/financial-v2')
     logger.info('Financial record updated successfully', { recordId: id })
     return actionSuccess(record, 'Financial record updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating financial record', { error, recordId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -81,7 +81,7 @@ export async function deleteFinancialRecord(id: string): Promise<ActionResult<vo
     revalidatePath('/dashboard/financial-v2')
     logger.info('Financial record deleted successfully', { recordId: id })
     return actionSuccess(undefined, 'Financial record deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting financial record', { error, recordId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -113,7 +113,7 @@ export async function approveFinancialRecord(id: string): Promise<ActionResult<a
     revalidatePath('/dashboard/financial-v2')
     logger.info('Financial record approved successfully', { recordId: id })
     return actionSuccess(record, 'Financial record approved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error approving financial record', { error, recordId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -144,7 +144,7 @@ export async function processFinancialRecord(id: string): Promise<ActionResult<a
     revalidatePath('/dashboard/financial-v2')
     logger.info('Financial record processed successfully', { recordId: id })
     return actionSuccess(record, 'Financial record processed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error processing financial record', { error, recordId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

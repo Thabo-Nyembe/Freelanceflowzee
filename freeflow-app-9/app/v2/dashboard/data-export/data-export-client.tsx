@@ -439,7 +439,7 @@ export default function DataExportClient() {
       toast.success('Export created successfully')
       setFormData({ export_name: '', description: '', export_format: 'csv', export_type: 'manual', data_source: 'users' })
       refreshExports()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create export')
     }
   }
@@ -453,7 +453,7 @@ export default function DataExportClient() {
       })
       toast.success(`Export started - "${exportName}" is now running`)
       refreshExports()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to start export')
     }
   }
@@ -468,7 +468,7 @@ export default function DataExportClient() {
       })
       toast.success(`Export scheduled - "${exportName}" scheduled for 1 hour`)
       refreshExports()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to schedule export')
     }
   }
@@ -484,7 +484,7 @@ export default function DataExportClient() {
       } else {
         toast.error('Download URL not available')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Download failed')
     }
   }
@@ -498,7 +498,7 @@ export default function DataExportClient() {
       })
       toast.success(`Export deleted - "${exportName}" has been removed`)
       refreshExports()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete export')
     }
   }
@@ -511,7 +511,7 @@ export default function DataExportClient() {
       })
       toast.success(`Export cancelled - "${exportName}"`)
       refreshExports()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to cancel export')
     }
   }
@@ -555,7 +555,7 @@ export default function DataExportClient() {
           error: 'Failed to create pipeline'
         }
       )
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create pipeline')
     }
   }
@@ -594,7 +594,7 @@ export default function DataExportClient() {
       toast.success("All syncs completed successfully - " + totalPipelines + " pipelines synced")
       setShowRunAllSyncsDialog(false)
       setSyncProgress(0)
-    } catch (error: any) {
+    } catch (error) {
       setIsSyncing(false)
       setSyncProgress(0)
       toast.error('Failed to run all syncs')

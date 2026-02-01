@@ -63,7 +63,7 @@ export async function getStoreApps(options?: {
     if (error) return actionError(error.message, 'DATABASE_ERROR')
 
     return actionSuccess(data || [], 'Store apps fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching store apps:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -87,7 +87,7 @@ export async function getInstalledApps(): Promise<ActionResult<any[]>> {
     if (error) return actionError(error.message, 'DATABASE_ERROR')
 
     return actionSuccess(data || [], 'Installed apps fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching installed apps:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -106,7 +106,7 @@ export async function getStoreApp(appId: string): Promise<ActionResult<any>> {
     if (error) return actionError(error.message, 'DATABASE_ERROR')
 
     return actionSuccess(data, 'Store app fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching store app:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -143,7 +143,7 @@ export async function installApp(appId: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/app-store-v2')
     return actionSuccess(data, 'App installed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error installing app:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -173,7 +173,7 @@ export async function uninstallApp(appId: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/app-store-v2')
     return actionSuccess(data, 'App uninstalled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error uninstalling app:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -206,7 +206,7 @@ export async function startTrial(appId: string, trialDays: number = 14): Promise
 
     revalidatePath('/dashboard/app-store-v2')
     return actionSuccess(data, 'Trial started successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error starting trial:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -246,7 +246,7 @@ export async function updateApp(appId: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/app-store-v2')
     return actionSuccess(data, 'App updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating app:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -282,7 +282,7 @@ export async function createAppReview(
 
     revalidatePath('/dashboard/app-store-v2')
     return actionSuccess(data, 'Review created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error creating app review:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -303,7 +303,7 @@ export async function getAppReviews(appId: string, limit: number = 50): Promise<
     if (error) return actionError(error.message, 'DATABASE_ERROR')
 
     return actionSuccess(data || [], 'App reviews fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching app reviews:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -331,7 +331,7 @@ export async function markReviewHelpful(reviewId: string): Promise<ActionResult<
     if (error) return actionError(error.message, 'DATABASE_ERROR')
 
     return actionSuccess(data, 'Review marked as helpful successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error marking review as helpful:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -377,7 +377,7 @@ export async function getStoreStats(): Promise<ActionResult<any>> {
     }
 
     return actionSuccess(stats, 'Store stats fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching store stats:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

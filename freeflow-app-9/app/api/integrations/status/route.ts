@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       lastChecked: new Date().toISOString()
     });
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Integration status check error', { error: error.message });
 
     return NextResponse.json(

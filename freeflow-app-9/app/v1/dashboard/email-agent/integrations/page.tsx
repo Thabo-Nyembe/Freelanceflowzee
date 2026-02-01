@@ -150,7 +150,7 @@ export default function IntegrationsManagement() {
       } else {
         throw new Error(result.error);
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Connection Failed',
         description: error.message,
@@ -189,7 +189,7 @@ export default function IntegrationsManagement() {
 
         setIntegrations(prev => prev.filter(int => int.id !== disconnectIntegration.id));
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Failed to Remove',
         description: error.message,

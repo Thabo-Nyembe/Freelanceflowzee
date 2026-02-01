@@ -1014,7 +1014,7 @@ export default function DesktopAppClient() {
       toast.success('App submitted for notarization')
       setShowNotarizeDialog(false)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss()
       console.error('Notarization error:', error)
       toast.error('Failed to submit for notarization', { description: error.message })
@@ -1057,7 +1057,7 @@ export default function DesktopAppClient() {
       toast.success(`Deployed ${latestBuild.version} to production`)
       setShowDeployDialog(false)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss()
       console.error('Deployment error:', error)
       toast.error('Failed to deploy to production', { description: error.message })

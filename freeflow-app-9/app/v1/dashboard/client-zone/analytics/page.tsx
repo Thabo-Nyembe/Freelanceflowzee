@@ -251,7 +251,7 @@ export default function AnalyticsPage() {
       toast.success('Export started!', {
         description: `Analytics exported as ${format.toUpperCase()}`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export analytics', { error })
       toast.error('Failed to export data', {
         description: error.message || 'Please try again later'
@@ -283,7 +283,7 @@ export default function AnalyticsPage() {
       toast.success('Share link copied!', {
         description: 'Report summary copied to clipboard'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to share report', { error })
       toast.error('Failed to share report')
     }

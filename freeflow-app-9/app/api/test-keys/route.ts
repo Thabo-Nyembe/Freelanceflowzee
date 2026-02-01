@@ -27,7 +27,7 @@ export async function GET() {
         key: apiKey.substring(0, 15) + '...'
       })
     }
-  } catch (error: any) {
+  } catch (error) {
     results.push({
       service: 'OpenAI (GPT-4, DALL-E)',
       status: error.status === 401 || error.message?.includes('Incorrect API key') ? 'invalid' : 'error',
@@ -74,7 +74,7 @@ export async function GET() {
         })
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     results.push({
       service: 'Google AI (Gemini)',
       status: 'error',
@@ -121,7 +121,7 @@ export async function GET() {
         })
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     results.push({
       service: 'OpenRouter (Claude, Llama)',
       status: 'error',
@@ -158,7 +158,7 @@ export async function GET() {
         })
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     results.push({
       service: 'Stripe (Payments)',
       status: 'error',
@@ -200,7 +200,7 @@ export async function GET() {
         })
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     results.push({
       service: 'Supabase (Database)',
       status: 'error',

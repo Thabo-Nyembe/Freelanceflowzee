@@ -77,7 +77,7 @@ export async function PUT(
       file: updatedFile,
       message: 'File moved successfully'
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('File move failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to move file' },

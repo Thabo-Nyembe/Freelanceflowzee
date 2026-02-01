@@ -680,7 +680,7 @@ export default function AiCodeCompletionClient() {
       try {
         const { incrementSnippetUsage } = await import('@/lib/ai-code-queries')
         await incrementSnippetUsage(snippetId)
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to track snippet usage', { error: error.message })
       }
     }

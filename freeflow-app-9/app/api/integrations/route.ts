@@ -64,7 +64,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Integrations GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch integrations' },
@@ -352,7 +352,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Integrations POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
@@ -389,7 +389,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       integration,
       message: 'Integration updated successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Integrations PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update integration' },
@@ -425,7 +425,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       success: true,
       message: 'Integration deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Integrations DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete integration' },

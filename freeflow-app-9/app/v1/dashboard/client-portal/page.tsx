@@ -341,7 +341,7 @@ export default function ClientPortalPage() {
         } else {
           throw new Error(result.error || 'Failed to load clients')
         }
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Portal data load error', {
           error: error instanceof Error ? error.message : 'Unknown error',
           errorObject: error
@@ -508,7 +508,7 @@ export default function ClientPortalPage() {
       } else {
         throw new Error(result.error || 'Failed to add client')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Client creation error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,
@@ -557,7 +557,7 @@ export default function ClientPortalPage() {
       } else {
         throw new Error(result.error || 'Failed to delete client')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Client deletion error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,
@@ -640,7 +640,7 @@ export default function ClientPortalPage() {
       announce('Project added successfully', 'polite')
       setIsAddProjectModalOpen(false)
       setProjectForm({ name: '', description: '', budget: '', clientId: '' })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Project creation error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,
@@ -712,7 +712,7 @@ export default function ClientPortalPage() {
       })
       setIsAddCommunicationModalOpen(false)
       setCommunicationForm({ type: 'email', subject: '', content: '' })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Communication creation error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,

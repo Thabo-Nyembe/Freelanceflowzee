@@ -43,7 +43,7 @@ export async function getVideoProjects(): Promise<ActionResult<any>> {
 
     logger.info('Video projects retrieved', { userId: user.id, count: data?.length })
     return actionSuccess(data, 'Video projects retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in getVideoProjects', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -70,7 +70,7 @@ export async function getVideoProject(id: string): Promise<ActionResult<any>> {
 
     logger.info('Video project retrieved', { userId: user.id, projectId: id })
     return actionSuccess(data, 'Video project retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in getVideoProject', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -103,7 +103,7 @@ export async function createVideoProject(input: VideoProjectInput): Promise<Acti
     revalidatePath('/dashboard/video-studio-v2')
     logger.info('Video project created', { userId: user.id, projectId: data.id })
     return actionSuccess(data, 'Video project created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in createVideoProject', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -135,7 +135,7 @@ export async function updateVideoProject(id: string, input: Partial<VideoProject
     revalidatePath('/dashboard/video-studio-v2')
     logger.info('Video project updated', { userId: user.id, projectId: id })
     return actionSuccess(data, 'Video project updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateVideoProject', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -162,7 +162,7 @@ export async function deleteVideoProject(id: string): Promise<ActionResult<any>>
     revalidatePath('/dashboard/video-studio-v2')
     logger.info('Video project deleted', { userId: user.id, projectId: id })
     return actionSuccess({ id }, 'Video project deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in deleteVideoProject', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -211,7 +211,7 @@ export async function processVideoProject(id: string): Promise<ActionResult<any>
     revalidatePath('/dashboard/video-studio-v2')
     logger.info('Video project processed', { userId: user.id, projectId: id })
     return actionSuccess(data, 'Video project processed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in processVideoProject', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -247,7 +247,7 @@ export async function getVideoProjectStats(): Promise<ActionResult<any>> {
 
     logger.info('Video project stats retrieved', { userId: user.id })
     return actionSuccess(stats, 'Video project stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in getVideoProjectStats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

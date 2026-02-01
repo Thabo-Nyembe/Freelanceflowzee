@@ -884,7 +884,7 @@ export default function CertificationsClient() {
       toast.success('Certification created successfully')
       setShowCreateDialog(false)
       resetForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create certification')
     } finally {
       setIsSubmitting(false)
@@ -920,7 +920,7 @@ export default function CertificationsClient() {
       setShowEditDialog(false)
       setCertToEdit(null)
       resetForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update certification')
     } finally {
       setIsSubmitting(false)
@@ -935,7 +935,7 @@ export default function CertificationsClient() {
       toast.success('Certification deleted successfully')
       setShowDeleteDialog(false)
       setCertToDelete(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete certification')
     } finally {
       setIsSubmitting(false)
@@ -993,7 +993,7 @@ export default function CertificationsClient() {
         verifierEmail: '',
         verifierOrganization: ''
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Verification failed')
     } finally {
       setIsSubmitting(false)
@@ -1073,7 +1073,7 @@ export default function CertificationsClient() {
       toast.success("Report Exported Successfully - exported as " + formatLabels[exportReportForm.format])
 
       setShowExportReportDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed')
     } finally {
       setIsSubmitting(false)

@@ -657,7 +657,7 @@ export default function CanvasPage() {
         description: `${deleteCanvas.name} - ${canvas?.artboards.length || 0} artboards - ${canvas?.totalLayers || 0} layers - ${canvas?.size.toFixed(2) || 0}MB`
       })
       announce('Canvas deleted', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete canvas', { error: error.message, canvasId: deleteCanvas.id })
       toast.error('Failed to delete canvas', {
         description: error.message || 'Please try again'
@@ -700,7 +700,7 @@ export default function CanvasPage() {
       dispatch({ type: 'CLEAR_SELECTED_CANVASES' })
       toast.success(`${count} canvas(es) deleted`)
       announce('Selected canvases deleted', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to bulk delete canvases', { error: error.message, count })
       toast.error('Failed to delete canvases', {
         description: error.message || 'Please try again'

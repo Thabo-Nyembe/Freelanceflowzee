@@ -442,7 +442,7 @@ Satisfaction Score: ${analytics.clientSatisfaction}/5.0
       toast.success('Export completed!', {
         description: `Analytics exported as ${format.toUpperCase()}`
       })
-    } catch (error: any) {
+    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Export failed'
       logger.error('Failed to export analytics', { error, format, timeRange })
       toast.error('Failed to export data', {
@@ -514,7 +514,7 @@ Generated: ${new Date().toLocaleDateString()}`
       toast.success('Report copied to clipboard!', {
         description: 'Share the summary with your team'
       })
-    } catch (error: any) {
+    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to share report'
       logger.error('Failed to share report', { error })
       toast.error('Failed to share report', {

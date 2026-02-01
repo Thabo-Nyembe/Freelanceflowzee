@@ -154,7 +154,7 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
       })
       logger.info('Report exported successfully', { format })
       announce('Report exported successfully', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export report', { error, format })
       toast.error('Failed to export report', {
         description: error.message || 'Please try again later'
@@ -221,7 +221,7 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
           })
           announce('Data imported successfully', 'polite')
         }
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to import data', { error, fileName: file?.name })
         toast.error('Failed to import data', {
           description: error.message || 'Please check file format'

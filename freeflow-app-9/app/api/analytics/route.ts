@@ -99,7 +99,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
       timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Analytics GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch analytics' },
@@ -420,7 +420,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Analytics POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },

@@ -996,7 +996,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             toast.dismiss()
             toast.success('Connection refreshed successfully')
             refetch()
-          } catch (error: any) {
+          } catch (error) {
             toast.dismiss()
             toast.error('Failed to refresh connection', { description: error.message })
           }
@@ -3231,7 +3231,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     toast.success('Automation generated! Review and customize your workflow.')
                     setShowAIAutomationDialog(false)
                     setShowNewWorkflow(true)
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.dismiss()
                     toast.error('Failed to generate automation', { description: error.message })
                   }
@@ -3328,7 +3328,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       toast.success(`${app} connected successfully!`)
                       setShowNewConnectionDialog(false)
                       refetch()
-                    } catch (error: any) {
+                    } catch (error) {
                       toast.dismiss()
                       toast.error(`Failed to connect to ${app}`, { description: error.message })
                     }
@@ -3398,7 +3398,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     toast.success('Webhook created successfully!')
                     setShowNewWebhookDialog(false)
                     refetch()
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.dismiss()
                     toast.error('Failed to create webhook', { description: error.message })
                   }
@@ -3659,7 +3659,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     toast.dismiss()
                     toast.success('Template submitted! Our team will review it shortly.')
                     setShowSubmitTemplateDialog(false)
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.dismiss()
                     toast.error('Failed to submit template', { description: error.message })
                   }

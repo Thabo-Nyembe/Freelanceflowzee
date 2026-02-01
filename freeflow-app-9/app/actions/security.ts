@@ -111,7 +111,7 @@ export async function updateSecuritySettings(formData: FormData): Promise<Action
 
     revalidatePath('/dashboard/security-v2')
     return actionSuccess(data, 'Security settings updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating security settings:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -139,7 +139,7 @@ export async function enable2FA(method: 'app' | 'sms' | 'email'): Promise<Action
 
     revalidatePath('/dashboard/security-v2')
     return actionSuccess(data, '2FA enabled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error enabling 2FA:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -167,7 +167,7 @@ export async function disable2FA(): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/security-v2')
     return actionSuccess(data, '2FA disabled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error disabling 2FA:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -194,7 +194,7 @@ export async function enableBiometric(type: 'fingerprint' | 'face_id'): Promise<
 
     revalidatePath('/dashboard/security-v2')
     return actionSuccess(data, 'Biometric authentication enabled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error enabling biometric:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -221,7 +221,7 @@ export async function disableBiometric(): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/security-v2')
     return actionSuccess(data, 'Biometric authentication disabled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error disabling biometric:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -257,7 +257,7 @@ export async function addToIPBlacklist(ip: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/security-v2')
     return actionSuccess(data, 'IP added to blacklist successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error adding IP to blacklist:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -290,7 +290,7 @@ export async function removeFromIPBlacklist(ip: string): Promise<ActionResult<an
 
     revalidatePath('/dashboard/security-v2')
     return actionSuccess(data, 'IP removed from blacklist successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error removing IP from blacklist:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -324,7 +324,7 @@ export async function resolveSecurityEvent(id: string, notes?: string): Promise<
 
     revalidatePath('/dashboard/security-v2')
     return actionSuccess(data, 'Security event resolved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error resolving security event:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -362,7 +362,7 @@ export async function blockIPFromEvent(id: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/security-v2')
     return result
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error blocking IP from event:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -389,7 +389,7 @@ export async function terminateSession(id: string): Promise<ActionResult<void>> 
 
     revalidatePath('/dashboard/security-v2')
     return actionSuccess(undefined, 'Session terminated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error terminating session:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -412,7 +412,7 @@ export async function terminateAllOtherSessions(): Promise<ActionResult<void>> {
 
     revalidatePath('/dashboard/security-v2')
     return actionSuccess(undefined, 'All other sessions terminated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error terminating all other sessions:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -451,7 +451,7 @@ export async function initializeSecuritySettings(): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/security-v2')
     return actionSuccess(data, 'Security settings initialized successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error initializing security settings:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

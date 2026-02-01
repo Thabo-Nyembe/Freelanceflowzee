@@ -168,7 +168,7 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
         toast.success('Community loaded', {
           description: `${membersResult.data?.length || 0} members • ${postsResult.data?.length || 0} posts`
         })
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to load community data', { error: error.message })
         // Fall back to mock data on error
         setPosts(MOCK_POSTS)

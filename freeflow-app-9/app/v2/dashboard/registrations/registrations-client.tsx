@@ -899,7 +899,7 @@ export default function RegistrationsClient() {
       setShowCreateDialog(false)
       setFormData(initialFormData)
       fetchRegistrations()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating registration:', error)
       toast.error('Failed to create registration')
     } finally {
@@ -943,7 +943,7 @@ export default function RegistrationsClient() {
       setRegistrationToEdit(null)
       setFormData(initialFormData)
       fetchRegistrations()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating registration:', error)
       toast.error('Failed to update registration')
     } finally {
@@ -975,7 +975,7 @@ export default function RegistrationsClient() {
       setShowDeleteDialog(false)
       setRegistrationToDelete(null)
       fetchRegistrations()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting registration:', error)
       toast.error('Failed to delete registration')
     } finally {
@@ -1003,7 +1003,7 @@ export default function RegistrationsClient() {
 
       toast.success(`Check-in complete`, { description: `${registration.registrant_name} has been checked in` })
       fetchRegistrations()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error checking in:', error)
       toast.error('Check-in failed')
     }
@@ -1029,7 +1029,7 @@ export default function RegistrationsClient() {
 
       toast.success(`Registration confirmed`, { description: `${registration.registrant_name} has been confirmed` })
       fetchRegistrations()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error confirming:', error)
       toast.error('Confirmation failed')
     }
@@ -1054,7 +1054,7 @@ export default function RegistrationsClient() {
 
       toast.info('Registration cancelled')
       fetchRegistrations()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error cancelling:', error)
       toast.error('Cancellation failed')
     }

@@ -37,7 +37,7 @@ export async function createCustomerSuccess(customerData: {
     logger.info('Customer success record created successfully', { customerId: customer.id })
     revalidatePath('/dashboard/customer-success-v2')
     return actionSuccess(customer, 'Customer success record created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in createCustomerSuccess', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -95,7 +95,7 @@ export async function updateHealthScore(id: string, healthScore: number): Promis
     logger.info('Health score updated successfully', { id, healthScore })
     revalidatePath('/dashboard/customer-success-v2')
     return actionSuccess(customer, 'Health score updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateHealthScore', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -139,7 +139,7 @@ export async function updateEngagementLevel(id: string, productUsagePercentage: 
     logger.info('Engagement level updated successfully', { id, engagementLevel })
     revalidatePath('/dashboard/customer-success-v2')
     return actionSuccess(customer, 'Engagement level updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateEngagementLevel', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -199,7 +199,7 @@ export async function updateOnboardingProgress(id: string, progressPercentage: n
     logger.info('Onboarding progress updated successfully', { id, progressPercentage })
     revalidatePath('/dashboard/customer-success-v2')
     return actionSuccess(customer, 'Onboarding progress updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateOnboardingProgress', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -247,7 +247,7 @@ export async function recordSupportTicket(id: string, isOpen: boolean): Promise<
     logger.info('Support ticket recorded successfully', { id, isOpen })
     revalidatePath('/dashboard/customer-success-v2')
     return actionSuccess(customer, 'Support ticket recorded successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in recordSupportTicket', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -295,7 +295,7 @@ export async function updateNpsScore(id: string, npsScore: number, csatScore?: n
     logger.info('NPS score updated successfully', { id, npsScore })
     revalidatePath('/dashboard/customer-success-v2')
     return actionSuccess(customer, 'NPS score updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateNpsScore', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -337,7 +337,7 @@ export async function scheduleQBR(id: string, qbrDate: string): Promise<ActionRe
     logger.info('QBR scheduled successfully', { id, qbrDate })
     revalidatePath('/dashboard/customer-success-v2')
     return actionSuccess(customer, 'QBR scheduled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in scheduleQBR', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -383,7 +383,7 @@ export async function updateChurnRisk(id: string, churnRiskScore: number, churnR
     logger.info('Churn risk updated successfully', { id, churnRiskScore })
     revalidatePath('/dashboard/customer-success-v2')
     return actionSuccess(customer, 'Churn risk updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateChurnRisk', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -415,7 +415,7 @@ export async function updateRenewalStatus(id: string, renewalDate: string, daysT
     logger.info('Renewal status updated successfully', { id })
     revalidatePath('/dashboard/customer-success-v2')
     return actionSuccess(customer, 'Renewal status updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateRenewalStatus', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -449,7 +449,7 @@ export async function assignCSM(id: string, csmId: string, csmName: string, csmE
     logger.info('CSM assigned successfully', { id, csmName })
     revalidatePath('/dashboard/customer-success-v2')
     return actionSuccess(customer, 'CSM assigned successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in assignCSM', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

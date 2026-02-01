@@ -109,7 +109,7 @@ export async function POST(
       try {
         const tokenPayload = await verifyAccessToken(accessToken)
         userId = tokenPayload.userId
-      } catch (error: any) {
+      } catch (error) {
         return NextResponse.json(
           { success: false, error: 'Invalid or expired access token' },
           { status: 401 }
@@ -245,7 +245,7 @@ export async function POST(
       expiresIn: 3600,
       accessToken: newAccessToken
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Download error', { error })
 
     return NextResponse.json(
@@ -310,7 +310,7 @@ export async function GET(
         canDownload: !isExpired && !limitReached
       }
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Get download status error', { error })
 
     return NextResponse.json(

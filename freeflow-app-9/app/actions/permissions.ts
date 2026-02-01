@@ -39,7 +39,7 @@ export async function createRole(data: any): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/permissions-v2')
     return actionSuccess(role, 'Role created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating role', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -73,7 +73,7 @@ export async function updateRole(id: string, data: any): Promise<ActionResult<an
 
     revalidatePath('/dashboard/permissions-v2')
     return actionSuccess(role, 'Role updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating role', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -115,7 +115,7 @@ export async function deleteRole(id: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/permissions-v2')
     return actionSuccess(role, 'Role deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting role', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -146,7 +146,7 @@ export async function createPermission(data: any): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/permissions-v2')
     return actionSuccess(permission, 'Permission created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating permission', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -179,7 +179,7 @@ export async function updatePermission(id: string, data: any): Promise<ActionRes
 
     revalidatePath('/dashboard/permissions-v2')
     return actionSuccess(permission, 'Permission updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating permission', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -225,7 +225,7 @@ export async function assignRole(roleId: string, assignedUserId: string, assigne
 
     revalidatePath('/dashboard/permissions-v2')
     return actionSuccess(assignment, 'Role assigned successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error assigning role', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -266,7 +266,7 @@ export async function revokeRole(assignmentId: string, reason: string): Promise<
 
     revalidatePath('/dashboard/permissions-v2')
     return actionSuccess(assignment, 'Role revoked successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error revoking role', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -317,7 +317,7 @@ export async function addPermissionToRole(roleId: string, permissionKey: string)
 
     revalidatePath('/dashboard/permissions-v2')
     return actionSuccess(updatedRole, 'Permission added to role successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error adding permission to role', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -366,7 +366,7 @@ export async function removePermissionFromRole(roleId: string, permissionKey: st
 
     revalidatePath('/dashboard/permissions-v2')
     return actionSuccess(updatedRole, 'Permission removed from role successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error removing permission from role', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -408,7 +408,7 @@ export async function getPermissionStats(): Promise<ActionResult<any>> {
     }
 
     return actionSuccess(stats, 'Permission stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting permission stats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

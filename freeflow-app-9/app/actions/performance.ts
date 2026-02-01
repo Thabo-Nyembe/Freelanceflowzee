@@ -70,7 +70,7 @@ export async function createPerformanceReview(data: {
 
     revalidatePath('/dashboard/performance-v2')
     return actionSuccess(review, 'Performance review created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating performance review', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -120,7 +120,7 @@ export async function updatePerformanceReview(reviewId: string, data: Partial<{
 
     revalidatePath('/dashboard/performance-v2')
     return actionSuccess(review, 'Performance review updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating performance review', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -164,7 +164,7 @@ export async function approveReview(reviewId: string, managerComments?: string):
 
     revalidatePath('/dashboard/performance-v2')
     return actionSuccess(review, 'Review approved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error approving review', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -198,7 +198,7 @@ export async function deletePerformanceReview(reviewId: string): Promise<ActionR
 
     revalidatePath('/dashboard/performance-v2')
     return actionSuccess({ success: true }, 'Performance review deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting performance review', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -249,7 +249,7 @@ export async function createPerformanceGoal(reviewId: string, data: {
 
     revalidatePath('/dashboard/performance-v2')
     return actionSuccess(goal, 'Performance goal created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating performance goal', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -320,7 +320,7 @@ export async function updatePerformanceGoal(goalId: string, data: Partial<{
 
     revalidatePath('/dashboard/performance-v2')
     return actionSuccess(goal, 'Performance goal updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating performance goal', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -374,7 +374,7 @@ export async function deletePerformanceGoal(goalId: string): Promise<ActionResul
 
     revalidatePath('/dashboard/performance-v2')
     return actionSuccess({ success: true }, 'Performance goal deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting performance goal', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -449,7 +449,7 @@ export async function calculateOverallScore(reviewId: string, scores: {
 
     revalidatePath('/dashboard/performance-v2')
     return actionSuccess(review, 'Overall score calculated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error calculating overall score', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -486,7 +486,7 @@ export async function getPerformanceStats(): Promise<ActionResult<any>> {
     }
 
     return actionSuccess(stats, 'Performance stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting performance stats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

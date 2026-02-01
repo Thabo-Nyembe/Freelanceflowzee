@@ -462,7 +462,7 @@ export default function DeploymentsClient() {
       toast.success(`Deployment v${deploymentForm.version} queued`)
       setShowCreateDialog(false)
       setDeploymentForm(defaultDeploymentForm)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create deployment')
     }
   }
@@ -472,7 +472,7 @@ export default function DeploymentsClient() {
     try {
       await startDeployment(deployment.id)
       toast.info(`Deployment Started: ${deployment.deployment_name} is now deploying...`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to start deployment')
     }
   }
@@ -485,7 +485,7 @@ export default function DeploymentsClient() {
         success ? 'Deployment Successful' : 'Deployment Failed',
         { description: `${deployment.deployment_name} v${deployment.version}` }
       )
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update deployment')
     }
   }
@@ -501,7 +501,7 @@ export default function DeploymentsClient() {
       await rollbackDeployment(deployment.id)
       toast.success(`Rollback Initiated`)
       setShowRollbackDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to rollback')
     }
   }
@@ -511,7 +511,7 @@ export default function DeploymentsClient() {
     try {
       await cancelDeployment(deployment.id)
       toast.info(`Deployment Cancelled: "${deployment.deployment_name}" has been cancelled`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to cancel deployment')
     }
   }
@@ -521,7 +521,7 @@ export default function DeploymentsClient() {
     try {
       await deleteDeployment(id)
       toast.success('Deployment Deleted')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete deployment')
     }
   }
@@ -618,7 +618,7 @@ export default function DeploymentsClient() {
         default:
           toast.info(`Processing Insight`)
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Action Failed')
     } finally {
       setIsProcessing(false)
@@ -678,7 +678,7 @@ export default function DeploymentsClient() {
       toast.success(`Variable Deleted: "${envVar.key}" has been removed`)
       setShowDeleteEnvVarDialog(false)
       setSelectedEnvVar(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete Failed')
     } finally {
       setIsProcessing(false)
@@ -694,7 +694,7 @@ export default function DeploymentsClient() {
       toast.success(`Deleted: "${blob.name}" has been deleted`)
       setShowDeleteBlobDialog(false)
       setSelectedBlob(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete Failed')
     } finally {
       setIsProcessing(false)
@@ -713,7 +713,7 @@ export default function DeploymentsClient() {
       setRealTimeLogs([])
       toast.success('Logs Cleared')
       setShowClearLogsDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Clear Failed')
     } finally {
       setIsProcessing(false)
@@ -729,7 +729,7 @@ export default function DeploymentsClient() {
       toast.success(`Hook Deleted: "${hookName}" has been removed`)
       setShowDeleteHookDialog(false)
       setSelectedHookName('')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete Failed')
     } finally {
       setIsProcessing(false)
@@ -745,7 +745,7 @@ export default function DeploymentsClient() {
       toast.success(`Member Removed: "${member.name}" has been removed from the team`)
       setShowTeamMemberMenu(false)
       setSelectedTeamMember(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Remove Failed')
     } finally {
       setIsProcessing(false)
@@ -772,7 +772,7 @@ export default function DeploymentsClient() {
       })
       if (error) throw error
       toast.success(`Plugin Installed: "${pluginName}" has been installed successfully`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Install Failed')
     } finally {
       setIsProcessing(false)
@@ -791,7 +791,7 @@ export default function DeploymentsClient() {
       if (!response.ok) throw new Error('Failed to save environment variables')
       toast.success('Environment Variables Saved')
       setShowEnvDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Save Failed')
     } finally {
       setIsProcessing(false)
@@ -813,7 +813,7 @@ export default function DeploymentsClient() {
       if (!response.ok) throw new Error('Failed to save alerts')
       toast.success('Alerts Configured')
       setShowAlertsDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Save Failed')
     } finally {
       setIsProcessing(false)
@@ -834,7 +834,7 @@ export default function DeploymentsClient() {
       URL.revokeObjectURL(url)
       toast.success('Export Started')
       setShowExportLogsDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export Failed')
     } finally {
       setIsProcessing(false)
@@ -862,7 +862,7 @@ export default function DeploymentsClient() {
       if (error) throw error
       toast.success(`Function Created: "${name}" has been created`)
       setShowNewFunctionDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Create Failed')
     } finally {
       setIsProcessing(false)
@@ -888,7 +888,7 @@ export default function DeploymentsClient() {
       if (error) throw error
       toast.success(`Config Created: edge config has been created`)
       setShowEdgeConfigDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Create Failed')
     } finally {
       setIsProcessing(false)
@@ -908,7 +908,7 @@ export default function DeploymentsClient() {
       if (!response.ok) throw new Error('Failed to apply filters')
       toast.success('Filters Applied')
       setShowFiltersDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Filter Failed')
     } finally {
       setIsProcessing(false)
@@ -930,7 +930,7 @@ export default function DeploymentsClient() {
       if (!response.ok) throw new Error('Failed to reset settings')
       toast.success('Settings Reset')
       setShowResetSettingsDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Reset Failed')
     } finally {
       setIsProcessing(false)
@@ -952,7 +952,7 @@ export default function DeploymentsClient() {
       if (!response.ok) throw new Error('Failed to disable deployments')
       toast.success('Deployments Disabled')
       setShowDisableDeploymentsDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Disable Failed')
     } finally {
       setIsProcessing(false)
@@ -975,7 +975,7 @@ export default function DeploymentsClient() {
 
       toast.success('Project Deleted')
       setShowDeleteProjectDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete Failed')
     } finally {
       setIsProcessing(false)
@@ -1000,7 +1000,7 @@ export default function DeploymentsClient() {
       if (error) throw error
       toast.success(`Hook Created: deploy hook has been created`)
       setShowCreateHookDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Create Failed')
     } finally {
       setIsProcessing(false)
@@ -1082,7 +1082,7 @@ export default function DeploymentsClient() {
         environment: 'production' as HookDeploymentEnvironment
       })
       toast.success(`Promoted: promoted to production`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to promote')
     }
   }
@@ -2489,7 +2489,7 @@ export default function DeploymentsClient() {
                     toast.success(`Variable Added: "${key}" has been added`)
                     keyInput.value = ''
                     valueInput.value = ''
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.error('Failed to Add Variable')
                   }
                 }}><Plus className="h-4 w-4" /></Button>
@@ -2542,7 +2542,7 @@ export default function DeploymentsClient() {
                     toast.success(`Domain "${domain}" has been added`)
                     input.value = ''
                     fetchDeployments()
-                  } catch (error: any) {
+                  } catch (error) {
                     console.error('Failed to add domain:', error)
                     toast.error(error.message || 'Failed to add domain')
                   }
@@ -2635,7 +2635,7 @@ export default function DeploymentsClient() {
                 toast.success(`Webhook "${name}" has been created`)
                 setShowWebhookDialog(false)
                 fetchDeployments()
-              } catch (error: any) {
+              } catch (error) {
                 console.error('Failed to create webhook:', error)
                 toast.error(error.message || 'Failed to create webhook')
               }
@@ -2663,7 +2663,7 @@ export default function DeploymentsClient() {
               try {
                 toast.success(`Invitation Sent`)
                 setShowTeamDialog(false)
-              } catch (error: any) {
+              } catch (error) {
                 toast.error('Failed to send invitation')
               }
             }}>Send Invitation</Button></DialogFooter>
@@ -3144,7 +3144,7 @@ export default function DeploymentsClient() {
                   if (error) throw error;
                   toast.success(`Config Saved has been updated`);
                   setShowEdgeConfigEditDialog(false);
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Save Failed');
                 } finally {
                   setIsProcessing(false);
@@ -3203,7 +3203,7 @@ export default function DeploymentsClient() {
                   if (error) throw error;
                   toast.success(`Folder Created has been created`);
                   setShowNewFolderDialog(false);
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Create Failed');
                 } finally {
                   setIsProcessing(false);
@@ -3271,7 +3271,7 @@ export default function DeploymentsClient() {
                   if (!response.ok) throw new Error('Upload failed')
                   toast.success('Upload Complete')
                   setShowUploadDialog(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Upload Failed')
                 } finally {
                   setIsProcessing(false)
@@ -3391,7 +3391,7 @@ export default function DeploymentsClient() {
                   toast.info('Stack Traces Loaded')
                   setShowErrorsDialog(false)
                   setActiveTab('logs')
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Load Failed')
                 } finally {
                   setIsProcessing(false)
@@ -3501,7 +3501,7 @@ export default function DeploymentsClient() {
                   URL.revokeObjectURL(url)
                   toast.success('Report Exported')
                   setShowLogAnalyticsDialog(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Export Failed')
                 } finally {
                   setIsProcessing(false)
@@ -3564,7 +3564,7 @@ export default function DeploymentsClient() {
                   URL.revokeObjectURL(url);
                   toast.success(`Export Complete: ${logsToExport.length} log entries exported`);
                   setShowExportLogsDialog(false);
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Export Failed');
                 } finally {
                   setIsProcessing(false);
@@ -3644,7 +3644,7 @@ export default function DeploymentsClient() {
                   URL.revokeObjectURL(url);
                   toast.success('Export Complete');
                   setShowExportAnalyticsDialog(false);
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Export Failed');
                 } finally {
                   setIsProcessing(false);
@@ -3711,7 +3711,7 @@ export default function DeploymentsClient() {
                   link.click()
                   URL.revokeObjectURL(url)
                   toast.success('Report Generated')
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Download Failed')
                 } finally {
                   setIsProcessing(false)
@@ -3784,7 +3784,7 @@ export default function DeploymentsClient() {
                   if (error) throw error;
                   toast.success(`Rule Created has been added`);
                   setShowAddRuleDialog(false);
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Create Failed');
                 } finally {
                   setIsProcessing(false);
@@ -3814,7 +3814,7 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteAllDeploymentsDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={async () => { const input = document.getElementById('confirm-delete-all') as HTMLInputElement; if (input?.value !== 'DELETE ALL') { toast.error('Confirmation Required'); return; } try { const { error } = await supabase.from('deployments').delete().neq('id', ''); if (error) throw error; toast.success('All Deployments Deleted'); setShowDeleteAllDeploymentsDialog(false); fetchDeployments(); } catch (error: any) { toast.error('Delete Failed'); } }}><Trash2 className="h-4 w-4 mr-2" />Delete All</Button>
+              <Button variant="destructive" onClick={async () => { const input = document.getElementById('confirm-delete-all') as HTMLInputElement; if (input?.value !== 'DELETE ALL') { toast.error('Confirmation Required'); return; } try { const { error } = await supabase.from('deployments').delete().neq('id', ''); if (error) throw error; toast.success('All Deployments Deleted'); setShowDeleteAllDeploymentsDialog(false); fetchDeployments(); } catch (error) { toast.error('Delete Failed'); } }}><Trash2 className="h-4 w-4 mr-2" />Delete All</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -4111,7 +4111,7 @@ export default function DeploymentsClient() {
                   toast.success(`Config Item Deleted has been removed from ${selectedEdgeConfig?.name}`)
                   setShowDeleteConfigItemDialog(false)
                   setSelectedConfigItem('')
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Delete Failed')
                 } finally {
                   setIsProcessing(false)

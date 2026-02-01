@@ -636,7 +636,7 @@ export default function AiVideoGenerationClient() {
       setSelectedExportVideos([])
       setIsExporting(false)
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Export failed', { error: error.message })
       toast.error('Export failed')
       setIsExporting(false)
@@ -656,7 +656,7 @@ export default function AiVideoGenerationClient() {
       announce('Settings saved successfully')
       setShowSettingsDialog(false)
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save settings', { error: error.message })
       toast.error('Failed to save settings')
     }
@@ -913,7 +913,7 @@ export default function AiVideoGenerationClient() {
       // Switch to library view
       dispatch({ type: 'SET_VIEW_MODE', viewMode: 'library' })
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Video generation failed', {
         error: error.message,
         prompt: genPrompt,
@@ -975,7 +975,7 @@ export default function AiVideoGenerationClient() {
       announce('Video updated successfully')
       setShowEditModal(false)
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Video update failed', { error: error.message, videoId: state.selectedVideo?.id })
       toast.error('Failed to update video')
     }
@@ -1005,7 +1005,7 @@ export default function AiVideoGenerationClient() {
       announce('Video deleted successfully')
       setShowViewModal(false)
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Video delete failed', { error: error.message, videoId, userId })
       toast.error('Failed to delete video')
       announce('Error deleting video', 'assertive')

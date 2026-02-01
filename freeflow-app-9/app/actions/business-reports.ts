@@ -49,7 +49,7 @@ export async function createReport(input: ReportInput): Promise<ActionResult<any
     revalidatePath('/dashboard/reporting-v2')
     logger.info('Report created successfully', { reportId: data.id })
     return actionSuccess(data, 'Report created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating report', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -81,7 +81,7 @@ export async function updateReport(id: string, updates: Partial<ReportInput>): P
     revalidatePath('/dashboard/reporting-v2')
     logger.info('Report updated successfully', { reportId: id })
     return actionSuccess(data, 'Report updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating report', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -108,7 +108,7 @@ export async function deleteReport(id: string): Promise<ActionResult<{ success: 
     revalidatePath('/dashboard/reporting-v2')
     logger.info('Report deleted successfully', { reportId: id })
     return actionSuccess({ success: true }, 'Report deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting report', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -158,7 +158,7 @@ export async function generateReport(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/reporting-v2')
     logger.info('Report generated successfully', { reportId: id })
     return actionSuccess(data, 'Report generated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error generating report', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -197,7 +197,7 @@ export async function viewReport(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/reporting-v2')
     logger.info('Report view count updated', { reportId: id })
     return actionSuccess(data, 'Report viewed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error viewing report', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -236,7 +236,7 @@ export async function downloadReport(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/reporting-v2')
     logger.info('Report downloaded successfully', { reportId: id })
     return actionSuccess({ ...data, downloadUrl: report.file_url }, 'Report downloaded successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error downloading report', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -275,7 +275,7 @@ export async function shareReport(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/reporting-v2')
     logger.info('Report shared successfully', { reportId: id })
     return actionSuccess(data, 'Report shared successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error sharing report', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -308,7 +308,7 @@ export async function scheduleReport(id: string, schedule: string, nextScheduled
     revalidatePath('/dashboard/reporting-v2')
     logger.info('Report scheduled successfully', { reportId: id, schedule })
     return actionSuccess(data, 'Report scheduled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error scheduling report', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -334,7 +334,7 @@ export async function getReports(): Promise<ActionResult<any[]>> {
 
     logger.info('Reports retrieved successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Reports retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting reports', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

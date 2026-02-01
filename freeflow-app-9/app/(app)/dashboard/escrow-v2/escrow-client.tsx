@@ -462,7 +462,7 @@ export default function EscrowClient() {
       toast.success('Escrow created successfully')
       setShowNewEscrowDialog(false)
       resetNewEscrowForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create escrow')
     } finally {
       setIsSubmitting(false)
@@ -499,7 +499,7 @@ export default function EscrowClient() {
       setShowReleaseDialog(false)
       resetReleaseForm()
       setSelectedEscrowDeposit(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to release funds')
     } finally {
       setIsSubmitting(false)
@@ -511,7 +511,7 @@ export default function EscrowClient() {
     try {
       await updateDeposit(deposit.id, { status: 'refunded' })
       toast.success('Refund requested')
-    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    } catch (error) { // eslint-disable-line @typescript-eslint/no-explicit-any
       toast.error('Failed to request refund')
     } finally {
       setIsSubmitting(false)
@@ -548,7 +548,7 @@ export default function EscrowClient() {
       setShowDisputeDialog(false)
       resetDisputeForm()
       setSelectedEscrowDeposit(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to open dispute')
     } finally {
       setIsSubmitting(false)
@@ -565,7 +565,7 @@ export default function EscrowClient() {
     try {
       await updateDeposit(deposit.id, { status: 'cancelled' })
       toast.success(`Escrow cancelled: "${deposit.project_title}" has been cancelled`)
-    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    } catch (error) { // eslint-disable-line @typescript-eslint/no-explicit-any
       toast.error('Failed to cancel escrow')
     } finally {
       setIsSubmitting(false)
@@ -582,7 +582,7 @@ export default function EscrowClient() {
     try {
       await deleteDeposit(deposit.id)
       toast.success(`Escrow deleted: "${deposit.project_title}" has been deleted`)
-    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    } catch (error) { // eslint-disable-line @typescript-eslint/no-explicit-any
       toast.error('Failed to delete escrow')
     } finally {
       setIsSubmitting(false)
@@ -624,7 +624,7 @@ export default function EscrowClient() {
       toast.success(`Payout created of ${formatCurrency(parseFloat(payoutForm.amount))} initiated`)
       setShowCreatePayout(false)
       resetPayoutForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create payout')
     } finally {
       setIsSubmitting(false)
@@ -654,7 +654,7 @@ export default function EscrowClient() {
       toast.success(`Invitation sent to ${inviteForm.email}`)
       setShowInviteAccount(false)
       resetInviteForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to send invitation')
     } finally {
       setIsSubmitting(false)

@@ -614,7 +614,7 @@ export default function FilesClient() {
       const link = `${window.location.origin}/files/${file.id}/${encodeURIComponent(file.name)}`
       await navigator.clipboard.writeText(link)
       toast.success('Link copied to clipboard!')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to copy link', { error })
       toast.error('Failed to copy link')
     }
@@ -784,7 +784,7 @@ export default function FilesClient() {
       } else {
         throw new Error(data.error || 'Download failed')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to download secure file', { error, fileName: file.fileName })
       toast.error('Failed to download file')
     }

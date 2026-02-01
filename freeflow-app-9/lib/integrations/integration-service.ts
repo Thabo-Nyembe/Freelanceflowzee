@@ -724,7 +724,7 @@ class IntegrationService {
         response_time_ms: responseTime,
       };
 
-    } catch (error: any) {
+    } catch (error) {
       // Update delivery as failed
       await supabase
         .from('webhook_deliveries')

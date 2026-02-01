@@ -845,7 +845,7 @@ export default function CommunityHubClient() {
 
       setNewItemForm({ type: 'post', title: '', content: '', category: '', tags: '' })
       setShowNewItemDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create item', { error: error.message })
       toast.error('Failed to create item')
     }
@@ -888,7 +888,7 @@ export default function CommunityHubClient() {
       )
 
       setShowExportDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export data', { error: error.message })
       toast.error('Export failed')
     }
@@ -917,7 +917,7 @@ export default function CommunityHubClient() {
       )
 
       setShowSettingsDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save settings', { error: error.message })
       toast.error('Failed to save settings')
     }
@@ -951,7 +951,7 @@ export default function CommunityHubClient() {
           toast.success(result.message + ' - ' + ((post?.likes || 0) + 1) + ' likes - ' + (post?.comments || 0) + ' comments')
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to like post', {
         error: error.message,
         postId: id
@@ -986,7 +986,7 @@ export default function CommunityHubClient() {
       if (result.success) {
         toast.success(result.message + ' - ' + ((post?.shares || 0) + 1) + ' shares - Link: ' + (result.shareUrl || 'Generated'))
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to share post', {
         error: error.message,
         postId: id
@@ -1017,7 +1017,7 @@ export default function CommunityHubClient() {
       if (result.success) {
         toast.success(result.message + ' - ' + ((post?.bookmarks || 0) + 1) + ' bookmarks - ' + (result.tip || 'Saved for later'))
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to bookmark post', {
         error: error.message,
         postId: id
@@ -1052,7 +1052,7 @@ export default function CommunityHubClient() {
           toast.success(result.message + ' - ' + (member?.title || '') + ' - ' + ((member?.followers || 0) + 1) + ' followers - ' + (member?.category || ''))
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to follow member', {
         error: error.message,
         memberId: id
@@ -1097,7 +1097,7 @@ export default function CommunityHubClient() {
           toast.success(result.message + ' - ' + (member?.title || '') + ' - ' + (member?.category || '') + ' - Now connected')
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to connect with member', {
         error: error.message,
         memberId: id
@@ -1117,7 +1117,7 @@ export default function CommunityHubClient() {
       try {
         const { rsvpEvent } = await import('@/lib/community-hub-queries')
         await rsvpEvent(id, userId, 'attending')
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to record event RSVP', { error: error.message })
       }
     }
@@ -1136,7 +1136,7 @@ export default function CommunityHubClient() {
       try {
         const { joinGroup } = await import('@/lib/community-hub-queries')
         await joinGroup(id, userId)
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to record group join', { error: error.message })
       }
     }
@@ -1875,7 +1875,7 @@ export default function CommunityHubClient() {
           toast.success('Community Hub loaded - ' + transformedMembers.length + ' members - ' + transformedPosts.length + ' posts - ' + transformedEvents.length + ' events - ' + transformedGroups.length + ' groups')
           announce('Community Hub loaded successfully', 'polite')
         }
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Exception loading Community Hub data', { error: error.message, userId })
         toast.error('Failed to load community data')
         announce('Failed to load community data', 'assertive')
@@ -2045,7 +2045,7 @@ export default function CommunityHubClient() {
       dispatch({ type: 'SET_SHOW_CREATE_POST', payload: false })
       toast.success('Post created successfully!')
       announce('Post created successfully', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create post')
       announce('Error creating post', 'assertive')
     }

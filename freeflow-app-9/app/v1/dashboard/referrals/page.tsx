@@ -225,7 +225,7 @@ export default function ReferralsPage() {
         // Refresh stats from database
         refreshStats()
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to claim reward', { error, rewardId })
       toast.error('Failed to claim reward')
     }
@@ -264,7 +264,7 @@ export default function ReferralsPage() {
         // Refresh stats from database
         refreshStats()
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to redeem points', { error, points })
       toast.error('Failed to redeem points')
     }

@@ -542,7 +542,7 @@ export default function BrowserExtensionPage() {
         description: `${deleteCapture.title} - ${deleteCapture.type} - ${fileSizeMB} MB freed`
       })
       announce('Capture deleted', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete capture', {
         error: error.message,
         captureId: deleteCapture.id,

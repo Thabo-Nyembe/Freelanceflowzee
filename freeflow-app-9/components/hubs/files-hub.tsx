@@ -207,7 +207,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
         setUploadProgress(0)
       }, 500)
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('File Upload Error:', error)
       setUploading(false)
       setUploadProgress(0)
@@ -250,7 +250,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           description: result.undoAvailable ? `Can restore within ${result.undoExpires}` : undefined
         })
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Delete File Error:', error)
       toast.error('Failed to delete file', {
         description: error.message || 'Please try again later'
@@ -310,7 +310,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           }
         }, 1000)
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Share File Error:', error)
       toast.error('Failed to share file', {
         description: error.message || 'Please try again later'
@@ -494,7 +494,7 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
         // Note: In production, this would update the local folders state
         // setFolders(prev => [...prev, result.folder])
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Create Folder Error:', error)
       toast.error('Failed to create folder', {
         description: error.message || 'Please try again later'

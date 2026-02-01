@@ -59,7 +59,7 @@ export async function getApiEndpoints(options?: {
 
     logger.info('API endpoints retrieved successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'API endpoints retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting API endpoints', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -86,7 +86,7 @@ export async function getApiEndpoint(endpointId: string): Promise<ActionResult<a
 
     logger.info('API endpoint retrieved successfully', { endpointId })
     return actionSuccess(data, 'API endpoint retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting API endpoint', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -131,7 +131,7 @@ export async function createApiEndpoint(input: ApiEndpointInput): Promise<Action
     logger.info('API endpoint created successfully', { endpointId: data.id })
     revalidatePath('/dashboard/api-v2')
     return actionSuccess(data, 'API endpoint created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating API endpoint', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -169,7 +169,7 @@ export async function updateApiEndpoint(
     logger.info('API endpoint updated successfully', { endpointId })
     revalidatePath('/dashboard/api-v2')
     return actionSuccess(data, 'API endpoint updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating API endpoint', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -196,7 +196,7 @@ export async function deleteApiEndpoint(endpointId: string): Promise<ActionResul
     logger.info('API endpoint deleted successfully', { endpointId })
     revalidatePath('/dashboard/api-v2')
     return actionSuccess({ success: true }, 'API endpoint deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting API endpoint', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -229,7 +229,7 @@ export async function deprecateApiEndpoint(endpointId: string): Promise<ActionRe
     logger.info('API endpoint deprecated successfully', { endpointId })
     revalidatePath('/dashboard/api-v2')
     return actionSuccess(data, 'API endpoint deprecated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deprecating API endpoint', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -287,7 +287,7 @@ export async function trackApiRequest(
 
     logger.info('API request tracked successfully', { endpointId, success })
     return actionSuccess(data, 'API request tracked successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error tracking API request', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -332,7 +332,7 @@ export async function getApiStats(): Promise<ActionResult<any>> {
 
     logger.info('API stats retrieved successfully', { total: stats.total })
     return actionSuccess(stats, 'API stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting API stats', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

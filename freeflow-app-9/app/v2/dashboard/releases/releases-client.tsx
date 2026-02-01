@@ -736,7 +736,7 @@ export default function ReleasesClient() {
       setShowCreateDialog(false)
       setFormData(initialFormData)
       fetchReleases()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating release:', error)
       toast.error('Failed to create release')
     } finally {
@@ -782,7 +782,7 @@ export default function ReleasesClient() {
       setReleaseToEdit(null)
       setFormData(initialFormData)
       fetchReleases()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating release:', error)
       toast.error('Failed to update release')
     } finally {
@@ -815,7 +815,7 @@ export default function ReleasesClient() {
       setShowDeleteDialog(false)
       setReleaseToDelete(null)
       fetchReleases()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting release:', error)
       toast.error('Failed to delete release')
     } finally {
@@ -870,7 +870,7 @@ export default function ReleasesClient() {
       setReleaseToDeploy(null)
       fetchReleases()
       fetchDeployments()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deploying release:', error)
       toast.error('Failed to deploy release')
     } finally {
@@ -927,7 +927,7 @@ export default function ReleasesClient() {
       setTargetVersion('')
       fetchReleases()
       fetchRollbacks()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error rolling back release:', error)
       toast.error('Failed to rollback release')
     } finally {

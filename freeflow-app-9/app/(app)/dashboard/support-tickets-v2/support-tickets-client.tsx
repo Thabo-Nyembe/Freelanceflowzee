@@ -563,7 +563,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
 
       toast.success('Selected tickets have been merged')
       fetchTickets() // Refresh the ticket list
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || 'Failed to merge tickets')
       console.error('Merge tickets error:', error)
     } finally {
@@ -598,7 +598,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
       document.body.removeChild(a)
 
       toast.success('Ticket data exported successfully')
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || 'Failed to export tickets')
       console.error('Export tickets error:', error)
     } finally {

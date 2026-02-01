@@ -132,7 +132,7 @@ export async function POST(
       log_id: webhookLog?.id,
     });
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Incoming webhook error', { error });
     return NextResponse.json(
       { success: false, error: 'Failed to process webhook' },

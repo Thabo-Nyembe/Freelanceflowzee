@@ -105,7 +105,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Settings GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch settings' },
@@ -235,7 +235,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Settings POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
@@ -316,7 +316,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Settings PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update settings' },

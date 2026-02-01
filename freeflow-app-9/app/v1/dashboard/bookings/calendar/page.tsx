@@ -314,7 +314,7 @@ export default function CalendarPage() {
       toast.success('Your availability preferences have been updated')
       setShowAvailabilityModal(false)
       announce('Availability settings saved', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save availability', { error: error.message })
       toast.error('Failed to save availability')
     } finally {

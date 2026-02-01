@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Email agent API error', { error });
     return NextResponse.json(
       {
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
           data: { message: 'Email Agent API' },
         });
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Email agent API error', { error });
     return NextResponse.json(
       {
@@ -154,7 +154,7 @@ export async function PUT(request: NextRequest) {
       message: 'Configuration updated successfully',
       data: config,
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Email agent API error', { error });
     return NextResponse.json(
       {

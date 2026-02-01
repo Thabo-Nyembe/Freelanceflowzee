@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Automation API error', { error });
     return NextResponse.json(
       {
@@ -190,7 +190,7 @@ export async function GET(request: NextRequest) {
           message: 'Business Automation API',
         });
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Automation API error', { error });
     return NextResponse.json(
       {

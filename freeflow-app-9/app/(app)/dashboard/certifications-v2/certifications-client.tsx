@@ -377,7 +377,7 @@ export default function CertificationsClient() {
       toast.success(`"${certForm.certification_name}" has been added`)
       setShowCreateDialog(false)
       resetForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create certification')
     } finally {
       setIsSubmitting(false)
@@ -413,7 +413,7 @@ export default function CertificationsClient() {
       setShowEditDialog(false)
       setCertToEdit(null)
       resetForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update certification')
     } finally {
       setIsSubmitting(false)
@@ -428,7 +428,7 @@ export default function CertificationsClient() {
       toast.success(`Certification deleted: "${certToDelete.certification_name}" has been removed`)
       setShowDeleteDialog(false)
       setCertToDelete(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete certification')
     } finally {
       setIsSubmitting(false)

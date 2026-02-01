@@ -629,7 +629,7 @@ export default function MLInsightsPage() {
       } else {
         throw new Error(result.error || 'Failed to create insight')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create ML insight', {
         error: error.message,
         title: insightTitle,
@@ -697,7 +697,7 @@ export default function MLInsightsPage() {
       } else {
         throw new Error(result.error || 'Delete failed')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete ML insight', {
         error: error.message,
         insightId
@@ -752,7 +752,7 @@ export default function MLInsightsPage() {
       } else {
         throw new Error(result.error || 'Bulk delete failed')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Bulk delete failed', {
         error: error.message,
         count: state.selectedInsights.length
@@ -821,7 +821,7 @@ export default function MLInsightsPage() {
           error: 'Failed to retrain model'
         }
       )
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to retrain model', {
         error: error.message,
         insightId,
@@ -881,7 +881,7 @@ export default function MLInsightsPage() {
       } else {
         throw new Error(result.error || 'Export failed')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Export failed', {
         error: error.message,
         format: exportFormat,

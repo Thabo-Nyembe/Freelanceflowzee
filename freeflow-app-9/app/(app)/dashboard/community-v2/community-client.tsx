@@ -791,7 +791,7 @@ export default function CommunityClient() {
       toast.success(`${channelForm.name} has been created successfully`)
       setShowCreateChannel(false)
       setChannelForm({ name: '', type: 'text', description: '', isPrivate: false })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create channel')
     } finally {
       setIsSubmitting(false)
@@ -824,7 +824,7 @@ export default function CommunityClient() {
       // Copy to clipboard
       await navigator.clipboard.writeText(`${window.location.origin}/invite/${inviteCode}`)
       toast.success('Invite link created')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create invite')
     } finally {
       setIsSubmitting(false)
@@ -858,7 +858,7 @@ export default function CommunityClient() {
 
       toast.success('Member banned from the community')
       refreshMembers()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to ban member')
     } finally {
       setIsSubmitting(false)
@@ -882,7 +882,7 @@ export default function CommunityClient() {
 
       toast.success('Message pinned')
       refreshPosts()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to pin message')
     } finally {
       setIsSubmitting(false)
@@ -922,7 +922,7 @@ export default function CommunityClient() {
       setShowCreateEvent(false)
       setEventForm({ name: '', description: '', entityType: 'voice', scheduledStart: '', scheduledEnd: '', location: '' })
       refreshEvents()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create event')
     } finally {
       setIsSubmitting(false)
@@ -960,7 +960,7 @@ export default function CommunityClient() {
       toast.success(`Role created: role has been created`)
       setShowCreateRole(false)
       setRoleForm({ name: '', color: '#6b7280', isHoisted: false, isMentionable: false })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create role')
     } finally {
       setIsSubmitting(false)
@@ -991,7 +991,7 @@ export default function CommunityClient() {
 
       setMessageInput('')
       refreshPosts()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to send message')
     } finally {
       setIsSubmitting(false)
@@ -1030,7 +1030,7 @@ export default function CommunityClient() {
       }
 
       refreshEvents()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update interest')
     } finally {
       setIsSubmitting(false)
@@ -1051,7 +1051,7 @@ export default function CommunityClient() {
         toast.success('Settings updated')
         refetchCommunities()
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update settings')
     } finally {
       setIsSubmitting(false)
@@ -1072,7 +1072,7 @@ export default function CommunityClient() {
         toast.success('Community deleted')
         refetchCommunities()
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete community')
     } finally {
       setIsSubmitting(false)
@@ -1106,7 +1106,7 @@ export default function CommunityClient() {
       }
 
       refreshPosts()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to add reaction')
     }
   }
@@ -1155,7 +1155,7 @@ export default function CommunityClient() {
       if (error) throw error
       setShowPinnedMessages(true)
       toast.success(`${data?.length || 0} pinned messages found`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to load pinned messages')
     }
   }
@@ -1262,7 +1262,7 @@ export default function CommunityClient() {
         })
         toast.success('Now following user')
       }
-    } catch (error: any) {
+    } catch (error) {
       // If table doesn't exist, just show success
       toast.success('Now following user')
     }
@@ -2370,7 +2370,7 @@ export default function CommunityClient() {
                               })
                               if (error) throw error
                               toast.success('Webhook created')
-                            } catch (error: any) {
+                            } catch (error) {
                               toast.error('Failed to create webhook')
                             } finally {
                               setIsSubmitting(false)
@@ -2491,7 +2491,7 @@ export default function CommunityClient() {
                               URL.revokeObjectURL(url)
 
                               toast.success('Export complete')
-                            } catch (error: any) {
+                            } catch (error) {
                               toast.error('Failed to export data')
                             } finally {
                               setIsSubmitting(false)
@@ -2568,7 +2568,7 @@ export default function CommunityClient() {
                                 if (error) throw error
                                 toast.success('Members pruned')
                                 refreshMembers()
-                              } catch (error: any) {
+                              } catch (error) {
                                 toast.error('Failed to prune members')
                               } finally {
                                 setIsSubmitting(false)
@@ -2598,7 +2598,7 @@ export default function CommunityClient() {
                                 if (error) throw error
                                 toast.success('Messages deleted')
                                 refreshPosts()
-                              } catch (error: any) {
+                              } catch (error) {
                                 toast.error('Failed to delete messages')
                               } finally {
                                 setIsSubmitting(false)

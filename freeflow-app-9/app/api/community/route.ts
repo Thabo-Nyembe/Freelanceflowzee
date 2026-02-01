@@ -56,7 +56,7 @@ async function handleLikePost(postId: string, userId: string = 'user-1', unlike:
         points: 5
       } : undefined
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to like/unlike post'
@@ -87,7 +87,7 @@ async function handleBookmarkPost(postId: string, userId: string = 'user-1', unb
       message: unbookmark ? 'Removed from bookmarks' : 'Saved to bookmarks!',
       tip: !unbookmark ? 'Access your saved posts anytime from your profile' : undefined
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to bookmark/unbookmark post'
@@ -123,7 +123,7 @@ async function handleSharePost(postId: string, data: any): Promise<NextResponse>
         facebook: `https://www.facebook.com/sharer/sharer.php?u=${result.shareUrl}`
       }
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to share post'
@@ -155,7 +155,7 @@ async function handleCreateComment(postId: string, data: any): Promise<NextRespo
       message: 'Comment posted!',
       totalComments: 1  // Would be actual count
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to create comment'
@@ -192,7 +192,7 @@ async function handleConnectionAction(memberId: string, userId: string = 'user-1
         'You can message once they accept'
       ] : undefined
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to update connection'
@@ -229,7 +229,7 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
         points: 10
       } : undefined
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to follow/unfollow'
@@ -270,7 +270,7 @@ async function handleCreatePost(data: any): Promise<NextResponse> {
         points: 15
       }
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to create post'
@@ -308,7 +308,7 @@ async function handleReport(resourceId: string, data: any): Promise<NextResponse
         'Content may be hidden from your feed'
       ]
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to submit report'
@@ -383,7 +383,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           error: `Unknown action: ${action}`
         }, { status: 400 })
     }
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Invalid request'
@@ -564,7 +564,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           message: `Unknown type: ${type}`
         })
     }
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to fetch data'

@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       stats,
       pagination: { limit, offset, total: count }
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     if (error) throw error
 
     return NextResponse.json({ data }, { status: 201 })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
@@ -124,7 +124,7 @@ export async function PATCH(request: NextRequest) {
     if (error) throw error
 
     return NextResponse.json({ data })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
@@ -154,7 +154,7 @@ export async function DELETE(request: NextRequest) {
     if (error) throw error
 
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

@@ -108,7 +108,7 @@ export function OAuthProviders() {
       }
 
       // OAuth redirect will happen automatically
-    } catch (error: any) {
+    } catch (error) {
       console.error(`${provider} OAuth error:`, error)
       toast({
         title: 'Authentication Error',
@@ -228,7 +228,7 @@ export function OAuthProvidersWithLabels() {
       if (error) {
         throw error
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error(`${provider} OAuth error:`, error)
       toast({
         title: 'Authentication Error',

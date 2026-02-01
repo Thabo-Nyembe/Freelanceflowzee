@@ -363,7 +363,7 @@ export function useOfflineSync<T = any>(config: OfflineSyncConfig): UseOfflineSy
         await dbRef.current.delete('pending_changes', change.id)
         results.push({ changeId: change.id, success: true })
 
-      } catch (error: any) {
+      } catch (error) {
         // Check if it's a conflict (record was modified)
         if (error.code === '23505' || error.code === '40001') {
           // Conflict detected

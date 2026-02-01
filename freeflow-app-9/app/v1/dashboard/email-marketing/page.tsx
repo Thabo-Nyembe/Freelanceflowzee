@@ -351,7 +351,7 @@ export default function EmailMarketingPage() {
       setIsAutomationOpen(false)
       toast.success(`Automation created: ${automationForm.name} is now active`)
       announce('Automation created successfully', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create automation', { error: error.message })
       toast.error('Failed to create automation')
     }
@@ -374,7 +374,7 @@ export default function EmailMarketingPage() {
           : a
       ))
       announce('Automation status updated', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to toggle automation', { error: error.message })
       toast.error('Failed to update automation status')
     }
@@ -391,7 +391,7 @@ export default function EmailMarketingPage() {
       setAutomations(prev => prev.filter(a => a.id !== id))
       toast.success('Automation deleted successfully')
       announce('Automation deleted', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete automation', { error: error.message })
       toast.error('Failed to delete automation')
     }

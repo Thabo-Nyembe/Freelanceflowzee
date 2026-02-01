@@ -102,7 +102,7 @@ export async function fetchShipments(): Promise<ActionResult<Shipment[]>> {
     if (error) return actionError(error.message, 'DATABASE_ERROR')
 
     return actionSuccess(data || [], 'Shipments fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching shipments:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -126,7 +126,7 @@ export async function createShipment(shipment: Partial<Shipment>): Promise<Actio
 
     revalidatePath('/dashboard/shipping-v2')
     return actionSuccess(data, 'Shipment created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error creating shipment:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -148,7 +148,7 @@ export async function updateShipment(id: string, updates: Partial<Shipment>): Pr
 
     revalidatePath('/dashboard/shipping-v2')
     return actionSuccess(data, 'Shipment updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating shipment:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -168,7 +168,7 @@ export async function deleteShipment(id: string): Promise<ActionResult<void>> {
 
     revalidatePath('/dashboard/shipping-v2')
     return actionSuccess(undefined, 'Shipment deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error deleting shipment:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -198,7 +198,7 @@ export async function markAsShipped(id: string, trackingNumber?: string): Promis
 
     revalidatePath('/dashboard/shipping-v2')
     return actionSuccess(data, 'Shipment marked as shipped successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error marking shipment as shipped:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -229,7 +229,7 @@ export async function markAsDelivered(id: string, signatureName?: string): Promi
 
     revalidatePath('/dashboard/shipping-v2')
     return actionSuccess(data, 'Shipment marked as delivered successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error marking shipment as delivered:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -254,7 +254,7 @@ export async function cancelShipment(id: string, reason?: string): Promise<Actio
 
     revalidatePath('/dashboard/shipping-v2')
     return actionSuccess(data, 'Shipment cancelled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error cancelling shipment:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -279,7 +279,7 @@ export async function markAsReturned(id: string, reason?: string): Promise<Actio
 
     revalidatePath('/dashboard/shipping-v2')
     return actionSuccess(data, 'Shipment marked as returned successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error marking shipment as returned:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -304,7 +304,7 @@ export async function addTrackingEvent(shipmentId: string, event: Partial<Shipme
 
     revalidatePath('/dashboard/shipping-v2')
     return actionSuccess(data, 'Tracking event added successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error adding tracking event:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -324,7 +324,7 @@ export async function fetchTrackingHistory(shipmentId: string): Promise<ActionRe
     if (error) return actionError(error.message, 'DATABASE_ERROR')
 
     return actionSuccess(data || [], 'Tracking history fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching tracking history:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -348,7 +348,7 @@ export async function fetchCarriers(): Promise<ActionResult<ShippingCarrier[]>> 
     if (error) return actionError(error.message, 'DATABASE_ERROR')
 
     return actionSuccess(data || [], 'Carriers fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching carriers:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -372,7 +372,7 @@ export async function createCarrier(carrier: Partial<ShippingCarrier>): Promise<
 
     revalidatePath('/dashboard/shipping-v2')
     return actionSuccess(data, 'Carrier created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error creating carrier:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -394,7 +394,7 @@ export async function updateCarrier(id: string, updates: Partial<ShippingCarrier
 
     revalidatePath('/dashboard/shipping-v2')
     return actionSuccess(data, 'Carrier updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating carrier:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -414,7 +414,7 @@ export async function deleteCarrier(id: string): Promise<ActionResult<void>> {
 
     revalidatePath('/dashboard/shipping-v2')
     return actionSuccess(undefined, 'Carrier deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error deleting carrier:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

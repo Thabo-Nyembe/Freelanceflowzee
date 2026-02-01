@@ -1225,7 +1225,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       toast.dismiss()
       toast.success('Learning data exported successfully')
       setShowExportDataDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss()
       toast.error('Failed to export data', { description: error.message })
     }
@@ -1275,7 +1275,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       toast.success('Transcript imported successfully')
       setShowImportTranscriptDialog(false)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss()
       toast.error('Failed to import transcript', { description: error.message })
     }

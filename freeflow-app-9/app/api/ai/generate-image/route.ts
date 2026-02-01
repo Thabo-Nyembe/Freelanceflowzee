@@ -93,7 +93,7 @@ export async function POST(request: Request) {
           provider: 'openrouter-dalle'
         })
 
-      } catch (error: any) {
+      } catch (error) {
         logger.error('DALL-E generation error', {
           error: error instanceof Error ? error.message : 'Unknown error',
           stack: error instanceof Error ? error.stack : undefined,
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
       return await generateViaTextToImage(prompt, openRouterModel, size, style, OPENROUTER_API_KEY)
     }
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Image Generation error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
@@ -188,7 +188,7 @@ async function generateViaTextToImage(
       note: 'Using Unsplash demo images. For production, configure proper image generation API access through OpenRouter.'
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Text-to-image generation error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,

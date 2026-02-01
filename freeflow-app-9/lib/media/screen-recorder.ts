@@ -152,7 +152,7 @@ export class ScreenRecorder {
         startTime: this.startTime.toISOString()
       })
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to start recording', {
         error: error.message,
         stack: error.stack
@@ -212,7 +212,7 @@ export class ScreenRecorder {
           this.cleanup()
           resolve(blob)
 
-        } catch (error: any) {
+        } catch (error) {
           logger.error('Failed to process recorded data', { error: error.message })
           this.cleanup()
           reject(error)

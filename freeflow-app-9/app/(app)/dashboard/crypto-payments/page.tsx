@@ -642,7 +642,7 @@ export default function CryptoPaymentsPage() {
         description: `${cancelTransaction.id} - ${formatCryptoAmount(cancelTransaction.amount, cancelTransaction.currency)} - ${cancelTransaction.description}`
       })
       announce('Transaction cancelled', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to cancel transaction', { error: error.message })
       toast.error('Failed to cancel transaction', { description: error.message })
     } finally {
@@ -702,7 +702,7 @@ export default function CryptoPaymentsPage() {
         description: `${formatCryptoAmount(refundTransaction.amount, refundTransaction.currency)} - ${formatUSD(refundTransaction.usdAmount)} - Refunded to ${refundTransaction.metadata.customerEmail || 'customer'}`
       })
       announce('Transaction refunded', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to refund transaction', { error: error.message })
       toast.error('Failed to refund transaction', { description: error.message })
     } finally {

@@ -28,7 +28,7 @@ export async function createInsight(data: any): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/system-insights-v2')
     logger.info('Insight created', { insightId: insight.id })
     return actionSuccess(insight, 'Insight created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating insight', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -57,7 +57,7 @@ export async function updateInsight(id: string, data: any): Promise<ActionResult
     revalidatePath('/dashboard/system-insights-v2')
     logger.info('Insight updated', { insightId: id })
     return actionSuccess(insight, 'Insight updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating insight', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -84,7 +84,7 @@ export async function deleteInsight(id: string): Promise<ActionResult<{ success:
     revalidatePath('/dashboard/system-insights-v2')
     logger.info('Insight deleted', { insightId: id })
     return actionSuccess({ success: true }, 'Insight deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting insight', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -117,7 +117,7 @@ export async function acknowledgeInsight(id: string): Promise<ActionResult<any>>
     revalidatePath('/dashboard/system-insights-v2')
     logger.info('Insight acknowledged', { insightId: id })
     return actionSuccess(insight, 'Insight acknowledged successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error acknowledging insight', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -152,7 +152,7 @@ export async function resolveInsight(id: string, actionTaken?: string): Promise<
     revalidatePath('/dashboard/system-insights-v2')
     logger.info('Insight resolved', { insightId: id })
     return actionSuccess(insight, 'Insight resolved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error resolving insight', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -181,7 +181,7 @@ export async function dismissInsight(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/system-insights-v2')
     logger.info('Insight dismissed', { insightId: id })
     return actionSuccess(insight, 'Insight dismissed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error dismissing insight', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -101,7 +101,7 @@ export function FileAccessDialog({
       } else {
         setError(data.error || 'Failed to fetch delivery information')
       }
-    } catch (error: any) {
+    } catch (error) {
       setError(error.message)
     } finally {
       setLoading(false)
@@ -135,7 +135,7 @@ export function FileAccessDialog({
         setError(data.error || 'Incorrect password')
         setRemainingAttempts(data.remainingAttempts ?? null)
       }
-    } catch (error: any) {
+    } catch (error) {
       setError(error.message)
     } finally {
       setVerifying(false)
@@ -160,7 +160,7 @@ export function FileAccessDialog({
       } else {
         setError(data.error || 'Failed to generate download link')
       }
-    } catch (error: any) {
+    } catch (error) {
       setError(error.message)
     } finally {
       setDownloading(false)
@@ -406,7 +406,7 @@ export function FileAccessDialog({
                   } else {
                     setError(data.error || 'Failed to create payment session')
                   }
-                } catch (error: any) {
+                } catch (error) {
                   setError(error.message)
                 }
               }}

@@ -186,7 +186,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Design Tools GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch design data' },
@@ -445,7 +445,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Design Tools POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Design operation failed' },
@@ -520,7 +520,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       { success: false, error: 'ID required for deletion' },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Design Tools DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },

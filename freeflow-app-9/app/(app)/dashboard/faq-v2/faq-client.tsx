@@ -414,7 +414,7 @@ export default function FAQClient() {
       )
       setShowCreateDialog(false)
       resetForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }, [newArticle, createFAQ, resetForm])
@@ -426,7 +426,7 @@ export default function FAQClient() {
       if (error) throw new Error(error)
       toast.success('Article Updated')
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
       return null
     }
@@ -438,7 +438,7 @@ export default function FAQClient() {
       const { error } = await updateFAQ(article.id, { status: 'published' })
       if (error) throw new Error(error)
       toast.success(`Article Published: "${article.title}" is now public`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }, [updateFAQ])
@@ -450,7 +450,7 @@ export default function FAQClient() {
       if (error) throw new Error(error)
       toast.success(`Article Archived: "${article.title}" has been archived`)
       setSelectedArticle(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }, [updateFAQ])
@@ -471,7 +471,7 @@ export default function FAQClient() {
       setShowDeleteDialog(false)
       setArticleToDelete(null)
       setSelectedArticle(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }, [articleToDelete, deleteFAQ])
@@ -482,7 +482,7 @@ export default function FAQClient() {
       const { error } = await markHelpful(articleId, helpful)
       if (error) throw new Error(error)
       toast.success('Feedback Recorded')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }, [markHelpful])
@@ -538,7 +538,7 @@ export default function FAQClient() {
       toast.success(`Article Updated: "${newArticle.title}" has been updated`)
       setShowCreateDialog(false)
       resetForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }, [editingArticle, newArticle, updateFAQ, resetForm])

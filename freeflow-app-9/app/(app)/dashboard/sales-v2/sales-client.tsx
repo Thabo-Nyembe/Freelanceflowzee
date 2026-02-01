@@ -491,7 +491,7 @@ export default function SalesClient() {
       toast.success('Deal Created', { description: `${dealForm.title} has been added to your pipeline` })
       setShowCreateDealDialog(false)
       setDealForm(defaultDealForm)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create deal', { description: error.message })
     } finally {
       setIsSubmitting(false)
@@ -520,7 +520,7 @@ export default function SalesClient() {
       setShowEditDealDialog(false)
       setSelectedDeal(null)
       setDealForm(defaultDealForm)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update deal', { description: error.message })
     } finally {
       setIsSubmitting(false)
@@ -536,7 +536,7 @@ export default function SalesClient() {
       toast.success('Deal Deleted', { description: `${selectedDeal.title} has been removed` })
       setShowDeleteConfirm(false)
       setSelectedDeal(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete deal', { description: error.message })
     } finally {
       setIsSubmitting(false)
@@ -559,7 +559,7 @@ export default function SalesClient() {
       try {
         await moveDealToStage(dealId, nextStage, probabilities[nextStage])
         toast.success('Stage Updated', { description: `Deal moved to ${nextStage.replace('_', ' ')}` })
-      } catch (error: any) {
+      } catch (error) {
         toast.error('Failed to advance stage', { description: error.message })
       }
     }
@@ -574,7 +574,7 @@ export default function SalesClient() {
       toast.success('Congratulations!', { description: `${selectedDeal.title} has been marked as won!` })
       setShowWinLossDialog(null)
       setSelectedDeal(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to mark deal as won', { description: error.message })
     } finally {
       setIsSubmitting(false)
@@ -592,7 +592,7 @@ export default function SalesClient() {
       setSelectedDeal(null)
       setLossReason('')
       setCompetitor('')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to mark deal as lost', { description: error.message })
     } finally {
       setIsSubmitting(false)
@@ -614,7 +614,7 @@ export default function SalesClient() {
       toast.success('Activity Logged', { description: `${activityForm.activity_type} logged for ${selectedDeal.title}` })
       setShowActivityDialog(false)
       setActivityForm({ activity_type: 'call', subject: '', description: '', outcome: '' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to log activity', { description: error.message })
     } finally {
       setIsSubmitting(false)

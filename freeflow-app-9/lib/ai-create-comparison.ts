@@ -199,7 +199,7 @@ export async function compareModels(
         try {
           const output = await generateWithModel(model, prompt, temperature, maxTokens)
           outputs.push(output)
-        } catch (error: any) {
+        } catch (error) {
           outputs.push({
             model,
             content: '',
@@ -319,7 +319,7 @@ async function generateWithModel(
       },
       metrics
     }
-  } catch (error: any) {
+  } catch (error) {
     const responseTime = Date.now() - startTime
     throw new Error(`${model} failed: ${error.message}`)
   }

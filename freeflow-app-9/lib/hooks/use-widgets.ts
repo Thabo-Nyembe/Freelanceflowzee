@@ -103,7 +103,7 @@ export function useWidgets(initialWidgets: Widget[] = [], initialStats: WidgetSt
 
       if (error) throw error
       return { data, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { data: null, error: error.message }
     } finally {
       setLoading(false)
@@ -122,7 +122,7 @@ export function useWidgets(initialWidgets: Widget[] = [], initialStats: WidgetSt
 
       if (error) throw error
       return { data, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { data: null, error: error.message }
     } finally {
       setLoading(false)
@@ -135,7 +135,7 @@ export function useWidgets(initialWidgets: Widget[] = [], initialStats: WidgetSt
       const { error } = await supabase.from('widgets').delete().eq('id', id)
       if (error) throw error
       return { success: true, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, error: error.message }
     } finally {
       setLoading(false)

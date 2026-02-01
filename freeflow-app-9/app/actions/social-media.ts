@@ -72,7 +72,7 @@ export async function createSocialPost(input: SocialPostInput): Promise<ActionRe
 
     revalidatePath('/dashboard/social-media-v2')
     return actionSuccess(data, 'Social post created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error creating social post:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -97,7 +97,7 @@ export async function updateSocialPost(id: string, updates: Partial<SocialPostIn
 
     revalidatePath('/dashboard/social-media-v2')
     return actionSuccess(data, 'Social post updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating social post:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -120,7 +120,7 @@ export async function deleteSocialPost(id: string): Promise<ActionResult<void>> 
 
     revalidatePath('/dashboard/social-media-v2')
     return actionSuccess(undefined, 'Social post deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error deleting social post:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -149,7 +149,7 @@ export async function schedulePost(id: string, scheduledAt: string): Promise<Act
 
     revalidatePath('/dashboard/social-media-v2')
     return actionSuccess(data, 'Post scheduled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error scheduling post:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -178,7 +178,7 @@ export async function publishPost(id: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/social-media-v2')
     return actionSuccess(data, 'Post published successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error publishing post:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -224,7 +224,7 @@ export async function updatePostMetrics(id: string, metrics: {
 
     revalidatePath('/dashboard/social-media-v2')
     return actionSuccess(data, 'Post metrics updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating post metrics:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -246,7 +246,7 @@ export async function getSocialPosts(): Promise<ActionResult<any[]>> {
 
     if (error) return actionError(error.message, 'DATABASE_ERROR')
     return actionSuccess(data || [], 'Social posts fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching social posts:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -278,7 +278,7 @@ export async function connectSocialAccount(input: SocialAccountInput): Promise<A
 
     revalidatePath('/dashboard/social-media-v2')
     return actionSuccess(data, 'Social account connected successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error connecting social account:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -301,7 +301,7 @@ export async function disconnectSocialAccount(id: string): Promise<ActionResult<
 
     revalidatePath('/dashboard/social-media-v2')
     return actionSuccess(undefined, 'Social account disconnected successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error disconnecting social account:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -334,7 +334,7 @@ export async function updateAccountMetrics(id: string, metrics: {
 
     revalidatePath('/dashboard/social-media-v2')
     return actionSuccess(data, 'Account metrics updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating account metrics:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -355,7 +355,7 @@ export async function getSocialAccounts(): Promise<ActionResult<any[]>> {
 
     if (error) return actionError(error.message, 'DATABASE_ERROR')
     return actionSuccess(data || [], 'Social accounts fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching social accounts:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -384,7 +384,7 @@ export async function getSocialAnalytics(accountId?: string, days: number = 30):
 
     if (error) return actionError(error.message, 'DATABASE_ERROR')
     return actionSuccess(data || [], 'Social analytics fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching social analytics:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

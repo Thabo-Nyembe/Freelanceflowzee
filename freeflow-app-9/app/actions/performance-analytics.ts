@@ -29,7 +29,7 @@ export async function createPerformanceAnalytic(data: any): Promise<ActionResult
 
     revalidatePath('/dashboard/performance-analytics-v2')
     return actionSuccess(analytic, 'Performance analytic created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating performance analytic', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -59,7 +59,7 @@ export async function updatePerformanceAnalytic(id: string, data: any): Promise<
 
     revalidatePath('/dashboard/performance-analytics-v2')
     return actionSuccess(analytic, 'Performance analytic updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating performance analytic', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -87,7 +87,7 @@ export async function deletePerformanceAnalytic(id: string): Promise<ActionResul
 
     revalidatePath('/dashboard/performance-analytics-v2')
     return actionSuccess({ success: true }, 'Performance analytic deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting performance analytic', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -120,7 +120,7 @@ export async function resolveAlert(id: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/performance-analytics-v2')
     return actionSuccess(analytic, 'Alert resolved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error resolving alert', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -153,7 +153,7 @@ export async function markDegraded(id: string, reason: string): Promise<ActionRe
 
     revalidatePath('/dashboard/performance-analytics-v2')
     return actionSuccess(analytic, 'Marked as degraded successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error marking degraded', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

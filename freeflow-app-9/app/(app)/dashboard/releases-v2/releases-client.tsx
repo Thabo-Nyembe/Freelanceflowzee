@@ -447,7 +447,7 @@ export default function ReleasesClient() {
       toast.success(`Release created successfully: (${formData.version}) has been created`)
       setShowCreateDialog(false)
       setFormData(initialFormData)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating release:', error)
       toast.error('Failed to create release')
     }
@@ -477,7 +477,7 @@ export default function ReleasesClient() {
       setShowEditDialog(false)
       setReleaseToEdit(null)
       setFormData(initialFormData)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating release:', error)
       toast.error('Failed to update release')
     }
@@ -493,7 +493,7 @@ export default function ReleasesClient() {
       toast.success(`Release deleted successfully`)
       setShowDeleteDialog(false)
       setReleaseToDelete(null)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting release:', error)
       toast.error('Failed to delete release')
     }
@@ -536,7 +536,7 @@ export default function ReleasesClient() {
       setShowDeployDialog(false)
       setReleaseToDeploy(null)
       fetchDeployments()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deploying release:', error)
       toast.error('Failed to deploy release')
     } finally {
@@ -583,7 +583,7 @@ export default function ReleasesClient() {
       setRollbackReason('')
       setTargetVersion('')
       fetchRollbacks()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error rolling back release:', error)
       toast.error('Failed to rollback release')
     } finally {
@@ -1203,7 +1203,7 @@ export default function ReleasesClient() {
 
                                     toast.success('Deployment paused successfully: deployment has been paused')
                                     fetchReleases()
-                                  } catch (error: any) {
+                                  } catch (error) {
                                     toast.error('Failed to pause deployment')
                                   }
                                 }}

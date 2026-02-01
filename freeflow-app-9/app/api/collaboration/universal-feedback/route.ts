@@ -218,7 +218,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Universal feedback GET failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to fetch feedback' },
@@ -325,7 +325,7 @@ export async function POST(request: NextRequest) {
       data: feedback,
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Universal feedback POST failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to create feedback' },
@@ -397,7 +397,7 @@ export async function PUT(request: NextRequest) {
       data: feedback,
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Universal feedback PUT failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to update feedback' },
@@ -473,7 +473,7 @@ export async function DELETE(request: NextRequest) {
       action: 'feedback_deleted',
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Universal feedback DELETE failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to delete feedback' },

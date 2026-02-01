@@ -312,7 +312,7 @@ export default function GalleryClient() {
       toast.success("Photo uploaded - " + uploadForm.title + " has been uploaded successfully")
       setShowUploadDialog(false)
       setUploadForm({ title: '', description: '', tags: '', file_url: '', file_type: 'image', is_public: true })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Upload failed')
     } finally {
       setIsSubmitting(false)
@@ -343,7 +343,7 @@ export default function GalleryClient() {
       toast.success("Collection created - " + collectionForm.name + " has been created")
       setShowCreateCollection(false)
       setCollectionForm({ name: '', description: '', is_public: true })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Creation failed')
     } finally {
       setIsSubmitting(false)
@@ -354,7 +354,7 @@ export default function GalleryClient() {
     try {
       await deleteCollection(collection.id)
       toast.success("Collection deleted - " + collection.name + " has been deleted")
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete failed')
     }
   }
@@ -433,7 +433,7 @@ export default function GalleryClient() {
       await deleteGalleryItem(item.id)
       toast.success("Photo deleted - " + item.title + " has been deleted")
       setSelectedGalleryItem(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete failed')
     }
   }
@@ -465,7 +465,7 @@ export default function GalleryClient() {
       toast.success('Following')
       setShowFollowDialog(false)
       setSelectedPhotographer(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Follow failed')
     } finally {
       setIsSubmitting(false)
@@ -504,7 +504,7 @@ export default function GalleryClient() {
       }
       toast.success('API Key regenerated')
       setShowRegenerateApiKeyDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Regeneration failed')
     } finally {
       setIsSubmitting(false)
@@ -541,7 +541,7 @@ export default function GalleryClient() {
       }
       setShowConnectServiceDialog(false)
       setSelectedService(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Action failed')
     } finally {
       setIsSubmitting(false)
@@ -580,7 +580,7 @@ export default function GalleryClient() {
       }
       toast.success('Trash emptied')
       setShowEmptyTrashDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to empty trash')
     } finally {
       setIsSubmitting(false)
@@ -614,7 +614,7 @@ export default function GalleryClient() {
       }
       toast.success("Export requested: " + exportResolution + " resolution export is being prepared. You will be notified when it is ready.")
       setShowDataExportDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed')
     } finally {
       setIsSubmitting(false)
@@ -652,7 +652,7 @@ export default function GalleryClient() {
       }
       toast.success('Photos deleted')
       setShowDeletePhotosDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete failed')
     } finally {
       setIsSubmitting(false)
@@ -670,7 +670,7 @@ export default function GalleryClient() {
       setShowDeleteCollectionsDialog(false)
       // Refresh the collections list
       await fetchCollections()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete failed')
     } finally {
       setIsSubmitting(false)
@@ -719,7 +719,7 @@ export default function GalleryClient() {
 
       toast.success('Account deleted')
       setShowDeleteAccountDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete failed')
     } finally {
       setIsSubmitting(false)

@@ -581,7 +581,7 @@ export default function ProfileClient() {
 
       toast.success('Skill added')
       fetchProfileData()
-    } catch (error: any) {
+    } catch (error) {
       if (error.code === '23505') {
         toast.error('Skill already exists')
       } else {

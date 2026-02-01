@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       default:
         throw new Error(`Unknown integration type: ${type}`);
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Integration test failed', { error: error.message });
     return NextResponse.json(
       { success: false, error: error.message },
@@ -119,7 +119,7 @@ async function testEmailConnection(config: any) {
     }
 
     throw new Error(`Unsupported email provider: ${provider}`);
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Email connection test failed', { provider, error: error.message });
     throw error;
   }
@@ -189,7 +189,7 @@ async function testAIConnection(config: any) {
     }
 
     throw new Error(`Unsupported AI provider: ${provider}`);
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI connection test failed', { provider, error: error.message });
     throw error;
   }
@@ -232,7 +232,7 @@ async function testPaymentConnection(config: any) {
         success: true,
         message: 'Stripe connection verified successfully',
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Stripe connection test failed', { error: error.message });
       throw error;
     }
@@ -264,7 +264,7 @@ async function testSMSConnection(config: any) {
         success: true,
         message: 'Twilio connection verified successfully',
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Twilio connection test failed', { error: error.message });
       throw error;
     }
@@ -295,7 +295,7 @@ async function testCRMConnection(config: any) {
         success: true,
         message: 'HubSpot connection verified successfully',
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error('HubSpot connection test failed', { error: error.message });
       throw error;
     }

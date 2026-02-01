@@ -76,7 +76,7 @@ export default function AnalyticsPage() {
         }
 
         setIsLoadingAnalytics(false)
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to fetch work pattern analytics', { error: error.message, userId })
         setIsLoadingAnalytics(false)
         setError(error.message)
@@ -103,7 +103,7 @@ export default function AnalyticsPage() {
       } else {
         throw new Error(data.error || 'Failed to refresh')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to refresh analytics')
       setError(error.message)
     } finally {

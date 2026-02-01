@@ -759,7 +759,7 @@ export async function POST(request: NextRequest) {
       data: result
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Community search failed', {
       error: error.message,
       stack: error.stack
@@ -820,7 +820,7 @@ export async function GET(request: NextRequest) {
       data: result
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Community search failed (GET)', { error: error.message })
 
     return NextResponse.json(

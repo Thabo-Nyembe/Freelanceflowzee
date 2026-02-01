@@ -76,7 +76,7 @@ export async function createSalesDeal(input: SalesDealInput): Promise<ActionResu
     logger.info('Sales deal created successfully', { title: input.title })
     revalidatePath('/dashboard/sales-v2')
     return actionSuccess(data, 'Sales deal created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating sales deal', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -108,7 +108,7 @@ export async function updateSalesDeal(id: string, updates: Partial<SalesDealInpu
     logger.info('Sales deal updated successfully', { id })
     revalidatePath('/dashboard/sales-v2')
     return actionSuccess(data, 'Sales deal updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating sales deal', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -138,7 +138,7 @@ export async function deleteSalesDeal(id: string): Promise<ActionResult<{ succes
     logger.info('Sales deal deleted successfully', { id })
     revalidatePath('/dashboard/sales-v2')
     return actionSuccess({ success: true }, 'Sales deal deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting sales deal', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -191,7 +191,7 @@ export async function moveDealToStage(id: string, stage: string, probability?: n
     logger.info('Deal moved to stage successfully', { id, stage })
     revalidatePath('/dashboard/sales-v2')
     return actionSuccess(data, 'Deal stage updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error moving deal to stage', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -235,7 +235,7 @@ export async function loseDeal(id: string, reason?: string, competitor?: string)
     logger.info('Deal marked as lost', { id, reason })
     revalidatePath('/dashboard/sales-v2')
     return actionSuccess(data, 'Deal marked as lost')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error losing deal', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -265,7 +265,7 @@ export async function getSalesDeals(): Promise<ActionResult<any[]>> {
 
     logger.info('Sales deals fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Sales deals fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching sales deals', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -295,7 +295,7 @@ export async function getSalesDeal(id: string): Promise<ActionResult<any>> {
 
     logger.info('Sales deal fetched successfully', { id })
     return actionSuccess(data, 'Sales deal fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching sales deal', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -335,7 +335,7 @@ export async function logSalesActivity(input: SalesActivityInput): Promise<Actio
     logger.info('Sales activity logged successfully', { dealId: input.deal_id })
     revalidatePath('/dashboard/sales-v2')
     return actionSuccess(data, 'Sales activity logged successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error logging sales activity', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -358,7 +358,7 @@ export async function getSalesActivities(dealId: string): Promise<ActionResult<a
 
     logger.info('Sales activities fetched successfully', { dealId, count: data?.length || 0 })
     return actionSuccess(data || [], 'Sales activities fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching sales activities', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -400,7 +400,7 @@ export async function createPipelineStage(input: {
     logger.info('Pipeline stage created successfully', { name: input.name })
     revalidatePath('/dashboard/sales-v2')
     return actionSuccess(data, 'Pipeline stage created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating pipeline stage', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -429,7 +429,7 @@ export async function getPipelineStages(): Promise<ActionResult<any[]>> {
 
     logger.info('Pipeline stages fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Pipeline stages fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching pipeline stages', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -40,7 +40,7 @@ export async function GET(
     }
 
     return NextResponse.json({ event });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Event GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch event' },
@@ -68,7 +68,7 @@ export async function PUT(
     const body = await request.json();
     const event = await calendarService.updateEvent(eventId, user.id, body);
     return NextResponse.json({ event });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Event PUT error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update event' },
@@ -114,7 +114,7 @@ export async function PATCH(
     // Partial update
     const event = await calendarService.updateEvent(eventId, user.id, body);
     return NextResponse.json({ event });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Event PATCH error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update event' },
@@ -144,7 +144,7 @@ export async function DELETE(
 
     await calendarService.deleteEvent(eventId, user.id, deleteRecurring);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Event DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete event' },

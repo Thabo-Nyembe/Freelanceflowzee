@@ -71,7 +71,7 @@ export async function createTestCase(input: CreateTestCaseInput): Promise<Action
     revalidatePath('/dashboard/qa-v2')
     logger.info('Test case created successfully', { testCaseId: data.id, testCode })
     return actionSuccess(data, 'Test case created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating test case', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -102,7 +102,7 @@ export async function updateTestCase(input: UpdateTestCaseInput): Promise<Action
     revalidatePath('/dashboard/qa-v2')
     logger.info('Test case updated successfully', { testCaseId: id })
     return actionSuccess(data, 'Test case updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating test case', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -129,7 +129,7 @@ export async function deleteTestCase(id: string): Promise<ActionResult<{ success
     revalidatePath('/dashboard/qa-v2')
     logger.info('Test case deleted successfully', { testCaseId: id })
     return actionSuccess({ success: true }, 'Test case deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting test case', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -172,7 +172,7 @@ export async function executeTest(testCaseId: string): Promise<ActionResult<any>
     revalidatePath('/dashboard/qa-v2')
     logger.info('Test execution started successfully', { testCaseId, executionId: execution.id })
     return actionSuccess(execution, 'Test execution started successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error executing test', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -235,7 +235,7 @@ export async function createTestExecution(input: {
     revalidatePath('/dashboard/qa-v2')
     logger.info('Test execution created successfully', { executionId: data.id, testCaseId: input.test_case_id })
     return actionSuccess(data, 'Test execution created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating test execution', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -276,7 +276,7 @@ export async function getQAStats(): Promise<ActionResult<any>> {
 
     logger.info('QA stats fetched successfully', { total })
     return actionSuccess(stats, 'QA statistics retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching QA stats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

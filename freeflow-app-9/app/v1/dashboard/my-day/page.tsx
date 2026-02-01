@@ -172,7 +172,7 @@ export default function MyDayTodayPage() {
           title: result.task.title
         })
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to add task', { error, title: newTaskTitle })
       toast.error('Failed to add task', {
         description: error.message || 'Please try again later'
@@ -224,7 +224,7 @@ export default function MyDayTodayPage() {
           toast.success(result.message || 'Task updated successfully!')
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to toggle task', { error, taskId })
       toast.error('Failed to update task', {
         description: error.message || 'Please try again later'
@@ -299,7 +299,7 @@ export default function MyDayTodayPage() {
       dispatch({ type: 'DELETE_TASK', id: taskToDelete })
       toast.success(`Task "${task?.title}" deleted successfully`)
       logger.info('Task deleted successfully', { taskId: taskToDelete, title: task?.title })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete task', { error, taskId: taskToDelete })
       // Optimistic deletion even if API fails
       dispatch({ type: 'DELETE_TASK', id: taskToDelete })

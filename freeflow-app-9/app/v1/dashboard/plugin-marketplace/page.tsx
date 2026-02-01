@@ -595,7 +595,7 @@ export default function PluginMarketplacePage() {
       const installsK = (plugin.installCount / 1000).toFixed(1)
       toast.success(`${plugin.name} installed - ${plugin.version} - ${price} - ${plugin.rating}⭐ (${installsK}k installs) - Active and ready to use`)
       announce(`${plugin.name} installed`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to install plugin', { error: error.message, pluginId: plugin.id })
       toast.error('Failed to install plugin')
     }
@@ -636,7 +636,7 @@ export default function PluginMarketplacePage() {
 
       toast.success(`${uninstallPlugin.name} uninstalled - ${uninstallPlugin.version} - ${fileSizeMB} MB freed - Installed since ${installedDate}`)
       announce('Plugin uninstalled', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to uninstall plugin', { error: error.message, pluginId: uninstallPlugin.id })
       toast.error('Failed to uninstall plugin')
     } finally {
@@ -654,7 +654,7 @@ export default function PluginMarketplacePage() {
         try {
           const { updateInstallation } = await import('@/lib/plugin-marketplace-queries')
           await updateInstallation(installed.id, { is_active: newState })
-        } catch (error: any) {
+        } catch (error) {
           logger.error('Failed to persist plugin active state', { error: error.message })
         }
       }

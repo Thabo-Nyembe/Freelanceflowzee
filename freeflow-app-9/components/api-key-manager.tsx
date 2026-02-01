@@ -523,7 +523,7 @@ export function APIKeyManager() {
         setApiKeys(result.data || [])
         logger.info('API keys loaded', { count: result.data?.length || 0 })
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to load API keys', { error: error.message })
     }
   }
@@ -606,7 +606,7 @@ export function APIKeyManager() {
         throw new Error(saveResult.error || 'Failed to save API key')
       }
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to add API key', {
         configId: selectedConfig.id,
         error: error.message
@@ -642,7 +642,7 @@ export function APIKeyManager() {
       } else {
         throw new Error(result.error || 'Failed to delete key')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete API key', { keyId, error: error.message })
       toast.error('Deletion Failed', {
         description: error.message

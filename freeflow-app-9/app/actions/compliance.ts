@@ -36,7 +36,7 @@ export async function createCompliance(data: {
     logger.info('Compliance created successfully', { complianceId: compliance.id })
     revalidatePath('/dashboard/compliance-v2')
     return actionSuccess(compliance, 'Compliance created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in createCompliance', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -65,7 +65,7 @@ export async function updateCompliance(id: string, data: any): Promise<ActionRes
     logger.info('Compliance updated successfully', { id })
     revalidatePath('/dashboard/compliance-v2')
     return actionSuccess(compliance, 'Compliance updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateCompliance', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -92,7 +92,7 @@ export async function deleteCompliance(id: string): Promise<ActionResult<void>> 
     logger.info('Compliance deleted successfully', { id })
     revalidatePath('/dashboard/compliance-v2')
     return actionSuccess(undefined, 'Compliance deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in deleteCompliance', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -131,7 +131,7 @@ export async function updateRequirements(id: string, requirements: { met: number
     logger.info('Requirements updated successfully', { id })
     revalidatePath('/dashboard/compliance-v2')
     return actionSuccess(compliance, 'Requirements updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateRequirements', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -174,7 +174,7 @@ export async function conductAudit(id: string, score: number): Promise<ActionRes
     logger.info('Audit conducted successfully', { id, score })
     revalidatePath('/dashboard/compliance-v2')
     return actionSuccess(compliance, 'Audit conducted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in conductAudit', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -215,7 +215,7 @@ export async function certifyCompliance(id: string, certification: {
     logger.info('Compliance certified successfully', { id })
     revalidatePath('/dashboard/compliance-v2')
     return actionSuccess(compliance, 'Compliance certified successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in certifyCompliance', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -258,7 +258,7 @@ export async function recordViolation(id: string, violation: { description: stri
     logger.info('Violation recorded successfully', { id })
     revalidatePath('/dashboard/compliance-v2')
     return actionSuccess(compliance, 'Violation recorded successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in recordViolation', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -298,7 +298,7 @@ export async function updateRemediation(id: string, remediation: {
     logger.info('Remediation updated successfully', { id })
     revalidatePath('/dashboard/compliance-v2')
     return actionSuccess(compliance, 'Remediation updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateRemediation', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -335,7 +335,7 @@ export async function updateTrainingProgress(id: string, trained: number, total:
     logger.info('Training progress updated successfully', { id })
     revalidatePath('/dashboard/compliance-v2')
     return actionSuccess(compliance, 'Training progress updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateTrainingProgress', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -367,7 +367,7 @@ export async function submitReport(id: string): Promise<ActionResult<any>> {
     logger.info('Report submitted successfully', { id })
     revalidatePath('/dashboard/compliance-v2')
     return actionSuccess(compliance, 'Report submitted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in submitReport', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

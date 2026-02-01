@@ -2698,7 +2698,7 @@ export default function HelpCenterClient() {
 
                 toast.success('Translation queue initiated', { id: 'translate-queue', description: 'Articles will be translated within 24 hours' })
                 setShowTranslateDialog(false)
-              } catch (error: any) {
+              } catch (error) {
                 toast.error('Failed to start translation', { id: 'translate-queue', description: error.message })
               }
             }}>
@@ -2748,7 +2748,7 @@ export default function HelpCenterClient() {
 
                 toast.success('Subcategory created', { id: 'create-subcategory' })
                 setShowSubcategoryDialog(false)
-              } catch (error: any) {
+              } catch (error) {
                 toast.error('Failed to create subcategory', { id: 'create-subcategory', description: error.message })
               }
             }}>
@@ -2810,7 +2810,7 @@ export default function HelpCenterClient() {
 
                 toast.success('Order saved', { id: 'save-order' })
                 setShowOrganizeDialog(false)
-              } catch (error: any) {
+              } catch (error) {
                 toast.error('Failed to save order', { id: 'save-order', description: error.message })
               }
             }}>

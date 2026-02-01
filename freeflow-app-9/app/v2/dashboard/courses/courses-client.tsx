@@ -790,7 +790,7 @@ export default function CoursesClient() {
       setShowCreateCourseDialog(false)
       resetCourseForm()
       refreshCourses()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create course')
     } finally {
       setIsSubmitting(false)
@@ -879,7 +879,7 @@ export default function CoursesClient() {
       resetCourseForm()
       setSelectedCourse(null)
       refreshCourses()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update course')
     } finally {
       setIsSubmitting(false)
@@ -907,7 +907,7 @@ export default function CoursesClient() {
       setShowDeleteCourseDialog(false)
       setCourseToDelete(null)
       refreshCourses()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete course')
     } finally {
       setIsSubmitting(false)
@@ -943,7 +943,7 @@ export default function CoursesClient() {
 
       toast.success("Course published - " + course.title + " is now live")
       refreshCourses()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to publish course')
     } finally {
       setIsSubmitting(false)
@@ -973,7 +973,7 @@ export default function CoursesClient() {
 
       toast.success("Course archived - " + course.title + " has been archived")
       refreshCourses()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to archive course')
     } finally {
       setIsSubmitting(false)
@@ -1003,7 +1003,7 @@ export default function CoursesClient() {
 
       toast.success("Enrolled! You are now enrolled in " + course.title)
       refreshCourses()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to enroll')
     } finally {
       setIsSubmitting(false)
@@ -1028,7 +1028,7 @@ export default function CoursesClient() {
       })
 
       toast.info("Starting lesson - " + lecture.title + "...")
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to start lesson')
     }
   }
@@ -1054,7 +1054,7 @@ export default function CoursesClient() {
 
       toast.success('Course completed!')
       refreshCourses()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to complete course')
     } finally {
       setIsSubmitting(false)
@@ -1072,7 +1072,7 @@ export default function CoursesClient() {
 
       // Generate certificate URL or trigger download
       toast.success('Download started')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to download certificate')
     }
   }
@@ -1099,7 +1099,7 @@ export default function CoursesClient() {
       setShowAddSectionDialog(false)
       resetSectionForm()
       refreshCourses()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to add section')
     } finally {
       setIsSubmitting(false)
@@ -1130,7 +1130,7 @@ export default function CoursesClient() {
       setShowAddLectureDialog(false)
       resetLectureForm()
       refreshCourses()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to add lecture')
     } finally {
       setIsSubmitting(false)
@@ -1153,7 +1153,7 @@ export default function CoursesClient() {
 
       toast.success('Response posted')
       refreshCourses()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to post response')
     } finally {
       setIsSubmitting(false)

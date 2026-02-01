@@ -62,7 +62,7 @@ export async function createGrowthMetric(input: GrowthMetricInput): Promise<Acti
     logger.info('Growth metric created successfully', { metricId: data.id })
     revalidatePath('/dashboard/growth-hub-v2')
     return actionSuccess(data, 'Growth metric created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating growth metric', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -115,7 +115,7 @@ export async function updateGrowthMetric(id: string, updates: Partial<GrowthMetr
     logger.info('Growth metric updated successfully', { metricId: id })
     revalidatePath('/dashboard/growth-hub-v2')
     return actionSuccess(data, 'Growth metric updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating growth metric', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -144,7 +144,7 @@ export async function deleteGrowthMetric(id: string): Promise<ActionResult<{ suc
     logger.info('Growth metric deleted successfully', { metricId: id })
     revalidatePath('/dashboard/growth-hub-v2')
     return actionSuccess({ success: true }, 'Growth metric deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting growth metric', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -197,7 +197,7 @@ export async function recordValue(id: string, newValue: number): Promise<ActionR
     logger.info('Value recorded successfully', { metricId: id, newValue })
     revalidatePath('/dashboard/growth-hub-v2')
     return actionSuccess(data, 'Value recorded successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error recording value', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -233,7 +233,7 @@ export async function setAsGoal(id: string, targetValue: number, deadline?: stri
     logger.info('Metric set as goal successfully', { metricId: id })
     revalidatePath('/dashboard/growth-hub-v2')
     return actionSuccess(data, 'Metric set as goal successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error setting metric as goal', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -261,7 +261,7 @@ export async function getGrowthMetrics(): Promise<ActionResult<any[]>> {
 
     logger.info('Growth metrics fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Growth metrics fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting growth metrics', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -290,7 +290,7 @@ export async function getGoals(): Promise<ActionResult<any[]>> {
 
     logger.info('Goals fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Goals fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting goals', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

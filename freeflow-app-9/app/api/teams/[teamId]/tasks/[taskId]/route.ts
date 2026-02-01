@@ -64,7 +64,7 @@ export async function GET(
         return NextResponse.json(response);
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Task GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch task' },
@@ -92,7 +92,7 @@ export async function PUT(
     const body = await request.json();
     const task = await teamService.updateTask(teamId, taskId, user.id, body);
     return NextResponse.json({ task });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Task PUT error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update task' },
@@ -138,7 +138,7 @@ export async function PATCH(
     // Partial update
     const task = await teamService.updateTask(teamId, taskId, user.id, body);
     return NextResponse.json({ task });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Task PATCH error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update task' },
@@ -165,7 +165,7 @@ export async function DELETE(
 
     await teamService.deleteTask(teamId, taskId, user.id);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Task DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete task' },

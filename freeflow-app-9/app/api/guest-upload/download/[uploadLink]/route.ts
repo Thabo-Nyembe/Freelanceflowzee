@@ -111,7 +111,7 @@ export async function GET(
       expiresAt: payment.expires_at
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Download request failed', { error: error.message, stack: error.stack })
     return NextResponse.json(
       { error: error.message || 'Failed to process download request' },

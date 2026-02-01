@@ -86,7 +86,7 @@ export async function apiFetch<T = any>(
         throw fetchError
       }
 
-    } catch (error: any) {
+    } catch (error) {
       lastError = error
 
       logger.warn('API request failed', {

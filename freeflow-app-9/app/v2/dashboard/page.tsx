@@ -776,7 +776,7 @@ export default function DashboardPage() {
       } else {
         throw new Error(result.error || 'Refresh failed')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Dashboard refresh failed', {
         error: error.message || 'Unknown error'
       })

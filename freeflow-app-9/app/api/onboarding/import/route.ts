@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
       message: `Successfully imported data from ${appId}`
     });
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Data import failed', {
       appId: body?.appId,
       error: error.message
@@ -220,7 +220,7 @@ export async function GET(request: NextRequest) {
       data: mockImportedApps
     });
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to fetch import history', { error: error.message });
 
     return NextResponse.json(

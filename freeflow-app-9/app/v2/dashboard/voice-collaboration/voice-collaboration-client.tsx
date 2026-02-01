@@ -429,7 +429,7 @@ export default function VoiceCollaborationClient() {
           recordingsCount: mappedRecordings.length
         })
         announce('Voice collaboration page loaded', 'polite')
-      } catch (error: any) {
+      } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load voice collaboration data'
         logger.error('Failed to load voice collaboration data', { error: errorMessage, userId })
         toast.error('Failed to load voice collaboration', { description: errorMessage })
@@ -621,7 +621,7 @@ export default function VoiceCollaborationClient() {
         description: `${newRoom.name} - ${newRoom.type} - ${newRoom.capacity} capacity - ${newRoom.quality} quality - Now active`
       })
       announce('Voice room created', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Room creation failed', { error: error.message, userId })
       toast.error('Failed to create room', {
         description: error.message || 'Please try again later'
@@ -735,7 +735,7 @@ export default function VoiceCollaborationClient() {
         description: `${room.name} - ${newParticipant.role} - ${newParticipantCount}/${room.capacity} participants - ${room.quality} quality`
       })
       announce(`Joined ${room.name}`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Join room failed', {
         roomId: room.id,
         roomName: room.name,
@@ -794,7 +794,7 @@ export default function VoiceCollaborationClient() {
         description: `${deleteRoom.name} - ${deleteRoom.type} room removed`
       })
       announce('Room deleted', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete room', {
         error: error.message,
         roomId: deleteRoom.id,
@@ -940,7 +940,7 @@ export default function VoiceCollaborationClient() {
       announce('Recordings exported', 'polite')
       setShowExportRecordingsModal(false)
       setExportSelectedRecordings([])
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Export failed', { error: error.message })
       toast.error('Export failed', {
         description: error.message || 'Please try again later'
@@ -991,7 +991,7 @@ export default function VoiceCollaborationClient() {
       })
       announce('Voice settings saved', 'polite')
       setShowVoiceSettingsModal(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save voice settings', { error: error.message })
       toast.error('Failed to save settings', {
         description: error.message || 'Please try again later'
@@ -1085,7 +1085,7 @@ export default function VoiceCollaborationClient() {
         description: `${newRoom.name} is now active and ready for participants`
       })
       announce('Voice room created', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Quick room creation failed', { error: error.message })
       toast.error('Failed to create room', {
         description: error.message || 'Please try again later'

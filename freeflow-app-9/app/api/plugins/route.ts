@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ data })
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Plugins API error', { error })
     return NextResponse.json(
       { error: error.message || 'Failed to fetch plugins' },
@@ -281,7 +281,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Plugins API error', { error })
     return NextResponse.json(
       { error: error.message || 'Operation failed' },

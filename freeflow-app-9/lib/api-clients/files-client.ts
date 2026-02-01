@@ -321,7 +321,7 @@ class FilesApiClient extends BaseApiClient {
         data: fileData as FileItem,
         error: null
       }
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: error.message || 'Failed to upload file',

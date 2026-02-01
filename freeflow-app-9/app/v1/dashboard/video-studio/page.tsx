@@ -353,7 +353,7 @@ export default function VideoStudioPage() {
         format: 'mp4',
         client: ''
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create project', { error, title: newProject.title })
       toast.error('Failed to create project')
     } finally {
@@ -365,7 +365,7 @@ export default function VideoStudioPage() {
     if (recordingState.status === 'recording') {
       // Stop recording
       try {        await stopRecording()
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to stop recording', { error: error.message })
         toast.error('Failed to stop recording')
       }
@@ -390,7 +390,7 @@ export default function VideoStudioPage() {
         })
 
         announce('Recording started')
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to start recording', { error: error.message })
         toast.error('Failed to start recording. Please check permissions.')
       }
@@ -456,7 +456,7 @@ export default function VideoStudioPage() {
       setProjects(prev => prev.filter(p => p.id !== projectToDelete))
     toast.success(`Project "${project?.title}" deleted`)
       announce(`Video project ${project?.title} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete project', { error, projectId: projectToDelete })
       toast.error('Failed to delete project')
       announce('Error deleting project', 'assertive')
@@ -496,7 +496,7 @@ export default function VideoStudioPage() {
       setAssets(prev => prev.filter(a => a.id !== assetToDelete))
     toast.success(`Asset "${asset?.name}" deleted`)
       announce(`Asset ${asset?.name} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete asset', { error, assetId: assetToDelete })
       toast.error('Failed to delete asset')
       announce('Error deleting asset', 'assertive')
@@ -538,7 +538,7 @@ export default function VideoStudioPage() {
       if (result.success) {        setInviteEmail('')
         announce(`Invitation sent to ${inviteEmail}`, 'polite')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to send collaboration invite', { error, email: inviteEmail })
     } finally {
       setIsSendingInvite(false)
@@ -578,7 +578,7 @@ export default function VideoStudioPage() {
         setProjects(prev => [newProject!, ...prev])
         toast.success(`Project duplicated: ${newProject.title}`)
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to duplicate project', { error, projectId })
       toast.error('Failed to duplicate project')
     }
@@ -655,7 +655,7 @@ export default function VideoStudioPage() {
 
       // Navigate to editor immediately
       router.push(`/dashboard/video-studio/editor?project=${newProjectData.id}`)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create project from template', { error, templateId: template.id })
       toast.error('Failed to create project from template')
     } finally {
@@ -686,7 +686,7 @@ export default function VideoStudioPage() {
       if (result.success) {        announce(`Project restored to ${version}`)
         setIsVersionHistoryOpen(false)
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to restore version', { error, version })
       toast.error('Failed to restore version')
     }
@@ -845,7 +845,7 @@ export default function VideoStudioPage() {
         }
       }
     toast.success('Project saved - All changes synced to cloud')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save project', { error, projectId: selectedProject.id })
       toast.error('Failed to save project')
     }
@@ -904,7 +904,7 @@ export default function VideoStudioPage() {
 
       if (result.success) {        toast.success('Subtitles generated! AI-powered captions have been created for your video')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to generate subtitles', { error })
       toast.error('Failed to generate subtitles')
     }
@@ -931,7 +931,7 @@ export default function VideoStudioPage() {
 
       if (result.success) {        toast.success('AI Enhancement complete! Color correction, noise reduction, and stabilization applied')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to enhance video', { error })
       toast.error('Failed to enhance video')
     }

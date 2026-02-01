@@ -65,7 +65,7 @@ export async function GET(
         due_date: docRequest.due_date,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Upload request GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch upload request' },
@@ -169,7 +169,7 @@ export async function POST(
         requested_count: updatedRequest.requested_documents.length,
       },
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Upload request POST error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to upload documents' },

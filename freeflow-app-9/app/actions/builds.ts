@@ -72,7 +72,7 @@ export async function createPipeline(input: CreatePipelineInput): Promise<Action
     revalidatePath('/dashboard/builds-v2')
     logger.info('Pipeline created successfully', { pipelineId: data.id })
     return actionSuccess(data, 'Pipeline created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating pipeline', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -103,7 +103,7 @@ export async function updatePipeline(input: UpdatePipelineInput): Promise<Action
     revalidatePath('/dashboard/builds-v2')
     logger.info('Pipeline updated successfully', { pipelineId: id })
     return actionSuccess(data, 'Pipeline updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating pipeline', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -130,7 +130,7 @@ export async function deletePipeline(id: string): Promise<ActionResult<{ success
     revalidatePath('/dashboard/builds-v2')
     logger.info('Pipeline deleted successfully', { pipelineId: id })
     return actionSuccess({ success: true }, 'Pipeline deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting pipeline', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -159,7 +159,7 @@ export async function togglePipeline(id: string, isActive: boolean): Promise<Act
     revalidatePath('/dashboard/builds-v2')
     logger.info('Pipeline toggled successfully', { pipelineId: id, isActive })
     return actionSuccess(data, 'Pipeline status updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error toggling pipeline', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -204,7 +204,7 @@ export async function triggerBuild(input: TriggerBuildInput): Promise<ActionResu
     revalidatePath('/dashboard/builds-v2')
     logger.info('Build triggered successfully', { buildId: data.id, buildNumber })
     return actionSuccess(data, 'Build triggered successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error triggering build', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -235,7 +235,7 @@ export async function updateBuild(input: UpdateBuildInput): Promise<ActionResult
     revalidatePath('/dashboard/builds-v2')
     logger.info('Build updated successfully', { buildId: id })
     return actionSuccess(data, 'Build updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating build', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -267,7 +267,7 @@ export async function cancelBuild(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/builds-v2')
     logger.info('Build cancelled successfully', { buildId: id })
     return actionSuccess(data, 'Build cancelled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error cancelling build', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -330,7 +330,7 @@ export async function retryBuild(buildId: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/builds-v2')
     logger.info('Build retried successfully', { originalBuildId: buildId, newBuildId: data.id })
     return actionSuccess(data, 'Build retried successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error retrying build', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -376,7 +376,7 @@ export async function getBuildStats(): Promise<ActionResult<any>> {
 
     logger.info('Build stats retrieved successfully')
     return actionSuccess(stats, 'Build stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting build stats', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -424,7 +424,7 @@ export async function createArtifact(input: {
     revalidatePath('/dashboard/builds-v2')
     logger.info('Artifact created successfully', { artifactId: data.id, buildId: input.build_id })
     return actionSuccess(data, 'Artifact created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating artifact', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -455,7 +455,7 @@ export async function downloadArtifact(id: string): Promise<ActionResult<any>> {
 
     logger.info('Artifact downloaded successfully', { artifactId: id })
     return actionSuccess(data, 'Artifact downloaded successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error downloading artifact', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -733,7 +733,7 @@ export default function SettingsClient() {
       toast.success('Profile saved')
       setSaveMessage('Profile saved successfully!')
       setLastSaved(new Date())
-    } catch (error: any) {
+    } catch (error) {
       console.error('Profile save error:', error)
       toast.error('Failed to save profile')
     } finally {
@@ -762,7 +762,7 @@ export default function SettingsClient() {
           }, { onConflict: 'id' })
       }
       toast.success('Notifications saved')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsSaving(false)
@@ -788,7 +788,7 @@ export default function SettingsClient() {
       setNewPassword('')
       setConfirmPassword('')
       setSecurity(prev => ({ ...prev, passwordLastChanged: new Date().toISOString() }))
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsSaving(false)
@@ -809,7 +809,7 @@ export default function SettingsClient() {
       if (error) throw error
       setSecurity(prev => ({ ...prev, twoFactorEnabled: newValue }))
       toast.success(newValue ? '2FA enabled' : '2FA disabled')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsSaving(false)
@@ -827,7 +827,7 @@ export default function SettingsClient() {
       if (error) throw error
       setSessions(prev => prev.filter(s => s.id !== sessionId))
       toast.success('Session revoked')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -845,7 +845,7 @@ export default function SettingsClient() {
       if (error) throw error
       setSessions(prev => prev.filter(s => s.isCurrent))
       toast.success('All sessions revoked')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -874,7 +874,7 @@ export default function SettingsClient() {
           : i
       ))
       toast.success(`${isConnecting ? 'Connected' : 'Disconnected'} has been ${isConnecting ? 'connected' : 'disconnected'}`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -891,7 +891,7 @@ export default function SettingsClient() {
 
       if (error) throw error
       toast.success(`Theme updated to ${newTheme}`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -914,7 +914,7 @@ export default function SettingsClient() {
       a.click()
       URL.revokeObjectURL(url)
       toast.success('Data exported')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -976,7 +976,7 @@ export default function SettingsClient() {
       } else {
         toast.error('Failed to generate API key')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsSaving(false)
@@ -992,7 +992,7 @@ export default function SettingsClient() {
       } else {
         toast.error('Failed to revoke key')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -1018,7 +1018,7 @@ export default function SettingsClient() {
       } else {
         toast.error('Failed to save appearance')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsSaving(false)
@@ -1044,7 +1044,7 @@ export default function SettingsClient() {
       }
       // Also save to direct Supabase for category-level preferences
       await handleSaveNotifications()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsSaving(false)
@@ -1057,7 +1057,7 @@ export default function SettingsClient() {
     try {
       await refreshSettings()
       toast.success('Settings refreshed')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsLoading(false)
@@ -1089,7 +1089,7 @@ export default function SettingsClient() {
       setProfile(prev => ({ ...prev, avatar: publicUrl }))
       setAvatarFile(null)
       toast.success('Avatar updated')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Upload failed')
     } finally {
       setIsUploadingAvatar(false)
@@ -1109,7 +1109,7 @@ export default function SettingsClient() {
       if (error) throw error
       saveLocalSettings({ webhookUrl })
       toast.success('Webhook saved')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsSavingWebhook(false)
@@ -1136,7 +1136,7 @@ export default function SettingsClient() {
         connectedAt: null
       })))
       toast.success('All integrations revoked')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
     setShowRevokeAllIntegrationsDialog(false)
@@ -1152,7 +1152,7 @@ export default function SettingsClient() {
       localStorage.clear()
       sessionStorage.clear()
       toast.success('All caches cleared')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
     setShowClearCacheDialog(false)

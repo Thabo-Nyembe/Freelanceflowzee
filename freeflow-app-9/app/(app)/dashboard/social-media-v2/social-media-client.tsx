@@ -883,7 +883,7 @@ export default function SocialMediaClient() {
       toast.success(`Invitation sent to ${inviteEmail} as ${inviteRole}!`)
       setIsInviteDialogOpen(false)
       setInviteEmail('')
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss()
       toast.error('Failed to send invitation', { description: error.message })
     }
@@ -910,7 +910,7 @@ export default function SocialMediaClient() {
 
       toast.dismiss()
       toast.success(`${integrationName} connected successfully!`)
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss()
       toast.error(`Failed to connect ${integrationName}`, { description: error.message })
     }

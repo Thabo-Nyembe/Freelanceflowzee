@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       data: enrichedWorkflows,
       count: workflows.length,
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching approval workflows', { error });
     return NextResponse.json(
       {
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
         action,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error processing approval', { error });
     return NextResponse.json(
       {

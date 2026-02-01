@@ -332,7 +332,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       window.URL.revokeObjectURL(url)
 
       toast.success("Export completed: " + (teamsData?.length || 0) + " teams")
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed')
     } finally {
       setExporting(false)
@@ -371,7 +371,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       toast.success("Team member added: " + newMemberForm.name + " has been added to the team")
       setShowAddMemberModal(false)
       setNewMemberForm({ name: '', email: '', role: '', department: 'Engineering' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to add member')
     } finally {
       setAddingMember(false)
@@ -384,7 +384,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       await updateTeam({ id: team.id, status: 'archived' as TeamStatus })
       toast.success("Team archived: " + team.team_name + " has been archived")
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to archive team')
     } finally {
       setArchivingTeam(null)
@@ -420,7 +420,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       toast.success("Recognition sent! Your recognition has been posted")
       setShowRecognitionModal(false)
       setRecognitionForm({ recipientId: '', value: 'Excellence', message: '' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to send recognition')
     } finally {
       setSendingRecognition(false)
@@ -457,7 +457,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       toast.success('1:1 scheduled')
       setShowSchedule1on1Modal(false)
       setSchedule1on1Form({ participantId: '', scheduledDate: '', topics: '' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to schedule 1:1')
     } finally {
       setScheduling1on1(false)
@@ -495,7 +495,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       toast.success("Review cycle started - " + reviewInserts.length + " review entries created")
       setShowReviewCycleModal(false)
       setReviewCycleForm({ cycleName: '', reviewType: '360', dueDate: '' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to start review cycle')
     } finally {
       setStartingReviewCycle(false)
@@ -523,7 +523,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
       toast.success('OKRs reset')
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to reset OKRs')
     }
   }
@@ -544,7 +544,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       if (error) throw error
 
       toast.success('Reviews archived')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to archive reviews')
     }
   }
@@ -581,7 +581,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       window.URL.revokeObjectURL(url)
 
       toast.success('Export completed')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed')
     } finally {
       setExporting(false)
@@ -593,7 +593,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     try {
       await refetch()
       toast.success('Sync complete')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Sync failed')
     }
   }

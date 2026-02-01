@@ -29,7 +29,7 @@ export async function createCampaign(data: Partial<Campaign>): Promise<ActionRes
     revalidatePath('/dashboard/campaigns-v2')
     logger.info('Campaign created successfully', { campaignId: campaign.id })
     return actionSuccess(campaign, 'Campaign created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating campaign', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -58,7 +58,7 @@ export async function updateCampaign(id: string, data: Partial<Campaign>): Promi
     revalidatePath('/dashboard/campaigns-v2')
     logger.info('Campaign updated successfully', { campaignId: id })
     return actionSuccess(campaign, 'Campaign updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating campaign', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -85,7 +85,7 @@ export async function deleteCampaign(id: string): Promise<ActionResult<{ success
     revalidatePath('/dashboard/campaigns-v2')
     logger.info('Campaign deleted successfully', { campaignId: id })
     return actionSuccess({ success: true }, 'Campaign deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting campaign', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -119,7 +119,7 @@ export async function launchCampaign(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/campaigns-v2')
     logger.info('Campaign launched successfully', { campaignId: id })
     return actionSuccess(campaign, 'Campaign launched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error launching campaign', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -151,7 +151,7 @@ export async function pauseCampaign(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/campaigns-v2')
     logger.info('Campaign paused successfully', { campaignId: id })
     return actionSuccess(campaign, 'Campaign paused successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error pausing campaign', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -185,7 +185,7 @@ export async function completeCampaign(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/campaigns-v2')
     logger.info('Campaign completed successfully', { campaignId: id })
     return actionSuccess(campaign, 'Campaign completed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error completing campaign', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -225,7 +225,7 @@ export async function updateCampaignMetrics(id: string, metrics: Partial<Pick<Ca
     revalidatePath('/dashboard/campaigns-v2')
     logger.info('Campaign metrics updated successfully', { campaignId: id })
     return actionSuccess(campaign, 'Campaign metrics updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating campaign metrics', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -257,7 +257,7 @@ export async function approveCampaign(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/campaigns-v2')
     logger.info('Campaign approved successfully', { campaignId: id })
     return actionSuccess(campaign, 'Campaign approved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error approving campaign', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       paymentIntentId: result.paymentIntentId,
       escrowDepositId: result.escrowDepositId
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Payment creation error', { error })
 
     return NextResponse.json(

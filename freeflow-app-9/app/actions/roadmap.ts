@@ -75,7 +75,7 @@ export async function createRoadmapInitiative(data: {
     logger.info('Roadmap initiative created successfully', { title: data.title })
     revalidatePath('/dashboard/roadmap-v2')
     return actionSuccess(initiative, 'Roadmap initiative created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating roadmap initiative', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -133,7 +133,7 @@ export async function updateRoadmapInitiative(initiativeId: string, data: Partia
     logger.info('Roadmap initiative updated successfully', { initiativeId })
     revalidatePath('/dashboard/roadmap-v2')
     return actionSuccess(initiative, 'Roadmap initiative updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating roadmap initiative', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -175,7 +175,7 @@ export async function deleteRoadmapInitiative(initiativeId: string): Promise<Act
     logger.info('Roadmap initiative deleted successfully', { initiativeId })
     revalidatePath('/dashboard/roadmap-v2')
     return actionSuccess({ success: true }, 'Roadmap initiative deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting roadmap initiative', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -218,7 +218,7 @@ export async function createRoadmapMilestone(data: {
     logger.info('Roadmap milestone created successfully', { milestone_name: data.milestone_name })
     revalidatePath('/dashboard/roadmap-v2')
     return actionSuccess(milestone, 'Roadmap milestone created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating roadmap milestone', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -265,7 +265,7 @@ export async function updateRoadmapMilestone(milestoneId: string, data: Partial<
     logger.info('Roadmap milestone updated successfully', { milestoneId })
     revalidatePath('/dashboard/roadmap-v2')
     return actionSuccess(milestone, 'Roadmap milestone updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating roadmap milestone', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -301,7 +301,7 @@ export async function deleteRoadmapMilestone(milestoneId: string): Promise<Actio
     logger.info('Roadmap milestone deleted successfully', { milestoneId })
     revalidatePath('/dashboard/roadmap-v2')
     return actionSuccess({ success: true }, 'Roadmap milestone deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting roadmap milestone', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -344,7 +344,7 @@ export async function calculateMilestoneProgress(milestoneId: string, initiative
       completion_percentage: completionPercentage,
       status
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error calculating milestone progress', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -379,7 +379,7 @@ export async function getRoadmapStats(): Promise<ActionResult<any>> {
 
     logger.info('Roadmap stats fetched successfully', { totalInitiatives: stats.totalInitiatives })
     return actionSuccess(stats, 'Roadmap stats fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching roadmap stats', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

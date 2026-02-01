@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
       fileId: uploadedFile.id
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('File upload failed', { error: error.message, stack: error.stack })
     return NextResponse.json(
       { error: error.message || 'Failed to upload file' },

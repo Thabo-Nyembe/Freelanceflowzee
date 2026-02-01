@@ -38,7 +38,7 @@ export async function createCrmContact(contactData: {
     logger.info('CRM contact created successfully', { contactId: contact.id })
     revalidatePath('/dashboard/crm-v2')
     return actionSuccess(contact, 'Contact created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in createCrmContact', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -87,7 +87,7 @@ export async function updateDealStage(id: string, dealStage: string, dealValue?:
     logger.info('Deal stage updated successfully', { id, dealStage })
     revalidatePath('/dashboard/crm-v2')
     return actionSuccess(contact, 'Deal stage updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateDealStage', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -138,7 +138,7 @@ export async function recordInteraction(id: string, interactionType: 'email' | '
     logger.info('Interaction recorded successfully', { id, interactionType })
     revalidatePath('/dashboard/crm-v2')
     return actionSuccess(contact, 'Interaction recorded successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in recordInteraction', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -175,7 +175,7 @@ export async function updateLeadScore(id: string, score: number): Promise<Action
     logger.info('Lead score updated successfully', { id, score })
     revalidatePath('/dashboard/crm-v2')
     return actionSuccess(contact, 'Lead score updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateLeadScore', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -225,7 +225,7 @@ export async function recordPurchase(id: string, purchaseValue: number): Promise
     logger.info('Purchase recorded successfully', { id, purchaseValue })
     revalidatePath('/dashboard/crm-v2')
     return actionSuccess(contact, 'Purchase recorded successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in recordPurchase', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -263,7 +263,7 @@ export async function updateSatisfactionScore(id: string, satisfactionScore: num
     logger.info('Satisfaction score updated successfully', { id })
     revalidatePath('/dashboard/crm-v2')
     return actionSuccess(contact, 'Satisfaction score updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateSatisfactionScore', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -292,7 +292,7 @@ export async function scheduleFollowup(id: string, followupDate: string): Promis
     logger.info('Followup scheduled successfully', { id, followupDate })
     revalidatePath('/dashboard/crm-v2')
     return actionSuccess(contact, 'Followup scheduled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in scheduleFollowup', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -324,7 +324,7 @@ export async function assignContact(id: string, assignedToId: string, assignedTo
     logger.info('Contact assigned successfully', { id, assignedToName })
     revalidatePath('/dashboard/crm-v2')
     return actionSuccess(contact, 'Contact assigned successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in assignContact', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -373,7 +373,7 @@ export async function convertToCustomer(id: string): Promise<ActionResult<any>> 
     logger.info('Contact converted to customer successfully', { id })
     revalidatePath('/dashboard/crm-v2')
     return actionSuccess(contact, 'Contact converted to customer successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in convertToCustomer', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

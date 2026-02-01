@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
         });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Webhooks GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch webhooks' },
@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Webhooks POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
@@ -279,7 +279,7 @@ export async function PUT(request: NextRequest) {
       webhook,
       message: 'Webhook updated successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Webhooks PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update webhook' },
@@ -315,7 +315,7 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'Webhook deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Webhooks DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete webhook' },

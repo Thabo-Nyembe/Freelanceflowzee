@@ -71,7 +71,7 @@ export async function GET(
     }
 
     return NextResponse.json(response);
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Share link GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to access shared document' },
@@ -138,7 +138,7 @@ export async function POST(
     );
 
     return NextResponse.json({ comment }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Share link POST error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to add comment' },

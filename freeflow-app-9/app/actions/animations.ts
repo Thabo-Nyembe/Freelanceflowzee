@@ -49,7 +49,7 @@ export async function createAnimation(input: AnimationInput): Promise<ActionResu
     logger.info('Animation created successfully', { animationId: data.id })
     revalidatePath('/dashboard/motion-graphics-v2')
     return actionSuccess(data, 'Animation created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating animation', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -81,7 +81,7 @@ export async function updateAnimation(id: string, updates: Partial<AnimationInpu
     logger.info('Animation updated successfully', { animationId: id })
     revalidatePath('/dashboard/motion-graphics-v2')
     return actionSuccess(data, 'Animation updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating animation', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -108,7 +108,7 @@ export async function deleteAnimation(id: string): Promise<ActionResult<{ succes
     logger.info('Animation deleted successfully', { animationId: id })
     revalidatePath('/dashboard/motion-graphics-v2')
     return actionSuccess({ success: true }, 'Animation deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting animation', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -140,7 +140,7 @@ export async function startRender(id: string): Promise<ActionResult<any>> {
     logger.info('Render started successfully', { animationId: id })
     revalidatePath('/dashboard/motion-graphics-v2')
     return actionSuccess(data, 'Render started successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error starting render', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -174,7 +174,7 @@ export async function completeRender(id: string, videoUrl?: string): Promise<Act
     logger.info('Render completed successfully', { animationId: id })
     revalidatePath('/dashboard/motion-graphics-v2')
     return actionSuccess(data, 'Render completed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error completing render', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -212,7 +212,7 @@ export async function likeAnimation(id: string): Promise<ActionResult<any>> {
     logger.info('Animation liked successfully', { animationId: id })
     revalidatePath('/dashboard/motion-graphics-v2')
     return actionSuccess(data, 'Animation liked successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error liking animation', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -250,7 +250,7 @@ export async function downloadAnimation(id: string): Promise<ActionResult<any>> 
     logger.info('Animation downloaded successfully', { animationId: id })
     revalidatePath('/dashboard/motion-graphics-v2')
     return actionSuccess({ ...data, downloadUrl: animation.video_url }, 'Animation download tracked successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error downloading animation', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -276,7 +276,7 @@ export async function getAnimations(): Promise<ActionResult<any[]>> {
 
     logger.info('Animations retrieved successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Animations retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting animations', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

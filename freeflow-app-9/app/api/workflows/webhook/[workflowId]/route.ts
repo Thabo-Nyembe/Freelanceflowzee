@@ -164,7 +164,7 @@ export async function POST(
       message: `Workflow "${workflow.name}" executed successfully`
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Webhook trigger error', { error: error.message, workflowId })
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -211,7 +211,7 @@ export async function GET(
         : 'Webhook is not active. Ensure workflow is active and has webhook trigger type.'
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Webhook status check error', { error: error.message, workflowId })
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },

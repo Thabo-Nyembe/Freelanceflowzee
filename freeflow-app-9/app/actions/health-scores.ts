@@ -116,7 +116,7 @@ export async function createHealthScore(input: CreateHealthScoreInput): Promise<
     logger.info('Health score created successfully', { healthCode })
     revalidatePath('/dashboard/health-score-v2')
     return actionSuccess(data, 'Health score created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating health score', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -147,7 +147,7 @@ export async function updateHealthScore(id: string, input: UpdateHealthScoreInpu
     logger.info('Health score updated successfully', { id })
     revalidatePath('/dashboard/health-score-v2')
     return actionSuccess(data, 'Health score updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating health score', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -212,7 +212,7 @@ export async function recalculateHealthScore(id: string): Promise<ActionResult<a
     logger.info('Health score recalculated successfully', { id })
     revalidatePath('/dashboard/health-score-v2')
     return actionSuccess(data, 'Health score recalculated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error recalculating health score', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -241,7 +241,7 @@ export async function deleteHealthScore(id: string): Promise<ActionResult<{ succ
     logger.info('Health score deleted successfully', { id })
     revalidatePath('/dashboard/health-score-v2')
     return actionSuccess({ success: true }, 'Health score deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting health score', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -282,7 +282,7 @@ export async function getHealthScores(filters?: {
 
     logger.info('Health scores fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Health scores fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting health scores', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

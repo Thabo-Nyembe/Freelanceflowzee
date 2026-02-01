@@ -302,7 +302,7 @@ export default function VoiceCollaborationPage() {  const announce = useAnnounce
 
         toast.success(`Voice collaboration loaded - ${mappedRooms.length} rooms, ${mappedRecordings.length} recordings from database`)
         announce('Voice collaboration page loaded', 'polite')
-      } catch (error: any) {
+      } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load voice collaboration data'
         logger.error('Failed to load voice collaboration data', { error: errorMessage, userId })
         toast.error('Failed to load voice collaboration')
@@ -472,7 +472,7 @@ export default function VoiceCollaborationPage() {  const announce = useAnnounce
 
       toast.success(`Voice room created - ${newRoom.name} - ${newRoom.type} - ${newRoom.capacity} capacity - ${newRoom.quality} quality - Now active`)
       announce('Voice room created', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Room creation failed', { error: error.message, userId })
       toast.error('Failed to create room')
       announce('Failed to create room', 'assertive')
@@ -541,7 +541,7 @@ export default function VoiceCollaborationPage() {  const announce = useAnnounce
       const newParticipantCount = room.currentParticipants + 1
       toast.success(`Joined call - ${room.name} - ${newParticipant.role} - ${newParticipantCount}/${room.capacity} participants`)
       announce(`Joined ${room.name}`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Join room failed', {
         roomId: room.id,
         roomName: room.name,
@@ -578,7 +578,7 @@ export default function VoiceCollaborationPage() {  const announce = useAnnounce
       setShowViewRoomModal(false)
     toast.success(`Room deleted - ${deleteRoom.name} - ${deleteRoom.type} room removed`)
       announce('Room deleted', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete room', {
         error: error.message,
         roomId: deleteRoom.id,

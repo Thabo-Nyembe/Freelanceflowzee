@@ -75,7 +75,7 @@ export async function createWarehouse(input: CreateWarehouseInput): Promise<Acti
     revalidatePath('/dashboard/warehouse-v2')
     logger.info('Warehouse created', { userId: user.id, warehouseId: data.id })
     return actionSuccess(data, 'Warehouse created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in createWarehouse', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -106,7 +106,7 @@ export async function updateWarehouse(input: UpdateWarehouseInput): Promise<Acti
     revalidatePath('/dashboard/warehouse-v2')
     logger.info('Warehouse updated', { userId: user.id, warehouseId: id })
     return actionSuccess(data, 'Warehouse updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateWarehouse', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -133,7 +133,7 @@ export async function deleteWarehouse(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/warehouse-v2')
     logger.info('Warehouse deleted', { userId: user.id, warehouseId: id })
     return actionSuccess({ id }, 'Warehouse deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in deleteWarehouse', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -189,7 +189,7 @@ export async function createWarehouseZone(input: {
     revalidatePath('/dashboard/warehouse-v2')
     logger.info('Warehouse zone created', { userId: user.id, zoneId: data.id, warehouseId: input.warehouse_id })
     return actionSuccess(data, 'Warehouse zone created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in createWarehouseZone', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -230,7 +230,7 @@ export async function updateWarehouseZone(input: {
     revalidatePath('/dashboard/warehouse-v2')
     logger.info('Warehouse zone updated', { userId: user.id, zoneId: id })
     return actionSuccess(data, 'Warehouse zone updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateWarehouseZone', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -271,7 +271,7 @@ export async function getWarehouseStats(): Promise<ActionResult<any>> {
 
     logger.info('Warehouse stats retrieved', { userId: user.id })
     return actionSuccess(stats, 'Warehouse stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in getWarehouseStats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

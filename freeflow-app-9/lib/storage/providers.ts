@@ -43,7 +43,7 @@ async function retryWithBackoff<T>(
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await fn()
-    } catch (error: any) {
+    } catch (error) {
       lastError = error
 
       // Don't retry on 4xx errors (except 429 rate limit)
@@ -208,7 +208,7 @@ export class GoogleDriveClient {
           isFolder: file.mimeType === 'application/vnd.google-apps.folder',
           parentId: file.parents?.[0]
         })) || []
-      } catch (error: any) {
+      } catch (error) {
         if (error instanceof StorageProviderError) throw error
         throw new StorageProviderError(
           `Google Drive error: ${error.message}`,
@@ -241,7 +241,7 @@ export class GoogleDriveClient {
         }
 
         return response.blob()
-      } catch (error: any) {
+      } catch (error) {
         if (error instanceof StorageProviderError) throw error
         throw new StorageProviderError(
           `Google Drive download error: ${error.message}`,
@@ -278,7 +278,7 @@ export class GoogleDriveClient {
           total: parseInt(data.storageQuota?.limit || '0'),
           used: parseInt(data.storageQuota?.usage || '0')
         }
-      } catch (error: any) {
+      } catch (error) {
         if (error instanceof StorageProviderError) throw error
         throw new StorageProviderError(
           `Google Drive quota error: ${error.message}`,
@@ -335,7 +335,7 @@ export class DropboxClient {
           provider: 'dropbox' as StorageProvider,
           isFolder: entry['.tag'] === 'folder'
         })) || []
-      } catch (error: any) {
+      } catch (error) {
         if (error instanceof StorageProviderError) throw error
         throw new StorageProviderError(
           `Dropbox error: ${error.message}`,
@@ -370,7 +370,7 @@ export class DropboxClient {
         }
 
         return response.blob()
-      } catch (error: any) {
+      } catch (error) {
         if (error instanceof StorageProviderError) throw error
         throw new StorageProviderError(
           `Dropbox download error: ${error.message}`,
@@ -408,7 +408,7 @@ export class DropboxClient {
           total: data.allocation?.allocated || 0,
           used: data.used || 0
         }
-      } catch (error: any) {
+      } catch (error) {
         if (error instanceof StorageProviderError) throw error
         throw new StorageProviderError(
           `Dropbox quota error: ${error.message}`,
@@ -466,7 +466,7 @@ export class OneDriveClient {
           isFolder: !!item.folder,
           parentId: item.parentReference?.id
         })) || []
-      } catch (error: any) {
+      } catch (error) {
         if (error instanceof StorageProviderError) throw error
         throw new StorageProviderError(
           `OneDrive error: ${error.message}`,
@@ -499,7 +499,7 @@ export class OneDriveClient {
         }
 
         return response.blob()
-      } catch (error: any) {
+      } catch (error) {
         if (error instanceof StorageProviderError) throw error
         throw new StorageProviderError(
           `OneDrive download error: ${error.message}`,
@@ -536,7 +536,7 @@ export class OneDriveClient {
           total: data.quota?.total || 0,
           used: data.quota?.used || 0
         }
-      } catch (error: any) {
+      } catch (error) {
         if (error instanceof StorageProviderError) throw error
         throw new StorageProviderError(
           `OneDrive quota error: ${error.message}`,
@@ -575,7 +575,7 @@ export class UnifiedStorageClient {
   async listFiles(folderId?: string): Promise<StorageFile[]> {
     try {
       return await this.client.listFiles(folderId)
-    } catch (error: any) {
+    } catch (error) {
       console.error('UnifiedStorageClient.listFiles error:', error)
       throw error
     }
@@ -584,7 +584,7 @@ export class UnifiedStorageClient {
   async downloadFile(fileId: string): Promise<Blob> {
     try {
       return await this.client.downloadFile(fileId)
-    } catch (error: any) {
+    } catch (error) {
       console.error('UnifiedStorageClient.downloadFile error:', error)
       throw error
     }
@@ -593,7 +593,7 @@ export class UnifiedStorageClient {
   async getStorageQuota(): Promise<{ total: number; used: number }> {
     try {
       return await this.client.getStorageQuota()
-    } catch (error: any) {
+    } catch (error) {
       console.error('UnifiedStorageClient.getStorageQuota error:', error)
       throw error
     }

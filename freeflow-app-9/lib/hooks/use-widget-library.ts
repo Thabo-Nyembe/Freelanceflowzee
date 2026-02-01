@@ -278,7 +278,7 @@ export function useWidgetLibrary() {
 
       setInstalledIds(prev => new Set([...prev, widgetId]))
       return { success: true, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, error: error.message }
     } finally {
       setOperationLoading(false)
@@ -306,7 +306,7 @@ export function useWidgetLibrary() {
         return newSet
       })
       return { success: true, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, error: error.message }
     } finally {
       setOperationLoading(false)
@@ -354,7 +354,7 @@ export function useWidgetLibrary() {
       }
 
       return { success: true, isBookmarked: !isCurrentlyBookmarked, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, isBookmarked: bookmarkedIds.has(widgetId), error: error.message }
     } finally {
       setOperationLoading(false)
@@ -387,7 +387,7 @@ export function useWidgetLibrary() {
 
       if (error) throw error
       return { data, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { data: null, error: error.message }
     } finally {
       setOperationLoading(false)
@@ -407,7 +407,7 @@ export function useWidgetLibrary() {
 
       if (error) throw error
       return { data, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { data: null, error: error.message }
     } finally {
       setOperationLoading(false)
@@ -421,7 +421,7 @@ export function useWidgetLibrary() {
       const { error } = await supabase.from('widgets').delete().eq('id', id)
       if (error) throw error
       return { success: true, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, error: error.message }
     } finally {
       setOperationLoading(false)
@@ -450,7 +450,7 @@ export function useWidgetLibrary() {
       if (error) throw error
       setCollections(prev => [data, ...prev])
       return { data, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { data: null, error: error.message }
     } finally {
       setOperationLoading(false)
@@ -477,7 +477,7 @@ export function useWidgetLibrary() {
       if (error) throw error
       setSettings(data)
       return { data, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { data: null, error: error.message }
     } finally {
       setOperationLoading(false)
@@ -522,7 +522,7 @@ export function useWidgetLibrary() {
       }
 
       return { success: true, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, error: error.message }
     } finally {
       setOperationLoading(false)
@@ -551,7 +551,7 @@ export function useWidgetLibrary() {
       URL.revokeObjectURL(url)
 
       return { success: true, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, error: error.message }
     }
   }, [settings, bookmarkedIds, installedIds, supabase])
@@ -585,7 +585,7 @@ export function useWidgetLibrary() {
       if (error) throw error
       setSettings(null)
       return { success: true, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, error: error.message }
     } finally {
       setOperationLoading(false)
@@ -607,7 +607,7 @@ export function useWidgetLibrary() {
       if (error) throw error
       setInstalledIds(new Set())
       return { success: true, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, error: error.message }
     } finally {
       setOperationLoading(false)

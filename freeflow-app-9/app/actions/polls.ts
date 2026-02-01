@@ -73,7 +73,7 @@ export async function createPoll(data: CreatePollData): Promise<ActionResult<any
     revalidatePath('/dashboard/polls-v2')
     logger.info('Poll created successfully', { pollId: poll.id })
     return actionSuccess(poll, 'Poll created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating poll', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -103,7 +103,7 @@ export async function updatePoll({ id, ...data }: UpdatePollData): Promise<Actio
     revalidatePath('/dashboard/polls-v2')
     logger.info('Poll updated successfully', { pollId: id })
     return actionSuccess(poll, 'Poll updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating poll', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -131,7 +131,7 @@ export async function deletePoll(id: string): Promise<ActionResult<{ success: bo
     revalidatePath('/dashboard/polls-v2')
     logger.info('Poll deleted successfully', { pollId: id })
     return actionSuccess({ success: true }, 'Poll deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting poll', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -164,7 +164,7 @@ export async function activatePoll(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/polls-v2')
     logger.info('Poll activated successfully', { pollId: id })
     return actionSuccess(poll, 'Poll activated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error activating poll', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -194,7 +194,7 @@ export async function pausePoll(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/polls-v2')
     logger.info('Poll paused successfully', { pollId: id })
     return actionSuccess(poll, 'Poll paused successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error pausing poll', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -227,7 +227,7 @@ export async function closePoll(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/polls-v2')
     logger.info('Poll closed successfully', { pollId: id })
     return actionSuccess(poll, 'Poll closed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error closing poll', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -281,7 +281,7 @@ export async function duplicatePoll(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/polls-v2')
     logger.info('Poll duplicated successfully', { originalId: id, duplicateId: duplicatedPoll.id })
     return actionSuccess(duplicatedPoll, 'Poll duplicated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error duplicating poll', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -317,7 +317,7 @@ export async function incrementPollViews(id: string): Promise<ActionResult<{ suc
 
     revalidatePath('/dashboard/polls-v2')
     return actionSuccess({ success: true }, 'Poll views incremented successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error incrementing poll views', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -361,7 +361,7 @@ export async function getPollStats(): Promise<ActionResult<any>> {
 
     logger.info('Poll stats fetched successfully')
     return actionSuccess(stats, 'Poll statistics retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching poll stats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

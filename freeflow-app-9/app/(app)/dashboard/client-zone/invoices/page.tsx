@@ -322,7 +322,7 @@ export default function InvoicesPage() {
       setTimeout(() => {
         window.open('https://stripe.com/checkout', '_blank')
       }, 1000)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to initiate payment', { error, invoiceId: invoice.id })
       toast.error('Failed to initiate payment', {
         description: error.message || 'Please try again later'
@@ -362,7 +362,7 @@ export default function InvoicesPage() {
       toast.success('PDF downloaded', {
         description: `${invoice.number} saved to downloads`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to download PDF', { error, invoiceId: invoice.id })
       toast.error('Failed to download PDF', {
         description: error.message || 'Please try again later'
@@ -425,7 +425,7 @@ export default function InvoicesPage() {
       setShowDisputeDialog(false)
       setDisputeInvoiceState(null)
       setDisputeReason('')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to submit dispute', { error, invoiceId: disputeInvoiceState.id })
       toast.error('Failed to submit dispute', {
         description: error.message || 'Please try again later'

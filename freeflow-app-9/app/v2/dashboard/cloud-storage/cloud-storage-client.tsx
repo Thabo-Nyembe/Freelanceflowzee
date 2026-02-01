@@ -449,7 +449,7 @@ export default function CloudStorageClient() {
 
       toast.success('Upload Complete', { description: `${files.length} file(s) uploaded successfully` })
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Upload Error', { description: error.message || 'Failed to upload files' })
     } finally {
       setIsUploading(false)
@@ -505,7 +505,7 @@ export default function CloudStorageClient() {
       setNewFolderName('')
       setShowCreateFolderDialog(false)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to Create Folder', { description: error.message })
     }
   }
@@ -538,7 +538,7 @@ export default function CloudStorageClient() {
       setSharePermission('view')
       setShowShareDialog(false)
       setFileToShare(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Share Failed', { description: error.message })
     }
   }
@@ -578,7 +578,7 @@ export default function CloudStorageClient() {
       URL.revokeObjectURL(url)
 
       toast.success('Download Started', { description: `Downloading "${file.name}"` })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Download Error', { description: error.message })
     }
   }
@@ -612,7 +612,7 @@ export default function CloudStorageClient() {
       setFileToDelete(null)
       setShowFileDialog(false)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete Failed', { description: error.message })
     }
   }
@@ -641,7 +641,7 @@ export default function CloudStorageClient() {
       setFileToMove(null)
       setTargetFolder('')
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Move Failed', { description: error.message })
     }
   }
@@ -687,7 +687,7 @@ export default function CloudStorageClient() {
       } else {
         toast.info('Cannot Copy', { description: 'Folders cannot be copied directly' })
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Copy Error', { description: error.message })
     }
   }
@@ -705,7 +705,7 @@ export default function CloudStorageClient() {
         )
         refetch()
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Update Failed', { description: error.message })
     }
   }
@@ -758,7 +758,7 @@ export default function CloudStorageClient() {
       // In a real app, you'd query for deleted files and restore them
       toast.success('Restore Complete', { description: 'All deleted files have been restored' })
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Restore Failed', { description: error.message })
     }
   }
@@ -768,7 +768,7 @@ export default function CloudStorageClient() {
       // In a real app, you'd permanently delete files marked as deleted
       toast.success('Trash Emptied', { description: 'All files in trash have been permanently deleted' })
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Empty Trash Failed', { description: error.message })
     }
   }
@@ -795,7 +795,7 @@ export default function CloudStorageClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       toast.success('Export Complete', { description: 'Storage data exported successfully' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export Failed', { description: error.message })
     }
   }
@@ -823,7 +823,7 @@ export default function CloudStorageClient() {
       // In a real app, you'd save the comment to a comments table
       toast.success('Comment Posted', { description: 'Your comment has been added' })
       setCommentText('')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Comment Failed', { description: error.message })
     }
   }
@@ -842,7 +842,7 @@ export default function CloudStorageClient() {
       } else {
         toast.info('Opening File', { description: `Opening "${file.name}"...` })
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Open Failed', { description: error.message })
     }
   }
@@ -855,7 +855,7 @@ export default function CloudStorageClient() {
       const shareLink = `${window.location.origin}/shared/${shareToken}`
       await navigator.clipboard.writeText(shareLink)
       toast.success('Link Created', { description: 'Shareable link copied to clipboard' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Link Creation Failed', { description: error.message })
     }
   }
@@ -901,7 +901,7 @@ export default function CloudStorageClient() {
 
       toast.success('Report Generated', { description: `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} storage report downloaded` })
       setShowStorageReportDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Report Generation Failed', { description: error.message })
     } finally {
       setIsGeneratingReport(false)

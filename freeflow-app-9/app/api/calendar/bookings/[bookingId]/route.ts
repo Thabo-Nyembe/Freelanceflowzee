@@ -64,7 +64,7 @@ export async function GET(
         location_type: bookingType.location_type,
       } : null,
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Booking GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch booking' },
@@ -116,7 +116,7 @@ export async function PUT(
       { error: 'No valid update fields provided' },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Booking PUT error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update booking' },
@@ -183,7 +183,7 @@ export async function PATCH(
       { error: 'No valid update fields provided' },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Booking PATCH error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update booking' },
@@ -213,7 +213,7 @@ export async function DELETE(
 
     await calendarService.updateBookingStatus(bookingId, user.id, 'cancelled', reason);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Booking DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to cancel booking' },

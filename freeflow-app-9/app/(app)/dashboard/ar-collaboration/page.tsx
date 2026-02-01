@@ -633,7 +633,7 @@ export default function ARCollaborationPage() {
         description: `${newSession.name} - ${getEnvironmentName(sessionEnvironment)} - ${maxParticipants} max participants - ${enabledFeatures.length} features enabled - ${sessionIsLocked ? 'Locked' : 'Open'}`
       })
       announce('AR session created', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Session creation failed', { error: error.message, name: sessionName, userId })
       toast.error('Failed to create session', {
         description: error.message || 'Please try again later'
@@ -763,7 +763,7 @@ export default function ARCollaborationPage() {
         description: `${deleteSession.name} - ${getEnvironmentName(deleteSession.environment)}`
       })
       announce('Session deleted', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete session', {
         error: error.message,
         sessionId: deleteSession.id,
@@ -792,7 +792,7 @@ export default function ARCollaborationPage() {
         const { updateSession } = await import('@/lib/ar-collaboration-queries')
         await updateSession(sessionId, { is_recording: newStatus })
         logger.info('Recording status persisted to database', { sessionId, recording: newStatus })
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to persist recording status', { error: error.message })
       }
     }
@@ -825,7 +825,7 @@ export default function ARCollaborationPage() {
         const { updateSession } = await import('@/lib/ar-collaboration-queries')
         await updateSession(sessionId, { is_locked: newStatus })
         logger.info('Lock status persisted to database', { sessionId, locked: newStatus })
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to persist lock status', { error: error.message })
       }
     }

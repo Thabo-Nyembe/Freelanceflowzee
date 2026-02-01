@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
       toast.success('Password reset email sent', {
         description: `Check your inbox at ${email} - Link expires in 1 hour`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Password reset failed', { email, error: error.message })
       toast.error('Failed to send reset email', {
         description: error.message || 'Please try again later'

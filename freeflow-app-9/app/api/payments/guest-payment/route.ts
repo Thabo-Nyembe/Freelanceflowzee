@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
       expiresAt: guestSession.expiresAt
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Guest payment error', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined })
     return NextResponse.json(
       { error: error.message || 'Payment failed' },
@@ -211,7 +211,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ received: true })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Webhook error', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined })
     return NextResponse.json(
       { error: error.message },

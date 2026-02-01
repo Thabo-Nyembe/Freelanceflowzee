@@ -47,7 +47,7 @@ export async function createKnowledgeArticle(input: KnowledgeArticleInput): Prom
     logger.info('Knowledge article created successfully', { articleId: data.id })
     revalidatePath('/dashboard/knowledge-articles-v2')
     return actionSuccess(data, 'Knowledge article created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating knowledge article', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -79,7 +79,7 @@ export async function updateKnowledgeArticle(id: string, input: Partial<Knowledg
     logger.info('Knowledge article updated successfully', { articleId: id })
     revalidatePath('/dashboard/knowledge-articles-v2')
     return actionSuccess(data, 'Knowledge article updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating knowledge article', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -106,7 +106,7 @@ export async function deleteKnowledgeArticle(id: string): Promise<ActionResult<{
     logger.info('Knowledge article deleted successfully', { articleId: id })
     revalidatePath('/dashboard/knowledge-articles-v2')
     return actionSuccess({ success: true }, 'Knowledge article deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting knowledge article', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -139,7 +139,7 @@ export async function publishKnowledgeArticle(id: string): Promise<ActionResult<
     logger.info('Knowledge article published successfully', { articleId: id })
     revalidatePath('/dashboard/knowledge-articles-v2')
     return actionSuccess(data, 'Knowledge article published successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error publishing knowledge article', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -171,7 +171,7 @@ export async function archiveKnowledgeArticle(id: string): Promise<ActionResult<
     logger.info('Knowledge article archived successfully', { articleId: id })
     revalidatePath('/dashboard/knowledge-articles-v2')
     return actionSuccess(data, 'Knowledge article archived successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error archiving knowledge article', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -203,7 +203,7 @@ export async function submitForReview(id: string): Promise<ActionResult<any>> {
     logger.info('Knowledge article submitted for review successfully', { articleId: id })
     revalidatePath('/dashboard/knowledge-articles-v2')
     return actionSuccess(data, 'Knowledge article submitted for review successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error submitting knowledge article for review', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -236,7 +236,7 @@ export async function scheduleArticle(id: string, scheduledAt: string): Promise<
     logger.info('Knowledge article scheduled successfully', { articleId: id, scheduledAt })
     revalidatePath('/dashboard/knowledge-articles-v2')
     return actionSuccess(data, 'Knowledge article scheduled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error scheduling knowledge article', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -271,7 +271,7 @@ export async function incrementArticleViews(id: string): Promise<ActionResult<an
     }
 
     return actionSuccess(data, 'Article views incremented successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error incrementing article views', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -317,7 +317,7 @@ export async function rateArticle(id: string, rating: number): Promise<ActionRes
     logger.info('Article rated successfully', { articleId: id, rating })
     revalidatePath('/dashboard/knowledge-articles-v2')
     return actionSuccess(data, 'Article rated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error rating article', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -342,7 +342,7 @@ export async function getKnowledgeArticles(): Promise<ActionResult<any[]>> {
     }
 
     return actionSuccess(data || [], 'Knowledge articles retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting knowledge articles', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -427,7 +427,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       setShowInviteModal(false)
       setInviteForm({ email: '', role: 'user', full_name: '', sendWelcomeEmail: true })
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to invite user')
     } finally {
       setInviting(false)
@@ -440,7 +440,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       await updateUser({ id: user.id, status: 'suspended' as UserStatus })
       toast.success(`User suspended has been suspended`)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to suspend user')
     } finally {
       setSuspendingUser(null)
@@ -453,7 +453,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       await updateUser({ id: user.id, status: 'active' as UserStatus })
       toast.success(`User activated has been activated`)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to activate user')
     } finally {
       setSuspendingUser(null)
@@ -471,7 +471,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       setShowUserModal(false)
       setSelectedUser(null)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete user')
     } finally {
       setDeletingUser(null)
@@ -499,7 +499,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       } as any)
 
       toast.success(`Password reset sent`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to send password reset')
     }
   }
@@ -540,7 +540,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       window.URL.revokeObjectURL(url)
 
       toast.success('Export complete')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed')
     } finally {
       setExporting(false)
@@ -600,7 +600,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       setShowBulkImportModal(false)
       setBulkImportData('')
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Import failed: ' + (error.message || 'Unknown error'))
     } finally {
       setIsImporting(false)
@@ -613,7 +613,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       await updateUser({ id: user.id, role: newRole })
       toast.success(`Role assigned role assigned to ${user.full_name || user.email}`)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to assign role')
     } finally {
       setUpdatingRole(null)
@@ -631,7 +631,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       toast.success(`Users suspended users have been suspended`)
       setSelectedUsers([])
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to suspend users')
     }
   }
@@ -647,7 +647,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       toast.success(`Users deleted users have been deleted`)
       setSelectedUsers([])
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete users')
     }
   }
@@ -675,7 +675,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       toast.success(`Role created role has been created`)
       setShowRoleModal(false)
       setRoleForm({ name: '', description: '', permissions: [] })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create role')
     } finally {
       setCreatingRole(false)
@@ -688,7 +688,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
         p.id === policyId ? { ...p, enabled } : p
       ))
       toast.success(`Security policy ${enabled ? 'enabled' : 'disabled'}`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update security policy')
     }
   }

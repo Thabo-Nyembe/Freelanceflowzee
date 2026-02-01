@@ -485,7 +485,7 @@ export default function WidgetsPage() {
       setIsDeleteModalOpen(false)
       toast.success(`Widget deleted - ${widgetToDelete.name} - ${widgetToDelete.type} - ${widgetToDelete.category} - Usage: ${widgetToDelete.usageCount} times`)
       announce('Widget deleted successfully', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Widget deletion error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,
@@ -533,7 +533,7 @@ export default function WidgetsPage() {
       dispatch({ type: 'CLEAR_SELECTED_WIDGETS' })
       toast.success(`Deleted ${deletedCount} widget(s) - Removed: ${widgetNames.slice(0, 3).join(', ')}${widgetNames.length > 3 ? ` +${widgetNames.length - 3} more` : ''}`)
       announce(`${deletedCount} widgets deleted successfully`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Bulk delete error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,

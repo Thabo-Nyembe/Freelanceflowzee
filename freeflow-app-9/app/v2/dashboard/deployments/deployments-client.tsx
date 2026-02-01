@@ -309,7 +309,7 @@ export default function DeploymentsClient() {
       setShowCreateDialog(false)
       setDeploymentForm(defaultDeploymentForm)
       fetchDeployments()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create deployment')
     } finally {
       setIsSubmitting(false)
@@ -327,7 +327,7 @@ export default function DeploymentsClient() {
 
       toast.info(`Deployment Started: ${deployment.deployment_name} is now deploying...`)
       fetchDeployments()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to start deployment')
     }
   }
@@ -350,7 +350,7 @@ export default function DeploymentsClient() {
         { description: `${deployment.deployment_name} v${deployment.version}` }
       )
       fetchDeployments()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update deployment')
     }
   }
@@ -371,7 +371,7 @@ export default function DeploymentsClient() {
       toast.success(`Rollback Initiated: ${deployment.deployment_name}`)
       setShowRollbackDialog(false)
       fetchDeployments()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to rollback')
     }
   }
@@ -386,7 +386,7 @@ export default function DeploymentsClient() {
 
       toast.info(`Deployment Cancelled: ${deployment.deployment_name} has been cancelled`)
       fetchDeployments()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to cancel deployment')
     }
   }
@@ -397,7 +397,7 @@ export default function DeploymentsClient() {
       await deleteDeploymentMutation.mutateAsync(id)
       toast.success('Deployment Deleted')
       fetchDeployments()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete deployment')
     }
   }
@@ -582,7 +582,7 @@ export default function DeploymentsClient() {
       setQuickDeployBranch('main')
       setQuickDeployEnvironment('staging')
       fetchDeployments()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Quick Deploy Failed')
     } finally {
       setIsQuickDeploying(false)
@@ -613,7 +613,7 @@ export default function DeploymentsClient() {
       setShowQuickRollbackDialog(false)
       setQuickRollbackVersion('')
       fetchDeployments()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Rollback Failed')
     } finally {
       setIsQuickRollingBack(false)
@@ -674,7 +674,7 @@ export default function DeploymentsClient() {
       if (error) throw error
       toast.success(`Promoted`, { description: `${deployment.version} promoted to production` })
       fetchDeployments()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to promote')
     }
   }
@@ -2354,7 +2354,7 @@ export default function DeploymentsClient() {
 
                   toast.success("Environment variables saved", { description: envVars.length + " variables updated successfully" })
                   setShowEnvDialog(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to save environment variables')
                 } finally {
                   setIsProcessing(false)
@@ -3005,7 +3005,7 @@ export default function DeploymentsClient() {
 
                   toast.success('Filters applied')
                   setShowFiltersDialog(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to apply filters')
                 } finally {
                   setIsProcessing(false)
@@ -3249,7 +3249,7 @@ export default function DeploymentsClient() {
 
                   toast.success(`Config updated`, { description: `${selectedEdgeConfig.name} configuration saved` })
                   setShowEdgeConfigEditDialog(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to update config')
                 } finally {
                   setIsProcessing(false)
@@ -3369,7 +3369,7 @@ export default function DeploymentsClient() {
                     toast.success(`Files uploaded`, { description: `${successCount} of ${uploadedFiles.length} files uploaded successfully` })
                     setUploadedFiles([])
                     setShowUploadDialog(false)
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.error('Upload failed')
                   } finally {
                     setIsProcessing(false)
@@ -3627,7 +3627,7 @@ export default function DeploymentsClient() {
                   if (alertSettings.deploymentAlerts) enabledAlerts.push('Deployments')
                   toast.success('Alert settings saved - ' + (enabledAlerts.length > 0 ? enabledAlerts.join(', ') : 'All alerts disabled'))
                   setShowAlertsDialog(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to save alert settings')
                 } finally {
                   setIsProcessing(false)
@@ -3733,7 +3733,7 @@ export default function DeploymentsClient() {
 
                   toast.success('Analytics exported')
                   setShowAnalyticsExportDialog(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Export failed')
                 } finally {
                   setIsProcessing(false)
@@ -3848,7 +3848,7 @@ export default function DeploymentsClient() {
 
                   toast.success('Security report downloaded')
                   setShowSecurityAuditDialog(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to generate report')
                 } finally {
                   setIsProcessing(false)
@@ -4070,7 +4070,7 @@ export default function DeploymentsClient() {
                     toast.success('All deployments deleted')
                     setShowDeleteAllDeploymentsDialog(false)
                     setDeleteAllConfirmation('')
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.error('Failed to delete deployments')
                   } finally {
                     setIsProcessing(false)
@@ -4131,7 +4131,7 @@ export default function DeploymentsClient() {
 
                     toast.success('Project settings reset')
                     setShowResetSettingsDialog(false)
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.error('Failed to reset settings')
                   } finally {
                     setIsProcessing(false)
@@ -4179,7 +4179,7 @@ export default function DeploymentsClient() {
 
                     toast.success('Deployments disabled')
                     setShowDisableDeploymentsDialog(false)
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.error('Failed to disable deployments')
                   } finally {
                     setIsProcessing(false)

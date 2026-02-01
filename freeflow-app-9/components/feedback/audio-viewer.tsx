@@ -173,7 +173,7 @@ export function AudioViewer({
           samples: normalized.length,
           duration: audioBuffer.duration
         })
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to generate waveform', {
           error: error.message,
           src

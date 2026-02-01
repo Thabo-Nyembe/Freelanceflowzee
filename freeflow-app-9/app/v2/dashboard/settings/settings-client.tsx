@@ -401,7 +401,7 @@ export default function SettingsClient() {
       if (error) throw error
       toast.success('Profile saved')
       setSaveMessage('Profile saved successfully!')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsSaving(false)
@@ -428,7 +428,7 @@ export default function SettingsClient() {
           }, { onConflict: 'id' })
       }
       toast.success('Notifications saved')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsSaving(false)
@@ -451,7 +451,7 @@ export default function SettingsClient() {
 
       if (error) throw error
       toast.success('Security settings saved')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsSaving(false)
@@ -471,7 +471,7 @@ export default function SettingsClient() {
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' })
       toast.success('Theme updated')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -499,7 +499,7 @@ export default function SettingsClient() {
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     } finally {
       setIsSaving(false)
@@ -529,7 +529,7 @@ export default function SettingsClient() {
         }, { onConflict: 'id' })
 
       toast.success(newStatus === 'connected' ? 'Connected successfully' : 'Disconnected successfully')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -546,7 +546,7 @@ export default function SettingsClient() {
         .eq('id', session.id)
 
       toast.success('Session revoked')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -729,7 +729,7 @@ export default function SettingsClient() {
       const { error } = await supabase.auth.resend({ type: 'signup', email: profile.email })
       if (error) throw error
       toast.success('Verification email sent')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }

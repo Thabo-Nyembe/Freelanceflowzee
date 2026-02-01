@@ -63,7 +63,7 @@ export async function createPricingPlan(input: PricingPlanInput): Promise<Action
     revalidatePath('/dashboard/pricing-v2')
     logger.info('Pricing plan created successfully', { planId: data.id })
     return actionSuccess(data, 'Pricing plan created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating pricing plan', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -92,7 +92,7 @@ export async function updatePricingPlan(id: string, updates: Partial<PricingPlan
     revalidatePath('/dashboard/pricing-v2')
     logger.info('Pricing plan updated successfully', { planId: id })
     return actionSuccess(data, 'Pricing plan updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating pricing plan', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -119,7 +119,7 @@ export async function deletePricingPlan(id: string): Promise<ActionResult<{ succ
     revalidatePath('/dashboard/pricing-v2')
     logger.info('Pricing plan deleted successfully', { planId: id })
     return actionSuccess({ success: true }, 'Pricing plan deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting pricing plan', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -163,7 +163,7 @@ export async function togglePlanActive(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/pricing-v2')
     logger.info('Plan active status toggled successfully', { planId: id, isActive: data.is_active })
     return actionSuccess(data, 'Plan status updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error toggling plan active status', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -202,7 +202,7 @@ export async function setFeaturedPlan(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/pricing-v2')
     logger.info('Featured plan set successfully', { planId: id })
     return actionSuccess(data, 'Featured plan set successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error setting featured plan', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -248,7 +248,7 @@ export async function updatePlanSubscribers(id: string, count: number): Promise<
     revalidatePath('/dashboard/pricing-v2')
     logger.info('Plan subscribers updated successfully', { planId: id, count })
     return actionSuccess(data, 'Subscribers count updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating plan subscribers', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -274,7 +274,7 @@ export async function getPricingPlans(): Promise<ActionResult<any[]>> {
 
     logger.info('Pricing plans fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Pricing plans retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching pricing plans', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

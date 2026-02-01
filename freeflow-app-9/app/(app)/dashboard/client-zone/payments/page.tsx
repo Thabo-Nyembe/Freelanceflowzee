@@ -301,7 +301,7 @@ export default function PaymentsPage() {
       setShowReleaseDialog(false)
       setReleaseMilestone(null)
       setReleaseConfirmation('')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to release payment', { error, milestoneId: releaseMilestone.id })
       toast.error('Failed to release payment', {
         description: error.message || 'Please try again later'
@@ -361,7 +361,7 @@ export default function PaymentsPage() {
       setShowDisputeDialog(false)
       setDisputeMilestone(null)
       setDisputeReason('')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to submit dispute', { error, milestoneId: disputeMilestone.id })
       toast.error('Failed to submit dispute', {
         description: error.message || 'Please try again later'
@@ -400,7 +400,7 @@ export default function PaymentsPage() {
       toast.success('Receipt downloaded', {
         description: `${payment.transactionId} saved to downloads`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to download receipt', { error, paymentId: payment.id })
       toast.error('Failed to download receipt', {
         description: error.message || 'Please try again later'

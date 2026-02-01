@@ -282,7 +282,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         requirePayment: false
       })
       // No need to call refetch - real-time subscription handles updates
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error', { description: error.message || 'Failed to create booking' })
     }
   }
@@ -296,7 +296,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error', { description: error.message || 'Failed to confirm booking' })
     }
   }
@@ -310,7 +310,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error', { description: error.message || 'Failed to cancel booking' })
     }
   }
@@ -347,7 +347,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       if (selectedBooking?.id === rescheduleData.bookingId) {
         setSelectedBooking(null)
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error', { description: error.message || 'Failed to reschedule booking' })
     }
   }
@@ -365,7 +365,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error', { description: error.message || 'Failed to delete booking' })
     }
   }
@@ -2770,7 +2770,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                         recurringDays: []
                       })
                       refetch()
-                    } catch (error: any) {
+                    } catch (error) {
                       toast.dismiss()
                       toast.error('Failed to block time slot', { description: error.message })
                     }

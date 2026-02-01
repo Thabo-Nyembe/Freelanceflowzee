@@ -111,7 +111,7 @@ export async function GET(request: Request) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to generate work pattern analytics', {
       error: error.message,
       stack: error.stack
@@ -147,7 +147,7 @@ export async function POST(request: Request) {
       taskId
     })
 
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       {
         success: false,

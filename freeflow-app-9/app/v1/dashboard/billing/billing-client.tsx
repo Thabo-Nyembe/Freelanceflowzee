@@ -1018,7 +1018,7 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
       } else {
         throw new Error('Unexpected payment response')
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to retry payment:', error)
 
       // Revert invoice status on failure

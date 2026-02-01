@@ -434,7 +434,7 @@ export default function AllocationClient() {
       setShowCreateDialog(false)
       setFormData(initialFormState)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create allocation')
     }
   }
@@ -465,7 +465,7 @@ export default function AllocationClient() {
       setEditingId(null)
       setFormData(initialFormState)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update allocation')
     }
   }
@@ -476,7 +476,7 @@ export default function AllocationClient() {
       toast.success(`Allocation Deleted: ${resourceName}'s allocation removed`)
       setSelectedAllocation(null)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete allocation')
     }
   }
@@ -486,7 +486,7 @@ export default function AllocationClient() {
       await activateAllocation(id)
       toast.success(`Allocation Approved: ${resourceName}'s allocation is now active`)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to approve allocation')
     }
   }
@@ -496,7 +496,7 @@ export default function AllocationClient() {
       await completeAllocation(id)
       toast.success(`Allocation Completed: ${resourceName}'s allocation marked complete`)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to complete allocation')
     }
   }
@@ -506,7 +506,7 @@ export default function AllocationClient() {
       await cancelAllocation(id)
       toast.info(`Allocation Cancelled: ${resourceName}'s allocation was cancelled`)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to cancel allocation')
     }
   }
@@ -567,7 +567,7 @@ export default function AllocationClient() {
       URL.revokeObjectURL(url)
 
       toast.success('Allocation report downloaded')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed', { description: error.message })
     }
   }

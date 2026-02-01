@@ -411,7 +411,7 @@ export default function AppStoreClient() {
         }))
         setApps(mappedApps)
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching apps:', error)
       setApps([])
     } finally {
@@ -503,7 +503,7 @@ export default function AppStoreClient() {
       setReviewContent('')
       setReviewRating(5)
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to submit review')
     } finally {
       setLoading(false)
@@ -561,7 +561,7 @@ export default function AppStoreClient() {
 
       toast.success(`${app.name} has been installed`)
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to install app')
     } finally {
       setLoading(false)
@@ -591,7 +591,7 @@ export default function AppStoreClient() {
 
       toast.success('App uninstalled')
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to uninstall')
     } finally {
       setLoading(false)
@@ -616,7 +616,7 @@ export default function AppStoreClient() {
       toast.success(`App updated to v${update.newVersion}`)
       setUpdates(prev => prev.filter(u => u.id !== update.id))
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Update failed')
     } finally {
       setLoading(false)
@@ -645,7 +645,7 @@ export default function AppStoreClient() {
 
       toast.success('Rating submitted')
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to submit rating')
     } finally {
       setLoading(false)
@@ -676,7 +676,7 @@ export default function AppStoreClient() {
 
       toast.success(`Trial started: 14-day trial for "${app.name}" has begun`)
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to start trial')
     } finally {
       setLoading(false)
@@ -699,7 +699,7 @@ export default function AppStoreClient() {
       if (error) throw error
 
       toast.success(`Added to wishlist: added to your wishlist`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to add to wishlist')
     }
   }
@@ -718,7 +718,7 @@ export default function AppStoreClient() {
       toast.success(`All apps updated: apps have been updated`)
       setUpdates([])
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Update failed')
     } finally {
       setLoading(false)

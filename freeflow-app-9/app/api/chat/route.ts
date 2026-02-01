@@ -207,7 +207,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Chat GET failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to fetch chat data' },
@@ -384,7 +384,7 @@ export async function POST(request: NextRequest) {
       data: message,
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Chat POST failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to send message' },
@@ -508,7 +508,7 @@ export async function PUT(request: NextRequest) {
       { status: 400 }
     )
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Chat PUT failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to update message' },
@@ -561,7 +561,7 @@ export async function DELETE(request: NextRequest) {
       action: 'message_deleted',
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Chat DELETE failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to delete message' },

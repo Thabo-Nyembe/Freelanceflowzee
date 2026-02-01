@@ -509,7 +509,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         id: 'run-suite'
       })
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to run test suite')
     } finally {
       setIsRunningAllTests(false)
@@ -552,7 +552,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       } else {
         throw new Error(result?.message || 'Failed to create test case')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create test case')
     } finally {
       setIsCreatingTest(false)
@@ -592,7 +592,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         config: '',
         assigned_to: ''
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create test run')
     } finally {
       setIsCreatingRun(false)
@@ -631,7 +631,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         severity: 'major',
         test_case_id: ''
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to report defect')
     } finally {
       setIsCreatingDefect(false)
@@ -670,7 +670,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         due_date: '',
         start_date: ''
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create milestone')
     } finally {
       setIsCreatingMilestone(false)
@@ -706,7 +706,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       URL.revokeObjectURL(url)
 
       toast.success('Export complete')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed')
     } finally {
       setIsExporting(false)
@@ -735,7 +735,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       } else {
         toast.info('No failed tests')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Rerun failed')
     }
   }, [ executeTest, refetch])
@@ -752,7 +752,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       } else {
         throw new Error(result?.message || 'Failed to execute test')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Execution failed')
     } finally {
       setIsExecutingTest(false)
@@ -770,7 +770,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       } else {
         throw new Error(result?.message || 'Failed to delete test case')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete failed')
     }
   }, [deleteTestCase, refetch])
@@ -792,7 +792,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       toast.success('Report generated: Total: ' + total + ', Passed: ' + passed + ', Failed: ' + failed + ', Pass Rate: ' + avgPassRate.toFixed(1) + '%', {
         id: 'report'
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Report generation failed')
     }
   }, [])
@@ -820,7 +820,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       } else {
         toast.info('No tests found')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Test run failed')
     } finally {
       setIsRunningAllTests(false)

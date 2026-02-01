@@ -41,7 +41,7 @@ export async function createHelpDoc(input: HelpDocInput): Promise<ActionResult<a
     logger.info('Help doc created successfully', { docId: data.id })
     revalidatePath('/dashboard/help-docs-v2')
     return actionSuccess(data, 'Help doc created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating help doc', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -72,7 +72,7 @@ export async function updateHelpDoc(id: string, input: Partial<HelpDocInput>): P
     logger.info('Help doc updated successfully', { docId: id })
     revalidatePath('/dashboard/help-docs-v2')
     return actionSuccess(data, 'Help doc updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating help doc', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -101,7 +101,7 @@ export async function deleteHelpDoc(id: string): Promise<ActionResult<{ success:
     logger.info('Help doc deleted successfully', { docId: id })
     revalidatePath('/dashboard/help-docs-v2')
     return actionSuccess({ success: true }, 'Help doc deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting help doc', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -157,7 +157,7 @@ export async function markHelpful(id: string, helpful: boolean): Promise<ActionR
     logger.info('Help doc marked as helpful', { docId: id, helpful })
     revalidatePath('/dashboard/help-docs-v2')
     return actionSuccess(data, 'Feedback recorded successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error marking helpful', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -189,7 +189,7 @@ export async function incrementViewCount(id: string): Promise<ActionResult<{ suc
 
     logger.info('Help doc view count incremented', { docId: id })
     return actionSuccess({ success: true }, 'View count incremented successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error incrementing view count', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -652,7 +652,7 @@ export default function FilesHubPage() {
 
       dispatch({ type: 'CLEAR_SELECTED_FILES' })
       toast.success(`${filesToDelete.length} files deleted - ${Math.round(totalSize / 1024)}KB removed`)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Bulk delete failed', {
         error: error.message,
         fileCount: state.selectedFiles.length
@@ -798,7 +798,7 @@ export default function FilesHubPage() {
       setShareEmails('')
     toast.success(`File shared: ${state.selectedFile.name} - ${emails.length} recipient(s)`)
       announce('File shared successfully', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File share failed', {
         error: error.message,
         fileId: state.selectedFile.id,
@@ -844,7 +844,7 @@ export default function FilesHubPage() {
       setMoveToFolder('')
     toast.success(`File moved: ${state.selectedFile.name} - ${previousFolder} to ${moveToFolder}`)
       announce('File moved successfully', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File move failed', {
         error: error.message,
         fileId: state.selectedFile.id,
@@ -878,7 +878,7 @@ export default function FilesHubPage() {
       dispatch({ type: 'TOGGLE_STAR', fileId })
 
       toast.success(newStarred ? `Added to favorites: ${file.name}` : `Removed from favorites: ${file.name}`)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Toggle star failed', {
         error: error.message,
         fileId,

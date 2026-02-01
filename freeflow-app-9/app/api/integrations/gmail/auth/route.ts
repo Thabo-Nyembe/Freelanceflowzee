@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(
       `${baseUrl}/dashboard/email-agent/setup?gmail=success&email=${encodeURIComponent(userInfo.email || '')}`
     );
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Gmail OAuth failed', {
       error: error.message,
       stack: error.stack

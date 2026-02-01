@@ -54,7 +54,7 @@ export async function GET(
       downloadUrl: signedUrl?.signedUrl || `/api/files/${fileId}/content`,
       message: 'Download prepared'
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('File download failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to download file' },

@@ -724,7 +724,7 @@ export class AICreateOrchestrator {
       })
 
       return result
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Generation failed', {
         requestId: request.id,
         error: error.message

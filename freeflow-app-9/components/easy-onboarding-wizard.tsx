@@ -326,7 +326,7 @@ export function EasyOnboardingWizard({ onComplete, userId }: EasyOnboardingWizar
 
       logger.info('Data import completed', { appId, itemsImported: app.importableData.length })
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Data import failed', { appId, error: error.message })
       toast.error('Import Failed', {
         description: error.message || 'Please try again'
@@ -381,7 +381,7 @@ export function EasyOnboardingWizard({ onComplete, userId }: EasyOnboardingWizar
         throw new Error(result.error || 'Failed to complete onboarding')
       }
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Onboarding completion failed', { error: error.message })
       toast.error('Setup Failed', {
         description: error.message || 'Please try again'

@@ -558,7 +558,7 @@ export default function StorageClient() {
       })
       setIsUploadModalOpen(false)
       setUploadFiles(null)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File upload failed', {
         error: error.message,
         provider: uploadProvider,
@@ -594,7 +594,7 @@ export default function StorageClient() {
       } else {
         throw new Error(result.error || 'Failed to delete file')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File delete failed', {
         error: error.message,
         fileId,
@@ -633,7 +633,7 @@ export default function StorageClient() {
       } else {
         throw new Error(result.error || 'Failed to delete files')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Bulk delete failed', {
         error: error.message,
         count: state.selectedFiles.length
@@ -684,7 +684,7 @@ export default function StorageClient() {
       } else {
         throw new Error(result.error || 'Failed to move file')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File move failed', {
         error: error.message,
         fileName: state.selectedFile?.name,
@@ -736,7 +736,7 @@ export default function StorageClient() {
       } else {
         throw new Error(result.error || 'Failed to share file')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File share failed', {
         error: error.message,
         fileName: state.selectedFile?.name,
@@ -777,7 +777,7 @@ export default function StorageClient() {
       } else {
         throw new Error(result.error || 'Failed to download file')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File download failed', {
         error: error.message,
         fileId,
@@ -853,7 +853,7 @@ export default function StorageClient() {
       setIsNewItemModalOpen(false)
       setNewItemName('')
       setNewItemType('folder')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create item', { error: error.message })
       toast.error('Failed to create item')
     } finally {
@@ -951,7 +951,7 @@ export default function StorageClient() {
       })
 
       setIsExportModalOpen(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Export failed', { error: error.message })
       toast.error('Failed to export data')
     } finally {
@@ -987,7 +987,7 @@ export default function StorageClient() {
       } else {
         throw new Error(result.error || 'Failed to save settings')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save settings', { error: error.message })
       toast.error('Failed to save settings')
     } finally {

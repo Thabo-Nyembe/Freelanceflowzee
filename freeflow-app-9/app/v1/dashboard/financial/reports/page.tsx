@@ -273,7 +273,7 @@ export default function ReportsPage() {
         reportType: template.type,
         format
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Report generation failed', {
         error,
         reportType: template.type,
@@ -610,7 +610,7 @@ export default function ReportsPage() {
       })
 
       logger.info('Print report prepared', { reportType: template.type })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Print failed', { error, reportType: template.type })
       toast.error('Print failed', { description: error.message })
     }
@@ -679,7 +679,7 @@ export default function ReportsPage() {
       })
       logger.info('Report email sent', { reportType: emailReportType.type })
       setIsEmailModalOpen(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Email failed', { error, reportType: emailReportType.type })
       // Fallback to mailto
       const mailtoLink = `mailto:${emailForm.recipients}?subject=${encodeURIComponent(emailForm.subject)}&body=${encodeURIComponent(emailForm.message)}`

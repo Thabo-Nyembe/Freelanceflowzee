@@ -188,7 +188,7 @@ function ProjectCreationWizard({ isOpen, onClose, onComplete }: ProjectWizardPro
         priority: 'medium'
       })
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create project', { error: error.message })
       toast.error('Failed to create project', {
         description: error.message

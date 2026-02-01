@@ -464,7 +464,7 @@ export default function ReferralsClient() {
         // Update local state
         setLoyaltyPoints(prev => prev + (reward?.points || 0))
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to claim reward', { error, rewardId })
       toast.error('Failed to claim reward')
     }
@@ -502,7 +502,7 @@ export default function ReferralsClient() {
 
         setLoyaltyPoints(prev => prev - points)
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to redeem points', { error, points })
       toast.error('Failed to redeem points')
     }
@@ -549,7 +549,7 @@ export default function ReferralsClient() {
       setIsProcessing(false)
 
       toast.success('Referral created!')
-    } catch (error: any) {
+    } catch (error) {
       setIsProcessing(false)
       logger.error('Failed to create referral', { error })
       toast.error('Failed to create referral')
@@ -591,7 +591,7 @@ export default function ReferralsClient() {
       setIsProcessing(false)
 
       toast.success('Payout requested! $' + payoutAmount + ' will be sent to your ' + payoutMethod + ' within 3-5 business days')
-    } catch (error: any) {
+    } catch (error) {
       setIsProcessing(false)
       logger.error('Failed to request payout', { error })
       toast.error('Failed to request payout')
@@ -620,7 +620,7 @@ export default function ReferralsClient() {
       setIsProcessing(false)
 
       toast.success('Settings saved!')
-    } catch (error: any) {
+    } catch (error) {
       setIsProcessing(false)
       logger.error('Failed to save settings', { error })
       toast.error('Failed to save settings')
@@ -656,7 +656,7 @@ export default function ReferralsClient() {
       if (!response.ok) throw new Error('Failed to send reminder')
 
       toast.success('Reminder sent!')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to send reminder', { error, referralId })
       toast.error('Failed to send reminder')
     }
@@ -688,7 +688,7 @@ export default function ReferralsClient() {
           error: 'Failed to export data'
         }
       )
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export referral data', { error, format })
       toast.error('Failed to export data')
     }
@@ -711,7 +711,7 @@ export default function ReferralsClient() {
           error: 'Failed to refresh data'
         }
       )
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to refresh data', { error })
       toast.error('Failed to refresh data')
     }

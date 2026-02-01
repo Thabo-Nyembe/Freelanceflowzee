@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       eventId: data?.id
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Analytics tracking failed', { error: error.message })
     // Silent fail - don't break user experience
     return NextResponse.json({ success: true, stored: false })

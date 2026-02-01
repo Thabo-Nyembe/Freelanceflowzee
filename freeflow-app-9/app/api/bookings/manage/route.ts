@@ -85,7 +85,7 @@ async function handleCreateBooking(userId: string, data: Partial<Booking>): Prom
         'Set up meeting room/video link'
       ]
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to create booking'
@@ -146,7 +146,7 @@ async function handleListBookings(userId: string, filters?: any): Promise<NextRe
       total: count || 0,
       message: `Found ${count || 0} bookings`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to list bookings'
@@ -180,7 +180,7 @@ async function handleConfirmBooking(userId: string, bookingId: string): Promise<
       message: 'Booking confirmed successfully!',
       emailSent: true
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to confirm booking'
@@ -216,7 +216,7 @@ async function handleCancelBooking(userId: string, bookingId: string, reason?: s
       refundProcessed: true,
       emailSent: true
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to cancel booking'
@@ -253,7 +253,7 @@ async function handleRescheduleBooking(userId: string, bookingId: string, data: 
       message: 'Booking rescheduled successfully!',
       emailSent: true
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to reschedule booking'
@@ -292,7 +292,7 @@ async function handleCompleteBooking(userId: string, bookingId: string, data?: a
         points: 20
       }
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to complete booking'
@@ -367,7 +367,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           error: `Unknown action: ${body.action}`
         }, { status: 400 })
     }
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Invalid request'
@@ -392,7 +392,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const limit = searchParams.get('limit')
 
     return handleListBookings(user.id, { status, date, search, limit })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to fetch bookings'

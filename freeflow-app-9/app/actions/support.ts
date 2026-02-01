@@ -73,7 +73,7 @@ export async function fetchTickets(): Promise<ActionResult<SupportTicket[]>> {
 
     logger.info('Tickets fetched', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Tickets fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching tickets', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -101,7 +101,7 @@ export async function createTicket(ticket: Partial<SupportTicket>): Promise<Acti
     revalidatePath('/dashboard/support-v2')
     logger.info('Ticket created', { ticketId: data.id })
     return actionSuccess(data, 'Ticket created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating ticket', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -130,7 +130,7 @@ export async function updateTicket(id: string, updates: Partial<SupportTicket>):
     revalidatePath('/dashboard/support-v2')
     logger.info('Ticket updated', { ticketId: id })
     return actionSuccess(data, 'Ticket updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating ticket', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -157,7 +157,7 @@ export async function deleteTicket(id: string): Promise<ActionResult<{ success: 
     revalidatePath('/dashboard/support-v2')
     logger.info('Ticket deleted', { ticketId: id })
     return actionSuccess({ success: true }, 'Ticket deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting ticket', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -190,7 +190,7 @@ export async function assignTicket(id: string, assignedTo: string): Promise<Acti
     revalidatePath('/dashboard/support-v2')
     logger.info('Ticket assigned', { ticketId: id, assignedTo })
     return actionSuccess(data, 'Ticket assigned successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error assigning ticket', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -224,7 +224,7 @@ export async function resolveTicket(id: string, resolutionNotes: string): Promis
     revalidatePath('/dashboard/support-v2')
     logger.info('Ticket resolved', { ticketId: id })
     return actionSuccess(data, 'Ticket resolved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error resolving ticket', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -253,7 +253,7 @@ export async function closeTicket(id: string): Promise<ActionResult<SupportTicke
     revalidatePath('/dashboard/support-v2')
     logger.info('Ticket closed', { ticketId: id })
     return actionSuccess(data, 'Ticket closed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error closing ticket', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -282,7 +282,7 @@ export async function reopenTicket(id: string): Promise<ActionResult<SupportTick
     revalidatePath('/dashboard/support-v2')
     logger.info('Ticket reopened', { ticketId: id })
     return actionSuccess(data, 'Ticket reopened successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error reopening ticket', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -316,7 +316,7 @@ export async function addTicketReply(ticketId: string, message: string, isIntern
     revalidatePath('/dashboard/support-v2')
     logger.info('Ticket reply added', { ticketId, replyId: data.id })
     return actionSuccess(data, 'Reply added successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error adding ticket reply', { error: error.message, ticketId })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -343,7 +343,7 @@ export async function fetchTicketReplies(ticketId: string): Promise<ActionResult
 
     logger.info('Ticket replies fetched', { ticketId, count: data?.length || 0 })
     return actionSuccess(data || [], 'Replies fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching ticket replies', { error: error.message, ticketId })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -375,7 +375,7 @@ export async function rateTicketSatisfaction(id: string, rating: number, feedbac
     revalidatePath('/dashboard/support-v2')
     logger.info('Ticket satisfaction rated', { ticketId: id, rating })
     return actionSuccess(data, 'Satisfaction rating submitted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error rating ticket satisfaction', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

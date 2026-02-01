@@ -34,7 +34,7 @@ export async function createInventoryItem(data: any): Promise<ActionResult<any>>
     logger.info('Inventory item created successfully', { itemId: item.id })
     revalidatePath('/dashboard/inventory-v2')
     return actionSuccess(item, 'Inventory item created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating inventory item', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -68,7 +68,7 @@ export async function updateInventoryItem(id: string, data: any): Promise<Action
     logger.info('Inventory item updated successfully', { itemId: id })
     revalidatePath('/dashboard/inventory-v2')
     return actionSuccess(item, 'Inventory item updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating inventory item', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -99,7 +99,7 @@ export async function deleteInventoryItem(id: string): Promise<ActionResult<any>
     logger.info('Inventory item deleted successfully', { itemId: id })
     revalidatePath('/dashboard/inventory-v2')
     return actionSuccess(item, 'Inventory item deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting inventory item', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -172,7 +172,7 @@ export async function adjustStock(id: string, quantityChange: number, reason: st
     logger.info('Stock adjusted successfully', { itemId: id, quantityChange })
     revalidatePath('/dashboard/inventory-v2')
     return actionSuccess(item, 'Stock adjusted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error adjusting stock', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -225,7 +225,7 @@ export async function reserveStock(id: string, quantity: number): Promise<Action
     logger.info('Stock reserved successfully', { itemId: id, quantity })
     revalidatePath('/dashboard/inventory-v2')
     return actionSuccess(item, 'Stock reserved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error reserving stock', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -275,7 +275,7 @@ export async function updatePricing(id: string, unitPrice: number, costPrice?: n
     logger.info('Pricing updated successfully', { itemId: id })
     revalidatePath('/dashboard/inventory-v2')
     return actionSuccess(item, 'Pricing updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating pricing', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -328,7 +328,7 @@ export async function checkReorderAlerts(id: string): Promise<ActionResult<{ nee
 
     logger.info('Reorder alert checked - no reorder needed', { itemId: id })
     return actionSuccess({ needsReorder: false, item }, 'No reorder needed')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error checking reorder alerts', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -382,7 +382,7 @@ export async function recordSale(id: string, quantitySold: number, saleAmount: n
     logger.info('Sale recorded successfully', { itemId: id, quantitySold, saleAmount })
     revalidatePath('/dashboard/inventory-v2')
     return actionSuccess(item, 'Sale recorded successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error recording sale', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -437,7 +437,7 @@ export async function updateTurnoverRate(id: string): Promise<ActionResult<any>>
     logger.info('Turnover rate updated successfully', { itemId: id, turnoverRate })
     revalidatePath('/dashboard/inventory-v2')
     return actionSuccess(updated, 'Turnover rate updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating turnover rate', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

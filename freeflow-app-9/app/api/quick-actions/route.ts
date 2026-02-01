@@ -129,7 +129,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }, { status: 400 })
     }
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Quick action error', { error: error.message })
     return NextResponse.json({
       success: false,
@@ -202,7 +202,7 @@ async function handleCreateProject(
       id: project.id,
       demo: demoMode
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Create project error', { error: error.message })
     return NextResponse.json({
       success: false,
@@ -272,7 +272,7 @@ async function handleCreateFolder(
       id: folder.id,
       demo: demoMode
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Create folder error', { error: error.message })
     return NextResponse.json({
       success: false,
@@ -344,7 +344,7 @@ async function handleSendMessage(
       id: message.id,
       demo: demoMode
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Send message error', { error: error.message })
     return NextResponse.json({
       success: false,
@@ -413,7 +413,7 @@ async function handleCreateTask(
       id: task.id,
       demo: demoMode
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Create task error', { error: error.message })
     return NextResponse.json({
       success: false,
@@ -480,7 +480,7 @@ async function handleBookmarkItem(
       id: bookmark.id,
       demo: demoMode
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Bookmark item error', { error: error.message })
     return NextResponse.json({
       success: false,
@@ -555,7 +555,7 @@ async function handleShareFile(
       id: share.id,
       demo: demoMode
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Share file error', { error: error.message })
     return NextResponse.json({
       success: false,
@@ -627,7 +627,7 @@ async function handleExportData(
       id: exportJob.id,
       demo: demoMode
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Export data error', { error: error.message })
     return NextResponse.json({
       success: false,
@@ -708,7 +708,7 @@ async function handleGenerateInvoice(
       id: invoice.id,
       demo: demoMode
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Generate invoice error', { error: error.message })
     return NextResponse.json({
       success: false,
@@ -806,7 +806,7 @@ async function handleScheduleMeeting(
       id: meeting.id,
       demo: demoMode
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Schedule meeting error', { error: error.message })
     return NextResponse.json({
       success: false,
@@ -873,7 +873,7 @@ async function handleQuickNote(
       id: note.id,
       demo: demoMode
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Quick note error', { error: error.message })
     return NextResponse.json({
       success: false,

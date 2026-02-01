@@ -351,7 +351,7 @@ export default function NotificationsPage() {
           toast.success(`${result.achievement.message} +${result.achievement.points} points!`)
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to mark all as read', { error: error instanceof Error ? error.message : String(error) })
       toast.error('Failed to mark all as read', {
         description: error.message || 'Please try again'
@@ -393,7 +393,7 @@ export default function NotificationsPage() {
         // Show success message
         toast.success(`${notification?.title || 'Notification'} archived`)
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to archive notification', {
         notificationId: id,
         error: error instanceof Error ? error.message : String(error)
@@ -433,7 +433,7 @@ export default function NotificationsPage() {
         logger.info('All notifications archived via API', { count: result.count || count })
         toast.success(`${result.count || count} notifications archived`)
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to archive all notifications', { error: error.message })
       toast.error('Failed to archive notifications', {
         description: error.message || 'Please try again'
@@ -477,7 +477,7 @@ export default function NotificationsPage() {
         // Show success message
         toast.success('Notification deleted')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete notification', {
         notificationId: id,
         error: error instanceof Error ? error.message : String(error)
@@ -517,7 +517,7 @@ export default function NotificationsPage() {
         logger.info('All notifications deleted via API', { count: result.count || count })
         toast.success(`${result.count || count} notifications deleted`)
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete all notifications', { error: error.message })
       setShowDeleteAllConfirm(false)
       toast.error('Failed to delete notifications', {
@@ -585,7 +585,7 @@ export default function NotificationsPage() {
         logger.info('All notifications cleared via API', { count: result.count || count })
         toast.success('All notifications cleared')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to clear notifications', { error: error.message })
       setShowClearAllConfirm(false)
       toast.error('Failed to clear notifications', {
@@ -681,7 +681,7 @@ export default function NotificationsPage() {
         logger.info('Notification preferences saved via API')
         toast.success('Settings saved successfully')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save preferences', { error: error.message })
       toast.error('Failed to save settings', {
         description: 'Please try again'
@@ -747,7 +747,7 @@ export default function NotificationsPage() {
         toast.success('Preferences reset to defaults')
         logger.info('Notification preferences reset via API')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to reset preferences', { error: error.message })
       setShowResetPreferencesConfirm(false)
       toast.error('Failed to reset preferences', {
@@ -765,7 +765,7 @@ export default function NotificationsPage() {
         const { error } = await snoozeNotification(userId, id, '1_hour')
         if (error) throw error
         logger.info('Notification snoozed in database', { notificationId: id })
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to snooze notification', { error: error.message })
       }
     }

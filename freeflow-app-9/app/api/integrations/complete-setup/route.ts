@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         approvalModeEnabled: true,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Setup completion failed', { error: error.message });
     return NextResponse.json(
       { success: false, error: error.message },
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
       setupCompleted: data?.setup_completed || false,
       config: data || null,
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to get setup status', { error: error.message });
     return NextResponse.json(
       { success: false, error: error.message },

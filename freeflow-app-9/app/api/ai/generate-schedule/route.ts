@@ -89,7 +89,7 @@ Only return valid JSON, no markdown or explanations.`
       message: 'Schedule generated successfully'
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Schedule Generation Error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined

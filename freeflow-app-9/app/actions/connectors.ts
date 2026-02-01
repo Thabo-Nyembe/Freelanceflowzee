@@ -37,7 +37,7 @@ export async function createConnector(data: {
     logger.info('Connector created successfully', { connectorId: connector.id })
     revalidatePath('/dashboard/connectors-v2')
     return actionSuccess(connector, 'Connector created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in createConnector', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -66,7 +66,7 @@ export async function updateConnector(id: string, data: any): Promise<ActionResu
     logger.info('Connector updated successfully', { id })
     revalidatePath('/dashboard/connectors-v2')
     return actionSuccess(connector, 'Connector updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateConnector', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -93,7 +93,7 @@ export async function deleteConnector(id: string): Promise<ActionResult<void>> {
     logger.info('Connector deleted successfully', { id })
     revalidatePath('/dashboard/connectors-v2')
     return actionSuccess(undefined, 'Connector deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in deleteConnector', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -128,7 +128,7 @@ export async function connectConnector(id: string): Promise<ActionResult<any>> {
     logger.info('Connector connected successfully', { id })
     revalidatePath('/dashboard/connectors-v2')
     return actionSuccess(connector, 'Connector connected successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in connectConnector', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -161,7 +161,7 @@ export async function disconnectConnector(id: string): Promise<ActionResult<any>
     logger.info('Connector disconnected successfully', { id })
     revalidatePath('/dashboard/connectors-v2')
     return actionSuccess(connector, 'Connector disconnected successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in disconnectConnector', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -197,7 +197,7 @@ export async function updateHealthStatus(id: string, health: {
     logger.info('Health status updated successfully', { id })
     revalidatePath('/dashboard/connectors-v2')
     return actionSuccess(connector, 'Health status updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateHealthStatus', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -255,7 +255,7 @@ export async function recordRequest(id: string, success: boolean, responseTime: 
     logger.info('Request recorded successfully', { id })
     revalidatePath('/dashboard/connectors-v2')
     return actionSuccess(connector, 'Request recorded successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in recordRequest', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -286,7 +286,7 @@ export async function updateQuotaUsage(id: string, used: number): Promise<Action
     logger.info('Quota usage updated successfully', { id })
     revalidatePath('/dashboard/connectors-v2')
     return actionSuccess(connector, 'Quota usage updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateQuotaUsage', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -328,7 +328,7 @@ export async function syncConnector(id: string, recordsSynced: number): Promise<
     logger.info('Connector synced successfully', { id })
     revalidatePath('/dashboard/connectors-v2')
     return actionSuccess(connector, 'Connector synced successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in syncConnector', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -360,7 +360,7 @@ export async function testConnector(id: string): Promise<ActionResult<any>> {
     logger.info('Connector test initiated successfully', { id })
     revalidatePath('/dashboard/connectors-v2')
     return actionSuccess(connector, 'Connector test initiated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in testConnector', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

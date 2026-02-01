@@ -737,7 +737,7 @@ export default function ContentClient() {
       // Refresh assets list
       const { data: newAssets } = await supabase.from('assets').select('*').eq('user_id', user.id).is('deleted_at', null)
       if (newAssets) setAssets(newAssets)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Upload failed', { description: error.message })
     }
   }
@@ -769,7 +769,7 @@ export default function ContentClient() {
       window.URL.revokeObjectURL(url)
 
       toast.success(`Downloaded: ${asset.filename}`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Download failed', { description: error.message })
     }
   }

@@ -152,7 +152,7 @@ export class WasabiClient {
         contentType: contentType || 'application/octet-stream',
         etag: response.ETag
       }
-    } catch (error: any) {
+    } catch (error) {
       throw new WasabiError(
         `Upload failed: ${error.message}`,
         error.Code,
@@ -177,7 +177,7 @@ export class WasabiClient {
 
       const url = await getSignedUrl(this.s3Client, command, { expiresIn })
       return url
-    } catch (error: any) {
+    } catch (error) {
       throw new WasabiError(
         `Failed to generate signed URL: ${error.message}`,
         error.Code,
@@ -209,7 +209,7 @@ export class WasabiClient {
         chunks.push(chunk)
       }
       return Buffer.concat(chunks)
-    } catch (error: any) {
+    } catch (error) {
       throw new WasabiError(
         `Download failed: ${error.message}`,
         error.Code,
@@ -230,7 +230,7 @@ export class WasabiClient {
       })
 
       await this.s3Client.send(command)
-    } catch (error: any) {
+    } catch (error) {
       throw new WasabiError(
         `Delete failed: ${error.message}`,
         error.Code,
@@ -260,7 +260,7 @@ export class WasabiClient {
         etag: response.ETag,
         metadata: response.Metadata
       }
-    } catch (error: any) {
+    } catch (error) {
       throw new WasabiError(
         `Failed to get metadata: ${error.message}`,
         error.Code,
@@ -290,7 +290,7 @@ export class WasabiClient {
         contentType: 'application/octet-stream',
         etag: item.ETag
       }))
-    } catch (error: any) {
+    } catch (error) {
       throw new WasabiError(
         `List files failed: ${error.message}`,
         error.Code,
@@ -312,7 +312,7 @@ export class WasabiClient {
       })
 
       await this.s3Client.send(command)
-    } catch (error: any) {
+    } catch (error) {
       throw new WasabiError(
         `Copy failed: ${error.message}`,
         error.Code,
@@ -329,7 +329,7 @@ export class WasabiClient {
     try {
       await this.getFileMetadata(key)
       return true
-    } catch (error: any) {
+    } catch (error) {
       if (error.code === 'NoSuchKey' || error.statusCode === 404) {
         return false
       }
@@ -348,7 +348,7 @@ export class WasabiClient {
       const fileCount = files.length
 
       return { totalSize, fileCount }
-    } catch (error: any) {
+    } catch (error) {
       throw new WasabiError(
         `Failed to get storage stats: ${error.message}`,
         error.Code,
@@ -375,7 +375,7 @@ export class WasabiClient {
 
       const url = await getSignedUrl(this.s3Client, command, { expiresIn })
       return url
-    } catch (error: any) {
+    } catch (error) {
       throw new WasabiError(
         `Failed to generate presigned upload URL: ${error.message}`,
         error.Code,

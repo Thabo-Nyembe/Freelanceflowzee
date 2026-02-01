@@ -166,7 +166,7 @@ export function EmailIntegrationStep({ onComplete, onBack }: any) {
       } else {
         throw new Error(result.error || 'Connection test failed');
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Connection Failed',
         description: error.message,
@@ -538,7 +538,7 @@ export function AIProviderStep({ onComplete, onBack }: any) {
       } else {
         throw new Error(result.error || 'Connection test failed');
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Connection Failed',
         description: error.message,

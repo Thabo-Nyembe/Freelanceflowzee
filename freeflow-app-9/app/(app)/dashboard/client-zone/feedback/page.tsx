@@ -225,7 +225,7 @@ export default function FeedbackPage() {
           description: 'Thank you for your valuable input'
         })
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to submit feedback', { error })
       toast.error('Failed to submit feedback', {
         description: error.message || 'Please try again later'
@@ -275,7 +275,7 @@ export default function FeedbackPage() {
           description: feedback?.isPublic ? 'Feedback is now private' : 'Feedback is now public'
         })
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update visibility', { error, feedbackId })
       toast.error('Failed to update visibility', {
         description: error.message

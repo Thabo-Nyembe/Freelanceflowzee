@@ -83,7 +83,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       effectiveDate: currentPeriodEnd,
       note: 'You will retain access to premium features until the end of your current billing period.'
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Subscription cancellation error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to cancel subscription' },
@@ -147,7 +147,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       success: true,
       message: 'Subscription reactivated successfully'
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Subscription reactivation error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to reactivate subscription' },

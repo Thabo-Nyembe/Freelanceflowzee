@@ -412,7 +412,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(response)
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Collaboration AI error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined

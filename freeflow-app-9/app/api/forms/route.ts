@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     if (error) throw error
 
     return NextResponse.json({ data: forms })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Forms API error', { error })
     return NextResponse.json(
       { error: error.message || 'Failed to fetch forms' },
@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Forms API error', { error })
     return NextResponse.json(
       { error: error.message || 'Operation failed' },

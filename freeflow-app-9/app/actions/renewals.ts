@@ -110,7 +110,7 @@ export async function createRenewal(input: CreateRenewalInput): Promise<ActionRe
     logger.info('Renewal created successfully', { renewalCode })
     revalidatePath('/dashboard/renewals-v2')
     return actionSuccess(data, 'Renewal created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating renewal', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -161,7 +161,7 @@ export async function updateRenewal(id: string, input: UpdateRenewalInput): Prom
     logger.info('Renewal updated successfully', { id })
     revalidatePath('/dashboard/renewals-v2')
     return actionSuccess(data, 'Renewal updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating renewal', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -196,7 +196,7 @@ export async function markRenewalAtRisk(id: string): Promise<ActionResult<any>> 
     logger.info('Renewal marked at risk', { id })
     revalidatePath('/dashboard/renewals-v2')
     return actionSuccess(data, 'Renewal marked at risk')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error marking renewal at risk', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -241,7 +241,7 @@ export async function winRenewal(id: string, finalArr?: number): Promise<ActionR
     logger.info('Renewal won', { id, finalArr: proposedArr })
     revalidatePath('/dashboard/renewals-v2')
     return actionSuccess(data, 'Renewal marked as won')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error winning renewal', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -285,7 +285,7 @@ export async function loseRenewal(id: string): Promise<ActionResult<any>> {
     logger.info('Renewal marked as lost', { id })
     revalidatePath('/dashboard/renewals-v2')
     return actionSuccess(data, 'Renewal marked as churned')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error losing renewal', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -315,7 +315,7 @@ export async function deleteRenewal(id: string): Promise<ActionResult<{ success:
     logger.info('Renewal deleted successfully', { id })
     revalidatePath('/dashboard/renewals-v2')
     return actionSuccess({ success: true }, 'Renewal deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting renewal', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -357,7 +357,7 @@ export async function getRenewals(filters?: {
 
     logger.info('Renewals fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Renewals fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching renewals', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

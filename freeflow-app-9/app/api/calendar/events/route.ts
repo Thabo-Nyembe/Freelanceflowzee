@@ -75,7 +75,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ success: true, events, total: events.length });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Calendar GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch calendar data' },
@@ -363,7 +363,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Calendar POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
@@ -394,7 +394,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
 
     await calendarService.deleteEvent(eventId, user.id, deleteRecurring);
     return NextResponse.json({ success: true, message: 'Event deleted' });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Calendar DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete event' },

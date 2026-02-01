@@ -156,7 +156,7 @@ class AIService {
       await this.updateUsageTracking(request.user_id, response);
 
       return response;
-    } catch (error: any) {
+    } catch (error) {
       await this.logError(request, error);
       throw error;
     }

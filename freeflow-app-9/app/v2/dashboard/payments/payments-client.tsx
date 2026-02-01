@@ -431,7 +431,7 @@ export default function PaymentsClient() {
       // Reset form and close dialog
       setNewPaymentData({ milestone: '', amount: '', type: 'hold', notes: '' })
       setShowRecordPaymentDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to record payment', { error })
       toast.error('Failed to record payment')
     }
@@ -503,7 +503,7 @@ export default function PaymentsClient() {
       setShowRefundDialog(false)
       setRefundPayment(null)
       setRefundData({ amount: '', reason: '', fullRefund: true })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to process refund', { error, paymentId: refundPayment.id })
       toast.error('Failed to process refund')
     }
@@ -611,7 +611,7 @@ export default function PaymentsClient() {
       toast.success("Export completed as " + exportOptions.format.toUpperCase())
 
       setShowExportDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export payments', { error })
       toast.error('Failed to export payments')
     }
@@ -635,7 +635,7 @@ export default function PaymentsClient() {
       toast.success('Settings saved!')
 
       setShowSettingsDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save payment settings', { error })
       toast.error('Failed to save settings')
     }
@@ -656,7 +656,7 @@ export default function PaymentsClient() {
 
       toast.success('Payments refreshed')
       announce('Payments data refreshed', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       setIsLoading(false)
       logger.error('Failed to refresh payments', { error })
       toast.error('Failed to refresh payments')
@@ -777,7 +777,7 @@ export default function PaymentsClient() {
       setShowReleaseDialog(false)
       setReleaseMilestone(null)
       setReleaseConfirmation('')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to release payment', { error, milestoneId: releaseMilestone.id })
       toast.error('Failed to release payment')
     }
@@ -826,7 +826,7 @@ export default function PaymentsClient() {
       setShowDisputeDialog(false)
       setDisputeMilestone(null)
       setDisputeReason('')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to submit dispute', { error, milestoneId: disputeMilestone.id })
       toast.error('Failed to submit dispute')
     }
@@ -853,7 +853,7 @@ export default function PaymentsClient() {
       document.body.removeChild(a)
 
       toast.success("Receipt downloaded and saved")
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to download receipt', { error, paymentId: payment.id })
       toast.error('Failed to download receipt')
     }

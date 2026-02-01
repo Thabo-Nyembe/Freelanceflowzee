@@ -611,7 +611,7 @@ export default function ProjectsOverviewPage() {
 
       toast.success(`Project created successfully! ${newProject.title} - Ready to add milestones and team members`)
       announce(`Project ${newProject.title} created successfully`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create project', { error, userId })
       toast.error('Failed to create project')
       announce('Error creating project', 'assertive')
@@ -649,7 +649,7 @@ export default function ProjectsOverviewPage() {
 
       toast.success(`Project status updated to ${newStatus}. ${project?.title || 'Project'} is now ${newStatus}`)
       announce(`Project status changed to ${newStatus}`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update project status', { error, projectId })
       toast.error('Failed to update project status')
       announce('Error updating project status', 'assertive')

@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         cost: stats.reduce((sum, s) => sum + s.totalCost, 0),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to get usage stats', { error: error.message });
     return NextResponse.json(
       { success: false, error: error.message },
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Usage recorded',
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to record usage', { error: error.message });
     return NextResponse.json(
       { success: false, error: error.message },

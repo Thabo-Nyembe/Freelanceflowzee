@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Escrow released successfully. File is now accessible to buyer.'
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Escrow release error', { error })
 
     return NextResponse.json(
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
       canRelease: delivery.status === 'escrowed',
       deliveryStatus: delivery.status
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Get escrow status error', { error })
 
     return NextResponse.json(

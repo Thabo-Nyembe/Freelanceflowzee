@@ -59,7 +59,7 @@ export async function createBroadcast(data: CreateBroadcastData): Promise<Action
     revalidatePath('/dashboard/broadcasts-v2')
     logger.info('Broadcast created successfully', { broadcastId: broadcast.id })
     return actionSuccess(broadcast, 'Broadcast created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating broadcast', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -88,7 +88,7 @@ export async function updateBroadcast(id: string, data: Partial<CreateBroadcastD
     revalidatePath('/dashboard/broadcasts-v2')
     logger.info('Broadcast updated successfully', { broadcastId: id })
     return actionSuccess(broadcast, 'Broadcast updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating broadcast', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -128,7 +128,7 @@ export async function deleteBroadcast(id: string, hardDelete: boolean = false): 
     revalidatePath('/dashboard/broadcasts-v2')
     logger.info('Broadcast deleted successfully', { broadcastId: id, hardDelete })
     return actionSuccess({ success: true }, 'Broadcast deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting broadcast', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -236,7 +236,7 @@ export async function sendBroadcast(id: string): Promise<ActionResult<any>> {
     })
 
     return actionSuccess(broadcast, `Broadcast sent to ${deliveredCount} recipients`)
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error sending broadcast', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -265,7 +265,7 @@ export async function pauseBroadcast(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/broadcasts-v2')
     logger.info('Broadcast paused successfully', { broadcastId: id })
     return actionSuccess(broadcast, 'Broadcast paused successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error pausing broadcast', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -294,7 +294,7 @@ export async function resumeBroadcast(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/broadcasts-v2')
     logger.info('Broadcast resumed successfully', { broadcastId: id })
     return actionSuccess(broadcast, 'Broadcast resumed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error resuming broadcast', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -333,7 +333,7 @@ export async function getBroadcastStats(): Promise<ActionResult<any>> {
 
     logger.info('Broadcast stats retrieved successfully')
     return actionSuccess(stats, 'Broadcast stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting broadcast stats', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

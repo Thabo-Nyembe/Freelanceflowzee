@@ -2634,7 +2634,7 @@ export default function CampaignsClient() {
                 setShowCreateAutomationDialog(false)
                 setAutomationData({ name: '', trigger: 'subscribe', action: 'send_email' })
                 refetch()
-              } catch (error: any) {
+              } catch (error) {
                 toast.dismiss()
                 toast.error('Failed to create automation', { description: error.message })
               }
@@ -2698,7 +2698,7 @@ export default function CampaignsClient() {
                 setShowAIGenerateDialog(false)
                 setAiPrompt('')
                 setShowTemplateDialog(true)
-              } catch (error: any) {
+              } catch (error) {
                 toast.dismiss()
                 toast.error('Failed to generate template', { description: error.message })
               }
@@ -2751,7 +2751,7 @@ export default function CampaignsClient() {
                     if (error) throw error
                     toast.dismiss()
                     toast.success(`Connected to ${crm}!`)
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.dismiss()
                     toast.error('Connection failed', { description: error.message })
                   }
@@ -2781,7 +2781,7 @@ export default function CampaignsClient() {
                 toast.success('Subscribers imported successfully!')
                 setShowImportDialog(false)
                 refetch()
-              } catch (error: any) {
+              } catch (error) {
                 toast.dismiss()
                 toast.error('Import failed', { description: error.message })
               }

@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
       count: keys.length
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to fetch API keys', { error: error.message })
 
     return NextResponse.json(
@@ -295,7 +295,7 @@ export async function POST(request: NextRequest) {
       message: 'API key added successfully'
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to process API key request', { error: error.message })
 
     return NextResponse.json(
@@ -340,7 +340,7 @@ export async function PUT(request: NextRequest) {
       message: 'API key updated successfully'
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to update API key', { error: error.message })
 
     return NextResponse.json(
@@ -389,7 +389,7 @@ export async function DELETE(request: NextRequest) {
       message: 'API key deleted successfully'
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to delete API key', { error: error.message })
 
     return NextResponse.json(

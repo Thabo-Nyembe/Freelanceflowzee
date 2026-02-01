@@ -92,7 +92,7 @@ export function useTeam(initialMembers: TeamMember[] = [], initialStats?: TeamSt
       if (error) throw error
       setMembers(data || [])
       setStats(calculateStats(data || []))
-    } catch (error: any) {
+    } catch (error) {
       // Silently handle RLS policy errors (infinite recursion)
       if (error?.code !== '42P17') {
         toast({
@@ -138,7 +138,7 @@ export function useTeam(initialMembers: TeamMember[] = [], initialStats?: TeamSt
       })
 
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to add team member',
@@ -175,7 +175,7 @@ export function useTeam(initialMembers: TeamMember[] = [], initialStats?: TeamSt
       })
 
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to update team member',
@@ -207,7 +207,7 @@ export function useTeam(initialMembers: TeamMember[] = [], initialStats?: TeamSt
       })
 
       return true
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to remove team member',

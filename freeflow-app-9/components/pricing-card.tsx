@@ -117,7 +117,7 @@ export const PricingCard = memo(function PricingCard({ plan }: PricingCardProps)
           description: result.error || 'Please try again later'
         })
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Plan selection error:', error)
       toast.error('Failed to select plan', {
         description: 'Please check your connection and try again'

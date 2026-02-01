@@ -730,7 +730,7 @@ export default function AppStoreClient() {
         }))
         setApps(mappedApps.length > 0 ? mappedApps : mockApps)
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching apps:', error)
       // Keep mock data if database fetch fails
     } finally {
@@ -814,7 +814,7 @@ export default function AppStoreClient() {
 
       toast.success('App installed successfully')
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to install app')
     } finally {
       setLoading(false)
@@ -838,7 +838,7 @@ export default function AppStoreClient() {
 
       toast.success('App uninstalled')
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to uninstall')
     } finally {
       setLoading(false)
@@ -863,7 +863,7 @@ export default function AppStoreClient() {
       toast.success('App updated')
       setUpdates(prev => prev.filter(u => u.id !== update.id))
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Update failed')
     } finally {
       setLoading(false)
@@ -892,7 +892,7 @@ export default function AppStoreClient() {
 
       toast.success('Rating submitted')
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to submit rating')
     } finally {
       setLoading(false)
@@ -923,7 +923,7 @@ export default function AppStoreClient() {
 
       toast.success('Trial started')
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to start trial')
     } finally {
       setLoading(false)
@@ -946,7 +946,7 @@ export default function AppStoreClient() {
       if (error) throw error
 
       toast.success('Added to wishlist')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to add to wishlist')
     }
   }
@@ -965,7 +965,7 @@ export default function AppStoreClient() {
       toast.success('All apps updated')
       setUpdates([])
       await fetchApps()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Update failed')
     } finally {
       setLoading(false)

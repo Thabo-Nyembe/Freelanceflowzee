@@ -221,7 +221,7 @@ export default function FilesPage() {
       ))
 
       toast.success(`Download started: ${file.name}`)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to download file', { error, fileName: file.name })
       toast.error('Failed to download file', {
         description: error.message || 'Please try again later'
@@ -285,7 +285,7 @@ export default function FilesPage() {
 
             logger.info('File uploaded successfully', { fileName: file.name })
             toast.success(`File uploaded: ${file.name}`)
-          } catch (error: any) {
+          } catch (error) {
             logger.error('Failed to upload file', { error, fileName: file.name })
             toast.error('Failed to upload file', {
               description: `${file.name}: ${error.message}`
@@ -325,7 +325,7 @@ export default function FilesPage() {
 
       logger.info('File deleted successfully', { fileId, fileName })
       toast.success(`File deleted: ${fileName}`)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete file', { error, fileId })
       toast.error('Failed to delete file')
     }
@@ -354,7 +354,7 @@ export default function FilesPage() {
 
       logger.info('File shared successfully', { fileId: file.id })
       toast.success('Share link copied to clipboard!')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to share file', { error, fileId: file.id })
       toast.error('Failed to share file')
     }
@@ -376,7 +376,7 @@ export default function FilesPage() {
       ))
 
       toast.success(`Preview opened: ${file.name}`)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to open file preview', { error })
       toast.error('Failed to open file preview')
     }
@@ -392,7 +392,7 @@ export default function FilesPage() {
       await navigator.clipboard.writeText(link)
       logger.info('File link copied', { fileId: file.id })
       toast.success('Link copied to clipboard!')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to copy link', { error })
       toast.error('Failed to copy link')
     }
@@ -429,7 +429,7 @@ export default function FilesPage() {
       } else {
         throw new Error(data.error || 'Download failed')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to download secure file', { error, fileName: file.fileName })
       toast.error('Failed to download file', {
         description: error.message

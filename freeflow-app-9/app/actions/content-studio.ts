@@ -32,7 +32,7 @@ export async function createProject(data: Partial<ContentStudio>): Promise<Actio
     logger.info('Project created successfully', { projectId: project.id })
     revalidatePath('/dashboard/content-studio-v2')
     return actionSuccess(project, 'Project created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in createProject', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -61,7 +61,7 @@ export async function updateProject(id: string, data: Partial<ContentStudio>): P
     logger.info('Project updated successfully', { id })
     revalidatePath('/dashboard/content-studio-v2')
     return actionSuccess(project, 'Project updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateProject', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -88,7 +88,7 @@ export async function deleteProject(id: string): Promise<ActionResult<void>> {
     logger.info('Project deleted successfully', { id })
     revalidatePath('/dashboard/content-studio-v2')
     return actionSuccess(undefined, 'Project deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in deleteProject', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -119,7 +119,7 @@ export async function autoSaveProject(id: string, canvasState: any, editorState:
     }
 
     return actionSuccess(project, 'Project auto-saved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in autoSaveProject', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -165,7 +165,7 @@ export async function exportProject(id: string, format: string): Promise<ActionR
     logger.info('Project exported successfully', { id, format })
     revalidatePath('/dashboard/content-studio-v2')
     return actionSuccess(updatedProject, 'Project exported successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in exportProject', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -197,7 +197,7 @@ export async function publishProject(id: string): Promise<ActionResult<any>> {
     logger.info('Project published successfully', { id })
     revalidatePath('/dashboard/content-studio-v2')
     return actionSuccess(project, 'Project published successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in publishProject', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -233,7 +233,7 @@ export async function updateProjectProgress(id: string, percentage: number): Pro
     logger.info('Project progress updated successfully', { id, percentage })
     revalidatePath('/dashboard/content-studio-v2')
     return actionSuccess(project, 'Project progress updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateProjectProgress', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -279,7 +279,7 @@ export async function addCollaborator(id: string, collaboratorEmail: string): Pr
     logger.info('Collaborator added successfully', { id, collaboratorEmail })
     revalidatePath('/dashboard/content-studio-v2')
     return actionSuccess(updatedProject, 'Collaborator added successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in addCollaborator', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

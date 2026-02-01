@@ -475,7 +475,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
       toast.success('Test suite completed', { id: 'run-suite' })
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to run test suite')
     } finally {
       setIsRunningAllTests(false)
@@ -518,7 +518,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       } else {
         throw new Error(result?.message || 'Failed to create test case')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create test case')
     } finally {
       setIsCreatingTest(false)
@@ -558,7 +558,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         config: '',
         assigned_to: ''
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create test run')
     } finally {
       setIsCreatingRun(false)
@@ -597,7 +597,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         severity: 'major',
         test_case_id: ''
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to report defect')
     } finally {
       setIsCreatingDefect(false)
@@ -636,7 +636,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         due_date: '',
         start_date: ''
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create milestone')
     } finally {
       setIsCreatingMilestone(false)
@@ -672,7 +672,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       URL.revokeObjectURL(url)
 
       toast.success('Export complete')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed')
     } finally {
       setIsExporting(false)
@@ -699,7 +699,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       } else {
         toast.info('No failed tests')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Rerun failed')
     }
   }, [ executeTest, refetch])
@@ -716,7 +716,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       } else {
         throw new Error(result?.message || 'Failed to execute test')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Execution failed')
     } finally {
       setIsExecutingTest(false)
@@ -734,7 +734,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       } else {
         throw new Error(result?.message || 'Failed to delete test case')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete failed')
     }
   }, [deleteTestCase, refetch])
@@ -754,7 +754,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       const avgPassRate = total > 0 ? stats!.reduce((sum, t) => sum + Number(t.pass_rate || 0), 0) / total : 0
 
       toast.success(`Report generated: Passed: ${passed}, Failed: ${failed}, Pass Rate: ${avgPassRate.toFixed(1)}%`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Report generation failed')
     }
   }, [])
@@ -780,7 +780,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       } else {
         toast.info('No tests found')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Test run failed')
     } finally {
       setIsRunningAllTests(false)
@@ -812,7 +812,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       setShowCreateSuiteDialog(false)
       setNewSuiteForm({ name: '', description: '' })
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create suite')
     } finally {
       setIsCreatingSuite(false)
@@ -844,7 +844,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       toast.success(`Defect updated has been updated`)
       setShowEditDefectDialog(false)
       setSelectedDefect(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update defect')
     } finally {
       setIsUpdatingDefect(false)
@@ -896,7 +896,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
       toast.success(`${reportType} generated`)
       setShowGenerateReportDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Report generation failed')
     } finally {
       setIsGeneratingReport(false)
@@ -930,7 +930,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       toast.success(`Environment created has been configured`)
       setShowEnvironmentDialog(false)
       setNewEnvironmentForm({ name: '', url: '', browser: 'Chrome', os: 'Windows' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create environment')
     } finally {
       setIsCreatingEnvironment(false)
@@ -962,7 +962,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       toast.success(`${newStatus === 'connected' ? 'Integration connected' : 'Integration disconnected'} has been ${newStatus}`)
       setShowIntegrationDialog(false)
       setSelectedIntegration(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update integration')
     } finally {
       setIsConnectingIntegration(false)
@@ -983,7 +983,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       toast.success('Data deleted')
       setShowDeleteDataDialog(false)
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete failed')
     } finally {
       setIsDeletingData(false)
@@ -1014,7 +1014,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       }
       setShowResumeRunDialog(false)
       setSelectedRun(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Resume failed')
     } finally {
       setIsResumingRun(false)
@@ -1048,7 +1048,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       URL.revokeObjectURL(url)
 
       toast.success(`Report downloaded has been saved`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Download failed')
     } finally {
       setIsDownloadingReport(false)
@@ -1077,7 +1077,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
       toast.success(`${suiteName} completed tests`, { id: 'run-suite' })
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Test run failed')
     } finally {
       setIsRunningAllTests(false)

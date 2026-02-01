@@ -126,7 +126,7 @@ export async function createLogisticsRoute(input: LogisticsRouteInput): Promise<
     logger.info('Logistics route created successfully', { routeId: data.id })
     revalidatePath('/dashboard/logistics-v2')
     return actionSuccess(data, 'Logistics route created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating logistics route', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -177,7 +177,7 @@ export async function updateLogisticsRoute(id: string, updates: Partial<Logistic
     logger.info('Logistics route updated successfully', { routeId: id })
     revalidatePath('/dashboard/logistics-v2')
     return actionSuccess(data, 'Logistics route updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating logistics route', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -204,7 +204,7 @@ export async function deleteLogisticsRoute(id: string): Promise<ActionResult<{ s
     logger.info('Logistics route deleted successfully', { routeId: id })
     revalidatePath('/dashboard/logistics-v2')
     return actionSuccess({ success: true }, 'Logistics route deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting logistics route', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -237,7 +237,7 @@ export async function startRoute(id: string): Promise<ActionResult<any>> {
     logger.info('Route started successfully', { routeId: id })
     revalidatePath('/dashboard/logistics-v2')
     return actionSuccess(data, 'Route started successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error starting route', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -283,7 +283,7 @@ export async function completeRoute(id: string): Promise<ActionResult<any>> {
     logger.info('Route completed successfully', { routeId: id })
     revalidatePath('/dashboard/logistics-v2')
     return actionSuccess(data, 'Route completed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error completing route', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

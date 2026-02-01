@@ -74,7 +74,7 @@ export async function createStockMovement(input: CreateStockMovementInput): Prom
 
     revalidatePath('/dashboard/stock-v2')
     return actionSuccess(data, 'Stock movement created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error creating stock movement:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -101,7 +101,7 @@ export async function updateStockMovement(input: UpdateStockMovementInput): Prom
 
     revalidatePath('/dashboard/stock-v2')
     return actionSuccess(data, 'Stock movement updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating stock movement:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -136,7 +136,7 @@ export async function completeStockMovement(id: string): Promise<ActionResult<an
 
     revalidatePath('/dashboard/stock-v2')
     return actionSuccess(data, 'Stock movement completed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error completing stock movement:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -161,7 +161,7 @@ export async function cancelStockMovement(id: string): Promise<ActionResult<any>
 
     revalidatePath('/dashboard/stock-v2')
     return actionSuccess(data, 'Stock movement cancelled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error cancelling stock movement:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -231,7 +231,7 @@ export async function updateStockLevel(input: {
       revalidatePath('/dashboard/stock-v2')
       return actionSuccess(data, 'Stock level created successfully')
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating stock level:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -276,7 +276,7 @@ export async function getStockStats(): Promise<ActionResult<any>> {
     }
 
     return actionSuccess(stats, 'Stock stats fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching stock stats:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

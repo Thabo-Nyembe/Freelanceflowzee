@@ -530,7 +530,7 @@ export default function CVPortfolioPage() {
       })
       setShowAddProjectDialog(false)
       announce(`Project ${result.title} added`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to add project', { error: error.message })
     } finally {
       setIsSaving(false)
@@ -600,7 +600,7 @@ export default function CVPortfolioPage() {
       setShowEditProjectDialog(false)
       setEditingProject(null)
       announce(`Project ${result.title} updated`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update project', { error: error.message, projectId: editingProject.id })
     } finally {
       setIsSaving(false)
@@ -634,7 +634,7 @@ export default function CVPortfolioPage() {
       const newCompleteness = calculateCompleteness()
     toast.success(`Project Deleted! "${project.title}" removed from portfolio`)
       announce(`Project ${project.title} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete project', { error: error.message, projectId: projectToDelete })
       toast.error('Failed to delete project')
     } finally {
@@ -704,7 +704,7 @@ export default function CVPortfolioPage() {
       setShowAddSkillDialog(false)
       toast.success(`Skill Added! ${name} (${proficiency}/5 stars) - ${skills.length + 1} skills total`)
       announce(`Skill ${name} added`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to add skill', { error: error.message })
       toast.error('Failed to add skill')
     }
@@ -725,7 +725,7 @@ export default function CVPortfolioPage() {
         s.id === skillId ? { ...s, proficiency: newProficiency } : s
       ))
     toast.success(`Skill Updated! ${skill.name}: ${newProficiency}/5 stars`)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update skill', { error: error.message, skillId })
       toast.error('Failed to update skill')
     }
@@ -758,7 +758,7 @@ export default function CVPortfolioPage() {
       const newCompleteness = calculateCompleteness()
     toast.success(`Skill Removed! ${skill.name} deleted (${skills.length - 1} skills remaining)`)
       announce(`Skill ${skill.name} removed`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to remove skill', { error: error.message, skillId: skillToRemove })
       toast.error('Failed to remove skill')
     } finally {
@@ -855,7 +855,7 @@ export default function CVPortfolioPage() {
       })
       setShowAddExperienceDialog(false)
       announce(`Experience at ${result.company} added`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to add experience', { error: error.message })
     } finally {
       setIsSaving(false)
@@ -925,7 +925,7 @@ export default function CVPortfolioPage() {
       setShowEditExperienceDialog(false)
       setEditingExperience(null)
       announce(`Experience at ${result.company} updated`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update experience', { error: error.message, experienceId: editingExperience.id })
     } finally {
       setIsSaving(false)
@@ -960,7 +960,7 @@ export default function CVPortfolioPage() {
       const newYears = calculateYearsOfExperience()
     toast.success(`Experience Deleted! ${exp.position} at ${exp.company} removed`)
       announce(`Experience at ${exp.company} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete experience', { error: error.message, experienceId: experienceToDelete })
       toast.error('Failed to delete experience')
     } finally {
@@ -1051,7 +1051,7 @@ export default function CVPortfolioPage() {
       })
       setShowAddEducationDialog(false)
       announce(`Education ${result.degree} added`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to add education', { error: error.message })
     } finally {
       setIsSaving(false)
@@ -1109,7 +1109,7 @@ export default function CVPortfolioPage() {
       setShowEditEducationDialog(false)
       setEditingEducation(null)
       announce(`Education ${result.degree} updated`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update education', { error: error.message, educationId: editingEducation.id })
     } finally {
       setIsSaving(false)
@@ -1143,7 +1143,7 @@ export default function CVPortfolioPage() {
       const newCompleteness = calculateCompleteness()
     toast.success(`Education Deleted! ${edu.degree} removed from CV`)
       announce(`Education ${edu.degree} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete education', { error: error.message, educationId: educationToDelete })
       toast.error('Failed to delete education')
     } finally {
@@ -1256,7 +1256,7 @@ export default function CVPortfolioPage() {
       const newCompleteness = calculateCompleteness()
     toast.success(`Achievement Deleted! ${achievement.title} removed`)
       announce(`Achievement ${achievement.title} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete achievement', { error: error.message, achievementId: achievementToDelete })
       toast.error('Failed to delete achievement')
     } finally {
@@ -1437,7 +1437,7 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
         success: (data) => `CV Exported as ${data.format}! ${data.fileName} (${data.completeness}% complete)`,
         error: 'Export failed. Please try again.'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export CV', {
         error: error.message,
         format
@@ -1470,7 +1470,7 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
 
         const newCompleteness = calculateCompleteness()
         toast.success(`CV Imported! Data loaded from ${file.name} (${newCompleteness}% complete)`)
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to import CV', {
           error: error.message,
           fileName: file.name
@@ -1500,7 +1500,7 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
         await navigator.clipboard.writeText(shareUrl)
       }
     toast.success('Share Link Generated! Link copied to clipboard. Valid for 30 days.')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to generate share link', {
         error: error.message
       })
@@ -1623,7 +1623,7 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
           success: (data) => `Image Uploaded! ${data.fileName} added to project`,
           error: 'Failed to upload image'
         })
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to upload project image', { error: error.message, projectId })
       } finally {
         setIsUploading(false)
@@ -1676,7 +1676,7 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
       setProjects(prev => prev.filter(p => !projectsToDelete.includes(p.id)))
     toast.success(`Projects Deleted! ${projectsToDelete.length} projects removed`)
       announce(`${projectsToDelete.length} projects deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to bulk delete projects', { error: error.message, projectIds: projectsToDelete })
       toast.error('Failed to delete projects')
     } finally {
@@ -1742,7 +1742,7 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
     try {
       await navigator.clipboard.writeText(publicUrl)
     toast.success('Link Copied! Portfolio link copied to clipboard')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to copy link', {
         error: error.message
       })
@@ -1773,7 +1773,7 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
 
       toast.dismiss()
       toast.success(`Test Email Sent! Email sent to ${profileData.email}`)
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss()
       toast.error('Failed to send test email')
     }
@@ -1832,7 +1832,7 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
       })
       setShowEditProfileDialog(false)
       announce(`Profile updated for ${result.name}`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update profile', { error: error.message })
     } finally {
       setIsSaving(false)

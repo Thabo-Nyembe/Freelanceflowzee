@@ -568,7 +568,7 @@ export function AICreateEnhanced({ onSaveKeys }: AICreateEnhancedProps) {
         setHistory(prev => [newGeneration, ...prev])
         toast.success('Content generated successfully!')
 
-      } catch (error: any) {
+      } catch (error) {
         if (error.name === 'AbortError') {
           toast.info('Generation cancelled')
           return

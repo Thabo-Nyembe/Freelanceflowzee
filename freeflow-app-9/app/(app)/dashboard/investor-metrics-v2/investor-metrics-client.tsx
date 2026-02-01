@@ -273,7 +273,7 @@ export default function InvestorMetricsClient() {
 
       if (error) throw error
       setDbMetrics(data || [])
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to fetch metrics', { description: error.message })
     } finally {
       setLoading(false)
@@ -315,7 +315,7 @@ export default function InvestorMetricsClient() {
       setShowMetricDialog(false)
       resetForm()
       toast.success('Metric created successfully')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create metric', { description: error.message })
     } finally {
       setLoading(false)
@@ -354,7 +354,7 @@ export default function InvestorMetricsClient() {
       setEditingMetric(null)
       resetForm()
       toast.success('Metric updated successfully')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update metric', { description: error.message })
     } finally {
       setLoading(false)
@@ -373,7 +373,7 @@ export default function InvestorMetricsClient() {
 
       setDbMetrics(prev => prev.filter(m => m.id !== id))
       toast.success('Metric deleted successfully')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete metric', { description: error.message })
     } finally {
       setLoading(false)
@@ -505,7 +505,7 @@ export default function InvestorMetricsClient() {
       a.click()
       URL.revokeObjectURL(url)
       toast.success('Metrics exported', { description: 'Investor report downloaded successfully' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed', { description: error.message })
     }
   }
@@ -551,7 +551,7 @@ export default function InvestorMetricsClient() {
 
       toast.success('Report Generated', { description: `${reportConfig.reportType.charAt(0).toUpperCase() + reportConfig.reportType.slice(1)} investor report is ready` })
       setShowInvestorReportDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to generate report', { description: error.message })
     } finally {
       setLoading(false)
@@ -592,7 +592,7 @@ export default function InvestorMetricsClient() {
         description: `Updated: ${updates.join(', ')}`
       })
       setShowUpdateMetricsDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update metrics', { description: error.message })
     } finally {
       setLoading(false)
@@ -651,7 +651,7 @@ export default function InvestorMetricsClient() {
         description: `Exported ${Object.keys(exportData).length - 2} data sets as ${exportConfig.format.toUpperCase()}`
       })
       setShowExportDataDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed', { description: error.message })
     } finally {
       setLoading(false)
@@ -667,7 +667,7 @@ export default function InvestorMetricsClient() {
       }
       // Could save alert to database here
       toast.success('Alert set', { description: `You'll be notified when ${metric} changes` })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to set alert', { description: error.message })
     }
   }

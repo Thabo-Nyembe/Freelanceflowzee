@@ -83,7 +83,7 @@ export function EscrowReleaseDialog({
       } else {
         setError(data.error || 'Failed to fetch escrow information')
       }
-    } catch (error: any) {
+    } catch (error) {
       setError(error.message)
     } finally {
       setLoading(false)
@@ -114,7 +114,7 @@ export function EscrowReleaseDialog({
       } else {
         setError(data.error || 'Failed to release escrow')
       }
-    } catch (error: any) {
+    } catch (error) {
       setError(error.message)
     } finally {
       setReleasing(false)

@@ -309,7 +309,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
     try {
       await addReply(replyContent, replyType === 'internal')
       setReplyContent('')
-    } catch (error: any) {
+    } catch (error) {
       // Error handled in hook
       console.error('Reply error:', error)
     }
@@ -1849,7 +1849,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                                 })
                                 if (!response.ok) throw new Error('Failed to purge tickets')
                                 toast.success('All closed tickets purged successfully', { id: 'purge-tickets' })
-                              } catch (error: any) {
+                              } catch (error) {
                                 toast.error(error.message || 'Failed to purge tickets', { id: 'purge-tickets' })
                                 console.error('Purge tickets error:', error)
                               }
@@ -1887,7 +1887,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                                 })
                                 if (!response.ok) throw new Error('Failed to reset settings')
                                 toast.success('All settings reset to defaults', { id: 'reset-settings' })
-                              } catch (error: any) {
+                              } catch (error) {
                                 toast.error(error.message || 'Failed to reset settings', { id: 'reset-settings' })
                                 console.error('Reset settings error:', error)
                               }
@@ -1926,7 +1926,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                                 document.body.removeChild(a)
 
                                 toast.success('Data exported successfully', { id: 'export-data' })
-                              } catch (error: any) {
+                              } catch (error) {
                                 toast.error(error.message || 'Failed to export data', { id: 'export-data' })
                                 console.error('Export data error:', error)
                               }

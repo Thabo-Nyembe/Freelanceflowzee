@@ -54,7 +54,7 @@ export async function createWebinar(data: CreateWebinarData): Promise<ActionResu
     revalidatePath('/dashboard/webinars-v2')
     logger.info('Webinar created', { userId: user.id, webinarId: webinar.id })
     return actionSuccess(webinar, 'Webinar created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in createWebinar', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -82,7 +82,7 @@ export async function updateWebinar(id: string, data: Partial<CreateWebinarData>
     revalidatePath('/dashboard/webinars-v2')
     logger.info('Webinar updated', { userId: user.id, webinarId: id })
     return actionSuccess(webinar, 'Webinar updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateWebinar', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -109,7 +109,7 @@ export async function deleteWebinar(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/webinars-v2')
     logger.info('Webinar deleted', { userId: user.id, webinarId: id })
     return actionSuccess({ id }, 'Webinar deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in deleteWebinar', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -137,7 +137,7 @@ export async function startWebinar(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/webinars-v2')
     logger.info('Webinar started', { userId: user.id, webinarId: id })
     return actionSuccess(webinar, 'Webinar started successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in startWebinar', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -165,7 +165,7 @@ export async function endWebinar(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/webinars-v2')
     logger.info('Webinar ended', { userId: user.id, webinarId: id })
     return actionSuccess(webinar, 'Webinar ended successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in endWebinar', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -208,7 +208,7 @@ export async function getWebinarStats(): Promise<ActionResult<any>> {
 
     logger.info('Webinar stats retrieved', { userId: user.id })
     return actionSuccess(stats, 'Webinar stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in getWebinarStats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

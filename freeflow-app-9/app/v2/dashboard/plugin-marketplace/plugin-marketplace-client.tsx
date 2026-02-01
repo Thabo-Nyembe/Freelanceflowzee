@@ -751,7 +751,7 @@ export default function PluginMarketplaceClient() {
         description: `${plugin.category} - ${plugin.version} - ${price} - ${plugin.rating}⭐ (${installsK}k installs) - Active and ready to use`
       })
       announce(`${plugin.name} installed`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to install plugin', { error: error.message, pluginId: plugin.id })
       toast.error('Failed to install plugin', {
         description: error.message || 'Please try again'
@@ -800,7 +800,7 @@ export default function PluginMarketplaceClient() {
         description: `${uninstallPlugin.category} plugin - ${uninstallPlugin.version} - ${fileSizeMB} MB freed - Installed since ${installedDate}`
       })
       announce('Plugin uninstalled', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to uninstall plugin', { error: error.message, pluginId: uninstallPlugin.id })
       toast.error('Failed to uninstall plugin', {
         description: error.message || 'Please try again'
@@ -830,7 +830,7 @@ export default function PluginMarketplaceClient() {
           const { updateInstallation } = await import('@/lib/plugin-marketplace-queries')
           await updateInstallation(installed.id, { is_active: newState })
           logger.info('Plugin active state persisted to database', { pluginId, isActive: newState })
-        } catch (error: any) {
+        } catch (error) {
           logger.error('Failed to persist plugin active state', { error: error.message })
         }
       }
@@ -943,7 +943,7 @@ export default function PluginMarketplaceClient() {
         version: '1.0.0'
       })
       announce('New plugin created', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create plugin', { error: error.message })
       toast.error('Failed to create plugin', { description: error.message })
     }

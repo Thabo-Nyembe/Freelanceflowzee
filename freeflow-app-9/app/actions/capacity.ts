@@ -31,7 +31,7 @@ export async function createCapacity(data: Partial<Capacity>): Promise<ActionRes
     revalidatePath('/dashboard/capacity-v2')
     logger.info('Capacity created successfully', { capacityId: capacity.id })
     return actionSuccess(capacity, 'Capacity created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating capacity', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -60,7 +60,7 @@ export async function updateCapacity(id: string, data: Partial<Capacity>): Promi
     revalidatePath('/dashboard/capacity-v2')
     logger.info('Capacity updated successfully', { capacityId: id })
     return actionSuccess(capacity, 'Capacity updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating capacity', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -87,7 +87,7 @@ export async function deleteCapacity(id: string): Promise<ActionResult<{ success
     revalidatePath('/dashboard/capacity-v2')
     logger.info('Capacity deleted successfully', { capacityId: id })
     return actionSuccess({ success: true }, 'Capacity deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting capacity', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -139,7 +139,7 @@ export async function updateUtilization(id: string, allocated: number): Promise<
     revalidatePath('/dashboard/capacity-v2')
     logger.info('Utilization updated successfully', { capacityId: id, newAllocated })
     return actionSuccess(capacity, 'Utilization updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating utilization', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -173,7 +173,7 @@ export async function markUnavailable(id: string, from: string, until: string): 
     revalidatePath('/dashboard/capacity-v2')
     logger.info('Capacity marked unavailable successfully', { capacityId: id, from, until })
     return actionSuccess(capacity, 'Capacity marked unavailable successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error marking capacity unavailable', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -220,7 +220,7 @@ export async function resetCapacity(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/capacity-v2')
     logger.info('Capacity reset successfully', { capacityId: id })
     return actionSuccess(capacity, 'Capacity reset successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error resetting capacity', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

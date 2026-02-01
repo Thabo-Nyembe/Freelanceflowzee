@@ -292,7 +292,7 @@ export default function DataExportClient() {
       toast.success('Export created')
       setFormData({ export_name: '', description: '', export_format: 'csv', export_type: 'manual', data_source: 'users' })
       fetchDataExports()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create export')
     }
   }
@@ -306,7 +306,7 @@ export default function DataExportClient() {
       if (error) throw error
       toast.success('Export started')
       fetchDataExports()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to start export')
     }
   }
@@ -321,7 +321,7 @@ export default function DataExportClient() {
       if (error) throw error
       toast.success('Export scheduled for 1 hour')
       fetchDataExports()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to schedule export')
     }
   }
@@ -338,7 +338,7 @@ export default function DataExportClient() {
         window.open(data.download_url, '_blank')
       }
       toast.success('Downloading export')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Download failed')
     }
   }
@@ -352,7 +352,7 @@ export default function DataExportClient() {
       if (error) throw error
       toast.success('Export deleted')
       fetchDataExports()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete export')
     }
   }
@@ -366,7 +366,7 @@ export default function DataExportClient() {
       if (error) throw error
       toast.success('Export cancelled')
       fetchDataExports()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to cancel export')
     }
   }

@@ -216,7 +216,7 @@ export async function createFilePayment(
       checkoutUrl: session.url || undefined,
       escrowDepositId
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('File payment error:', error)
     return {
       success: false,
@@ -313,7 +313,7 @@ export async function handlePaymentWebhook(event: Stripe.Event): Promise<boolean
     }
 
     return false
-  } catch (error: any) {
+  } catch (error) {
     console.error('Webhook processing error:', error)
     return false
   }
@@ -417,7 +417,7 @@ export async function releaseFileEscrow(
     })
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Escrow release error:', error)
     return {
       success: false,
@@ -489,7 +489,7 @@ export async function getFilePaymentStatus(
     return {
       hasPaid: false
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Payment status check error:', error)
     return {
       hasPaid: false
@@ -568,7 +568,7 @@ export async function requestFileRefund(
     })
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Refund error:', error)
     return {
       success: false,

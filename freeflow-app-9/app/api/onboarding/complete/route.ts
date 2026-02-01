@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Onboarding completion failed', { error: error.message });
 
     return NextResponse.json(
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
       data: mockOnboardingStatus
     });
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to fetch onboarding status', { error: error.message });
 
     return NextResponse.json(

@@ -82,7 +82,7 @@ export async function createRole(input: RoleInput): Promise<ActionResult<any>> {
     logger.info('Role created successfully', { name: input.name })
     revalidatePath('/dashboard/roles-v2')
     return actionSuccess(data, 'Role created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating role', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -128,7 +128,7 @@ export async function updateRole(id: string, input: Partial<RoleInput>): Promise
     logger.info('Role updated successfully', { id })
     revalidatePath('/dashboard/roles-v2')
     return actionSuccess(data, 'Role updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating role', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -171,7 +171,7 @@ export async function deleteRole(id: string): Promise<ActionResult<{ success: bo
     logger.info('Role deleted successfully', { id })
     revalidatePath('/dashboard/roles-v2')
     return actionSuccess({ success: true }, 'Role deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting role', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -207,7 +207,7 @@ export async function activateRole(id: string): Promise<ActionResult<any>> {
     logger.info('Role activated successfully', { id })
     revalidatePath('/dashboard/roles-v2')
     return actionSuccess(data, 'Role activated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error activating role', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -243,7 +243,7 @@ export async function deactivateRole(id: string): Promise<ActionResult<any>> {
     logger.info('Role deactivated successfully', { id })
     revalidatePath('/dashboard/roles-v2')
     return actionSuccess(data, 'Role deactivated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deactivating role', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -287,7 +287,7 @@ export async function setDefaultRole(id: string): Promise<ActionResult<any>> {
     logger.info('Default role set successfully', { id })
     revalidatePath('/dashboard/roles-v2')
     return actionSuccess(data, 'Default role set successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error setting default role', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -345,7 +345,7 @@ export async function cloneRole(id: string, newName: string): Promise<ActionResu
     logger.info('Role cloned successfully', { id, newName })
     revalidatePath('/dashboard/roles-v2')
     return actionSuccess(data, 'Role cloned successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error cloning role', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -381,7 +381,7 @@ export async function updateRolePermissions(id: string, permissions: string[]): 
     logger.info('Role permissions updated successfully', { id })
     revalidatePath('/dashboard/roles-v2')
     return actionSuccess(data, 'Role permissions updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating role permissions', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

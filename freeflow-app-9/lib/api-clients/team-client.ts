@@ -296,7 +296,7 @@ class TeamClient extends BaseApiClient {
           hasMore: (count || 0) > to + 1
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       // Silently handle known RLS policy errors, return empty data
       if (error?.code === '42P17') {
         // Infinite recursion in RLS policy - known issue
@@ -580,7 +580,7 @@ class TeamClient extends BaseApiClient {
       if (error) throw error
 
       return { success: true, data: data || [] }
-    } catch (error: any) {
+    } catch (error) {
       // Silently handle RLS policy errors (infinite recursion)
       if (error?.code !== '42P17') {
         console.error('Failed to fetch invitations:', error)
@@ -660,7 +660,7 @@ class TeamClient extends BaseApiClient {
       }
 
       return { success: true, data: data || [] }
-    } catch (error: any) {
+    } catch (error) {
       // Return empty data on error for graceful degradation
       return { success: true, data: [] }
     }
@@ -754,7 +754,7 @@ class TeamClient extends BaseApiClient {
       }
 
       return { success: true, data: stats }
-    } catch (error: any) {
+    } catch (error) {
       // Silently handle known RLS policy errors
       if (error?.code !== '42P17') {
         console.error('Failed to fetch team stats:', error)

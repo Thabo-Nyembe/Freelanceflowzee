@@ -2002,7 +2002,7 @@ export default function AICreateClient() {
                                       }, { onConflict: 'user_id,service_name' })
 
                                       toast.success(`${service.name} connected`, { id: 'service-connect', description: 'Integration is now active' })
-                                    } catch (error: any) {
+                                    } catch (error) {
                                       toast.error(`Failed to connect ${service.name}`, { id: 'service-connect', description: error.message })
                                     }
                                   })()

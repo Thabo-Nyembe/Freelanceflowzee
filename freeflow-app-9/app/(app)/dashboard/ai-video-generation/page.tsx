@@ -812,7 +812,7 @@ export default function AIVideoGenerationPage() {
       // Switch to library view
       dispatch({ type: 'SET_VIEW_MODE', viewMode: 'library' })
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Video generation failed', {
         error: error.message,
         prompt: genPrompt,
@@ -890,7 +890,7 @@ export default function AIVideoGenerationPage() {
       announce('Video updated successfully')
       setShowEditModal(false)
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Video update failed', { error: error.message, videoId: state.selectedVideo?.id })
       toast.error('Failed to update video', {
         description: error.message || 'Please try again later'
@@ -927,7 +927,7 @@ export default function AIVideoGenerationPage() {
       announce('Video deleted successfully')
       setShowViewModal(false)
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Video delete failed', { error: error.message, videoId, userId })
       toast.error('Failed to delete video', {
         description: error.message || 'Please try again later'

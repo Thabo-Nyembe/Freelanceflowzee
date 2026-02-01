@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ data })
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Resources API error', { error })
     return NextResponse.json(
       { error: error.message || 'Failed to fetch resources' },
@@ -348,7 +348,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Resources API error', { error })
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
@@ -374,7 +374,7 @@ export async function DELETE(request: NextRequest) {
 
     if (error) throw error
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Resources API error', { error })
     return NextResponse.json(
       { error: error.message || 'Delete failed' },

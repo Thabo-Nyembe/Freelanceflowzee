@@ -151,7 +151,7 @@ export async function addTextWatermark(
       format: watermarkedMetadata.format || 'jpeg',
       size: watermarkedBuffer.length
     }
-  } catch (error: any) {
+  } catch (error) {
     throw new Error(`Watermarking failed: ${error.message}`)
   }
 }
@@ -263,7 +263,7 @@ export async function addLogoWatermark(
       format: watermarkedMetadata.format || 'jpeg',
       size: watermarkedBuffer.length
     }
-  } catch (error: any) {
+  } catch (error) {
     throw new Error(`Logo watermarking failed: ${error.message}`)
   }
 }
@@ -298,7 +298,7 @@ export async function generateWatermarkedPreview(
     })
 
     return watermarked
-  } catch (error: any) {
+  } catch (error) {
     throw new Error(`Preview generation failed: ${error.message}`)
   }
 }
@@ -320,7 +320,7 @@ export async function batchWatermark(
     try {
       const watermarked = await addTextWatermark(image, options)
       results.push(watermarked)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Batch watermark error:', error)
       // Continue with other images even if one fails
     }
@@ -403,7 +403,7 @@ export async function addPatternWatermark(
       format: watermarkedMetadata.format || 'jpeg',
       size: watermarkedBuffer.length
     }
-  } catch (error: any) {
+  } catch (error) {
     throw new Error(`Pattern watermarking failed: ${error.message}`)
   }
 }
@@ -456,7 +456,7 @@ export async function stripMetadata(imageBuffer: Buffer): Promise<Buffer> {
         icc: undefined
       })
       .toBuffer()
-  } catch (error: any) {
+  } catch (error) {
     throw new Error(`Metadata stripping failed: ${error.message}`)
   }
 }

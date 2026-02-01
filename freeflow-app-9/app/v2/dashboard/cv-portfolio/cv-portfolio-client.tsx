@@ -806,7 +806,7 @@ export default function CvPortfolioClient() {
       const newCompleteness = calculateCompleteness()
       toast.success('Project Deleted')
       announce("Project " + project.title + " deleted", 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete project', { error: error.message, projectId: projectToDelete })
       toast.error('Failed to delete project')
     } finally {
@@ -871,7 +871,7 @@ export default function CvPortfolioClient() {
       setShowAddSkillDialog(false)
       toast.success("Skill Added! (" + proficiency + "/5 stars) - " + (skills.length + 1) + " skills total")
       announce(`Skill ${name} added`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to add skill', { error: error.message })
       toast.error('Failed to add skill')
     }
@@ -892,7 +892,7 @@ export default function CvPortfolioClient() {
         s.id === skillId ? { ...s, proficiency: newProficiency } : s
       ))
       toast.success("Skill Updated! " + newProficiency + "/5 stars")
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update skill', { error: error.message, skillId })
       toast.error('Failed to update skill')
     }
@@ -925,7 +925,7 @@ export default function CvPortfolioClient() {
       const newCompleteness = calculateCompleteness()
       toast.success("Skill Removed! " + (skills.length - 1) + " skills remaining")
       announce(`Skill ${skill.name} removed`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to remove skill', { error: error.message, skillId: skillToRemove })
       toast.error('Failed to remove skill')
     } finally {
@@ -1065,7 +1065,7 @@ export default function CvPortfolioClient() {
       const newYears = calculateYearsOfExperience()
       toast.success("Experience Deleted! at " + exp.company + " removed")
       announce(`Experience at ${exp.company} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete experience', { error: error.message, experienceId: experienceToDelete })
       toast.error('Failed to delete experience')
     } finally {
@@ -1187,7 +1187,7 @@ export default function CvPortfolioClient() {
       const newCompleteness = calculateCompleteness()
       toast.success("Education Deleted! removed from CV")
       announce(`Education ${edu.degree} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete education', { error: error.message, educationId: educationToDelete })
       toast.error('Failed to delete education')
     } finally {
@@ -1300,7 +1300,7 @@ export default function CvPortfolioClient() {
       const newCompleteness = calculateCompleteness()
       toast.success("Achievement Deleted! removed")
       announce(`Achievement ${achievement.title} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete achievement', { error: error.message, achievementId: achievementToDelete })
       toast.error('Failed to delete achievement')
     } finally {
@@ -1546,7 +1546,7 @@ export default function CvPortfolioClient() {
           error: `Failed to export ${format}`
         }
       )
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export CV', {
         error: error.message,
         format
@@ -1579,7 +1579,7 @@ export default function CvPortfolioClient() {
 
         const newCompleteness = calculateCompleteness()
         toast.success("CV Imported! " + newCompleteness + "% complete")
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to import CV', {
           error: error.message,
           fileName: file.name
@@ -1609,7 +1609,7 @@ export default function CvPortfolioClient() {
         await navigator.clipboard.writeText(shareUrl)
       }
       toast.success('Share Link Generated!')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to generate share link', {
         error: error.message
       })
@@ -1711,7 +1711,7 @@ export default function CvPortfolioClient() {
         }
       }
       toast.success("Projects Reordered! moved to position " + (targetIndex + 1))
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to persist reorder', { error: error.message })
     } finally {
       setDraggedProjectId(null)
@@ -1752,7 +1752,7 @@ export default function CvPortfolioClient() {
           error: 'Failed to update featured status'
         }
       )
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to toggle featured', { error: error.message, projectId })
     } finally {
       setTogglingFeaturedId(null)
@@ -1835,7 +1835,7 @@ export default function CvPortfolioClient() {
             error: 'Failed to upload image'
           }
         )
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to upload project image', {
           error: error.message,
           projectId,
@@ -1893,7 +1893,7 @@ export default function CvPortfolioClient() {
       setProjects(prev => prev.filter(p => !projectsToDelete.includes(p.id)))
       toast.success("Projects Deleted! " + projectsToDelete.length + " projects removed")
       announce(`${projectsToDelete.length} projects deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to bulk delete projects', { error: error.message, projectIds: projectsToDelete })
       toast.error('Failed to delete projects')
     } finally {
@@ -1960,7 +1960,7 @@ export default function CvPortfolioClient() {
         await navigator.clipboard.writeText(publicUrl)
       }
       toast.success('Link Copied!')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to copy link', {
         error: error.message
       })
@@ -2054,7 +2054,7 @@ export default function CvPortfolioClient() {
           error: 'Failed to update profile'
         }
       )
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update profile', { error: error.message })
     }
   }
@@ -2122,7 +2122,7 @@ export default function CvPortfolioClient() {
             error: 'Failed to upload avatar'
           }
         )
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to upload avatar', { error: error.message })
       } finally {
         setIsUploading(false)

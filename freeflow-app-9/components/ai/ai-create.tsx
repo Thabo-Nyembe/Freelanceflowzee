@@ -519,7 +519,7 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
 
       toast.success('Content generated successfully!')
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Content generation failed', {
         error,
         model: selectedModel,
@@ -675,7 +675,7 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
 
       setVoiceInput(controller)
       controller.start()
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message)
     }
   }
@@ -744,7 +744,7 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
         setSelectedVersionDiff(null)
         toast.success('Content restored to selected version')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error(`Rollback failed: ${error.message}`)
     }
   }
@@ -924,7 +924,7 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
           })
         }
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error(`Comparison failed: ${error.message}`)
     } finally {
       setIsComparing(false)

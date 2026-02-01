@@ -84,7 +84,7 @@ export async function createResource(input: CreateResourceInput): Promise<Action
     logger.info('Resource created successfully', { resourceCode })
     revalidatePath('/dashboard/resources-v2')
     return actionSuccess(data, 'Resource created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating resource', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -136,7 +136,7 @@ export async function updateResource(id: string, input: UpdateResourceInput): Pr
     logger.info('Resource updated successfully', { id })
     revalidatePath('/dashboard/resources-v2')
     return actionSuccess(data, 'Resource updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating resource', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -185,7 +185,7 @@ export async function assignResourceToProject(id: string, projectName: string, h
     logger.info('Resource assigned to project', { id, projectName })
     revalidatePath('/dashboard/resources-v2')
     return actionSuccess(data, 'Resource assigned to project successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error assigning resource', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -220,7 +220,7 @@ export async function setResourceUnavailable(id: string, availabilityDate: strin
     logger.info('Resource set to unavailable', { id, availabilityDate })
     revalidatePath('/dashboard/resources-v2')
     return actionSuccess(data, 'Resource set to unavailable')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error setting resource unavailable', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -250,7 +250,7 @@ export async function deleteResource(id: string): Promise<ActionResult<{ success
     logger.info('Resource deleted successfully', { id })
     revalidatePath('/dashboard/resources-v2')
     return actionSuccess({ success: true }, 'Resource deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting resource', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -300,7 +300,7 @@ export async function getResources(filters?: {
 
     logger.info('Resources fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Resources fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching resources', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -780,7 +780,7 @@ export default function CommunityHubPage() {
           })
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to like post', {
         error: error.message,
         postId: id
@@ -842,7 +842,7 @@ export default function CommunityHubPage() {
           description: `${post?.type} post - ${(post?.shares || 0) + 1} shares - Link: ${result.shareUrl || 'Generated'}`
         })
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to share post', {
         error: error.message,
         postId: id
@@ -889,7 +889,7 @@ export default function CommunityHubPage() {
           description: `${post?.type} post - ${(post?.bookmarks || 0) + 1} bookmarks - ${result.tip || 'Saved for later'}`
         })
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to bookmark post', {
         error: error.message,
         postId: id
@@ -945,7 +945,7 @@ export default function CommunityHubPage() {
           })
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to follow member', {
         error: error.message,
         memberId: id
@@ -1018,7 +1018,7 @@ export default function CommunityHubPage() {
           })
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to connect with member', {
         error: error.message,
         memberId: id
@@ -1060,7 +1060,7 @@ export default function CommunityHubPage() {
         const { rsvpEvent } = await import('@/lib/community-hub-queries')
         await rsvpEvent(id, userId, 'attending')
         logger.info('Event RSVP recorded in database', { eventId: id })
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to record event RSVP', { error: error.message })
       }
     }
@@ -1093,7 +1093,7 @@ export default function CommunityHubPage() {
         const { joinGroup } = await import('@/lib/community-hub-queries')
         await joinGroup(id, userId)
         logger.info('Group join recorded in database', { groupId: id })
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to record group join', { error: error.message })
       }
     }
@@ -1515,7 +1515,7 @@ export default function CommunityHubPage() {
           })
           announce('Community Hub loaded successfully', 'polite')
         }
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Exception loading Community Hub data', { error: error.message, userId })
         toast.error('Failed to load community data')
         announce('Failed to load community data', 'assertive')
@@ -1685,7 +1685,7 @@ export default function CommunityHubPage() {
       dispatch({ type: 'SET_SHOW_CREATE_POST', payload: false })
       toast.success('Post created successfully!')
       announce('Post created successfully', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create post', {
         description: error.message || 'Please try again later'
       })

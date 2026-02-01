@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(result);
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Documents GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch documents' },
@@ -282,7 +282,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Documents POST error', { error });
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
@@ -315,7 +315,7 @@ export async function DELETE(request: NextRequest) {
 
     await documentService.bulkDelete(document_ids, user.id);
     return NextResponse.json({ success: true, deleted: document_ids.length });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Documents DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete documents' },

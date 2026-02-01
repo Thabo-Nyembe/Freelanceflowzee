@@ -71,7 +71,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       message: 'Account deactivated successfully. You can reactivate by logging in again.',
       deactivatedAt: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Account deactivation error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to deactivate account' },
@@ -124,7 +124,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       success: true,
       message: 'Account reactivated successfully'
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Account reactivation error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to reactivate account' },

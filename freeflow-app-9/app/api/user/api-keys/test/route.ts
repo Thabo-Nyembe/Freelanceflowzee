@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       throw new Error(testResult.error || 'API key validation failed')
     }
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('API key test failed', {
       configId: body?.configId,
       error: error.message
@@ -110,7 +110,7 @@ async function testOpenAI(apiKey: string) {
         error: error.error?.message || 'Invalid API key'
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
       error: error.message || 'Failed to test OpenAI key'
@@ -151,7 +151,7 @@ async function testAnthropic(apiKey: string) {
         error: error.error?.message || 'Invalid API key'
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
       error: error.message || 'Failed to test Anthropic key'
@@ -182,7 +182,7 @@ async function testResend(apiKey: string) {
         error: 'Invalid API key'
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
       error: error.message || 'Failed to test Resend key'
@@ -213,7 +213,7 @@ async function testSendGrid(apiKey: string) {
         error: 'Invalid API key'
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
       error: error.message || 'Failed to test SendGrid key'
@@ -277,7 +277,7 @@ async function testTwilio(accountSid: string, authToken?: string) {
         error: errorData.message || `API error: ${response.status}`
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
       error: error.message || 'Failed to test Twilio credentials'
@@ -309,7 +309,7 @@ async function testStripe(apiKey: string) {
         error: 'Invalid API key'
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
       error: error.message || 'Failed to test Stripe key'

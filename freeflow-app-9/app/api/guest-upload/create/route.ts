@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       message: 'Upload initiated successfully'
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Guest upload creation failed', { error: error.message })
     return NextResponse.json(
       { error: error.message || 'Failed to create guest upload' },

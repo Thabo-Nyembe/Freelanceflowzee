@@ -96,7 +96,7 @@ export async function GET(
         return NextResponse.json(response);
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Team GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch team' },
@@ -124,7 +124,7 @@ export async function PUT(
     const body = await request.json();
     const team = await teamService.updateTeam(teamId, user.id, body);
     return NextResponse.json({ team });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Team PUT error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update team' },
@@ -279,7 +279,7 @@ export async function POST(
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Team POST error', { error });
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
@@ -306,7 +306,7 @@ export async function DELETE(
 
     await teamService.deleteTeam(teamId, user.id);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Team DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete team' },

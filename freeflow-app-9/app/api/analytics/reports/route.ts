@@ -218,7 +218,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       format,
       generatedAt: new Date().toISOString()
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Analytics API Error', { error })
     return NextResponse.json({
       success: false,
@@ -283,7 +283,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       format,
       generatedAt: new Date().toISOString()
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Analytics API Error', { error })
     return NextResponse.json({
       success: false,

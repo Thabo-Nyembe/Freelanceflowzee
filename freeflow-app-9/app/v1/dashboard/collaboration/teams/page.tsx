@@ -247,7 +247,7 @@ export default function TeamsPage() {
           totalTeams: prev.totalTeams + 1,
         }));
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error("Failed to create team", { error, name });
       toast.error("Failed to create team", {
         description: error.message || "Please try again",

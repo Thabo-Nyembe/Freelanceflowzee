@@ -185,7 +185,7 @@ export default function FinancialOverviewPage() {
       document.body.removeChild(a)
 
       toast.success('Overview exported successfully')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Export failed', { error })
       toast.error(error.message || 'Export failed')
     }
@@ -262,7 +262,7 @@ export default function FinancialOverviewPage() {
       if (!response.ok) throw new Error('Failed to implement insight')
 
       toast.success(`Insight implementation started - Potential: ${formatCurrency(insight.potentialValue)}`)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to implement insight', { error })
       toast.error(error.message || 'Implementation failed')
     }
@@ -286,7 +286,7 @@ export default function FinancialOverviewPage() {
       if (!response.ok) throw new Error('Report generation failed')
 
       toast.success(`${reportType} report is ready`)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Report generation failed', { error })
       toast.error(error.message || 'Report generation failed')
     }

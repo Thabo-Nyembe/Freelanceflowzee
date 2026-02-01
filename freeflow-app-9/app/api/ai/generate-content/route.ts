@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       model: openRouterModel
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Generate Content Error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined

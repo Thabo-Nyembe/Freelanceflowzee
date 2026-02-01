@@ -4128,7 +4128,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
                 toast.success('Webhook configured', { id: 'save-webhook', description: 'Endpoint saved successfully' })
                 setShowWebhooksDialog(false)
-              } catch (error: any) {
+              } catch (error) {
                 toast.error('Failed to save webhook', { id: 'save-webhook', description: error.message })
               }
             }}>Save Webhook</Button>

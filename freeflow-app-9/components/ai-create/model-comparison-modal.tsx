@@ -134,7 +134,7 @@ export function ModelComparisonModal({
         } else {
           throw new Error(data.error || 'Generation failed')
         }
-      } catch (error: any) {
+      } catch (error) {
         setResults(prev => ({
           ...prev,
           [model]: {

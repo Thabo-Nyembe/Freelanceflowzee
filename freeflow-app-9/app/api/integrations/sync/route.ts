@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       jobs,
       total: jobs.length,
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Sync Jobs GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch sync jobs' },
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Sync Jobs POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },

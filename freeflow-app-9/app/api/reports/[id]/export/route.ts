@@ -92,7 +92,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           { status: 400 }
         )
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Export error', { error })
     return NextResponse.json(
       { success: false, error: error.message || 'Export failed' },

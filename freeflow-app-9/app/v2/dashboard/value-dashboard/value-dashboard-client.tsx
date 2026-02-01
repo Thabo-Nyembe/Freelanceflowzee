@@ -286,7 +286,7 @@ export default function ValueDashboardClient() {
         link.click()
         URL.revokeObjectURL(downloadUrl)
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export report', { error, period: selectedPeriod })
       toast.error('Failed to export report')
     } finally {
@@ -317,7 +317,7 @@ export default function ValueDashboardClient() {
 
       setShareEmail('')
       setShowShareDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to share dashboard', { error })
       toast.error('Failed to share dashboard')
     }
@@ -370,7 +370,7 @@ export default function ValueDashboardClient() {
       })
 
       setShowExportDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Export failed', { error, format: selectedExportFormat })
       toast.error('Export failed')
     } finally {

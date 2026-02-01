@@ -63,7 +63,7 @@ export async function GET() {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       error: 'Test failed',
       details: error.message

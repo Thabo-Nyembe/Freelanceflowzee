@@ -348,7 +348,7 @@ export async function POST(request: NextRequest) {
     };
 
     return NextResponse.json(response);
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Create API error', {
       error: error.message,
       stack: error.stack

@@ -86,7 +86,7 @@ export async function createSEOKeyword(input: SEOKeywordInput): Promise<ActionRe
 
     revalidatePath('/dashboard/seo-v2')
     return actionSuccess(data, 'SEO keyword created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error creating SEO keyword:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -111,7 +111,7 @@ export async function updateSEOKeyword(id: string, updates: Partial<SEOKeywordIn
 
     revalidatePath('/dashboard/seo-v2')
     return actionSuccess(data, 'SEO keyword updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating SEO keyword:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -134,7 +134,7 @@ export async function deleteSEOKeyword(id: string): Promise<ActionResult<void>> 
 
     revalidatePath('/dashboard/seo-v2')
     return actionSuccess(undefined, 'SEO keyword deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error deleting SEO keyword:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -181,7 +181,7 @@ export async function updateKeywordRanking(id: string, newPosition: number): Pro
 
     revalidatePath('/dashboard/seo-v2')
     return actionSuccess(data, 'Keyword ranking updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating keyword ranking:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -202,7 +202,7 @@ export async function getSEOKeywords(): Promise<ActionResult<any[]>> {
 
     if (error) return actionError(error.message, 'DATABASE_ERROR')
     return actionSuccess(data || [], 'SEO keywords fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching SEO keywords:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -233,7 +233,7 @@ export async function createSEOBacklink(input: SEOBacklinkInput): Promise<Action
 
     revalidatePath('/dashboard/seo-v2')
     return actionSuccess(data, 'SEO backlink created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error creating SEO backlink:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -262,7 +262,7 @@ export async function updateSEOBacklink(id: string, updates: Partial<SEOBacklink
 
     revalidatePath('/dashboard/seo-v2')
     return actionSuccess(data, 'SEO backlink updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating SEO backlink:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -291,7 +291,7 @@ export async function markBacklinkLost(id: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/seo-v2')
     return actionSuccess(data, 'Backlink marked as lost successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error marking backlink as lost:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -312,7 +312,7 @@ export async function getSEOBacklinks(): Promise<ActionResult<any[]>> {
 
     if (error) return actionError(error.message, 'DATABASE_ERROR')
     return actionSuccess(data || [], 'SEO backlinks fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching SEO backlinks:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -347,7 +347,7 @@ export async function createSEOPage(input: SEOPageInput): Promise<ActionResult<a
 
     revalidatePath('/dashboard/seo-v2')
     return actionSuccess(data, 'SEO page created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error creating SEO page:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -372,7 +372,7 @@ export async function updateSEOPage(id: string, updates: Partial<SEOPageInput>):
 
     revalidatePath('/dashboard/seo-v2')
     return actionSuccess(data, 'SEO page updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating SEO page:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -401,7 +401,7 @@ export async function crawlPage(id: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/seo-v2')
     return actionSuccess(data, 'Page crawled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error crawling page:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -422,7 +422,7 @@ export async function getSEOPages(): Promise<ActionResult<any[]>> {
 
     if (error) return actionError(error.message, 'DATABASE_ERROR')
     return actionSuccess(data || [], 'SEO pages fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching SEO pages:', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

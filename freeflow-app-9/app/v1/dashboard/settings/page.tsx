@@ -181,7 +181,7 @@ export default function SettingsPage() {
         } else {
           reject(new Error('Settings update failed'))
         }
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to save settings', { error })
         reject(error)
       } finally {
@@ -266,7 +266,7 @@ export default function SettingsPage() {
         } else {
           reject(new Error('Export failed'))
         }
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to export data', { error, format })
         reject(error)
       } finally {
@@ -309,7 +309,7 @@ export default function SettingsPage() {
         toast.success('Verification email sent! Check your inbox to continue.')      } else {
         throw new Error(result.error || 'Failed to send verification email')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to initiate password change', { error })
       toast.error(`Failed to send verification email: ${error.message || 'Please try again'}`)
     }
@@ -343,7 +343,7 @@ export default function SettingsPage() {
         toast.success('Deactivation email sent. Check your inbox to confirm.')      } else {
         throw new Error(result.error || 'Failed to send deactivation email')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to initiate account deactivation', { error })
       toast.error(`Failed to process deactivation: ${error.message || 'Please try again'}`)
     }
@@ -377,7 +377,7 @@ export default function SettingsPage() {
         toast.success('Verification email sent. Confirm deletion within 24 hours.')      } else {
         throw new Error(result.error || 'Failed to send deletion verification email')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to initiate account deletion', { error })
       toast.error(`Failed to process deletion: ${error.message || 'Please try again'}`)
     }
@@ -421,7 +421,7 @@ export default function SettingsPage() {
         setNotificationSettings(notificationSettings)
         throw new Error(result.error || 'Failed to update notifications')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to toggle all notifications', { error })
       setNotificationSettings(notificationSettings)
       toast.error(`Failed to update notifications: ${error.message || 'Please try again'}`)

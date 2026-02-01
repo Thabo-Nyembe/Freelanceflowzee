@@ -45,7 +45,7 @@ export async function DELETE(
       message: 'API key deleted successfully'
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to delete API key', { error: error.message })
 
     return NextResponse.json(
@@ -79,7 +79,7 @@ export async function GET(
       data: key
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to fetch API key', { error: error.message })
 
     return NextResponse.json(

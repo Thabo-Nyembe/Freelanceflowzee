@@ -83,7 +83,7 @@ export default function SignUpPage() {
       setTimeout(() => {
         router.push('/login?message=Account created! Please log in.')
       }, 2500)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Signup error:', error)
       toast.error(error.message || 'Failed to create account')
       setIsLoading(false)

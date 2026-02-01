@@ -362,7 +362,7 @@ export function CreativeAssetGenerator({ asStandalone = true }: CreativeAssetGen
       toast.success('Assets Generated & Saved', {
         description: `${newAssets.length} ${assetCount > 1 ? 'assets' : 'asset'} created and saved to library`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Generation failed', { error })
       toast.error('Generation Failed', {
         description: error.message || 'Please try again'

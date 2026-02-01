@@ -698,7 +698,7 @@ export default function OverviewClient() {
 
       if (error) throw error
       toast.success('Settings saved')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving settings:', error)
       toast.error('Failed to save settings')
     } finally {

@@ -51,7 +51,7 @@ export async function createFile(input: FileInput): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/files-hub-v2')
     logger.info('File created successfully', { fileId: data.id })
     return actionSuccess(data, 'File created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating file', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -79,7 +79,7 @@ export async function updateFile(id: string, updates: Partial<FileInput>): Promi
     revalidatePath('/dashboard/files-hub-v2')
     logger.info('File updated successfully', { fileId: id })
     return actionSuccess(data, 'File updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating file', { error, fileId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -113,7 +113,7 @@ export async function toggleFileStar(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/files-hub-v2')
     logger.info('File star toggled successfully', { fileId: id, isStarred: data.is_starred })
     return actionSuccess(data, 'File star toggled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error toggling file star', { error, fileId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -143,7 +143,7 @@ export async function deleteFile(id: string): Promise<ActionResult<{ success: bo
     revalidatePath('/dashboard/files-hub-v2')
     logger.info('File deleted successfully', { fileId: id })
     return actionSuccess({ success: true }, 'File deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting file', { error, fileId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -176,7 +176,7 @@ export async function getFiles(folderId?: string): Promise<ActionResult<any[]>> 
 
     logger.info('Files retrieved successfully', { count: data?.length || 0, folderId })
     return actionSuccess(data || [], 'Files retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting files', { error, folderId })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -203,7 +203,7 @@ export async function createFolder(input: FolderInput): Promise<ActionResult<any
     revalidatePath('/dashboard/files-hub-v2')
     logger.info('Folder created successfully', { folderId: data.id })
     return actionSuccess(data, 'Folder created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating folder', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -231,7 +231,7 @@ export async function updateFolder(id: string, updates: Partial<FolderInput>): P
     revalidatePath('/dashboard/files-hub-v2')
     logger.info('Folder updated successfully', { folderId: id })
     return actionSuccess(data, 'Folder updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating folder', { error, folderId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -257,7 +257,7 @@ export async function deleteFolder(id: string): Promise<ActionResult<{ success: 
     revalidatePath('/dashboard/files-hub-v2')
     logger.info('Folder deleted successfully', { folderId: id })
     return actionSuccess({ success: true }, 'Folder deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting folder', { error, folderId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -282,7 +282,7 @@ export async function getFolders(): Promise<ActionResult<any[]>> {
 
     logger.info('Folders retrieved successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Folders retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting folders', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

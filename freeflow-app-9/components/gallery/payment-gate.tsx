@@ -206,7 +206,7 @@ export function PaymentGate({
 
       setIsOpen(false)
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Payment failed', {
         itemId,
         error: error.message

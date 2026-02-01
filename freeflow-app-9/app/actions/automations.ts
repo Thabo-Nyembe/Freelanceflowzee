@@ -29,7 +29,7 @@ export async function createWorkflow(data: Partial<AutomationWorkflow>): Promise
     logger.info('Workflow created successfully', { workflowId: workflow.id })
     revalidatePath('/dashboard/automations-v2')
     return actionSuccess(workflow, 'Workflow created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating workflow', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -58,7 +58,7 @@ export async function updateWorkflow(id: string, data: Partial<AutomationWorkflo
     logger.info('Workflow updated successfully', { workflowId: id })
     revalidatePath('/dashboard/automations-v2')
     return actionSuccess(workflow, 'Workflow updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating workflow', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -85,7 +85,7 @@ export async function deleteWorkflow(id: string): Promise<ActionResult<{ success
     logger.info('Workflow deleted successfully', { workflowId: id })
     revalidatePath('/dashboard/automations-v2')
     return actionSuccess({ success: true }, 'Workflow deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting workflow', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -132,7 +132,7 @@ export async function publishWorkflow(id: string): Promise<ActionResult<any>> {
     logger.info('Workflow published successfully', { workflowId: id })
     revalidatePath('/dashboard/automations-v2')
     return actionSuccess(workflow, 'Workflow published successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error publishing workflow', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -193,7 +193,7 @@ export async function executeWorkflow(id: string): Promise<ActionResult<any>> {
     logger.info('Workflow execution completed successfully', { workflowId: id, executionTime })
     revalidatePath('/dashboard/automations-v2')
     return actionSuccess(completedWorkflow, 'Workflow execution completed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error executing workflow', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -226,7 +226,7 @@ export async function toggleWorkflow(id: string, enabled: boolean): Promise<Acti
     logger.info('Workflow toggled successfully', { workflowId: id, enabled })
     revalidatePath('/dashboard/automations-v2')
     return actionSuccess(workflow, `Workflow ${enabled ? 'enabled' : 'paused'} successfully`)
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error toggling workflow', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -258,7 +258,7 @@ export async function approveWorkflow(id: string): Promise<ActionResult<any>> {
     logger.info('Workflow approved successfully', { workflowId: id })
     revalidatePath('/dashboard/automations-v2')
     return actionSuccess(workflow, 'Workflow approved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error approving workflow', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

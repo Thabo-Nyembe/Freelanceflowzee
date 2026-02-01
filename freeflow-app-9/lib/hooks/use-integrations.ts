@@ -97,7 +97,7 @@ export function useIntegrations(initialIntegrations: Integration[] = [], initial
       if (error) throw error
       setIntegrations(data || [])
       setStats(calculateStats(data || []))
-    } catch (error: any) {
+    } catch (error) {
       // Fallback to demo data on error
       if (isDemo) {
         const demoData = getDemoIntegrations()
@@ -145,7 +145,7 @@ export function useIntegrations(initialIntegrations: Integration[] = [], initial
       })
 
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to add integration',
@@ -182,7 +182,7 @@ export function useIntegrations(initialIntegrations: Integration[] = [], initial
       })
 
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to update integration',
@@ -214,7 +214,7 @@ export function useIntegrations(initialIntegrations: Integration[] = [], initial
       })
 
       return true
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to remove integration',

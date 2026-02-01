@@ -265,7 +265,7 @@ export default function SettingsPage() {
           description: 'Your preferences have been updated'
         })
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save settings', { error })
       toast.error('Failed to save settings', {
         description: error.message || 'Please try again later'
@@ -368,7 +368,7 @@ export default function SettingsPage() {
           description: 'Your file is ready to download'
         })
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export data', { error, format })
       toast.error('Failed to export data', {
         description: error.message || 'Please try again'

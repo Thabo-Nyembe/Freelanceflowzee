@@ -33,7 +33,7 @@ export async function createAuditEvent(data: any): Promise<ActionResult<any>> {
     logger.info('Audit event created successfully', { eventId: event.id })
     revalidatePath('/dashboard/audit-v2')
     return actionSuccess(event, 'Audit event created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating audit event', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -59,7 +59,7 @@ export async function getAuditEvent(id: string): Promise<ActionResult<any>> {
 
     logger.info('Audit event retrieved successfully', { eventId: id })
     return actionSuccess(event, 'Audit event retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting audit event', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -88,7 +88,7 @@ export async function createComplianceCheck(data: any): Promise<ActionResult<any
     logger.info('Compliance check created successfully', { checkId: check.id })
     revalidatePath('/dashboard/audit-v2')
     return actionSuccess(check, 'Compliance check created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating compliance check', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -119,7 +119,7 @@ export async function updateComplianceCheck(id: string, data: any): Promise<Acti
     logger.info('Compliance check updated successfully', { checkId: id })
     revalidatePath('/dashboard/audit-v2')
     return actionSuccess(check, 'Compliance check updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating compliance check', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -163,7 +163,7 @@ export async function runComplianceCheck(id: string): Promise<ActionResult<any>>
     logger.info('Compliance check completed successfully', { checkId: id, score, status })
     revalidatePath('/dashboard/audit-v2')
     return actionSuccess(check, 'Compliance check completed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error running compliance check', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -199,7 +199,7 @@ export async function getAuditStats(): Promise<ActionResult<any>> {
 
     logger.info('Audit stats retrieved successfully', { total: stats.total })
     return actionSuccess(stats, 'Audit stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting audit stats', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -241,7 +241,7 @@ export async function exportAuditTrail(startDate: string, endDate: string, forma
 
     logger.info('Audit trail exported successfully', { recordCount: events?.length || 0 })
     return actionSuccess(events || [], 'Audit trail exported successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error exporting audit trail', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -292,7 +292,7 @@ export async function searchAuditEvents(query: string, options?: {
 
     logger.info('Audit events searched successfully', { count: events?.length || 0 })
     return actionSuccess(events || [], 'Audit events searched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error searching audit events', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

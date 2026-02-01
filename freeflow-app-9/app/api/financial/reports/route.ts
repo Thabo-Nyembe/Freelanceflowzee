@@ -102,7 +102,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to fetch report', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch report' },
@@ -227,7 +227,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to generate report', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate report' },
@@ -257,7 +257,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
 
     await reportsService.deleteReport(reportId, user.id);
     return NextResponse.json({ success: true, message: 'Report deleted' });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to delete report', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete report' },

@@ -45,7 +45,7 @@ export async function createReleaseNote(input: ReleaseNoteInput): Promise<Action
     revalidatePath('/dashboard/release-notes-v2')
     logger.info('Release note created successfully', { releaseNoteId: data.id })
     return actionSuccess(data, 'Release note created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating release note', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -74,7 +74,7 @@ export async function updateReleaseNote(id: string, input: Partial<ReleaseNoteIn
     revalidatePath('/dashboard/release-notes-v2')
     logger.info('Release note updated successfully', { releaseNoteId: id })
     return actionSuccess(data, 'Release note updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating release note', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -101,7 +101,7 @@ export async function deleteReleaseNote(id: string): Promise<ActionResult<{ succ
     revalidatePath('/dashboard/release-notes-v2')
     logger.info('Release note deleted successfully', { releaseNoteId: id })
     return actionSuccess({ success: true }, 'Release note deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting release note', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -148,7 +148,7 @@ export async function likeReleaseNote(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/release-notes-v2')
     logger.info('Release note liked successfully', { releaseNoteId: id, likesCount: data.likes_count })
     return actionSuccess(data, 'Release note liked successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error liking release note', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(
       `${baseUrl}/dashboard/email-agent/setup?outlook=success&email=${encodeURIComponent(userEmail)}`
     );
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Outlook OAuth failed', {
       error: error.message,
       stack: error.stack

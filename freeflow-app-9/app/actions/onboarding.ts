@@ -112,7 +112,7 @@ export async function createOnboardingProgram(input: CreateProgramInput): Promis
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess(data, 'Onboarding program created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating onboarding program', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -142,7 +142,7 @@ export async function updateOnboardingProgram(id: string, input: UpdateProgramIn
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess(data, 'Onboarding program updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating onboarding program', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -175,7 +175,7 @@ export async function startOnboardingProgram(id: string): Promise<ActionResult<a
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess(data, 'Onboarding program started successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error starting onboarding program', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -210,7 +210,7 @@ export async function completeOnboardingProgram(id: string): Promise<ActionResul
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess(data, 'Onboarding program completed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error completing onboarding program', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -238,7 +238,7 @@ export async function deleteOnboardingProgram(id: string): Promise<ActionResult<
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess({ success: true }, 'Onboarding program deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting onboarding program', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -271,7 +271,7 @@ export async function sendWelcomeEmail(id: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess(data, 'Welcome email sent successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error sending welcome email', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -303,7 +303,7 @@ export async function markEquipmentProvided(id: string): Promise<ActionResult<an
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess(data, 'Equipment marked as provided')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error marking equipment provided', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -335,7 +335,7 @@ export async function grantSystemAccess(id: string): Promise<ActionResult<any>> 
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess(data, 'System access granted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error granting system access', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -381,7 +381,7 @@ export async function createOnboardingTask(input: CreateTaskInput): Promise<Acti
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess(data, 'Onboarding task created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating onboarding task', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -416,7 +416,7 @@ export async function updateOnboardingTask(id: string, input: UpdateTaskInput): 
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess(data, 'Onboarding task updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating onboarding task', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -454,7 +454,7 @@ export async function completeOnboardingTask(id: string): Promise<ActionResult<a
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess(data, 'Onboarding task completed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error completing onboarding task', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -494,7 +494,7 @@ export async function deleteOnboardingTask(id: string): Promise<ActionResult<{ s
 
     revalidatePath('/dashboard/onboarding-v2')
     return actionSuccess({ success: true }, 'Onboarding task deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting onboarding task', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -563,7 +563,7 @@ export async function getOnboardingPrograms(filters?: {
     }
 
     return actionSuccess(data || [], 'Onboarding programs retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting onboarding programs', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -590,7 +590,7 @@ export async function getOnboardingTasks(programId: string): Promise<ActionResul
     }
 
     return actionSuccess(data || [], 'Onboarding tasks retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting onboarding tasks', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

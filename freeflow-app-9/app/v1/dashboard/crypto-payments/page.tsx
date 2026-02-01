@@ -591,7 +591,7 @@ export default function CryptoPaymentsPage() {
       dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
       toast.success(`Transaction cancelled - ${formatCryptoAmount(cancelTransaction.amount, cancelTransaction.currency)}`)
       announce('Transaction cancelled', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to cancel transaction', { error: error.message })
       toast.error('Failed to cancel transaction')
     } finally {
@@ -635,7 +635,7 @@ export default function CryptoPaymentsPage() {
       dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
       toast.success(`Transaction refunded - ${formatUSD(refundTransaction.usdAmount)}`)
       announce('Transaction refunded', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to refund transaction', { error: error.message })
       toast.error('Failed to refund transaction')
     } finally {

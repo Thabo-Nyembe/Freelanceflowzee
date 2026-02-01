@@ -50,7 +50,7 @@ async function handleCreateProject(data: any): Promise<NextResponse> {
       message: `Project "${project.title}" created successfully!`,
       projectId: project.id
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to create project'
@@ -164,7 +164,7 @@ async function handleUpdateStatus(projectId: string, newStatus: string): Promise
       project,
       message: `Project status updated to ${newStatus}`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to update status'
@@ -196,7 +196,7 @@ async function handleUpdateProgress(projectId: string, progress: number): Promis
       project,
       message: `Project progress updated to ${project.progress}%`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to update progress'
@@ -224,7 +224,7 @@ async function handleUpdateProject(projectId: string, updates: any): Promise<Nex
       project,
       message: 'Project updated successfully'
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to update project'
@@ -250,7 +250,7 @@ async function handleDeleteProject(projectId: string): Promise<NextResponse> {
       projectId,
       message: 'Project deleted successfully'
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to delete project'
@@ -301,7 +301,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           error: `Unknown action: ${body.action}`
         }, { status: 400 })
     }
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Invalid request'
@@ -318,7 +318,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const search = searchParams.get('search')
 
     return handleListProjects({ status, priority, search })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to fetch projects'

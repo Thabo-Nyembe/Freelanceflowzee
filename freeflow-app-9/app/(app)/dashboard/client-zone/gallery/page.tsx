@@ -235,7 +235,7 @@ export default function GalleryPage() {
       toast.success('Share link generated!', {
         description: 'Link copied to clipboard'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to share gallery item', { error, itemId: item.id })
       toast.error('Failed to generate share link', {
         description: error.message || 'Please try again later'
@@ -275,7 +275,7 @@ export default function GalleryPage() {
       toast.success('Item deleted', {
         description: `${deleteItem.name} has been removed from gallery`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete gallery item', { error, itemId: deleteItem.id })
       toast.error('Failed to delete item', {
         description: error.message || 'Please try again later'
@@ -315,7 +315,7 @@ export default function GalleryPage() {
       })
 
       setSelectedItems([])
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to bulk download', { error })
       toast.error('Failed to prepare download', {
         description: error.message || 'Please try again later'

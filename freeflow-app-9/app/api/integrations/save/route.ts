@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Integration saved successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Integration save failed', { error: error.message });
     return NextResponse.json(
       { success: false, error: error.message },
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
         integration: decryptedData,
       });
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Integration retrieval failed', { error: error.message });
     return NextResponse.json(
       { success: false, error: error.message },
@@ -134,7 +134,7 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'Integration deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Integration deletion failed', { error: error.message });
     return NextResponse.json(
       { success: false, error: error.message },

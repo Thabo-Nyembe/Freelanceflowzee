@@ -187,7 +187,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
       trends: trends.reverse()
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Investor metrics error', { error })
     return NextResponse.json(
       { success: false, error: error.message },
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { success: false, error: 'Unknown action' },
       { status: 400 }
     )
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

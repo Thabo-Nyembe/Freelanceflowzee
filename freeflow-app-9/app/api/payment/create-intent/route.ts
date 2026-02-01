@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       paymentIntentId: paymentIntent.id,
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Payment intent creation failed', { error: error.message })
 
     if (error.type === 'StripeCardError') {

@@ -62,7 +62,7 @@ export async function getUserSettings(): Promise<ActionResult<any>> {
 
     logger.info('User settings retrieved', { userId: user.id })
     return actionSuccess(data, 'User settings retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in getUserSettings', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -89,7 +89,7 @@ export async function updateUserSettings(updates: UserSettingsInput): Promise<Ac
     revalidatePath('/dashboard/settings-v2')
     logger.info('User settings updated', { userId: user.id })
     return actionSuccess(data, 'User settings updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateUserSettings', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -155,7 +155,7 @@ export async function generateApiKey(): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/settings-v2')
     logger.info('API key generated', { userId: user.id })
     return actionSuccess(data, 'API key generated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in generateApiKey', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -185,7 +185,7 @@ export async function revokeApiKey(): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/settings-v2')
     logger.info('API key revoked', { userId: user.id })
     return actionSuccess(data, 'API key revoked successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in revokeApiKey', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -2178,7 +2178,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     toast.success(`Template Applied! "${selectedTemplate.name}" has been created`)
                     setShowTemplateDialog(false)
                     refetch()
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.dismiss()
                     toast.error('Failed to apply template', { description: error.message })
                   }
@@ -2256,7 +2256,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     toast.success(`Integration Connected! ${selectedIntegration.name} is now ready to use`)
                     setShowIntegrationDialog(false)
                     refetch()
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.dismiss()
                     toast.error('Failed to connect integration', { description: error.message })
                   }

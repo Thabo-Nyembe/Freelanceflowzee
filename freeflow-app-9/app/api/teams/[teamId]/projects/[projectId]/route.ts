@@ -68,7 +68,7 @@ export async function GET(
         return NextResponse.json(response);
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Project GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch project' },
@@ -96,7 +96,7 @@ export async function PUT(
     const body = await request.json();
     const project = await teamService.updateProject(teamId, projectId, user.id, body);
     return NextResponse.json({ project });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Project PUT error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update project' },
@@ -123,7 +123,7 @@ export async function DELETE(
 
     await teamService.deleteProject(teamId, projectId, user.id);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Project DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete project' },

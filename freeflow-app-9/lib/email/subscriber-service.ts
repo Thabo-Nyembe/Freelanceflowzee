@@ -786,7 +786,7 @@ class SubscriberService {
 
       await this.createSubscriber(userId, subscriberData);
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, error: error.message };
     }
   }

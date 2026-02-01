@@ -533,7 +533,7 @@ export default function ClientPortalClient() {
       } else {
         throw new Error(result.error || 'Failed to add client')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Client creation error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,
@@ -568,7 +568,7 @@ export default function ClientPortalClient() {
       } else {
         throw new Error(result.error || 'Failed to delete client')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Client deletion error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,
@@ -632,7 +632,7 @@ export default function ClientPortalClient() {
       announce('Project added successfully', 'polite')
       setIsAddProjectModalOpen(false)
       setProjectForm({ name: '', description: '', budget: '', clientId: '' })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Project creation error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,
@@ -686,7 +686,7 @@ export default function ClientPortalClient() {
       toast.success("Communication logged successfully - " + communicationForm.type + " - " + communicationForm.subject + " - " + timestamp)
       setIsAddCommunicationModalOpen(false)
       setCommunicationForm({ type: 'email', subject: '', content: '' })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Communication creation error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,
@@ -776,7 +776,7 @@ export default function ClientPortalClient() {
       toast.success("Export completed", { description: dataToExport.length + " records exported as " + exportFormat.toUpperCase() })
 
       setIsExportDialogOpen(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Export error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error
@@ -801,7 +801,7 @@ export default function ClientPortalClient() {
       toast.success("Settings saved | Health threshold: " + portalSettings.healthScoreThreshold + "% | Default tier: " + portalSettings.defaultClientTier)
 
       setIsSettingsDialogOpen(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Settings save error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error

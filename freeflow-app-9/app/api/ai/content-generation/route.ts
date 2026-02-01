@@ -172,7 +172,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Content Generation GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch content data' },
@@ -410,7 +410,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Content Generation POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Content generation failed' },
@@ -469,7 +469,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       { success: false, error: 'Content ID or Template ID required' },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Content Generation DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },

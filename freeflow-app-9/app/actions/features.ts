@@ -31,7 +31,7 @@ export async function createFeature(data: any): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/features-v2')
     logger.info('Feature created successfully', { featureId: feature.id })
     return actionSuccess(feature, 'Feature created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating feature', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -63,7 +63,7 @@ export async function updateFeature(id: string, data: any): Promise<ActionResult
     revalidatePath('/dashboard/features-v2')
     logger.info('Feature updated successfully', { featureId: id })
     return actionSuccess(feature, 'Feature updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating feature', { error, featureId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -91,7 +91,7 @@ export async function deleteFeature(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/features-v2')
     logger.info('Feature deleted successfully', { featureId: id })
     return actionSuccess(feature, 'Feature deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting feature', { error, featureId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -130,7 +130,7 @@ export async function enableFeature(id: string, environment?: 'production' | 'st
     revalidatePath('/dashboard/features-v2')
     logger.info('Feature enabled successfully', { featureId: id, environment })
     return actionSuccess(feature, 'Feature enabled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error enabling feature', { error, featureId: id, environment })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -169,7 +169,7 @@ export async function disableFeature(id: string, environment?: 'production' | 's
     revalidatePath('/dashboard/features-v2')
     logger.info('Feature disabled successfully', { featureId: id, environment })
     return actionSuccess(feature, 'Feature disabled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error disabling feature', { error, featureId: id, environment })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -202,7 +202,7 @@ export async function updateRollout(id: string, percentage: number): Promise<Act
     revalidatePath('/dashboard/features-v2')
     logger.info('Rollout updated successfully', { featureId: id, percentage })
     return actionSuccess(feature, 'Rollout updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating rollout', { error, featureId: id, percentage })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -236,7 +236,7 @@ export async function startABTest(id: string, variants: any, trafficSplit: any):
     revalidatePath('/dashboard/features-v2')
     logger.info('A/B test started successfully', { featureId: id })
     return actionSuccess(feature, 'A/B test started successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error starting A/B test', { error, featureId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -270,7 +270,7 @@ export async function rollbackFeature(id: string, reason: string): Promise<Actio
     revalidatePath('/dashboard/features-v2')
     logger.info('Feature rolled back successfully', { featureId: id, reason })
     return actionSuccess(feature, 'Feature rolled back successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error rolling back feature', { error, featureId: id, reason })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -325,7 +325,7 @@ export async function updateFeatureMetrics(id: string, success: boolean, respons
     revalidatePath('/dashboard/features-v2')
     logger.info('Feature metrics updated successfully', { featureId: id, successRate })
     return actionSuccess(feature, 'Feature metrics updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating feature metrics', { error, featureId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

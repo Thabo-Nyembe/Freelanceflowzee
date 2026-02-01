@@ -534,7 +534,7 @@ export default function StoragePage() {
       })
       setIsUploadModalOpen(false)
       setUploadFiles(null)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File upload failed', {
         error: error.message,
         provider: uploadProvider,
@@ -584,7 +584,7 @@ export default function StoragePage() {
       } else {
         throw new Error(result.error || 'Failed to delete file')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File delete failed', {
         error: error.message,
         fileId,
@@ -637,7 +637,7 @@ export default function StoragePage() {
       } else {
         throw new Error(result.error || 'Failed to delete files')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Bulk delete failed', {
         error: error.message,
         count: state.selectedFiles.length
@@ -703,7 +703,7 @@ export default function StoragePage() {
       } else {
         throw new Error(result.error || 'Failed to move file')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File move failed', {
         error: error.message,
         fileName: state.selectedFile?.name,
@@ -770,7 +770,7 @@ export default function StoragePage() {
       } else {
         throw new Error(result.error || 'Failed to share file')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File share failed', {
         error: error.message,
         fileName: state.selectedFile?.name,
@@ -825,7 +825,7 @@ export default function StoragePage() {
       } else {
         throw new Error(result.error || 'Failed to download file')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('File download failed', {
         error: error.message,
         fileId,

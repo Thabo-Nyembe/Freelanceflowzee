@@ -314,7 +314,7 @@ export default function TransactionsPage() {
 
       setIsDialogOpen(false)
       setIsSubmitting(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save transaction', { error })
       toast.error('Failed to save transaction', {
         description: error.message
@@ -348,7 +348,7 @@ export default function TransactionsPage() {
       })
 
       logger.info('Transaction deleted successfully', { transactionId: deleteTransaction.id })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete transaction', { error, transactionId: deleteTransaction.id })
       toast.error('Delete failed', { description: error.message })
     } finally {
@@ -389,7 +389,7 @@ export default function TransactionsPage() {
       logger.info('Transactions exported', {
         count: filteredTransactions.length
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Export failed', { error })
       toast.error('Export failed', { description: error.message })
     }

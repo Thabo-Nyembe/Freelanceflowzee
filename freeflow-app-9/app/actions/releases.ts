@@ -62,7 +62,7 @@ export async function createRelease(data: {
     revalidatePath('/dashboard/releases-v2')
     logger.info('Release created successfully', { releaseId: release.id, version: data.version })
     return actionSuccess(release, 'Release created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating release', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -107,7 +107,7 @@ export async function updateRelease(releaseId: string, data: Partial<{
     revalidatePath('/dashboard/releases-v2')
     logger.info('Release updated successfully', { releaseId })
     return actionSuccess(release, 'Release updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating release', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -160,7 +160,7 @@ export async function deployRelease(releaseId: string, environment: Environment 
     revalidatePath('/dashboard/releases-v2')
     logger.info('Release deployment started', { releaseId, deploymentId: deployment.id, environment })
     return actionSuccess({ release, deployment }, 'Release deployment started successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deploying release', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -230,7 +230,7 @@ export async function completeDeployment(deploymentId: string, success: boolean 
     revalidatePath('/dashboard/releases-v2')
     logger.info('Deployment completed', { deploymentId, releaseId: deployment.release_id, success })
     return actionSuccess(release, success ? 'Deployment completed successfully' : 'Deployment failed')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error completing deployment', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -272,7 +272,7 @@ export async function rollbackRelease(releaseId: string, reason?: string): Promi
     revalidatePath('/dashboard/releases-v2')
     logger.info('Release rolled back', { releaseId, reason })
     return actionSuccess(release, 'Release rolled back successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error rolling back release', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -312,7 +312,7 @@ export async function pauseRollingDeployment(releaseId: string): Promise<ActionR
     revalidatePath('/dashboard/releases-v2')
     logger.info('Rolling deployment paused', { releaseId, coverage: currentRelease?.coverage_percentage })
     return actionSuccess(release, 'Rolling deployment paused successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error pausing rolling deployment', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -340,7 +340,7 @@ export async function deleteRelease(releaseId: string): Promise<ActionResult<{ s
     revalidatePath('/dashboard/releases-v2')
     logger.info('Release deleted successfully', { releaseId })
     return actionSuccess({ success: true }, 'Release deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting release', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -381,7 +381,7 @@ export async function getReleaseStats(): Promise<ActionResult<any>> {
 
     logger.info('Release stats fetched successfully', { totalReleases: stats.totalReleases })
     return actionSuccess(stats, 'Release statistics retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching release stats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

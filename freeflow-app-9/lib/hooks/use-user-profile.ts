@@ -131,7 +131,7 @@ export function useUserProfile(initialProfile: UserProfile | null = null, initia
       setProfile(data)
       setStats(calculateStats(data))
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to fetch profile',
@@ -176,7 +176,7 @@ export function useUserProfile(initialProfile: UserProfile | null = null, initia
       })
 
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to create profile',
@@ -214,7 +214,7 @@ export function useUserProfile(initialProfile: UserProfile | null = null, initia
       })
 
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to update profile',

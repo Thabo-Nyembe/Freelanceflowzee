@@ -270,7 +270,7 @@ async function handleGetSettings(category: string, userId?: string, supabase?: a
       demo: !userId,
       message: `${category} settings retrieved successfully`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to get settings'
@@ -448,7 +448,7 @@ async function handleUpdateSettings(category: string, data: any, userId?: string
       updatedAt: new Date().toISOString(),
       message: `${category} settings updated successfully`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to update settings'
@@ -535,7 +535,7 @@ async function handleResetSettings(category: string, userId?: string, supabase?:
       data: defaults[category] || {},
       message: `${category} settings reset to defaults`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to reset settings'
@@ -566,7 +566,7 @@ async function handleExportSettings(userId?: string, supabase?: any): Promise<Ne
         'Content-Disposition': `attachment; filename="kazi-settings-${Date.now()}.json"`
       }
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to export settings'
@@ -606,7 +606,7 @@ async function handleImportSettings(data: any, userId?: string, supabase?: any):
       categoriesImported: importedCount,
       message: 'Settings imported successfully'
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to import settings'
@@ -653,7 +653,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           error: `Unknown action: ${body.action}`
         }, { status: 400 })
     }
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Invalid request'
@@ -677,7 +677,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     return handleGetSettings(category, userId, supabase)
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to fetch settings'

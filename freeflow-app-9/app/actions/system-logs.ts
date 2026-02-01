@@ -32,7 +32,7 @@ export async function createSystemLog(data: any): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/logs-v2')
     logger.info('System log created', { logId: log.id })
     return actionSuccess(log, 'System log created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating system log', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -64,7 +64,7 @@ export async function archiveLog(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/logs-v2')
     logger.info('Log archived', { logId: id })
     return actionSuccess(log, 'Log archived successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error archiving log', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -93,7 +93,7 @@ export async function deleteLog(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/logs-v2')
     logger.info('Log deleted', { logId: id })
     return actionSuccess(log, 'Log deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting log', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -129,7 +129,7 @@ export async function bulkArchiveLogs(olderThanDays: number): Promise<ActionResu
     revalidatePath('/dashboard/logs-v2')
     logger.info('Bulk archive logs completed', { archivedCount, olderThanDays })
     return actionSuccess({ archivedCount }, `${archivedCount} logs archived successfully`)
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error bulk archiving logs', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -166,7 +166,7 @@ export async function getLogStats(): Promise<ActionResult<any>> {
 
     logger.info('Log stats fetched', { total: stats.total })
     return actionSuccess(stats, 'Log stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching log stats', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -218,7 +218,7 @@ export async function searchLogs(query: string, options?: {
 
     logger.info('Logs searched', { query, count: logs?.length || 0 })
     return actionSuccess(logs || [], 'Logs retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error searching logs', { error: error.message, query })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

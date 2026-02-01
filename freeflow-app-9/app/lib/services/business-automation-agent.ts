@@ -1021,7 +1021,7 @@ Return as JSON with fields: insights (array), recommendations (array)`;
       logger.info('Automation task completed', { taskId: task.id, type: task.type });
 
       return task;
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Error executing automation task', { taskId: task.id, error });
 
       task.status = 'failed';

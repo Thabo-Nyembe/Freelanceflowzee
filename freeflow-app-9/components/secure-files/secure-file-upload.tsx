@@ -180,7 +180,7 @@ export function SecureFileUpload({
       }))
 
       onUploadComplete?.(data.file)
-    } catch (error: any) {
+    } catch (error) {
       setUploadState(prev => ({
         ...prev,
         uploading: false,
@@ -227,7 +227,7 @@ export function SecureFileUpload({
 
       onDeliveryCreated?.(data.delivery)
       onSuccess?.()
-    } catch (error: any) {
+    } catch (error) {
       setUploadState(prev => ({
         ...prev,
         creatingDelivery: false,

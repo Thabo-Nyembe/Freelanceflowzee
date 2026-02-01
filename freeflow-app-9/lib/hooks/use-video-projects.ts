@@ -77,7 +77,7 @@ export function useVideoProjects(initialProjects: VideoProject[] = [], initialSt
       if (error) throw error
       setProjects(data || [])
       setStats(calculateStats(data || []))
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to fetch video projects',
@@ -118,7 +118,7 @@ export function useVideoProjects(initialProjects: VideoProject[] = [], initialSt
       })
 
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to create video project',
@@ -155,7 +155,7 @@ export function useVideoProjects(initialProjects: VideoProject[] = [], initialSt
       })
 
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to update video project',
@@ -187,7 +187,7 @@ export function useVideoProjects(initialProjects: VideoProject[] = [], initialSt
       })
 
       return true
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to delete video project',

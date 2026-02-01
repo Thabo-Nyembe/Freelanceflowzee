@@ -55,7 +55,7 @@ export async function createLead(input: LeadInput): Promise<ActionResult<any>> {
     logger.info('Lead created successfully', { leadId: data.id })
     revalidatePath('/dashboard/lead-generation-v2')
     return actionSuccess(data, 'Lead created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating lead', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -84,7 +84,7 @@ export async function updateLead(id: string, updates: Partial<LeadInput>): Promi
     logger.info('Lead updated successfully', { leadId: id })
     revalidatePath('/dashboard/lead-generation-v2')
     return actionSuccess(data, 'Lead updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating lead', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -111,7 +111,7 @@ export async function deleteLead(id: string): Promise<ActionResult<{ success: bo
     logger.info('Lead deleted successfully', { leadId: id })
     revalidatePath('/dashboard/lead-generation-v2')
     return actionSuccess({ success: true }, 'Lead deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting lead', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -148,7 +148,7 @@ export async function contactLead(id: string): Promise<ActionResult<any>> {
     logger.info('Lead contacted successfully', { leadId: id })
     revalidatePath('/dashboard/lead-generation-v2')
     return actionSuccess(data, 'Lead contacted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error contacting lead', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -181,7 +181,7 @@ export async function getLeads(): Promise<ActionResult<any[]>> {
     }
 
     return actionSuccess(data || [], 'Leads retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting leads', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -207,7 +207,7 @@ export async function getLeadsByStatus(status: string): Promise<ActionResult<any
     }
 
     return actionSuccess(data || [], 'Leads retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting leads by status', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -240,7 +240,7 @@ export async function addLeadActivity(leadId: string, activityType: string, titl
     logger.info('Lead activity added successfully', { leadId, activityId: data.id })
     revalidatePath('/dashboard/lead-generation-v2')
     return actionSuccess(data, 'Lead activity added successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error adding lead activity', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

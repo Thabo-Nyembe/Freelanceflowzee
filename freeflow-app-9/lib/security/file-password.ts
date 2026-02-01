@@ -48,7 +48,7 @@ export async function hashPassword(password: string): Promise<string> {
   try {
     const hash = await bcrypt.hash(password, SALT_ROUNDS)
     return hash
-  } catch (error: any) {
+  } catch (error) {
     throw new Error(`Failed to hash password: ${error.message}`)
   }
 }
@@ -79,7 +79,7 @@ export async function verifyPassword(
   try {
     const isMatch = await bcrypt.compare(password, hash)
     return isMatch
-  } catch (error: any) {
+  } catch (error) {
     console.error('Password verification error:', error)
     return false
   }
@@ -199,7 +199,7 @@ export async function verifyAccessToken(
       userId,
       expiresAt: new Date(expiresAt)
     }
-  } catch (error: any) {
+  } catch (error) {
     throw new Error(`Token verification failed: ${error.message}`)
   }
 }
@@ -357,7 +357,7 @@ export async function revokeAccessToken(token: string): Promise<boolean> {
       .eq('id', decoded.logId)
 
     return !error
-  } catch (error: any) {
+  } catch (error) {
     console.error('Token revocation error:', error)
     return false
   }

@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
         uploadedAt: fileRecord.created_at
       }
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('File upload error', { error })
 
     return NextResponse.json(

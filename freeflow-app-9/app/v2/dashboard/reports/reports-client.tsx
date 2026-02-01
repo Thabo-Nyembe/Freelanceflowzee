@@ -555,7 +555,7 @@ export default function ReportsClient() {
       } else {
         toast.error('Failed to create report')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create report')
     } finally {
       setIsCreatingReport(false)
@@ -601,7 +601,7 @@ export default function ReportsClient() {
       } else {
         toast.error('Failed to schedule export')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to schedule export')
     } finally {
       setIsSchedulingExport(false)
@@ -653,7 +653,7 @@ export default function ReportsClient() {
       await loadReports()
       setImportFile('')
       setShowImportDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Import failed')
     } finally {
       setIsImporting(false)
@@ -672,7 +672,7 @@ export default function ReportsClient() {
       } else {
         toast.error('Export failed')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed')
     } finally {
       setIsExportingAll(false)
@@ -704,7 +704,7 @@ export default function ReportsClient() {
         ])
         toast.success('AI analysis complete')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('AI analysis failed')
     } finally {
       setAiAnalysisRunning(false)
@@ -829,7 +829,7 @@ export default function ReportsClient() {
       } else {
         toast.error('Export failed')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed')
     } finally {
       setIsExportingReport(false)
@@ -855,7 +855,7 @@ export default function ReportsClient() {
       } else {
         toast.error('Delete failed')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete failed')
     } finally {
       setIsDeletingReport(false)

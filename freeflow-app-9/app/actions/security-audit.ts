@@ -73,7 +73,7 @@ export async function createSecurityAudit(input: SecurityAuditInput): Promise<Ac
     logger.info('Security audit created successfully', { name: input.name })
     revalidatePath('/dashboard/security-audit-v2')
     return actionSuccess(data, 'Security audit created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating security audit', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -105,7 +105,7 @@ export async function updateSecurityAudit(id: string, updates: Partial<SecurityA
     logger.info('Security audit updated successfully', { id })
     revalidatePath('/dashboard/security-audit-v2')
     return actionSuccess(data, 'Security audit updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating security audit', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -135,7 +135,7 @@ export async function deleteSecurityAudit(id: string): Promise<ActionResult<{ su
     logger.info('Security audit deleted successfully', { id })
     revalidatePath('/dashboard/security-audit-v2')
     return actionSuccess({ success: true }, 'Security audit deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting security audit', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -171,7 +171,7 @@ export async function startSecurityAudit(id: string): Promise<ActionResult<any>>
     logger.info('Security audit started successfully', { id })
     revalidatePath('/dashboard/security-audit-v2')
     return actionSuccess(data, 'Security audit started successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error starting security audit', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -223,7 +223,7 @@ export async function completeSecurityAudit(
     logger.info('Security audit completed successfully', { id, status })
     revalidatePath('/dashboard/security-audit-v2')
     return actionSuccess(data, 'Security audit completed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error completing security audit', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -258,7 +258,7 @@ export async function cancelSecurityAudit(id: string): Promise<ActionResult<any>
     logger.info('Security audit cancelled successfully', { id })
     revalidatePath('/dashboard/security-audit-v2')
     return actionSuccess(data, 'Security audit cancelled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error cancelling security audit', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -288,7 +288,7 @@ export async function getSecurityAudits(): Promise<ActionResult<any[]>> {
 
     logger.info('Security audits fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Security audits fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching security audits', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -318,7 +318,7 @@ export async function getSecurityAudit(id: string): Promise<ActionResult<any>> {
 
     logger.info('Security audit fetched successfully', { id })
     return actionSuccess(data, 'Security audit fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching security audit', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -359,7 +359,7 @@ export async function createAuditFinding(input: AuditFindingInput): Promise<Acti
     logger.info('Audit finding created successfully', { auditId: input.audit_id, severity: input.severity })
     revalidatePath('/dashboard/security-audit-v2')
     return actionSuccess(data, 'Audit finding created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating audit finding', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -384,7 +384,7 @@ export async function updateAuditFinding(id: string, updates: Partial<AuditFindi
     logger.info('Audit finding updated successfully', { id })
     revalidatePath('/dashboard/security-audit-v2')
     return actionSuccess(data, 'Audit finding updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating audit finding', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -420,7 +420,7 @@ export async function remediateFinding(id: string): Promise<ActionResult<any>> {
     logger.info('Finding remediated successfully', { id })
     revalidatePath('/dashboard/security-audit-v2')
     return actionSuccess(data, 'Finding remediated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error remediating finding', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -448,7 +448,7 @@ export async function acceptFinding(id: string): Promise<ActionResult<any>> {
     logger.info('Finding accepted successfully', { id })
     revalidatePath('/dashboard/security-audit-v2')
     return actionSuccess(data, 'Finding accepted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error accepting finding', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -476,7 +476,7 @@ export async function markFalsePositive(id: string): Promise<ActionResult<any>> 
     logger.info('Finding marked as false positive successfully', { id })
     revalidatePath('/dashboard/security-audit-v2')
     return actionSuccess(data, 'Finding marked as false positive successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error marking finding as false positive', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -499,7 +499,7 @@ export async function getAuditFindings(auditId: string): Promise<ActionResult<an
 
     logger.info('Audit findings fetched successfully', { auditId, count: data?.length || 0 })
     return actionSuccess(data || [], 'Audit findings fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching audit findings', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

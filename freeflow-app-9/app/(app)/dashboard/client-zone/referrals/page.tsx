@@ -371,7 +371,7 @@ export default function ReferralsPage() {
         // Update local state
         setLoyaltyPoints(prev => prev + (reward?.points || 0))
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to claim reward', { error, rewardId })
       toast.error('Failed to claim reward', {
         description: error.message || 'Please try again'
@@ -423,7 +423,7 @@ export default function ReferralsPage() {
 
         setLoyaltyPoints(prev => prev - points)
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to redeem points', { error, points })
       toast.error('Failed to redeem points', {
         description: error.message || 'Please try again'

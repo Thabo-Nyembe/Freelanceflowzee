@@ -3714,7 +3714,7 @@ export default function EventsClient() {
                 URL.revokeObjectURL(url)
                 toast.success('Data exported successfully!')
                 setShowExportAllDataDialog(false)
-              } catch (error: any) {
+              } catch (error) {
                 toast.error(error.message || 'Failed to export data')
               }
             }}>
@@ -3755,7 +3755,7 @@ export default function EventsClient() {
                 await refetch()
                 toast.success('Cache cleared successfully!')
                 setShowClearCacheDialog(false)
-              } catch (error: any) {
+              } catch (error) {
                 toast.error(error.message || 'Failed to clear cache')
               }
             }}>
@@ -3808,7 +3808,7 @@ export default function EventsClient() {
                 await refetch()
                 toast.success('All events deleted successfully')
                 setShowDeleteAllEventsDialog(false)
-              } catch (error: any) {
+              } catch (error) {
                 toast.error(error.message || 'Failed to delete events')
               }
             }}>

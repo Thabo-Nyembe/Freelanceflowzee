@@ -658,7 +658,7 @@ export default function ReportsPage() {
         setReportForm({ name: '', type: 'analytics', description: '', frequency: 'once' })
         announce(`Report ${reportForm.name} created successfully`, 'polite')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create report', { error: error instanceof Error ? error.message : String(error), userId })
       toast.error('Failed to create report', {
         description: error.message || 'Please try again later'
@@ -739,7 +739,7 @@ export default function ReportsPage() {
       } else {
         throw new Error(result.error || 'Failed to generate report')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to generate report', { error: error instanceof Error ? error.message : String(error) })
       toast.error('Failed to generate report', {
         description: error.message || 'Please try again later'
@@ -793,7 +793,7 @@ export default function ReportsPage() {
       } else {
         throw new Error('Failed to delete report')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete report', { error: error instanceof Error ? error.message : String(error) })
       toast.error('Failed to delete report', {
         description: error.message || 'Please try again later'
@@ -845,7 +845,7 @@ export default function ReportsPage() {
       } else {
         throw new Error(result.error || 'Failed to export report')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export report', { error: error instanceof Error ? error.message : String(error) })
       toast.error('Failed to export report', {
         description: error.message || 'Please try again later'
@@ -911,7 +911,7 @@ export default function ReportsPage() {
       } else {
         throw new Error(result.error || 'Failed to schedule report')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to schedule report', { error: error instanceof Error ? error.message : String(error) })
       toast.error('Failed to schedule report', {
         description: error.message || 'Please try again later'

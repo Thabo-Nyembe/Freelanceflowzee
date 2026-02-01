@@ -111,7 +111,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Events GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch events' },
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       event,
       message: 'Event created successfully',
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Events POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to create event' },
@@ -227,7 +227,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       event,
       message: 'Event updated successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Events PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update event' },
@@ -285,7 +285,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       success: true,
       message: 'Event deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Events DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete event' },

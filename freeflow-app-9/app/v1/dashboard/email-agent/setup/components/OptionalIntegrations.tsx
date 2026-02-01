@@ -207,7 +207,7 @@ export function PaymentIntegrationStep({ onComplete, onSkip, onBack }: any) {
       } else {
         throw new Error(result.error);
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({ title: 'Connection Failed', description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
@@ -358,7 +358,7 @@ export function SMSIntegrationStep({ onComplete, onSkip, onBack }: any) {
       } else {
         throw new Error(result.error);
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({ title: 'Connection Failed', description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
@@ -544,7 +544,7 @@ export function CRMIntegrationStep({ onComplete, onSkip, onBack }: any) {
         } else {
           throw new Error(result.error);
         }
-      } catch (error: any) {
+      } catch (error) {
         toast({ title: 'Connection Failed', description: error.message, variant: 'destructive' });
       } finally {
         setLoading(false);

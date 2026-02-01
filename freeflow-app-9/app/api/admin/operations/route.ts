@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({ success: true, data: body })
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Admin operations error', { error })
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },

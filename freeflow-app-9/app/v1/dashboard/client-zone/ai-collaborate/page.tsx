@@ -152,7 +152,7 @@ export default function AICollaboratePage() {
       toast.success('AI designs generated!', {
         description: `${selectedStyles.length} new design options created based on your preferences`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to generate AI options', { error })
       toast.error('Failed to generate designs', {
         description: error.message || 'Please try again later'
@@ -206,7 +206,7 @@ export default function AICollaboratePage() {
       toast.success('Option selected!', {
         description: 'Design added to your selections'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to select option', { error, optionId })
       toast.error('Failed to select option')
     }
@@ -244,7 +244,7 @@ export default function AICollaboratePage() {
       ))
 
       toast.success(`Rated ${rating} stars!`)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to rate option', { error })
       toast.error('Failed to rate option')
     }
@@ -293,7 +293,7 @@ export default function AICollaboratePage() {
       toast.success('Downloads starting!', {
         description: `${selectedOptions.length} design(s) downloading`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to download selection', { error })
       toast.error('Failed to download designs')
     }
@@ -330,7 +330,7 @@ export default function AICollaboratePage() {
       toast.success('Share link copied!', {
         description: 'Design links copied to clipboard'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to share selection', { error })
       toast.error('Failed to share designs')
     }

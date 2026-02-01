@@ -59,7 +59,7 @@ export async function GET(
       )
     );
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('OAuth callback error', { error });
 
     // Redirect to error page

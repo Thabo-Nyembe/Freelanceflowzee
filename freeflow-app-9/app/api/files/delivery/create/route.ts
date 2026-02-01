@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     if (password) {
       try {
         passwordHash = await hashPassword(password)
-      } catch (error: any) {
+      } catch (error) {
         return NextResponse.json(
           { success: false, error: error.message },
           { status: 400 }
@@ -244,7 +244,7 @@ export async function POST(request: NextRequest) {
         escrowEnabled
       }
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Delivery creation error', { error })
 
     return NextResponse.json(
@@ -328,7 +328,7 @@ export async function GET(request: NextRequest) {
         }
       })
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Get delivery error', { error })
 
     return NextResponse.json(

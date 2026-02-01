@@ -142,7 +142,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       permissions: tokenPermissions,
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Collaboration token error', { error })
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate token' },
@@ -193,7 +193,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }, { status: 401 })
     }
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Token verification error', { error })
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to verify token' },

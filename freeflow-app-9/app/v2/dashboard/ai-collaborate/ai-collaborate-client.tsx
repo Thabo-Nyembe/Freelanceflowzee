@@ -330,7 +330,7 @@ export default function AiCollaborateClient() {
         throw new Error('Failed to generate AI options')
       }
       toast.success('AI designs generated! New design options created based on your preferences')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to generate AI options', { error })
       toast.error('Failed to generate designs')
     } finally {
@@ -372,7 +372,7 @@ export default function AiCollaborateClient() {
         setSelectedOptions([...selectedOptions, optionId])
       }
       toast.success('Option selected!')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to select option', { error, optionId })
       toast.error('Failed to select option')
     }
@@ -405,7 +405,7 @@ export default function AiCollaborateClient() {
       ))
 
       toast.success(`Rated ${rating} stars!`)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to rate option', { error })
       toast.error('Failed to rate option')
     }
@@ -447,7 +447,7 @@ export default function AiCollaborateClient() {
       }
 
       toast.success('Downloads starting! ' + selectedOptions.length + ' design(s) downloading')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to download selection', { error })
       toast.error('Failed to download designs')
     }
@@ -477,7 +477,7 @@ export default function AiCollaborateClient() {
       }
 
       toast.success('Share link copied!')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to share selection', { error })
       toast.error('Failed to share designs')
     }
@@ -516,7 +516,7 @@ export default function AiCollaborateClient() {
       setNewSessionDescription('')
       setCreateSessionDialogOpen(false)
       announce('New AI collaboration session created', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create session', { error })
       toast.error('Failed to create session')
     } finally {
@@ -563,7 +563,7 @@ export default function AiCollaborateClient() {
       setInviteRole('viewer')
       setInviteDialogOpen(false)
       announce('Collaboration invitation sent', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to invite collaborator', { error })
       toast.error('Failed to send invitation')
     } finally {
@@ -613,7 +613,7 @@ export default function AiCollaborateClient() {
 
       setShareMessage('')
       setShareDialogOpen(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to share via email', { error })
       toast.error('Failed to share')
     } finally {
@@ -645,7 +645,7 @@ export default function AiCollaborateClient() {
 
       setSettingsDialogOpen(false)
       announce('AI settings saved', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save settings', { error })
       toast.error('Failed to save settings')
     } finally {
@@ -690,7 +690,7 @@ export default function AiCollaborateClient() {
 
       setConfirmDeleteDialogOpen(false)
       announce('All selections cleared', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete selections', { error })
       toast.error('Failed to clear selections')
     } finally {
@@ -722,7 +722,7 @@ export default function AiCollaborateClient() {
       toast.success('Options regenerated!')
 
       announce('AI options regenerated', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to regenerate options', { error })
       toast.error('Failed to regenerate')
     } finally {

@@ -239,7 +239,7 @@ export default function AdminOverviewPage() {
 
       // Refresh dashboard data to update alerts list
       await handleRefreshDashboard()
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to acknowledge alert', { error, alertId, userId })
       toast.error('Failed to mark alert as read', {
         description: error.message || 'Please try again'
@@ -261,7 +261,7 @@ export default function AdminOverviewPage() {
 
       // Refresh dashboard data to update alerts list
       await handleRefreshDashboard()
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to dismiss alert', { error, alertId, userId })
       toast.error('Failed to dismiss alert', {
         description: error.message || 'Please try again'

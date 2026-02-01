@@ -2229,7 +2229,7 @@ export default function ThreeDModelingClient() {
 
                   toast.success('Temp file path updated', { id: 'temp-path', description: tempFilePath })
                   setShowBrowseTempDialog(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to save path', { id: 'temp-path', description: error.message })
                 }
               }}>Save</Button>
@@ -2273,7 +2273,7 @@ export default function ThreeDModelingClient() {
 
                   toast.success('Assets path updated', { id: 'assets-path', description: assetsPath })
                   setShowBrowseAssetsDialog(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to save path', { id: 'assets-path', description: error.message })
                 }
               }}>Save</Button>

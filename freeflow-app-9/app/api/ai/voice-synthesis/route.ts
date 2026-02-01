@@ -85,7 +85,7 @@ async function handleOpenAITTS(body: VoiceSynthesisRequest, apiKey: string) {
         'Cache-Control': 'public, max-age=31536000'
       }
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('OpenAI TTS error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
@@ -136,7 +136,7 @@ async function handleElevenLabsTTS(body: VoiceSynthesisRequest, apiKey: string) 
         'Cache-Control': 'public, max-age=31536000'
       }
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('ElevenLabs TTS error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
@@ -196,7 +196,7 @@ async function handleAzureTTS(body: VoiceSynthesisRequest, apiKey: string) {
         'Cache-Control': 'public, max-age=31536000'
       }
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Azure TTS error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,

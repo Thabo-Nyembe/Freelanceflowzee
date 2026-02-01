@@ -699,7 +699,7 @@ export default function AiEnhancedClient() {
       setToolDescription('')
       setToolModel('')
       setToolProvider('')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to create AI tool', {
         error: error.message,
         name: toolName,
@@ -763,7 +763,7 @@ export default function AiEnhancedClient() {
 
       setShowDeleteModal(false)
       setShowViewModal(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete AI tool', {
         error: error.message,
         toolId
@@ -809,7 +809,7 @@ export default function AiEnhancedClient() {
       })
 
       dispatch({ type: 'CLEAR_SELECTED_TOOLS' })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Bulk delete failed', {
         error: error.message,
         count: state.selectedTools.length
@@ -847,7 +847,7 @@ export default function AiEnhancedClient() {
       toast.success(newFavoriteState ? 'Added to favorites' : 'Removed from favorites', {
         description: `${tool?.name} - ${tool?.type} - ${newFavoriteState ? '★ Favorited' : '☆ Unfavorited'}`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to toggle favorite', { error: error.message, toolId })
       toast.error('Failed to update favorite status')
     }
@@ -899,7 +899,7 @@ export default function AiEnhancedClient() {
       toast.success(`${tool.name} completed`, {
         description: `${tool.type} - ${formatNumber(updatedTool.usageCount)} total uses - ${(tool.successRate * 100).toFixed(1)}% success rate`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Tool execution failed', {
         error: error.message,
         toolId,
@@ -965,7 +965,7 @@ export default function AiEnhancedClient() {
       })
 
       setShowExportModal(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Export failed', {
         error: error.message,
         format: exportFormat,

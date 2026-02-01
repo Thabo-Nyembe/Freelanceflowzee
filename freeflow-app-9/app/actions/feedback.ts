@@ -63,7 +63,7 @@ export async function createFeedback(data: CreateFeedbackData): Promise<ActionRe
     revalidatePath('/dashboard/feedback-v2')
     logger.info('Feedback created successfully', { feedbackId: feedback.id })
     return actionSuccess(feedback, 'Feedback created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating feedback', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -93,7 +93,7 @@ export async function updateFeedback({ id, ...data }: UpdateFeedbackData): Promi
     revalidatePath('/dashboard/feedback-v2')
     logger.info('Feedback updated successfully', { feedbackId: id })
     return actionSuccess(feedback, 'Feedback updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating feedback', { error, feedbackId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -121,7 +121,7 @@ export async function deleteFeedback(id: string): Promise<ActionResult<void>> {
     revalidatePath('/dashboard/feedback-v2')
     logger.info('Feedback deleted successfully', { feedbackId: id })
     return actionSuccess(undefined, 'Feedback deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting feedback', { error, feedbackId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -151,7 +151,7 @@ export async function updateFeedbackStatus(id: string, status: string): Promise<
     revalidatePath('/dashboard/feedback-v2')
     logger.info('Feedback status updated successfully', { feedbackId: id, status })
     return actionSuccess(feedback, 'Feedback status updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating feedback status', { error, feedbackId: id, status })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -184,7 +184,7 @@ export async function assignFeedback(id: string, assignedTo: string): Promise<Ac
     revalidatePath('/dashboard/feedback-v2')
     logger.info('Feedback assigned successfully', { feedbackId: id, assignedTo })
     return actionSuccess(feedback, 'Feedback assigned successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error assigning feedback', { error, feedbackId: id, assignedTo })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -219,7 +219,7 @@ export async function respondToFeedback(id: string, responseText: string): Promi
     revalidatePath('/dashboard/feedback-v2')
     logger.info('Feedback response added successfully', { feedbackId: id })
     return actionSuccess(feedback, 'Feedback response added successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error responding to feedback', { error, feedbackId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -247,7 +247,7 @@ export async function markFeedbackAsSpam(id: string): Promise<ActionResult<void>
     revalidatePath('/dashboard/feedback-v2')
     logger.info('Feedback marked as spam successfully', { feedbackId: id })
     return actionSuccess(undefined, 'Feedback marked as spam successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error marking feedback as spam', { error, feedbackId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -291,7 +291,7 @@ export async function getFeedbackStats(): Promise<ActionResult<any>> {
 
     logger.info('Feedback stats retrieved successfully', { total: stats.total })
     return actionSuccess(stats, 'Feedback stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting feedback stats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

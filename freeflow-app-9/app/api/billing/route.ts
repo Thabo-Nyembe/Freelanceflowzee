@@ -72,7 +72,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         }
       }
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Billing GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to get billing information' },
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Billing POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },

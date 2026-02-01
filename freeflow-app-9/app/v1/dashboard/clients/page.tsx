@@ -562,7 +562,7 @@ export default function ClientsPage() {
         description: `${createdClient.name} has been added to your client list`
       })
       announce(`Client ${createdClient.name} added successfully`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to add client', { error, name: formData.name, userId })
       toast.error('Failed to add client', {
         description: error.message || 'Please try again later'
@@ -659,7 +659,7 @@ export default function ClientsPage() {
         description: `${updatedClient.name}'s information has been updated`
       })
       announce(`Client ${updatedClient.name} updated successfully`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update client', {
         error,
         clientId: state.selectedClient.id,
@@ -717,7 +717,7 @@ export default function ClientsPage() {
         description: `${client?.name} has been removed from your client list`
       })
       announce(`Client ${client?.name} deleted successfully`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete client', {
         error,
         clientId: clientToDelete,
@@ -1005,7 +1005,7 @@ export default function ClientsPage() {
       if (failedDeletes.length > 0) {
         toast.error(`Failed to delete ${failedDeletes.length} client${failedDeletes.length > 1 ? 's' : ''}`)
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to bulk delete clients', {
         error,
         count: state.selectedClients.length
@@ -1056,7 +1056,7 @@ export default function ClientsPage() {
       } else {
         throw new Error(error || 'Failed to update status')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update status', { error, clientId, newStatus })
       toast.error('Failed to update status', {
         description: error.message || 'Please try again later'
@@ -1109,7 +1109,7 @@ export default function ClientsPage() {
         description: `Note updated for ${state.selectedClient.name}`
       })
       announce('Note saved successfully', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save note', { error, clientId: state.selectedClient.id })
       toast.error('Failed to save note', {
         description: error.message || 'Please try again'
@@ -1194,7 +1194,7 @@ export default function ClientsPage() {
 
       setClientHistory(combinedHistory)
       toast.success('History loaded')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to fetch client history', { error, clientId: client.id })
 
       // Fallback to local history data on error
@@ -1282,7 +1282,7 @@ export default function ClientsPage() {
       toast.success('Email client opened', {
         description: `Composing email to ${state.selectedClient.name}`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to compose email', { error })
       toast.error('Failed to open email client')
     } finally {

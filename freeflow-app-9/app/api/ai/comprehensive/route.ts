@@ -154,7 +154,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Service GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch AI data' },
@@ -448,7 +448,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Service POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
@@ -494,7 +494,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       { success: false, error: 'Conversation ID or Template ID required' },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Service PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update' },
@@ -548,7 +548,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       { success: false, error: 'ID required for deletion' },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Service DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },

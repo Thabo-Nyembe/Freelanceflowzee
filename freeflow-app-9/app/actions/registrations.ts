@@ -76,7 +76,7 @@ export async function createRegistration(data: CreateRegistrationData): Promise<
     revalidatePath('/dashboard/registrations-v2')
     logger.info('Registration created successfully', { registrationId: registration.id })
     return actionSuccess(registration, 'Registration created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating registration', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -105,7 +105,7 @@ export async function updateRegistration(id: string, data: Partial<CreateRegistr
     revalidatePath('/dashboard/registrations-v2')
     logger.info('Registration updated successfully', { registrationId: id })
     return actionSuccess(registration, 'Registration updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating registration', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -148,7 +148,7 @@ export async function deleteRegistration(id: string): Promise<ActionResult<{ suc
     revalidatePath('/dashboard/registrations-v2')
     logger.info('Registration deleted successfully', { registrationId: id })
     return actionSuccess({ success: true }, 'Registration deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting registration', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -180,7 +180,7 @@ export async function checkInRegistration(id: string): Promise<ActionResult<any>
     revalidatePath('/dashboard/registrations-v2')
     logger.info('Registration checked in successfully', { registrationId: id })
     return actionSuccess(registration, 'Registration checked in successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error checking in registration', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -224,7 +224,7 @@ export async function getRegistrationStats(): Promise<ActionResult<any>> {
 
     logger.info('Registration stats fetched successfully', { total: stats.total })
     return actionSuccess(stats, 'Registration statistics retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching registration stats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

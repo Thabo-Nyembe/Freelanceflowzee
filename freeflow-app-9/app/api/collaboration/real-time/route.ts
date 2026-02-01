@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
       message: 'Real-time collaboration API operational'
     });
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Real-time collaboration API error', { error });
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
@@ -238,7 +238,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Real-time collaboration API error', { error });
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
@@ -285,7 +285,7 @@ export async function PUT(request: NextRequest) {
       message: 'Session updated successfully'
     });
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Real-time collaboration API error', { error });
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
@@ -367,7 +367,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Left session successfully'
     });
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Real-time collaboration API error', { error });
     return NextResponse.json(
       { error: error.message || 'Internal server error' },

@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Gallery API error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
@@ -225,7 +225,7 @@ export async function GET(request: NextRequest) {
       total: filtered.length,
       categories: getCategories(items),
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Gallery GET error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined

@@ -45,7 +45,7 @@ export async function getTeamMembers(): Promise<ActionResult<any[]>> {
 
     logger.info('Team members fetched', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Team members retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching team members', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -72,7 +72,7 @@ export async function getTeamMember(id: string): Promise<ActionResult<any>> {
 
     logger.info('Team member fetched', { memberId: id })
     return actionSuccess(data, 'Team member retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching team member', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -104,7 +104,7 @@ export async function createTeamMember(input: TeamMemberInput): Promise<ActionRe
     revalidatePath('/dashboard/team-hub-v2')
     logger.info('Team member created', { memberId: data.id })
     return actionSuccess(data, 'Team member created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating team member', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -136,7 +136,7 @@ export async function updateTeamMember(id: string, input: Partial<TeamMemberInpu
     revalidatePath('/dashboard/team-hub-v2')
     logger.info('Team member updated', { memberId: id })
     return actionSuccess(data, 'Team member updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating team member', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -163,7 +163,7 @@ export async function deleteTeamMember(id: string): Promise<ActionResult<{ succe
     revalidatePath('/dashboard/team-hub-v2')
     logger.info('Team member deleted', { memberId: id })
     return actionSuccess({ success: true }, 'Team member deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting team member', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -213,7 +213,7 @@ export async function toggleTeamMemberLead(id: string): Promise<ActionResult<any
     revalidatePath('/dashboard/team-hub-v2')
     logger.info('Team member lead status toggled', { memberId: id, isLead: data.is_lead })
     return actionSuccess(data, 'Team member lead status updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error toggling team member lead status', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -248,7 +248,7 @@ export async function bulkUpdateTeamMembers(ids: string[], updates: Partial<Team
     revalidatePath('/dashboard/team-hub-v2')
     logger.info('Team members bulk updated', { count: ids.length })
     return actionSuccess({ success: true }, `${ids.length} team members updated successfully`)
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error bulk updating team members', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -286,7 +286,7 @@ export async function getTeamStats(): Promise<ActionResult<any>> {
 
     logger.info('Team stats fetched', { total: stats.total })
     return actionSuccess(stats, 'Team stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching team stats', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

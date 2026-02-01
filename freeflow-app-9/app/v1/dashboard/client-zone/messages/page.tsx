@@ -158,7 +158,7 @@ export default function MessagesPage() {
       toast.success('Message sent!', {
         description: 'Your team will respond within 4-6 hours'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to send message', { error })
       toast.error('Failed to send message', {
         description: error.message || 'Please try again later'
@@ -202,7 +202,7 @@ export default function MessagesPage() {
       setUnreadCount(newUnreadCount)
 
       logger.info('Message marked as read', { messageId })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to mark as read', { error, messageId })
       toast.error('Failed to mark as read')
     }
@@ -235,7 +235,7 @@ export default function MessagesPage() {
       toast.success('Message deleted', {
         description: 'The message has been removed'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete message', { error, messageId })
       toast.error('Failed to delete message')
     }
@@ -278,7 +278,7 @@ export default function MessagesPage() {
       toast.success('Message archived', {
         description: 'Message moved to archived conversations'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to archive message', { error, messageId })
       toast.error('Failed to archive message')
     }
@@ -309,7 +309,7 @@ export default function MessagesPage() {
       toast.success('Message pinned', {
         description: 'Message added to your pinned conversations'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to pin message', { error, messageId })
       toast.error('Failed to pin message')
     }

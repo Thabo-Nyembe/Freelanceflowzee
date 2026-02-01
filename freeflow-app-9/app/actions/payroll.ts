@@ -67,7 +67,7 @@ export async function createPayrollRun(input: CreatePayrollRunInput): Promise<Ac
 
     revalidatePath('/dashboard/payroll-v2')
     return actionSuccess(data, 'Payroll run created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating payroll run', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -97,7 +97,7 @@ export async function updatePayrollRun(id: string, input: UpdatePayrollRunInput)
 
     revalidatePath('/dashboard/payroll-v2')
     return actionSuccess(data, 'Payroll run updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating payroll run', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -127,7 +127,7 @@ export async function processPayrollRun(id: string): Promise<ActionResult<any>> 
 
     revalidatePath('/dashboard/payroll-v2')
     return actionSuccess(data, 'Payroll run processing started')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error processing payroll run', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -161,7 +161,7 @@ export async function approvePayrollRun(id: string, approverName: string): Promi
 
     revalidatePath('/dashboard/payroll-v2')
     return actionSuccess(data, 'Payroll run approved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error approving payroll run', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -189,7 +189,7 @@ export async function deletePayrollRun(id: string): Promise<ActionResult<{ succe
 
     revalidatePath('/dashboard/payroll-v2')
     return actionSuccess({ success: true }, 'Payroll run deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting payroll run', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -245,7 +245,7 @@ export async function addEmployeePayroll(runId: string, input: {
 
     revalidatePath('/dashboard/payroll-v2')
     return actionSuccess(data, 'Employee payroll added successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error adding employee payroll', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -285,7 +285,7 @@ export async function getPayrollRuns(filters?: {
     }
 
     return actionSuccess(data || [], 'Payroll runs retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting payroll runs', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

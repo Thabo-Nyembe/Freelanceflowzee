@@ -200,7 +200,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         )
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Engagement tracking error', { error })
     return NextResponse.json(
       { success: false, error: error.message },
@@ -306,7 +306,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         )
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Engagement fetch error', { error })
     return NextResponse.json(
       { success: false, error: error.message },

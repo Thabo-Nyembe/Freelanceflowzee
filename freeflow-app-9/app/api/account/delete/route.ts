@@ -72,7 +72,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       scheduledDeletion,
       gracePeriodDays: 30
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Account deletion request error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to request account deletion' },
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { success: false, error: 'Invalid action' },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Cancel deletion error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to cancel deletion' },

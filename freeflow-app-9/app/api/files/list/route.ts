@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       )
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('File list error', { error })
 
     return NextResponse.json(

@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     logger.info('WebSocket status requested')
 
     return NextResponse.json(status)
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to get WebSocket status', { error: error.message })
 
     return NextResponse.json(
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: `Broadcast ${event} ${roomId ? `to room ${roomId}` : 'to all clients'}`
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Broadcast failed', { error: error.message })
 
     return NextResponse.json(

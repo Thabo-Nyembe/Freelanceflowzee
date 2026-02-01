@@ -38,7 +38,7 @@ export async function createCourse(courseData: {
     logger.info('Course created successfully', { courseId: course.id })
     revalidatePath('/dashboard/courses-v2')
     return actionSuccess(course, 'Course created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in createCourse', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -71,7 +71,7 @@ export async function publishCourse(id: string): Promise<ActionResult<any>> {
     logger.info('Course published successfully', { id })
     revalidatePath('/dashboard/courses-v2')
     return actionSuccess(course, 'Course published successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in publishCourse', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -113,7 +113,7 @@ export async function enrollStudent(id: string): Promise<ActionResult<any>> {
     logger.info('Student enrolled successfully', { id })
     revalidatePath('/dashboard/courses-v2')
     return actionSuccess(course, 'Student enrolled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in enrollStudent', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -159,7 +159,7 @@ export async function updateCompletionRate(id: string, completedStudents: number
     logger.info('Completion rate updated successfully', { id })
     revalidatePath('/dashboard/courses-v2')
     return actionSuccess(course, 'Completion rate updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateCompletionRate', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -221,7 +221,7 @@ export async function addRating(id: string, rating: number): Promise<ActionResul
     logger.info('Rating added successfully', { id, rating })
     revalidatePath('/dashboard/courses-v2')
     return actionSuccess(course, 'Rating added successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in addRating', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -267,7 +267,7 @@ export async function updateRevenue(id: string, revenue: number): Promise<Action
     logger.info('Revenue updated successfully', { id })
     revalidatePath('/dashboard/courses-v2')
     return actionSuccess(course, 'Revenue updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateRevenue', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -327,7 +327,7 @@ export async function updateEngagementMetrics(id: string, metrics: {
     logger.info('Engagement metrics updated successfully', { id })
     revalidatePath('/dashboard/courses-v2')
     return actionSuccess(course, 'Engagement metrics updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateEngagementMetrics', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -356,7 +356,7 @@ export async function markAsFeatured(id: string, featured: boolean): Promise<Act
     logger.info('Course featured status updated successfully', { id, featured })
     revalidatePath('/dashboard/courses-v2')
     return actionSuccess(course, `Course ${featured ? 'marked' : 'unmarked'} as featured successfully`)
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in markAsFeatured', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -388,7 +388,7 @@ export async function archiveCourse(id: string): Promise<ActionResult<any>> {
     logger.info('Course archived successfully', { id })
     revalidatePath('/dashboard/courses-v2')
     return actionSuccess(course, 'Course archived successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in archiveCourse', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -95,7 +95,7 @@ export async function createBug(input: CreateBugInput): Promise<ActionResult<any
     revalidatePath('/dashboard/bugs-v2')
     logger.info('Bug created successfully', { bugId: data.id, bugCode })
     return actionSuccess(data, 'Bug created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating bug', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -134,7 +134,7 @@ export async function updateBug(id: string, input: UpdateBugInput): Promise<Acti
     revalidatePath('/dashboard/bugs-v2')
     logger.info('Bug updated successfully', { bugId: id })
     return actionSuccess(data, 'Bug updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating bug', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -161,7 +161,7 @@ export async function deleteBug(id: string): Promise<ActionResult<{ success: boo
     revalidatePath('/dashboard/bugs-v2')
     logger.info('Bug deleted successfully', { bugId: id })
     return actionSuccess({ success: true }, 'Bug deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting bug', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -194,7 +194,7 @@ export async function resolveBug(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/bugs-v2')
     logger.info('Bug resolved successfully', { bugId: id })
     return actionSuccess(data, 'Bug resolved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error resolving bug', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -227,7 +227,7 @@ export async function reopenBug(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/bugs-v2')
     logger.info('Bug reopened successfully', { bugId: id })
     return actionSuccess(data, 'Bug reopened successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error reopening bug', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -268,7 +268,7 @@ export async function addBugComment(bugId: string, input: {
     revalidatePath('/dashboard/bugs-v2')
     logger.info('Bug comment added successfully', { bugId, commentId: data.id })
     return actionSuccess(data, 'Comment added successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error adding bug comment', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -310,7 +310,7 @@ export async function voteBug(id: string, increment: boolean = true): Promise<Ac
     revalidatePath('/dashboard/bugs-v2')
     logger.info('Bug vote updated successfully', { bugId: id, newVotes })
     return actionSuccess(data, 'Vote updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error voting bug', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -352,7 +352,7 @@ export async function watchBug(id: string, watch: boolean = true): Promise<Actio
     revalidatePath('/dashboard/bugs-v2')
     logger.info('Bug watch status updated successfully', { bugId: id, newWatchers })
     return actionSuccess(data, 'Watch status updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error watching bug', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -399,7 +399,7 @@ export async function getBugs(filters?: {
 
     logger.info('Bugs retrieved successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Bugs retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting bugs', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -425,7 +425,7 @@ export async function getBugComments(bugId: string): Promise<ActionResult<any[]>
 
     logger.info('Bug comments retrieved successfully', { bugId, count: data?.length || 0 })
     return actionSuccess(data || [], 'Comments retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting bug comments', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

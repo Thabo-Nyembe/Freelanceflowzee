@@ -166,7 +166,7 @@ export default function BusinessAutomationAgentSetup() {
       } else {
         throw new Error(result.error || 'Connection failed');
       }
-    } catch (error: any) {
+    } catch (error) {
       setIntegrations(prev => prev.map(int =>
         int.type === type ? { ...int, status: 'error', error: error.message } : int
       ));
@@ -204,7 +204,7 @@ export default function BusinessAutomationAgentSetup() {
       } else {
         throw new Error(result.error || 'Save failed');
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Save Failed',
         description: error.message,
@@ -239,7 +239,7 @@ export default function BusinessAutomationAgentSetup() {
       } else {
         throw new Error(result.error || 'Setup completion failed');
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Setup Failed',
         description: error.message,

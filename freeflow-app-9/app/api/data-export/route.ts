@@ -80,7 +80,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ success: true, pipelines: pipelines || [] })
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Data Export GET error', { error })
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch data' },
@@ -271,7 +271,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       default:
         return NextResponse.json({ success: false, error: `Unknown action: ${action}` }, { status: 400 })
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Data Export POST error', { error })
     return NextResponse.json({ success: false, error: error.message || 'Operation failed' }, { status: 500 })
   }
@@ -309,7 +309,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
 
     if (error) throw error
     return NextResponse.json({ success: true, message: `${type} deleted` })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Data Export DELETE error', { error })
     return NextResponse.json({ success: false, error: error.message || 'Delete failed' }, { status: 500 })
   }

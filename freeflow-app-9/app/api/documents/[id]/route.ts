@@ -89,7 +89,7 @@ export async function GET(
         return NextResponse.json(response);
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Document GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch document' },
@@ -191,7 +191,7 @@ export async function PUT(
         return NextResponse.json({ document });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Document PUT error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update document' },
@@ -228,7 +228,7 @@ export async function DELETE(
 
     await documentService.deleteDocument(id, user.id);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Document DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete document' },
@@ -286,7 +286,7 @@ export async function PATCH(
     // Partial update
     const document = await documentService.updateDocument(id, user.id, body);
     return NextResponse.json({ document });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Document PATCH error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update document' },

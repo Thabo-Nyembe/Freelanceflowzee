@@ -342,7 +342,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       toast.success('Export completed', {
         description: `Exported ${teamsData?.length || 0} teams`
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed', {
         description: error.message || 'Could not export team data'
       })
@@ -385,7 +385,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       })
       setShowAddMemberModal(false)
       setNewMemberForm({ name: '', email: '', role: '', department: 'Engineering' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to add member', {
         description: error.message || 'Could not add team member'
       })
@@ -402,7 +402,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
         description: `"${team.team_name}" has been archived`
       })
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to archive team', {
         description: error.message || 'Could not archive the team'
       })
@@ -442,7 +442,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       })
       setShowRecognitionModal(false)
       setRecognitionForm({ recipientId: '', value: 'Excellence', message: '' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to send recognition', {
         description: error.message || 'Could not send recognition'
       })
@@ -483,7 +483,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       })
       setShowSchedule1on1Modal(false)
       setSchedule1on1Form({ participantId: '', scheduledDate: '', topics: '' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to schedule 1:1', {
         description: error.message || 'Could not schedule meeting'
       })
@@ -525,7 +525,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       })
       setShowReviewCycleModal(false)
       setReviewCycleForm({ cycleName: '', reviewType: '360', dueDate: '' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to start review cycle', {
         description: error.message || 'Could not start review cycle'
       })
@@ -557,7 +557,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
         description: 'All goals and OKRs have been cleared'
       })
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to reset OKRs', {
         description: error.message || 'Could not reset OKRs'
       })
@@ -582,7 +582,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       toast.success('Reviews archived', {
         description: 'All reviews have been moved to archive'
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to archive reviews', {
         description: error.message || 'Could not archive reviews'
       })
@@ -623,7 +623,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       toast.success('Export completed', {
         description: 'All HR data has been exported'
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed', {
         description: error.message || 'Could not export data'
       })
@@ -637,7 +637,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     try {
       await refetch()
       toast.success('Sync complete', { description: 'All data is up to date' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Sync failed', { description: error.message })
     }
   }

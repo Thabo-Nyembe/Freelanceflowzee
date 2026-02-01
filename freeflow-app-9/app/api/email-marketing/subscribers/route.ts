@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(result);
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to fetch subscribers', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch subscribers' },
@@ -237,7 +237,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Subscriber operation failed', { error });
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
@@ -267,7 +267,7 @@ export async function PUT(request: NextRequest) {
 
     const subscriber = await subscriberService.updateSubscriber(subscriber_id, updates);
     return NextResponse.json({ subscriber });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to update subscriber', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update subscriber' },
@@ -297,7 +297,7 @@ export async function DELETE(request: NextRequest) {
 
     await subscriberService.deleteSubscriber(subscriberId);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to delete subscriber', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete subscriber' },

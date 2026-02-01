@@ -4115,7 +4115,7 @@ export default function MessagesClient() {
                     toast.success(`${uploadedFiles.length} file(s) uploaded successfully`)
                     setShowFileUploadDialog(false)
                     setUploadedFiles([])
-                  } catch (error: any) {
+                  } catch (error) {
                     toast.dismiss()
                     toast.error('Failed to upload files', { description: error.message })
                   }

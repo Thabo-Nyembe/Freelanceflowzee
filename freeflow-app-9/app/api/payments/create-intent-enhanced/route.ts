@@ -227,7 +227,7 @@ export async function POST(request: NextRequest) {
       metadata: paymentIntent.metadata,
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Enhanced payment intent creation failed', {
       error: error.message,
       code: error.code,
@@ -286,7 +286,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Enhanced payment intent retrieval failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to retrieve payment intent' },

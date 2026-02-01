@@ -89,7 +89,7 @@ async function handleCreateTool(supabase: any, userId: string, data: Partial<AIT
       tool,
       message: `AI tool "${tool.name}" created successfully`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to create AI tool'
@@ -124,7 +124,7 @@ async function handleUpdateTool(supabase: any, userId: string, toolId: string, d
       tool,
       message: 'AI tool updated successfully'
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to update AI tool'
@@ -154,7 +154,7 @@ async function handleDeleteTool(supabase: any, userId: string, toolId: string): 
       toolId,
       message: 'AI tool deleted successfully'
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to delete AI tool'
@@ -191,7 +191,7 @@ async function handleBulkDelete(supabase: any, userId: string, toolIds: string[]
       deletedCount: toolIds.length,
       message: `Deleted ${toolIds.length} AI tool(s)`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to delete AI tools'
@@ -267,7 +267,7 @@ async function handleExecuteTool(supabase: any, userId: string, toolId: string):
       result,
       message: 'AI tool executed successfully'
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to execute AI tool'
@@ -302,7 +302,7 @@ async function handleExportTools(supabase: any, userId: string, format: string):
       data: exportData,
       message: `Exported ${tools?.length || 0} AI tools as ${format.toUpperCase()}`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to export AI tools'
@@ -334,7 +334,7 @@ async function handleListTools(supabase: any, userId: string): Promise<NextRespo
       total: tools?.length || 0,
       message: `Found ${tools?.length || 0} AI tools`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to list AI tools'
@@ -412,7 +412,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           error: `Unknown action: ${body.action}`
         }, { status: 400 })
     }
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Invalid request'
@@ -431,7 +431,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     return handleListTools(supabase, user.id)
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to fetch AI tools'

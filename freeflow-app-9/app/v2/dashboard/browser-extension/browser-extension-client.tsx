@@ -765,7 +765,7 @@ export default function BrowserExtensionClient() {
       const fileSizeMB = (deleteCapture.fileSize / (1024 * 1024)).toFixed(1)
       toast.success("Capture deleted - " + deleteCapture.type + " - " + fileSizeMB + " MB freed")
       announce('Capture deleted', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete capture', {
         error: error.message,
         captureId: deleteCapture.id,

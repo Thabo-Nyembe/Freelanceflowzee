@@ -29,7 +29,7 @@ export async function createAutomation(data: Partial<Automation>): Promise<Actio
     logger.info('Automation created successfully', { automationId: automation.id })
     revalidatePath('/dashboard/automation-v2')
     return actionSuccess(automation, 'Automation created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating automation', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -58,7 +58,7 @@ export async function updateAutomation(id: string, data: Partial<Automation>): P
     logger.info('Automation updated successfully', { automationId: id })
     revalidatePath('/dashboard/automation-v2')
     return actionSuccess(automation, 'Automation updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating automation', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -85,7 +85,7 @@ export async function deleteAutomation(id: string): Promise<ActionResult<{ succe
     logger.info('Automation deleted successfully', { automationId: id })
     revalidatePath('/dashboard/automation-v2')
     return actionSuccess({ success: true }, 'Automation deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting automation', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -118,7 +118,7 @@ export async function toggleAutomation(id: string, enabled: boolean): Promise<Ac
     logger.info('Automation toggled successfully', { automationId: id, enabled })
     revalidatePath('/dashboard/automation-v2')
     return actionSuccess(automation, `Automation ${enabled ? 'enabled' : 'disabled'} successfully`)
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error toggling automation', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -179,7 +179,7 @@ export async function runAutomation(id: string): Promise<ActionResult<any>> {
     logger.info('Automation run completed successfully', { automationId: id, executionTime })
     revalidatePath('/dashboard/automation-v2')
     return actionSuccess(completedAutomation, 'Automation run completed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error running automation', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -103,7 +103,7 @@ export function useReports(initialReports: Report[] = [], initialStats?: ReportS
       if (error) throw error
       setReports(data || [])
       setStats(calculateStats(data || [], revenueEntries))
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to fetch reports',
@@ -131,7 +131,7 @@ export function useReports(initialReports: Report[] = [], initialStats?: ReportS
       setRevenueEntries(data || [])
       setStats(calculateStats(reports, data || []))
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to fetch revenue entries',
@@ -173,7 +173,7 @@ export function useReports(initialReports: Report[] = [], initialStats?: ReportS
       })
 
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to create report',
@@ -210,7 +210,7 @@ export function useReports(initialReports: Report[] = [], initialStats?: ReportS
       })
 
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to update report',
@@ -242,7 +242,7 @@ export function useReports(initialReports: Report[] = [], initialStats?: ReportS
       })
 
       return true
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to delete report',
@@ -311,7 +311,7 @@ export function useReports(initialReports: Report[] = [], initialStats?: ReportS
       })
 
       return data
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Error',
         description: error.message || 'Failed to add revenue entry',

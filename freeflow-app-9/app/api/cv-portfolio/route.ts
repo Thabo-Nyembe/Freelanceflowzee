@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('CV Portfolio API error', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: cvData,
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('CV Portfolio GET error', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     return NextResponse.json(
       { success: false, error: error.message },

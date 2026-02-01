@@ -56,7 +56,7 @@ export async function createGalleryItem(input: GalleryItemInput): Promise<Action
     revalidatePath('/dashboard/gallery-v2')
     logger.info('Gallery item created successfully', { itemId: data.id })
     return actionSuccess(data, 'Gallery item created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating gallery item', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -84,7 +84,7 @@ export async function updateGalleryItem(id: string, updates: Partial<GalleryItem
     revalidatePath('/dashboard/gallery-v2')
     logger.info('Gallery item updated successfully', { itemId: id })
     return actionSuccess(data, 'Gallery item updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating gallery item', { error, itemId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -118,7 +118,7 @@ export async function toggleGalleryItemFeatured(id: string): Promise<ActionResul
     revalidatePath('/dashboard/gallery-v2')
     logger.info('Gallery item featured status toggled successfully', { itemId: id, isFeatured: data.is_featured })
     return actionSuccess(data, 'Gallery item featured status toggled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error toggling gallery item featured status', { error, itemId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -152,7 +152,7 @@ export async function toggleGalleryItemPortfolio(id: string): Promise<ActionResu
     revalidatePath('/dashboard/gallery-v2')
     logger.info('Gallery item portfolio status toggled successfully', { itemId: id, isPortfolio: data.is_portfolio })
     return actionSuccess(data, 'Gallery item portfolio status toggled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error toggling gallery item portfolio status', { error, itemId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -178,7 +178,7 @@ export async function deleteGalleryItem(id: string): Promise<ActionResult<{ succ
     revalidatePath('/dashboard/gallery-v2')
     logger.info('Gallery item deleted successfully', { itemId: id })
     return actionSuccess({ success: true }, 'Gallery item deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting gallery item', { error, itemId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -209,7 +209,7 @@ export async function getGalleryItems(collectionId?: string): Promise<ActionResu
 
     logger.info('Gallery items retrieved successfully', { count: data?.length || 0, collectionId })
     return actionSuccess(data || [], 'Gallery items retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting gallery items', { error, collectionId })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -236,7 +236,7 @@ export async function createCollection(input: CollectionInput): Promise<ActionRe
     revalidatePath('/dashboard/gallery-v2')
     logger.info('Collection created successfully', { collectionId: data.id })
     return actionSuccess(data, 'Collection created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating collection', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -264,7 +264,7 @@ export async function updateCollection(id: string, updates: Partial<CollectionIn
     revalidatePath('/dashboard/gallery-v2')
     logger.info('Collection updated successfully', { collectionId: id })
     return actionSuccess(data, 'Collection updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating collection', { error, collectionId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -290,7 +290,7 @@ export async function deleteCollection(id: string): Promise<ActionResult<{ succe
     revalidatePath('/dashboard/gallery-v2')
     logger.info('Collection deleted successfully', { collectionId: id })
     return actionSuccess({ success: true }, 'Collection deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting collection', { error, collectionId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -315,7 +315,7 @@ export async function getCollections(): Promise<ActionResult<any[]>> {
 
     logger.info('Collections retrieved successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Collections retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting collections', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

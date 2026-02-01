@@ -69,7 +69,7 @@ export async function POST(
       shares: shares || [],
       message: 'File shared successfully'
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('File share failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to share file' },

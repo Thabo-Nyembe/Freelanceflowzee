@@ -595,7 +595,7 @@ export default function SalesClient() {
       toast.success('Deal Created')
       setShowCreateDealDialog(false)
       setDealForm(defaultDealForm)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create deal')
     } finally {
       setIsSubmitting(false)
@@ -624,7 +624,7 @@ export default function SalesClient() {
       setShowEditDealDialog(false)
       setSelectedDeal(null)
       setDealForm(defaultDealForm)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to update deal')
     } finally {
       setIsSubmitting(false)
@@ -640,7 +640,7 @@ export default function SalesClient() {
       toast.success('Deal Deleted')
       setShowDeleteConfirm(false)
       setSelectedDeal(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete deal')
     } finally {
       setIsSubmitting(false)
@@ -663,7 +663,7 @@ export default function SalesClient() {
       try {
         await moveDealToStage(dealId, nextStage, probabilities[nextStage])
         toast.success('Stage Updated', { description: 'Deal moved to ' + nextStage })
-      } catch (error: any) {
+      } catch (error) {
         toast.error('Failed to advance stage')
       }
     }
@@ -678,7 +678,7 @@ export default function SalesClient() {
       toast.success('Congratulations!')
       setShowWinLossDialog(null)
       setSelectedDeal(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to mark deal as won')
     } finally {
       setIsSubmitting(false)
@@ -696,7 +696,7 @@ export default function SalesClient() {
       setSelectedDeal(null)
       setLossReason('')
       setCompetitor('')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to mark deal as lost')
     } finally {
       setIsSubmitting(false)
@@ -718,7 +718,7 @@ export default function SalesClient() {
       toast.success('Activity Logged')
       setShowActivityDialog(false)
       setActivityForm({ activity_type: 'call', subject: '', description: '', outcome: '' })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to log activity')
     } finally {
       setIsSubmitting(false)

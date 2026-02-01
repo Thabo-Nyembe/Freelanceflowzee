@@ -481,7 +481,7 @@ export default function PerformanceAnalyticsClient() {
       setLastRefresh(new Date())
       setShowRefreshDialog(false)
       // Toast is handled by refetchAllApiData
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to refresh metrics', { description: error.message })
     } finally {
       setIsRefreshing(false)
@@ -559,7 +559,7 @@ export default function PerformanceAnalyticsClient() {
       toast.success('Export completed', {
         description: `${dataTypes.join(', ')} exported as ${exportFormat.toUpperCase()} for ${exportTimeRange}`
       })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Export failed', { description: error.message })
     } finally {
       setIsExporting(false)

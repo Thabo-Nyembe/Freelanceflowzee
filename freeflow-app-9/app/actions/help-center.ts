@@ -79,7 +79,7 @@ export async function fetchArticles(): Promise<ActionResult<HelpArticle[]>> {
 
     logger.info('Articles fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Articles fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching articles', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -109,7 +109,7 @@ export async function createArticle(article: Partial<HelpArticle>): Promise<Acti
     logger.info('Article created successfully', { articleId: data.id })
     revalidatePath('/dashboard/help-center-v2')
     return actionSuccess(data, 'Article created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating article', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -140,7 +140,7 @@ export async function updateArticle(id: string, updates: Partial<HelpArticle>): 
     logger.info('Article updated successfully', { articleId: id })
     revalidatePath('/dashboard/help-center-v2')
     return actionSuccess(data, 'Article updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating article', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -169,7 +169,7 @@ export async function deleteArticle(id: string): Promise<ActionResult<{ success:
     logger.info('Article deleted successfully', { articleId: id })
     revalidatePath('/dashboard/help-center-v2')
     return actionSuccess({ success: true }, 'Article deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting article', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -203,7 +203,7 @@ export async function publishArticle(id: string): Promise<ActionResult<HelpArtic
     logger.info('Article published successfully', { articleId: id })
     revalidatePath('/dashboard/help-center-v2')
     return actionSuccess(data, 'Article published successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error publishing article', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -234,7 +234,7 @@ export async function unpublishArticle(id: string): Promise<ActionResult<HelpArt
     logger.info('Article unpublished successfully', { articleId: id })
     revalidatePath('/dashboard/help-center-v2')
     return actionSuccess(data, 'Article unpublished successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error unpublishing article', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -265,7 +265,7 @@ export async function archiveArticle(id: string): Promise<ActionResult<HelpArtic
     logger.info('Article archived successfully', { articleId: id })
     revalidatePath('/dashboard/help-center-v2')
     return actionSuccess(data, 'Article archived successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error archiving article', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -291,7 +291,7 @@ export async function incrementArticleViewCount(id: string): Promise<ActionResul
 
     logger.info('Article view count incremented', { articleId: id })
     return actionSuccess({ success: true }, 'View count incremented successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error incrementing view count', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -321,7 +321,7 @@ export async function fetchCategories(): Promise<ActionResult<HelpCategory[]>> {
 
     logger.info('Categories fetched successfully', { count: data?.length || 0 })
     return actionSuccess(data || [], 'Categories fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching categories', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -351,7 +351,7 @@ export async function createCategory(category: Partial<HelpCategory>): Promise<A
     logger.info('Category created successfully', { categoryId: data.id })
     revalidatePath('/dashboard/help-center-v2')
     return actionSuccess(data, 'Category created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating category', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -382,7 +382,7 @@ export async function updateCategory(id: string, updates: Partial<HelpCategory>)
     logger.info('Category updated successfully', { categoryId: id })
     revalidatePath('/dashboard/help-center-v2')
     return actionSuccess(data, 'Category updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating category', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -411,7 +411,7 @@ export async function deleteCategory(id: string): Promise<ActionResult<{ success
     logger.info('Category deleted successfully', { categoryId: id })
     revalidatePath('/dashboard/help-center-v2')
     return actionSuccess({ success: true }, 'Category deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting category', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -448,7 +448,7 @@ export async function submitArticleFeedback(
     logger.info('Article feedback submitted successfully', { articleId, isHelpful })
     revalidatePath('/dashboard/help-center-v2')
     return actionSuccess(data, 'Feedback submitted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error submitting article feedback', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -472,7 +472,7 @@ export async function fetchArticleFeedback(articleId: string): Promise<ActionRes
 
     logger.info('Article feedback fetched successfully', { articleId, count: data?.length || 0 })
     return actionSuccess(data || [], 'Feedback fetched successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching article feedback', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

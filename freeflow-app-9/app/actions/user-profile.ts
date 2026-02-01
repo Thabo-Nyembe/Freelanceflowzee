@@ -87,7 +87,7 @@ export async function getUserProfile(): Promise<ActionResult<any>> {
 
     logger.info('User profile retrieved', { userId: user.id })
     return actionSuccess(data, 'User profile retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in getUserProfile', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -138,7 +138,7 @@ export async function createUserProfile(input: UserProfileInput): Promise<Action
     revalidatePath('/dashboard/profile-v2')
     logger.info('User profile created', { userId: user.id })
     return actionSuccess(data, 'User profile created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in createUserProfile', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -171,7 +171,7 @@ export async function updateUserProfile(input: Partial<UserProfileInput>): Promi
     revalidatePath('/dashboard/profile-v2')
     logger.info('User profile updated', { userId: user.id })
     return actionSuccess(data, 'User profile updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in updateUserProfile', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -214,7 +214,7 @@ export async function upsertUserProfile(input: UserProfileInput): Promise<Action
     revalidatePath('/dashboard/profile-v2')
     logger.info('User profile upserted', { userId: user.id })
     return actionSuccess(data, 'User profile saved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in upsertUserProfile', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -261,7 +261,7 @@ export async function addSkill(skill: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/profile-v2')
     logger.info('Skill added to profile', { userId: user.id, skill })
     return actionSuccess(data, 'Skill added successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in addSkill', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -295,7 +295,7 @@ export async function removeSkill(skill: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/profile-v2')
     logger.info('Skill removed from profile', { userId: user.id, skill })
     return actionSuccess(data, 'Skill removed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in removeSkill', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -330,7 +330,7 @@ export async function addExperience(experience: Omit<ExperienceItem, 'id'>): Pro
     revalidatePath('/dashboard/profile-v2')
     logger.info('Experience added to profile', { userId: user.id })
     return actionSuccess(data, 'Experience added successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in addExperience', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -364,7 +364,7 @@ export async function removeExperience(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/profile-v2')
     logger.info('Experience removed from profile', { userId: user.id })
     return actionSuccess(data, 'Experience removed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in removeExperience', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -399,7 +399,7 @@ export async function addPortfolioItem(item: Omit<PortfolioItem, 'id'>): Promise
     revalidatePath('/dashboard/profile-v2')
     logger.info('Portfolio item added to profile', { userId: user.id })
     return actionSuccess(data, 'Portfolio item added successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in addPortfolioItem', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -433,7 +433,7 @@ export async function removePortfolioItem(id: string): Promise<ActionResult<any>
     revalidatePath('/dashboard/profile-v2')
     logger.info('Portfolio item removed from profile', { userId: user.id })
     return actionSuccess(data, 'Portfolio item removed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in removePortfolioItem', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -480,7 +480,7 @@ export async function getProfileStats(): Promise<ActionResult<any>> {
 
     logger.info('Profile stats retrieved', { userId: user.id })
     return actionSuccess(stats, 'Profile stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error in getProfileStats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

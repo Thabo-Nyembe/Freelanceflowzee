@@ -292,7 +292,7 @@ export default function InvoicesPage() {
 
       setIsDialogOpen(false)
       setIsSubmitting(false)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to save invoice', { error })
       toast.error('Failed to save invoice', {
         description: error.message
@@ -333,7 +333,7 @@ export default function InvoicesPage() {
         invoiceNumber: invoice.number,
         recipient: invoice.client
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to send invoice', { error, invoiceId: invoice.id })
       toast.error('Failed to send invoice', {
         description: error.message
@@ -384,7 +384,7 @@ Thank you for your business!
       })
 
       logger.info('PDF downloaded successfully', { invoiceId: invoice.id })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('PDF generation failed', { error, invoiceId: invoice.id })
       toast.error('Download failed', {
         id: 'pdf-gen',
@@ -437,7 +437,7 @@ Thank you for your business!
         invoiceId: invoiceToMarkPaid.id,
         amount: invoiceToMarkPaid.amount
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to mark as paid', { error, invoiceId: invoiceToMarkPaid.id })
       toast.error('Failed to mark as paid', {
         description: error.message
@@ -480,7 +480,7 @@ Thank you for your business!
       })
 
       logger.info('Invoice deleted', { invoiceId: invoiceToDelete.id })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete invoice', { error, invoiceId: invoiceToDelete.id })
       toast.error('Failed to delete invoice', {
         description: error.message
@@ -533,7 +533,7 @@ KAZI Team
         invoiceId: invoice.id,
         daysOverdue
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to send reminder', { error, invoiceId: invoice.id })
       toast.error('Failed to send reminder', {
         id: 'reminder',

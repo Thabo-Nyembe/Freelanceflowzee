@@ -147,7 +147,7 @@ export default function ContactPage() {
           description: result.error || 'Please try again later'
         })
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Contact form error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         formData: {

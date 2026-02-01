@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
       message: 'Payment intent created. Complete payment using Stripe Elements.',
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Invoice retry payment failed', {
       error: error.message,
       code: error.code,
@@ -293,7 +293,7 @@ export async function GET(request: NextRequest) {
       paymentIntentId: invoice?.stripe_payment_intent_id,
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Invoice status check failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to check invoice status' },

@@ -664,7 +664,7 @@ export default function ClientZoneClient() {
       const data = await getClientZoneDashboard()
       setDashboardData(data)
       setProjects(data.recentProjects)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to request revision', { error, projectId: revisionProjectId, userId })
       toast.error('Failed to request revision')
     } finally {
@@ -688,7 +688,7 @@ export default function ClientZoneClient() {
       const data = await getClientZoneDashboard()
       setDashboardData(data)
       setProjects(data.recentProjects)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to approve deliverable', { error, deliverableId, userId })
       toast.error('Failed to approve deliverable')
     }
@@ -779,7 +779,7 @@ export default function ClientZoneClient() {
       // Reload messages
       const data = await getClientZoneDashboard()
       setMessages(data.recentMessages)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to send message', { error, userId })
       toast.error('Failed to send message')
     }
@@ -814,7 +814,7 @@ export default function ClientZoneClient() {
       // Reload dashboard
       const data = await getClientZoneDashboard()
       setDashboardData(data)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to submit feedback', { error, userId })
       toast.error('Failed to submit feedback')
     }
@@ -884,7 +884,7 @@ export default function ClientZoneClient() {
 
       if (response.ok) {        toast.success('Project proposal sent!')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to send proposal', { error, projectId, userId })
       toast.error('Failed to send proposal')
     }
@@ -914,7 +914,7 @@ export default function ClientZoneClient() {
 
       if (response.ok) {        toast.success('Milestone approved!')
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to approve milestone', { error, milestoneId, userId })
       toast.error('Failed to approve milestone')
     }
@@ -971,7 +971,7 @@ export default function ClientZoneClient() {
       const dashboardData = await getClientZoneDashboard()
       setDashboardData(dashboardData)
       setInvoices(dashboardData.pendingInvoices)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to submit dispute', { error, invoiceNumber: disputeInvoiceNumber, userId })
       toast.error('Failed to submit dispute')
       announce('Error submitting invoice dispute', 'assertive')
@@ -1215,7 +1215,7 @@ export default function ClientZoneClient() {
       const results = await searchClientZone(query)
       setFilteredClients(results.projects)
       toast.success("Found " + results.projects.length + " matching projects")
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Search failed', { error, userId })
       toast.error('Search failed')
     }
@@ -1238,7 +1238,7 @@ export default function ClientZoneClient() {
         setProjects(filtered)
       }
       announce(`Showing ${status === 'all' ? 'all' : status} projects`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Filter failed', { error, userId })
       toast.error('Failed to filter projects')
     }
@@ -1269,7 +1269,7 @@ export default function ClientZoneClient() {
         ]
       })
       setShowClientHistoryDialog(true)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to load client history', { error, userId })
       toast.error('Failed to load client history')
     }
@@ -1284,7 +1284,7 @@ export default function ClientZoneClient() {
 
     try {
       const notifs = await getNotifications({ limit: 20 })
-      setNotifications(notifs)    } catch (error: any) {
+      setNotifications(notifs)    } catch (error) {
       logger.error('Failed to load notifications', { error, userId })
       toast.error('Failed to load notifications')
     } finally {
@@ -1300,7 +1300,7 @@ export default function ClientZoneClient() {
       await markAllNotificationsAsRead()
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
       toast.success('All notifications marked as read')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to mark notifications as read', { error, userId })
       toast.error('Failed to mark notifications as read')
     }

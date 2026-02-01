@@ -443,7 +443,7 @@ export default function ARCollaborationPage() {
 
         dispatch({ type: 'SET_SESSIONS', sessions: sessions || [] })
         announce('AR collaboration page loaded', 'polite')
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to load sessions', { error: error.message })
         dispatch({ type: 'SET_ERROR', error: 'Failed to load sessions' })
         announce('Failed to load AR sessions', 'assertive')
@@ -604,7 +604,7 @@ export default function ARCollaborationPage() {
 
       toast.success(`AR session created - ${sessionName} - ${getEnvironmentName(sessionEnvironment)} - ${maxParticipants} max participants`)
       announce('AR session created', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Session creation failed', { error: error.message, name: sessionName, userId })
       toast.error('Failed to create session')
       announce('Failed to create session', 'assertive')
@@ -684,7 +684,7 @@ export default function ARCollaborationPage() {
       dispatch({ type: 'DELETE_SESSION', sessionId: deleteSession.id })
       toast.success(`Session deleted - ${getEnvironmentName(deleteSession.environment)}`)
       announce('Session deleted', 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete session', {
         error: error.message,
         sessionId: deleteSession.id,
@@ -706,7 +706,7 @@ export default function ARCollaborationPage() {
     if (userId) {
       try {
         const { updateSession } = await import('@/lib/ar-collaboration-queries')
-        await updateSession(sessionId, { is_recording: newStatus })      } catch (error: any) {
+        await updateSession(sessionId, { is_recording: newStatus })      } catch (error) {
         logger.error('Failed to persist recording status', { error: error.message })
       }
     }
@@ -725,7 +725,7 @@ export default function ARCollaborationPage() {
     if (userId) {
       try {
         const { updateSession } = await import('@/lib/ar-collaboration-queries')
-        await updateSession(sessionId, { is_locked: newStatus })      } catch (error: any) {
+        await updateSession(sessionId, { is_locked: newStatus })      } catch (error) {
         logger.error('Failed to persist lock status', { error: error.message })
       }
     }

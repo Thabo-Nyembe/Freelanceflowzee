@@ -223,7 +223,7 @@ export default function CalendarPage() {
 
       // Open meeting URL
       window.open(meeting.meetingUrl, '_blank')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to join meeting', { error, meetingId: meeting.id })
       toast.error('Failed to join meeting', {
         description: error.message || 'Please try again later'
@@ -255,7 +255,7 @@ export default function CalendarPage() {
         description: 'Select date, time, and attendees'
       })
       setShowScheduleDialog(true)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to schedule meeting', { error })
       toast.error('Failed to open scheduler', {
         description: error.message || 'Please try again later'
@@ -292,7 +292,7 @@ export default function CalendarPage() {
       toast.success('Meeting rescheduled', {
         description: `${meeting.title} has been updated`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to reschedule meeting', { error, meetingId })
       toast.error('Failed to reschedule', {
         description: error.message || 'Please try again later'
@@ -336,7 +336,7 @@ export default function CalendarPage() {
       toast.success('Meeting cancelled', {
         description: `${cancelMeeting.title} has been cancelled`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to cancel meeting', { error, meetingId: cancelMeeting.id })
       toast.error('Failed to cancel meeting', {
         description: error.message || 'Please try again later'
@@ -375,7 +375,7 @@ export default function CalendarPage() {
       toast.success('Reminder set', {
         description: 'You will be notified 15 minutes before the meeting'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to set reminder', { error, meetingId })
       toast.error('Failed to set reminder', {
         description: error.message || 'Please try again later'

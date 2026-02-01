@@ -71,7 +71,7 @@ const applyMiddleware = async (req: NextRequest) => {
 const errorHandler = async (fn: (req: NextRequest) => Promise<Response>, req: NextRequest) => {
   try {
     return await fn(req);
-  } catch (error: any) {
+  } catch (error) {
     logger.error('API Error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,

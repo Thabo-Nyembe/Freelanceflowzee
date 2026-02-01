@@ -81,7 +81,7 @@ export async function createForm(data: CreateFormData): Promise<ActionResult<any
     revalidatePath('/dashboard/forms-v2')
     logger.info('Form created successfully', { formId: form.id })
     return actionSuccess(form, 'Form created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating form', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -111,7 +111,7 @@ export async function updateForm({ id, ...data }: UpdateFormData): Promise<Actio
     revalidatePath('/dashboard/forms-v2')
     logger.info('Form updated successfully', { formId: id })
     return actionSuccess(form, 'Form updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating form', { error, formId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -139,7 +139,7 @@ export async function deleteForm(id: string): Promise<ActionResult<void>> {
     revalidatePath('/dashboard/forms-v2')
     logger.info('Form deleted successfully', { formId: id })
     return actionSuccess(undefined, 'Form deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting form', { error, formId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -172,7 +172,7 @@ export async function publishForm(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/forms-v2')
     logger.info('Form published successfully', { formId: id })
     return actionSuccess(form, 'Form published successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error publishing form', { error, formId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -202,7 +202,7 @@ export async function pauseForm(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/forms-v2')
     logger.info('Form paused successfully', { formId: id })
     return actionSuccess(form, 'Form paused successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error pausing form', { error, formId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -235,7 +235,7 @@ export async function closeForm(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/forms-v2')
     logger.info('Form closed successfully', { formId: id })
     return actionSuccess(form, 'Form closed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error closing form', { error, formId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -288,7 +288,7 @@ export async function duplicateForm(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/forms-v2')
     logger.info('Form duplicated successfully', { originalId: id, duplicateId: duplicatedForm.id })
     return actionSuccess(duplicatedForm, 'Form duplicated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error duplicating form', { error, formId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -325,7 +325,7 @@ export async function incrementFormViews(id: string): Promise<ActionResult<void>
     revalidatePath('/dashboard/forms-v2')
     logger.info('Form views incremented successfully', { formId: id })
     return actionSuccess(undefined, 'Form views incremented successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error incrementing form views', { error, formId: id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -379,7 +379,7 @@ export async function getFormStats(): Promise<ActionResult<any>> {
 
     logger.info('Form stats retrieved successfully', { total: stats.total })
     return actionSuccess(stats, 'Form stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting form stats', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -331,7 +331,7 @@ export default function GalleryClient() {
       toast.success(`Photo uploaded: "${uploadForm.title}" has been uploaded successfully`)
       setShowUploadDialog(false)
       setUploadForm({ title: '', description: '', tags: '', file_url: '', file_type: 'image', is_public: true })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Upload failed')
     } finally {
       setIsSubmitting(false)
@@ -362,7 +362,7 @@ export default function GalleryClient() {
       toast.success(`Collection created: "${collectionForm.name}" has been created`)
       setShowCreateCollection(false)
       setCollectionForm({ name: '', description: '', is_public: true })
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Creation failed')
     } finally {
       setIsSubmitting(false)
@@ -377,7 +377,7 @@ export default function GalleryClient() {
     try {
       await deleteCollection(collection.id)
       toast.success(`Collection deleted: "${collection.name}" has been deleted`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete failed')
     }
   }
@@ -404,7 +404,7 @@ export default function GalleryClient() {
         toast.success(
           isCurrentlyLiked ? 'Unliked' : 'Liked'
         )
-      } catch (error: any) {
+      } catch (error) {
         // Revert on error
         if (isCurrentlyLiked) {
           newLiked.add(photoId)
@@ -446,7 +446,7 @@ export default function GalleryClient() {
         toast.success(
           isCurrentlySaved ? 'Unsaved' : 'Saved'
         )
-      } catch (error: any) {
+      } catch (error) {
         // Revert on error
         if (isCurrentlySaved) {
           newSaved.add(photoId)
@@ -500,7 +500,7 @@ export default function GalleryClient() {
       await deleteGalleryItem(item.id)
       toast.success(`Photo deleted: "${item.title || 'Photo'}" has been deleted`)
       setSelectedGalleryItem(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Delete failed')
     }
   }
@@ -518,7 +518,7 @@ export default function GalleryClient() {
       }
 
       toast.success(`Following ${photographerName}`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to follow')
     }
   }
@@ -565,7 +565,7 @@ export default function GalleryClient() {
 
       setUploadForm(prev => ({ ...prev, file_url: publicUrl }))
       toast.success('File uploaded')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Upload failed')
     } finally {
       setIsSubmitting(false)

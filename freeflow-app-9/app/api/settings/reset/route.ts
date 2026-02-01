@@ -225,7 +225,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Settings reset error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to reset settings' },
@@ -269,7 +269,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         privacy: defaultPrivacySettings
       }
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Get defaults error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to get defaults' },

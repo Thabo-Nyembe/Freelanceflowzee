@@ -747,7 +747,7 @@ export default function CVPortfolioPage() {
         description: `"${project.title}" removed from portfolio`
       })
       announce(`Project ${project.title} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete project', { error: error.message, projectId: projectToDelete })
       toast.error('Failed to delete project', {
         description: error.message || 'Please try again'
@@ -833,7 +833,7 @@ export default function CVPortfolioPage() {
         description: `${name} (${proficiency}/5 stars) - ${skills.length + 1} skills total`
       })
       announce(`Skill ${name} added`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to add skill', { error: error.message })
       toast.error('Failed to add skill', {
         description: error.message || 'Please try again'
@@ -866,7 +866,7 @@ export default function CVPortfolioPage() {
       toast.success('Skill Updated!', {
         description: `${skill.name}: ${newProficiency}/5 stars`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to update skill', { error: error.message, skillId })
       toast.error('Failed to update skill', {
         description: error.message || 'Please try again'
@@ -911,7 +911,7 @@ export default function CVPortfolioPage() {
         description: `${skill.name} deleted (${skills.length - 1} skills remaining)`
       })
       announce(`Skill ${skill.name} removed`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to remove skill', { error: error.message, skillId: skillToRemove })
       toast.error('Failed to remove skill', {
         description: error.message || 'Please try again'
@@ -1088,7 +1088,7 @@ export default function CVPortfolioPage() {
         description: `${exp.position} at ${exp.company} removed`
       })
       announce(`Experience at ${exp.company} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete experience', { error: error.message, experienceId: experienceToDelete })
       toast.error('Failed to delete experience', {
         description: error.message || 'Please try again'
@@ -1243,7 +1243,7 @@ export default function CVPortfolioPage() {
         description: `${edu.degree} removed from CV`
       })
       announce(`Education ${edu.degree} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete education', { error: error.message, educationId: educationToDelete })
       toast.error('Failed to delete education', {
         description: error.message || 'Please try again'
@@ -1389,7 +1389,7 @@ export default function CVPortfolioPage() {
         description: `${achievement.title} removed`
       })
       announce(`Achievement ${achievement.title} deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to delete achievement', { error: error.message, achievementId: achievementToDelete })
       toast.error('Failed to delete achievement', {
         description: error.message || 'Please try again'
@@ -1550,7 +1550,7 @@ export default function CVPortfolioPage() {
       toast.success(`CV Exported as ${format}!`, {
         description: `${a.download} (${completenessScore}% complete)`
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export CV', {
         error: error.message,
         format
@@ -1605,7 +1605,7 @@ export default function CVPortfolioPage() {
         toast.success('CV Imported!', {
           description: `Data loaded from ${file.name} (${newCompleteness}% complete)`
         })
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to import CV', {
           error: error.message,
           fileName: file.name
@@ -1652,7 +1652,7 @@ export default function CVPortfolioPage() {
       toast.success('Share Link Generated!', {
         description: 'Link copied to clipboard. Valid for 30 days.'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to generate share link', {
         error: error.message
       })
@@ -1844,7 +1844,7 @@ export default function CVPortfolioPage() {
         description: `${projectsToDelete.length} projects removed`
       })
       announce(`${projectsToDelete.length} projects deleted`, 'polite')
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to bulk delete projects', { error: error.message, projectIds: projectsToDelete })
       toast.error('Failed to delete projects', {
         description: error.message || 'Please try again'
@@ -1950,7 +1950,7 @@ export default function CVPortfolioPage() {
       toast.success('Link Copied!', {
         description: 'Portfolio link copied to clipboard'
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to copy link', {
         error: error.message
       })

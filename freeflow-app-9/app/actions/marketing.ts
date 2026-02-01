@@ -71,7 +71,7 @@ export async function createMarketingCampaign(input: MarketingCampaignInput): Pr
     logger.info('Marketing campaign created successfully', { campaignId: data.id })
     revalidatePath('/dashboard/marketing-v2')
     return actionSuccess(data, 'Marketing campaign created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating marketing campaign', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -100,7 +100,7 @@ export async function updateMarketingCampaign(id: string, updates: Partial<Marke
     logger.info('Marketing campaign updated successfully', { campaignId: id })
     revalidatePath('/dashboard/marketing-v2')
     return actionSuccess(data, 'Marketing campaign updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating marketing campaign', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -127,7 +127,7 @@ export async function deleteMarketingCampaign(id: string): Promise<ActionResult<
     logger.info('Marketing campaign deleted successfully', { campaignId: id })
     revalidatePath('/dashboard/marketing-v2')
     return actionSuccess({ success: true }, 'Marketing campaign deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting marketing campaign', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -196,7 +196,7 @@ export async function updateCampaignMetrics(
     logger.info('Campaign metrics updated successfully', { campaignId: id })
     revalidatePath('/dashboard/marketing-v2')
     return actionSuccess(data, 'Campaign metrics updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating campaign metrics', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -222,7 +222,7 @@ export async function getMarketingCampaigns(): Promise<ActionResult<any[]>> {
     }
 
     return actionSuccess(data || [], 'Marketing campaigns retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting marketing campaigns', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -260,7 +260,7 @@ export async function createMarketingChannel(input: MarketingChannelInput): Prom
     logger.info('Marketing channel created successfully', { channelId: data.id })
     revalidatePath('/dashboard/marketing-v2')
     return actionSuccess(data, 'Marketing channel created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating marketing channel', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -289,7 +289,7 @@ export async function updateMarketingChannel(id: string, updates: Partial<Market
     logger.info('Marketing channel updated successfully', { channelId: id })
     revalidatePath('/dashboard/marketing-v2')
     return actionSuccess(data, 'Marketing channel updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating marketing channel', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -314,7 +314,7 @@ export async function getMarketingChannels(): Promise<ActionResult<any[]>> {
     }
 
     return actionSuccess(data || [], 'Marketing channels retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting marketing channels', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

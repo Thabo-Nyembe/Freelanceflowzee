@@ -360,7 +360,7 @@ export default function AIAssistantPage() {
     if (userId) {
       try {
         const { rateMessage } = await import('@/lib/ai-assistant-queries')
-        await rateMessage(messageId, rating)      } catch (error: any) {
+        await rateMessage(messageId, rating)      } catch (error) {
         logger.error('Failed to persist message rating', { error: error.message })
       }
     }
@@ -601,7 +601,7 @@ export default function AIAssistantPage() {
         const { implementInsight } = await import('@/lib/ai-assistant-queries')
         await implementInsight(insightId, action)
         toast.success(`Action started - ${action} (${insight?.priority} priority)`)
-      } catch (error: any) {
+      } catch (error) {
         logger.error('Failed to track insight implementation', { error: error.message })
         toast.error('Failed to start action')
       }

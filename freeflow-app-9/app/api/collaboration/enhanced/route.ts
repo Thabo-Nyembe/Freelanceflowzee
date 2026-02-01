@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Enhanced collaboration GET failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to fetch collaboration data' },
@@ -382,7 +382,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Enhanced collaboration POST failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to process collaboration request' },
@@ -474,7 +474,7 @@ export async function PUT(request: NextRequest) {
       { status: 400 }
     )
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Enhanced collaboration PUT failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to update collaboration' },
@@ -557,7 +557,7 @@ export async function DELETE(request: NextRequest) {
       action: 'left_session',
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Enhanced collaboration DELETE failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to process leave request' },

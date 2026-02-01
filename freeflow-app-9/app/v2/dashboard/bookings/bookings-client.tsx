@@ -257,7 +257,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         requirePayment: false
       })
       refetch()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -274,7 +274,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -291,7 +291,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -327,7 +327,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       if (selectedBooking?.id === rescheduleData.bookingId) {
         setSelectedBooking(null)
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }
@@ -344,7 +344,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Error')
     }
   }

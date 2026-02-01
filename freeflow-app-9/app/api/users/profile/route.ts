@@ -105,7 +105,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ success: true, profile, stats });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Profile GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch profile data' },
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Profile POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
@@ -346,7 +346,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Profile PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update' },
@@ -410,7 +410,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Profile DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },

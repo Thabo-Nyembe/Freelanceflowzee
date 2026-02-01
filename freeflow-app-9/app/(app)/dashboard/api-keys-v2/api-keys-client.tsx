@@ -469,7 +469,7 @@ export default function ApiKeysClient() {
       } else {
         toast.success('API key created successfully!')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create API key')
     }
   }
@@ -492,7 +492,7 @@ export default function ApiKeysClient() {
       }
 
       toast.success(`${keyName} has been revoked successfully`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error(`Failed to revoke ${keyName}`)
     }
   }
@@ -521,7 +521,7 @@ export default function ApiKeysClient() {
       } else {
         toast.success(`Key regenerated for ${keyName}`)
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error(`Failed to regenerate key for ${keyName}`)
     }
   }
@@ -539,7 +539,7 @@ export default function ApiKeysClient() {
       }
 
       toast.success(`${keyName} has been deleted successfully`)
-    } catch (error: any) {
+    } catch (error) {
       toast.error(`Failed to delete ${keyName}`)
     }
   }
@@ -1880,7 +1880,7 @@ export default function ApiKeysClient() {
                   toast.success(`Expiration set to ${expiryDays === 'never' ? 'never expire' : expiryDays + ' days'}`, { id: 'set-expiry', description: keyToAction?.name || 'selected key' })
                   setSetExpiryDialogOpen(false)
                   setKeyToAction(null)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to set expiration', { id: 'set-expiry', description: error.message })
                 }
               }}>Set Expiration</Button>
@@ -1955,7 +1955,7 @@ export default function ApiKeysClient() {
                   toast.success('Permissions updated successfully', { id: 'update-permissions', description: keyToAction?.name })
                   setPermissionsDialogOpen(false)
                   setKeyToAction(null)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to update permissions', { id: 'update-permissions', description: error.message })
                 }
               }}>Save Permissions</Button>
@@ -2157,7 +2157,7 @@ export default function ApiKeysClient() {
                   setCreateAppDialogOpen(false)
                   setNewAppName('')
                   setNewAppDescription('')
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to create application', { id: 'create-app', description: error.message })
                 }
               }}>Create Application</Button>
@@ -2239,7 +2239,7 @@ export default function ApiKeysClient() {
 
                   toast.success('Application settings saved', { id: 'app-settings', description: selectedApp?.name })
                   setAppSettingsDialogOpen(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to save settings', { id: 'app-settings', description: error.message })
                 }
               }}>Save Settings</Button>
@@ -2357,7 +2357,7 @@ console.log(user);`}</code>
                   URL.revokeObjectURL(url)
                   toast.success('Logs exported', { id: 'export-logs', description: 'File downloaded successfully' })
                   setExportLogsDialogOpen(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Export failed', { id: 'export-logs', description: error.message })
                 }
               }}>Export Logs</Button>
@@ -2428,7 +2428,7 @@ console.log(user);`}</code>
                   setNewWebhookName('')
                   setNewWebhookUrl('')
                   setNewWebhookEvents([])
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to create webhook', { id: 'create-webhook', description: error.message })
                 }
               }}>Create Webhook</Button>
@@ -2489,7 +2489,7 @@ console.log(user);`}</code>
 
                   toast.success('Test webhook sent successfully!', { id: 'test-webhook', description: `Status: 200 OK - Response time: ${responseTime}ms` })
                   setTestWebhookDialogOpen(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to send webhook', { id: 'test-webhook', description: error.message })
                 }
               }}>Send Test Event</Button>
@@ -2575,7 +2575,7 @@ console.log(user);`}</code>
 
                   toast.success('Webhook settings saved', { id: 'webhook-settings' })
                   setWebhookSettingsDialogOpen(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to save settings', { id: 'webhook-settings', description: error.message })
                 }
               }}>Save Settings</Button>
@@ -2812,7 +2812,7 @@ console.log(user);`}</code>
 
                   toast.success('Settings saved', { id: 'quick-settings' })
                   setSettingsDialogOpen(false)
-                } catch (error: any) {
+                } catch (error) {
                   toast.error('Failed to save settings', { id: 'quick-settings', description: error.message })
                 }
               }}>Save</Button>

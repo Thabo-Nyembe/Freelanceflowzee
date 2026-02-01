@@ -65,7 +65,7 @@ export async function createSurvey(data: CreateSurveyData): Promise<ActionResult
     revalidatePath('/dashboard/surveys-v2')
     logger.info('Survey created', { surveyId: survey.id })
     return actionSuccess(survey, 'Survey created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating survey', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -94,7 +94,7 @@ export async function updateSurvey(id: string, data: Partial<CreateSurveyData>):
     revalidatePath('/dashboard/surveys-v2')
     logger.info('Survey updated', { surveyId: id })
     return actionSuccess(survey, 'Survey updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating survey', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -134,7 +134,7 @@ export async function deleteSurvey(id: string, hardDelete: boolean = false): Pro
     revalidatePath('/dashboard/surveys-v2')
     logger.info('Survey deleted', { surveyId: id, hardDelete })
     return actionSuccess({ success: true }, 'Survey deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting survey', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -170,7 +170,7 @@ export async function activateSurvey(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/surveys-v2')
     logger.info('Survey activated', { surveyId: id })
     return actionSuccess(survey, 'Survey activated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error activating survey', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -202,7 +202,7 @@ export async function closeSurvey(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/surveys-v2')
     logger.info('Survey closed', { surveyId: id })
     return actionSuccess(survey, 'Survey closed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error closing survey', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -231,7 +231,7 @@ export async function pauseSurvey(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/surveys-v2')
     logger.info('Survey paused', { surveyId: id })
     return actionSuccess(survey, 'Survey paused successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error pausing survey', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -281,7 +281,7 @@ export async function duplicateSurvey(id: string): Promise<ActionResult<any>> {
     revalidatePath('/dashboard/surveys-v2')
     logger.info('Survey duplicated', { originalId: id, duplicateId: duplicate.id })
     return actionSuccess(duplicate, 'Survey duplicated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error duplicating survey', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -319,7 +319,7 @@ export async function getSurveyStats(): Promise<ActionResult<any>> {
 
     logger.info('Survey stats fetched', { total: stats.total })
     return actionSuccess(stats, 'Survey stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error fetching survey stats', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

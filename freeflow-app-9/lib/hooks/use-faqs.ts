@@ -132,7 +132,7 @@ export function useFAQs(initialFAQs: FAQ[] = [], initialStats: FAQStats = {
 
       if (error) throw error
       return { data, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { data: null, error: error.message }
     } finally {
       setLoading(false)
@@ -151,7 +151,7 @@ export function useFAQs(initialFAQs: FAQ[] = [], initialStats: FAQStats = {
 
       if (error) throw error
       return { data, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { data: null, error: error.message }
     } finally {
       setLoading(false)
@@ -164,7 +164,7 @@ export function useFAQs(initialFAQs: FAQ[] = [], initialStats: FAQStats = {
       const { error } = await supabase.from('faqs').delete().eq('id', id)
       if (error) throw error
       return { success: true, error: null }
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, error: error.message }
     } finally {
       setLoading(false)

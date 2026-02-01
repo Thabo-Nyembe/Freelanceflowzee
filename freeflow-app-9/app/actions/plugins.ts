@@ -52,7 +52,7 @@ export async function createPlugin(input: PluginInput): Promise<ActionResult<any
 
     revalidatePath('/dashboard/plugins-v2')
     return actionSuccess(data, 'Plugin created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating plugin', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -85,7 +85,7 @@ export async function updatePlugin(id: string, input: Partial<PluginInput>): Pro
 
     revalidatePath('/dashboard/plugins-v2')
     return actionSuccess(data, 'Plugin updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating plugin', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -113,7 +113,7 @@ export async function deletePlugin(id: string): Promise<ActionResult<{ success: 
 
     revalidatePath('/dashboard/plugins-v2')
     return actionSuccess({ success: true }, 'Plugin deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting plugin', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -146,7 +146,7 @@ export async function activatePlugin(id: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/plugins-v2')
     return actionSuccess(data, 'Plugin activated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error activating plugin', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -179,7 +179,7 @@ export async function deactivatePlugin(id: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/plugins-v2')
     return actionSuccess(data, 'Plugin deactivated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deactivating plugin', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -224,7 +224,7 @@ export async function updatePluginVersion(id: string, newVersion: string): Promi
 
     revalidatePath('/dashboard/plugins-v2')
     return actionSuccess(data, 'Plugin version updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating plugin version', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -269,7 +269,7 @@ export async function installPlugin(id: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/plugins-v2')
     return actionSuccess(data, 'Plugin installed successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error installing plugin', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -303,7 +303,7 @@ export async function uninstallPlugin(id: string): Promise<ActionResult<any>> {
 
     revalidatePath('/dashboard/plugins-v2')
     return actionSuccess(data, 'Plugin uninstalled successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error uninstalling plugin', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -350,7 +350,7 @@ export async function ratePlugin(id: string, rating: number): Promise<ActionResu
 
     revalidatePath('/dashboard/plugins-v2')
     return actionSuccess(data, 'Plugin rated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error rating plugin', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -385,7 +385,7 @@ export async function incrementApiCalls(id: string): Promise<ActionResult<any>> 
     }
 
     return actionSuccess(data, 'API call count incremented')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error incrementing API calls', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -412,7 +412,7 @@ export async function getPlugins(): Promise<ActionResult<any[]>> {
     }
 
     return actionSuccess(data || [], 'Plugins retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting plugins', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

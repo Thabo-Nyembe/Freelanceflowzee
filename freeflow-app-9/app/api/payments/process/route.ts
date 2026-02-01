@@ -129,7 +129,7 @@ async function processStripePayment(
       accessToken: paymentIntent.status === 'succeeded' ? accessToken : undefined,
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Stripe payment failed', {
       error: error.message,
       code: error.code,
@@ -247,7 +247,7 @@ async function handleWebhook(request: NextRequest) {
     }
 
     return NextResponse.json({ received: true })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Webhook verification failed', { error: error.message })
     return NextResponse.json(
       { error: 'Webhook signature verification failed' },
@@ -355,7 +355,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent): Prom
     })
 
     logger.info('Payment success handling completed', { paymentIntentId: paymentIntent.id, userId })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error handling payment success', { error: error.message, paymentIntentId: paymentIntent.id })
   }
 }
@@ -421,7 +421,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent): Promise
     }
 
     logger.info('Payment failure handling completed', { paymentIntentId: paymentIntent.id, userId, errorCode })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error handling payment failure', { error: error.message, paymentIntentId: paymentIntent.id })
   }
 }
@@ -515,7 +515,7 @@ async function handleChargeRefunded(charge: Stripe.Charge): Promise<void> {
     }
 
     logger.info('Refund handling completed', { chargeId: charge.id, paymentIntentId, userId })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error handling refund', { error: error.message, chargeId: charge.id })
   }
 }
@@ -644,7 +644,7 @@ async function handleDisputeCreated(dispute: Stripe.Dispute): Promise<void> {
     })
 
     logger.info('Dispute handling completed', { disputeId: dispute.id, paymentIntentId, reason: dispute.reason })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error handling dispute', { error: error.message, disputeId: dispute.id })
   }
 }
@@ -807,7 +807,7 @@ export async function POST(request: NextRequest) {
       requiresAction: transaction.status === 'requires_action',
       ...transaction,
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Payment processing failed', {
       error: error.message,
       stack: error.stack,
@@ -884,7 +884,7 @@ export async function GET(request: NextRequest) {
       success: true,
       transaction,
     })
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Failed to retrieve transaction', { error: error.message })
 
     return NextResponse.json(

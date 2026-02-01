@@ -442,7 +442,7 @@ export default function ClientZonePage() {
       const data = await getClientZoneDashboard()
       setDashboardData(data)
       setProjects(data.recentProjects)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to request revision', { error, projectId: revisionProjectId, userId })
       toast.error('Failed to request revision', {
         description: error.message || 'Please try again later'
@@ -478,7 +478,7 @@ export default function ClientZonePage() {
       const data = await getClientZoneDashboard()
       setDashboardData(data)
       setProjects(data.recentProjects)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to approve deliverable', { error, deliverableId, userId })
       toast.error('Failed to approve deliverable', {
         description: error.message || 'Please try again later'
@@ -575,7 +575,7 @@ export default function ClientZonePage() {
       // Reload messages
       const data = await getClientZoneDashboard()
       setMessages(data.recentMessages)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to send message', { error, userId })
       toast.error('Failed to send message', {
         description: error.message || 'Please try again later'
@@ -625,7 +625,7 @@ export default function ClientZonePage() {
       // Reload dashboard
       const data = await getClientZoneDashboard()
       setDashboardData(data)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to submit feedback', { error, userId })
       toast.error('Failed to submit feedback', {
         description: error.message || 'Please try again later'
@@ -775,7 +775,7 @@ export default function ClientZonePage() {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || 'Failed to send proposal')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss()
       logger.error('Failed to send proposal', { error, projectId, userId })
       toast.error('Failed to send proposal', {
@@ -837,7 +837,7 @@ export default function ClientZonePage() {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || 'Failed to approve milestone')
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss()
       logger.error('Failed to approve milestone', { error, milestoneId, userId })
       toast.error('Failed to approve milestone', {
@@ -944,7 +944,7 @@ export default function ClientZonePage() {
       const dashboardData = await getClientZoneDashboard()
       setDashboardData(dashboardData)
       setInvoices(dashboardData.pendingInvoices)
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to submit dispute', { error, invoiceNumber: disputeInvoiceNumber, userId })
       toast.error('Failed to submit dispute', {
         description: error.message || 'Please try again'

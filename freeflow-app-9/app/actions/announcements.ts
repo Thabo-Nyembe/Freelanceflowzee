@@ -54,7 +54,7 @@ export async function createAnnouncement(data: CreateAnnouncementData): Promise<
     logger.info('Announcement created successfully', { announcementId: announcement.id })
     revalidatePath('/dashboard/announcements-v2')
     return actionSuccess(announcement, 'Announcement created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating announcement', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -83,7 +83,7 @@ export async function updateAnnouncement(id: string, data: Partial<CreateAnnounc
     logger.info('Announcement updated successfully', { announcementId: id })
     revalidatePath('/dashboard/announcements-v2')
     return actionSuccess(announcement, 'Announcement updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating announcement', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -123,7 +123,7 @@ export async function deleteAnnouncement(id: string, hardDelete: boolean = false
     logger.info('Announcement deleted successfully', { announcementId: id, hardDelete })
     revalidatePath('/dashboard/announcements-v2')
     return actionSuccess({ success: true }, 'Announcement deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting announcement', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -155,7 +155,7 @@ export async function publishAnnouncement(id: string): Promise<ActionResult<any>
     logger.info('Announcement published successfully', { announcementId: id })
     revalidatePath('/dashboard/announcements-v2')
     return actionSuccess(announcement, 'Announcement published successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error publishing announcement', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -184,7 +184,7 @@ export async function pinAnnouncement(id: string, isPinned: boolean): Promise<Ac
     logger.info('Announcement pin status updated', { announcementId: id, isPinned })
     revalidatePath('/dashboard/announcements-v2')
     return actionSuccess(announcement, `Announcement ${isPinned ? 'pinned' : 'unpinned'} successfully`)
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error pinning announcement', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -202,7 +202,7 @@ export async function incrementAnnouncementViews(id: string): Promise<ActionResu
     }
 
     return actionSuccess({ success: true }, 'Views incremented successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error incrementing views', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -237,7 +237,7 @@ export async function getAnnouncementStats(): Promise<ActionResult<any>> {
 
     logger.info('Announcement stats retrieved successfully', { total: stats.total })
     return actionSuccess(stats, 'Stats retrieved successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error getting stats', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

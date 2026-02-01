@@ -40,7 +40,7 @@ export async function createSupportTicket(input: SupportTicketInput): Promise<Ac
     revalidatePath('/dashboard/support-tickets-v2')
     logger.info('Support ticket created', { ticketId: data.id })
     return actionSuccess(data, 'Support ticket created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating support ticket', { error: error.message })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -69,7 +69,7 @@ export async function updateSupportTicket(id: string, input: Partial<SupportTick
     revalidatePath('/dashboard/support-tickets-v2')
     logger.info('Support ticket updated', { ticketId: id })
     return actionSuccess(data, 'Support ticket updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating support ticket', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -96,7 +96,7 @@ export async function deleteSupportTicket(id: string): Promise<ActionResult<{ su
     revalidatePath('/dashboard/support-tickets-v2')
     logger.info('Support ticket deleted', { ticketId: id })
     return actionSuccess({ success: true }, 'Support ticket deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting support ticket', { error: error.message, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

@@ -682,7 +682,7 @@ export default function OverviewClient() {
 
       if (error) throw error
       toast.success('Settings saved')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving settings:', error)
       toast.error('Failed to save settings')
     } finally {
@@ -703,7 +703,7 @@ export default function OverviewClient() {
       if (error) throw error
       setDbNotifications(prev => prev.filter(n => n.id !== notificationId))
       toast.success('Notification dismissed')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error marking notification read:', error)
       toast.error('Failed to dismiss notification')
     }
@@ -725,7 +725,7 @@ export default function OverviewClient() {
       if (error) throw error
       setDbMetrics([])
       toast.success('Metrics cleared')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error clearing metrics:', error)
       toast.error('Failed to clear metrics')
     }
@@ -747,7 +747,7 @@ export default function OverviewClient() {
       if (error) throw error
       setDbStats(null)
       toast.success('Dashboard reset')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error resetting dashboard:', error)
       toast.error('Failed to reset dashboard')
     }
@@ -771,7 +771,7 @@ export default function OverviewClient() {
       setDbStats(null)
       setDbNotifications([])
       toast.success('All data deleted')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting all data:', error)
       toast.error('Failed to delete data')
     }

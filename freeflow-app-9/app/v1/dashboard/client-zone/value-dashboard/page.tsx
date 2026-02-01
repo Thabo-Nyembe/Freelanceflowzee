@@ -153,7 +153,7 @@ export default function ValueDashboardPage() {
         link.click()
         URL.revokeObjectURL(downloadUrl)
       }
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Failed to export report', { error, period: selectedPeriod })
       toast.error('Failed to export report', {
         description: error.message || 'Please try again later'

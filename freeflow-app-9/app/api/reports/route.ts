@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
         });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Reports GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch reports' },
@@ -435,7 +435,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Reports POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },

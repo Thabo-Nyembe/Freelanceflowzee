@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('OpenAI collaboration failed', { error: error.message })
     return NextResponse.json(
       { error: 'AI processing failed. Please try again.' },
@@ -298,7 +298,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error('OpenAI collaboration GET failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to fetch AI collaboration data' },

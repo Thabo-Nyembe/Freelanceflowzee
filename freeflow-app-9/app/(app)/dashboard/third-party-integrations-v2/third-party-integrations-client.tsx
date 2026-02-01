@@ -437,7 +437,7 @@ export default function ThirdPartyIntegrationsClient() {
         setTestConnectionStatus('error')
         setTestConnectionMessage(`Connection to ${connection?.app.name} failed: ${result.error}`)
       }
-    } catch (error: any) {
+    } catch (error) {
       setTestConnectionStatus('error')
       setTestConnectionMessage(`Connection test failed: ${error.message}`)
     }
@@ -873,7 +873,7 @@ export default function ThirdPartyIntegrationsClient() {
 
       toast.dismiss(toastId)
       toast.success('Sync Complete', { description: `${conn.app.name} data is now up to date` })
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss(toastId)
       toast.error('Sync failed', { description: error.message })
     }
@@ -912,7 +912,7 @@ export default function ThirdPartyIntegrationsClient() {
 
       toast.dismiss(toastId)
       toast.success('Logs Refreshed', { description: `${freshLogs?.length || 0} logs loaded` })
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss(toastId)
       toast.error('Refresh failed', { description: error.message })
     }
@@ -1240,7 +1240,7 @@ export default function ThirdPartyIntegrationsClient() {
       toast.dismiss(toastId)
       toast.success('Export Complete', { description: 'Your data has been downloaded' })
       setShowExportDataDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss(toastId)
       toast.error('Export failed', { description: error.message })
     }
@@ -1276,7 +1276,7 @@ export default function ThirdPartyIntegrationsClient() {
       toast.dismiss(toastId)
       toast.success('All Zaps Paused: Active zaps have been paused')
       setShowPauseAllDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss(toastId)
       toast.error('Failed to pause zaps', { description: error.message })
     }
@@ -1309,7 +1309,7 @@ export default function ThirdPartyIntegrationsClient() {
       toast.dismiss(toastId)
       toast.success('Connections Deleted: All integrations have been disconnected')
       setShowDeleteConnectionsDialog(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.dismiss(toastId)
       toast.error('Failed to delete connections', { description: error.message })
     }

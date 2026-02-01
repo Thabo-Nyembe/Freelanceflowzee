@@ -751,7 +751,7 @@ export default function EscrowClient() {
       toast.success('Escrow created successfully')
       setShowNewEscrowDialog(false)
       resetNewEscrowForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create escrow')
     } finally {
       setIsSubmitting(false)
@@ -788,7 +788,7 @@ export default function EscrowClient() {
       setShowReleaseDialog(false)
       resetReleaseForm()
       setSelectedEscrowDeposit(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to release funds')
     } finally {
       setIsSubmitting(false)
@@ -800,7 +800,7 @@ export default function EscrowClient() {
     try {
       await updateDeposit(deposit.id, { status: 'refunded' })
       toast.success('Refund requested')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to request refund')
     } finally {
       setIsSubmitting(false)
@@ -837,7 +837,7 @@ export default function EscrowClient() {
       setShowDisputeDialog(false)
       resetDisputeForm()
       setSelectedEscrowDeposit(null)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to open dispute')
     } finally {
       setIsSubmitting(false)
@@ -854,7 +854,7 @@ export default function EscrowClient() {
     try {
       await updateDeposit(deposit.id, { status: 'cancelled' })
       toast.success('Escrow has been cancelled')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to cancel escrow')
     } finally {
       setIsSubmitting(false)
@@ -871,7 +871,7 @@ export default function EscrowClient() {
     try {
       await deleteDeposit(deposit.id)
       toast.success('Escrow has been deleted')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete escrow')
     } finally {
       setIsSubmitting(false)
@@ -913,7 +913,7 @@ export default function EscrowClient() {
       toast.success('Payout of ' + formatCurrency(parseFloat(payoutForm.amount)) + ' initiated')
       setShowCreatePayout(false)
       resetPayoutForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create payout')
     } finally {
       setIsSubmitting(false)
@@ -943,7 +943,7 @@ export default function EscrowClient() {
       toast.success('Invitation sent')
       setShowInviteAccount(false)
       resetInviteForm()
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to send invitation')
     } finally {
       setIsSubmitting(false)
@@ -955,7 +955,7 @@ export default function EscrowClient() {
     try {
       await fetchDeposits()
       toast.success('Sync complete')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Sync failed')
     }
   }

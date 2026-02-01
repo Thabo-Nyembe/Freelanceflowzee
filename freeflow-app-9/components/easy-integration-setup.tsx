@@ -388,7 +388,7 @@ export function EasyIntegrationSetup({ onComplete, compact = false }: EasyIntegr
         description: 'Please complete the authentication in the popup window'
       })
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('OAuth connection failed', {
         integrationId: integration.id,
         error: error.message
@@ -455,7 +455,7 @@ export function EasyIntegrationSetup({ onComplete, compact = false }: EasyIntegr
         throw new Error(result.error || 'Connection test failed')
       }
 
-    } catch (error: any) {
+    } catch (error) {
       logger.error('API key connection failed', {
         integrationId: selectedIntegration.id,
         error: error.message

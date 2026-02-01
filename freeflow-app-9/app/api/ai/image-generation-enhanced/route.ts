@@ -214,7 +214,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Image Generation GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch image data' },
@@ -539,7 +539,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Image Generation POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Image generation failed' },
@@ -614,7 +614,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       { success: false, error: 'ID required for deletion' },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error) {
     logger.error('AI Image Generation DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },

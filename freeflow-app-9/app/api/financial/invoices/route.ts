@@ -101,7 +101,7 @@ async function handleCreateInvoice(data: any, userId: string): Promise<NextRespo
       message: `Invoice ${invoiceNumber} created successfully`,
       pdfUrl: `/api/financial/invoices/${invoice.id}/pdf`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       action: 'create',
@@ -147,7 +147,7 @@ async function handleListInvoices(userId: string, filters?: any): Promise<NextRe
       total: count || 0,
       message: `Found ${count || 0} invoices`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       action: 'list',
@@ -208,7 +208,7 @@ async function handleSendInvoice(invoiceId: string, userId: string): Promise<Nex
       message: `Invoice sent successfully to client`,
       emailSent
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       action: 'send',
@@ -245,7 +245,7 @@ async function handleMarkPaid(invoiceId: string, userId: string, data: any): Pro
       invoice,
       message: `Invoice marked as paid`
     })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       action: 'mark-paid',
@@ -297,7 +297,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           error: `Unknown action: ${body.action}`
         }, { status: 400 })
     }
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Invalid request'
@@ -322,7 +322,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const offset = searchParams.get('offset')
 
     return handleListInvoices(user.id, { status, client, limit, offset })
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to fetch invoices'

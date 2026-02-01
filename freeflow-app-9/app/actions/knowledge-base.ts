@@ -39,7 +39,7 @@ export async function createArticle(data: any): Promise<ActionResult<any>> {
     logger.info('Article created successfully', { articleId: article.id })
     revalidatePath('/dashboard/knowledge-base-v2')
     return actionSuccess(article, 'Article created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating article', { error })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -72,7 +72,7 @@ export async function updateArticle(id: string, data: any): Promise<ActionResult
     logger.info('Article updated successfully', { articleId: id })
     revalidatePath('/dashboard/knowledge-base-v2')
     return actionSuccess(article, 'Article updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating article', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -101,7 +101,7 @@ export async function deleteArticle(id: string): Promise<ActionResult<any>> {
     logger.info('Article deleted successfully', { articleId: id })
     revalidatePath('/dashboard/knowledge-base-v2')
     return actionSuccess(article, 'Article deleted successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error deleting article', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -135,7 +135,7 @@ export async function publishArticle(id: string): Promise<ActionResult<any>> {
     logger.info('Article published successfully', { articleId: id })
     revalidatePath('/dashboard/knowledge-base-v2')
     return actionSuccess(article, 'Article published successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error publishing article', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -168,7 +168,7 @@ export async function unpublishArticle(id: string): Promise<ActionResult<any>> {
     logger.info('Article unpublished successfully', { articleId: id })
     revalidatePath('/dashboard/knowledge-base-v2')
     return actionSuccess(article, 'Article unpublished successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error unpublishing article', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -211,7 +211,7 @@ export async function incrementViewCount(id: string, isUnique: boolean = false):
 
     revalidatePath('/dashboard/knowledge-base-v2')
     return actionSuccess(article, 'View count incremented successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error incrementing view count', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -270,7 +270,7 @@ export async function rateArticle(id: string, rating: number, helpful: boolean):
     logger.info('Article rated successfully', { articleId: id, rating })
     revalidatePath('/dashboard/knowledge-base-v2')
     return actionSuccess(article, 'Article rated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error rating article', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -319,7 +319,7 @@ export async function trackReadCompletion(id: string, completionRate: number, ti
 
     revalidatePath('/dashboard/knowledge-base-v2')
     return actionSuccess(article, 'Read completion tracked successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error tracking read completion', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -362,7 +362,7 @@ export async function updateSearchMetrics(id: string, clicked: boolean): Promise
 
     revalidatePath('/dashboard/knowledge-base-v2')
     return actionSuccess(article, 'Search metrics updated successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error updating search metrics', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
@@ -418,7 +418,7 @@ export async function createNewVersion(id: string, changeLog: string): Promise<A
     logger.info('New version created successfully', { articleId: id, newVersionId: newVersion.id })
     revalidatePath('/dashboard/knowledge-base-v2')
     return actionSuccess(newVersion, 'New version created successfully')
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Unexpected error creating new version', { error, id })
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }

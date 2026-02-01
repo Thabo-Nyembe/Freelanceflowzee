@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
       api_keys: sanitizedKeys,
       total: sanitizedKeys.length,
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('API Keys GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch API keys' },
@@ -272,7 +272,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('API Keys POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
@@ -308,7 +308,7 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'API key deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('API Keys DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete API key' },
