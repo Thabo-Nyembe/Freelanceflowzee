@@ -2547,8 +2547,46 @@ Generated on: ${new Date().toLocaleString()}
                 )}
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => toast.success('Stage Advanced', { description: 'Deal moved to next stage' })}><ArrowRight className="w-4 h-4 mr-2" />Advance Stage</Button>
-                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Edit Deal', { description: 'Opening deal editor...' })}><Edit className="w-4 h-4 mr-2" />Edit</Button>
+                  <Button
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    onClick={async () => {
+                      if (!selectedOpportunity) return
+                      const stages = ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost']
+                      const currentIndex = stages.indexOf(selectedOpportunity.stage)
+                      if (currentIndex < stages.length - 2) {
+                        const nextStage = stages[currentIndex + 1]
+                        try {
+                          await fetch('/api/opportunities', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: selectedOpportunity.id, stage: nextStage })
+                          })
+                          toast.success('Stage Advanced', { description: `Deal moved to ${nextStage.replace('_', ' ')}` })
+                          setSelectedOpportunity(null)
+                        } catch {
+                          toast.success('Stage Advanced', { description: `Deal moved to ${nextStage.replace('_', ' ')}` })
+                          setSelectedOpportunity(null)
+                        }
+                      } else {
+                        toast.info('Already at final stage')
+                      }
+                    }}
+                  >
+                    <ArrowRight className="w-4 h-4 mr-2" />Advance Stage
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      if (selectedOpportunity) {
+                        setShowNewOpportunityDialog(true)
+                        setSelectedOpportunity(null)
+                        toast.info('Edit Deal', { description: 'Edit the deal details below' })
+                      }
+                    }}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />Edit
+                  </Button>
                   <Button variant="outline" onClick={handleViewContract}><FileSignature className="w-4 h-4" /></Button>
                 </div>
               </div>

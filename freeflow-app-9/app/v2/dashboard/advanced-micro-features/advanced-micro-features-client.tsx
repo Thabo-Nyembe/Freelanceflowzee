@@ -380,7 +380,26 @@ export default function AdvancedMicroFeaturesClient() {
     { id: '3', label: 'Team Chat', icon: MessageSquare, onClick: () => router.push('/v2/dashboard/messaging'), badge: 3 },
     { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => router.push('/v2/dashboard/analytics') },
     { id: '5', label: 'Settings', icon: Settings, onClick: () => setSettingsDialogOpen(true) },
-    { id: '6', label: 'Share', icon: Share2, onClick: () => toast.info('Share feature coming soon'), disabled: true }
+    { id: '6', label: 'Share', icon: Share2, onClick: async () => {
+      const shareUrl = window.location.href
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'KAZI Dashboard',
+            text: 'Check out this dashboard feature',
+            url: shareUrl
+          })
+          toast.success('Shared successfully')
+        } catch (err) {
+          // User cancelled or error
+          await navigator.clipboard.writeText(shareUrl)
+          toast.success('Link copied', { description: 'Share link copied to clipboard' })
+        }
+      } else {
+        await navigator.clipboard.writeText(shareUrl)
+        toast.success('Link copied', { description: 'Share link copied to clipboard' })
+      }
+    }}
   ], [router])
 
   const mockNotifications = useMemo(() => [

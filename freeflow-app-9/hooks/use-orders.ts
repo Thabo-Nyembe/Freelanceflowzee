@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 // ============================================================================
 // TYPES
@@ -266,7 +267,183 @@ export function useOrders(options: UseOrdersOptions = {}) {
   const [error, setError] = useState<Error | null>(null)
 
   const fetchOrders = useCallback(async () => {
-    }, [orders.length])
+    setIsLoading(true)
+    setError(null)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        // Return mock data for unauthenticated users
+        setOrders([])
+        setIsLoading(false)
+        return
+      }
+
+      const { data, error: fetchError } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (*)
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (fetchError) throw fetchError
+
+      // Map database response to Order type
+      const mappedOrders: Order[] = (data || []).map((order: any) => ({
+        id: order.id,
+        orderNumber: order.order_number || `ORD-${order.id.slice(0, 8).toUpperCase()}`,
+        customerId: order.customer_id || '',
+        customerName: order.customer_name || 'Unknown Customer',
+        customerEmail: order.customer_email || '',
+        status: order.status || 'pending',
+        paymentStatus: order.payment_status || 'pending',
+        fulfillmentStatus: order.fulfillment_status || 'unfulfilled',
+        items: (order.order_items || []).map((item: any) => ({
+          id: item.id,
+          productId: item.product_id || '',
+          productName: item.product_name || 'Unknown Product',
+          sku: item.sku || '',
+          variant: item.variant,
+          quantity: item.quantity || 1,
+          unitPrice: item.unit_price || 0,
+          total: item.total || 0,
+          imageUrl: item.image_url,
+          weight: item.weight,
+          fulfillmentStatus: item.fulfillment_status || 'unfulfilled',
+          fulfilledQuantity: item.fulfilled_quantity || 0
+        })),
+        subtotal: order.subtotal || 0,
+        discount: order.discount || 0,
+        discountCode: order.discount_code,
+        tax: order.tax || 0,
+        taxRate: order.tax_rate || 0,
+        shippingCost: order.shipping_cost || 0,
+        total: order.total || 0,
+        currency: order.currency || 'USD',
+        shippingAddress: order.shipping_address || { firstName: '', lastName: '', street1: '', city: '', state: '', postalCode: '', country: '' },
+        billingAddress: order.billing_address || order.shipping_address || { firstName: '', lastName: '', street1: '', city: '', state: '', postalCode: '', country: '' },
+        shippingMethod: order.shipping_method,
+        trackingNumber: order.tracking_number,
+        paymentMethod: order.payment_method || 'card',
+        paymentId: order.payment_id,
+        notes: order.notes,
+        internalNotes: order.internal_notes,
+        tags: order.tags || [],
+        timeline: order.timeline || [],
+        refunds: order.refunds || [],
+        createdAt: order.created_at,
+        updatedAt: order.updated_at || order.created_at
+      }))
+
+      setOrders(mappedOrders)
+
+      // Calculate stats
+      const totalOrders = mappedOrders.length
+      const totalRevenue = mappedOrders.filter(o => o.paymentStatus === 'paid').reduce((sum, o) => sum + o.total, 0)
+      const pendingCount = mappedOrders.filter(o => o.status === 'pending').length
+
+      setStats({
+        totalOrders,
+        totalRevenue,
+        pendingOrders: pendingCount,
+        processingOrders: mappedOrders.filter(o => o.status === 'processing').length,
+        shippedOrders: mappedOrders.filter(o => o.status === 'shipped').length,
+        deliveredOrders: mappedOrders.filter(o => o.status === 'delivered').length,
+        cancelledOrders: mappedOrders.filter(o => o.status === 'cancelled').length,
+        averageOrderValue: totalOrders > 0 ? totalRevenue / totalOrders : 0
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch orders'))
+      setOrders([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  const createOrder = useCallback(async (orderData: Partial<Order>) => {
+    setIsProcessing(true)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) throw new Error('Not authenticated')
+
+      // Generate order number
+      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`
+
+      // Insert order
+      const { data: newOrder, error: insertError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          order_number: orderNumber,
+          customer_id: orderData.customerId,
+          customer_name: orderData.customerName,
+          customer_email: orderData.customerEmail,
+          status: orderData.status || 'pending',
+          payment_status: orderData.paymentStatus || 'pending',
+          fulfillment_status: orderData.fulfillmentStatus || 'unfulfilled',
+          subtotal: orderData.subtotal || 0,
+          discount: orderData.discount || 0,
+          discount_code: orderData.discountCode,
+          tax: orderData.tax || 0,
+          tax_rate: orderData.taxRate || 0,
+          shipping_cost: orderData.shippingCost || 0,
+          total: orderData.total || 0,
+          currency: orderData.currency || 'USD',
+          shipping_address: orderData.shippingAddress,
+          billing_address: orderData.billingAddress,
+          shipping_method: orderData.shippingMethod,
+          payment_method: orderData.paymentMethod || 'card',
+          notes: orderData.notes,
+          tags: orderData.tags || [],
+          timeline: [{
+            id: `evt-${Date.now()}`,
+            type: 'created',
+            description: 'Order created',
+            timestamp: new Date().toISOString()
+          }]
+        })
+        .select()
+        .single()
+
+      if (insertError) throw insertError
+
+      // Insert order items if provided
+      if (orderData.items && orderData.items.length > 0) {
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(orderData.items.map(item => ({
+            order_id: newOrder.id,
+            product_id: item.productId,
+            product_name: item.productName,
+            sku: item.sku,
+            variant: item.variant,
+            quantity: item.quantity,
+            unit_price: item.unitPrice,
+            total: item.total,
+            image_url: item.imageUrl,
+            fulfillment_status: 'unfulfilled',
+            fulfilled_quantity: 0
+          })))
+
+        if (itemsError) console.warn('Failed to insert order items:', itemsError)
+      }
+
+      // Refresh orders list
+      await fetchOrders()
+
+      return { success: true, order: newOrder }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to create order'))
+      return { success: false, error: err instanceof Error ? err.message : 'Failed to create order' }
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [fetchOrders])
 
   const updateOrder = useCallback(async (orderId: string, updates: Partial<Order>) => {
     setOrders(prev => prev.map(o => o.id === orderId ? {

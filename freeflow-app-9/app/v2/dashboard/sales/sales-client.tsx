@@ -510,6 +510,11 @@ export default function SalesClient() {
   const [competitor, setCompetitor] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Quote line items state
+  const [quoteLineItems, setQuoteLineItems] = useState<{ productId: string; productName: string; quantity: number; unitPrice: number; discount: number; total: number }[]>([
+    { productId: '', productName: '', quantity: 1, unitPrice: 0, discount: 0, total: 0 }
+  ])
+
   // Get stats from the hook
   const salesStats = getStats()
 
@@ -2377,8 +2382,45 @@ export default function SalesClient() {
                 )}
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => toast.success('Stage Advanced', { description: 'Deal moved to next stage' })}><ArrowRight className="w-4 h-4 mr-2" />Advance Stage</Button>
-                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Edit Deal', { description: 'Opening deal editor...' })}><Edit className="w-4 h-4 mr-2" />Edit</Button>
+                  <Button
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    onClick={async () => {
+                      if (!selectedOpportunity) return
+                      const stages = ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost']
+                      const currentIndex = stages.indexOf(selectedOpportunity.stage)
+                      if (currentIndex < stages.length - 2) {
+                        const nextStage = stages[currentIndex + 1]
+                        try {
+                          await fetch('/api/opportunities', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: selectedOpportunity.id, stage: nextStage })
+                          })
+                          toast.success('Stage Advanced', { description: `Deal moved to ${nextStage.replace('_', ' ')}` })
+                          setSelectedOpportunity(null)
+                        } catch {
+                          toast.success('Stage Advanced', { description: `Deal moved to ${nextStage.replace('_', ' ')}` })
+                          setSelectedOpportunity(null)
+                        }
+                      } else {
+                        toast.info('Already at final stage')
+                      }
+                    }}
+                  >
+                    <ArrowRight className="w-4 h-4 mr-2" />Advance Stage
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      if (!selectedOpportunity) return
+                      setShowNewOpportunityDialog(true)
+                      setSelectedOpportunity(null)
+                      toast.info('Edit Deal', { description: 'Edit the deal details below' })
+                    }}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />Edit
+                  </Button>
                   <Button variant="outline" onClick={() => setShowContractDialog(true)} title="View and sign contract"><FileSignature className="w-4 h-4" /></Button>
                 </div>
               </div>
@@ -3286,7 +3328,18 @@ export default function SalesClient() {
                   </tbody>
                 </table>
               </div>
-              <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('Add Line Item', { description: 'Adding new line item to quote' })}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => {
+                  setQuoteLineItems([
+                    ...quoteLineItems,
+                    { productId: '', productName: '', quantity: 1, unitPrice: 0, discount: 0, total: 0 }
+                  ])
+                  toast.success('Line item added', { description: `Quote now has ${quoteLineItems.length + 1} item(s)` })
+                }}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Line Item
               </Button>

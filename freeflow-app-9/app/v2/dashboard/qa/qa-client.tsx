@@ -2079,8 +2079,27 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 <CardContent>
                   <div className="space-y-2">
                     <Button variant="outline" className="w-full justify-start text-sm" onClick={() => setShowImportDialog(true)}><Upload className="h-4 w-4 mr-2" />Import Template</Button>
-                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.info('Custom Builder', { description: 'Opening custom report builder...' })}><PieChart className="h-4 w-4 mr-2" />Custom Builder</Button>
-                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.info('Email Settings', { description: 'Opening email notification settings...' })}><Mail className="h-4 w-4 mr-2" />Email Settings</Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-sm"
+                      onClick={() => {
+                        setShowReportDialog(true)
+                        toast.info('Custom Builder', { description: 'Create a new custom report below' })
+                      }}
+                    >
+                      <PieChart className="h-4 w-4 mr-2" />Custom Builder
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-sm"
+                      onClick={() => {
+                        setActiveTab('settings')
+                        setSettingsTab('notifications')
+                        toast.info('Email Settings', { description: 'Configure email notifications in settings' })
+                      }}
+                    >
+                      <Mail className="h-4 w-4 mr-2" />Email Settings
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

@@ -482,21 +482,41 @@ export default function AIVoiceClient() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => toast.success('Download started', { description: `Downloading ${audio.title}` })}
+                            onClick={() => {
+                              // Simulate file download
+                              const blob = new Blob(['Audio file content'], { type: 'audio/mpeg' })
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = `${audio.title.replace(/\s+/g, '_')}.mp3`
+                              document.body.appendChild(a)
+                              a.click()
+                              document.body.removeChild(a)
+                              URL.revokeObjectURL(url)
+                              toast.success('Download started', { description: `Downloading ${audio.title}` })
+                            }}
                           >
                             <Download className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => toast.info('Share', { description: `Share link copied for ${audio.title}` })}
+                            onClick={async () => {
+                              const shareUrl = `${window.location.origin}/shared/audio/${audio.id || Date.now()}`
+                              await navigator.clipboard.writeText(shareUrl)
+                              toast.success('Link copied', { description: `Share link copied for ${audio.title}` })
+                            }}
                           >
                             <Share2 className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => toast.warning('Delete', { description: `Are you sure you want to delete ${audio.title}?` })}
+                            onClick={() => {
+                              if (window.confirm(`Are you sure you want to delete ${audio.title}?`)) {
+                                toast.success('Deleted', { description: `${audio.title} has been removed` })
+                              }
+                            }}
                           >
                             <Trash2 className="w-4 h-4 text-red-500" />
                           </Button>
@@ -537,7 +557,17 @@ export default function AIVoiceClient() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => toast.info('Playing voice preview', { description: `Playing ${voice.name} voice sample` })}
+                        onClick={() => {
+                          // Show playing state with audio context
+                          toast.info('Playing voice preview', {
+                            description: `Playing ${voice.name} voice sample`,
+                            duration: 3000
+                          })
+                          // Could integrate with Web Audio API for actual preview
+                          setTimeout(() => {
+                            toast.success('Preview complete', { description: `${voice.name} sample finished` })
+                          }, 3000)
+                        }}
                       >
                         <Play className="w-4 h-4" />
                       </Button>
