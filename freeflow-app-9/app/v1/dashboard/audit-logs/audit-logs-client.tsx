@@ -451,6 +451,11 @@ export default function AuditLogsClient() {
   const [severityFilter, setSeverityFilter] = useState<LogSeverity | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<LogType | 'all'>('all')
 
+  // Date, User, and Action filters for actual filtering
+  const [dateFilter, setDateFilter] = useState<string>('all')
+  const [userFilter, setUserFilter] = useState<string>('all')
+  const [actionFilter, setActionFilter] = useState<string>('all')
+
   // Build filters object for the hook
   const hookFilters = useMemo(() => ({
     severity: severityFilter === 'all' ? undefined : severityFilter,
@@ -693,18 +698,41 @@ export default function AuditLogsClient() {
     }))
   }, [logs])
 
-  // Filtered logs (search only; severity/type already handled by hook filters)
+  // Filtered logs with date, user, action, and search filters
   const filteredLogs = useMemo(() => {
-    if (!searchQuery) return allLogs
     return allLogs.filter(log => {
-      const matchesSearch =
-        log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        log.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (log.user_email?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
-        log.ip_address.includes(searchQuery)
-      return matchesSearch
+      // Date filter
+      if (dateFilter !== 'all') {
+        const days = parseInt(dateFilter.replace('d', ''))
+        if (!isNaN(days)) {
+          const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+          if (new Date(log.timestamp) < cutoff) return false
+        }
+      }
+
+      // User filter
+      if (userFilter !== 'all') {
+        if (log.user_email !== userFilter && log.user_id !== userFilter) return false
+      }
+
+      // Action filter
+      if (actionFilter !== 'all') {
+        if (log.action !== actionFilter && log.log_type !== actionFilter) return false
+      }
+
+      // Search filter
+      if (searchQuery) {
+        const matchesSearch =
+          log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          log.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (log.user_email?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+          log.ip_address.includes(searchQuery)
+        if (!matchesSearch) return false
+      }
+
+      return true
     })
-  }, [allLogs, searchQuery])
+  }, [allLogs, searchQuery, dateFilter, userFilter, actionFilter])
 
   // Convert hook alert rules to display format
   const allAlertRules = useMemo(() => {
@@ -1610,11 +1638,34 @@ export default function AuditLogsClient() {
                 </div>
                 <div className="flex items-center gap-4 mt-6">
                   <button
-                    onClick={() => toast.success('Date filter set to last 7 days')}
-                    className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors"
+                    onClick={() => {
+                      setDateFilter('7d')
+                      toast.success('Filtering logs from last 7 days')
+                    }}
+                    className={`px-4 py-2 ${dateFilter === '7d' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
                   >
                     <Calendar className="w-4 h-4 inline mr-2" />
                     Last 7 Days
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDateFilter('30d')
+                      toast.success('Filtering logs from last 30 days')
+                    }}
+                    className={`px-4 py-2 ${dateFilter === '30d' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
+                  >
+                    <Calendar className="w-4 h-4 inline mr-2" />
+                    Last 30 Days
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDateFilter('all')
+                      toast.success('Showing all logs')
+                    }}
+                    className={`px-4 py-2 ${dateFilter === 'all' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
+                  >
+                    <Calendar className="w-4 h-4 inline mr-2" />
+                    All Time
                   </button>
                   <button
                     onClick={handleExportAuditLogs}

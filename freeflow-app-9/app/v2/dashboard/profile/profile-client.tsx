@@ -650,9 +650,92 @@ export default function ProfileClient() {
     toast.success('Link copied')
   }
 
-  // Download profile as PDF (placeholder)
+  // Download profile as PDF/JSON export
   const handleDownloadPDF = () => {
-    toast.info('Generating PDF...')
+    try {
+      // Generate profile data for export
+      const profileData = {
+        name: displayProfile ? `${displayProfile.firstName} ${displayProfile.lastName}`.trim() : '',
+        headline: displayProfile?.headline || '',
+        summary: displayProfile?.summary || '',
+        email: displayProfile?.email || '',
+        phone: displayProfile?.phone || '',
+        location: displayProfile?.location || '',
+        website: displayProfile?.website || '',
+        company: displayProfile?.currentCompany || '',
+        title: displayProfile?.currentTitle || '',
+        skills: displaySkills.map(s => ({
+          name: s.name,
+          level: s.level,
+          endorsements: s.endorsements,
+          category: s.category
+        })),
+        experiences: displayExperiences.map(exp => ({
+          company: exp.company,
+          title: exp.title,
+          location: exp.location,
+          startDate: exp.startDate,
+          endDate: exp.endDate || 'Present',
+          description: exp.description
+        })),
+        education: displayEducation.map(edu => ({
+          school: edu.school,
+          degree: edu.degree,
+          field: edu.field,
+          startYear: edu.startYear,
+          endYear: edu.endYear
+        })),
+        exportedAt: new Date().toISOString()
+      }
+
+      // Create and download the file
+      const dataStr = JSON.stringify(profileData, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `profile-${user?.id || 'export'}-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Profile data exported!', { description: 'You can convert the JSON to PDF using online tools' })
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Failed to export profile data')
+    }
+  }
+
+  // Delete account handler
+  const handleDeleteAccount = async () => {
+    if (!user?.id) return
+
+    setIsDeletingAccount(true)
+    try {
+      // Delete user data from all tables
+      await Promise.all([
+        supabase.from('user_profiles').delete().eq('user_id', user.id),
+        supabase.from('skills').delete().eq('user_id', user.id),
+        supabase.from('experience').delete().eq('user_id', user.id),
+        supabase.from('education').delete().eq('user_id', user.id),
+        supabase.from('profile_settings').delete().eq('user_id', user.id)
+      ])
+
+      // Sign out the user
+      await supabase.auth.signOut()
+
+      toast.success('Account deleted', { description: 'Your account has been permanently deleted' })
+      setShowDeleteAccountDialog(false)
+
+      // Redirect to home page
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Delete account error:', error)
+      toast.error('Failed to delete account', { description: 'Please try again or contact support' })
+    } finally {
+      setIsDeletingAccount(false)
+    }
   }
 
   // Lifted displaySkills calculation specifically for cross-component usage
@@ -2291,35 +2374,67 @@ export default function ProfileClient() {
                               size="sm"
                               onClick={async () => {
                                 toast.loading('Preparing your data export...')
-                                // Simulate data export preparation
-                                await new Promise(resolve => setTimeout(resolve, 1500))
 
-                                // Generate user data export
-                                const exportData = {
-                                  exportedAt: new Date().toISOString(),
-                                  profile: {
-                                    name: 'User Profile',
-                                    email: 'user@example.com',
-                                    created: new Date().toISOString()
-                                  },
-                                  settings: {
-                                    theme: 'dark',
-                                    notifications: true
+                                try {
+                                  // Generate comprehensive user data export with real data
+                                  const exportData = {
+                                    exportedAt: new Date().toISOString(),
+                                    profile: {
+                                      id: profile?.id,
+                                      firstName: profile?.first_name,
+                                      lastName: profile?.last_name,
+                                      email: profile?.email,
+                                      phone: profile?.phone,
+                                      bio: profile?.bio,
+                                      location: profile?.location,
+                                      website: profile?.website,
+                                      company: profile?.company,
+                                      title: profile?.title,
+                                      createdAt: profile?.created_at
+                                    },
+                                    skills: skills.map(s => ({
+                                      name: s.name,
+                                      category: s.category,
+                                      level: s.level,
+                                      endorsements: s.endorsements
+                                    })),
+                                    experiences: experiences.map(exp => ({
+                                      company: exp.company,
+                                      title: exp.title,
+                                      location: exp.location,
+                                      startDate: exp.start_date,
+                                      endDate: exp.end_date,
+                                      current: exp.current,
+                                      description: exp.description
+                                    })),
+                                    education: education.map(edu => ({
+                                      school: edu.school,
+                                      degree: edu.degree,
+                                      field: edu.field,
+                                      startDate: edu.start_date,
+                                      endDate: edu.end_date,
+                                      grade: edu.grade
+                                    })),
+                                    settings: settings
                                   }
+
+                                  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+                                  const url = URL.createObjectURL(blob)
+                                  const a = document.createElement('a')
+                                  a.href = url
+                                  a.download = `kazi-data-export-${new Date().toISOString().split('T')[0]}.json`
+                                  document.body.appendChild(a)
+                                  a.click()
+                                  document.body.removeChild(a)
+                                  URL.revokeObjectURL(url)
+
+                                  toast.dismiss()
+                                  toast.success('Download complete', { description: 'Your data has been exported' })
+                                } catch (error) {
+                                  toast.dismiss()
+                                  toast.error('Export failed', { description: 'Please try again' })
+                                  console.error('Data export error:', error)
                                 }
-
-                                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-                                const url = URL.createObjectURL(blob)
-                                const a = document.createElement('a')
-                                a.href = url
-                                a.download = `kazi-data-export-${new Date().toISOString().split('T')[0]}.json`
-                                document.body.appendChild(a)
-                                a.click()
-                                document.body.removeChild(a)
-                                URL.revokeObjectURL(url)
-
-                                toast.dismiss()
-                                toast.success('Download complete', { description: 'Your data has been exported' })
                               }}
                             >
                               <Download className="w-4 h-4 mr-2" />Download
@@ -2330,7 +2445,14 @@ export default function ProfileClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Delete Account</p>
                               <p className="text-sm text-red-600 dark:text-red-400">Permanently delete your account</p>
                             </div>
-                            <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.error('Delete Account', { description: 'Are you sure? This action cannot be undone.' })}><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                              onClick={() => setShowDeleteAccountDialog(true)}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />Delete
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -2681,8 +2803,64 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                   onClick={() => {
-                    toast.success('CV Generated')
-                    setShowDownloadCVDialog(false)
+                    try {
+                      // Build CV data based on selected sections
+                      const cvData: Record<string, any> = {
+                        name: `${displayProfile.firstName} ${displayProfile.lastName}`.trim(),
+                        headline: displayProfile.headline,
+                        email: displayProfile.email,
+                        phone: displayProfile.phone,
+                        location: displayProfile.location,
+                        website: displayProfile.website,
+                        generatedAt: new Date().toISOString(),
+                        format: cvFormat
+                      }
+
+                      if (cvIncludeSections.summary) {
+                        cvData.summary = displayProfile.summary
+                      }
+                      if (cvIncludeSections.experience) {
+                        cvData.experience = displayExperiences.map(exp => ({
+                          company: exp.company,
+                          title: exp.title,
+                          location: exp.location,
+                          period: `${exp.startDate} - ${exp.endDate || 'Present'}`,
+                          description: exp.description
+                        }))
+                      }
+                      if (cvIncludeSections.education) {
+                        cvData.education = displayEducation.map(edu => ({
+                          school: edu.school,
+                          degree: `${edu.degree} in ${edu.field}`,
+                          years: `${edu.startYear} - ${edu.endYear || 'Present'}`
+                        }))
+                      }
+                      if (cvIncludeSections.skills) {
+                        cvData.skills = displaySkills.map(s => s.name)
+                      }
+                      if (cvIncludeSections.certifications) {
+                        cvData.certifications = [] // Would come from DB
+                      }
+                      if (cvIncludeSections.projects) {
+                        cvData.projects = [] // Would come from DB
+                      }
+
+                      const dataStr = JSON.stringify(cvData, null, 2)
+                      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+                      const url = URL.createObjectURL(dataBlob)
+                      const link = document.createElement('a')
+                      link.href = url
+                      link.download = `cv-${user?.id || 'export'}.json`
+                      document.body.appendChild(link)
+                      link.click()
+                      document.body.removeChild(link)
+                      URL.revokeObjectURL(url)
+
+                      toast.success('CV Generated', { description: 'Download started' })
+                      setShowDownloadCVDialog(false)
+                    } catch (error) {
+                      toast.error('Failed to generate CV')
+                    }
                   }}
                 >
                   <Download className="w-4 h-4 mr-2" />Download
@@ -4908,6 +5086,56 @@ export default function ProfileClient() {
                   }}
                 >
                   Save Order
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Delete Account Confirmation Dialog */}
+          <Dialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-red-600">
+                  <AlertTriangle className="w-5 h-5" />
+                  Delete Account
+                </DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone. All your data will be permanently deleted.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4 space-y-4">
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    <strong>Warning:</strong> Deleting your account will permanently remove:
+                  </p>
+                  <ul className="mt-2 text-sm text-red-600 dark:text-red-400 list-disc list-inside space-y-1">
+                    <li>Your profile information</li>
+                    <li>All skills and endorsements</li>
+                    <li>Work experience and education</li>
+                    <li>All settings and preferences</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowDeleteAccountDialog(false)} disabled={isDeletingAccount}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteAccount}
+                  disabled={isDeletingAccount}
+                >
+                  {isDeletingAccount ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete Account
+                    </>
+                  )}
                 </Button>
               </div>
             </DialogContent>

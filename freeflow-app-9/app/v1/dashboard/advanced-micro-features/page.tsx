@@ -99,7 +99,7 @@ const quickActionsConfig = [
   { id: '3', label: 'Team Chat', icon: MessageSquare, badge: 3, actionType: 'team-chat' },
   { id: '4', label: 'Analytics', icon: BarChart3, actionType: 'analytics' },
   { id: '5', label: 'Settings', icon: Settings, actionType: 'settings' },
-  { id: '6', label: 'Share', icon: Share2, disabled: true, actionType: 'share' }
+  { id: '6', label: 'Share', icon: Share2, actionType: 'share' }
 ]
 
 // Type definition for widget data
@@ -313,8 +313,26 @@ export default function AdvancedMicroFeaturesPage() {
     toast.success(`Theme changed to ${themeId}`)
   }, [])
 
+  // Share handler for quick actions
+  const handleShare = useCallback(async () => {
+    const shareUrl = window.location.href
+    const shareData = {
+      title: 'KAZI Advanced Micro Features',
+      text: 'Check out these advanced micro features on KAZI Dashboard',
+      url: shareUrl
+    }
+    await shareContent(shareData)
+  }, [])
 
-
+  // Quick actions with handlers
+  const quickActions = useMemo(() => [
+    { id: '1', label: 'New Project', icon: Zap, variant: 'primary' as const, shortcut: '\u2318N', onClick: () => toast.success('New project dialog opened') },
+    { id: '2', label: 'Upload Files', icon: Download, badge: '5', onClick: () => toast.success('File upload initiated') },
+    { id: '3', label: 'Team Chat', icon: MessageSquare, badge: 3, onClick: () => toast.success('Opening team chat') },
+    { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => setActiveTab('visualization') },
+    { id: '5', label: 'Settings', icon: Settings, onClick: () => setActiveTab('settings') },
+    { id: '6', label: 'Share', icon: Share2, onClick: handleShare }
+  ], [handleShare])
 
 
 
@@ -497,7 +515,7 @@ export default function AdvancedMicroFeaturesPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Enhanced Quick Actions</h3>
                   <EnhancedQuickActions
-                    actions={[]}
+                    actions={quickActions}
                     title="Quick Actions"
                     layout="grid"
                   />

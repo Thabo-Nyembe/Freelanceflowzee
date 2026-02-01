@@ -627,6 +627,7 @@ export default function AppStoreClient() {
   const [showMyAppsDialog, setShowMyAppsDialog] = useState(false)
   const [showSeeAllDialog, setShowSeeAllDialog] = useState(false)
   const [seeAllType, setSeeAllType] = useState<'editors' | 'trending' | 'collections'>('editors')
+  const [specialFilter, setSpecialFilter] = useState<'all' | 'editors' | 'trending'>('all')
 
   // Additional Dialog States for Full Functionality
   const [showOpenAppDialog, setShowOpenAppDialog] = useState(false)
@@ -752,9 +753,13 @@ export default function AppStoreClient() {
       const matchesStatus = statusFilter === 'all' || app.status === statusFilter
       const matchesCategory = categoryFilter === 'all' || app.category === categoryFilter
       const matchesPricing = pricingFilter === 'all' || app.pricing === pricingFilter
-      return matchesSearch && matchesStatus && matchesCategory && matchesPricing
+      // Special filter for Editor's Choice and Trending
+      const matchesSpecial = specialFilter === 'all' ||
+        (specialFilter === 'editors' && app.editorChoice) ||
+        (specialFilter === 'trending' && app.trending)
+      return matchesSearch && matchesStatus && matchesCategory && matchesPricing && matchesSpecial
     })
-  }, [apps, searchQuery, statusFilter, categoryFilter, pricingFilter])
+  }, [apps, searchQuery, statusFilter, categoryFilter, pricingFilter, specialFilter])
 
   // Stats
   const stats = useMemo(() => ({
@@ -1346,6 +1351,18 @@ export default function AppStoreClient() {
                     <option value="subscription">Subscription</option>
                     <option value="enterprise">Enterprise</option>
                   </select>
+                  {/* Special filter badge */}
+                  {specialFilter !== 'all' && (
+                    <Badge
+                      className="cursor-pointer flex items-center gap-1"
+                      variant="secondary"
+                      onClick={() => setSpecialFilter('all')}
+                    >
+                      {specialFilter === 'editors' && <><Award className="w-3 h-3 text-yellow-500" />Editor&apos;s Choice</>}
+                      {specialFilter === 'trending' && <><TrendingUp className="w-3 h-3 text-green-500" />Trending</>}
+                      <span className="ml-1 text-xs">x</span>
+                    </Badge>
+                  )}
                   <div className="flex-1" />
                   <span className="text-sm text-muted-foreground">
                     {filteredApps.length} apps
@@ -2552,7 +2569,7 @@ export default function AppStoreClient() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {seeAllType === 'editors' && <><Award className="w-5 h-5 text-yellow-500" />Editor's Choice</>}
+              {seeAllType === 'editors' && <><Award className="w-5 h-5 text-yellow-500" />Editor&apos;s Choice</>}
               {seeAllType === 'trending' && <><TrendingUp className="w-5 h-5 text-green-500" />Trending Apps</>}
               {seeAllType === 'collections' && <><Layers className="w-5 h-5 text-purple-500" />All Collections</>}
             </DialogTitle>
@@ -2585,8 +2602,31 @@ export default function AppStoreClient() {
                         {getPricingBadge(app.pricing, app.price)}
                       </div>
                     </div>
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (app.status === 'installed') {
+                          setAppToOpen(app)
+                          setShowSeeAllDialog(false)
+                          setShowOpenAppDialog(true)
+                        } else {
+                          handleInstallApp(app)
+                        }
+                      }}
+                      disabled={loading}
+                    >
+                      {app.status === 'installed' ? (
+                        <><Play className="w-4 h-4 mr-1" />Open</>
+                      ) : (
+                        <><Download className="w-4 h-4 mr-1" />Get</>
+                      )}
+                    </Button>
                   </div>
                 ))}
+                {editorChoiceApps.length === 0 && (
+                  <p className="text-muted-foreground col-span-2 text-center py-8">No Editor&apos;s Choice apps available</p>
+                )}
               </div>
             )}
             {seeAllType === 'trending' && (
@@ -2614,8 +2654,31 @@ export default function AppStoreClient() {
                         <span className="text-xs text-muted-foreground">{formatNumber(app.downloadCount)} downloads</span>
                       </div>
                     </div>
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (app.status === 'installed') {
+                          setAppToOpen(app)
+                          setShowSeeAllDialog(false)
+                          setShowOpenAppDialog(true)
+                        } else {
+                          handleInstallApp(app)
+                        }
+                      }}
+                      disabled={loading}
+                    >
+                      {app.status === 'installed' ? (
+                        <><Play className="w-4 h-4 mr-1" />Open</>
+                      ) : (
+                        <><Download className="w-4 h-4 mr-1" />Get</>
+                      )}
+                    </Button>
                   </div>
                 ))}
+                {trendingApps.length === 0 && (
+                  <p className="text-muted-foreground col-span-2 text-center py-8">No trending apps available</p>
+                )}
               </div>
             )}
             {seeAllType === 'collections' && (
@@ -2637,7 +2700,27 @@ export default function AppStoreClient() {
                 ))}
               </div>
             )}
-            <div className="flex justify-end pt-4 border-t">
+            <div className="flex justify-between pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowSeeAllDialog(false)
+                  // Apply filter to browse tab
+                  if (seeAllType === 'editors') {
+                    setSpecialFilter('editors')
+                    setActiveTab('browse')
+                    toast.success(`Showing ${editorChoiceApps.length} Editor's Choice apps`)
+                  } else if (seeAllType === 'trending') {
+                    setSpecialFilter('trending')
+                    setActiveTab('browse')
+                    toast.success(`Showing ${trendingApps.length} trending apps`)
+                  } else {
+                    setActiveTab('collections')
+                  }
+                }}
+              >
+                {seeAllType === 'collections' ? 'View Collections Tab' : 'Filter in Browse'}
+              </Button>
               <Button variant="outline" onClick={() => setShowSeeAllDialog(false)}>
                 Close
               </Button>

@@ -100,12 +100,46 @@ export default function ProfilePage() {
                       input.accept = 'image/*'
                       input.onchange = async (e) => {
                         const file = (e.target as HTMLInputElement).files?.[0]
-                        if (file) {
-                          if (file.size > 5 * 1024 * 1024) {
-                            toast.error('File too large', { description: 'Max file size is 5MB' })
-                            return
-                          }
-                          toast.success('Photo selected', { description: `${file.name} ready to upload` })
+                        if (!file) return
+
+                        if (file.size > 5 * 1024 * 1024) {
+                          toast.error('File too large', { description: 'Max file size is 5MB' })
+                          return
+                        }
+
+                        toast.loading('Uploading photo...')
+                        try {
+                          const supabase = createClient()
+                          const fileExt = file.name.split('.').pop()
+                          const fileName = `${userId}-${Date.now()}.${fileExt}`
+
+                          const { error: uploadError } = await supabase.storage
+                            .from('avatars')
+                            .upload(fileName, file, { upsert: true })
+
+                          if (uploadError) throw uploadError
+
+                          const { data: urlData } = supabase.storage
+                            .from('avatars')
+                            .getPublicUrl(fileName)
+
+                          // Update profile with new avatar URL
+                          const { error: updateError } = await supabase
+                            .from('profiles')
+                            .update({ avatar_url: urlData.publicUrl })
+                            .eq('id', userId)
+
+                          if (updateError) throw updateError
+
+                          toast.dismiss()
+                          toast.success('Profile photo updated!', { description: 'Your new photo is now visible' })
+
+                          // Refresh profile data
+                          setProfile((prev: any) => ({ ...prev, avatar_url: urlData.publicUrl }))
+                        } catch (error) {
+                          toast.dismiss()
+                          toast.error('Upload failed', { description: 'Please try again' })
+                          console.error('Photo upload error:', error)
                         }
                       }
                       input.click()

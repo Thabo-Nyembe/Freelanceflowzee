@@ -339,6 +339,11 @@ export default function AppStoreClient() {
   const [appToInstall, setAppToInstall] = useState<App | null>(null)
   const [installLoading, setInstallLoading] = useState(false)
 
+  // See All Dialog and special filter states
+  const [showSeeAllDialog, setShowSeeAllDialog] = useState(false)
+  const [seeAllType, setSeeAllType] = useState<'editors' | 'trending' | 'collections'>('editors')
+  const [specialFilter, setSpecialFilter] = useState<'all' | 'editors' | 'trending'>('all')
+
   // Fetch user on mount
   useEffect(() => {
     const getUser = async () => {
@@ -441,9 +446,13 @@ export default function AppStoreClient() {
       const matchesStatus = statusFilter === 'all' || app.status === statusFilter
       const matchesCategory = categoryFilter === 'all' || app.category === categoryFilter
       const matchesPricing = pricingFilter === 'all' || app.pricing === pricingFilter
-      return matchesSearch && matchesStatus && matchesCategory && matchesPricing
+      // Special filter for Editor's Choice and Trending
+      const matchesSpecial = specialFilter === 'all' ||
+        (specialFilter === 'editors' && app.editorChoice) ||
+        (specialFilter === 'trending' && app.trending)
+      return matchesSearch && matchesStatus && matchesCategory && matchesPricing && matchesSpecial
     })
-  }, [apps, searchQuery, statusFilter, categoryFilter, pricingFilter])
+  }, [apps, searchQuery, statusFilter, categoryFilter, pricingFilter, specialFilter])
 
   // Stats
   const stats = useMemo(() => ({
@@ -1034,19 +1043,20 @@ export default function AppStoreClient() {
             {/* Discover Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Sparkles, label: 'For You', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: TrendingUp, label: 'Trending', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Award, label: 'Top Charts', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Zap, label: 'New Apps', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Gift, label: 'Free Today', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Tag, label: 'On Sale', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Users, label: 'Team Picks', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Heart, label: 'Wishlist', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Sparkles, label: 'For You', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setSpecialFilter('all'); setActiveTab('browse'); toast.success('Showing personalized app recommendations') } },
+                { icon: TrendingUp, label: 'Trending', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setSeeAllType('trending'); setShowSeeAllDialog(true) } },
+                { icon: Award, label: 'Top Charts', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => { setSeeAllType('editors'); setShowSeeAllDialog(true) } },
+                { icon: Zap, label: 'New Apps', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { setSpecialFilter('all'); setActiveTab('browse'); toast.success('Showing newest apps first') } },
+                { icon: Gift, label: 'Free Today', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setPricingFilter('free'); setActiveTab('browse'); toast.success('Showing free apps') } },
+                { icon: Tag, label: 'On Sale', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { setActiveTab('browse'); toast.success('Showing apps on sale') } },
+                { icon: Users, label: 'Team Picks', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { setSeeAllType('editors'); setShowSeeAllDialog(true) } },
+                { icon: Heart, label: 'Wishlist', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setActiveTab('installed'); toast.success('Showing your wishlist') } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1062,8 +1072,8 @@ export default function AppStoreClient() {
                   Editor's Choice
                 </h3>
                 <Button variant="ghost" size="sm" onClick={() => {
-                  setSearchQuery('editor choice')
-                  toast.success('Editor\'s Choice', { description: `Showing ${editorChoiceApps.length} editor's choice apps` })
+                  setSeeAllType('editors')
+                  setShowSeeAllDialog(true)
                 }}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -1110,8 +1120,8 @@ export default function AppStoreClient() {
                   Trending Now
                 </h3>
                 <Button variant="ghost" size="sm" onClick={() => {
-                  setSearchQuery('trending')
-                  toast.success('Trending Apps', { description: `Showing ${trendingApps.length} trending apps` })
+                  setSeeAllType('trending')
+                  setShowSeeAllDialog(true)
                 }}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -1154,8 +1164,8 @@ export default function AppStoreClient() {
                   Featured Collections
                 </h3>
                 <Button variant="ghost" size="sm" onClick={() => {
-                  setActiveTab('collections')
-                  toast.success('Collections', { description: `Viewing ${collections.length} featured collections` })
+                  setSeeAllType('collections')
+                  setShowSeeAllDialog(true)
                 }}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -1219,6 +1229,18 @@ export default function AppStoreClient() {
                     <option value="subscription">Subscription</option>
                     <option value="enterprise">Enterprise</option>
                   </select>
+                  {/* Special filter badge */}
+                  {specialFilter !== 'all' && (
+                    <Badge
+                      className="cursor-pointer flex items-center gap-1"
+                      variant="secondary"
+                      onClick={() => setSpecialFilter('all')}
+                    >
+                      {specialFilter === 'editors' && <><Award className="w-3 h-3 text-yellow-500" />Editor&apos;s Choice</>}
+                      {specialFilter === 'trending' && <><TrendingUp className="w-3 h-3 text-green-500" />Trending</>}
+                      <span className="ml-1 text-xs">x</span>
+                    </Badge>
+                  )}
                   <div className="flex-1" />
                   <span className="text-sm text-muted-foreground">
                     {filteredApps.length} apps
@@ -2272,6 +2294,167 @@ export default function AppStoreClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* See All Dialog */}
+      <Dialog open={showSeeAllDialog} onOpenChange={setShowSeeAllDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {seeAllType === 'editors' && <><Award className="w-5 h-5 text-yellow-500" />Editor&apos;s Choice</>}
+              {seeAllType === 'trending' && <><TrendingUp className="w-5 h-5 text-green-500" />Trending Apps</>}
+              {seeAllType === 'collections' && <><Layers className="w-5 h-5 text-purple-500" />All Collections</>}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {seeAllType === 'editors' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {editorChoiceApps.map((app) => (
+                  <div
+                    key={app.id}
+                    className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => {
+                      setSelectedApp(app)
+                      setShowSeeAllDialog(false)
+                      setShowAppDialog(true)
+                    }}
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white font-bold">
+                      {app.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold">{app.name}</h4>
+                        <Award className="w-4 h-4 text-yellow-500" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">{app.developer.name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                        <span className="text-xs">{app.rating.toFixed(1)}</span>
+                        {getPricingBadge(app.pricing, app.price)}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (app.status === 'installed') {
+                          handleOpenApp(app, e)
+                        } else {
+                          openInstallConfirmation(app)
+                        }
+                      }}
+                      disabled={loading}
+                    >
+                      {app.status === 'installed' ? (
+                        <><Play className="w-4 h-4 mr-1" />Open</>
+                      ) : (
+                        <><Download className="w-4 h-4 mr-1" />Get</>
+                      )}
+                    </Button>
+                  </div>
+                ))}
+                {editorChoiceApps.length === 0 && (
+                  <p className="text-muted-foreground col-span-2 text-center py-8">No Editor&apos;s Choice apps available</p>
+                )}
+              </div>
+            )}
+            {seeAllType === 'trending' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {trendingApps.map((app) => (
+                  <div
+                    key={app.id}
+                    className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => {
+                      setSelectedApp(app)
+                      setShowSeeAllDialog(false)
+                      setShowAppDialog(true)
+                    }}
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">
+                      {app.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold">{app.name}</h4>
+                        <TrendingUp className="w-4 h-4 text-green-500" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">{app.developer.name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted-foreground">{formatNumber(app.downloadCount)} downloads</span>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (app.status === 'installed') {
+                          handleOpenApp(app, e)
+                        } else {
+                          openInstallConfirmation(app)
+                        }
+                      }}
+                      disabled={loading}
+                    >
+                      {app.status === 'installed' ? (
+                        <><Play className="w-4 h-4 mr-1" />Open</>
+                      ) : (
+                        <><Download className="w-4 h-4 mr-1" />Get</>
+                      )}
+                    </Button>
+                  </div>
+                ))}
+                {trendingApps.length === 0 && (
+                  <p className="text-muted-foreground col-span-2 text-center py-8">No trending apps available</p>
+                )}
+              </div>
+            )}
+            {seeAllType === 'collections' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {collections.map((collection) => (
+                  <div
+                    key={collection.id}
+                    className="p-6 border rounded-lg hover:bg-muted/50 cursor-pointer text-center"
+                    onClick={() => {
+                      setShowSeeAllDialog(false)
+                      setActiveTab('collections')
+                    }}
+                  >
+                    <div className="text-4xl mb-3">{collection.icon}</div>
+                    <h4 className="font-semibold mb-1">{collection.name}</h4>
+                    <p className="text-sm text-muted-foreground mb-2">{collection.description}</p>
+                    <Badge variant="outline">{collection.apps.length} apps</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex justify-between pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowSeeAllDialog(false)
+                  // Apply filter to browse tab
+                  if (seeAllType === 'editors') {
+                    setSpecialFilter('editors')
+                    setActiveTab('browse')
+                    toast.success(`Showing ${editorChoiceApps.length} Editor's Choice apps`)
+                  } else if (seeAllType === 'trending') {
+                    setSpecialFilter('trending')
+                    setActiveTab('browse')
+                    toast.success(`Showing ${trendingApps.length} trending apps`)
+                  } else {
+                    setActiveTab('collections')
+                  }
+                }}
+              >
+                {seeAllType === 'collections' ? 'View Collections Tab' : 'Filter in Browse'}
+              </Button>
+              <Button variant="outline" onClick={() => setShowSeeAllDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -681,6 +681,11 @@ export default function AuditLogsClient() {
   const [isLiveMode, setIsLiveMode] = useState(true)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Date, User, and Action filters for actual filtering
+  const [dateFilter, setDateFilter] = useState<string>('all')
+  const [userFilter, setUserFilter] = useState<string>('all')
+  const [actionFilter, setActionFilter] = useState<string>('all')
+
   // Data State
   const [dbLogs, setDbLogs] = useState<DbAuditLog[]>([])
   const [dbAlertRules, setDbAlertRules] = useState<DbAlertRule[]>([])
@@ -1026,9 +1031,28 @@ export default function AuditLogsClient() {
     return [...convertedDbLogs, ...mockLogs]
   }, [convertedDbLogs])
 
-  // Filtered logs
+  // Filtered logs with date, user, action, and search filters
   const filteredLogs = useMemo(() => {
     return allLogs.filter(log => {
+      // Date filter
+      if (dateFilter !== 'all') {
+        const days = parseInt(dateFilter.replace('d', ''))
+        if (!isNaN(days)) {
+          const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+          if (new Date(log.timestamp) < cutoff) return false
+        }
+      }
+
+      // User filter
+      if (userFilter !== 'all') {
+        if (log.user_email !== userFilter && log.user_id !== userFilter) return false
+      }
+
+      // Action filter
+      if (actionFilter !== 'all') {
+        if (log.action !== actionFilter && log.log_type !== actionFilter) return false
+      }
+
       const matchesSearch =
         log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
         log.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1258,7 +1282,7 @@ export default function AuditLogsClient() {
                 { icon: Search, label: 'Search Logs', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600', action: () => setShowSearchDialog(true) },
                 { icon: Bell, label: 'New Alert', color: 'bg-red-100 dark:bg-red-900/30 text-red-600', action: () => setShowCreateRuleDialog(true) },
                 { icon: Download, label: 'Export', color: 'bg-green-100 dark:bg-green-900/30 text-green-600', action: () => setShowExportDialog(true) },
-                { icon: Filter, label: 'Save Filter', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600', action: () => { toast.success('Filter saved') } },
+                { icon: Filter, label: 'Save Filter', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600', action: () => setShowSavedQueriesDialog(true) },
                 { icon: ShieldCheck, label: 'Compliance', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600', action: () => setActiveTab('compliance') },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600', action: () => setActiveTab('analytics') },
                 { icon: Archive, label: 'Archive', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600', action: () => setShowArchiveDialog(true) },
@@ -1711,30 +1735,41 @@ export default function AuditLogsClient() {
                 </div>
                 <div className="flex items-center gap-4 mt-6">
                   <button
-                    className={`px-4 py-2 ${analyticsDateRange === '7d' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
+                    className={`px-4 py-2 ${dateFilter === '7d' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
                     onClick={() => {
+                      setDateFilter('7d')
                       setAnalyticsDateRange('7d')
-                      toast.success('Date range updated')
+                      toast.success('Filtering logs from last 7 days')
                     }}
                   >
                     <Calendar className="w-4 h-4 inline mr-2" />
                     Last 7 Days
                   </button>
                   <button
-                    className={`px-4 py-2 ${analyticsDateRange === '30d' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
+                    className={`px-4 py-2 ${dateFilter === '30d' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
                     onClick={() => {
+                      setDateFilter('30d')
                       setAnalyticsDateRange('30d')
-                      toast.success('Date range updated')
+                      toast.success('Filtering logs from last 30 days')
                     }}
                   >
                     <Calendar className="w-4 h-4 inline mr-2" />
                     Last 30 Days
                   </button>
                   <button
-                    className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-white/90 transition-colors"
+                    className={`px-4 py-2 ${dateFilter === 'all' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
                     onClick={() => {
-                      toast.success('Exporting analytics report')
+                      setDateFilter('all')
+                      setAnalyticsDateRange('all')
+                      toast.success('Showing all logs')
                     }}
+                  >
+                    <Calendar className="w-4 h-4 inline mr-2" />
+                    All Time
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-white/90 transition-colors"
+                    onClick={handleExportAuditLogs}
                   >
                     <Download className="w-4 h-4 inline mr-2" />
                     Export Report
@@ -2695,7 +2730,7 @@ export default function AuditLogsClient() {
               </Button>
               <Button onClick={() => {
                 setShowExportDialog(false)
-                toast.success('Export started - file will download shortly')
+                handleExportAuditLogs()
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export

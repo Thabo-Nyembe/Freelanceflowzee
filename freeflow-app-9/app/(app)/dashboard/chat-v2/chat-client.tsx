@@ -208,6 +208,15 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   const [inviteRole, setInviteRole] = useState('agent')
   const [showMemberOptionsDialog, setShowMemberOptionsDialog] = useState(false)
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
+  const [showRoleChangeDialog, setShowRoleChangeDialog] = useState(false)
+  const [selectedRoleMember, setSelectedRoleMember] = useState<TeamMember | null>(null)
+  const [selectedNewRole, setSelectedNewRole] = useState<string>('')
+  const [widgetColor, setWidgetColor] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('chat_widget_color') || '#06B6D4'
+    }
+    return '#06B6D4'
+  })
 
   // New state for wired handlers
   const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false)
@@ -579,6 +588,36 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       setIsSaving(false)
     }
   }, [selectedConversation])
+
+  // Change member role handler
+  const handleChangeRole = useCallback(async (memberId: string, newRole: string) => {
+    setIsSaving(true)
+    try {
+      const { error } = await supabase
+        .from('team_members')
+        .update({ role: newRole })
+        .eq('id', memberId)
+      if (error) throw error
+      toast.success('Role updated successfully')
+      setShowRoleChangeDialog(false)
+      setSelectedRoleMember(null)
+      setSelectedNewRole('')
+    } catch (err) {
+      console.error('Failed to update role:', err)
+      toast.error('Failed to update role')
+    } finally {
+      setIsSaving(false)
+    }
+  }, [])
+
+  // Widget color change handler
+  const handleWidgetColorChange = useCallback((color: string) => {
+    setWidgetColor(color)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('chat_widget_color', color)
+    }
+    toast.success(`Widget color updated to ${color}`)
+  }, [])
 
   // Delete message handler
   const handleDeleteMessage = useCallback(async (messageId: string) => {
@@ -1482,7 +1521,8 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                           {['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#EC4899'].map(color => (
                             <button
                               key={color}
-                              className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:scale-110 transition-transform"
+                              onClick={() => handleWidgetColorChange(color)}
+                              className={`w-10 h-10 rounded-lg border-2 hover:scale-110 transition-transform ${widgetColor === color ? 'border-gray-900 dark:border-white ring-2 ring-offset-2 ring-gray-900 dark:ring-white' : 'border-gray-200'}`}
                               style={{ backgroundColor: color }}
                             />
                           ))}
@@ -1619,7 +1659,11 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                                 }}>
                                   <Edit className="h-4 w-4 mr-2" />Edit Profile
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => toast.success(`Role options for ${member.name}: Admin, Agent, Manager`)}>
+                                <DropdownMenuItem onClick={() => {
+                                  setSelectedRoleMember(member)
+                                  setSelectedNewRole(member.role)
+                                  setShowRoleChangeDialog(true)
+                                }}>
                                   <Users className="h-4 w-4 mr-2" />Change Role
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
@@ -2573,7 +2617,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                 <Card><CardHeader><CardTitle>Chat Widget</CardTitle></CardHeader><CardContent className="space-y-4">
                   <div className="flex items-center justify-between"><div><p className="font-medium">Enable Chat Widget</p><p className="text-sm text-gray-500">Show widget on website</p></div><Switch defaultChecked /></div>
                   <div><Label>Widget Position</Label><Select defaultValue="right"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="left">Bottom Left</SelectItem><SelectItem value="right">Bottom Right</SelectItem></SelectContent></Select></div>
-                  <div><Label>Widget Color</Label><div className="flex gap-2 mt-2">{['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'].map(c => (<button key={c} className="w-8 h-8 rounded-full border-2" style={{ backgroundColor: c }} />))}</div></div>
+                  <div><Label>Widget Color</Label><div className="flex gap-2 mt-2">{['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'].map(c => (<button key={c} onClick={() => handleWidgetColorChange(c)} className={`w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform ${widgetColor === c ? 'border-gray-900 ring-2 ring-offset-2' : ''}`} style={{ backgroundColor: c }} />))}</div></div>
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Email Channel</CardTitle></CardHeader><CardContent className="space-y-4">
                   <div className="flex items-center justify-between"><div><p className="font-medium">Forward to Chat</p><p className="text-sm text-gray-500">Convert emails to conversations</p></div><Switch defaultChecked /></div>
@@ -2619,7 +2663,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => { setSelectedMember(member); setShowMemberOptionsDialog(true); }}><Edit className="h-4 w-4 mr-2" />Edit Profile</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast.success(`Role options for ${member.name}: Admin, Agent, Manager`)}><Users className="h-4 w-4 mr-2" />Change Role</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => { setSelectedRoleMember(member); setSelectedNewRole(member.role); setShowRoleChangeDialog(true); }}><Users className="h-4 w-4 mr-2" />Change Role</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-red-600" onClick={async () => { if (confirm(`Remove ${member.name}?`)) { try { const { error } = await supabase.from('team_members').delete().eq('id', member.id); if (error) throw error; toast.success(`${member.name} removed`); } catch { toast.error('Failed to remove member'); } } }}><Trash2 className="h-4 w-4 mr-2" />Remove</DropdownMenuItem>
                           </DropdownMenuContent>
@@ -2848,6 +2892,66 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
               toast.success('Member profile updated')
               setShowMemberOptionsDialog(false)
             }}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Role Change Dialog */}
+      <Dialog open={showRoleChangeDialog} onOpenChange={setShowRoleChangeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Member Role</DialogTitle>
+            <DialogDescription>
+              Update the role for {selectedRoleMember?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={selectedRoleMember?.avatar} alt="User avatar" />
+                <AvatarFallback>{selectedRoleMember?.name?.[0] || 'U'}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold">{selectedRoleMember?.name}</p>
+                <p className="text-sm text-gray-500">{selectedRoleMember?.email}</p>
+              </div>
+            </div>
+            <div>
+              <Label>Select New Role</Label>
+              <Select value={selectedNewRole} onValueChange={setSelectedNewRole}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="agent">Support Agent</SelectItem>
+                  <SelectItem value="manager">Team Manager</SelectItem>
+                  <SelectItem value="admin">Administrator</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="text-sm text-gray-500 space-y-1">
+              <p><strong>Agent:</strong> Can handle conversations and respond to customers</p>
+              <p><strong>Manager:</strong> Can manage team members and view reports</p>
+              <p><strong>Admin:</strong> Full access to all settings and configurations</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowRoleChangeDialog(false)
+              setSelectedRoleMember(null)
+              setSelectedNewRole('')
+            }}>Cancel</Button>
+            <Button
+              className="bg-cyan-600"
+              disabled={!selectedNewRole || isSaving}
+              onClick={() => {
+                if (selectedRoleMember && selectedNewRole) {
+                  handleChangeRole(selectedRoleMember.id, selectedNewRole)
+                }
+              }}
+            >
+              {isSaving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Updating...</> : 'Update Role'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
