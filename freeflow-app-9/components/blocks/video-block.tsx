@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { useDropzone } from 'react-dropzone'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -142,7 +143,7 @@ export function VideoBlock({
               <p>Drag & drop a video here, or click to select</p>
             )}
           </div>
-          <Button variant="outline" size="sm" className="mt-2">
+          <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('Upload', { description: 'Click anywhere in the dropzone or drag a video file' })}>
             <Upload className="w-4 h-4 mr-2" />
             Upload Video
           </Button>

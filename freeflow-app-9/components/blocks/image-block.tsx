@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback } from 'react'
+import { toast } from 'sonner'
 import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
 import { Input } from '@/components/ui/input'
@@ -67,7 +68,7 @@ export function ImageBlock({
               <p>Drag & drop an image here, or click to select</p>
             )}
           </div>
-          <Button variant="outline" size="sm" className="mt-2">
+          <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('Upload', { description: 'Click anywhere in the dropzone or drag an image' })}>
             <Upload className="w-4 h-4 mr-2" />
             Upload Image
           </Button>

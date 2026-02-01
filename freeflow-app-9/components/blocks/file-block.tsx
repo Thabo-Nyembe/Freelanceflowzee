@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback } from 'react'
+import { toast } from 'sonner'
 import { useDropzone } from 'react-dropzone'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -111,7 +112,7 @@ export function FileBlock({
               <p>Drag & drop a file here, or click to select</p>
             )}
           </div>
-          <Button variant="outline" size="sm" className="mt-2">
+          <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('Upload', { description: 'Click anywhere in the dropzone or drag a file' })}>
             <Upload className="w-4 h-4 mr-2" />
             Upload File
           </Button>

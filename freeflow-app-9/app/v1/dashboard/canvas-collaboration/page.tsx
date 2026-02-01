@@ -1274,7 +1274,7 @@ export default function CanvasCollaboration() {
                       {layer.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
                     </Button>
                     <span className="flex-1 text-sm">{layer.name}</span>
-                    <Button variant="ghost" size="sm" className="p-0 w-6 h-6">
+                    <Button variant="ghost" size="sm" className="p-0 w-6 h-6" onClick={() => toast.warning('Delete Layer', { description: `Are you sure you want to delete ${layer.name}?` })}>
                       <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>

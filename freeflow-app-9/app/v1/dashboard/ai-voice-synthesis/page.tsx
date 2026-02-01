@@ -439,7 +439,7 @@ export default function AIVoiceSynthesisPage() {
                       <Settings className="w-5 h-5 text-purple-500" />
                       Voice Settings
                     </h3>
-                    <Button variant="ghost" size="sm">Reset</Button>
+                    <Button variant="ghost" size="sm" onClick={() => { setSpeed([1.0]); setPitch([1.0]); toast.info('Reset', { description: 'Voice settings reset to defaults' }); }}>Reset</Button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

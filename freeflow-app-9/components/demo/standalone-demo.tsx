@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -296,7 +297,7 @@ export function StandaloneDemo() {
               <h2 className="text-3xl font-bold mb-4">Ready to Start Your Next Project?</h2>
               <p className="text-xl opacity-90 mb-6">Join thousands of satisfied clients who trust KAZI</p>
               <div className="space-y-4">
-                <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100">
+                <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100" onClick={() => toast.success('Get Started', { description: 'Redirecting to project creation...' })}>
                   Start Your Project Today
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>

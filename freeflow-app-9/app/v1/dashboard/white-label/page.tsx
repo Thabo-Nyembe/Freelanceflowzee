@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 import {
   Palette, Type, Image, Globe, Code, Eye, Download,
   Settings, Sparkles, CheckCircle, AlertCircle, Copy, Upload, RefreshCw, Save, Star, Crown, Shield, Zap, Info, Award
@@ -670,7 +671,7 @@ export default function WhiteLabelPage() {
                               <code className="flex-1 px-3 py-2 bg-slate-950 rounded text-xs text-gray-300 font-mono overflow-x-auto">
                                 {record.value}
                               </code>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(record.value); toast.success('Copied', { description: 'DNS record value copied to clipboard' }); }}>
                                 <Copy className="w-4 h-4" />
                               </Button>
                             </div>

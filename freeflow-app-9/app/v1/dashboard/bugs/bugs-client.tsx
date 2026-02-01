@@ -1367,7 +1367,7 @@ export default function BugsClient() {
                           </div>
                         ))}
                         {sprintBugs.length > 3 && (
-                          <Button variant="ghost" className="w-full text-sm">
+                          <Button variant="ghost" className="w-full text-sm" onClick={() => toast.info('Sprint Bugs', { description: `Showing all ${sprintBugs.length} bugs for this sprint` })}>
                             View all {sprintBugs.length} bugs
                           </Button>
                         )}

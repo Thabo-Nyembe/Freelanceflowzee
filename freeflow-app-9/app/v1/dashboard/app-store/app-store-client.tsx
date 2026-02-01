@@ -984,7 +984,7 @@ export default function AppStoreClient() {
                   <Award className="w-5 h-5 text-yellow-500" />
                   Editor's Choice
                 </h3>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => toast.info('Editor\'s Choice', { description: 'Viewing all editor\'s choice apps...' })}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1029,7 +1029,7 @@ export default function AppStoreClient() {
                   <TrendingUp className="w-5 h-5 text-green-500" />
                   Trending Now
                 </h3>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => toast.info('Trending Apps', { description: 'Viewing all trending apps...' })}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1070,7 +1070,7 @@ export default function AppStoreClient() {
                   <Layers className="w-5 h-5 text-purple-500" />
                   Featured Collections
                 </h3>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => toast.info('Collections', { description: 'Viewing all featured collections...' })}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
