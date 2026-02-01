@@ -68,8 +68,8 @@ export function useFiles(folderId?: string | null, initialFiles: FileItem[] = []
 
       if (error) throw error
       setFiles(data || [])
-    } catch (err: unknown) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setIsLoading(false)
     }
