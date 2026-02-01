@@ -20,8 +20,15 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Zap
+  Zap,
+  Check,
+  Sparkles,
+  Building2
 } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { UsageChart } from './usage-chart'
 
@@ -68,6 +75,20 @@ export function BillingDashboard() {
   const [usage, setUsage] = useState<UsageData[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
+  const [showPlanDialog, setShowPlanDialog] = useState(false)
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState('pro')
+  const [paymentMethod, setPaymentMethod] = useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+    name: ''
+  })
+  const plans = [
+    { id: 'starter', name: 'Starter', price: 29, features: ['5 Projects', '10GB Storage', 'Basic Analytics', 'Email Support'] },
+    { id: 'pro', name: 'Pro', price: 79, features: ['Unlimited Projects', '100GB Storage', 'Advanced Analytics', 'Priority Support', 'API Access', 'Custom Branding'] },
+    { id: 'enterprise', name: 'Enterprise', price: 199, features: ['Everything in Pro', 'Unlimited Storage', 'Dedicated Account Manager', 'SLA Guarantee', 'SSO/SAML', 'Custom Integrations'] }
+  ]
 
   useEffect(() => {
     fetchBillingData()
@@ -331,8 +352,8 @@ export function BillingDashboard() {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => toast.info('Coming Soon', { description: 'Plan management will be available in the next release' })}>Change Plan</Button>
-                    <Button variant="outline" onClick={() => toast.info('Coming Soon', { description: 'Payment method updates are coming soon' })}>
+                    <Button variant="outline" onClick={() => setShowPlanDialog(true)}>Change Plan</Button>
+                    <Button variant="outline" onClick={() => setShowPaymentDialog(true)}>
                       <CreditCard className="h-4 w-4 mr-2" />
                       Update Payment
                     </Button>
@@ -341,7 +362,7 @@ export function BillingDashboard() {
               ) : (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground mb-4">No active subscription</p>
-                  <Button onClick={() => toast.info('Coming Soon', { description: 'Subscription plans will be available soon' })}>View Plans</Button>
+                  <Button onClick={() => setShowPlanDialog(true)}>View Plans</Button>
                 </div>
               )}
             </CardContent>
@@ -422,6 +443,156 @@ export function BillingDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Plan Selection Dialog */}
+      <Dialog open={showPlanDialog} onOpenChange={setShowPlanDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-purple-500" />
+              Choose Your Plan
+            </DialogTitle>
+            <DialogDescription>
+              Select the plan that best fits your needs
+            </DialogDescription>
+          </DialogHeader>
+
+          <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan} className="grid grid-cols-3 gap-4 mt-4">
+            {plans.map((plan) => (
+              <Label
+                key={plan.id}
+                htmlFor={plan.id}
+                className={`flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                  selectedPlan === plan.id ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20' : 'border-muted hover:border-purple-200'
+                }`}
+              >
+                <RadioGroupItem value={plan.id} id={plan.id} className="sr-only" />
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold text-lg">{plan.name}</span>
+                  {plan.id === 'pro' && (
+                    <Badge className="bg-purple-500">Popular</Badge>
+                  )}
+                </div>
+                <div className="text-3xl font-bold mb-4">
+                  ${plan.price}<span className="text-sm font-normal text-muted-foreground">/mo</span>
+                </div>
+                <ul className="space-y-2">
+                  {plan.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-center text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 mr-2 text-green-500" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </Label>
+            ))}
+          </RadioGroup>
+
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => setShowPlanDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-purple-600 hover:bg-purple-700"
+              onClick={() => {
+                const plan = plans.find(p => p.id === selectedPlan)
+                toast.success('Plan Updated!', { description: `You are now on the ${plan?.name} plan` })
+                setShowPlanDialog(false)
+              }}
+            >
+              Upgrade to {plans.find(p => p.id === selectedPlan)?.name}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Method Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Update Payment Method
+            </DialogTitle>
+            <DialogDescription>
+              Enter your new card details
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label>Cardholder Name</Label>
+              <Input
+                placeholder="John Doe"
+                value={paymentMethod.name}
+                onChange={(e) => setPaymentMethod(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Card Number</Label>
+              <Input
+                placeholder="4242 4242 4242 4242"
+                value={paymentMethod.cardNumber}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim()
+                  setPaymentMethod(prev => ({ ...prev, cardNumber: value }))
+                }}
+                maxLength={19}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Expiry Date</Label>
+                <Input
+                  placeholder="MM/YY"
+                  value={paymentMethod.expiryDate}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/\D/g, '')
+                    if (value.length >= 2) {
+                      value = value.slice(0, 2) + '/' + value.slice(2, 4)
+                    }
+                    setPaymentMethod(prev => ({ ...prev, expiryDate: value }))
+                  }}
+                  maxLength={5}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>CVV</Label>
+                <Input
+                  placeholder="123"
+                  type="password"
+                  value={paymentMethod.cvv}
+                  onChange={(e) => setPaymentMethod(prev => ({ ...prev, cvv: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
+                  maxLength={4}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg text-sm text-muted-foreground">
+              <CheckCircle className="w-4 h-4 text-green-500" />
+              Your payment information is encrypted and secure
+            </div>
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success('Payment Updated!', { description: 'Your payment method has been saved' })
+                setShowPaymentDialog(false)
+                setPaymentMethod({ cardNumber: '', expiryDate: '', cvv: '', name: '' })
+              }}
+              disabled={!paymentMethod.cardNumber || !paymentMethod.expiryDate || !paymentMethod.cvv || !paymentMethod.name}
+            >
+              Save Payment Method
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

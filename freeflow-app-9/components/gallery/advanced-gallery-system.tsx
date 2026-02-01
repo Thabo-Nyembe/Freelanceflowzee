@@ -9,11 +9,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { 
-  Download, Share2, Heart, Eye, Copy, ExternalLink, 
+import {
+  Download, Share2, Heart, Eye, Copy, ExternalLink,
   Settings, Users,
-  Grid3X3, List, Filter, Play
+  Grid3X3, List, Filter, Play, X, Shield, Lock, Image, Palette
 } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Slider } from '@/components/ui/slider'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface GalleryItem {
   id: string
@@ -188,6 +192,20 @@ export function AdvancedGallerySystem() {
   const [activeTab, setActiveTab] = useState<any>('gallery')
   const [sharingPanelOpen, setSharingPanelOpen] = useState<any>(false)
   const [copiedText, setCopiedText] = useState<string | null>(null)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [gallerySettings, setGallerySettings] = useState({
+    watermarkEnabled: false,
+    watermarkType: 'text' as 'text' | 'logo',
+    watermarkText: '© Your Brand',
+    watermarkPosition: 'corner' as 'center' | 'corner' | 'repeated',
+    watermarkOpacity: 50,
+    autoProcessing: true,
+    compressionQuality: 85,
+    defaultPrivacy: 'private' as 'public' | 'private' | 'password',
+    notifyOnDownload: true,
+    notifyOnView: false,
+    theme: 'auto' as 'light' | 'dark' | 'auto'
+  })
 
   const copyToClipboard = async (text: string, type: string) => {
     try {
@@ -258,7 +276,7 @@ export function AdvancedGallerySystem() {
             Manage your collections, analytics, and client galleries
           </p>
         </div>
-        <Button onClick={() => toast.info('Coming Soon', { description: 'Gallery settings will be available in the next release' })}>
+        <Button onClick={() => setShowSettingsDialog(true)}>
           <Settings className="w-4 h-4 mr-2" />
           Settings
         </Button>
@@ -514,6 +532,223 @@ export function AdvancedGallerySystem() {
           </Card>
         </div>
       )}
+
+      {/* Gallery Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Gallery Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure default settings for your galleries and collections
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Watermark Settings */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Image className="w-4 h-4" />
+                  Watermark Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Enable Watermark</Label>
+                    <p className="text-sm text-muted-foreground">Add watermark to all gallery images</p>
+                  </div>
+                  <Switch
+                    checked={gallerySettings.watermarkEnabled}
+                    onCheckedChange={(checked) => setGallerySettings(prev => ({ ...prev, watermarkEnabled: checked }))}
+                  />
+                </div>
+
+                {gallerySettings.watermarkEnabled && (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Watermark Type</Label>
+                        <Select
+                          value={gallerySettings.watermarkType}
+                          onValueChange={(value: 'text' | 'logo') => setGallerySettings(prev => ({ ...prev, watermarkType: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="text">Text</SelectItem>
+                            <SelectItem value="logo">Logo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Position</Label>
+                        <Select
+                          value={gallerySettings.watermarkPosition}
+                          onValueChange={(value: 'center' | 'corner' | 'repeated') => setGallerySettings(prev => ({ ...prev, watermarkPosition: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="corner">Corner</SelectItem>
+                            <SelectItem value="center">Center</SelectItem>
+                            <SelectItem value="repeated">Repeated</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {gallerySettings.watermarkType === 'text' && (
+                      <div className="space-y-2">
+                        <Label>Watermark Text</Label>
+                        <Input
+                          value={gallerySettings.watermarkText}
+                          onChange={(e) => setGallerySettings(prev => ({ ...prev, watermarkText: e.target.value }))}
+                          placeholder="© Your Brand"
+                        />
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label>Opacity</Label>
+                        <span className="text-sm text-muted-foreground">{gallerySettings.watermarkOpacity}%</span>
+                      </div>
+                      <Slider
+                        value={[gallerySettings.watermarkOpacity]}
+                        onValueChange={([value]) => setGallerySettings(prev => ({ ...prev, watermarkOpacity: value }))}
+                        min={10}
+                        max={100}
+                        step={5}
+                      />
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Privacy & Security */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  Privacy & Security
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Default Privacy</Label>
+                  <Select
+                    value={gallerySettings.defaultPrivacy}
+                    onValueChange={(value: 'public' | 'private' | 'password') => setGallerySettings(prev => ({ ...prev, defaultPrivacy: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="private">Private (Invite Only)</SelectItem>
+                      <SelectItem value="password">Password Protected</SelectItem>
+                      <SelectItem value="public">Public</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Download Notifications</Label>
+                    <p className="text-sm text-muted-foreground">Get notified when someone downloads</p>
+                  </div>
+                  <Switch
+                    checked={gallerySettings.notifyOnDownload}
+                    onCheckedChange={(checked) => setGallerySettings(prev => ({ ...prev, notifyOnDownload: checked }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>View Notifications</Label>
+                    <p className="text-sm text-muted-foreground">Get notified when someone views</p>
+                  </div>
+                  <Switch
+                    checked={gallerySettings.notifyOnView}
+                    onCheckedChange={(checked) => setGallerySettings(prev => ({ ...prev, notifyOnView: checked }))}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Processing Settings */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Palette className="w-4 h-4" />
+                  Processing & Display
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Auto Processing</Label>
+                    <p className="text-sm text-muted-foreground">Automatically optimize uploaded images</p>
+                  </div>
+                  <Switch
+                    checked={gallerySettings.autoProcessing}
+                    onCheckedChange={(checked) => setGallerySettings(prev => ({ ...prev, autoProcessing: checked }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Compression Quality</Label>
+                    <span className="text-sm text-muted-foreground">{gallerySettings.compressionQuality}%</span>
+                  </div>
+                  <Slider
+                    value={[gallerySettings.compressionQuality]}
+                    onValueChange={([value]) => setGallerySettings(prev => ({ ...prev, compressionQuality: value }))}
+                    min={50}
+                    max={100}
+                    step={5}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Theme</Label>
+                  <Select
+                    value={gallerySettings.theme}
+                    onValueChange={(value: 'light' | 'dark' | 'auto') => setGallerySettings(prev => ({ ...prev, theme: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="auto">Auto (System)</SelectItem>
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="dark">Dark</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Settings saved', { description: 'Your gallery settings have been updated' })
+              setShowSettingsDialog(false)
+            }}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 

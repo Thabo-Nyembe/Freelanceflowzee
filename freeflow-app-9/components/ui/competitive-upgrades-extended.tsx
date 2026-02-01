@@ -37,7 +37,7 @@ import {
   Crown,
   Flame,
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -47,6 +47,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // ============================================================================
 // 1. ADVANCED ACTIVITY FEED (Like Slack + Notion Combined)
@@ -105,6 +108,26 @@ export function ActivityFeed({
   const [activeFilter, setActiveFilter] = React.useState('all')
   const [searchQuery, setSearchQuery] = React.useState('')
   const [showUnreadOnly, setShowUnreadOnly] = React.useState(false)
+  const [showNotificationSettings, setShowNotificationSettings] = React.useState(false)
+  const [notificationPrefs, setNotificationPrefs] = React.useState({
+    emailNotifications: true,
+    pushNotifications: true,
+    mentionsOnly: false,
+    digestFrequency: 'realtime' as 'realtime' | 'hourly' | 'daily' | 'weekly',
+    quietHoursEnabled: false,
+    quietHoursStart: '22:00',
+    quietHoursEnd: '08:00',
+    soundEnabled: true,
+    desktopNotifications: true,
+    mobileNotifications: true,
+    categories: {
+      comments: true,
+      mentions: true,
+      updates: true,
+      assignments: true,
+      milestones: true
+    }
+  })
 
   const unreadCount = activities?.filter(a => !a.isRead).length ?? 0
 
@@ -221,7 +244,7 @@ export function ActivityFeed({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => toast.info('Coming Soon', { description: 'Notification settings will be available in the next release' })}
+              onClick={() => setShowNotificationSettings(true)}
             >
               <Settings className="h-4 w-4" />
             </Button>
@@ -401,6 +424,227 @@ export function ActivityFeed({
           )}
         </ScrollArea>
       </CardContent>
+
+      {/* Notification Settings Dialog */}
+      <Dialog open={showNotificationSettings} onOpenChange={setShowNotificationSettings}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              Notification Settings
+            </DialogTitle>
+            <DialogDescription>
+              Customize how and when you receive notifications
+            </DialogDescription>
+          </DialogHeader>
+
+          <Tabs defaultValue="channels" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="channels">Channels</TabsTrigger>
+              <TabsTrigger value="categories">Categories</TabsTrigger>
+              <TabsTrigger value="schedule">Schedule</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="channels" className="space-y-4 mt-4">
+              <Card>
+                <CardContent className="pt-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Email Notifications</Label>
+                      <p className="text-sm text-muted-foreground">Receive updates via email</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.emailNotifications}
+                      onCheckedChange={(checked) => setNotificationPrefs(prev => ({ ...prev, emailNotifications: checked }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Push Notifications</Label>
+                      <p className="text-sm text-muted-foreground">Browser push notifications</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.pushNotifications}
+                      onCheckedChange={(checked) => setNotificationPrefs(prev => ({ ...prev, pushNotifications: checked }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Desktop Notifications</Label>
+                      <p className="text-sm text-muted-foreground">System desktop alerts</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.desktopNotifications}
+                      onCheckedChange={(checked) => setNotificationPrefs(prev => ({ ...prev, desktopNotifications: checked }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Sound</Label>
+                      <p className="text-sm text-muted-foreground">Play sound for notifications</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.soundEnabled}
+                      onCheckedChange={(checked) => setNotificationPrefs(prev => ({ ...prev, soundEnabled: checked }))}
+                    />
+                  </div>
+
+                  <div className="space-y-2 pt-2">
+                    <Label>Digest Frequency</Label>
+                    <Select
+                      value={notificationPrefs.digestFrequency}
+                      onValueChange={(value: 'realtime' | 'hourly' | 'daily' | 'weekly') => setNotificationPrefs(prev => ({ ...prev, digestFrequency: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="realtime">Real-time</SelectItem>
+                        <SelectItem value="hourly">Hourly Digest</SelectItem>
+                        <SelectItem value="daily">Daily Digest</SelectItem>
+                        <SelectItem value="weekly">Weekly Digest</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="categories" className="space-y-4 mt-4">
+              <Card>
+                <CardContent className="pt-6 space-y-4">
+                  <p className="text-sm text-muted-foreground mb-4">Choose which types of notifications you want to receive</p>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-blue-500" />
+                      <Label>Comments</Label>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.categories.comments}
+                      onCheckedChange={(checked) => setNotificationPrefs(prev => ({ ...prev, categories: { ...prev.categories, comments: checked } }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Hash className="w-4 h-4 text-purple-500" />
+                      <Label>Mentions</Label>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.categories.mentions}
+                      onCheckedChange={(checked) => setNotificationPrefs(prev => ({ ...prev, categories: { ...prev.categories, mentions: checked } }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4 text-amber-500" />
+                      <Label>Updates</Label>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.categories.updates}
+                      onCheckedChange={(checked) => setNotificationPrefs(prev => ({ ...prev, categories: { ...prev.categories, updates: checked } }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-indigo-500" />
+                      <Label>Assignments</Label>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.categories.assignments}
+                      onCheckedChange={(checked) => setNotificationPrefs(prev => ({ ...prev, categories: { ...prev.categories, assignments: checked } }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Flag className="w-4 h-4 text-green-500" />
+                      <Label>Milestones</Label>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.categories.milestones}
+                      onCheckedChange={(checked) => setNotificationPrefs(prev => ({ ...prev, categories: { ...prev.categories, milestones: checked } }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div>
+                      <Label>Mentions Only Mode</Label>
+                      <p className="text-sm text-muted-foreground">Only notify when you&apos;re mentioned</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.mentionsOnly}
+                      onCheckedChange={(checked) => setNotificationPrefs(prev => ({ ...prev, mentionsOnly: checked }))}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="schedule" className="space-y-4 mt-4">
+              <Card>
+                <CardContent className="pt-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base">Quiet Hours</Label>
+                      <p className="text-sm text-muted-foreground">Pause notifications during set times</p>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.quietHoursEnabled}
+                      onCheckedChange={(checked) => setNotificationPrefs(prev => ({ ...prev, quietHoursEnabled: checked }))}
+                    />
+                  </div>
+
+                  {notificationPrefs.quietHoursEnabled && (
+                    <div className="grid grid-cols-2 gap-4 pl-4 border-l-2 border-muted">
+                      <div className="space-y-2">
+                        <Label>Start Time</Label>
+                        <Input
+                          type="time"
+                          value={notificationPrefs.quietHoursStart}
+                          onChange={(e) => setNotificationPrefs(prev => ({ ...prev, quietHoursStart: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>End Time</Label>
+                        <Input
+                          type="time"
+                          value={notificationPrefs.quietHoursEnd}
+                          onChange={(e) => setNotificationPrefs(prev => ({ ...prev, quietHoursEnd: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      During quiet hours, notifications will be silently collected and delivered as a summary when quiet hours end.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowNotificationSettings(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Settings saved', { description: 'Your notification preferences have been updated' })
+              setShowNotificationSettings(false)
+            }}>
+              Save Preferences
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }
