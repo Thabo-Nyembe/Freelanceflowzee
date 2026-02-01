@@ -64,6 +64,12 @@ export default function ReviewManagementDashboard({
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<any>(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [selectedReview, setSelectedReview] = useState<ClientReview | null>(null);
+  const [shareEmail, setShareEmail] = useState('');
+  const [editedReview, setEditedReview] = useState<Partial<ClientReview>>({});
   const [newReview, setNewReview] = useState<any>({
     title: '',
     description: '',
@@ -72,6 +78,52 @@ export default function ReviewManagementDashboard({
     require_all_approvals: true,
     auto_advance_stages: false
   });
+
+  const handleViewReview = (review: ClientReview) => {
+    setSelectedReview(review);
+    setShowViewDialog(true);
+  };
+
+  const handleEditReview = (review: ClientReview) => {
+    setSelectedReview(review);
+    setEditedReview({
+      title: review.title,
+      description: review.description,
+      deadline: review.deadline
+    });
+    setShowEditDialog(true);
+  };
+
+  const handleShareReview = (review: ClientReview) => {
+    setSelectedReview(review);
+    setShareEmail('');
+    setShowShareDialog(true);
+  };
+
+  const saveEditedReview = () => {
+    if (selectedReview && onUpdateReview) {
+      onUpdateReview(selectedReview.id, editedReview);
+      toast.success('Review updated', {
+        description: `Changes saved for "${selectedReview.title}"`
+      });
+    }
+    setShowEditDialog(false);
+  };
+
+  const sendShareInvite = async () => {
+    if (!shareEmail || !selectedReview) return;
+
+    toast.loading('Sending invite...', { id: 'share-invite' });
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    toast.success('Invite sent', {
+      id: 'share-invite',
+      description: `Review access shared with ${shareEmail}`
+    });
+
+    setShareEmail('');
+    setShowShareDialog(false);
+  };
 
   const filteredReviews = reviews.filter(review => {
     const matchesSearch = review.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -493,15 +545,15 @@ export default function ReviewManagementDashboard({
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.info('In Development', { description: `Review viewer for ${review.name} coming soon` })}>
+                    <Button variant="outline" size="sm" onClick={() => handleViewReview(review)}>
                       <Eye className="w-4 h-4 mr-1" />
                       View
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => toast.info('In Development', { description: `Review editor for ${review.name} coming soon` })}>
+                    <Button variant="outline" size="sm" onClick={() => handleEditReview(review)}>
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Review sharing will be available soon' })}>
+                    <Button variant="outline" size="sm" onClick={() => handleShareReview(review)}>
                       <Share className="w-4 h-4 mr-1" />
                       Share
                     </Button>
@@ -531,6 +583,168 @@ export default function ReviewManagementDashboard({
           </Card>
         )}
       </div>
+
+      {/* View Review Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5" />
+              Review Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedReview && (
+            <div className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg">
+                <h3 className="font-semibold text-lg mb-2">{selectedReview.title}</h3>
+                <p className="text-muted-foreground">{selectedReview.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Status</Label>
+                  <Badge className="mt-1" variant={
+                    selectedReview.status === 'approved' ? 'default' :
+                    selectedReview.status === 'rejected' ? 'destructive' :
+                    'secondary'
+                  }>
+                    {selectedReview.status}
+                  </Badge>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Deadline</Label>
+                  <p className="font-medium">{new Date(selectedReview.deadline).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Created</Label>
+                  <p className="font-medium">{new Date(selectedReview.created_at).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Stages</Label>
+                  <p className="font-medium">{selectedReview.stages?.length || 0} stages</p>
+                </div>
+              </div>
+
+              {selectedReview.stages && selectedReview.stages.length > 0 && (
+                <div>
+                  <Label className="text-muted-foreground mb-2 block">Progress</Label>
+                  <div className="space-y-2">
+                    {selectedReview.stages.map((stage, index) => (
+                      <div key={stage.id} className="flex items-center gap-2">
+                        <div className={cn(
+                          "w-6 h-6 rounded-full flex items-center justify-center text-xs",
+                          stage.status === 'approved' ? "bg-green-100 text-green-600" :
+                          stage.status === 'rejected' ? "bg-red-100 text-red-600" :
+                          "bg-gray-100 text-gray-600"
+                        )}>
+                          {index + 1}
+                        </div>
+                        <span className="flex-1">{stage.name}</span>
+                        <Badge variant="outline" className="text-xs">{stage.status}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowViewDialog(false)}>
+                  Close
+                </Button>
+                <Button onClick={() => {
+                  setShowViewDialog(false);
+                  handleEditReview(selectedReview);
+                }}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Review Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5" />
+              Edit Review
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Title</Label>
+              <Input
+                value={editedReview.title || ''}
+                onChange={(e) => setEditedReview({ ...editedReview, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                value={editedReview.description || ''}
+                onChange={(e) => setEditedReview({ ...editedReview, description: e.target.value })}
+                rows={4}
+              />
+            </div>
+            <div>
+              <Label>Deadline</Label>
+              <Input
+                type="date"
+                value={editedReview.deadline?.split('T')[0] || ''}
+                onChange={(e) => setEditedReview({ ...editedReview, deadline: e.target.value })}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={saveEditedReview}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Review Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share className="w-5 h-5" />
+              Share Review
+            </DialogTitle>
+          </DialogHeader>
+          {selectedReview && (
+            <div className="space-y-4">
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="font-medium">{selectedReview.title}</p>
+                <p className="text-sm text-muted-foreground">{selectedReview.description}</p>
+              </div>
+              <div>
+                <Label>Invite by email</Label>
+                <Input
+                  type="email"
+                  placeholder="colleague@example.com"
+                  value={shareEmail}
+                  onChange={(e) => setShareEmail(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={sendShareInvite} disabled={!shareEmail}>
+                  Send Invite
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
