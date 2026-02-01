@@ -130,6 +130,25 @@ export function AdvancedGallerySharingSystem({
   const [_qrCodeDialog, setQrCodeDialog] = useState<any>(false)
   const [customMessage, setCustomMessage] = useState<any>('')
   const [_embedCode, _setEmbedCode] = useState<any>('')
+  const [favorites, setFavorites] = useState<Set<string>>(new Set())
+
+  const toggleFavorite = (item: GalleryItem) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev)
+      if (newFavorites.has(item.id)) {
+        newFavorites.delete(item.id)
+        toast.success('Removed from favorites', {
+          description: `${item.name} removed from your favorites`
+        })
+      } else {
+        newFavorites.add(item.id)
+        toast.success('Added to favorites', {
+          description: `${item.name} added to your favorites`
+        })
+      }
+      return newFavorites
+    })
+  }
 
   const galleryUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/gallery/${galleryId}`
   const publicShareUrl = settings.customDomain ? `https://${settings.customDomain}` : galleryUrl
@@ -411,8 +430,8 @@ export function AdvancedGallerySharingSystem({
                   <Button onClick={() => _setLightboxItem(item)}>
                     <Eye />
                   </Button>
-                  <Button onClick={() => toast.info('In Development', { description: `Favorites for ${item.name} coming soon` })}>
-                    <Heart />
+                  <Button onClick={() => toggleFavorite(item)} className={favorites.has(item.id) ? 'text-red-500' : ''}>
+                    <Heart className={favorites.has(item.id) ? 'fill-current' : ''} />
                   </Button>
                   {settings.allowDownloads && (
                     <DropdownMenu>

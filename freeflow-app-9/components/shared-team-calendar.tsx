@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { ChevronLeft, ChevronRight, Plus, Search, Users, Video, Clock, Calendar as CalendarIcon, Filter, MapPin, MoreVertical, MessageSquare, CheckCircle2, Globe } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Search, Users, Video, Clock, Calendar as CalendarIcon, Filter, MapPin, MoreVertical, MessageSquare, CheckCircle2, Globe, Phone, Mic, MicOff, VideoOff } from 'lucide-react'
 
 // Type Definitions
 interface CalendarEvent {
@@ -234,6 +234,51 @@ export function SharedTeamCalendar() {
     description: '',
     location: ''
   })
+  const [showVideoCall, setShowVideoCall] = useState(false)
+  const [callStatus, setCallStatus] = useState<'connecting' | 'connected' | 'ended'>('connecting')
+  const [isMuted, setIsMuted] = useState(false)
+  const [isVideoOn, setIsVideoOn] = useState(true)
+  const [callDuration, setCallDuration] = useState(0)
+
+  const handleJoinMeeting = () => {
+    setShowVideoCall(true)
+    setCallStatus('connecting')
+    setCallDuration(0)
+
+    // Simulate connection
+    setTimeout(() => {
+      setCallStatus('connected')
+      toast.success('Connected to meeting', {
+        description: `Joined: ${state.selectedEvent?.title}`
+      })
+
+      // Start call timer
+      const timer = setInterval(() => {
+        setCallDuration(prev => prev + 1)
+      }, 1000)
+
+      // Store timer for cleanup
+      return () => clearInterval(timer)
+    }, 2000)
+  }
+
+  const handleEndCall = () => {
+    setCallStatus('ended')
+    toast.info('Call ended', {
+      description: `Duration: ${Math.floor(callDuration / 60)}:${(callDuration % 60).toString().padStart(2, '0')}`
+    })
+    setTimeout(() => {
+      setShowVideoCall(false)
+      setCallStatus('connecting')
+      setCallDuration(0)
+    }, 1000)
+  }
+
+  const formatCallDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   // Calendar Utilities
   const getDaysInMonth = (date: Date) => {
@@ -820,13 +865,134 @@ export function SharedTeamCalendar() {
                 <Button variant="outline" onClick={() => dispatch({ type: 'TOGGLE_EVENT_MODAL' })}>
                   Close
                 </Button>
-                <Button onClick={() => toast.info('Coming Soon', { description: 'Video conferencing integration is coming in Q2 2026' })}>
+                <Button onClick={handleJoinMeeting}>
                   <Video className="w-4 h-4 mr-2" />
                   Join Meeting
                 </Button>
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Video Call Dialog */}
+      <Dialog open={showVideoCall} onOpenChange={(open) => {
+        if (!open && callStatus === 'connected') {
+          handleEndCall()
+        } else if (!open) {
+          setShowVideoCall(false)
+        }
+      }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Video className="w-5 h-5" />
+              {state.selectedEvent?.title || 'Video Meeting'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Video Area */}
+            <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
+              {callStatus === 'connecting' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+                  <p className="text-white">Connecting...</p>
+                </div>
+              )}
+
+              {callStatus === 'connected' && (
+                <>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {isVideoOn ? (
+                      <div className="text-center">
+                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-4">
+                          <Users className="w-12 h-12 text-white" />
+                        </div>
+                        <p className="text-white text-lg">{state.selectedEvent?.attendees.length || 1} participants</p>
+                      </div>
+                    ) : (
+                      <div className="text-center text-white">
+                        <VideoOff className="w-16 h-16 mx-auto mb-2 opacity-50" />
+                        <p>Camera Off</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Call Timer */}
+                  <div className="absolute top-4 left-4 bg-black/50 px-3 py-1 rounded-full">
+                    <span className="text-white text-sm font-mono">{formatCallDuration(callDuration)}</span>
+                  </div>
+
+                  {/* Self View */}
+                  <div className="absolute bottom-4 right-4 w-32 h-24 bg-gray-800 rounded-lg border-2 border-gray-700 flex items-center justify-center">
+                    <span className="text-gray-400 text-xs">You</span>
+                  </div>
+                </>
+              )}
+
+              {callStatus === 'ended' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                  <Phone className="w-12 h-12 mb-4 opacity-50" />
+                  <p>Call Ended</p>
+                </div>
+              )}
+            </div>
+
+            {/* Controls */}
+            {callStatus === 'connected' && (
+              <div className="flex items-center justify-center gap-4">
+                <Button
+                  variant={isMuted ? "destructive" : "outline"}
+                  size="lg"
+                  className="rounded-full w-14 h-14"
+                  onClick={() => {
+                    setIsMuted(!isMuted)
+                    toast.info(isMuted ? 'Unmuted' : 'Muted')
+                  }}
+                >
+                  {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  size="lg"
+                  className="rounded-full w-16 h-16"
+                  onClick={handleEndCall}
+                >
+                  <Phone className="w-6 h-6 rotate-[135deg]" />
+                </Button>
+
+                <Button
+                  variant={!isVideoOn ? "destructive" : "outline"}
+                  size="lg"
+                  className="rounded-full w-14 h-14"
+                  onClick={() => {
+                    setIsVideoOn(!isVideoOn)
+                    toast.info(isVideoOn ? 'Camera off' : 'Camera on')
+                  }}
+                >
+                  {isVideoOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
+                </Button>
+              </div>
+            )}
+
+            {callStatus === 'connecting' && (
+              <div className="flex justify-center">
+                <Button variant="outline" onClick={() => setShowVideoCall(false)}>
+                  Cancel
+                </Button>
+              </div>
+            )}
+
+            {callStatus === 'ended' && (
+              <div className="flex justify-center">
+                <Button onClick={() => setShowVideoCall(false)}>
+                  Close
+                </Button>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

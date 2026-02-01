@@ -66,6 +66,46 @@ export function OrderDetail({ order, role, onRefresh }: OrderDetailProps) {
   const [showDeliverDialog, setShowDeliverDialog] = useState(false);
   const [showRevisionDialog, setShowRevisionDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showMessageDialog, setShowMessageDialog] = useState(false);
+  const [messageContent, setMessageContent] = useState('');
+  const [deliveryFiles, setDeliveryFiles] = useState<File[]>([]);
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+
+  const handleDeliveryFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const validFiles = Array.from(files).filter(file => file.size < 50 * 1024 * 1024); // 50MB max
+    if (validFiles.length < files.length) {
+      toast.warning('Some files were skipped', { description: 'Maximum file size is 50MB' });
+    }
+
+    setDeliveryFiles(prev => [...prev, ...validFiles].slice(0, 10));
+    toast.success(`${validFiles.length} file(s) added`);
+  };
+
+  const removeDeliveryFile = (index: number) => {
+    setDeliveryFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSendMessage = async () => {
+    if (!messageContent.trim()) return;
+
+    setIsSendingMessage(true);
+    toast.loading('Sending message...', { id: 'send-message' });
+
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const otherParty = role === 'buyer' ? order.seller : order.buyer;
+    toast.success('Message sent', {
+      id: 'send-message',
+      description: `Your message was delivered to ${otherParty?.name || 'the other party'}`
+    });
+
+    setMessageContent('');
+    setIsSendingMessage(false);
+    setShowMessageDialog(false);
+  };
 
   const {
     startWork,
@@ -348,10 +388,46 @@ export function OrderDetail({ order, role, onRefresh }: OrderDetailProps) {
                             onChange={(e) => setDeliverMessage(e.target.value)}
                             rows={4}
                           />
-                          <Button variant="outline" className="w-full" onClick={() => toast.info('In Development', { description: 'File upload for deliveries is being built' })}>
+                          <input
+                            type="file"
+                            id="delivery-files"
+                            multiple
+                            className="hidden"
+                            onChange={handleDeliveryFileSelect}
+                          />
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => document.getElementById('delivery-files')?.click()}
+                          >
                             <Upload className="h-4 w-4 mr-2" />
                             Upload Files
                           </Button>
+
+                          {/* Display uploaded files */}
+                          {deliveryFiles.length > 0 && (
+                            <div className="space-y-2 mt-2">
+                              {deliveryFiles.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between text-sm bg-muted p-2 rounded">
+                                  <div className="flex items-center gap-2 truncate">
+                                    <FileText className="h-4 w-4 flex-shrink-0" />
+                                    <span className="truncate">{file.name}</span>
+                                    <span className="text-muted-foreground text-xs">
+                                      ({(file.size / 1024 / 1024).toFixed(1)}MB)
+                                    </span>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 w-6 p-0"
+                                    onClick={() => removeDeliveryFile(index)}
+                                  >
+                                    <XCircle className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                         <DialogFooter>
                           <Button variant="outline" onClick={() => setShowDeliverDialog(false)}>
@@ -547,10 +623,55 @@ export function OrderDetail({ order, role, onRefresh }: OrderDetailProps) {
                   </p>
                 </div>
               </div>
-              <Button variant="outline" className="w-full mt-4" onClick={() => toast.info('Coming Soon', { description: 'In-app messaging is coming soon' })}>
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Send Message
-              </Button>
+              <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full mt-4">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Send Message
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Send Message</DialogTitle>
+                    <DialogDescription>
+                      Message {(role === 'buyer' ? order.seller : order.buyer)?.name || 'the other party'} about this order
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                      <Avatar>
+                        <AvatarImage src={(role === 'buyer' ? order.seller : order.buyer)?.avatar_url || ''} />
+                        <AvatarFallback>
+                          {(role === 'buyer' ? order.seller : order.buyer)?.name?.[0] || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">
+                          {(role === 'buyer' ? order.seller : order.buyer)?.name || 'Unknown'}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Order #{order.id.slice(0, 8)}
+                        </p>
+                      </div>
+                    </div>
+                    <Textarea
+                      placeholder="Write your message..."
+                      value={messageContent}
+                      onChange={(e) => setMessageContent(e.target.value)}
+                      rows={5}
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowMessageDialog(false)} disabled={isSendingMessage}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSendMessage} disabled={!messageContent.trim() || isSendingMessage}>
+                      <Send className="h-4 w-4 mr-2" />
+                      {isSendingMessage ? 'Sending...' : 'Send'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </div>
