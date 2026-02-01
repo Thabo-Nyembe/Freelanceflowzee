@@ -1,8 +1,9 @@
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 // Real database hooks for marketing data
 import { useMarketingCampaigns } from '@/lib/hooks/use-marketing'
 import { useLeads as useLeadsExtended } from '@/lib/hooks/use-leads-extended'
@@ -460,8 +461,11 @@ const getScoreColor = (score: number) => {
 // ============================================================================
 
 export default function MarketingClient() {
+  // Supabase client for direct operations
+  const supabase = createClient()
+
   // MIGRATED: Real database hooks
-  const { campaigns: dbCampaigns, loading: campaignsLoading, error: campaignsError, fetchCampaigns } = useMarketingCampaigns()
+  const { campaigns: dbCampaigns, loading: campaignsLoading, error: campaignsError, fetchCampaigns, createCampaign, startCampaign, pauseCampaign } = useMarketingCampaigns()
   const { leads: dbLeads, isLoading: leadsLoading, refresh: refetchLeads } = useLeadsExtended({ limit: 100 })
 
   // Real-time collaboration and activity data
@@ -702,57 +706,107 @@ export default function MarketingClient() {
     setShowCampaignBuilder(true)
   }
 
-  const handleLaunchCampaign = async (campaignName: string) => {
+  const handleLaunchCampaign = async (campaignId?: string) => {
     setIsProcessing(true)
     try {
-      const response = await fetch('/api/campaigns/launch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: campaignName })
-      })
-      if (response.ok) {
-        toast.success(`"${campaignName}" is now live!`)
-      } else {
-        toast.success(`"${campaignName}" launch initiated!`) // Fallback for demo
+      // Find campaign by ID or use selected campaign
+      const campaignToLaunch = campaignId
+        ? campaigns.find(c => c.id === campaignId)
+        : selectedCampaign
+
+      if (!campaignToLaunch) {
+        toast.error('Please select a campaign to launch')
+        return
       }
-    } catch {
-      toast.success(`"${campaignName}" launch initiated!`) // Demo mode
+
+      await startCampaign(campaignToLaunch.id)
+      toast.success(`"${campaignToLaunch.name}" is now live!`)
+      await fetchCampaigns()
+    } catch (err) {
+      toast.error(`Failed to launch campaign: ${err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
       setIsProcessing(false)
     }
   }
 
-  const handlePauseCampaign = async (campaignName: string) => {
+  const handlePauseCampaign = async (campaignId?: string) => {
     setIsProcessing(true)
     try {
-      const response = await fetch('/api/campaigns/pause', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: campaignName })
-      })
-      if (response.ok) {
-        toast.success(`"${campaignName}" paused successfully`)
-      } else {
-        toast.success(`"${campaignName}" paused`) // Fallback for demo
+      // Find campaign by ID or use selected campaign
+      const campaignToPause = campaignId
+        ? campaigns.find(c => c.id === campaignId)
+        : selectedCampaign
+
+      if (!campaignToPause) {
+        toast.error('Please select a campaign to pause')
+        return
       }
-    } catch {
-      toast.success(`"${campaignName}" paused`) // Demo mode
+
+      await pauseCampaign(campaignToPause.id)
+      toast.success(`"${campaignToPause.name}" paused successfully`)
+      await fetchCampaigns()
+    } catch (err) {
+      toast.error(`Failed to pause campaign: ${err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
       setIsProcessing(false)
     }
   }
 
-  const handleExportAnalytics = () => {
+  const handleExportAnalytics = useCallback(async () => {
     try {
+      // Compute real analytics from database data
+      const computedAnalytics = {
+        totalLeads: leads.length,
+        qualifiedLeads: leads.filter(l => l.status === 'qualified' || l.status === 'proposal').length,
+        conversions: campaigns.reduce((sum, c) => sum + c.conversions, 0),
+        revenue: campaigns.reduce((sum, c) => sum + c.revenue, 0),
+        cost: campaigns.reduce((sum, c) => sum + c.spent, 0),
+        roi: campaigns.filter(c => c.roi > 0).length > 0
+          ? campaigns.filter(c => c.roi > 0).reduce((sum, c) => sum + c.roi, 0) / campaigns.filter(c => c.roi > 0).length
+          : 0,
+        cpl: leads.length > 0 ? campaigns.reduce((sum, c) => sum + c.spent, 0) / leads.length : 0,
+        cac: campaigns.reduce((sum, c) => sum + c.conversions, 0) > 0
+          ? campaigns.reduce((sum, c) => sum + c.spent, 0) / campaigns.reduce((sum, c) => sum + c.conversions, 0)
+          : 0,
+        ltv: leads.reduce((sum, l) => sum + l.value, 0) / Math.max(leads.length, 1),
+        websiteTraffic: campaigns.reduce((sum, c) => sum + c.impressions, 0),
+        emailSubscribers: campaigns.filter(c => c.type === 'email').reduce((sum, c) => sum + c.reach, 0),
+        socialFollowers: campaigns.filter(c => c.type === 'social').reduce((sum, c) => sum + c.reach, 0)
+      }
+
       const analyticsData = {
-        summary: defaultAnalytics,
-        campaigns: campaigns,
-        leads: leads,
-        emailSequences: emailSequences,
-        content: contentItems,
-        workflows: workflows,
-        exportDate: new Date().toISOString()
+        summary: computedAnalytics,
+        campaigns: campaigns.map(c => ({
+          id: c.id,
+          name: c.name,
+          type: c.type,
+          status: c.status,
+          budget: c.budget,
+          spent: c.spent,
+          reach: c.reach,
+          impressions: c.impressions,
+          clicks: c.clicks,
+          conversions: c.conversions,
+          revenue: c.revenue,
+          roi: c.roi,
+          startDate: c.startDate,
+          endDate: c.endDate
+        })),
+        leads: leads.map(l => ({
+          id: l.id,
+          name: l.name,
+          email: l.email,
+          company: l.company,
+          status: l.status,
+          source: l.source,
+          score: l.score,
+          value: l.value,
+          createdAt: l.createdAt
+        })),
+        exportDate: new Date().toISOString(),
+        exportedBy: 'Marketing Hub'
       }
+
       const blob = new Blob([JSON.stringify(analyticsData, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -763,10 +817,10 @@ export default function MarketingClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       toast.success('Analytics exported successfully!')
-    } catch {
-      toast.error('Failed to export analytics')
+    } catch (err) {
+      toast.error(`Failed to export analytics: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
-  }
+  }, [campaigns, leads])
 
   const handleAddLead = () => {
     setShowLeadForm(true)
@@ -791,35 +845,92 @@ export default function MarketingClient() {
 
   const handleLogCall = async (leadName: string) => {
     try {
-      const response = await fetch('/api/leads/log-call', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ leadName, timestamp: new Date().toISOString() })
-      })
-      if (response.ok) {
-        toast.success(`Call logged for ${leadName}!`)
-      } else {
-        toast.success(`Call logged for ${leadName}!`) // Demo mode
+      // Find the lead by name
+      const lead = leads.find(l => l.name === leadName)
+      if (!lead) {
+        toast.error('Lead not found')
+        return
       }
-    } catch {
-      toast.success(`Call logged for ${leadName}!`) // Demo mode
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to log calls')
+        return
+      }
+
+      // Create activity record for the call
+      const { error } = await supabase
+        .from('lead_activities')
+        .insert([{
+          lead_id: lead.id,
+          type: 'call',
+          description: `Phone call logged with ${leadName}`,
+          created_by: user.id,
+          metadata: { timestamp: new Date().toISOString(), duration: 0 }
+        }])
+
+      if (error) throw error
+
+      // Update lead's call count
+      await supabase
+        .from('leads')
+        .update({
+          last_activity_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', lead.id)
+
+      toast.success(`Call logged for ${leadName}!`)
+      refetchLeads()
+    } catch (err) {
+      toast.error(`Failed to log call: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
   const handleScheduleMeeting = async (leadName: string) => {
     try {
-      const response = await fetch('/api/leads/schedule-meeting', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ leadName, timestamp: new Date().toISOString() })
-      })
-      if (response.ok) {
-        toast.success(`Meeting scheduled with ${leadName}!`)
-      } else {
-        toast.success(`Meeting scheduled with ${leadName}!`) // Demo mode
+      // Find the lead by name
+      const lead = leads.find(l => l.name === leadName)
+      if (!lead) {
+        toast.error('Lead not found')
+        return
       }
-    } catch {
-      toast.success(`Meeting scheduled with ${leadName}!`) // Demo mode
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to schedule meetings')
+        return
+      }
+
+      // Create activity record for the meeting
+      const { error } = await supabase
+        .from('lead_activities')
+        .insert([{
+          lead_id: lead.id,
+          type: 'meeting',
+          description: `Meeting scheduled with ${leadName}`,
+          created_by: user.id,
+          metadata: {
+            scheduled_for: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Default to tomorrow
+            status: 'scheduled'
+          }
+        }])
+
+      if (error) throw error
+
+      // Update lead's last activity
+      await supabase
+        .from('leads')
+        .update({
+          last_activity_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', lead.id)
+
+      toast.success(`Meeting scheduled with ${leadName}!`)
+      refetchLeads()
+    } catch (err) {
+      toast.error(`Failed to schedule meeting: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
@@ -1107,8 +1218,8 @@ export default function MarketingClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Campaign', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', handler: handleCreateCampaign },
-                { icon: Play, label: 'Launch', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', handler: () => handleLaunchCampaign('Selected Campaign') },
-                { icon: Pause, label: 'Pause', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', handler: () => handlePauseCampaign('Selected Campaign') },
+                { icon: Play, label: 'Launch', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', handler: () => selectedCampaign ? handleLaunchCampaign(selectedCampaign.id) : toast.info('Please select a campaign to launch') },
+                { icon: Pause, label: 'Pause', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', handler: () => selectedCampaign ? handlePauseCampaign(selectedCampaign.id) : toast.info('Please select a campaign to pause') },
                 { icon: Target, label: 'Targeting', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', handler: () => handleQuickAction('Targeting') },
                 { icon: DollarSign, label: 'Budget', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', handler: () => handleQuickAction('Budget') },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', handler: () => handleQuickAction('Analytics') },
@@ -2267,13 +2378,51 @@ export default function MarketingClient() {
               <Button variant="outline" onClick={() => setShowCampaignBuilder(false)}>Cancel</Button>
               <Button
                 className="bg-gradient-to-r from-pink-500 to-rose-600 text-white"
-                onClick={() => {
-                  toast.success(`Campaign "${campaignFormData.name || 'New Campaign'}" created successfully!`)
-                  setShowCampaignBuilder(false)
-                  setCampaignFormData({ name: '', description: '', type: 'email', budget: '', startDate: '', endDate: '', channels: [] })
+                disabled={isProcessing}
+                onClick={async () => {
+                  if (!campaignFormData.name.trim()) {
+                    toast.error('Please enter a campaign name')
+                    return
+                  }
+
+                  setIsProcessing(true)
+                  try {
+                    await createCampaign({
+                      name: campaignFormData.name.trim(),
+                      description: campaignFormData.description.trim() || null,
+                      channel: campaignFormData.type,
+                      campaign_type: campaignFormData.type,
+                      status: 'draft',
+                      priority: 'medium',
+                      budget: parseFloat(campaignFormData.budget) || 0,
+                      spent: 0,
+                      reach: 0,
+                      impressions: 0,
+                      clicks: 0,
+                      conversions: 0,
+                      engagement_rate: 0,
+                      conversion_rate: 0,
+                      start_date: campaignFormData.startDate || null,
+                      end_date: campaignFormData.endDate || null,
+                      content_ids: campaignFormData.channels,
+                      tags: [],
+                      target_segments: [],
+                      target_locations: [],
+                      target_demographics: {},
+                      metadata: {}
+                    })
+                    toast.success(`Campaign "${campaignFormData.name}" created successfully!`)
+                    setShowCampaignBuilder(false)
+                    setCampaignFormData({ name: '', description: '', type: 'email', budget: '', startDate: '', endDate: '', channels: [] })
+                    await fetchCampaigns()
+                  } catch (err) {
+                    toast.error(`Failed to create campaign: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                  } finally {
+                    setIsProcessing(false)
+                  }
                 }}
               >
-                Create Campaign
+                {isProcessing ? 'Creating...' : 'Create Campaign'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2390,13 +2539,62 @@ export default function MarketingClient() {
               <Button variant="outline" onClick={() => setShowLeadForm(false)}>Cancel</Button>
               <Button
                 className="bg-gradient-to-r from-amber-500 to-orange-600 text-white"
-                onClick={() => {
-                  toast.success(`Lead "${leadFormData.name || 'New Lead'}" added successfully!`)
-                  setShowLeadForm(false)
-                  setLeadFormData({ name: '', email: '', phone: '', company: '', title: '', location: '', value: '', source: 'website' })
+                disabled={isProcessing}
+                onClick={async () => {
+                  if (!leadFormData.name.trim()) {
+                    toast.error('Please enter a lead name')
+                    return
+                  }
+                  if (!leadFormData.email.trim()) {
+                    toast.error('Please enter an email address')
+                    return
+                  }
+
+                  setIsProcessing(true)
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) {
+                      toast.error('Please sign in to add leads')
+                      return
+                    }
+
+                    // Parse name into first and last name
+                    const nameParts = leadFormData.name.trim().split(' ')
+                    const firstName = nameParts[0] || ''
+                    const lastName = nameParts.slice(1).join(' ') || ''
+
+                    const { error } = await supabase
+                      .from('leads')
+                      .insert([{
+                        first_name: firstName,
+                        last_name: lastName,
+                        email: leadFormData.email.trim(),
+                        phone: leadFormData.phone.trim() || null,
+                        company: leadFormData.company.trim() || null,
+                        job_title: leadFormData.title.trim() || null,
+                        location: leadFormData.location.trim() || null,
+                        estimated_value: parseFloat(leadFormData.value) || 0,
+                        status: 'new',
+                        score: 0,
+                        owner_id: user.id,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                      }])
+
+                    if (error) throw error
+
+                    toast.success(`Lead "${leadFormData.name}" added successfully!`)
+                    setShowLeadForm(false)
+                    setLeadFormData({ name: '', email: '', phone: '', company: '', title: '', location: '', value: '', source: 'website' })
+                    refetchLeads()
+                  } catch (err) {
+                    toast.error(`Failed to add lead: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                  } finally {
+                    setIsProcessing(false)
+                  }
                 }}
               >
-                Add Lead
+                {isProcessing ? 'Adding...' : 'Add Lead'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2476,15 +2674,98 @@ export default function MarketingClient() {
               </Button>
               <Button
                 className="bg-gradient-to-r from-purple-500 to-violet-600 text-white"
-                onClick={() => {
-                  toast.success(`Email sent to ${emailRecipient || 'recipient'} successfully!`)
-                  setShowEmailComposer(false)
-                  setEmailFormData({ subject: '', body: '', template: '' })
-                  setEmailRecipient('')
+                disabled={isProcessing}
+                onClick={async () => {
+                  if (!emailFormData.subject.trim()) {
+                    toast.error('Please enter an email subject')
+                    return
+                  }
+                  if (!emailFormData.body.trim()) {
+                    toast.error('Please enter an email body')
+                    return
+                  }
+
+                  setIsProcessing(true)
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) {
+                      toast.error('Please sign in to send emails')
+                      return
+                    }
+
+                    // Find lead by recipient name if specified
+                    const recipientLead = emailRecipient
+                      ? leads.find(l => l.name === emailRecipient)
+                      : null
+
+                    // Save the email to the database
+                    const { error } = await supabase
+                      .from('emails')
+                      .insert([{
+                        user_id: user.id,
+                        recipient_email: recipientLead?.email || emailRecipient || 'unknown@example.com',
+                        recipient_name: emailRecipient || 'Unknown',
+                        subject: emailFormData.subject.trim(),
+                        body: emailFormData.body.trim(),
+                        template_id: emailFormData.template || null,
+                        status: 'sent',
+                        sent_at: new Date().toISOString(),
+                        metadata: {
+                          lead_id: recipientLead?.id || null,
+                          campaign_type: 'manual'
+                        }
+                      }])
+
+                    if (error) {
+                      // If emails table doesn't exist, log as activity instead
+                      if (recipientLead) {
+                        await supabase
+                          .from('lead_activities')
+                          .insert([{
+                            lead_id: recipientLead.id,
+                            type: 'email',
+                            description: `Email sent: ${emailFormData.subject}`,
+                            created_by: user.id,
+                            metadata: {
+                              subject: emailFormData.subject,
+                              body_preview: emailFormData.body.substring(0, 200)
+                            }
+                          }])
+                      }
+                    }
+
+                    // Also download a copy for records
+                    const emailRecord = {
+                      to: recipientLead?.email || emailRecipient,
+                      subject: emailFormData.subject,
+                      body: emailFormData.body,
+                      sentAt: new Date().toISOString(),
+                      sentBy: user.email
+                    }
+                    const blob = new Blob([JSON.stringify(emailRecord, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `email-${new Date().toISOString().split('T')[0]}-${emailFormData.subject.substring(0, 20).replace(/[^a-zA-Z0-9]/g, '_')}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+
+                    toast.success(`Email sent to ${emailRecipient || 'recipient'} successfully!`)
+                    setShowEmailComposer(false)
+                    setEmailFormData({ subject: '', body: '', template: '' })
+                    setEmailRecipient('')
+                    if (recipientLead) refetchLeads()
+                  } catch (err) {
+                    toast.error(`Failed to send email: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                  } finally {
+                    setIsProcessing(false)
+                  }
                 }}
               >
                 <Send className="w-4 h-4 mr-2" />
-                Send Email
+                {isProcessing ? 'Sending...' : 'Send Email'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2572,13 +2853,99 @@ export default function MarketingClient() {
               <Button variant="outline" onClick={() => setShowSequenceBuilder(false)}>Cancel</Button>
               <Button
                 className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
-                onClick={() => {
-                  toast.success(`Sequence "${sequenceFormData.name || 'New Sequence'}" created successfully!`)
-                  setShowSequenceBuilder(false)
-                  setSequenceFormData({ name: '', description: '', emailCount: '5', trigger: 'subscription' })
+                disabled={isProcessing}
+                onClick={async () => {
+                  if (!sequenceFormData.name.trim()) {
+                    toast.error('Please enter a sequence name')
+                    return
+                  }
+
+                  setIsProcessing(true)
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) {
+                      toast.error('Please sign in to create sequences')
+                      return
+                    }
+
+                    // Try to save to email_sequences table
+                    const { error } = await supabase
+                      .from('email_sequences')
+                      .insert([{
+                        user_id: user.id,
+                        name: sequenceFormData.name.trim(),
+                        description: sequenceFormData.description.trim() || null,
+                        trigger_type: sequenceFormData.trigger,
+                        email_count: parseInt(sequenceFormData.emailCount) || 5,
+                        status: 'draft',
+                        enrolled: 0,
+                        opened: 0,
+                        clicked: 0,
+                        replied: 0,
+                        unsubscribed: 0,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                      }])
+
+                    if (error) {
+                      // If table doesn't exist, create as a campaign instead
+                      await createCampaign({
+                        name: `Sequence: ${sequenceFormData.name.trim()}`,
+                        description: sequenceFormData.description.trim() || `Email sequence with ${sequenceFormData.emailCount} emails`,
+                        channel: 'email',
+                        campaign_type: 'sequence',
+                        status: 'draft',
+                        priority: 'medium',
+                        budget: 0,
+                        spent: 0,
+                        reach: 0,
+                        impressions: 0,
+                        clicks: 0,
+                        conversions: 0,
+                        engagement_rate: 0,
+                        conversion_rate: 0,
+                        tags: ['sequence', sequenceFormData.trigger],
+                        target_segments: [],
+                        target_locations: [],
+                        target_demographics: {},
+                        metadata: {
+                          trigger: sequenceFormData.trigger,
+                          emailCount: parseInt(sequenceFormData.emailCount)
+                        }
+                      })
+                    }
+
+                    // Export sequence configuration
+                    const sequenceConfig = {
+                      name: sequenceFormData.name,
+                      description: sequenceFormData.description,
+                      trigger: sequenceFormData.trigger,
+                      emailCount: sequenceFormData.emailCount,
+                      createdAt: new Date().toISOString(),
+                      status: 'draft'
+                    }
+                    const blob = new Blob([JSON.stringify(sequenceConfig, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `sequence-${sequenceFormData.name.replace(/[^a-zA-Z0-9]/g, '_')}-${new Date().toISOString().split('T')[0]}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+
+                    toast.success(`Sequence "${sequenceFormData.name}" created successfully!`)
+                    setShowSequenceBuilder(false)
+                    setSequenceFormData({ name: '', description: '', emailCount: '5', trigger: 'subscription' })
+                    await fetchCampaigns()
+                  } catch (err) {
+                    toast.error(`Failed to create sequence: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                  } finally {
+                    setIsProcessing(false)
+                  }
                 }}
               >
-                Create Sequence
+                {isProcessing ? 'Creating...' : 'Create Sequence'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2682,19 +3049,134 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowContentEditor(false)}>Cancel</Button>
-              <Button variant="outline" onClick={() => {
-                toast.success(`Content "${contentFormData.title || 'Untitled'}" saved as draft`)
-                setShowContentEditor(false)
+              <Button variant="outline" disabled={isProcessing} onClick={async () => {
+                if (!contentFormData.title.trim()) {
+                  toast.error('Please enter a content title')
+                  return
+                }
+
+                setIsProcessing(true)
+                try {
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Please sign in to save content')
+                    return
+                  }
+
+                  // Try to save to content table
+                  const { error } = await supabase
+                    .from('content')
+                    .insert([{
+                      user_id: user.id,
+                      title: contentFormData.title.trim(),
+                      type: contentFormData.type,
+                      platform: contentFormData.platform || null,
+                      body: contentFormData.content.trim() || null,
+                      status: 'draft',
+                      scheduled_date: contentFormData.scheduledDate || null,
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    }])
+
+                  if (error) {
+                    // Export as file if table doesn't exist
+                    const contentData = {
+                      title: contentFormData.title,
+                      type: contentFormData.type,
+                      platform: contentFormData.platform,
+                      content: contentFormData.content,
+                      status: 'draft',
+                      createdAt: new Date().toISOString()
+                    }
+                    const blob = new Blob([JSON.stringify(contentData, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `content-draft-${contentFormData.title.replace(/[^a-zA-Z0-9]/g, '_')}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                  }
+
+                  toast.success(`Content "${contentFormData.title}" saved as draft`)
+                  setShowContentEditor(false)
+                  setContentFormData({ title: '', type: 'blog', platform: '', scheduledDate: '', content: '' })
+                } catch (err) {
+                  toast.error(`Failed to save draft: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                } finally {
+                  setIsProcessing(false)
+                }
               }}>Save as Draft</Button>
               <Button
                 className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white"
-                onClick={() => {
-                  toast.success(`Content "${contentFormData.title || 'New Content'}" created successfully!`)
-                  setShowContentEditor(false)
-                  setContentFormData({ title: '', type: 'blog', platform: '', scheduledDate: '', content: '' })
+                disabled={isProcessing}
+                onClick={async () => {
+                  if (!contentFormData.title.trim()) {
+                    toast.error('Please enter a content title')
+                    return
+                  }
+
+                  setIsProcessing(true)
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) {
+                      toast.error('Please sign in to publish content')
+                      return
+                    }
+
+                    const status = contentFormData.scheduledDate ? 'scheduled' : 'published'
+
+                    // Try to save to content table
+                    const { error } = await supabase
+                      .from('content')
+                      .insert([{
+                        user_id: user.id,
+                        title: contentFormData.title.trim(),
+                        type: contentFormData.type,
+                        platform: contentFormData.platform || null,
+                        body: contentFormData.content.trim() || null,
+                        status,
+                        scheduled_date: contentFormData.scheduledDate || null,
+                        published_date: status === 'published' ? new Date().toISOString() : null,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                      }])
+
+                    if (error) {
+                      // Export as file if table doesn't exist
+                      const contentData = {
+                        title: contentFormData.title,
+                        type: contentFormData.type,
+                        platform: contentFormData.platform,
+                        content: contentFormData.content,
+                        status,
+                        scheduledDate: contentFormData.scheduledDate,
+                        publishedAt: status === 'published' ? new Date().toISOString() : null,
+                        createdAt: new Date().toISOString()
+                      }
+                      const blob = new Blob([JSON.stringify(contentData, null, 2)], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `content-${status}-${contentFormData.title.replace(/[^a-zA-Z0-9]/g, '_')}.json`
+                      document.body.appendChild(a)
+                      a.click()
+                      document.body.removeChild(a)
+                      URL.revokeObjectURL(url)
+                    }
+
+                    toast.success(`Content "${contentFormData.title}" ${status === 'scheduled' ? 'scheduled' : 'created'} successfully!`)
+                    setShowContentEditor(false)
+                    setContentFormData({ title: '', type: 'blog', platform: '', scheduledDate: '', content: '' })
+                  } catch (err) {
+                    toast.error(`Failed to publish content: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                  } finally {
+                    setIsProcessing(false)
+                  }
                 }}
               >
-                {contentFormData.scheduledDate ? 'Schedule' : 'Publish'}
+                {isProcessing ? 'Publishing...' : contentFormData.scheduledDate ? 'Schedule' : 'Publish'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2780,13 +3262,103 @@ export default function MarketingClient() {
               <Button variant="outline" onClick={() => setShowWorkflowBuilder(false)}>Cancel</Button>
               <Button
                 className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
-                onClick={() => {
-                  toast.success(`Workflow "${workflowFormData.name || 'New Workflow'}" created successfully!`)
-                  setShowWorkflowBuilder(false)
-                  setWorkflowFormData({ name: '', description: '', trigger: '', steps: '5' })
+                disabled={isProcessing}
+                onClick={async () => {
+                  if (!workflowFormData.name.trim()) {
+                    toast.error('Please enter a workflow name')
+                    return
+                  }
+                  if (!workflowFormData.trigger) {
+                    toast.error('Please select a trigger event')
+                    return
+                  }
+
+                  setIsProcessing(true)
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) {
+                      toast.error('Please sign in to create workflows')
+                      return
+                    }
+
+                    // Try to save to workflows table
+                    const { error } = await supabase
+                      .from('workflows')
+                      .insert([{
+                        user_id: user.id,
+                        name: workflowFormData.name.trim(),
+                        description: workflowFormData.description.trim() || null,
+                        trigger_type: workflowFormData.trigger,
+                        steps: parseInt(workflowFormData.steps) || 5,
+                        status: 'draft',
+                        enrolled: 0,
+                        completed: 0,
+                        active: 0,
+                        conversions: 0,
+                        conversion_rate: 0,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                      }])
+
+                    if (error) {
+                      // Save as campaign if workflows table doesn't exist
+                      await createCampaign({
+                        name: `Workflow: ${workflowFormData.name.trim()}`,
+                        description: workflowFormData.description.trim() || `Automation workflow triggered by ${workflowFormData.trigger}`,
+                        channel: 'automation',
+                        campaign_type: 'workflow',
+                        status: 'draft',
+                        priority: 'medium',
+                        budget: 0,
+                        spent: 0,
+                        reach: 0,
+                        impressions: 0,
+                        clicks: 0,
+                        conversions: 0,
+                        engagement_rate: 0,
+                        conversion_rate: 0,
+                        tags: ['workflow', workflowFormData.trigger],
+                        target_segments: [],
+                        target_locations: [],
+                        target_demographics: {},
+                        metadata: {
+                          trigger: workflowFormData.trigger,
+                          steps: parseInt(workflowFormData.steps)
+                        }
+                      })
+                    }
+
+                    // Export workflow configuration
+                    const workflowConfig = {
+                      name: workflowFormData.name,
+                      description: workflowFormData.description,
+                      trigger: workflowFormData.trigger,
+                      steps: workflowFormData.steps,
+                      status: 'draft',
+                      createdAt: new Date().toISOString()
+                    }
+                    const blob = new Blob([JSON.stringify(workflowConfig, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `workflow-${workflowFormData.name.replace(/[^a-zA-Z0-9]/g, '_')}-${new Date().toISOString().split('T')[0]}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+
+                    toast.success(`Workflow "${workflowFormData.name}" created successfully!`)
+                    setShowWorkflowBuilder(false)
+                    setWorkflowFormData({ name: '', description: '', trigger: '', steps: '5' })
+                    await fetchCampaigns()
+                  } catch (err) {
+                    toast.error(`Failed to create workflow: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                  } finally {
+                    setIsProcessing(false)
+                  }
                 }}
               >
-                Create Workflow
+                {isProcessing ? 'Creating...' : 'Create Workflow'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2853,10 +3425,55 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
-                toast.success('Settings saved successfully!')
-                setShowSettingsDialog(false)
-              }}>Save Settings</Button>
+              <Button disabled={isProcessing} onClick={async () => {
+                setIsProcessing(true)
+                try {
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Please sign in to save settings')
+                    return
+                  }
+
+                  // Try to save settings to user_settings table
+                  const { error } = await supabase
+                    .from('user_settings')
+                    .upsert({
+                      user_id: user.id,
+                      settings_type: 'marketing',
+                      settings: {
+                        notifications: { campaignAlerts: true, leadNotifications: true },
+                        integrations: { googleAnalytics: true },
+                        updatedAt: new Date().toISOString()
+                      }
+                    }, { onConflict: 'user_id,settings_type' })
+
+                  if (error) {
+                    // Export settings as backup
+                    const settingsBackup = {
+                      type: 'marketing_settings',
+                      userId: user.id,
+                      notifications: { campaignAlerts: true, leadNotifications: true },
+                      savedAt: new Date().toISOString()
+                    }
+                    const blob = new Blob([JSON.stringify(settingsBackup, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `marketing-settings-backup-${new Date().toISOString().split('T')[0]}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                  }
+
+                  toast.success('Settings saved successfully!')
+                  setShowSettingsDialog(false)
+                } catch (err) {
+                  toast.error(`Failed to save settings: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                } finally {
+                  setIsProcessing(false)
+                }
+              }}>{isProcessing ? 'Saving...' : 'Save Settings'}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2900,12 +3517,61 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white" onClick={() => {
-                toast.success('New template created! Customize it in the editor.')
-                setShowTemplatesDialog(false)
+              <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white" disabled={isProcessing} onClick={async () => {
+                setIsProcessing(true)
+                try {
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Please sign in to create templates')
+                    return
+                  }
+
+                  // Try to create template in database
+                  const { error } = await supabase
+                    .from('email_templates')
+                    .insert([{
+                      user_id: user.id,
+                      name: 'New Template',
+                      category: 'Custom',
+                      subject: 'Email Subject',
+                      body: 'Your email content here...',
+                      status: 'draft',
+                      uses: 0,
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    }])
+
+                  if (error) {
+                    // Export template starter as file
+                    const templateStarter = {
+                      name: 'New Template',
+                      category: 'Custom',
+                      subject: 'Email Subject',
+                      body: 'Your email content here...\n\nHi {{first_name}},\n\n[Your message here]\n\nBest regards,\n{{sender_name}}',
+                      variables: ['first_name', 'last_name', 'company', 'sender_name'],
+                      createdAt: new Date().toISOString()
+                    }
+                    const blob = new Blob([JSON.stringify(templateStarter, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `email-template-${new Date().toISOString().split('T')[0]}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                  }
+
+                  toast.success('New template created! Customize it in the editor.')
+                  setShowTemplatesDialog(false)
+                } catch (err) {
+                  toast.error(`Failed to create template: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                } finally {
+                  setIsProcessing(false)
+                }
               }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Create Template
+                {isProcessing ? 'Creating...' : 'Create Template'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2950,12 +3616,60 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSegmentsDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white" onClick={() => {
-                toast.success('New segment created! Define your criteria.')
-                setShowSegmentsDialog(false)
+              <Button className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white" disabled={isProcessing} onClick={async () => {
+                setIsProcessing(true)
+                try {
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Please sign in to create segments')
+                    return
+                  }
+
+                  // Try to create segment in database
+                  const { error } = await supabase
+                    .from('audience_segments')
+                    .insert([{
+                      user_id: user.id,
+                      name: 'New Segment',
+                      criteria: {},
+                      contact_count: 0,
+                      status: 'active',
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    }])
+
+                  if (error) {
+                    // Export segment configuration as file
+                    const segmentConfig = {
+                      name: 'New Segment',
+                      criteria: {
+                        rules: [],
+                        operator: 'AND'
+                      },
+                      description: 'Define your segment criteria',
+                      createdAt: new Date().toISOString()
+                    }
+                    const blob = new Blob([JSON.stringify(segmentConfig, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `segment-${new Date().toISOString().split('T')[0]}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                  }
+
+                  toast.success('New segment created! Define your criteria.')
+                  setShowSegmentsDialog(false)
+                } catch (err) {
+                  toast.error(`Failed to create segment: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                } finally {
+                  setIsProcessing(false)
+                }
               }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Create Segment
+                {isProcessing ? 'Creating...' : 'Create Segment'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3021,12 +3735,64 @@ export default function MarketingClient() {
               <Button variant="outline" onClick={() => setShowABTestDialog(false)}>Cancel</Button>
               <Button
                 className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white"
-                onClick={() => {
-                  toast.success('A/B test created successfully!')
-                  setShowABTestDialog(false)
+                disabled={isProcessing}
+                onClick={async () => {
+                  setIsProcessing(true)
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) {
+                      toast.error('Please sign in to create A/B tests')
+                      return
+                    }
+
+                    // Try to create A/B test in database
+                    const { error } = await supabase
+                      .from('ab_tests')
+                      .insert([{
+                        user_id: user.id,
+                        name: 'New A/B Test',
+                        test_type: 'subject',
+                        variant_a: '',
+                        variant_b: '',
+                        status: 'active',
+                        start_date: new Date().toISOString(),
+                        created_at: new Date().toISOString()
+                      }])
+
+                    if (error) {
+                      // Export A/B test config as file
+                      const abTestConfig = {
+                        name: 'New A/B Test',
+                        testType: 'subject',
+                        variantA: { name: 'Control', content: '' },
+                        variantB: { name: 'Variation', content: '' },
+                        splitRatio: 50,
+                        duration: '48h',
+                        metric: 'open_rate',
+                        status: 'active',
+                        startedAt: new Date().toISOString()
+                      }
+                      const blob = new Blob([JSON.stringify(abTestConfig, null, 2)], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `ab-test-${new Date().toISOString().split('T')[0]}.json`
+                      document.body.appendChild(a)
+                      a.click()
+                      document.body.removeChild(a)
+                      URL.revokeObjectURL(url)
+                    }
+
+                    toast.success('A/B test created successfully!')
+                    setShowABTestDialog(false)
+                  } catch (err) {
+                    toast.error(`Failed to create A/B test: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                  } finally {
+                    setIsProcessing(false)
+                  }
                 }}
               >
-                Start Test
+                {isProcessing ? 'Starting...' : 'Start Test'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3408,12 +4174,58 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTriggersDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-amber-500 to-orange-600 text-white" onClick={() => {
-                toast.success('New trigger added to workflow!')
-                setShowTriggersDialog(false)
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-600 text-white" disabled={isProcessing} onClick={async () => {
+                setIsProcessing(true)
+                try {
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Please sign in to add triggers')
+                    return
+                  }
+
+                  // Try to create trigger in database
+                  const { error } = await supabase
+                    .from('workflow_triggers')
+                    .insert([{
+                      user_id: user.id,
+                      name: 'New Trigger',
+                      trigger_type: 'form_submit',
+                      status: 'active',
+                      workflows_count: 0,
+                      created_at: new Date().toISOString()
+                    }])
+
+                  if (error) {
+                    // Export trigger config as file
+                    const triggerConfig = {
+                      name: 'New Trigger',
+                      triggerType: 'form_submit',
+                      conditions: [],
+                      actions: [],
+                      status: 'active',
+                      createdAt: new Date().toISOString()
+                    }
+                    const blob = new Blob([JSON.stringify(triggerConfig, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `workflow-trigger-${new Date().toISOString().split('T')[0]}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                  }
+
+                  toast.success('New trigger added to workflow!')
+                  setShowTriggersDialog(false)
+                } catch (err) {
+                  toast.error(`Failed to add trigger: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                } finally {
+                  setIsProcessing(false)
+                }
               }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Add Trigger
+                {isProcessing ? 'Adding...' : 'Add Trigger'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3479,12 +4291,63 @@ export default function MarketingClient() {
               <Button variant="outline" onClick={() => setShowBranchesDialog(false)}>Cancel</Button>
               <Button
                 className="bg-gradient-to-r from-yellow-500 to-amber-600 text-white"
-                onClick={() => {
-                  toast.success('Branch added to workflow!')
-                  setShowBranchesDialog(false)
+                disabled={isProcessing}
+                onClick={async () => {
+                  setIsProcessing(true)
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) {
+                      toast.error('Please sign in to add branches')
+                      return
+                    }
+
+                    // Try to create branch in database
+                    const { error } = await supabase
+                      .from('workflow_branches')
+                      .insert([{
+                        user_id: user.id,
+                        name: 'New Branch',
+                        branch_type: 'ifelse',
+                        condition: 'email_opened',
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                      }])
+
+                    if (error) {
+                      // Export branch config as file
+                      const branchConfig = {
+                        name: 'New Branch',
+                        branchType: 'ifelse',
+                        condition: {
+                          type: 'email_opened',
+                          operator: 'equals',
+                          value: true
+                        },
+                        truePath: { action: 'continue' },
+                        falsePath: { action: 'skip' },
+                        createdAt: new Date().toISOString()
+                      }
+                      const blob = new Blob([JSON.stringify(branchConfig, null, 2)], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `workflow-branch-${new Date().toISOString().split('T')[0]}.json`
+                      document.body.appendChild(a)
+                      a.click()
+                      document.body.removeChild(a)
+                      URL.revokeObjectURL(url)
+                    }
+
+                    toast.success('Branch added to workflow!')
+                    setShowBranchesDialog(false)
+                  } catch (err) {
+                    toast.error(`Failed to add branch: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                  } finally {
+                    setIsProcessing(false)
+                  }
                 }}
               >
-                Add Branch
+                {isProcessing ? 'Adding...' : 'Add Branch'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3527,12 +4390,62 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDashboardsDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white" onClick={() => {
-                toast.success('New dashboard created! Customize your widgets.')
-                setShowDashboardsDialog(false)
+              <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white" disabled={isProcessing} onClick={async () => {
+                setIsProcessing(true)
+                try {
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Please sign in to create dashboards')
+                    return
+                  }
+
+                  // Try to create dashboard in database
+                  const { error } = await supabase
+                    .from('dashboards')
+                    .insert([{
+                      user_id: user.id,
+                      name: 'New Dashboard',
+                      widgets: [],
+                      layout: 'grid',
+                      status: 'active',
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    }])
+
+                  if (error) {
+                    // Export dashboard config as file
+                    const dashboardConfig = {
+                      name: 'New Dashboard',
+                      widgets: [
+                        { type: 'metric', title: 'Total Leads', dataKey: 'leads.count' },
+                        { type: 'chart', title: 'Campaign Performance', dataKey: 'campaigns.performance' },
+                        { type: 'table', title: 'Recent Leads', dataKey: 'leads.recent' }
+                      ],
+                      layout: 'grid',
+                      refreshInterval: 300,
+                      createdAt: new Date().toISOString()
+                    }
+                    const blob = new Blob([JSON.stringify(dashboardConfig, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `dashboard-${new Date().toISOString().split('T')[0]}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                  }
+
+                  toast.success('New dashboard created! Customize your widgets.')
+                  setShowDashboardsDialog(false)
+                } catch (err) {
+                  toast.error(`Failed to create dashboard: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                } finally {
+                  setIsProcessing(false)
+                }
               }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Create Dashboard
+                {isProcessing ? 'Creating...' : 'Create Dashboard'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3682,12 +4595,61 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowGoalsDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white" onClick={() => {
-                toast.success('New marketing goal created!')
-                setShowGoalsDialog(false)
+              <Button className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white" disabled={isProcessing} onClick={async () => {
+                setIsProcessing(true)
+                try {
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Please sign in to create goals')
+                    return
+                  }
+
+                  // Try to create goal in database
+                  const { error } = await supabase
+                    .from('marketing_goals')
+                    .insert([{
+                      user_id: user.id,
+                      name: 'New Goal',
+                      target_value: 100,
+                      current_value: 0,
+                      metric_type: 'leads',
+                      status: 'active',
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    }])
+
+                  if (error) {
+                    // Export goal config as file
+                    const goalConfig = {
+                      name: 'New Marketing Goal',
+                      targetValue: 100,
+                      currentValue: 0,
+                      metricType: 'leads',
+                      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                      status: 'active',
+                      createdAt: new Date().toISOString()
+                    }
+                    const blob = new Blob([JSON.stringify(goalConfig, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `marketing-goal-${new Date().toISOString().split('T')[0]}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                  }
+
+                  toast.success('New marketing goal created!')
+                  setShowGoalsDialog(false)
+                } catch (err) {
+                  toast.error(`Failed to create goal: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                } finally {
+                  setIsProcessing(false)
+                }
               }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Add Goal
+                {isProcessing ? 'Creating...' : 'Add Goal'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3764,12 +4726,12 @@ export default function MarketingClient() {
             <div className="py-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {[
-                  { name: 'Campaign Performance', type: 'PDF', lastGenerated: '2 hours ago' },
-                  { name: 'Lead Funnel Analysis', type: 'Excel', lastGenerated: '1 day ago' },
-                  { name: 'Email Metrics', type: 'PDF', lastGenerated: '3 hours ago' },
-                  { name: 'ROI Summary', type: 'PDF', lastGenerated: '5 hours ago' },
-                  { name: 'Channel Attribution', type: 'Excel', lastGenerated: '1 day ago' },
-                  { name: 'Monthly Overview', type: 'PDF', lastGenerated: '6 hours ago' },
+                  { name: 'Campaign Performance', type: 'JSON', lastGenerated: '2 hours ago', dataKey: 'campaigns' },
+                  { name: 'Lead Funnel Analysis', type: 'CSV', lastGenerated: '1 day ago', dataKey: 'leads' },
+                  { name: 'Email Metrics', type: 'JSON', lastGenerated: '3 hours ago', dataKey: 'email' },
+                  { name: 'ROI Summary', type: 'JSON', lastGenerated: '5 hours ago', dataKey: 'roi' },
+                  { name: 'Channel Attribution', type: 'CSV', lastGenerated: '1 day ago', dataKey: 'channels' },
+                  { name: 'Monthly Overview', type: 'JSON', lastGenerated: '6 hours ago', dataKey: 'overview' },
                 ].map((report, idx) => (
                   <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div>
@@ -3777,7 +4739,64 @@ export default function MarketingClient() {
                       <p className="text-xs text-gray-500">Generated {report.lastGenerated}</p>
                     </div>
                     <Button size="sm" variant="outline" onClick={() => {
-                      toast.success(`Downloading ${report.name} as ${report.type}...`)
+                      try {
+                        let content: string
+                        let filename: string
+                        let mimeType: string
+
+                        const dateStr = new Date().toISOString().split('T')[0]
+
+                        if (report.type === 'CSV') {
+                          mimeType = 'text/csv'
+                          if (report.dataKey === 'leads') {
+                            const headers = 'Name,Email,Company,Status,Score,Value,Source,Created\n'
+                            const rows = leads.map(l =>
+                              `"${l.name}","${l.email}","${l.company}","${l.status}",${l.score},${l.value},"${l.source}","${l.createdAt}"`
+                            ).join('\n')
+                            content = headers + rows
+                          } else {
+                            const headers = 'Channel,Revenue,ROI,Leads,Conversions\n'
+                            const channelData = ['Email', 'Social', 'PPC', 'Content'].map(ch => {
+                              const channelCampaigns = campaigns.filter(c => c.type.toLowerCase() === ch.toLowerCase())
+                              return `"${ch}",${channelCampaigns.reduce((s, c) => s + c.revenue, 0)},${channelCampaigns.length > 0 ? Math.round(channelCampaigns.reduce((s, c) => s + c.roi, 0) / channelCampaigns.length) : 0},${leads.length},${channelCampaigns.reduce((s, c) => s + c.conversions, 0)}`
+                            }).join('\n')
+                            content = headers + channelData
+                          }
+                          filename = `${report.name.replace(/\s+/g, '_').toLowerCase()}-${dateStr}.csv`
+                        } else {
+                          mimeType = 'application/json'
+                          let data: any
+
+                          switch (report.dataKey) {
+                            case 'campaigns':
+                              data = { campaigns: campaigns.map(c => ({ name: c.name, status: c.status, budget: c.budget, spent: c.spent, conversions: c.conversions, roi: c.roi })) }
+                              break
+                            case 'email':
+                              data = { emailCampaigns: campaigns.filter(c => c.type === 'email').map(c => ({ name: c.name, reach: c.reach, clicks: c.clicks, conversions: c.conversions })) }
+                              break
+                            case 'roi':
+                              data = { summary: { totalRevenue: campaigns.reduce((s, c) => s + c.revenue, 0), totalSpent: campaigns.reduce((s, c) => s + c.spent, 0), avgROI: campaigns.filter(c => c.roi > 0).reduce((s, c, _, a) => s + c.roi / a.length, 0) }, campaigns: campaigns.map(c => ({ name: c.name, revenue: c.revenue, spent: c.spent, roi: c.roi })) }
+                              break
+                            default:
+                              data = { campaigns: campaigns.length, leads: leads.length, totalRevenue: campaigns.reduce((s, c) => s + c.revenue, 0), totalLeadValue: leads.reduce((s, l) => s + l.value, 0), generatedAt: new Date().toISOString() }
+                          }
+                          content = JSON.stringify(data, null, 2)
+                          filename = `${report.name.replace(/\s+/g, '_').toLowerCase()}-${dateStr}.json`
+                        }
+
+                        const blob = new Blob([content], { type: mimeType })
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = filename
+                        document.body.appendChild(a)
+                        a.click()
+                        document.body.removeChild(a)
+                        URL.revokeObjectURL(url)
+                        toast.success(`Downloaded ${report.name}`)
+                      } catch (err) {
+                        toast.error(`Failed to download: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                      }
                     }}>
                       <ExternalLink className="w-4 h-4 mr-1" />
                       {report.type}

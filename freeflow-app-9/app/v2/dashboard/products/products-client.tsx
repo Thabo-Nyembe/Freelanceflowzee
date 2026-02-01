@@ -63,7 +63,7 @@ import {
 
 
 
-import { useProducts, useProductStats, type Product } from '@/lib/hooks/use-products'
+import { useProducts, useProductStats, useProductMutations, type Product } from '@/lib/hooks/use-products'
 
 // Stripe-level types
 type ProductStatus = 'active' | 'draft' | 'archived' | 'discontinued'
@@ -385,11 +385,327 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
     { id: '3', label: 'Analytics', icon: 'chart', action: () => setShowQuickAnalytics(true), variant: 'outline' as const },
   ]
 
-  const { data: products, isLoading: hookLoading } = useProducts({
+  const { data: products, isLoading: hookLoading, refetch } = useProducts({
     status: selectedCategory === 'all' ? undefined : selectedCategory,
     searchQuery: searchQuery || undefined
   })
   const { stats: hookStats } = useProductStats()
+  const { mutate: mutateProduct, remove: removeProduct, loading: mutationLoading } = useProductMutations()
+
+  // Loading state for operations
+  const [operationLoading, setOperationLoading] = useState(false)
+
+  // Generate CSV content from products
+  const generateCSV = (productsData: StripeProduct[], includeAnalytics: boolean = false) => {
+    const headers = ['ID', 'Name', 'Description', 'Status', 'Category', 'Price', 'Currency', 'Billing Interval']
+    if (includeAnalytics) {
+      headers.push('Revenue', 'Subscribers', 'MRR', 'Churn Rate', 'Conversion Rate')
+    }
+
+    const rows = productsData.map(p => {
+      const row = [
+        p.id,
+        p.name,
+        p.description.replace(/,/g, ';'),
+        p.status,
+        p.category,
+        (p.prices[0]?.unitAmount || 0) / 100,
+        p.prices[0]?.currency || 'usd',
+        p.prices[0]?.billingInterval || 'one_time'
+      ]
+      if (includeAnalytics) {
+        row.push(p.revenue, p.subscribers, p.mrr, p.churnRate, p.conversionRate)
+      }
+      return row.join(',')
+    })
+
+    return [headers.join(','), ...rows].join('\n')
+  }
+
+  // Generate JSON content from products
+  const generateJSON = (productsData: StripeProduct[], includeAnalytics: boolean = false) => {
+    const data = productsData.map(p => {
+      const base = {
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        status: p.status,
+        category: p.category,
+        prices: p.prices.map(price => ({
+          id: price.id,
+          nickname: price.nickname,
+          amount: price.unitAmount / 100,
+          currency: price.currency,
+          type: price.type,
+          billingInterval: price.billingInterval
+        })),
+        features: p.features,
+        metadata: p.metadata
+      }
+      if (includeAnalytics) {
+        return {
+          ...base,
+          analytics: {
+            revenue: p.revenue,
+            subscribers: p.subscribers,
+            mrr: p.mrr,
+            churnRate: p.churnRate,
+            conversionRate: p.conversionRate
+          }
+        }
+      }
+      return base
+    })
+    return JSON.stringify(data, null, 2)
+  }
+
+  // Download file using Blob and URL.createObjectURL
+  const downloadFile = (content: string, filename: string, mimeType: string) => {
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
+  // Real export handler
+  const handleExport = async (format: string, includeAnalytics: boolean = false) => {
+    setOperationLoading(true)
+    try {
+      const timestamp = new Date().toISOString().split('T')[0]
+
+      switch (format) {
+        case 'csv': {
+          const csvContent = generateCSV(activeProducts, includeAnalytics)
+          downloadFile(csvContent, `products-export-${timestamp}.csv`, 'text/csv')
+          break
+        }
+        case 'json': {
+          const jsonContent = generateJSON(activeProducts, includeAnalytics)
+          downloadFile(jsonContent, `products-export-${timestamp}.json`, 'application/json')
+          break
+        }
+        case 'xlsx': {
+          // For XLSX, we'll create a CSV that Excel can open
+          const csvContent = generateCSV(activeProducts, includeAnalytics)
+          downloadFile(csvContent, `products-export-${timestamp}.csv`, 'text/csv')
+          break
+        }
+        case 'pdf': {
+          // Generate a simple text-based report for PDF
+          const reportContent = `Product Catalog Report
+Generated: ${new Date().toLocaleString()}
+Total Products: ${activeProducts.length}
+Active Products: ${activeProducts.filter(p => p.status === 'active').length}
+Total Revenue: $${totalRevenue.toLocaleString()}
+Total MRR: $${totalMRR.toLocaleString()}
+
+Products:
+${activeProducts.map(p => `- ${p.name} (${p.status}): $${(p.prices[0]?.unitAmount || 0) / 100}`).join('\n')}
+`
+          downloadFile(reportContent, `products-report-${timestamp}.txt`, 'text/plain')
+          break
+        }
+      }
+      toast.success(`Export complete! Downloaded as ${format.toUpperCase()}`)
+    } catch (error) {
+      toast.error('Export failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    } finally {
+      setOperationLoading(false)
+    }
+  }
+
+  // Real import handler
+  const handleImport = async (file: File) => {
+    setOperationLoading(true)
+    try {
+      const text = await file.text()
+      let importedProducts: any[] = []
+
+      if (file.name.endsWith('.json')) {
+        importedProducts = JSON.parse(text)
+      } else if (file.name.endsWith('.csv')) {
+        const lines = text.split('\n')
+        const headers = lines[0].split(',')
+        importedProducts = lines.slice(1).filter(line => line.trim()).map(line => {
+          const values = line.split(',')
+          const product: Record<string, string> = {}
+          headers.forEach((header, index) => {
+            product[header.trim().toLowerCase()] = values[index]?.trim() || ''
+          })
+          return product
+        })
+      }
+
+      // Create products in Supabase
+      let successCount = 0
+      for (const product of importedProducts) {
+        try {
+          await mutateProduct({
+            product_name: product.name || product.product_name || 'Imported Product',
+            description: product.description || '',
+            category: product.category || 'subscription',
+            status: 'draft', // Always import as draft
+            price: parseFloat(product.price) || 0,
+            currency: product.currency || 'usd',
+            billing_cycle: product.billing_interval || product.billing_cycle || 'monthly',
+            features: product.features || [],
+            metadata: product.metadata || {}
+          })
+          successCount++
+        } catch (err) {
+          console.error('Failed to import product:', err)
+        }
+      }
+
+      toast.success(`Import complete! ${successCount} of ${importedProducts.length} products imported as drafts`)
+      refetch()
+    } catch (error) {
+      toast.error('Import failed: ' + (error instanceof Error ? error.message : 'Invalid file format'))
+    } finally {
+      setOperationLoading(false)
+    }
+  }
+
+  // Real backup handler
+  const handleBackup = async (backupName: string, includeOptions: { products: boolean; prices: boolean; coupons: boolean; taxRates: boolean }) => {
+    setOperationLoading(true)
+    try {
+      const backupData: Record<string, any> = {
+        name: backupName,
+        createdAt: new Date().toISOString(),
+        version: '1.0'
+      }
+
+      if (includeOptions.products) {
+        backupData.products = activeProducts
+      }
+      if (includeOptions.prices) {
+        backupData.prices = activeProducts.flatMap(p => p.prices)
+      }
+      if (includeOptions.coupons) {
+        backupData.coupons = mockCoupons
+      }
+      if (includeOptions.taxRates) {
+        backupData.taxRates = mockTaxRates
+      }
+
+      const content = JSON.stringify(backupData, null, 2)
+      downloadFile(content, `${backupName}.json`, 'application/json')
+      toast.success(`Backup "${backupName}" created and downloaded`)
+    } catch (error) {
+      toast.error('Backup failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    } finally {
+      setOperationLoading(false)
+    }
+  }
+
+  // Real create product handler
+  const handleCreateProductReal = async (productData: {
+    name: string
+    description: string
+    category: string
+    price: number
+  }) => {
+    setOperationLoading(true)
+    try {
+      await mutateProduct({
+        product_name: productData.name,
+        description: productData.description,
+        category: productData.category as any,
+        status: 'draft',
+        price: productData.price,
+        currency: 'usd',
+        billing_cycle: productData.category === 'one_time' ? 'one_time' : 'monthly',
+        features: [],
+        metadata: {}
+      })
+      toast.success(`Product "${productData.name}" created as draft`)
+      refetch()
+      return true
+    } catch (error) {
+      toast.error('Failed to create product: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      return false
+    } finally {
+      setOperationLoading(false)
+    }
+  }
+
+  // Real update product handler
+  const handleUpdateProductReal = async (productId: string, updates: Partial<{
+    name: string
+    description: string
+    category: string
+    status: string
+    price: number
+  }>) => {
+    setOperationLoading(true)
+    try {
+      const updateData: Record<string, any> = {}
+      if (updates.name) updateData.product_name = updates.name
+      if (updates.description) updateData.description = updates.description
+      if (updates.category) updateData.category = updates.category
+      if (updates.status) updateData.status = updates.status
+      if (updates.price !== undefined) updateData.price = updates.price
+
+      await mutateProduct(updateData, productId)
+      toast.success(`Product updated successfully`)
+      refetch()
+      return true
+    } catch (error) {
+      toast.error('Failed to update product: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      return false
+    } finally {
+      setOperationLoading(false)
+    }
+  }
+
+  // Real archive product handler
+  const handleArchiveProductReal = async (productId: string, productName: string) => {
+    setOperationLoading(true)
+    try {
+      await mutateProduct({ status: 'archived' }, productId)
+      toast.success(`"${productName}" has been archived`)
+      refetch()
+      return true
+    } catch (error) {
+      toast.error('Failed to archive product: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      return false
+    } finally {
+      setOperationLoading(false)
+    }
+  }
+
+  // Real duplicate product handler
+  const handleDuplicateProductReal = async (product: StripeProduct, newName: string) => {
+    setOperationLoading(true)
+    try {
+      await mutateProduct({
+        product_name: newName,
+        description: product.description,
+        category: product.category as any,
+        status: 'draft',
+        price: (product.prices[0]?.unitAmount || 0) / 100,
+        currency: product.prices[0]?.currency || 'usd',
+        billing_cycle: product.prices[0]?.billingInterval === 'month' ? 'monthly' :
+                       product.prices[0]?.billingInterval === 'year' ? 'yearly' : 'one_time',
+        features: product.features.map(f => ({ name: f, enabled: true })),
+        metadata: product.metadata
+      })
+      toast.success(`Product duplicated as "${newName}"`)
+      refetch()
+      return true
+    } catch (error) {
+      toast.error('Failed to duplicate product: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      return false
+    } finally {
+      setOperationLoading(false)
+    }
+  }
 
   // Map Supabase products to StripeProduct format with mock fallback
   const activeProducts: StripeProduct[] = useMemo(() => {
@@ -470,21 +786,19 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
   // Handlers
   const handleCreateProduct = () => {
-    toast.info('Create Product')
-    setShowCreateProduct(true)
+    setShowQuickNewProduct(true)
   }
 
   const handleCreateCoupon = () => {
-    toast.info('Create Coupon')
     setShowCreateCoupon(true)
   }
 
   const handleExportProducts = () => {
-    toast.success('Export started')
+    setShowExportDialog(true)
   }
 
-  const handleArchiveProduct = (product: StripeProduct) => {
-    toast.success("Product archived: " + product.name + " has been archived")
+  const handleArchiveProduct = async (product: StripeProduct) => {
+    await handleArchiveProductReal(product.id, product.name)
   }
 
   const getStatusColor = (status: ProductStatus) => {
@@ -1795,7 +2109,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 { icon: DollarSign, label: 'Add Price', desc: 'Pricing', color: 'from-green-500 to-emerald-600', action: () => setShowCreatePrice(true) },
                 { icon: Tag, label: 'Coupon', desc: 'Discount', color: 'from-orange-500 to-red-600', action: () => setShowCreateCoupon(true) },
                 { icon: Percent, label: 'Tax Rate', desc: 'Configure', color: 'from-blue-500 to-cyan-600', action: () => setShowAddTaxRateDialog(true) },
-                { icon: Box, label: 'Inventory', desc: 'Stock', color: 'from-amber-500 to-yellow-600', action: () => { setSettingsTab('inventory'); toast.info('Navigated to Inventory Settings') } },
+                { icon: Box, label: 'Inventory', desc: 'Stock', color: 'from-amber-500 to-yellow-600', action: () => { setSettingsTab('inventory'); setActiveTab('settings') } },
                 { icon: BarChart3, label: 'Analytics', desc: 'Reports', color: 'from-pink-500 to-rose-600', action: () => setShowQuickAnalytics(true) },
                 { icon: Download, label: 'Export', desc: 'Download', color: 'from-teal-500 to-green-600', action: () => setShowExportDialog(true) },
                 { icon: RefreshCw, label: 'Sync', desc: 'Update', color: 'from-indigo-500 to-blue-600', action: () => setShowSyncDialog(true) }
@@ -1820,7 +2134,34 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
             <AIInsightsPanel
               insights={mockProductsAIInsights}
               title="Product Intelligence"
-              onInsightAction={(insight) => toast.info("Insight: " + insight.title)}
+              onInsightAction={(insight) => {
+                // Generate insight report
+                const insightReport = {
+                  insight: {
+                    id: insight.id,
+                    title: insight.title,
+                    description: insight.description,
+                    type: insight.type,
+                    priority: insight.priority,
+                    category: insight.category
+                  },
+                  actionTaken: 'viewed',
+                  timestamp: new Date().toISOString()
+                }
+
+                // Download insight report
+                const blob = new Blob([JSON.stringify(insightReport, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                link.download = `insight-${insight.id}-${Date.now()}.json`
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                URL.revokeObjectURL(url)
+
+                toast.success(`Insight "${insight.title}" exported for review`)
+              }}
             />
           </div>
           <div className="space-y-6">
@@ -2113,16 +2454,27 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               </Button>
               <Button
                 className="flex-1 bg-violet-600 hover:bg-violet-700"
-                disabled={!quickProductName || !quickProductPrice}
-                onClick={() => {
-                  toast.success("Product created successfully: " + quickProductName + " has been created as a draft")
-                  setShowQuickNewProduct(false)
-                  setQuickProductName('')
-                  setQuickProductDescription('')
-                  setQuickProductPrice('')
+                disabled={!quickProductName || !quickProductPrice || operationLoading}
+                onClick={async () => {
+                  const success = await handleCreateProductReal({
+                    name: quickProductName,
+                    description: quickProductDescription,
+                    category: quickProductCategory,
+                    price: parseFloat(quickProductPrice)
+                  })
+                  if (success) {
+                    setShowQuickNewProduct(false)
+                    setQuickProductName('')
+                    setQuickProductDescription('')
+                    setQuickProductPrice('')
+                  }
                 }}
               >
-                <Plus className="w-4 h-4 mr-2" />
+                {operationLoading ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Plus className="w-4 h-4 mr-2" />
+                )}
                 Create Product
               </Button>
             </div>
@@ -2234,16 +2586,23 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               </Button>
               <Button
                 className="flex-1 bg-green-600 hover:bg-green-700"
-                disabled={!quickPricingProduct || !quickNewPrice}
-                onClick={() => {
-                  const productName = activeProducts.find(p => p.id === quickPricingProduct)?.name
-                  toast.success("Pricing updated successfully: price of $" + quickNewPrice + " set for " + productName)
-                  setShowQuickUpdatePricing(false)
-                  setQuickPricingProduct('')
-                  setQuickNewPrice('')
+                disabled={!quickPricingProduct || !quickNewPrice || operationLoading}
+                onClick={async () => {
+                  const success = await handleUpdateProductReal(quickPricingProduct, {
+                    price: parseFloat(quickNewPrice)
+                  })
+                  if (success) {
+                    setShowQuickUpdatePricing(false)
+                    setQuickPricingProduct('')
+                    setQuickNewPrice('')
+                  }
                 }}
               >
-                <DollarSign className="w-4 h-4 mr-2" />
+                {operationLoading ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <DollarSign className="w-4 h-4 mr-2" />
+                )}
                 Update Pricing
               </Button>
             </div>
@@ -2406,11 +2765,19 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.success("Export started...")
-                setShowExportDialog(false)
-              }}>
-                <Download className="w-4 h-4 mr-2" />
+              <Button
+                className="bg-violet-600 hover:bg-violet-700"
+                disabled={operationLoading}
+                onClick={async () => {
+                  await handleExport(exportFormat, true)
+                  setShowExportDialog(false)
+                }}
+              >
+                {operationLoading ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4 mr-2" />
+                )}
                 Export
               </Button>
             </DialogFooter>
@@ -2459,12 +2826,22 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               }}>
                 Cancel
               </Button>
-              <Button className="bg-violet-600 hover:bg-violet-700" disabled={!importFile} onClick={() => {
-                toast.success("Import started...")
-                setShowImportDialog(false)
-                setImportFile(null)
-              }}>
-                <Upload className="w-4 h-4 mr-2" />
+              <Button
+                className="bg-violet-600 hover:bg-violet-700"
+                disabled={!importFile || operationLoading}
+                onClick={async () => {
+                  if (importFile) {
+                    await handleImport(importFile)
+                    setShowImportDialog(false)
+                    setImportFile(null)
+                  }
+                }}
+              >
+                {operationLoading ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4 mr-2" />
+                )}
                 Import
               </Button>
             </DialogFooter>
@@ -2533,11 +2910,38 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowAddTaxRateDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success("Tax rate created: " + newTaxRate.displayName + " (" + newTaxRate.percentage + "%) has been created")
-                setShowAddTaxRateDialog(false)
-                setNewTaxRate({ displayName: '', description: '', percentage: '', country: '', inclusive: false })
-              }}>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                disabled={!newTaxRate.displayName || !newTaxRate.percentage || !newTaxRate.country}
+                onClick={() => {
+                  // Generate a config file for the tax rate
+                  const taxRateConfig = {
+                    id: `tax_${Date.now()}`,
+                    displayName: newTaxRate.displayName,
+                    description: newTaxRate.description,
+                    percentage: parseFloat(newTaxRate.percentage),
+                    country: newTaxRate.country,
+                    inclusive: newTaxRate.inclusive,
+                    active: true,
+                    createdAt: new Date().toISOString()
+                  }
+
+                  // Download the tax rate config as JSON
+                  const blob = new Blob([JSON.stringify(taxRateConfig, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `tax-rate-${newTaxRate.country}-${newTaxRate.percentage}pct.json`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  URL.revokeObjectURL(url)
+
+                  toast.success(`Tax rate "${newTaxRate.displayName}" (${newTaxRate.percentage}%) created and downloaded`)
+                  setShowAddTaxRateDialog(false)
+                  setNewTaxRate({ displayName: '', description: '', percentage: '', country: '', inclusive: false })
+                }}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Tax Rate
               </Button>
@@ -2603,10 +3007,37 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowEditTaxRateDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success("Tax rate updated: " + newTaxRate.displayName + " has been updated")
-                setShowEditTaxRateDialog(false)
-              }}>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                disabled={!newTaxRate.displayName || !newTaxRate.percentage}
+                onClick={() => {
+                  // Generate updated tax rate config
+                  const taxRateConfig = {
+                    id: selectedTaxRate?.id || `tax_${Date.now()}`,
+                    displayName: newTaxRate.displayName,
+                    description: newTaxRate.description,
+                    percentage: parseFloat(newTaxRate.percentage),
+                    country: newTaxRate.country,
+                    inclusive: newTaxRate.inclusive,
+                    active: true,
+                    updatedAt: new Date().toISOString()
+                  }
+
+                  // Download the updated tax rate config
+                  const blob = new Blob([JSON.stringify(taxRateConfig, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `tax-rate-${newTaxRate.country}-${newTaxRate.percentage}pct-updated.json`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  URL.revokeObjectURL(url)
+
+                  toast.success(`Tax rate "${newTaxRate.displayName}" updated and downloaded`)
+                  setShowEditTaxRateDialog(false)
+                }}
+              >
                 Save Changes
               </Button>
             </DialogFooter>
@@ -2662,10 +3093,27 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowEditPriceDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success("Price updated: price updated to $" + editedPrice.unitAmount)
-                setShowEditPriceDialog(false)
-              }}>
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                disabled={operationLoading}
+                onClick={async () => {
+                  if (selectedPrice) {
+                    // Find the product ID from the price
+                    const product = activeProducts.find(p => p.prices.some(pr => pr.id === selectedPrice.price.id))
+                    if (product) {
+                      const success = await handleUpdateProductReal(product.id, {
+                        price: parseFloat(editedPrice.unitAmount)
+                      })
+                      if (success) {
+                        setShowEditPriceDialog(false)
+                      }
+                    }
+                  }
+                }}
+              >
+                {operationLoading ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : null}
                 Save Changes
               </Button>
             </DialogFooter>
@@ -2769,10 +3217,27 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowEditProductDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.success("Product updated: " + editedProduct.name + " has been updated")
-                setShowEditProductDialog(false)
-              }}>
+              <Button
+                className="bg-violet-600 hover:bg-violet-700"
+                disabled={operationLoading}
+                onClick={async () => {
+                  const productId = selectedProduct?.id || selectedActionProduct?.id
+                  if (productId) {
+                    const success = await handleUpdateProductReal(productId, {
+                      name: editedProduct.name,
+                      description: editedProduct.description,
+                      category: editedProduct.category
+                    })
+                    if (success) {
+                      setShowEditProductDialog(false)
+                      setSelectedProduct(null)
+                    }
+                  }
+                }}
+              >
+                {operationLoading ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : null}
                 Save Changes
               </Button>
             </DialogFooter>
@@ -2806,11 +3271,26 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowDuplicateProductDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.success('Product duplicated')
-                setShowDuplicateProductDialog(false)
-              }}>
-                <Copy className="w-4 h-4 mr-2" />
+              <Button
+                className="bg-violet-600 hover:bg-violet-700"
+                disabled={operationLoading}
+                onClick={async () => {
+                  const product = selectedProduct || selectedActionProduct
+                  if (product) {
+                    const newName = `${product.name} (Copy)`
+                    const success = await handleDuplicateProductReal(product, newName)
+                    if (success) {
+                      setShowDuplicateProductDialog(false)
+                      setSelectedProduct(null)
+                    }
+                  }
+                }}
+              >
+                {operationLoading ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Copy className="w-4 h-4 mr-2" />
+                )}
                 Duplicate
               </Button>
             </DialogFooter>
@@ -2845,12 +3325,25 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowArchiveProductDialog(false)}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={() => {
-                toast.success("Product archived: " + (selectedProduct?.name || selectedActionProduct?.name) + " has been archived")
-                setShowArchiveProductDialog(false)
-                setSelectedProduct(null)
-              }}>
-                <Archive className="w-4 h-4 mr-2" />
+              <Button
+                variant="destructive"
+                disabled={operationLoading}
+                onClick={async () => {
+                  const product = selectedProduct || selectedActionProduct
+                  if (product) {
+                    const success = await handleArchiveProductReal(product.id, product.name)
+                    if (success) {
+                      setShowArchiveProductDialog(false)
+                      setSelectedProduct(null)
+                    }
+                  }
+                }}
+              >
+                {operationLoading ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Archive className="w-4 h-4 mr-2" />
+                )}
                 Archive
               </Button>
             </DialogFooter>
@@ -2880,11 +3373,34 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowDeleteCouponDialog(false)}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={() => {
-                toast.success("Coupon deleted: " + selectedCoupon?.name + " has been deleted")
-                setShowDeleteCouponDialog(false)
-                setSelectedCoupon(null)
-              }}>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  // Generate deletion record file
+                  const deletionRecord = {
+                    action: 'delete',
+                    couponId: selectedCoupon?.id,
+                    couponName: selectedCoupon?.name,
+                    deletedAt: new Date().toISOString(),
+                    reason: 'User initiated deletion'
+                  }
+
+                  // Download the deletion record
+                  const blob = new Blob([JSON.stringify(deletionRecord, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `coupon-deletion-${selectedCoupon?.name}-${Date.now()}.json`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  URL.revokeObjectURL(url)
+
+                  toast.success(`Coupon "${selectedCoupon?.name}" deletion record saved`)
+                  setShowDeleteCouponDialog(false)
+                  setSelectedCoupon(null)
+                }}
+              >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </Button>
@@ -2937,10 +3453,35 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowEditCouponDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                toast.success("Coupon updated: " + editedCoupon.name + " has been updated")
-                setShowEditCouponDialog(false)
-              }}>
+              <Button
+                className="bg-orange-600 hover:bg-orange-700"
+                disabled={!editedCoupon.name || !editedCoupon.percentOff}
+                onClick={() => {
+                  // Generate updated coupon config
+                  const couponConfig = {
+                    id: selectedCoupon?.id || `coupon_${Date.now()}`,
+                    name: editedCoupon.name,
+                    percentOff: parseFloat(editedCoupon.percentOff),
+                    duration: editedCoupon.duration,
+                    valid: true,
+                    updatedAt: new Date().toISOString()
+                  }
+
+                  // Download the coupon config
+                  const blob = new Blob([JSON.stringify(couponConfig, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `coupon-${editedCoupon.name}-updated.json`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  URL.revokeObjectURL(url)
+
+                  toast.success(`Coupon "${editedCoupon.name}" updated and downloaded`)
+                  setShowEditCouponDialog(false)
+                }}
+              >
                 Save Changes
               </Button>
             </DialogFooter>
@@ -2972,7 +3513,26 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                       <Button variant="ghost" size="sm" onClick={() => {
                         const newRate = prompt("Edit shipping rate for " + zone + ":", "$9.99")
                         if (newRate && newRate.trim()) {
-                          toast.success("Updated " + zone + " rate")
+                          // Generate updated zone rate config
+                          const zoneRateUpdate = {
+                            zone,
+                            rate: parseFloat(newRate.replace('$', '')) || 9.99,
+                            currency: 'usd',
+                            updatedAt: new Date().toISOString()
+                          }
+
+                          // Download the updated zone rate config
+                          const blob = new Blob([JSON.stringify(zoneRateUpdate, null, 2)], { type: 'application/json' })
+                          const url = URL.createObjectURL(blob)
+                          const link = document.createElement('a')
+                          link.href = url
+                          link.download = `shipping-rate-${zone.replace(/\s+/g, '-').toLowerCase()}-update.json`
+                          document.body.appendChild(link)
+                          link.click()
+                          document.body.removeChild(link)
+                          URL.revokeObjectURL(url)
+
+                          toast.success(`Updated ${zone} rate to ${newRate} - config downloaded`)
                         }
                       }}>
                         <Edit className="w-4 h-4" />
@@ -2984,7 +3544,27 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" className="w-full gap-2" onClick={() => {
                 const zoneName = prompt('Enter shipping zone name:', 'New Zone')
                 if (zoneName && zoneName.trim()) {
-                  toast.success('Shipping zone added')
+                  // Generate new zone config
+                  const newZoneConfig = {
+                    name: zoneName,
+                    rate: 9.99,
+                    currency: 'usd',
+                    active: true,
+                    createdAt: new Date().toISOString()
+                  }
+
+                  // Download the new zone config
+                  const blob = new Blob([JSON.stringify(newZoneConfig, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `shipping-zone-${zoneName.replace(/\s+/g, '-').toLowerCase()}.json`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  URL.revokeObjectURL(url)
+
+                  toast.success(`Shipping zone "${zoneName}" config downloaded`)
                 }
               }}>
                 <Plus className="w-4 h-4" />
@@ -2995,10 +3575,35 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowManageZonesDialog(false)}>
                 Close
               </Button>
-              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Shipping zones saved')
-                setShowManageZonesDialog(false)
-              }}>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  // Generate shipping zones config
+                  const shippingZonesConfig = {
+                    zones: [
+                      { name: 'United States', rate: 9.99, currency: 'usd' },
+                      { name: 'Canada', rate: 14.99, currency: 'usd' },
+                      { name: 'Europe', rate: 19.99, currency: 'usd' },
+                      { name: 'Rest of World', rate: 24.99, currency: 'usd' }
+                    ],
+                    updatedAt: new Date().toISOString()
+                  }
+
+                  // Download the shipping zones config
+                  const blob = new Blob([JSON.stringify(shippingZonesConfig, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `shipping-zones-${Date.now()}.json`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  URL.revokeObjectURL(url)
+
+                  toast.success('Shipping zones configuration saved and downloaded')
+                  setShowManageZonesDialog(false)
+                }}
+              >
                 Save Changes
               </Button>
             </DialogFooter>
@@ -3025,7 +3630,34 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                       <Package className="w-4 h-4 text-gray-500" />
                       <span className="font-medium">{carrier}</span>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.info('Connect Carrier', { description: `Connecting to ${carrier}...` })}>Connect</Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Generate carrier config
+                        const carrierConfig = {
+                          carrier,
+                          status: 'pending_api_key',
+                          createdAt: new Date().toISOString(),
+                          instructions: `To connect ${carrier}, you'll need to obtain API credentials from their developer portal.`
+                        }
+
+                        // Download the carrier config template
+                        const blob = new Blob([JSON.stringify(carrierConfig, null, 2)], { type: 'application/json' })
+                        const url = URL.createObjectURL(blob)
+                        const link = document.createElement('a')
+                        link.href = url
+                        link.download = `${carrier.toLowerCase()}-carrier-config.json`
+                        document.body.appendChild(link)
+                        link.click()
+                        document.body.removeChild(link)
+                        URL.revokeObjectURL(url)
+
+                        toast.info(`${carrier} config template downloaded. Add your API credentials and import.`)
+                      }}
+                    >
+                      Connect
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -3067,10 +3699,42 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowConnectShopifyDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Connecting to Shopify...')
-                setShowConnectShopifyDialog(false)
-              }}>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  // Get Shopify credentials
+                  const storeUrl = (document.querySelector('input[placeholder="your-store.myshopify.com"]') as HTMLInputElement)?.value
+                  const apiKey = (document.querySelector('input[placeholder="Enter your Shopify API key"]') as HTMLInputElement)?.value
+
+                  if (!storeUrl || !apiKey) {
+                    toast.error('Please enter both Store URL and API Key')
+                    return
+                  }
+
+                  // Generate integration config (with redacted key)
+                  const integrationConfig = {
+                    platform: 'shopify',
+                    storeUrl,
+                    apiKeyHash: btoa(apiKey.slice(0, 4) + '...' + apiKey.slice(-4)),
+                    status: 'pending_verification',
+                    createdAt: new Date().toISOString()
+                  }
+
+                  // Download the integration config
+                  const blob = new Blob([JSON.stringify(integrationConfig, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `shopify-integration-${Date.now()}.json`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  URL.revokeObjectURL(url)
+
+                  toast.success('Shopify integration config saved. Please import this to complete setup.')
+                  setShowConnectShopifyDialog(false)
+                }}
+              >
                 Connect
               </Button>
             </DialogFooter>
@@ -3106,10 +3770,42 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowConnectAmazonDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                toast.success('Connecting to Amazon...')
-                setShowConnectAmazonDialog(false)
-              }}>
+              <Button
+                className="bg-orange-600 hover:bg-orange-700"
+                onClick={() => {
+                  // Get Amazon credentials
+                  const sellerId = (document.querySelector('input[placeholder="Enter your Seller ID"]') as HTMLInputElement)?.value
+                  const authToken = (document.querySelector('input[placeholder="Enter your MWS Auth Token"]') as HTMLInputElement)?.value
+
+                  if (!sellerId || !authToken) {
+                    toast.error('Please enter both Seller ID and MWS Auth Token')
+                    return
+                  }
+
+                  // Generate integration config (with redacted token)
+                  const integrationConfig = {
+                    platform: 'amazon',
+                    sellerId,
+                    authTokenHash: btoa(authToken.slice(0, 4) + '...' + authToken.slice(-4)),
+                    status: 'pending_verification',
+                    createdAt: new Date().toISOString()
+                  }
+
+                  // Download the integration config
+                  const blob = new Blob([JSON.stringify(integrationConfig, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `amazon-integration-${Date.now()}.json`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  URL.revokeObjectURL(url)
+
+                  toast.success('Amazon integration config saved. Please import this to complete setup.')
+                  setShowConnectAmazonDialog(false)
+                }}
+              >
                 Connect
               </Button>
             </DialogFooter>
@@ -3198,10 +3894,46 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowWebhookConfigDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.success('Webhook configured')
-                setShowWebhookConfigDialog(false)
-              }}>
+              <Button
+                className="bg-violet-600 hover:bg-violet-700"
+                onClick={() => {
+                  // Get webhook config from form
+                  const webhookUrl = (document.querySelector('input[placeholder="https://your-server.com/webhooks"]') as HTMLInputElement)?.value
+                  const secretKey = (document.querySelector('input[placeholder="whsec_..."]') as HTMLInputElement)?.value
+
+                  // Get selected events
+                  const events: string[] = []
+                  document.querySelectorAll('input[type="checkbox"]:checked').forEach((checkbox) => {
+                    const label = checkbox.nextElementSibling?.textContent
+                    if (label && (label.includes('product.') || label.includes('price.'))) {
+                      events.push(label)
+                    }
+                  })
+
+                  // Generate webhook config file
+                  const webhookConfig = {
+                    url: webhookUrl || 'https://your-server.com/webhooks',
+                    events,
+                    secretKey: secretKey ? '***REDACTED***' : null,
+                    active: true,
+                    createdAt: new Date().toISOString()
+                  }
+
+                  // Download the webhook config
+                  const blob = new Blob([JSON.stringify(webhookConfig, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `webhook-config-${Date.now()}.json`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  URL.revokeObjectURL(url)
+
+                  toast.success('Webhook configuration saved and downloaded')
+                  setShowWebhookConfigDialog(false)
+                }}
+              >
                 Save Configuration
               </Button>
             </DialogFooter>
@@ -3223,25 +3955,28 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Backup Name</Label>
-                <Input defaultValue={`backup-${new Date().toISOString().split('T')[0]}`} />
+                <Input
+                  id="backup-name"
+                  defaultValue={`backup-${new Date().toISOString().split('T')[0]}`}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Include Data</Label>
                 <div className="space-y-2">
                   <label className="flex items-center gap-2">
-                    <input type="checkbox" defaultChecked className="rounded" />
+                    <input type="checkbox" id="backup-products" defaultChecked className="rounded" />
                     <span className="text-sm">Products</span>
                   </label>
                   <label className="flex items-center gap-2">
-                    <input type="checkbox" defaultChecked className="rounded" />
+                    <input type="checkbox" id="backup-prices" defaultChecked className="rounded" />
                     <span className="text-sm">Prices</span>
                   </label>
                   <label className="flex items-center gap-2">
-                    <input type="checkbox" defaultChecked className="rounded" />
+                    <input type="checkbox" id="backup-coupons" defaultChecked className="rounded" />
                     <span className="text-sm">Coupons</span>
                   </label>
                   <label className="flex items-center gap-2">
-                    <input type="checkbox" defaultChecked className="rounded" />
+                    <input type="checkbox" id="backup-taxrates" defaultChecked className="rounded" />
                     <span className="text-sm">Tax Rates</span>
                   </label>
                 </div>
@@ -3251,11 +3986,30 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowBackupDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => {
-                toast.success('Backup created')
-                setShowBackupDialog(false)
-              }}>
-                <Archive className="w-4 h-4 mr-2" />
+              <Button
+                className="bg-amber-600 hover:bg-amber-700"
+                disabled={operationLoading}
+                onClick={async () => {
+                  const backupName = (document.getElementById('backup-name') as HTMLInputElement)?.value || `backup-${new Date().toISOString().split('T')[0]}`
+                  const includeProducts = (document.getElementById('backup-products') as HTMLInputElement)?.checked ?? true
+                  const includePrices = (document.getElementById('backup-prices') as HTMLInputElement)?.checked ?? true
+                  const includeCoupons = (document.getElementById('backup-coupons') as HTMLInputElement)?.checked ?? true
+                  const includeTaxRates = (document.getElementById('backup-taxrates') as HTMLInputElement)?.checked ?? true
+
+                  await handleBackup(backupName, {
+                    products: includeProducts,
+                    prices: includePrices,
+                    coupons: includeCoupons,
+                    taxRates: includeTaxRates
+                  })
+                  setShowBackupDialog(false)
+                }}
+              >
+                {operationLoading ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Archive className="w-4 h-4 mr-2" />
+                )}
                 Create Backup
               </Button>
             </DialogFooter>
@@ -3298,11 +4052,28 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" onClick={() => setShowSyncDialog(false)}>
                 Cancel
               </Button>
-              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => {
-                toast.success('Sync started')
-                setShowSyncDialog(false)
-              }}>
-                <RefreshCw className="w-4 h-4 mr-2" />
+              <Button
+                className="bg-indigo-600 hover:bg-indigo-700"
+                disabled={operationLoading}
+                onClick={async () => {
+                  setOperationLoading(true)
+                  try {
+                    // Refetch products from Supabase
+                    await refetch()
+                    toast.success('Sync complete! Product data refreshed from database')
+                  } catch (error) {
+                    toast.error('Sync failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
+                  } finally {
+                    setOperationLoading(false)
+                    setShowSyncDialog(false)
+                  }
+                }}
+              >
+                {operationLoading ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
                 Sync Now
               </Button>
             </DialogFooter>

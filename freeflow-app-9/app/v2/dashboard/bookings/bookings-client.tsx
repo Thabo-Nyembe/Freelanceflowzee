@@ -69,29 +69,356 @@ interface TeamMember {
   bookingsToday: number
 }
 
-// Mock data for AI-powered competitive upgrade components
-const mockBookingsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'High Demand', description: 'Consultation bookings up 45% this week. Consider adding more slots.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Capacity' },
-  { id: '2', type: 'warning' as const, title: 'No-Show Alert', description: '3 no-shows yesterday. Send reminder SMS 2 hours before appointments.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Attendance' },
-  { id: '3', type: 'info' as const, title: 'Popular Time', description: '10-11 AM slots are most booked. 87% utilization rate.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-]
+// Helper function to generate ICS calendar file
+function generateICSFile(bookings: Booking[]): string {
+  const icsLines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//FreeFlow//Booking System//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+  ]
 
-const mockBookingsCollaborators = [
-  { id: '1', name: 'Scheduler', avatar: '/avatars/scheduler.jpg', status: 'online' as const, role: 'Scheduling' },
-  { id: '2', name: 'Consultant', avatar: '/avatars/consultant.jpg', status: 'online' as const, role: 'Consultant' },
-  { id: '3', name: 'Support', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
-]
+  bookings.forEach((booking) => {
+    const startDate = new Date(booking.start_time)
+    const endDate = new Date(booking.end_time)
+    const formatDate = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
 
-const mockBookingsPredictions = [
-  { id: '1', title: 'Weekly Forecast', prediction: 'Expect 35% more bookings next week based on seasonal trends', confidence: 82, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Cancellation Risk', prediction: '5 bookings have high cancellation probability', confidence: 76, trend: 'down' as const, impact: 'medium' as const },
-]
+    icsLines.push(
+      'BEGIN:VEVENT',
+      `UID:${booking.id}@freeflow.app`,
+      `DTSTAMP:${formatDate(new Date())}`,
+      `DTSTART:${formatDate(startDate)}`,
+      `DTEND:${formatDate(endDate)}`,
+      `SUMMARY:${booking.title.replace(/[,;]/g, ' ')}`,
+      `DESCRIPTION:${(booking.description || '').replace(/\n/g, '\\n').replace(/[,;]/g, ' ')}`,
+      booking.location ? `LOCATION:${booking.location.replace(/[,;]/g, ' ')}` : '',
+      booking.customer_name ? `ATTENDEE;CN=${booking.customer_name}:MAILTO:${booking.customer_email || 'unknown@email.com'}` : '',
+      `STATUS:${booking.status === 'confirmed' ? 'CONFIRMED' : booking.status === 'cancelled' ? 'CANCELLED' : 'TENTATIVE'}`,
+      'END:VEVENT'
+    )
+  })
 
-const mockBookingsActivities = [
-  { id: '1', user: 'Client', action: 'Booked', target: 'Strategy Consultation for tomorrow', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Scheduler', action: 'Rescheduled', target: 'Weekly sync meeting', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Sent', target: 'reminder to 12 clients', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+  icsLines.push('END:VCALENDAR')
+  return icsLines.filter(Boolean).join('\r\n')
+}
+
+// Helper function to generate PDF report
+async function generateBookingsPDF(bookings: Booking[], stats: { total: number; confirmed: number; pending: number; completed: number; cancelled: number; totalRevenue: number; paidRevenue: number; pendingPayments: number }): Promise<Blob> {
+  // Generate HTML content for PDF
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    h1 { color: #0ea5e9; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; }
+    h2 { color: #333; margin-top: 30px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 20px 0; }
+    .stat-box { background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; }
+    .stat-value { font-size: 24px; font-weight: bold; color: #0ea5e9; }
+    .stat-label { font-size: 12px; color: #666; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #0ea5e9; color: white; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    .status-confirmed { color: #22c55e; }
+    .status-pending { color: #f59e0b; }
+    .status-cancelled { color: #ef4444; }
+    .footer { margin-top: 40px; text-align: center; color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Bookings Report</h1>
+  <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+
+  <h2>Summary Statistics</h2>
+  <div class="stats-grid">
+    <div class="stat-box"><div class="stat-value">${stats.total}</div><div class="stat-label">Total Bookings</div></div>
+    <div class="stat-box"><div class="stat-value">${stats.confirmed}</div><div class="stat-label">Confirmed</div></div>
+    <div class="stat-box"><div class="stat-value">${stats.pending}</div><div class="stat-label">Pending</div></div>
+    <div class="stat-box"><div class="stat-value">$${stats.totalRevenue.toLocaleString()}</div><div class="stat-label">Total Revenue</div></div>
+  </div>
+
+  <h2>Booking Details</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Booking #</th>
+        <th>Title</th>
+        <th>Customer</th>
+        <th>Date & Time</th>
+        <th>Duration</th>
+        <th>Status</th>
+        <th>Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${bookings.map(b => `
+        <tr>
+          <td>${b.booking_number || '-'}</td>
+          <td>${b.title}</td>
+          <td>${b.customer_name || '-'}</td>
+          <td>${new Date(b.start_time).toLocaleDateString()} ${new Date(b.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+          <td>${b.duration_minutes} min</td>
+          <td class="status-${b.status}">${b.status}</td>
+          <td>$${b.price.toFixed(2)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <p>FreeFlow Booking System - Confidential Report</p>
+  </div>
+</body>
+</html>`
+
+  // Create PDF using browser print API fallback (HTML to PDF)
+  const blob = new Blob([htmlContent], { type: 'text/html' })
+  return blob
+}
+
+// Generate real insights from booking data
+function generateBookingInsights(bookings: Booking[]): Array<{ id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'high' | 'medium' | 'low'; timestamp: string; category: string }> {
+  const insights: Array<{ id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'high' | 'medium' | 'low'; timestamp: string; category: string }> = []
+
+  if (bookings.length === 0) {
+    return [{ id: '1', type: 'info', title: 'No Bookings Yet', description: 'Start creating bookings to see insights here.', priority: 'low', timestamp: new Date().toISOString(), category: 'Getting Started' }]
+  }
+
+  // Calculate metrics
+  const now = new Date()
+  const thisWeekBookings = bookings.filter(b => {
+    const bookingDate = new Date(b.start_time)
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    return bookingDate >= weekAgo && bookingDate <= now
+  })
+
+  const lastWeekBookings = bookings.filter(b => {
+    const bookingDate = new Date(b.start_time)
+    const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    return bookingDate >= twoWeeksAgo && bookingDate < weekAgo
+  })
+
+  const pendingCount = bookings.filter(b => b.status === 'pending').length
+  const cancelledCount = bookings.filter(b => b.status === 'cancelled').length
+  const noShowCount = bookings.filter(b => b.status === 'no_show').length
+  const upcomingNoReminder = bookings.filter(b =>
+    new Date(b.start_time) > now &&
+    !b.reminder_sent &&
+    ['pending', 'confirmed'].includes(b.status)
+  ).length
+
+  // Generate insights based on real data
+  if (thisWeekBookings.length > lastWeekBookings.length && lastWeekBookings.length > 0) {
+    const growthPercent = Math.round(((thisWeekBookings.length - lastWeekBookings.length) / lastWeekBookings.length) * 100)
+    insights.push({
+      id: '1',
+      type: 'success',
+      title: 'Booking Growth',
+      description: `Bookings up ${growthPercent}% this week (${thisWeekBookings.length} vs ${lastWeekBookings.length}). Great momentum!`,
+      priority: 'medium',
+      timestamp: now.toISOString(),
+      category: 'Growth'
+    })
+  }
+
+  if (pendingCount > 3) {
+    insights.push({
+      id: '2',
+      type: 'warning',
+      title: 'Pending Review',
+      description: `${pendingCount} bookings awaiting confirmation. Consider bulk confirming to improve customer experience.`,
+      priority: 'high',
+      timestamp: now.toISOString(),
+      category: 'Action Required'
+    })
+  }
+
+  if (cancelledCount + noShowCount > 2) {
+    const cancelRate = Math.round(((cancelledCount + noShowCount) / bookings.length) * 100)
+    insights.push({
+      id: '3',
+      type: cancelRate > 20 ? 'error' : 'warning',
+      title: 'Cancellation Alert',
+      description: `${cancelRate}% cancellation/no-show rate. ${upcomingNoReminder > 0 ? `Send reminders to ${upcomingNoReminder} upcoming bookings.` : 'Consider implementing deposits.'}`,
+      priority: 'high',
+      timestamp: now.toISOString(),
+      category: 'Attendance'
+    })
+  }
+
+  if (upcomingNoReminder > 0) {
+    insights.push({
+      id: '4',
+      type: 'info',
+      title: 'Reminder Opportunity',
+      description: `${upcomingNoReminder} upcoming bookings haven't received reminders. Send bulk reminders to reduce no-shows.`,
+      priority: 'medium',
+      timestamp: now.toISOString(),
+      category: 'Engagement'
+    })
+  }
+
+  // Most popular time slot
+  const timeSlotCounts: Record<string, number> = {}
+  bookings.forEach(b => {
+    const hour = new Date(b.start_time).getHours()
+    const slot = `${hour}:00`
+    timeSlotCounts[slot] = (timeSlotCounts[slot] || 0) + 1
+  })
+  const popularSlot = Object.entries(timeSlotCounts).sort((a, b) => b[1] - a[1])[0]
+  if (popularSlot) {
+    const utilization = Math.round((popularSlot[1] / bookings.length) * 100)
+    insights.push({
+      id: '5',
+      type: 'info',
+      title: 'Peak Hours',
+      description: `${popularSlot[0]} is your most booked time slot with ${utilization}% of bookings. Consider premium pricing.`,
+      priority: 'low',
+      timestamp: now.toISOString(),
+      category: 'Analytics'
+    })
+  }
+
+  return insights.length > 0 ? insights : [
+    { id: '1', type: 'success', title: 'Looking Good', description: 'Your booking system is running smoothly with no issues detected.', priority: 'low', timestamp: now.toISOString(), category: 'Status' }
+  ]
+}
+
+// Generate real activity feed from booking data
+function generateActivityFeed(bookings: Booking[]): Array<{ id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }> {
+  const activities: Array<{ id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }> = []
+
+  // Sort bookings by updated_at to get recent activity
+  const sortedBookings = [...bookings].sort((a, b) =>
+    new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
+  ).slice(0, 10)
+
+  sortedBookings.forEach((booking, idx) => {
+    const wasRecent = new Date(booking.updated_at || booking.created_at).getTime() > Date.now() - 24 * 60 * 60 * 1000
+
+    if (booking.status === 'confirmed' && booking.confirmed_at) {
+      activities.push({
+        id: `${idx}-confirmed`,
+        user: 'System',
+        action: 'Confirmed',
+        target: `${booking.title} for ${booking.customer_name || 'customer'}`,
+        timestamp: booking.confirmed_at,
+        type: 'success'
+      })
+    } else if (booking.status === 'cancelled' && booking.cancelled_at) {
+      activities.push({
+        id: `${idx}-cancelled`,
+        user: booking.customer_name || 'Customer',
+        action: 'Cancelled',
+        target: booking.title,
+        timestamp: booking.cancelled_at,
+        type: 'warning'
+      })
+    } else if (booking.status === 'rescheduled') {
+      activities.push({
+        id: `${idx}-rescheduled`,
+        user: booking.customer_name || 'Customer',
+        action: 'Rescheduled',
+        target: `${booking.title} to ${new Date(booking.start_time).toLocaleDateString()}`,
+        timestamp: booking.updated_at || booking.created_at,
+        type: 'info'
+      })
+    } else if (booking.reminder_sent && booking.reminder_sent_at) {
+      activities.push({
+        id: `${idx}-reminder`,
+        user: 'System',
+        action: 'Sent reminder',
+        target: `to ${booking.customer_name || booking.customer_email || 'customer'}`,
+        timestamp: booking.reminder_sent_at,
+        type: 'info'
+      })
+    } else if (wasRecent && booking.status === 'pending') {
+      activities.push({
+        id: `${idx}-created`,
+        user: booking.customer_name || 'Customer',
+        action: 'Booked',
+        target: `${booking.title} for ${new Date(booking.start_time).toLocaleDateString()}`,
+        timestamp: booking.created_at,
+        type: 'success'
+      })
+    }
+  })
+
+  return activities.slice(0, 5).length > 0 ? activities.slice(0, 5) : [
+    { id: '1', user: 'System', action: 'Ready', target: 'Booking system initialized', timestamp: new Date().toISOString(), type: 'info' }
+  ]
+}
+
+// Generate real predictions based on booking trends
+function generateBookingPredictions(bookings: Booking[]): Array<{ id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'high' | 'medium' | 'low' }> {
+  const predictions: Array<{ id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'high' | 'medium' | 'low' }> = []
+
+  if (bookings.length < 3) {
+    return [
+      { id: '1', title: 'Need More Data', prediction: 'Create more bookings to enable predictive analytics', confidence: 100, trend: 'stable', impact: 'low' }
+    ]
+  }
+
+  const now = new Date()
+
+  // Weekly booking trend
+  const thisWeek = bookings.filter(b => {
+    const d = new Date(b.start_time)
+    return d >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  }).length
+
+  const lastWeek = bookings.filter(b => {
+    const d = new Date(b.start_time)
+    return d >= new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000) && d < new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  }).length
+
+  if (lastWeek > 0) {
+    const growthRate = ((thisWeek - lastWeek) / lastWeek) * 100
+    const projectedNextWeek = Math.round(thisWeek * (1 + growthRate / 100))
+    predictions.push({
+      id: '1',
+      title: 'Weekly Forecast',
+      prediction: `Expect ~${projectedNextWeek} bookings next week based on current ${growthRate > 0 ? 'growth' : 'trend'}`,
+      confidence: Math.min(85, 60 + bookings.length),
+      trend: growthRate > 5 ? 'up' : growthRate < -5 ? 'down' : 'stable',
+      impact: 'high'
+    })
+  }
+
+  // Cancellation risk
+  const pendingBookings = bookings.filter(b => b.status === 'pending' && new Date(b.start_time) > now)
+  const historicalCancelRate = bookings.filter(b => b.status === 'cancelled').length / Math.max(bookings.length, 1)
+  const atRiskCount = Math.round(pendingBookings.length * historicalCancelRate)
+
+  if (atRiskCount > 0) {
+    predictions.push({
+      id: '2',
+      title: 'Cancellation Risk',
+      prediction: `${atRiskCount} pending booking${atRiskCount > 1 ? 's have' : ' has'} elevated cancellation probability based on patterns`,
+      confidence: Math.min(80, 50 + Math.round(historicalCancelRate * 100)),
+      trend: 'down',
+      impact: atRiskCount > 2 ? 'high' : 'medium'
+    })
+  }
+
+  // Revenue forecast
+  const avgBookingValue = bookings.reduce((sum, b) => sum + b.price, 0) / bookings.length
+  const projectedRevenue = Math.round(thisWeek * avgBookingValue * 1.1)
+  predictions.push({
+    id: '3',
+    title: 'Revenue Outlook',
+    prediction: `Projected ~$${projectedRevenue.toLocaleString()} in bookings next week at current pace`,
+    confidence: Math.min(75, 55 + bookings.length / 2),
+    trend: thisWeek > lastWeek ? 'up' : 'stable',
+    impact: 'medium'
+  })
+
+  return predictions
+}
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -416,9 +743,51 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     }
   }
 
-  // Export bookings to CSV
-  const handleExportBookings = (type: 'calendar' | 'list' | 'agenda') => {
+  // Export bookings to CSV or ICS
+  const handleExportBookings = (type: 'calendar' | 'list' | 'agenda', format: 'csv' | 'ics' | 'pdf' = 'csv') => {
     const dataToExport = filteredBookings.length > 0 ? filteredBookings : displayBookings
+
+    if (dataToExport.length === 0) {
+      toast.info('No Data', { description: 'No bookings to export' })
+      return
+    }
+
+    if (format === 'ics') {
+      // Generate ICS calendar file
+      const icsContent = generateICSFile(dataToExport)
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `bookings-${type}-${new Date().toISOString().split('T')[0]}.ics`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Calendar Exported', { description: `${dataToExport.length} bookings exported to ICS format` })
+      return
+    }
+
+    if (format === 'pdf') {
+      // Generate PDF report
+      toast.loading('Generating PDF report...', { id: 'pdf-export' })
+      generateBookingsPDF(dataToExport, stats).then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `bookings-report-${new Date().toISOString().split('T')[0]}.html`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        toast.success('Report Generated', { id: 'pdf-export', description: 'Open the HTML file and print to PDF for best results' })
+      }).catch(() => {
+        toast.error('Export Failed', { id: 'pdf-export' })
+      })
+      return
+    }
+
+    // Default CSV export
     const csvContent = [
       ['Booking Number', 'Title', 'Customer', 'Email', 'Date', 'Time', 'Duration', 'Status', 'Payment', 'Price'].join(','),
       ...dataToExport.map(b => [
@@ -444,7 +813,17 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Export Complete')
+    toast.success('Export Complete', { description: `${dataToExport.length} bookings exported to CSV` })
+  }
+
+  // Export to ICS (calendar format)
+  const handleExportToICS = () => {
+    handleExportBookings('calendar', 'ics')
+  }
+
+  // Export to PDF report
+  const handleExportToPDF = () => {
+    handleExportBookings('list', 'pdf')
   }
 
   // Confirm all pending bookings
@@ -1628,7 +2007,29 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             { icon: Plus, label: 'New Booking', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => setShowNewBooking(true) },
             { icon: Calendar, label: 'Calendar', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { setView('calendar') } },
             { icon: Users, label: 'Clients', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { window.location.href = '/dashboard/clients-v2' } },
-            { icon: Video, label: 'Video Meet', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { window.open('https://meet.google.com/new', '_blank'); toast.success('Video Meeting') } },
+            { icon: Video, label: 'Video Meet', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: async () => {
+              // Generate a unique meeting ID
+              const meetingId = `ff-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`
+              const meetUrl = `https://meet.google.com/new?hs=122&authuser=0`
+
+              // Track meeting creation via API
+              try {
+                await fetch('/api/bookings', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    action: 'track-meeting',
+                    meetingId,
+                    createdAt: new Date().toISOString()
+                  })
+                })
+              } catch {
+                // Silent fail for tracking - don't block user
+              }
+
+              window.open(meetUrl, '_blank')
+              toast.success('Video Meeting Started', { description: 'Google Meet opened in new tab. Copy the link to share with attendees.' })
+            }},
             { icon: CreditCard, label: 'Payments', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { window.location.href = '/dashboard/billing-v2' } },
             { icon: Bell, label: 'Reminders', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { setShowSettings(true); setSettingsTab('notifications') } },
             { icon: BarChart3, label: 'Analytics', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { window.location.href = '/dashboard/analytics-v2' } },
@@ -1823,10 +2224,18 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 { icon: Calendar, label: 'Day View', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setCalendarView('day') },
                 { icon: CalendarClock, label: 'Week View', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => setCalendarView('week') },
                 { icon: Globe, label: 'Month View', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => setCalendarView('month') },
-                { icon: RefreshCw, label: 'Sync', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { refetch(); toast.success('Calendar Synced') } },
-                { icon: Repeat, label: 'Recurring', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setShowSettings(true); setSettingsTab('availability') } },
-                { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => handleExportBookings('calendar') },
-                { icon: Filter, label: 'Filter', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { document.getElementById('status-filter')?.focus() } },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: async () => {
+                  toast.loading('Syncing calendar...', { id: 'calendar-sync' })
+                  try {
+                    await refetch()
+                    toast.success('Calendar Synced', { id: 'calendar-sync', description: `${displayBookings.length} bookings loaded` })
+                  } catch {
+                    toast.error('Sync Failed', { id: 'calendar-sync' })
+                  }
+                }},
+                { icon: Repeat, label: 'ICS Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => handleExportToICS() },
+                { icon: Download, label: 'CSV Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => handleExportBookings('calendar', 'csv') },
+                { icon: FileText, label: 'PDF Report', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => handleExportToPDF() },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2014,8 +2423,8 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 { icon: Search, label: 'Search', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { document.getElementById('search-input')?.focus() } },
                 { icon: Check, label: 'Confirm All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { if (confirm('Confirm all pending bookings?')) { handleConfirmAllPending() } } },
                 { icon: Mail, label: 'Email All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => handleSendAllReminders() },
-                { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => handleExportBookings('list') },
-                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { window.location.href = '/dashboard/reports-v2' } },
+                { icon: Download, label: 'CSV Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => handleExportBookings('list', 'csv') },
+                { icon: FileText, label: 'PDF Report', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => handleExportToPDF() },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setShowSettings(true) },
               ].map((action, idx) => (
                 <Button
@@ -2153,8 +2562,8 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 { icon: CalendarClock, label: 'This Month', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setView('calendar'); setCalendarView('month') } },
                 { icon: Filter, label: 'Filter', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { document.getElementById('status-filter')?.focus() } },
                 { icon: Bell, label: 'Reminders', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => handleSendAllReminders() },
-                { icon: Repeat, label: 'Recurring', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => { setShowSettings(true); setSettingsTab('availability') } },
-                { icon: Download, label: 'Export', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => handleExportBookings('agenda') },
+                { icon: Repeat, label: 'ICS Export', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => handleExportToICS() },
+                { icon: Download, label: 'CSV Export', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => handleExportBookings('agenda', 'csv') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -3335,22 +3744,37 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
           </DialogContent>
         </Dialog>
 
-        {/* Enhanced Competitive Upgrade Components */}
+        {/* Enhanced Competitive Upgrade Components - Using Real Data */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockBookingsAIInsights}
+              insights={generateBookingInsights(displayBookings)}
               title="Booking Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
+              onInsightAction={(insight) => {
+                // Handle insight actions with real functionality
+                if (insight.category === 'Action Required' && insight.title.includes('Pending')) {
+                  handleConfirmAllPending()
+                } else if (insight.category === 'Engagement' && insight.title.includes('Reminder')) {
+                  handleSendAllReminders()
+                } else {
+                  toast.info(insight.title, { description: insight.description })
+                }
+              }}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockBookingsCollaborators}
+              collaborators={teamMembers.map((m, i) => ({
+                id: m.id,
+                name: m.name,
+                avatar: `/avatars/${m.name.toLowerCase().replace(' ', '-')}.jpg`,
+                status: (i === 0 ? 'online' : i === 1 ? 'online' : 'away') as const,
+                role: m.role
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockBookingsPredictions}
+              predictions={generateBookingPredictions(displayBookings)}
               title="Booking Forecasts"
             />
           </div>
@@ -3358,7 +3782,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockBookingsActivities}
+            activities={generateActivityFeed(displayBookings)}
             title="Booking Activity"
             maxItems={5}
           />
