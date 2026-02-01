@@ -13,7 +13,7 @@
     "dev:debug": "NODE_OPTIONS='--inspect --max-old-space-size=8192' next dev --turbo -p 9323",
     "dev:debug-full": "NODE_OPTIONS='--inspect=0.0.0.0 --max-old-space-size=8192' next dev --turbo -p 9323",
     "build": "NODE_OPTIONS='--max-old-space-size=4096 --no-deprecation' next build",
-    "start": "node .next/standalone/server.js",
+    "start": "cp -r public .next/standalone/ 2>/dev/null; cp -r .next/static .next/standalone/.next/ 2>/dev/null; node .next/standalone/server.js",
     "lint": "next lint",
     "test": "jest --config jest.config.ts",
     "test:watch": "jest --watch --config jest.config.ts",
