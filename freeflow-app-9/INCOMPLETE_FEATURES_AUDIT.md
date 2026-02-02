@@ -260,17 +260,17 @@ The following items were initially flagged but found to be **already complete**:
 |-----------------|-------------------|---------------|
 | `app/api/contracts/route.ts` | "No DB operations" | ✅ Full 1327-line implementation with CRUD |
 | `app/api/escrow/route.ts` | "No API routes" | ✅ Full 1105-line implementation with Stripe |
+| `app/api/sprints/route.ts` | "Demo only" | ✅ Full 283-line implementation with CRUD on `sprints` table |
+| `app/api/goals/route.ts` | "Demo only" | ✅ Full 665-line OKR tracking with key results |
+| `app/api/video/render/route.ts` | "Demo only" | ✅ Full 229-line implementation with `render_jobs` table |
+| `app/api/video/transcribe/route.ts` | "Demo only" | ✅ Full 704-line implementation with OpenAI Whisper |
+| `app/api/gallery/route.ts` | "Demo only" | ✅ Full 511-line implementation with `portfolio_items` table |
+
+**Note:** These routes have demo fallbacks for unauthenticated/demo users, but all real users get proper database operations.
 
 ---
 
 ## Remaining Critical Items
-
-### API Routes Still Demo-Only:
-- `/api/sprints/route.ts`
-- `/api/goals/route.ts`
-- `/api/video/render/route.ts`
-- `/api/video/transcribe/route.ts`
-- `/api/gallery/route.ts`
 
 ### Components Still Need Database Wiring:
 - `app/v1/dashboard/broadcasts/broadcasts-client.tsx` - AI insights/collaborators
