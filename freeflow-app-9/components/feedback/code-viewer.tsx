@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { sanitizeCode } from '@/lib/sanitize'
 import {
   MessageSquare,
@@ -12,7 +12,9 @@ import {
   EyeOff,
   ChevronDown,
   ChevronRight,
-  Check
+  Check,
+  Copy,
+  CheckCheck
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
@@ -21,7 +23,49 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createFeatureLogger } from '@/lib/logger'
 
+// Import Prism for proper syntax highlighting
+import Prism from 'prismjs'
+import 'prismjs/components/prism-javascript'
+import 'prismjs/components/prism-typescript'
+import 'prismjs/components/prism-jsx'
+import 'prismjs/components/prism-tsx'
+import 'prismjs/components/prism-python'
+import 'prismjs/components/prism-java'
+import 'prismjs/components/prism-c'
+import 'prismjs/components/prism-cpp'
+import 'prismjs/components/prism-csharp'
+import 'prismjs/components/prism-go'
+import 'prismjs/components/prism-rust'
+import 'prismjs/components/prism-ruby'
+import 'prismjs/components/prism-php'
+import 'prismjs/components/prism-swift'
+import 'prismjs/components/prism-kotlin'
+import 'prismjs/components/prism-sql'
+import 'prismjs/components/prism-bash'
+import 'prismjs/components/prism-json'
+import 'prismjs/components/prism-yaml'
+import 'prismjs/components/prism-markdown'
+import 'prismjs/components/prism-css'
+import 'prismjs/components/prism-scss'
+import 'prismjs/components/prism-graphql'
+
 const logger = createFeatureLogger('CodeViewer')
+
+// Language mapping for Prism
+const LANGUAGE_MAP: Record<string, string> = {
+  js: 'javascript',
+  ts: 'typescript',
+  jsx: 'jsx',
+  tsx: 'tsx',
+  py: 'python',
+  rb: 'ruby',
+  rs: 'rust',
+  cs: 'csharp',
+  'c++': 'cpp',
+  sh: 'bash',
+  yml: 'yaml',
+  md: 'markdown',
+}
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -52,47 +96,77 @@ interface CodeViewerProps {
 }
 
 // ============================================================================
-// SYNTAX HIGHLIGHTING HELPER
+// SYNTAX HIGHLIGHTING WITH PRISM
 // ============================================================================
 
 function highlightCode(code: string, language: string): string {
-  // Basic syntax highlighting for common languages
-  const keywords: Record<string, string[]> = {
-    javascript: ['import', 'export', 'const', 'let', 'var', 'function', 'return', 'if', 'else', 'for', 'while', 'class', 'extends', 'async', 'await', 'try', 'catch', 'throw', 'new'],
-    typescript: ['import', 'export', 'const', 'let', 'var', 'function', 'return', 'if', 'else', 'for', 'while', 'class', 'extends', 'async', 'await', 'try', 'catch', 'throw', 'new', 'interface', 'type', 'enum', 'public', 'private', 'protected'],
-    python: ['import', 'from', 'def', 'class', 'return', 'if', 'else', 'elif', 'for', 'while', 'try', 'except', 'finally', 'with', 'as', 'async', 'await'],
-    java: ['import', 'package', 'public', 'private', 'protected', 'class', 'interface', 'extends', 'implements', 'return', 'if', 'else', 'for', 'while', 'try', 'catch', 'finally', 'new', 'static', 'void'],
+  // Map language aliases to Prism language names
+  const prismLang = LANGUAGE_MAP[language.toLowerCase()] || language.toLowerCase()
+
+  // Check if Prism has the language loaded
+  const grammar = Prism.languages[prismLang]
+
+  if (!grammar) {
+    // Fallback: escape HTML and return plain text
+    return code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
   }
 
-  const langKeywords = keywords[language] || keywords.javascript
+  try {
+    // Use Prism to highlight the code
+    return Prism.highlight(code, grammar, prismLang)
+  } catch (error) {
+    // Fallback on error
+    return code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+  }
+}
 
-  // Escape HTML
-  let highlighted = code
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-
-  // Highlight strings
-  highlighted = highlighted.replace(/(['"`])(.*?)\1/g, '<span class="text-green-400">$&</span>')
-
-  // Highlight comments
-  highlighted = highlighted.replace(/(\/\/.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
-  highlighted = highlighted.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="text-gray-500 italic">$1</span>')
-  highlighted = highlighted.replace(/(#.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
-
-  // Highlight keywords
-  langKeywords.forEach(keyword => {
-    const regex = new RegExp(`\\b(${keyword})\\b`, 'g')
-    highlighted = highlighted.replace(regex, '<span class="text-purple-400 font-semibold">$1</span>')
-  })
-
-  // Highlight numbers
-  highlighted = highlighted.replace(/\b(\d+)\b/g, '<span class="text-orange-400">$1</span>')
-
-  // Highlight functions
-  highlighted = highlighted.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, '<span class="text-blue-400">$1</span>(')
-
-  return highlighted
+// Detect language from filename extension
+function detectLanguage(filename: string): string {
+  const ext = filename.split('.').pop()?.toLowerCase() || ''
+  const extensionMap: Record<string, string> = {
+    js: 'javascript',
+    mjs: 'javascript',
+    cjs: 'javascript',
+    ts: 'typescript',
+    mts: 'typescript',
+    cts: 'typescript',
+    jsx: 'jsx',
+    tsx: 'tsx',
+    py: 'python',
+    rb: 'ruby',
+    rs: 'rust',
+    go: 'go',
+    java: 'java',
+    kt: 'kotlin',
+    swift: 'swift',
+    c: 'c',
+    h: 'c',
+    cpp: 'cpp',
+    hpp: 'cpp',
+    cc: 'cpp',
+    cs: 'csharp',
+    php: 'php',
+    sql: 'sql',
+    sh: 'bash',
+    bash: 'bash',
+    zsh: 'bash',
+    json: 'json',
+    yaml: 'yaml',
+    yml: 'yaml',
+    md: 'markdown',
+    css: 'css',
+    scss: 'scss',
+    sass: 'scss',
+    graphql: 'graphql',
+    gql: 'graphql',
+  }
+  return extensionMap[ext] || 'javascript'
 }
 
 function getPriorityColor(priority: string = 'medium'): string {
@@ -111,7 +185,7 @@ function getPriorityColor(priority: string = 'medium'): string {
 
 export function CodeViewer({
   code,
-  language = 'javascript',
+  language,
   filename = 'code.js',
   comments = [],
   onCommentAdd,
@@ -127,6 +201,7 @@ export function CodeViewer({
   const [lines, setLines] = useState<string[]>([])
   const [highlightedLines, setHighlightedLines] = useState<string[]>([])
   const [selectedLine, setSelectedLine] = useState<number | null>(null)
+  const [selectedLineRange, setSelectedLineRange] = useState<[number, number] | null>(null)
   const [showCommentDialog, setShowCommentDialog] = useState(false)
   const [newComment, setNewComment] = useState('')
   const [selectedPriority, setSelectedPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium')
@@ -134,6 +209,12 @@ export function CodeViewer({
   const [editingComment, setEditingComment] = useState<Comment | null>(null)
   const [showResolvedComments, setShowResolvedComments] = useState(false)
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set())
+  const [copied, setCopied] = useState(false)
+  const [isSelecting, setIsSelecting] = useState(false)
+  const selectionStartRef = useRef<number | null>(null)
+
+  // Detect language from filename if not provided
+  const detectedLanguage = language || detectLanguage(filename)
 
   // ============================================================================
   // PROCESS CODE INTO LINES
@@ -143,29 +224,87 @@ export function CodeViewer({
     const codeLines = code.split('\n')
     setLines(codeLines)
 
-    const highlighted = codeLines.map(line => highlightCode(line, language))
+    const highlighted = codeLines.map(line => highlightCode(line, detectedLanguage))
     setHighlightedLines(highlighted)
 
     logger.info('Code processed', {
       filename,
-      language,
+      language: detectedLanguage,
       lineCount: codeLines.length
     })
-  }, [code, language, filename])
+  }, [code, detectedLanguage, filename])
+
+  // ============================================================================
+  // COPY TO CLIPBOARD
+  // ============================================================================
+
+  const handleCopyCode = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+      logger.info('Code copied to clipboard', { filename })
+    } catch (error) {
+      logger.error('Failed to copy code', { error })
+    }
+  }, [code, filename])
+
+  // ============================================================================
+  // LINE RANGE SELECTION
+  // ============================================================================
+
+  const handleLineMouseDown = (lineNumber: number, event: React.MouseEvent) => {
+    if (event.shiftKey && selectionStartRef.current !== null) {
+      // Shift-click: extend selection
+      const start = Math.min(selectionStartRef.current, lineNumber)
+      const end = Math.max(selectionStartRef.current, lineNumber)
+      setSelectedLineRange([start, end])
+    } else {
+      // Normal click: start new selection
+      selectionStartRef.current = lineNumber
+      setSelectedLineRange(null)
+      setIsSelecting(true)
+    }
+  }
+
+  const handleLineMouseEnter = (lineNumber: number) => {
+    if (isSelecting && selectionStartRef.current !== null) {
+      const start = Math.min(selectionStartRef.current, lineNumber)
+      const end = Math.max(selectionStartRef.current, lineNumber)
+      setSelectedLineRange([start, end])
+    }
+  }
+
+  const handleMouseUp = () => {
+    setIsSelecting(false)
+  }
+
+  const isLineSelected = (lineNumber: number): boolean => {
+    if (!selectedLineRange) return false
+    return lineNumber >= selectedLineRange[0] && lineNumber <= selectedLineRange[1]
+  }
 
   // ============================================================================
   // COMMENT MANAGEMENT
   // ============================================================================
 
   const handleLineClick = (lineNumber: number) => {
-    setSelectedLine(lineNumber)
+    // If we have a range selected, use that; otherwise use single line
+    if (selectedLineRange) {
+      setSelectedLine(selectedLineRange[0])
+    } else {
+      setSelectedLine(lineNumber)
+    }
     setShowCommentDialog(true)
     setNewComment('')
     setSelectedPriority('medium')
     setSelectedTags([])
     setEditingComment(null)
 
-    logger.info('Adding comment to line', { lineNumber, filename })
+    const rangeInfo = selectedLineRange
+      ? `lines ${selectedLineRange[0]}-${selectedLineRange[1]}`
+      : `line ${lineNumber}`
+    logger.info('Adding comment to', { rangeInfo, filename })
   }
 
   const handleCommentSubmit = () => {
@@ -269,21 +408,56 @@ export function CodeViewer({
   // ============================================================================
 
   return (
-    <div className={`bg-gray-900 rounded-lg overflow-hidden ${className}`}>
+    <div
+      className={`bg-gray-900 rounded-lg overflow-hidden ${className}`}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
+      {/* Prism CSS for token colors */}
+      <style jsx global>{`
+        .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6a737d; font-style: italic; }
+        .token.punctuation { color: #e1e4e8; }
+        .token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: #f97583; }
+        .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: #9ecbff; }
+        .token.operator, .token.entity, .token.url { color: #79b8ff; }
+        .token.atrule, .token.attr-value, .token.keyword { color: #f97583; }
+        .token.function, .token.class-name { color: #b392f0; }
+        .token.regex, .token.important, .token.variable { color: #ffab70; }
+      `}</style>
+
       {/* Header */}
       <div className="bg-gray-800 px-4 py-3 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Code className="w-5 h-5 text-gray-400" />
           <h3 className="text-white font-semibold">{filename}</h3>
           <Badge variant="outline" className="text-xs text-gray-300">
-            {language}
+            {detectedLanguage}
           </Badge>
+          <span className="text-xs text-gray-500">{lines.length} lines</span>
         </div>
 
         <div className="flex items-center gap-3">
+          {selectedLineRange && (
+            <span className="text-xs text-blue-400">
+              Lines {selectedLineRange[0]}-{selectedLineRange[1]} selected
+            </span>
+          )}
           <div className="text-sm text-gray-400">
             {unresolvedCount} unresolved, {resolvedCount} resolved
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopyCode}
+            className="text-gray-300"
+            title="Copy code"
+          >
+            {copied ? (
+              <CheckCheck className="w-4 h-4 text-green-400" />
+            ) : (
+              <Copy className="w-4 h-4" />
+            )}
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -317,22 +491,31 @@ export function CodeViewer({
               <div key={lineNumber} className="group">
                 {/* Code Line */}
                 <div
-                  className={`flex items-start hover:bg-gray-800 transition-colors ${
+                  className={`flex items-start hover:bg-gray-800 transition-colors cursor-pointer select-none ${
                     hasComments ? 'bg-gray-800/50' : ''
-                  }`}
+                  } ${isLineSelected(lineNumber) ? 'bg-blue-900/40 border-l-2 border-blue-500' : ''}`}
+                  onMouseDown={(e) => handleLineMouseDown(lineNumber, e)}
+                  onMouseEnter={() => handleLineMouseEnter(lineNumber)}
                 >
                   {/* Line Number */}
                   {showLineNumbers && (
-                    <div className="sticky left-0 bg-gray-900 group-hover:bg-gray-800 transition-colors">
+                    <div className={`sticky left-0 transition-colors ${
+                      isLineSelected(lineNumber) ? 'bg-blue-900/40' : 'bg-gray-900 group-hover:bg-gray-800'
+                    }`}>
                       <div className="flex items-center gap-2 px-3 py-1">
-                        <span className="text-gray-500 text-right w-8 select-none">
+                        <span className={`text-right w-8 select-none ${
+                          isLineSelected(lineNumber) ? 'text-blue-400' : 'text-gray-500'
+                        }`}>
                           {lineNumber}
                         </span>
                         <Button
                           variant="ghost"
                           size="sm"
                           className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                          onClick={() => handleLineClick(lineNumber)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleLineClick(lineNumber)
+                          }}
                         >
                           <Plus className="w-3 h-3" />
                         </Button>
@@ -343,7 +526,7 @@ export function CodeViewer({
                   {/* Code Content */}
                   <div className="flex-1 px-4 py-1">
                     <code
-                      className="text-gray-300"
+                      className="text-gray-300 whitespace-pre"
                       dangerouslySetInnerHTML={{ __html: sanitizeCode(highlightedLines[index] || line) }}
                     />
                   </div>

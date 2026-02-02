@@ -229,6 +229,37 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
   const [showAuditLogModal, setShowAuditLogModal] = useState(false)
   const [showSecretKey, setShowSecretKey] = useState(false)
 
+  // Webhook form state
+  const [webhookForm, setWebhookForm] = useState({
+    url: '',
+    events: [] as string[],
+    secret: ''
+  })
+  const [isSubmittingWebhook, setIsSubmittingWebhook] = useState(false)
+
+  // Tax rate form state
+  const [taxRateForm, setTaxRateForm] = useState({
+    name: '',
+    percentage: '',
+    jurisdiction: '',
+    country: '',
+    state: '',
+    inclusive: false
+  })
+  const [isSubmittingTaxRate, setIsSubmittingTaxRate] = useState(false)
+
+  // Audit logs state
+  const [auditLogs, setAuditLogs] = useState<Array<{
+    id: string
+    action: string
+    resource_type: string
+    resource_id: string
+    user_name: string
+    created_at: string
+    details: Record<string, unknown>
+  }>>([])
+  const [isLoadingAuditLogs, setIsLoadingAuditLogs] = useState(false)
+
   // Guest payment modal state
   const [showGuestPaymentModal, setShowGuestPaymentModal] = useState(false)
   const [selectedPlanForGuestPayment, setSelectedPlanForGuestPayment] = useState<{
@@ -642,26 +673,46 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
     }
   }, [])
 
-  // Handle AI insight action
-  const handleInsightAction = useCallback((insight: AIInsight) => {
+  // Handle AI insight action with real navigation and data loading
+  const handleInsightAction = useCallback(async (insight: AIInsight) => {
     switch (insight.category) {
       case 'Revenue':
         setActiveTab('dashboard')
-        toast.success('Viewing revenue details')
+        // Refresh revenue data to ensure latest stats
+        await refreshAllBillingData()
         break
       case 'Retention':
         setActiveTab('subscriptions')
         setStatusFilter('past_due')
-        toast.info('Showing at-risk accounts with payment failures')
+        // Fetch at-risk subscriptions
+        await refreshSubscriptions?.()
         break
       case 'AI Insights':
         setActiveTab('coupons')
-        toast.info('Consider creating an annual discount coupon')
+        setShowNewCouponModal(true)
+        // Pre-fill with suggested annual discount
+        setNewCouponForm({
+          name: 'Annual Discount',
+          code: 'ANNUAL20',
+          discountType: 'percent_off',
+          value: '20',
+          duration: 'forever',
+          maxRedemptions: ''
+        })
+        break
+      case 'Growth':
+        setActiveTab('settings')
+        setSettingsTab('integrations')
+        break
+      case 'Optimization':
+        setActiveTab('usage')
         break
       default:
-        toast.info(`Insight action: ${insight.title}`)
+        // For any unhandled category, navigate to relevant tab and refresh
+        setActiveTab('dashboard')
+        await refreshAllBillingData()
     }
-  }, [])
+  }, [refreshAllBillingData, refreshSubscriptions])
 
   // Handler for guest payment completion
   const handleGuestPaymentSuccess = useCallback(async (paymentResult: {
@@ -1586,11 +1637,37 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
       id: '2',
       label: 'Refund',
       icon: <RotateCcw className="h-4 w-4" />,
-      action: () => {
-        // Open refund dialog or navigate to refunds section
-        setActiveTab('settings')
-        setSettingsTab('advanced')
-        toast.info('Navigate to a transaction to process a refund')
+      action: async () => {
+        // Navigate to transactions and show refund selection dialog
+        setActiveTab('dashboard')
+        // Load recent transactions that are eligible for refund
+        const { data: eligibleTransactions } = await supabase
+          .from('billing')
+          .select('*')
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false })
+          .limit(10)
+
+        if (eligibleTransactions && eligibleTransactions.length > 0) {
+          // Select the most recent transaction for refund
+          const transaction = eligibleTransactions[0]
+          setConfirmDialog({
+            open: true,
+            title: 'Initiate Refund',
+            description: `Refund ${formatCurrency(transaction.amount)} for transaction ${transaction.transaction_id || transaction.id}? This action cannot be undone.`,
+            variant: 'destructive',
+            onConfirm: async () => {
+              await handleRequestRefund(
+                transaction.id,
+                transaction.amount,
+                'requested_by_customer',
+                'Refund initiated from quick action'
+              )
+            }
+          })
+        } else {
+          toast.info('No completed transactions available for refund')
+        }
       },
     },
     {

@@ -79,6 +79,7 @@ import {
 // Custom Components
 import { WebcamOverlay } from '@/components/video/webcam-overlay';
 import { FloatingRecordingControls } from '@/components/video/floating-recording-controls';
+import { TeleprompterOverlay } from '@/components/video/teleprompter-overlay';
 
 // Hooks
 import { useScreenRecorder, RecordingOptions } from '@/hooks/use-screen-recorder';
@@ -165,6 +166,10 @@ export function ScreenRecordingClient() {
   // Upload state
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Teleprompter state
+  const [showTeleprompter, setShowTeleprompter] = useState(false);
+  const [teleprompterScript, setTeleprompterScript] = useState('');
 
   // Preview state
   const previewVideoRef = useRef<HTMLVideoElement>(null);
@@ -706,6 +711,37 @@ export function ScreenRecordingClient() {
                         placeholder="My Recording"
                       />
                     </div>
+
+                    <Separator />
+
+                    {/* Teleprompter */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Settings className="w-4 h-4" />
+                          <Label>Teleprompter</Label>
+                        </div>
+                        <Button
+                          variant={showTeleprompter ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setShowTeleprompter(!showTeleprompter)}
+                        >
+                          {showTeleprompter ? 'Hide' : 'Show'}
+                        </Button>
+                      </div>
+                      {showTeleprompter && (
+                        <Textarea
+                          value={teleprompterScript}
+                          onChange={(e) => setTeleprompterScript(e.target.value)}
+                          placeholder="Enter your script here... The teleprompter will scroll this text during recording."
+                          rows={4}
+                          className="text-sm"
+                        />
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Use the teleprompter to read from a script while recording
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -1036,6 +1072,13 @@ export function ScreenRecordingClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Teleprompter Overlay */}
+      <TeleprompterOverlay
+        isVisible={showTeleprompter}
+        onClose={() => setShowTeleprompter(false)}
+        initialScript={teleprompterScript}
+      />
     </div>
   );
 }

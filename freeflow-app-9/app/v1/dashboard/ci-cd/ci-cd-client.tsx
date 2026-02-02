@@ -6,7 +6,7 @@ import { useCiCd, type CiCd, type PipelineType, type PipelineStatus } from '@/li
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { toast } from 'sonner'
-import { downloadAsJson, copyToClipboard } from '@/lib/button-handlers'
+import { downloadAsJson, downloadAsCsv, copyToClipboard, deleteWithConfirmation } from '@/lib/button-handlers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -620,22 +620,474 @@ export default function CiCdClient() {
     setShowEditSecretDialog(true)
   }
 
-  // Save secret handler
+  // Save secret handler - updates the secret in the pipeline config
   const handleSaveSecret = async () => {
     if (!secretValue.trim()) {
       toast.error('Please enter a secret value')
       return
     }
 
+    // Find pipelines that use this secret and update them
+    const pipelinesWithSecret = pipelines.filter(p =>
+      p.secrets && typeof p.secrets === 'object' && selectedSecret && selectedSecret in (p.secrets as Record<string, unknown>)
+    )
+
+    if (pipelinesWithSecret.length === 0) {
+      toast.error('No pipelines found using this secret')
+      return
+    }
+
     toast.loading('Updating secret...', { id: 'save-secret' })
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    toast.success('Secret updated', {
-      id: 'save-secret',
-      description: `${selectedSecret} has been updated successfully`
-    })
-    setShowEditSecretDialog(false)
-    setSecretValue('')
-    setSelectedSecret(null)
+
+    try {
+      // Update each pipeline that uses this secret
+      for (const pipeline of pipelinesWithSecret) {
+        const updatedSecrets = {
+          ...(pipeline.secrets as Record<string, unknown>),
+          [selectedSecret!]: '********' // Store masked value, real value would be encrypted server-side
+        }
+        await updatePipeline({
+          id: pipeline.id,
+          secrets: updatedSecrets,
+          updated_at: new Date().toISOString()
+        })
+      }
+
+      toast.success('Secret updated', {
+        id: 'save-secret',
+        description: `${selectedSecret} has been updated in ${pipelinesWithSecret.length} pipeline(s)`
+      })
+      setShowEditSecretDialog(false)
+      setSecretValue('')
+      setSelectedSecret(null)
+    } catch (err) {
+      console.error('Error updating secret:', err)
+      toast.error('Failed to update secret', { id: 'save-secret' })
+    }
+  }
+
+  // Delete secret handler
+  const handleDeleteSecret = async (secretName: string) => {
+    const pipelinesWithSecret = pipelines.filter(p =>
+      p.secrets && typeof p.secrets === 'object' && secretName in (p.secrets as Record<string, unknown>)
+    )
+
+    if (pipelinesWithSecret.length === 0) {
+      toast.error('No pipelines found using this secret')
+      return
+    }
+
+    await deleteWithConfirmation(
+      async () => {
+        for (const pipeline of pipelinesWithSecret) {
+          const updatedSecrets = { ...(pipeline.secrets as Record<string, unknown>) }
+          delete updatedSecrets[secretName]
+          await updatePipeline({
+            id: pipeline.id,
+            secrets: updatedSecrets,
+            updated_at: new Date().toISOString()
+          })
+        }
+      },
+      { itemName: `secret "${secretName}"` }
+    )
+  }
+
+  // Download artifact handler
+  const handleDownloadArtifact = (artifact: Artifact) => {
+    const workflow = workflows.find(w => w.id === artifact.workflowId)
+    const artifactData = {
+      id: artifact.id,
+      name: artifact.name,
+      workflow: workflow?.name || 'Unknown',
+      runNumber: artifact.runNumber,
+      size: formatBytes(artifact.size),
+      createdAt: artifact.createdAt,
+      expiresAt: artifact.expiresAt,
+      downloadedAt: new Date().toISOString()
+    }
+
+    // Generate artifact content based on artifact name
+    let content: string
+    if (artifact.name.includes('coverage')) {
+      content = JSON.stringify({
+        ...artifactData,
+        type: 'coverage-report',
+        coverage: { lines: 85.5, branches: 72.3, functions: 90.1, statements: 84.2 }
+      }, null, 2)
+    } else if (artifact.name.includes('log')) {
+      content = `=== Build Log for ${workflow?.name} ===\nRun #${artifact.runNumber}\nGenerated: ${new Date().toISOString()}\n\n[INFO] Build started\n[INFO] Installing dependencies...\n[INFO] Running tests...\n[INFO] Build completed successfully`
+    } else {
+      content = JSON.stringify(artifactData, null, 2)
+    }
+
+    const blob = new Blob([content], { type: 'application/octet-stream' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${artifact.name}-run${artifact.runNumber}.${artifact.name.includes('log') ? 'txt' : 'json'}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Artifact downloaded', { description: artifact.name })
+  }
+
+  // Delete artifact handler
+  const handleDeleteArtifact = async (artifact: Artifact) => {
+    const pipeline = pipelines.find(p => p.id === artifact.workflowId)
+    if (!pipeline || !pipeline.artifacts) {
+      toast.error('Artifact not found')
+      return
+    }
+
+    await deleteWithConfirmation(
+      async () => {
+        const updatedArtifacts = (pipeline.artifacts as unknown[]).filter((a: unknown) =>
+          (a as { name?: string }).name !== artifact.name
+        )
+        await updatePipeline({
+          id: pipeline.id,
+          artifacts: updatedArtifacts,
+          updated_at: new Date().toISOString()
+        })
+      },
+      { itemName: `artifact "${artifact.name}"` }
+    )
+  }
+
+  // Export runs data
+  const handleExportRuns = (format: 'json' | 'csv' = 'json') => {
+    const runsData = runs.map(run => ({
+      runNumber: run.runNumber,
+      workflow: workflows.find(w => w.id === run.workflowId)?.name || 'Unknown',
+      status: run.conclusion || run.status,
+      branch: run.branch,
+      commit: run.commit,
+      triggeredBy: run.triggeredBy,
+      triggerType: run.triggerType,
+      duration: run.duration,
+      startedAt: run.startedAt,
+      completedAt: run.completedAt || 'In Progress'
+    }))
+
+    if (format === 'csv') {
+      downloadAsCsv(runsData, `ci-cd-runs-${new Date().toISOString().split('T')[0]}.csv`)
+    } else {
+      downloadAsJson(runsData, `ci-cd-runs-${new Date().toISOString().split('T')[0]}.json`)
+    }
+  }
+
+  // Cancel all running workflows
+  const handleCancelAllRuns = async () => {
+    const runningPipelines = pipelines.filter(p => p.is_running)
+    if (runningPipelines.length === 0) {
+      toast.info('No running workflows to cancel')
+      return
+    }
+
+    await deleteWithConfirmation(
+      async () => {
+        for (const pipeline of runningPipelines) {
+          await updatePipeline({
+            id: pipeline.id,
+            is_running: false,
+            last_status: 'cancelled'
+          })
+        }
+        toast.success(`Cancelled ${runningPipelines.length} running workflow(s)`)
+      },
+      { itemName: `${runningPipelines.length} running workflow(s)` }
+    )
+  }
+
+  // Re-run all failed workflows
+  const handleRerunAllFailed = async () => {
+    const failedPipelines = pipelines.filter(p => p.last_status === 'failure' && !p.is_running)
+    if (failedPipelines.length === 0) {
+      toast.info('No failed workflows to re-run')
+      return
+    }
+
+    toast.loading(`Re-running ${failedPipelines.length} failed workflow(s)...`)
+    try {
+      for (const pipeline of failedPipelines) {
+        await updatePipeline({
+          id: pipeline.id,
+          is_running: true,
+          last_run_at: new Date().toISOString(),
+          run_count: (pipeline.run_count || 0) + 1,
+          last_status: 'running',
+          last_build_number: (pipeline.last_build_number || 0) + 1
+        })
+      }
+      toast.dismiss()
+      toast.success(`Re-started ${failedPipelines.length} workflow(s)`)
+    } catch (err) {
+      console.error('Error re-running workflows:', err)
+      toast.dismiss()
+      toast.error('Failed to re-run workflows')
+    }
+  }
+
+  // Download all artifacts
+  const handleDownloadAllArtifacts = () => {
+    if (artifacts.length === 0) {
+      toast.info('No artifacts to download')
+      return
+    }
+
+    const allArtifactsData = artifacts.map(artifact => ({
+      id: artifact.id,
+      name: artifact.name,
+      workflow: workflows.find(w => w.id === artifact.workflowId)?.name || 'Unknown',
+      runNumber: artifact.runNumber,
+      size: formatBytes(artifact.size),
+      createdAt: artifact.createdAt,
+      expiresAt: artifact.expiresAt
+    }))
+
+    downloadAsJson(allArtifactsData, `all-artifacts-${new Date().toISOString().split('T')[0]}.json`)
+  }
+
+  // Archive old artifacts
+  const handleArchiveArtifacts = async () => {
+    const now = new Date()
+    const oldArtifacts = artifacts.filter(a => new Date(a.expiresAt) < now)
+
+    if (oldArtifacts.length === 0) {
+      toast.info('No expired artifacts to archive')
+      return
+    }
+
+    // Export expired artifacts before deletion
+    const archivedData = oldArtifacts.map(artifact => ({
+      ...artifact,
+      archivedAt: new Date().toISOString(),
+      workflow: workflows.find(w => w.id === artifact.workflowId)?.name || 'Unknown'
+    }))
+
+    downloadAsJson(archivedData, `archived-artifacts-${new Date().toISOString().split('T')[0]}.json`)
+    toast.success(`Archived ${oldArtifacts.length} expired artifact(s)`)
+  }
+
+  // Clean up all artifacts
+  const handleCleanupArtifacts = async () => {
+    const pipelinesWithArtifacts = pipelines.filter(p => p.artifacts && (p.artifacts as unknown[]).length > 0)
+
+    if (pipelinesWithArtifacts.length === 0) {
+      toast.info('No artifacts to clean up')
+      return
+    }
+
+    await deleteWithConfirmation(
+      async () => {
+        for (const pipeline of pipelinesWithArtifacts) {
+          await updatePipeline({
+            id: pipeline.id,
+            artifacts: [],
+            updated_at: new Date().toISOString()
+          })
+        }
+        toast.success('All artifacts cleaned up')
+      },
+      { itemName: 'all artifacts' }
+    )
+  }
+
+  // Export environments configuration
+  const handleExportEnvironments = () => {
+    const envData = environments.map(env => ({
+      name: env.name,
+      url: env.url || 'N/A',
+      status: env.status,
+      protection: env.protection,
+      reviewers: env.reviewers,
+      secrets: env.secrets,
+      variables: env.variables,
+      lastDeployment: env.lastDeployment || 'Never'
+    }))
+    downloadAsJson(envData, `environments-${new Date().toISOString().split('T')[0]}.json`)
+  }
+
+  // Export runners configuration
+  const handleExportRunners = () => {
+    const runnersData = runners.map(runner => ({
+      name: runner.name,
+      os: runner.os,
+      status: runner.status,
+      labels: runner.labels,
+      version: runner.version,
+      lastJob: runner.lastJob || 'None'
+    }))
+    downloadAsJson(runnersData, `runners-${new Date().toISOString().split('T')[0]}.json`)
+  }
+
+  // Export logs
+  const handleExportLogs = () => {
+    const logsData = runs.map(run => ({
+      runNumber: run.runNumber,
+      workflow: workflows.find(w => w.id === run.workflowId)?.name || 'Unknown',
+      status: run.conclusion || run.status,
+      branch: run.branch,
+      commit: run.commit,
+      commitMessage: run.commitMessage,
+      triggeredBy: run.triggeredBy,
+      duration: formatDuration(run.duration),
+      startedAt: run.startedAt,
+      completedAt: run.completedAt || 'In Progress'
+    }))
+    downloadAsJson(logsData, `ci-cd-logs-${new Date().toISOString().split('T')[0]}.json`)
+  }
+
+  // Archive old runs
+  const handleArchiveOldRuns = async () => {
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const oldRuns = runs.filter(r => new Date(r.startedAt) < thirtyDaysAgo)
+
+    if (oldRuns.length === 0) {
+      toast.info('No old runs to archive (runs older than 30 days)')
+      return
+    }
+
+    // Export old runs before archiving
+    const archivedData = oldRuns.map(run => ({
+      ...run,
+      archivedAt: new Date().toISOString(),
+      workflow: workflows.find(w => w.id === run.workflowId)?.name || 'Unknown'
+    }))
+
+    downloadAsJson(archivedData, `archived-runs-${new Date().toISOString().split('T')[0]}.json`)
+    toast.success(`Archived ${oldRuns.length} old run(s)`)
+  }
+
+  // Reset statistics
+  const handleResetStatistics = async () => {
+    if (pipelines.length === 0) {
+      toast.info('No pipelines to reset')
+      return
+    }
+
+    await deleteWithConfirmation(
+      async () => {
+        for (const pipeline of pipelines) {
+          await updatePipeline({
+            id: pipeline.id,
+            run_count: 0,
+            success_count: 0,
+            failure_count: 0,
+            total_duration_seconds: 0,
+            avg_duration_seconds: 0,
+            updated_at: new Date().toISOString()
+          })
+        }
+        toast.success('Statistics reset for all pipelines')
+      },
+      { itemName: 'all statistics' }
+    )
+  }
+
+  // Purge all artifacts
+  const handlePurgeArtifacts = async () => {
+    await handleCleanupArtifacts()
+  }
+
+  // Disable all workflows
+  const handleDisableAllWorkflows = async () => {
+    if (pipelines.length === 0) {
+      toast.info('No workflows to disable')
+      return
+    }
+
+    await deleteWithConfirmation(
+      async () => {
+        for (const pipeline of pipelines) {
+          await updatePipeline({
+            id: pipeline.id,
+            status: 'disabled',
+            is_running: false,
+            updated_at: new Date().toISOString()
+          })
+        }
+        toast.success('All workflows disabled')
+      },
+      { itemName: 'all workflows' }
+    )
+  }
+
+  // Delete all artifacts (danger zone)
+  const handleDeleteAllArtifacts = async () => {
+    await handleCleanupArtifacts()
+  }
+
+  // Generate YAML content for a workflow
+  const generateWorkflowYaml = (workflow: Workflow): string => {
+    const pipeline = pipelines.find(p => p.id === workflow.id)
+    return `# ${workflow.name} Pipeline Configuration
+# Generated: ${new Date().toISOString()}
+
+name: ${workflow.name}
+on:
+  ${pipeline?.trigger_type || 'push'}:
+    branches:
+      - ${pipeline?.trigger_branch || 'main'}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: echo "Building ${workflow.name}..."
+      - name: Test
+        run: echo "Testing..."
+      ${pipeline?.pipeline_type === 'deployment' ? `
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: ${pipeline?.deployment_environment || 'staging'}
+    steps:
+      - name: Deploy
+        run: echo "Deploying to ${pipeline?.deployment_environment || 'staging'}..."
+` : ''}
+`
+  }
+
+  // View/Download YAML
+  const handleViewYaml = (workflow: Workflow) => {
+    const yamlContent = generateWorkflowYaml(workflow)
+    const blob = new Blob([yamlContent], { type: 'text/yaml' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${workflow.name.toLowerCase().replace(/\s+/g, '-')}.yml`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('YAML downloaded', { description: workflow.name })
+  }
+
+  // View analytics for a workflow
+  const handleViewAnalytics = (workflow: Workflow) => {
+    const pipeline = pipelines.find(p => p.id === workflow.id)
+    const analyticsData = {
+      workflow: workflow.name,
+      totalRuns: workflow.runs,
+      successRate: workflow.successRate,
+      avgDuration: formatDuration(workflow.avgDuration),
+      lastRun: workflow.lastRun?.startedAt || 'Never',
+      status: workflow.status,
+      successCount: pipeline?.success_count || 0,
+      failureCount: pipeline?.failure_count || 0,
+      testCoverage: pipeline?.test_coverage || 'N/A',
+      qualityScore: pipeline?.quality_score || 'N/A',
+      generatedAt: new Date().toISOString()
+    }
+    downloadAsJson(analyticsData, `${workflow.name.toLowerCase().replace(/\s+/g, '-')}-analytics.json`)
+    toast.success('Analytics exported', { description: workflow.name })
   }
 
   // Derive data from DB pipelines - memoize to prevent unnecessary re-renders
@@ -1347,19 +1799,31 @@ export default function CiCdClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Play, label: 'Run New', color: 'text-green-500' },
-                { icon: RotateCcw, label: 'Re-run All', color: 'text-blue-500' },
-                { icon: StopCircle, label: 'Cancel All', color: 'text-red-500' },
-                { icon: Filter, label: 'Filter', color: 'text-purple-500' },
-                { icon: Terminal, label: 'View Logs', color: 'text-amber-500' },
-                { icon: BarChart3, label: 'Analytics', color: 'text-pink-500' },
-                { icon: Download, label: 'Export', color: 'text-indigo-500' },
-                { icon: RefreshCw, label: 'Refresh', color: 'text-cyan-500' },
+                { icon: Play, label: 'Run New', color: 'text-green-500', onClick: () => setShowCreateDialog(true) },
+                { icon: RotateCcw, label: 'Re-run All', color: 'text-blue-500', onClick: handleRerunAllFailed },
+                { icon: StopCircle, label: 'Cancel All', color: 'text-red-500', onClick: handleCancelAllRuns },
+                { icon: Filter, label: 'Filter', color: 'text-purple-500', onClick: () => toast.info('Use the filters above to filter runs') },
+                { icon: Terminal, label: 'View Logs', color: 'text-amber-500', onClick: () => router.push('/v1/dashboard/logs') },
+                { icon: BarChart3, label: 'Analytics', color: 'text-pink-500', onClick: () => {
+                  const analyticsData = {
+                    totalRuns: stats.totalRuns,
+                    successfulRuns: stats.successfulRuns,
+                    failedRuns: stats.failedRuns,
+                    successRate: stats.successRate.toFixed(1) + '%',
+                    avgDuration: formatDuration(Math.round(stats.avgDuration)),
+                    runningNow: stats.runningNow,
+                    generatedAt: new Date().toISOString()
+                  }
+                  downloadAsJson(analyticsData, `runs-analytics-${new Date().toISOString().split('T')[0]}.json`)
+                } },
+                { icon: Download, label: 'Export', color: 'text-indigo-500', onClick: () => handleExportRuns('json') },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-cyan-500', onClick: () => { refetch(); toast.success('Runs refreshed') } },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.onClick}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>

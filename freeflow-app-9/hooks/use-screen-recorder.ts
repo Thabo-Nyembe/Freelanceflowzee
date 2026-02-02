@@ -307,60 +307,63 @@ export function useScreenRecorder({ onRecordingComplete, onUploadComplete }: Use
 
   // Upload recording
   const uploadRecording = useCallback(async (options: RecordingOptions) => {
-    if (!recordingBlob) return;
+    if (!recordingBlob) {
+      throw new Error('No recording to upload. Please record something first.');
+    }
 
     try {
-      const fileName = `screen-recording-${Date.now()}.webm`;
       const title = options.title || `Screen Recording ${new Date().toLocaleDateString()}`;
+      const recordingType = options.video.mediaSource === 'screen' ? 'screen' : 'both';
 
-      const uploadResponse = await fetch('/api/video/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName,
-          fileSize: recordingBlob.size,
-          fileType: recordingBlob.type,
-          title,
-          description: `Screen recording captured on ${new Date().toLocaleString()}`,
-          project_id: options.projectId,
-          tags: ['screen-recording', 'freeflow'],
-          is_public: false
-        })
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to create upload URL');
+      // Create FormData for upload
+      const formData = new FormData();
+      formData.append('file', recordingBlob, `recording-${Date.now()}.webm`);
+      formData.append('title', title);
+      formData.append('description', `Screen recording captured on ${new Date().toLocaleString()}`);
+      formData.append('recordingType', recordingType);
+      formData.append('duration', recordingState.duration.toString());
+      formData.append('resolution', '1920x1080');
+      formData.append('isPublic', 'false');
+      if (options.projectId) {
+        formData.append('projectId', options.projectId);
       }
 
-      const uploadData = await uploadResponse.json();
-      const { uploadUrl } = uploadData.data.upload;
-
-      // Upload to Mux
-      const formData = new FormData();
-      formData.append('file', recordingBlob, fileName);
-
-      const response = await fetch(uploadUrl, {
-        method: 'PUT',
+      // Upload to screen recordings API
+      const response = await fetch('/api/screen-recordings', {
+        method: 'POST',
         body: formData
       });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
+      }
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Upload failed');
       }
 
       toast.success('Recording uploaded successfully!');
-      if (onUploadComplete) {
-        onUploadComplete(uploadData.data.video.id);
+
+      // Show share URL
+      if (data.recording?.shareUrl) {
+        toast.success(`Share link: ${data.recording.shareUrl}`, { duration: 5000 });
       }
 
-      return uploadData.data.video.id;
+      if (onUploadComplete) {
+        onUploadComplete(data.recording.id);
+      }
+
+      return data.recording;
 
     } catch (error) {
       console.error('Upload failed:', error);
-      toast.error('Failed to upload recording');
+      toast.error(error instanceof Error ? error.message : 'Failed to upload recording');
       throw error;
     }
-  }, [recordingBlob, onUploadComplete]);
+  }, [recordingBlob, recordingState.duration, onUploadComplete]);
 
   // Cleanup
   useEffect(() => {

@@ -63,7 +63,8 @@ import {
   HardDrive,
   Cloud,
   Lock,
-  Unlock
+  Unlock,
+  Circle
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -77,6 +78,9 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+// Screen Recording
+import { ScreenRecordingClient } from '@/app/(app)/dashboard/screen-recording-v2/screen-recording-client'
 
 
 
@@ -1550,6 +1554,10 @@ export default function VideoStudioClient() {
               <Video className="w-4 h-4" />
               Projects
             </TabsTrigger>
+            <TabsTrigger value="record" className="flex items-center gap-2">
+              <Circle className="w-4 h-4 text-red-500" />
+              Record
+            </TabsTrigger>
             <TabsTrigger value="timeline" className="flex items-center gap-2">
               <Sliders className="w-4 h-4" />
               Timeline
@@ -1575,6 +1583,11 @@ export default function VideoStudioClient() {
               Settings
             </TabsTrigger>
           </TabsList>
+
+          {/* Record Tab - Screen Recording */}
+          <TabsContent value="record" className="space-y-6">
+            <ScreenRecordingClient />
+          </TabsContent>
 
           {/* Projects Tab */}
           <TabsContent value="projects" className="space-y-6">

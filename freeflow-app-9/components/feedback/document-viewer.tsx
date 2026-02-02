@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import {
   ZoomIn,
   ZoomOut,
@@ -13,16 +13,29 @@ import {
   Square,
   Circle,
   ArrowRight,
-  Eraser
+  Eraser,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Maximize2,
+  RotateCw,
+  File
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('DocumentViewer')
+
+// Check if a file is a PDF based on filename or URL
+function isPdfFile(filename?: string, url?: string): boolean {
+  const name = filename?.toLowerCase() || url?.toLowerCase() || ''
+  return name.endsWith('.pdf') || name.includes('application/pdf')
+}
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -106,6 +119,14 @@ export function DocumentViewer({
   const [editingComment, setEditingComment] = useState<Comment | null>(null)
   const [commentPosition, setCommentPosition] = useState<{ x: number; y: number } | null>(null)
 
+  // PDF state
+  const [isPdf, setIsPdf] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [pageInput, setPageInput] = useState('1')
+  const [rotation, setRotation] = useState(0)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
   // Drawing state
   const [drawingMode, setDrawingMode] = useState<'none' | 'highlight' | 'draw' | 'shape' | 'text'>('none')
   const [drawingColor, setDrawingColor] = useState('#FFEB3B')
@@ -116,6 +137,15 @@ export function DocumentViewer({
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const documentRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  // Detect if document is PDF
+  useEffect(() => {
+    const isPdfDocument = isPdfFile(filename, documentUrl)
+    setIsPdf(isPdfDocument)
+    logger.info('Document type detected', { isPdf: isPdfDocument, filename })
+  }, [filename, documentUrl])
 
   // ============================================================================
   // DOCUMENT RENDERING
@@ -429,20 +459,221 @@ export function DocumentViewer({
   }
 
   // ============================================================================
+  // PDF NAVIGATION HANDLERS
+  // ============================================================================
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      const newPage = currentPage - 1
+      setCurrentPage(newPage)
+      setPageInput(newPage.toString())
+      logger.info('PDF page changed', { page: newPage })
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      const newPage = currentPage + 1
+      setCurrentPage(newPage)
+      setPageInput(newPage.toString())
+      logger.info('PDF page changed', { page: newPage })
+    }
+  }
+
+  const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPageInput(e.target.value)
+  }
+
+  const handlePageInputSubmit = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      const page = parseInt(pageInput, 10)
+      if (!isNaN(page) && page >= 1 && page <= totalPages) {
+        setCurrentPage(page)
+        logger.info('PDF page jumped', { page })
+      } else {
+        setPageInput(currentPage.toString())
+      }
+    }
+  }
+
+  const handleRotate = () => {
+    setRotation(prev => (prev + 90) % 360)
+    logger.info('PDF rotated', { rotation: (rotation + 90) % 360 })
+  }
+
+  const handleFullscreen = async () => {
+    if (!containerRef.current) return
+
+    if (!document.fullscreenElement) {
+      await containerRef.current.requestFullscreen()
+      setIsFullscreen(true)
+    } else {
+      await document.exitFullscreen()
+      setIsFullscreen(false)
+    }
+  }
+
+  const handleDownload = () => {
+    if (documentUrl) {
+      const link = document.createElement('a')
+      link.href = documentUrl
+      link.download = filename || 'document.pdf'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      logger.info('PDF downloaded', { filename })
+    }
+  }
+
+  // Get page-specific comments
+  const getPageComments = useCallback(() => {
+    return comments.filter(c => !c.position?.page || c.position.page === currentPage)
+  }, [comments, currentPage])
+
+  // ============================================================================
+  // PDF VIEWER COMPONENT
+  // ============================================================================
+
+  const renderPdfViewer = () => {
+    if (!documentUrl) {
+      return (
+        <div className="flex flex-col items-center justify-center h-96 text-gray-500">
+          <File className="w-16 h-16 mb-4 opacity-50" />
+          <p>No PDF URL provided</p>
+        </div>
+      )
+    }
+
+    // Use iframe with browser's native PDF viewer
+    // Add page parameter for page navigation (works with Chrome/Firefox PDF viewer)
+    const pdfUrlWithPage = `${documentUrl}#page=${currentPage}`
+
+    return (
+      <div className="relative w-full h-full min-h-[600px]">
+        <iframe
+          ref={iframeRef}
+          src={pdfUrlWithPage}
+          className="w-full h-full border-0"
+          style={{
+            transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
+            transformOrigin: 'top center',
+            minHeight: '600px'
+          }}
+          title={filename || 'PDF Document'}
+        />
+
+        {/* Page overlay for comments (positioned absolutely) */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+        >
+          {/* Comment Markers for current page */}
+          {getPageComments().map((comment) => {
+            if (!comment.position) return null
+
+            return (
+              <div
+                key={comment.id}
+                className="absolute w-6 h-6 bg-blue-500 rounded-full cursor-pointer hover:bg-blue-600 transition-colors flex items-center justify-center text-white text-xs font-bold pointer-events-auto"
+                style={{
+                  left: `${comment.position.x}%`,
+                  top: `${comment.position.y}%`,
+                  transform: 'translate(-50%, -50%)'
+                }}
+                title={comment.content}
+              >
+                <MessageSquare className="w-3 h-3" />
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
   // RENDER
   // ============================================================================
 
   return (
-    <div className={`flex flex-col h-full bg-gray-50 dark:bg-gray-950 ${className}`}>
+    <div ref={containerRef} className={`flex flex-col h-full bg-gray-50 dark:bg-gray-950 ${className}`}>
       {/* Toolbar */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <FileText className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             <h3 className="font-semibold text-gray-900 dark:text-gray-100">{filename}</h3>
+            {isPdf && (
+              <Badge variant="outline" className="text-xs">PDF</Badge>
+            )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* PDF Page Navigation */}
+            {isPdf && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreviousPage}
+                  disabled={currentPage <= 1}
+                  title="Previous page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <div className="flex items-center gap-1">
+                  <Input
+                    type="text"
+                    value={pageInput}
+                    onChange={handlePageInputChange}
+                    onKeyDown={handlePageInputSubmit}
+                    className="w-12 h-8 text-center text-sm"
+                  />
+                  <span className="text-sm text-gray-500">/ {totalPages}</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={currentPage >= totalPages}
+                  title="Next page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+
+                <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1" />
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRotate}
+                  title="Rotate"
+                >
+                  <RotateCw className="w-4 h-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleFullscreen}
+                  title="Fullscreen"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownload}
+                  title="Download"
+                >
+                  <Download className="w-4 h-4" />
+                </Button>
+
+                <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1" />
+              </>
+            )}
+
             {/* Zoom Controls */}
             <Button variant="outline" size="sm" onClick={handleZoomOut}>
               <ZoomOut className="w-4 h-4" />
@@ -452,74 +683,78 @@ export function DocumentViewer({
               <ZoomIn className="w-4 h-4" />
             </Button>
 
-            <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-2" />
+            {/* Drawing Tools (for non-PDF or when annotations enabled) */}
+            {!isPdf && (
+              <>
+                <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-2" />
 
-            {/* Drawing Tools */}
-            <Button
-              variant={drawingMode === 'highlight' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setDrawingMode(drawingMode === 'highlight' ? 'none' : 'highlight')}
-              title="Highlight"
-            >
-              <Highlighter className="w-4 h-4" />
-            </Button>
+                <Button
+                  variant={drawingMode === 'highlight' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setDrawingMode(drawingMode === 'highlight' ? 'none' : 'highlight')}
+                  title="Highlight"
+                >
+                  <Highlighter className="w-4 h-4" />
+                </Button>
 
-            <Button
-              variant={drawingMode === 'draw' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setDrawingMode(drawingMode === 'draw' ? 'none' : 'draw')}
-              title="Draw"
-            >
-              <PenTool className="w-4 h-4" />
-            </Button>
+                <Button
+                  variant={drawingMode === 'draw' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setDrawingMode(drawingMode === 'draw' ? 'none' : 'draw')}
+                  title="Draw"
+                >
+                  <PenTool className="w-4 h-4" />
+                </Button>
 
-            <Button
-              variant={drawingMode === 'shape' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setDrawingMode(drawingMode === 'shape' ? 'none' : 'shape')}
-              title="Shape"
-            >
-              {shapeType === 'rectangle' && <Square className="w-4 h-4" />}
-              {shapeType === 'circle' && <Circle className="w-4 h-4" />}
-              {shapeType === 'arrow' && <ArrowRight className="w-4 h-4" />}
-            </Button>
+                <Button
+                  variant={drawingMode === 'shape' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setDrawingMode(drawingMode === 'shape' ? 'none' : 'shape')}
+                  title="Shape"
+                >
+                  {shapeType === 'rectangle' && <Square className="w-4 h-4" />}
+                  {shapeType === 'circle' && <Circle className="w-4 h-4" />}
+                  {shapeType === 'arrow' && <ArrowRight className="w-4 h-4" />}
+                </Button>
 
-            {drawingMode === 'shape' && (
-              <Select value={shapeType} onValueChange={(value: any) => setShapeType(value)}>
-                <SelectTrigger className="w-24 h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="rectangle">Rectangle</SelectItem>
-                  <SelectItem value="circle">Circle</SelectItem>
-                  <SelectItem value="arrow">Arrow</SelectItem>
-                </SelectContent>
-              </Select>
+                {drawingMode === 'shape' && (
+                  <Select value={shapeType} onValueChange={(value: any) => setShapeType(value)}>
+                    <SelectTrigger className="w-24 h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rectangle">Rectangle</SelectItem>
+                      <SelectItem value="circle">Circle</SelectItem>
+                      <SelectItem value="arrow">Arrow</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+
+                <input
+                  type="color"
+                  value={drawingColor}
+                  onChange={(e) => setDrawingColor(e.target.value)}
+                  className="w-8 h-8 rounded border border-gray-300 dark:border-gray-700 cursor-pointer"
+                  title="Color"
+                />
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAnnotations}
+                  title="Clear Annotations"
+                >
+                  <Eraser className="w-4 h-4" />
+                </Button>
+              </>
             )}
-
-            <input
-              type="color"
-              value={drawingColor}
-              onChange={(e) => setDrawingColor(e.target.value)}
-              className="w-8 h-8 rounded border border-gray-300 dark:border-gray-700 cursor-pointer"
-              title="Color"
-            />
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearAnnotations}
-              title="Clear Annotations"
-            >
-              <Eraser className="w-4 h-4" />
-            </Button>
 
             <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-2" />
 
             {/* Comment Count */}
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <MessageSquare className="w-4 h-4" />
-              <span>{comments.length} comments</span>
+              <span>{isPdf ? getPageComments().length : comments.length} comments</span>
             </div>
           </div>
         </div>
@@ -528,51 +763,58 @@ export function DocumentViewer({
       {/* Document Display */}
       <div className="flex-1 overflow-auto p-8">
         <div className="relative max-w-4xl mx-auto">
-          {/* Document Content */}
-          <div
-            ref={documentRef}
-            className="bg-white dark:bg-gray-900 shadow-lg rounded-lg p-12 relative"
-            style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
-            onMouseUp={handleTextSelection}
-          >
-            {renderDocument()}
+          {isPdf ? (
+            /* PDF Viewer */
+            renderPdfViewer()
+          ) : (
+            <>
+              {/* Document Content (Markdown/Text) */}
+              <div
+                ref={documentRef}
+                className="bg-white dark:bg-gray-900 shadow-lg rounded-lg p-12 relative"
+                style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+                onMouseUp={handleTextSelection}
+              >
+                {renderDocument()}
 
-            {/* Comment Markers */}
-            {comments.map((comment) => {
-              if (!comment.position) return null
+                {/* Comment Markers */}
+                {comments.map((comment) => {
+                  if (!comment.position) return null
 
-              return (
-                <div
-                  key={comment.id}
-                  className="absolute w-6 h-6 bg-blue-500 rounded-full cursor-pointer hover:bg-blue-600 transition-colors flex items-center justify-center text-white text-xs font-bold"
-                  style={{
-                    left: `${comment.position.x}%`,
-                    top: `${comment.position.y}%`,
-                    transform: 'translate(-50%, -50%)'
-                  }}
-                  title={comment.content}
-                >
-                  <MessageSquare className="w-3 h-3" />
-                </div>
-              )
-            })}
-          </div>
+                  return (
+                    <div
+                      key={comment.id}
+                      className="absolute w-6 h-6 bg-blue-500 rounded-full cursor-pointer hover:bg-blue-600 transition-colors flex items-center justify-center text-white text-xs font-bold"
+                      style={{
+                        left: `${comment.position.x}%`,
+                        top: `${comment.position.y}%`,
+                        transform: 'translate(-50%, -50%)'
+                      }}
+                      title={comment.content}
+                    >
+                      <MessageSquare className="w-3 h-3" />
+                    </div>
+                  )
+                })}
+              </div>
 
-          {/* Drawing Canvas Overlay */}
-          <canvas
-            ref={canvasRef}
-            width={800}
-            height={1200}
-            className="absolute top-0 left-0 pointer-events-auto cursor-crosshair"
-            style={{
-              transform: `scale(${zoom / 100})`,
-              transformOrigin: 'top center',
-              display: drawingMode !== 'none' ? 'block' : 'none'
-            }}
-            onMouseDown={handleCanvasMouseDown}
-            onMouseMove={handleCanvasMouseMove}
-            onMouseUp={handleCanvasMouseUp}
-          />
+              {/* Drawing Canvas Overlay */}
+              <canvas
+                ref={canvasRef}
+                width={800}
+                height={1200}
+                className="absolute top-0 left-0 pointer-events-auto cursor-crosshair"
+                style={{
+                  transform: `scale(${zoom / 100})`,
+                  transformOrigin: 'top center',
+                  display: drawingMode !== 'none' ? 'block' : 'none'
+                }}
+                onMouseDown={handleCanvasMouseDown}
+                onMouseMove={handleCanvasMouseMove}
+                onMouseUp={handleCanvasMouseUp}
+              />
+            </>
+          )}
         </div>
       </div>
 

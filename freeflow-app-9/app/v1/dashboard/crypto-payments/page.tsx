@@ -32,11 +32,11 @@ export const dynamic = 'force-dynamic';
  * A+++ UTILITIES IMPORTED
  */
 
-import { useReducer, useMemo, useEffect, useState } from 'react'
+import { useReducer, useMemo, useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Wallet, CheckCircle, Info, Plus, Search, Filter, Clock, Eye, X, Copy, RefreshCw,
-  DollarSign, Activity, BarChart3, Receipt
+  DollarSign, Activity, BarChart3, Receipt, Download, FileText, Share2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -351,37 +351,78 @@ export default function CryptoPaymentsPage() {
   const [refundTransaction, setRefundTransaction] = useState<CryptoTransaction | null>(null)
 
   // Load data from database
-  useEffect(() => {
-    const loadData = async () => {
-      if (!userId) {
-        dispatch({ type: 'SET_LOADING', isLoading: false })
-        return
-      }
-
-      try {
-        dispatch({ type: 'SET_LOADING', isLoading: true })
-
-        // Load transactions and wallets from database
-        const { getCryptoTransactions, getCryptoWallets } = await import('@/lib/crypto-payment-queries')
-
-        const [transactions, wallets] = await Promise.all([
-          getCryptoTransactions(userId),
-          getCryptoWallets(userId)
-        ])
-
-        dispatch({ type: 'SET_TRANSACTIONS', transactions: transactions || [] })
-        dispatch({ type: 'SET_WALLETS', wallets: wallets || [] })
-
-        announce('Crypto payments page loaded', 'polite')
-      } catch (error) {
-        logger.error('Failed to load crypto payment data', { error })
-        dispatch({ type: 'SET_ERROR', error: 'Failed to load data' })
-        announce('Error loading crypto payments', 'assertive')
-      }
+  const loadData = useCallback(async () => {
+    if (!userId) {
+      dispatch({ type: 'SET_LOADING', isLoading: false })
+      return
     }
 
+    try {
+      dispatch({ type: 'SET_LOADING', isLoading: true })
+
+      // Load transactions and wallets from database using proper query signatures
+      const { getCryptoTransactions, getCryptoWallets } = await import('@/lib/crypto-payment-queries')
+
+      const [transactionsResult, walletsResult] = await Promise.all([
+        getCryptoTransactions(), // Uses authenticated user from session
+        getCryptoWallets()       // Uses authenticated user from session
+      ])
+
+      // Transform database format to component format
+      const transactions: CryptoTransaction[] = (transactionsResult || []).map(tx => ({
+        id: tx.id,
+        type: tx.type as TransactionType,
+        amount: Number(tx.amount),
+        currency: tx.currency as CryptoCurrency,
+        usdAmount: Number(tx.usd_amount),
+        fee: Number(tx.fee),
+        status: tx.status as PaymentStatus,
+        fromAddress: tx.from_address || undefined,
+        toAddress: tx.to_address,
+        txHash: tx.tx_hash || undefined,
+        confirmations: tx.confirmations,
+        requiredConfirmations: tx.required_confirmations,
+        network: tx.network,
+        description: tx.description || '',
+        metadata: {
+          customerEmail: (tx.metadata as Record<string, unknown>)?.customer_email as string | undefined,
+          customerName: (tx.metadata as Record<string, unknown>)?.customer_name as string | undefined,
+          invoiceId: (tx.metadata as Record<string, unknown>)?.invoice_id as string | undefined,
+          productId: (tx.metadata as Record<string, unknown>)?.product_id as string | undefined,
+        },
+        createdAt: tx.created_at,
+        updatedAt: tx.updated_at,
+        completedAt: tx.completed_at || undefined,
+        expiresAt: tx.expires_at || undefined
+      }))
+
+      const wallets: CryptoWallet[] = (walletsResult || []).map(w => ({
+        id: w.id,
+        name: w.name,
+        currency: w.currency as CryptoCurrency,
+        address: w.address,
+        balance: Number(w.balance),
+        usdValue: Number(w.usd_value),
+        type: w.type as WalletType,
+        isActive: w.is_active,
+        network: w.network,
+        createdAt: w.created_at
+      }))
+
+      dispatch({ type: 'SET_TRANSACTIONS', transactions })
+      dispatch({ type: 'SET_WALLETS', wallets })
+
+      announce('Crypto payments page loaded', 'polite')
+    } catch (error) {
+      logger.error('Failed to load crypto payment data', { error })
+      dispatch({ type: 'SET_ERROR', error: 'Failed to load data' })
+      announce('Error loading crypto payments', 'assertive')
+    }
+  }, [userId, announce])
+
+  useEffect(() => {
     loadData()
-  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loadData])
 
   // Computed Stats
   const stats = useMemo(() => {
@@ -465,7 +506,8 @@ export default function CryptoPaymentsPage() {
   // HANDLERS
   // ========================================
 
-  const handleCreatePayment = async () => {    if (paymentAmount <= 0) {
+  const handleCreatePayment = async () => {
+    if (paymentAmount <= 0) {
       logger.warn('Payment validation failed', { reason: 'Invalid amount', amount: paymentAmount })
       toast.error('Please enter a valid amount')
       announce('Invalid payment amount', 'assertive')
@@ -482,37 +524,78 @@ export default function CryptoPaymentsPage() {
     try {
       dispatch({ type: 'SET_LOADING', isLoading: true })
 
-      // Calculate crypto amount and fee
-      const cryptoAmount = paymentAmount / (paymentCurrency === 'BTC' ? 45000 : paymentCurrency === 'ETH' ? 2500 : 1)
-      const fee = Math.random() * 5
-      const network = paymentCurrency === 'BTC' ? 'Bitcoin' : paymentCurrency === 'SOL' ? 'Solana' : 'Ethereum'
-      const requiredConfirmations = paymentCurrency === 'BTC' ? 6 : 12
+      // Get the appropriate wallet for the currency or use the first available wallet
+      const { getCryptoWallets, createCryptoTransaction, calculateCryptoAmount, getCryptoPrice } = await import('@/lib/crypto-payment-queries')
 
-      let transactionId = `TX-${Date.now()}`
-      const toAddress = `0x${Math.random().toString(36).substr(2, 40)}`
+      // Find a wallet for the selected currency
+      const userWallets = await getCryptoWallets({ currency: paymentCurrency, is_active: true })
+      let walletId = userWallets?.[0]?.id
 
-      // Create transaction in database
-      if (userId) {
-        const { createCryptoTransaction } = await import('@/lib/crypto-payment-queries')
-        const createdTx = await createCryptoTransaction({
-          type: 'payment',
-          amount: cryptoAmount,
-          currency: paymentCurrency,
-          usd_amount: paymentAmount,
-          fee,
-          status: 'pending',
-          to_address: toAddress,
-          network,
-          description: paymentDescription,
+      // If no wallet exists for this currency, try to use any active wallet
+      if (!walletId) {
+        const allWallets = await getCryptoWallets({ is_active: true })
+        walletId = allWallets?.[0]?.id
+      }
+
+      if (!walletId) {
+        toast.error('No active wallet found. Please create a wallet first.')
+        dispatch({ type: 'SET_LOADING', isLoading: false })
+        return
+      }
+
+      // Calculate crypto amount using real exchange rate from database
+      let cryptoAmount: number
+      let exchangeRate: number
+      try {
+        const priceData = await calculateCryptoAmount(paymentAmount, paymentCurrency, 'usd')
+        cryptoAmount = priceData.cryptoAmount
+        exchangeRate = priceData.exchangeRate
+      } catch {
+        // Fallback to approximate rates if price data unavailable
+        const fallbackRates: Record<CryptoCurrency, number> = {
+          BTC: 45000, ETH: 2500, USDT: 1, USDC: 1, BNB: 300, SOL: 100, ADA: 0.5, DOGE: 0.1
+        }
+        exchangeRate = fallbackRates[paymentCurrency] || 1
+        cryptoAmount = paymentAmount / exchangeRate
+      }
+
+      // Calculate network-specific fee (based on typical fees)
+      const feeRates: Record<string, number> = {
+        Bitcoin: 0.0001, Ethereum: 0.002, Solana: 0.00001, Cardano: 0.2, BNB: 0.001
+      }
+      const network = paymentCurrency === 'BTC' ? 'Bitcoin' :
+                     paymentCurrency === 'SOL' ? 'Solana' :
+                     paymentCurrency === 'ADA' ? 'Cardano' :
+                     paymentCurrency === 'BNB' ? 'BNB' : 'Ethereum'
+      const fee = feeRates[network] || 0.001
+      const feeUsd = fee * exchangeRate
+
+      const requiredConfirmations = paymentCurrency === 'BTC' ? 6 : paymentCurrency === 'SOL' ? 32 : 12
+      const toAddress = `0x${crypto.randomUUID().replace(/-/g, '').substring(0, 40)}`
+
+      // Create transaction in database with proper wallet_id
+      const createdTx = await createCryptoTransaction({
+        wallet_id: walletId,
+        type: 'payment',
+        amount: cryptoAmount,
+        currency: paymentCurrency,
+        usd_amount: paymentAmount,
+        to_address: toAddress,
+        network,
+        fee,
+        fee_usd: feeUsd,
+        required_confirmations: requiredConfirmations,
+        description: paymentDescription,
+        metadata: {
           customer_email: customerEmail || undefined,
-          user_id: userId
-        })
-        if (createdTx?.id) {
-          transactionId = createdTx.id
-        }      }
+          invoice_id: `INV-${Date.now()}`,
+          exchange_rate: exchangeRate
+        },
+        expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString()
+      })
 
       const newTransaction: CryptoTransaction = {
-        id: transactionId,
+        id: createdTx.id,
         type: 'payment',
         amount: cryptoAmount,
         currency: paymentCurrency,
@@ -528,18 +611,20 @@ export default function CryptoPaymentsPage() {
           customerEmail: customerEmail || undefined,
           invoiceId: `INV-${Date.now()}`
         },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: createdTx.created_at,
+        updatedAt: createdTx.updated_at,
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString()
       }
 
-      dispatch({ type: 'ADD_TRANSACTION', transaction: newTransaction })      // Reset form
+      dispatch({ type: 'ADD_TRANSACTION', transaction: newTransaction })
+
+      // Reset form
       setPaymentAmount(100)
       setPaymentDescription('')
       setCustomerEmail('')
       setShowCreatePaymentModal(false)
 
-      toast.success(`Payment created - ${formatUSD(paymentAmount)} - ${network} network`)
+      toast.success(`Payment created - ${formatUSD(paymentAmount)} on ${network}`)
       announce('Payment created', 'polite')
     } catch (error) {
       logger.error('Payment creation failed', { error, amount: paymentAmount, currency: paymentCurrency })
@@ -643,10 +728,246 @@ export default function CryptoPaymentsPage() {
     }
   }
 
-  const handleCopyAddress = (address: string) => {    navigator.clipboard.writeText(address)
+  const handleCopyAddress = async (address: string) => {
+    try {
+      await navigator.clipboard.writeText(address)
+      toast.success(`Address copied - ${address.substring(0, 10)}...`)
+      announce('Address copied', 'polite')
+    } catch (error) {
+      logger.error('Failed to copy address', { error })
+      toast.error('Failed to copy address')
+    }
+  }
 
-    toast.success(`Address copied - ${address.substring(0, 10)}...`)
-    announce('Address copied', 'polite')
+  // Export transactions to CSV with real file generation
+  const handleExportTransactions = async (format: 'csv' | 'json' = 'csv') => {
+    logger.info('Exporting transactions', { format, count: filteredAndSortedTransactions.length })
+
+    if (filteredAndSortedTransactions.length === 0) {
+      toast.error('No transactions to export')
+      return
+    }
+
+    try {
+      let content: string
+      let mimeType: string
+      let filename: string
+
+      if (format === 'csv') {
+        // Generate CSV using proper escaping
+        const headers = [
+          'Transaction ID',
+          'Date',
+          'Type',
+          'Currency',
+          'Amount',
+          'USD Amount',
+          'Fee',
+          'Status',
+          'To Address',
+          'TX Hash',
+          'Confirmations',
+          'Network',
+          'Description',
+          'Customer Email'
+        ]
+
+        const escapeCSV = (value: string | number | undefined): string => {
+          if (value === undefined || value === null) return ''
+          const str = String(value)
+          if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            return `"${str.replace(/"/g, '""')}"`
+          }
+          return str
+        }
+
+        const rows = filteredAndSortedTransactions.map(tx => [
+          escapeCSV(tx.id),
+          escapeCSV(new Date(tx.createdAt).toLocaleString()),
+          escapeCSV(tx.type),
+          escapeCSV(tx.currency),
+          escapeCSV(tx.amount),
+          escapeCSV(tx.usdAmount),
+          escapeCSV(tx.fee),
+          escapeCSV(tx.status),
+          escapeCSV(tx.toAddress),
+          escapeCSV(tx.txHash || ''),
+          escapeCSV(`${tx.confirmations}/${tx.requiredConfirmations}`),
+          escapeCSV(tx.network),
+          escapeCSV(tx.description),
+          escapeCSV(tx.metadata?.customerEmail || '')
+        ].join(','))
+
+        content = [headers.join(','), ...rows].join('\n')
+        mimeType = 'text/csv;charset=utf-8;'
+        filename = `crypto-transactions-${new Date().toISOString().split('T')[0]}.csv`
+      } else {
+        // Generate JSON export
+        const exportData = {
+          exportDate: new Date().toISOString(),
+          totalTransactions: filteredAndSortedTransactions.length,
+          filters: {
+            status: state.filterStatus,
+            currency: state.filterCurrency,
+            searchTerm: state.searchTerm
+          },
+          summary: {
+            totalVolume: stats.totalVolume,
+            totalFees: stats.totalFees,
+            completedCount: stats.completedTransactions,
+            pendingCount: stats.pendingCount
+          },
+          transactions: filteredAndSortedTransactions.map(tx => ({
+            id: tx.id,
+            date: tx.createdAt,
+            type: tx.type,
+            currency: tx.currency,
+            amount: tx.amount,
+            usdAmount: tx.usdAmount,
+            fee: tx.fee,
+            status: tx.status,
+            toAddress: tx.toAddress,
+            txHash: tx.txHash,
+            confirmations: tx.confirmations,
+            requiredConfirmations: tx.requiredConfirmations,
+            network: tx.network,
+            description: tx.description,
+            metadata: tx.metadata
+          }))
+        }
+
+        content = JSON.stringify(exportData, null, 2)
+        mimeType = 'application/json'
+        filename = `crypto-transactions-${new Date().toISOString().split('T')[0]}.json`
+      }
+
+      // Create Blob and download using URL.createObjectURL
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      link.style.display = 'none'
+      document.body.appendChild(link)
+      link.click()
+
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      }, 100)
+
+      toast.success(`Exported ${filteredAndSortedTransactions.length} transactions as ${format.toUpperCase()}`)
+      announce(`Transactions exported as ${format}`, 'polite')
+    } catch (error) {
+      logger.error('Export failed', { error, format })
+      toast.error('Failed to export transactions')
+    }
+  }
+
+  // Generate and download payment receipt
+  const handleGenerateReceipt = async (transaction: CryptoTransaction) => {
+    logger.info('Generating receipt', { transactionId: transaction.id })
+
+    try {
+      const receiptContent = `
+================================================================================
+                        CRYPTOCURRENCY PAYMENT RECEIPT
+================================================================================
+
+Transaction ID: ${transaction.id}
+Date: ${new Date(transaction.createdAt).toLocaleString()}
+Status: ${transaction.status.toUpperCase()}
+
+--------------------------------------------------------------------------------
+                              PAYMENT DETAILS
+--------------------------------------------------------------------------------
+
+Amount: ${formatCryptoAmount(transaction.amount, transaction.currency)}
+USD Value: ${formatUSD(transaction.usdAmount)}
+Network Fee: ${formatCryptoAmount(transaction.fee, transaction.currency)}
+Network: ${transaction.network}
+
+--------------------------------------------------------------------------------
+                            BLOCKCHAIN DETAILS
+--------------------------------------------------------------------------------
+
+To Address: ${transaction.toAddress}
+${transaction.txHash ? `Transaction Hash: ${transaction.txHash}` : 'Transaction Hash: Pending'}
+Confirmations: ${transaction.confirmations} / ${transaction.requiredConfirmations}
+
+--------------------------------------------------------------------------------
+                              ADDITIONAL INFO
+--------------------------------------------------------------------------------
+
+Description: ${transaction.description || 'N/A'}
+${transaction.metadata?.customerEmail ? `Customer Email: ${transaction.metadata.customerEmail}` : ''}
+${transaction.metadata?.invoiceId ? `Invoice ID: ${transaction.metadata.invoiceId}` : ''}
+
+--------------------------------------------------------------------------------
+
+Generated: ${new Date().toLocaleString()}
+This receipt was generated automatically by FreeFlow Crypto Payments.
+
+================================================================================
+`.trim()
+
+      const blob = new Blob([receiptContent], { type: 'text/plain;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `receipt-${transaction.id}.txt`
+      link.style.display = 'none'
+      document.body.appendChild(link)
+      link.click()
+
+      setTimeout(() => {
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      }, 100)
+
+      toast.success('Receipt downloaded')
+      announce('Receipt generated', 'polite')
+    } catch (error) {
+      logger.error('Receipt generation failed', { error, transactionId: transaction.id })
+      toast.error('Failed to generate receipt')
+    }
+  }
+
+  // Refresh data from database
+  const handleRefreshData = async () => {
+    logger.info('Refreshing crypto payment data')
+    announce('Refreshing data...', 'polite')
+    await loadData()
+    toast.success('Data refreshed')
+  }
+
+  // Share payment link
+  const handleSharePayment = async (transaction: CryptoTransaction) => {
+    const shareData = {
+      title: `Crypto Payment - ${formatUSD(transaction.usdAmount)}`,
+      text: `Payment request for ${formatCryptoAmount(transaction.amount, transaction.currency)} (${formatUSD(transaction.usdAmount)}) on ${transaction.network}`,
+      url: `${window.location.origin}/pay/${transaction.id}`
+    }
+
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData)
+        toast.success('Payment shared')
+      } else {
+        // Fallback: copy link to clipboard
+        await navigator.clipboard.writeText(shareData.url)
+        toast.success('Payment link copied to clipboard')
+      }
+      announce('Payment shared', 'polite')
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
+        logger.error('Share failed', { error })
+        toast.error('Failed to share payment')
+      }
+    }
   }
 
   // ========================================
@@ -863,6 +1184,24 @@ export default function CryptoPaymentsPage() {
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Analytics
                   </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleExportTransactions('csv')}
+                    className="border-gray-700 hover:bg-slate-800"
+                    disabled={filteredAndSortedTransactions.length === 0}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleRefreshData}
+                    disabled={state.isLoading}
+                    className="border-gray-700 hover:bg-slate-800"
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${state.isLoading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -979,8 +1318,27 @@ export default function CryptoPaymentsPage() {
                                 size="icon"
                                 onClick={() => handleViewTransaction(transaction)}
                                 className="border-gray-700 hover:bg-slate-800"
+                                title="View details"
                               >
                                 <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleGenerateReceipt(transaction)}
+                                className="border-gray-700 hover:bg-slate-800"
+                                title="Download receipt"
+                              >
+                                <FileText className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleSharePayment(transaction)}
+                                className="border-gray-700 hover:bg-slate-800"
+                                title="Share payment"
+                              >
+                                <Share2 className="w-4 h-4" />
                               </Button>
                               {transaction.status === 'pending' && (
                                 <Button
@@ -988,6 +1346,7 @@ export default function CryptoPaymentsPage() {
                                   size="icon"
                                   onClick={() => handleCancelTransaction(transaction.id)}
                                   className="border-red-700 text-red-400 hover:bg-red-900/20"
+                                  title="Cancel transaction"
                                 >
                                   <X className="w-4 h-4" />
                                 </Button>

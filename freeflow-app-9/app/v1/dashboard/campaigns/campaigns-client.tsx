@@ -1,9 +1,13 @@
 'use client'
 
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef } from 'react'
 import { useCampaigns, type CampaignType as CampaignTypeDB, type CampaignStatus as CampaignStatusDB } from '@/lib/hooks/use-campaigns'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+
+// Initialize Supabase client
+const supabase = createClient()
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -279,6 +283,46 @@ const formatNumber = (num: number): string => {
   return num.toString()
 }
 
+// Helper function to get status color
+const getStatusColor = (status: string): string => {
+  const colors: Record<string, string> = {
+    draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+    scheduled: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+    sending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+    running: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+    paused: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+    completed: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+    archived: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+  }
+  return colors[status] || colors.draft
+}
+
+// Helper function to get campaign type color
+const getCampaignTypeColor = (type: string): string => {
+  const colors: Record<string, string> = {
+    email: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
+    sms: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300',
+    social: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300',
+    multi_channel: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
+    ab_test: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+    automation: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+  }
+  return colors[type] || colors.email
+}
+
+// Helper function to get campaign icon
+const getCampaignIcon = (type: string): React.ReactNode => {
+  const iconMap: Record<string, React.ReactNode> = {
+    email: <Mail className="w-5 h-5 text-rose-600" />,
+    sms: <MessageSquare className="w-5 h-5 text-cyan-600" />,
+    social: <Globe className="w-5 h-5 text-indigo-600" />,
+    multi_channel: <Megaphone className="w-5 h-5 text-violet-600" />,
+    ab_test: <Split className="w-5 h-5 text-amber-600" />,
+    automation: <Zap className="w-5 h-5 text-emerald-600" />
+  }
+  return iconMap[type] || iconMap.email
+}
+
 export default function CampaignsClient() {
   const [activeTab, setActiveTab] = useState('campaigns')
   const [searchQuery, setSearchQuery] = useState('')
@@ -300,6 +344,11 @@ export default function CampaignsClient() {
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [aiPrompt, setAiPrompt] = useState('')
   const [automationData, setAutomationData] = useState({ name: '', trigger: 'subscribe', action: 'send_email' })
+  const [testEmail, setTestEmail] = useState('')
+  const [selectedTestCampaignId, setSelectedTestCampaignId] = useState('')
+  const [sendingTestEmail, setSendingTestEmail] = useState(false)
+  const importFileRef = useRef<HTMLInputElement>(null)
+  const [importFile, setImportFile] = useState<File | null>(null)
 
   // Quick Actions Array (inside component to access state setters)
   const campaignQuickActions = [
@@ -2135,8 +2184,8 @@ export default function CampaignsClient() {
         <DialogContent className="max-w-4xl max-h-[85vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              {selectedCampaign && getCampaignIcon(selectedCampaign.type)}
-              {selectedCampaign?.name}
+              {selectedCampaign && getCampaignIcon(selectedCampaign.campaign_type)}
+              {selectedCampaign?.campaign_name}
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="h-[60vh]">
@@ -2144,19 +2193,19 @@ export default function CampaignsClient() {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                    <p className="text-2xl font-bold">{formatNumber(selectedCampaign.stats.sent)}</p>
+                    <p className="text-2xl font-bold">{formatNumber(selectedCampaign.emails_sent || 0)}</p>
                     <p className="text-sm text-gray-500">Sent</p>
                   </div>
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                    <p className="text-2xl font-bold text-green-600">{selectedCampaign.stats.openRate.toFixed(1)}%</p>
+                    <p className="text-2xl font-bold text-green-600">{(selectedCampaign.open_rate || 0).toFixed(1)}%</p>
                     <p className="text-sm text-gray-500">Open Rate</p>
                   </div>
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                    <p className="text-2xl font-bold text-blue-600">{selectedCampaign.stats.clickRate.toFixed(1)}%</p>
+                    <p className="text-2xl font-bold text-blue-600">{(selectedCampaign.click_rate || 0).toFixed(1)}%</p>
                     <p className="text-sm text-gray-500">Click Rate</p>
                   </div>
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                    <p className="text-2xl font-bold text-green-600">${formatNumber(selectedCampaign.stats.revenue)}</p>
+                    <p className="text-2xl font-bold text-green-600">${formatNumber(selectedCampaign.revenue_generated || 0)}</p>
                     <p className="text-sm text-gray-500">Revenue</p>
                   </div>
                 </div>
@@ -2166,20 +2215,20 @@ export default function CampaignsClient() {
                     <h4 className="font-semibold mb-3">Campaign Details</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Subject</span>
-                        <span>{selectedCampaign.subject}</span>
+                        <span className="text-gray-500">Name</span>
+                        <span>{selectedCampaign.campaign_name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">From</span>
-                        <span>{selectedCampaign.fromName}</span>
+                        <span className="text-gray-500">Status</span>
+                        <Badge className={getStatusColor(selectedCampaign.status)}>{selectedCampaign.status}</Badge>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Audience</span>
-                        <span>{selectedCampaign.audienceName}</span>
+                        <span className="text-gray-500">Audience Size</span>
+                        <span>{formatNumber(selectedCampaign.audience_size || 0)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Type</span>
-                        <Badge className={getCampaignTypeColor(selectedCampaign.type)}>{selectedCampaign.type}</Badge>
+                        <Badge className={getCampaignTypeColor(selectedCampaign.campaign_type)}>{selectedCampaign.campaign_type}</Badge>
                       </div>
                     </div>
                   </Card>
@@ -2187,23 +2236,129 @@ export default function CampaignsClient() {
                     <h4 className="font-semibold mb-3">Engagement Metrics</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Unique Opens</span>
-                        <span>{formatNumber(selectedCampaign.stats.uniqueOpens)}</span>
+                        <span className="text-gray-500">Emails Opened</span>
+                        <span>{formatNumber(selectedCampaign.emails_opened || 0)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Unique Clicks</span>
-                        <span>{formatNumber(selectedCampaign.stats.uniqueClicks)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Unsubscribes</span>
-                        <span className="text-red-600">{selectedCampaign.stats.unsubscribes}</span>
+                        <span className="text-gray-500">Emails Clicked</span>
+                        <span>{formatNumber(selectedCampaign.emails_clicked || 0)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Conversions</span>
-                        <span className="text-green-600">{selectedCampaign.stats.conversions}</span>
+                        <span className="text-green-600">{formatNumber(selectedCampaign.conversions || 0)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Leads Generated</span>
+                        <span className="text-blue-600">{formatNumber(selectedCampaign.leads_generated || 0)}</span>
                       </div>
                     </div>
                   </Card>
+                </div>
+
+                {/* Export Campaign Report */}
+                <div className="pt-4 border-t">
+                  <h4 className="font-semibold mb-3">Export Campaign Data</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        // Generate campaign report as CSV
+                        const csvContent = [
+                          ['Campaign Report', selectedCampaign.campaign_name],
+                          ['Generated At', new Date().toISOString()],
+                          [''],
+                          ['Metric', 'Value'],
+                          ['Status', selectedCampaign.status],
+                          ['Type', selectedCampaign.campaign_type],
+                          ['Emails Sent', selectedCampaign.emails_sent || 0],
+                          ['Emails Delivered', selectedCampaign.emails_delivered || 0],
+                          ['Emails Opened', selectedCampaign.emails_opened || 0],
+                          ['Emails Clicked', selectedCampaign.emails_clicked || 0],
+                          ['Open Rate', `${(selectedCampaign.open_rate || 0).toFixed(2)}%`],
+                          ['Click Rate', `${(selectedCampaign.click_rate || 0).toFixed(2)}%`],
+                          ['Conversions', selectedCampaign.conversions || 0],
+                          ['Revenue Generated', `$${selectedCampaign.revenue_generated || 0}`],
+                          ['Leads Generated', selectedCampaign.leads_generated || 0],
+                          ['Budget Total', `$${selectedCampaign.budget_total || 0}`],
+                          ['Budget Spent', `$${selectedCampaign.budget_spent || 0}`],
+                        ].map(row => row.join(',')).join('\n')
+
+                        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `campaign-report-${selectedCampaign.campaign_name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`
+                        document.body.appendChild(a)
+                        a.click()
+                        document.body.removeChild(a)
+                        URL.revokeObjectURL(url)
+
+                        toast.success('Report downloaded', {
+                          description: 'Campaign report exported as CSV'
+                        })
+                      }}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Export CSV
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        // Generate campaign report as JSON
+                        const reportData = {
+                          campaign: {
+                            id: selectedCampaign.id,
+                            name: selectedCampaign.campaign_name,
+                            type: selectedCampaign.campaign_type,
+                            status: selectedCampaign.status,
+                            description: selectedCampaign.description
+                          },
+                          metrics: {
+                            emailsSent: selectedCampaign.emails_sent || 0,
+                            emailsDelivered: selectedCampaign.emails_delivered || 0,
+                            emailsOpened: selectedCampaign.emails_opened || 0,
+                            emailsClicked: selectedCampaign.emails_clicked || 0,
+                            openRate: selectedCampaign.open_rate || 0,
+                            clickRate: selectedCampaign.click_rate || 0,
+                            conversions: selectedCampaign.conversions || 0,
+                            leadsGenerated: selectedCampaign.leads_generated || 0,
+                            revenueGenerated: selectedCampaign.revenue_generated || 0
+                          },
+                          budget: {
+                            total: selectedCampaign.budget_total || 0,
+                            spent: selectedCampaign.budget_spent || 0,
+                            remaining: selectedCampaign.budget_remaining || 0,
+                            currency: selectedCampaign.currency || 'USD'
+                          },
+                          dates: {
+                            createdAt: selectedCampaign.created_at,
+                            launchedAt: selectedCampaign.launched_at,
+                            completedAt: selectedCampaign.completed_at,
+                            startDate: selectedCampaign.start_date,
+                            endDate: selectedCampaign.end_date
+                          },
+                          exportedAt: new Date().toISOString()
+                        }
+
+                        const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `campaign-report-${selectedCampaign.campaign_name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`
+                        document.body.appendChild(a)
+                        a.click()
+                        document.body.removeChild(a)
+                        URL.revokeObjectURL(url)
+
+                        toast.success('Report downloaded', {
+                          description: 'Campaign report exported as JSON'
+                        })
+                      }}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Export JSON
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Campaign Actions */}
@@ -2213,7 +2368,7 @@ export default function CampaignsClient() {
                     {(selectedCampaign.status === 'draft' || selectedCampaign.status === 'scheduled' || selectedCampaign.status === 'paused') && (
                       <Button
                         className="bg-green-600 hover:bg-green-700"
-                        onClick={() => handleLaunchCampaign(selectedCampaign.id, selectedCampaign.name)}
+                        onClick={() => handleLaunchCampaign(selectedCampaign.id, selectedCampaign.campaign_name)}
                         disabled={operationLoading === selectedCampaign.id}
                       >
                         <Play className="w-4 h-4 mr-2" />
@@ -2225,7 +2380,7 @@ export default function CampaignsClient() {
                         <Button
                           variant="outline"
                           className="border-orange-600 text-orange-600 hover:bg-orange-50"
-                          onClick={() => handlePauseCampaign(selectedCampaign.id, selectedCampaign.name)}
+                          onClick={() => handlePauseCampaign(selectedCampaign.id, selectedCampaign.campaign_name)}
                           disabled={operationLoading === selectedCampaign.id}
                         >
                           <Pause className="w-4 h-4 mr-2" />
@@ -2234,7 +2389,7 @@ export default function CampaignsClient() {
                         <Button
                           variant="outline"
                           className="border-purple-600 text-purple-600 hover:bg-purple-50"
-                          onClick={() => handleEndCampaign(selectedCampaign.id, selectedCampaign.name)}
+                          onClick={() => handleEndCampaign(selectedCampaign.id, selectedCampaign.campaign_name)}
                           disabled={operationLoading === selectedCampaign.id}
                         >
                           <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -2253,7 +2408,7 @@ export default function CampaignsClient() {
                     <Button
                       variant="outline"
                       className="border-gray-400 text-gray-600 hover:bg-gray-50"
-                      onClick={() => handleArchiveCampaign(selectedCampaign.id, selectedCampaign.name)}
+                      onClick={() => handleArchiveCampaign(selectedCampaign.id, selectedCampaign.campaign_name)}
                       disabled={operationLoading === selectedCampaign.id}
                     >
                       <Archive className="w-4 h-4 mr-2" />
@@ -2261,7 +2416,7 @@ export default function CampaignsClient() {
                     </Button>
                     <Button
                       variant="destructive"
-                      onClick={() => handleDeleteCampaign(selectedCampaign.id, selectedCampaign.name)}
+                      onClick={() => handleDeleteCampaign(selectedCampaign.id, selectedCampaign.campaign_name)}
                       disabled={operationLoading === selectedCampaign.id}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
@@ -2374,7 +2529,13 @@ export default function CampaignsClient() {
       <QuickActionsToolbar actions={campaignQuickActions} />
 
       {/* Send Test Email Dialog */}
-      <Dialog open={showSendTestDialog} onOpenChange={setShowSendTestDialog}>
+      <Dialog open={showSendTestDialog} onOpenChange={(open) => {
+        setShowSendTestDialog(open)
+        if (!open) {
+          setTestEmail('')
+          setSelectedTestCampaignId('')
+        }
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -2391,12 +2552,18 @@ export default function CampaignsClient() {
               <Input
                 type="email"
                 placeholder="Enter email address"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
                 className="mt-1"
               />
             </div>
             <div>
               <Label>Select Campaign</Label>
-              <select className="w-full mt-1 px-3 py-2 border rounded-md bg-background">
+              <select
+                className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                value={selectedTestCampaignId}
+                onChange={(e) => setSelectedTestCampaignId(e.target.value)}
+              >
                 <option value="">Select a campaign...</option>
                 {dbCampaigns.filter(c => c.status === 'draft' || c.status === 'scheduled').map(campaign => (
                   <option key={campaign.id} value={campaign.id}>{campaign.campaign_name}</option>
@@ -2413,24 +2580,83 @@ export default function CampaignsClient() {
             <Button variant="outline" onClick={() => setShowSendTestDialog(false)}>Cancel</Button>
             <Button
               className="bg-gradient-to-r from-rose-600 to-pink-600"
+              disabled={sendingTestEmail || !testEmail || !selectedTestCampaignId}
               onClick={async () => {
-                toast.promise(
-                  fetch('/api/email-marketing/campaigns', {
+                if (!testEmail || !selectedTestCampaignId) {
+                  toast.error('Please fill in all fields')
+                  return
+                }
+
+                // Validate email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                if (!emailRegex.test(testEmail)) {
+                  toast.error('Please enter a valid email address')
+                  return
+                }
+
+                setSendingTestEmail(true)
+                try {
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) throw new Error('Not authenticated')
+
+                  const selectedCampaign = dbCampaigns.find(c => c.id === selectedTestCampaignId)
+
+                  // Record the test email in the database
+                  const { error } = await supabase.from('campaign_test_emails').insert({
+                    campaign_id: selectedTestCampaignId,
+                    user_id: user.id,
+                    recipient_email: testEmail,
+                    sent_at: new Date().toISOString(),
+                    status: 'sent'
+                  })
+
+                  if (error && !error.message.includes('does not exist')) {
+                    console.warn('Could not record test email:', error)
+                  }
+
+                  // Call the API to send the test email
+                  const response = await fetch('/api/email-marketing/campaigns', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'send_test', email: testEmail })
-                  }),
-                  {
-                    loading: 'Sending test email...',
-                    success: 'Test email sent successfully!',
-                    error: 'Failed to send test email'
+                    body: JSON.stringify({
+                      action: 'send_test',
+                      email: testEmail,
+                      campaignId: selectedTestCampaignId,
+                      campaignName: selectedCampaign?.campaign_name
+                    })
+                  })
+
+                  if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}))
+                    throw new Error(errorData.error || 'Failed to send test email')
                   }
-                )
-                setShowSendTestDialog(false)
+
+                  toast.success('Test email sent!', {
+                    description: `Sent to ${testEmail}`
+                  })
+                  setShowSendTestDialog(false)
+                  setTestEmail('')
+                  setSelectedTestCampaignId('')
+                } catch (error) {
+                  toast.error('Failed to send test email', {
+                    description: error instanceof Error ? error.message : 'Please try again'
+                  })
+                } finally {
+                  setSendingTestEmail(false)
+                }
               }}
             >
-              <Send className="w-4 h-4 mr-2" />
-              Send Test
+              {sendingTestEmail ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Test
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
