@@ -1506,7 +1506,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <Badge variant="outline">Active</Badge>
                               <Button variant="ghost" size="sm" onClick={() => {
                                 toast.promise(
-                                  navigator.clipboard.writeText('tf_STRIPE_KEY_PLACEHOLDER'),
+                                  navigator.clipboard.writeText(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''),
                                   { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy API key' }
                                 )
                               }}>
@@ -1515,7 +1515,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             </div>
                           </div>
                           <code className="block w-full p-3 bg-gray-900 text-green-400 rounded font-mono text-sm overflow-x-auto">
-                            tf_STRIPE_KEY_PLACEHOLDER
+                            {process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''}
                           </code>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">

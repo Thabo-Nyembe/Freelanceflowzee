@@ -299,10 +299,10 @@ const mockPaymentProviders: PaymentProvider[] = [
 ]
 
 const mockAPIKeys: APIKey[] = [
-  { id: 'ak1', name: 'Production API', key: 'STRIPE_KEY_PLACEHOLDER', permissions: ['read', 'write', 'delete'], lastUsed: '2024-01-16 09:23', createdAt: '2023-06-15', status: 'active' },
-  { id: 'ak2', name: 'Staging API', key: 'sk_test_xxxxxxxxxxxxxxxx', permissions: ['read', 'write'], lastUsed: '2024-01-15 14:45', createdAt: '2023-08-20', status: 'active' },
-  { id: 'ak3', name: 'Analytics Integration', key: 'STRIPE_KEY_PLACEHOLDER', permissions: ['read'], lastUsed: '2024-01-16 08:00', createdAt: '2024-01-01', status: 'active' },
-  { id: 'ak4', name: 'Old Mobile App', key: 'STRIPE_KEY_PLACEHOLDER', permissions: ['read'], lastUsed: '2023-11-30', createdAt: '2022-03-10', status: 'revoked' }
+  { id: 'ak1', name: 'Production API', key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_live_••••••••••••••••', permissions: ['read', 'write', 'delete'], lastUsed: '2024-01-16 09:23', createdAt: '2023-06-15', status: 'active' },
+  { id: 'ak2', name: 'Staging API', key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_••••••••••••••••', permissions: ['read', 'write'], lastUsed: '2024-01-15 14:45', createdAt: '2023-08-20', status: 'active' },
+  { id: 'ak3', name: 'Analytics Integration', key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_live_••••••••••••••••', permissions: ['read'], lastUsed: '2024-01-16 08:00', createdAt: '2024-01-01', status: 'active' },
+  { id: 'ak4', name: 'Old Mobile App', key: 'pk_live_••••••••••••••••', permissions: ['read'], lastUsed: '2023-11-30', createdAt: '2022-03-10', status: 'revoked' }
 ]
 
 const mockWebhooks: Webhook[] = [

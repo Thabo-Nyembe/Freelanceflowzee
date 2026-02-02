@@ -1109,7 +1109,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
   // Handler for API key operations
   const handleCopyApiKey = () => {
-    navigator.clipboard.writeText('exp_sk_live_xxxxxxxxxxxxxxxxxxxx')
+    navigator.clipboard.writeText(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '')
     toast.success('API key copied to clipboard')
   }
 

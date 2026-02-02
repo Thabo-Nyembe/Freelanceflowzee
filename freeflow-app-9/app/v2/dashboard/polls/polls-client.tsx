@@ -1889,7 +1889,7 @@ export default function PollsClient() {
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly />
+                            <Input type="password" value={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '••••••••••••••••'} readOnly />
                             <Button variant="outline">
                               <Copy className="w-4 h-4" />
                             </Button>

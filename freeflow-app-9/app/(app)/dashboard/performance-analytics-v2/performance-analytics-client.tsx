@@ -3317,7 +3317,7 @@ export default function PerformanceAnalyticsClient() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className="bg-green-100 text-green-700">Active</Badge>
-                    <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('pk_live_xxxxx'); toast.success('Key copied to clipboard'); }}>
+                    <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''); toast.success('Key copied to clipboard'); }}>
                       Copy
                     </Button>
                   </div>

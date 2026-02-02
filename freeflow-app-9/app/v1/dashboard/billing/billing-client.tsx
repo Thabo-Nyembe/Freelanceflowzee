@@ -2911,9 +2911,9 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Publishable Key</Label>
                         <div className="flex gap-2">
-                          <Input value="pk_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" />
+                          <Input value={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} readOnly className="flex-1 font-mono text-sm" />
                           <Button variant="outline" size="icon" onClick={() => {
-                            navigator.clipboard.writeText('pk_live_xxxxxxxxxxxxxxxxxxxxx')
+                            navigator.clipboard.writeText(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '')
                               .then(() => toast.success('Publishable key copied to clipboard'))
                               .catch(() => toast.error('Failed to copy'))
                           }}>
@@ -2924,7 +2924,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Secret Key</Label>
                         <div className="flex gap-2">
-                          <Input value={showSecretKey ? 'sk_live_yyyyyyyyyyyyyyyyyyyyy' : 'STRIPE_KEY_PLACEHOLDER'} readOnly className="flex-1 font-mono text-sm" type={showSecretKey ? 'text' : 'password'} />
+                          <Input value={showSecretKey ? 'sk_live_••••••••••••••••••••' : '••••••••••••••••••••••••'} readOnly className="flex-1 font-mono text-sm" type={showSecretKey ? 'text' : 'password'} />
                           <Button variant="outline" size="icon" onClick={() => {
                             setShowSecretKey(true)
                             toast.success('Secret key revealed - will hide in 30s')
@@ -2933,9 +2933,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button variant="outline" size="icon" onClick={() => {
-                            navigator.clipboard.writeText('sk_live_yyyyyyyyyyyyyyyyyyyyy')
-                              .then(() => toast.success('Secret key copied to clipboard'))
-                              .catch(() => toast.error('Failed to copy'))
+                            toast.error('Secret keys cannot be copied from client-side. Access via server-side API.')
                           }}>
                             <Copy className="h-4 w-4" />
                           </Button>

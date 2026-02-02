@@ -687,7 +687,7 @@ export default function PollsClient() {
   // Handle copy API key
   const handleCopyApiKey = async () => {
     try {
-      await navigator.clipboard.writeText('sk_live_xxxxxxxxxxxxxxxxxxxxx')
+      await navigator.clipboard.writeText(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '')
       toast.success('API key copied to clipboard')
     } catch {
       toast.error('Failed to copy API key')
@@ -1935,7 +1935,7 @@ export default function PollsClient() {
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly />
+                            <Input type="password" value={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} readOnly />
                             <Button variant="outline" onClick={handleCopyApiKey}>
                               <Copy className="w-4 h-4" />
                             </Button>

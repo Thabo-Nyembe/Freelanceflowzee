@@ -1700,10 +1700,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
+                            <Input type="password" value={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} readOnly className="font-mono" />
                             <button
                               onClick={() => {
-                                navigator.clipboard.writeText('STRIPE_KEY_PLACEHOLDER')
+                                navigator.clipboard.writeText(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '')
                                 toast.success('API key copied to clipboard')
                               }}
                               className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"

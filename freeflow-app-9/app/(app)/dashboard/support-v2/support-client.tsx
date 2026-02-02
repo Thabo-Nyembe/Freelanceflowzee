@@ -1533,8 +1533,8 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText('STRIPE_KEY_PLACEHOLDER'), { loading: 'Copying API key...', success: 'API key copied to clipboard!', error: 'Failed to copy API key' })}>Copy</Button>
+                            <Input type="password" value={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} readOnly className="font-mono" />
+                            <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''), { loading: 'Copying API key...', success: 'API key copied to clipboard!', error: 'Failed to copy API key' })}>Copy</Button>
                             <Button variant="outline" onClick={async () => { if (!confirm('Regenerate API key? This will invalidate the current key.')) return; try { const res = await fetch('/api/support/api-keys/regenerate', { method: 'POST' }); if (!res.ok) throw new Error(); setApiKey('sk_live_' + Math.random().toString(36).substring(2, 15)); toast.success('New API key generated! Copy it now'); } catch { toast.error('Failed to generate'); } }}>Regenerate</Button>
                           </div>
                         </div>

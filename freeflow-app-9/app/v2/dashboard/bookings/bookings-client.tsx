@@ -1814,7 +1814,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                               ••••••••••••••••••••
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" className="flex-1 gap-2" onClick={() => { navigator.clipboard.writeText('sk_live_xxxxxxxxxxxxx'); toast.success('API Key Copied') }}>
+                              <Button variant="outline" className="flex-1 gap-2" onClick={() => { navigator.clipboard.writeText(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''); toast.success('API Key Copied') }}>
                                 <Copy className="w-4 h-4" />
                                 Copy Key
                               </Button>

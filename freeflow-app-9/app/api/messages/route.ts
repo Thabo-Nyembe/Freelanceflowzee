@@ -1323,3 +1323,254 @@ async function handleAIAssist(data: {
     result,
   });
 }
+
+// ============================================================================
+// PATCH - Update/Edit messages
+// ============================================================================
+
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
+  try {
+    const supabase = await createClient();
+    const session = await getServerSession(authOptions);
+    const { searchParams } = new URL(request.url);
+    const body = await request.json();
+
+    // Get message ID from searchParams or body
+    const messageId = searchParams.get('messageId') || body.messageId;
+    const newText = body.text || body.content;
+
+    if (!messageId) {
+      return NextResponse.json(
+        { success: false, error: 'Message ID is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!newText) {
+      return NextResponse.json(
+        { success: false, error: 'New text content is required' },
+        { status: 400 }
+      );
+    }
+
+    // Check for demo mode
+    const demoMode = isDemoMode(request);
+
+    // Unauthenticated users in demo mode
+    if (!session?.user?.id) {
+      if (demoMode) {
+        return NextResponse.json({
+          success: true,
+          demo: true,
+          action: 'edit',
+          message: {
+            id: messageId,
+            text: newText,
+            is_edited: true,
+            edited_at: new Date().toISOString(),
+          },
+          message_text: 'Demo: Message would be updated',
+        });
+      }
+
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id;
+    const userEmail = session.user.email;
+
+    // Demo mode for demo accounts
+    const isDemoAccount = demoMode || userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io';
+
+    if (isDemoAccount) {
+      return NextResponse.json({
+        success: true,
+        demo: true,
+        action: 'edit',
+        message: {
+          id: messageId,
+          text: newText,
+          is_edited: true,
+          edited_at: new Date().toISOString(),
+        },
+        message_text: 'Demo: Message would be updated',
+      });
+    }
+
+    // Verify user owns this message
+    const { data: message } = await supabase
+      .from('messages')
+      .select('id, sender_id, chat_id')
+      .eq('id', messageId)
+      .single();
+
+    if (!message) {
+      return NextResponse.json(
+        { success: false, error: 'Message not found' },
+        { status: 404 }
+      );
+    }
+
+    if (message.sender_id !== userId) {
+      return NextResponse.json(
+        { success: false, error: 'Cannot edit this message - you are not the sender' },
+        { status: 403 }
+      );
+    }
+
+    // Update the message
+    const { data: updated, error } = await supabase
+      .from('messages')
+      .update({
+        text: newText,
+        is_edited: true,
+        edited_at: new Date().toISOString(),
+      })
+      .eq('id', messageId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    logger.info('Message updated', { messageId, userId });
+
+    return NextResponse.json({
+      success: true,
+      action: 'edit',
+      message: updated,
+    });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Messages PATCH error', { error: errorMessage });
+    return NextResponse.json(
+      { success: false, error: errorMessage },
+      { status: 500 }
+    );
+  }
+}
+
+// ============================================================================
+// DELETE - Delete messages
+// ============================================================================
+
+export async function DELETE(request: NextRequest): Promise<NextResponse> {
+  try {
+    const supabase = await createClient();
+    const session = await getServerSession(authOptions);
+    const { searchParams } = new URL(request.url);
+
+    // Get message ID from searchParams
+    const messageId = searchParams.get('messageId');
+
+    if (!messageId) {
+      return NextResponse.json(
+        { success: false, error: 'Message ID is required (pass as ?messageId=...)' },
+        { status: 400 }
+      );
+    }
+
+    // Check for demo mode
+    const demoMode = isDemoMode(request);
+
+    // Unauthenticated users in demo mode
+    if (!session?.user?.id) {
+      if (demoMode) {
+        return NextResponse.json({
+          success: true,
+          demo: true,
+          action: 'delete',
+          messageId,
+          message_text: 'Demo: Message would be deleted',
+        });
+      }
+
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id;
+    const userEmail = session.user.email;
+
+    // Demo mode for demo accounts
+    const isDemoAccount = demoMode || userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io';
+
+    if (isDemoAccount) {
+      return NextResponse.json({
+        success: true,
+        demo: true,
+        action: 'delete',
+        messageId,
+        message_text: 'Demo: Message would be deleted',
+      });
+    }
+
+    // Verify user owns this message or is admin
+    const { data: message } = await supabase
+      .from('messages')
+      .select('id, sender_id, chat_id')
+      .eq('id', messageId)
+      .single();
+
+    if (!message) {
+      return NextResponse.json(
+        { success: false, error: 'Message not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if user is sender or admin/owner
+    const isOwner = message.sender_id === userId;
+
+    if (!isOwner) {
+      const { data: membership } = await supabase
+        .from('chat_members')
+        .select('role')
+        .eq('chat_id', message.chat_id)
+        .eq('user_id', userId)
+        .single();
+
+      if (!membership || (membership.role !== 'admin' && membership.role !== 'owner')) {
+        return NextResponse.json(
+          { success: false, error: 'Cannot delete this message - insufficient permissions' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Soft delete the message
+    const { error } = await supabase
+      .from('messages')
+      .update({
+        is_deleted: true,
+        deleted_at: new Date().toISOString(),
+      })
+      .eq('id', messageId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    logger.info('Message deleted', { messageId, userId });
+
+    return NextResponse.json({
+      success: true,
+      action: 'delete',
+      messageId,
+      deleted: true,
+    });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Messages DELETE error', { error: errorMessage });
+    return NextResponse.json(
+      { success: false, error: errorMessage },
+      { status: 500 }
+    );
+  }
+}

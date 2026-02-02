@@ -1934,7 +1934,7 @@ export default function SurveysClient() {
                         <div>
                           <Label htmlFor="apiKey">API Key</Label>
                           <div className="mt-1 flex gap-2">
-                            <Input id="apiKey" type="password" className="flex-1" defaultValue="STRIPE_KEY_PLACEHOLDER" readOnly />
+                            <Input id="apiKey" type="password" className="flex-1" defaultValue={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} readOnly />
                             <Button
                               variant="outline"
                               onClick={() => {

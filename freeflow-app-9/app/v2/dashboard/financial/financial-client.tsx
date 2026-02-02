@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   DollarSign,
@@ -116,7 +117,9 @@ const mockBankAccounts: BankAccount[] = []
 const mockBudgetItems: BudgetItem[] = []
 // const profitLossData = financialProfitLoss // Removed to use real data
 const cashFlowData: any = {}
-const mockAIInsights = [
+
+// Fallback AI insights for demo mode or when database is empty
+const fallbackAIInsights = [
   {
     id: '1',
     type: 'opportunity' as const,
@@ -182,10 +185,24 @@ const mockFinancialActivities = [
 
 const mockFinancialQuickActions: any[] = []
 
+// Type for AI Insight from database
+interface AIInsight {
+  id: string
+  type: 'opportunity' | 'alert' | 'info' | 'success'
+  title: string
+  description: string
+  confidence: number
+  action?: string
+}
+
 export default function FinancialClient({ initialFinancial }: { initialFinancial: FinancialRecord[] }) {
   const [activeTab, setActiveTab] = useState('overview')
   const [showInsights, setShowInsights] = useState(false)
   const insightsPanel = useInsightsPanel(false)
+
+  // AI Insights state with database loading
+  const [aiInsights, setAIInsights] = useState<AIInsight[]>(fallbackAIInsights)
+  const [isLoadingInsights, setIsLoadingInsights] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState('this-year')
   const [showNewTransactionDialog, setShowNewTransactionDialog] = useState(false)
   const [showNewAccountDialog, setShowNewAccountDialog] = useState(false)
@@ -308,6 +325,73 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
     subtype: '',
     description: ''
   })
+
+  // Load AI insights from database
+  useEffect(() => {
+    const loadAIInsights = async () => {
+      try {
+        setIsLoadingInsights(true)
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+          // Use fallback for unauthenticated users (demo mode)
+          setAIInsights(fallbackAIInsights)
+          return
+        }
+
+        // Fetch insights from financial_insights table
+        const { data: dbInsights, error } = await supabase
+          .from('financial_insights')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(10)
+
+        if (error) {
+          console.error('Error loading financial insights:', error)
+          // Fall back to mock data on error
+          setAIInsights(fallbackAIInsights)
+          return
+        }
+
+        if (dbInsights && dbInsights.length > 0) {
+          // Map database records to AIInsight interface
+          const mappedInsights: AIInsight[] = dbInsights.map((insight: any) => ({
+            id: insight.id,
+            type: mapInsightType(insight.type),
+            title: insight.title,
+            description: insight.description,
+            confidence: insight.confidence || 0.8,
+            action: insight.is_actionable ? 'Take Action' : undefined
+          }))
+          setAIInsights(mappedInsights)
+        } else {
+          // Use fallback if no insights exist
+          setAIInsights(fallbackAIInsights)
+        }
+      } catch (err) {
+        console.error('Error loading financial insights:', err)
+        setAIInsights(fallbackAIInsights)
+      } finally {
+        setIsLoadingInsights(false)
+      }
+    }
+
+    loadAIInsights()
+  }, [])
+
+  // Helper function to map database insight types to UI types
+  const mapInsightType = (dbType: string): 'opportunity' | 'alert' | 'info' | 'success' => {
+    const typeMap: Record<string, 'opportunity' | 'alert' | 'info' | 'success'> = {
+      'revenue_optimization': 'opportunity',
+      'cash_flow': 'info',
+      'cost_reduction': 'success',
+      'risk_alert': 'alert'
+    }
+    return typeMap[dbType] || 'info'
+  }
 
   const handleCreateTransaction = async () => {
     if (!newTransactionForm.title || !newTransactionForm.amount) {
@@ -1346,7 +1430,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
               className="overflow-hidden"
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <AIInsightsPanel insights={mockAIInsights} />
+                <AIInsightsPanel insights={aiInsights} />
                 <PredictiveAnalytics predictions={mockFinancialPredictions} />
                 <CollaborationIndicator collaborators={mockFinancialCollaborators} />
               </div>
@@ -3189,7 +3273,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
           <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <AIInsightsPanel
-                insights={mockAIInsights}
+                insights={aiInsights}
               />
               <PredictiveAnalytics predictions={mockFinancialPredictions} />
             </div>

@@ -843,6 +843,158 @@ export async function PUT(request: NextRequest) {
   }
 }
 
+// PATCH: Partially update an invoice in Supabase
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const session = await getServerSession()
+    const { searchParams } = new URL(request.url)
+    const body = await request.json().catch(() => ({}))
+
+    // Get invoice ID from searchParams or body
+    const id = searchParams.get('id') || body.id
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Invoice ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Check for demo mode
+    const demoMode = isDemoMode(request)
+
+    // Require authentication (unless demo mode)
+    if (!session?.user && !demoMode) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // Use authId for database queries (auth.users FK constraints)
+    const userId = session?.user
+      ? (session.user as { authId?: string; id: string }).authId || session.user.id
+      : DEMO_USER_ID
+
+    // First verify the invoice exists and belongs to user
+    const { data: existingInvoice, error: fetchError } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !existingInvoice) {
+      return NextResponse.json(
+        { success: false, error: 'Invoice not found' },
+        { status: 404 }
+      )
+    }
+
+    // Verify ownership (skip for demo mode to allow demo data updates)
+    if (!demoMode && existingInvoice.user_id !== userId) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized to update this invoice' },
+        { status: 403 }
+      )
+    }
+
+    // Build partial update object - only include fields that are provided
+    const dbUpdateData: Record<string, any> = {}
+
+    // Map frontend field names to database column names
+    if (body.title !== undefined) dbUpdateData.title = body.title
+    if (body.description !== undefined) dbUpdateData.description = body.description
+    if (body.clientName !== undefined) dbUpdateData.client_name = body.clientName
+    if (body.client_name !== undefined) dbUpdateData.client_name = body.client_name
+    if (body.clientEmail !== undefined) dbUpdateData.client_email = body.clientEmail
+    if (body.client_email !== undefined) dbUpdateData.client_email = body.client_email
+    if (body.status !== undefined) dbUpdateData.status = body.status
+    if (body.dueDate !== undefined) dbUpdateData.due_date = body.dueDate
+    if (body.due_date !== undefined) dbUpdateData.due_date = body.due_date
+    if (body.issueDate !== undefined) dbUpdateData.issue_date = body.issueDate
+    if (body.issue_date !== undefined) dbUpdateData.issue_date = body.issue_date
+    if (body.notes !== undefined) dbUpdateData.notes = body.notes
+    if (body.terms !== undefined) dbUpdateData.terms_and_conditions = body.terms
+    if (body.terms_and_conditions !== undefined) dbUpdateData.terms_and_conditions = body.terms_and_conditions
+    if (body.currency !== undefined) dbUpdateData.currency = body.currency
+    if (body.invoice_number !== undefined) dbUpdateData.invoice_number = body.invoice_number
+    if (body.client_id !== undefined) dbUpdateData.client_id = body.client_id
+
+    // Handle payment-related fields
+    if (body.payment_method !== undefined) dbUpdateData.payment_method = body.payment_method
+    if (body.payment_reference !== undefined) dbUpdateData.payment_reference = body.payment_reference
+    if (body.paid_date !== undefined) dbUpdateData.paid_date = body.paid_date
+    if (body.sent_date !== undefined) dbUpdateData.sent_date = body.sent_date
+
+    // Handle items and recalculate amounts if items are provided
+    if (body.items !== undefined) {
+      dbUpdateData.items = body.items
+      dbUpdateData.item_count = body.items.length
+      const calculatedAmount = body.items.reduce((sum: number, item: any) =>
+        sum + (item.total || item.amount || (item.quantity * item.unitPrice) || 0), 0)
+      dbUpdateData.subtotal = body.subtotal ?? calculatedAmount
+      dbUpdateData.total_amount = body.amount ?? body.total_amount ?? calculatedAmount
+      dbUpdateData.amount_due = dbUpdateData.total_amount - (body.amount_paid ?? existingInvoice.amount_paid ?? 0)
+    }
+
+    // Handle amount fields (only if not already set by items calculation)
+    if (body.subtotal !== undefined && dbUpdateData.subtotal === undefined) dbUpdateData.subtotal = body.subtotal
+    if (body.tax_amount !== undefined) dbUpdateData.tax_amount = body.tax_amount
+    if (body.tax_rate !== undefined) dbUpdateData.tax_rate = body.tax_rate
+    if (body.discount_amount !== undefined) dbUpdateData.discount_amount = body.discount_amount
+    if (body.discount_percentage !== undefined) dbUpdateData.discount_percentage = body.discount_percentage
+    if (body.total_amount !== undefined && dbUpdateData.total_amount === undefined) dbUpdateData.total_amount = body.total_amount
+    if (body.amount !== undefined && dbUpdateData.total_amount === undefined) dbUpdateData.total_amount = body.amount
+    if (body.amount_paid !== undefined) dbUpdateData.amount_paid = body.amount_paid
+    if (body.amount_due !== undefined && dbUpdateData.amount_due === undefined) dbUpdateData.amount_due = body.amount_due
+
+    // Handle recurring invoice fields
+    if (body.is_recurring !== undefined) dbUpdateData.is_recurring = body.is_recurring
+    if (body.recurring_schedule !== undefined) dbUpdateData.recurring_schedule = body.recurring_schedule
+
+    // Check if there are any fields to update
+    if (Object.keys(dbUpdateData).length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'No fields provided to update' },
+        { status: 400 }
+      )
+    }
+
+    // Always update the updated_at timestamp
+    dbUpdateData.updated_at = new Date().toISOString()
+
+    const { data: updatedInvoice, error } = await supabase
+      .from('invoices')
+      .update(dbUpdateData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Invoice PATCH error', { error })
+      return NextResponse.json(
+        { success: false, error: 'Failed to update invoice' },
+        { status: 500 }
+      )
+    }
+
+    logger.info('Invoice partially updated', { invoiceId: id, fields: Object.keys(dbUpdateData) })
+
+    return NextResponse.json({
+      success: true,
+      data: updatedInvoice,
+      message: `Invoice ${updatedInvoice.invoice_number} updated successfully`
+    })
+  } catch (error) {
+    logger.error('Invoice PATCH error', { error })
+    return NextResponse.json(
+      { success: false, error: 'Failed to update invoice' },
+      { status: 500 }
+    )
+  }
+}
+
 // DELETE: Delete an invoice from Supabase
 export async function DELETE(request: NextRequest) {
   try {

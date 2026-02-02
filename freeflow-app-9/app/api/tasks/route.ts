@@ -519,6 +519,151 @@ export async function POST(request: NextRequest) {
 }
 
 // ============================================================================
+// PATCH - Partial Update Task
+// ============================================================================
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession()
+    const { searchParams } = new URL(request.url)
+
+    // Check for demo mode
+    const demoMode = isDemoMode(request)
+
+    if (!session?.user) {
+      if (demoMode) {
+        // In demo mode, return a mock success response
+        return NextResponse.json({
+          success: true,
+          demo: true,
+          task: { id: searchParams.get('id') || 'demo-task', updated_at: new Date().toISOString() },
+          message: 'Task updated (demo mode)'
+        })
+      }
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id
+    const body = await request.json()
+
+    // Get task ID from searchParams or body
+    const taskId = searchParams.get('id') || body.id
+
+    if (!taskId) {
+      return NextResponse.json(
+        { error: 'Task ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Check permission
+    const canUpdate = await checkPermission(userId, 'tasks', 'update', taskId)
+    if (!canUpdate) {
+      return NextResponse.json(
+        { error: 'Permission denied' },
+        { status: 403 }
+      )
+    }
+
+    const supabase = await createClient()
+
+    // Get current task for comparison
+    const { data: currentTask, error: fetchError } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('id', taskId)
+      .single()
+
+    if (fetchError || !currentTask) {
+      return NextResponse.json(
+        { error: 'Task not found' },
+        { status: 404 }
+      )
+    }
+
+    // Prepare update data - only include fields that are provided
+    const allowedFields = [
+      'title', 'description', 'status', 'priority', 'category', 'type',
+      'project_id', 'parent_id', 'assignee_id', 'reviewer_id',
+      'estimated_minutes', 'start_date', 'due_date', 'position',
+      'tags', 'labels', 'checklist', 'dependencies', 'blockers',
+      'attachments', 'metadata'
+    ]
+
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString()
+    }
+
+    const updatedFields: string[] = []
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updateData[field] = body[field]
+        updatedFields.push(field)
+      }
+    }
+
+    // If no fields to update, return early
+    if (updatedFields.length === 0) {
+      return NextResponse.json({
+        success: true,
+        task: currentTask,
+        message: 'No changes to apply'
+      })
+    }
+
+    // Handle status change to completed
+    if (body.status === 'completed' && currentTask.status !== 'completed') {
+      updateData.completed_at = new Date().toISOString()
+    } else if (body.status && body.status !== 'completed' && currentTask.status === 'completed') {
+      updateData.completed_at = null
+    }
+
+    // Update task
+    const { data: task, error } = await supabase
+      .from('tasks')
+      .update(updateData)
+      .eq('id', taskId)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Task PATCH error', { error })
+      return NextResponse.json(
+        { error: 'Failed to update task' },
+        { status: 500 }
+      )
+    }
+
+    // Log activity
+    await logTaskActivity(supabase, taskId, userId, 'updated', {
+      fields_updated: updatedFields,
+      old_status: currentTask.status,
+      new_status: body.status
+    })
+
+    // Update project progress if task completed or status changed
+    if ((body.status === 'completed' || body.status !== currentTask.status) && currentTask.project_id) {
+      await updateProjectProgress(supabase, currentTask.project_id)
+    }
+
+    return NextResponse.json({
+      success: true,
+      task,
+      message: 'Task updated successfully'
+    })
+  } catch (error) {
+    logger.error('Tasks PATCH error', { error })
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// ============================================================================
 // PUT - Update Task
 // ============================================================================
 

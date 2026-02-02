@@ -508,3 +508,256 @@ function getCategories(items: GalleryItem[]) {
     count: cat === 'all' ? items.length : items.filter(item => item.category === cat).length,
   }));
 }
+
+/**
+ * PATCH - Update a gallery item
+ * Supports partial updates for allowed fields
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const { searchParams } = new URL(request.url);
+    const body = await request.json();
+
+    // Get item ID from searchParams or body
+    const itemId = searchParams.get('id') || body.id;
+
+    if (!itemId) {
+      return NextResponse.json(
+        { success: false, error: 'Gallery item ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Check for demo mode
+    const demoMode = isDemoMode(request);
+
+    // Determine user ID
+    let userId: string;
+    if (!user) {
+      if (demoMode) {
+        userId = DEMO_USER_ID;
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
+    } else {
+      userId = user.id;
+    }
+
+    // Define allowed fields for update
+    const allowedFields = [
+      'title',
+      'description',
+      'category',
+      'tags',
+      'featured',
+      'client_name',
+      'project_name',
+      'media_type',
+    ];
+
+    // Build update object with only allowed fields
+    const updateData: Record<string, any> = {};
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updateData[field] = body[field];
+      }
+    }
+
+    // Handle aliased fields from the GalleryItem interface
+    if (body.client !== undefined) {
+      updateData.client_name = body.client;
+    }
+    if (body.project !== undefined) {
+      updateData.project_name = body.project;
+    }
+    if (body.type !== undefined) {
+      updateData.media_type = body.type;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'No valid fields to update' },
+        { status: 400 }
+      );
+    }
+
+    // Add updated_at timestamp
+    updateData.updated_at = new Date().toISOString();
+
+    // Update the item (with ownership verification)
+    const { data: updatedItem, error } = await supabase
+      .from('portfolio_items')
+      .update(updateData)
+      .eq('id', itemId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      logger.error('Gallery PATCH error - database', {
+        error: error.message,
+        itemId,
+        userId,
+      });
+
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { success: false, error: 'Gallery item not found or unauthorized' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(
+        { success: false, error: 'Failed to update gallery item' },
+        { status: 500 }
+      );
+    }
+
+    // Transform to GalleryItem format
+    const item: GalleryItem = {
+      id: updatedItem.id,
+      title: updatedItem.title,
+      type: updatedItem.media_type || 'image',
+      category: updatedItem.category || 'branding',
+      url: updatedItem.media_url,
+      thumbnail: updatedItem.thumbnail_url || updatedItem.media_url,
+      dateCreated: updatedItem.created_at,
+      likes: updatedItem.likes_count || 0,
+      comments: updatedItem.comments_count || 0,
+      client: updatedItem.client_name,
+      project: updatedItem.project_name,
+      tags: updatedItem.tags || [],
+      featured: updatedItem.featured || false,
+    };
+
+    logger.info('Gallery item updated', {
+      itemId,
+      userId,
+      updatedFields: Object.keys(updateData),
+      demo: demoMode,
+    });
+
+    return NextResponse.json({
+      success: true,
+      item,
+      message: 'Gallery item updated successfully',
+      demo: demoMode,
+    });
+  } catch (error) {
+    logger.error('Gallery PATCH error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE - Remove a gallery item
+ * Verifies ownership before deletion
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const { searchParams } = new URL(request.url);
+    const itemId = searchParams.get('id');
+
+    if (!itemId) {
+      return NextResponse.json(
+        { success: false, error: 'Gallery item ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Check for demo mode
+    const demoMode = isDemoMode(request);
+
+    // Determine user ID
+    let userId: string;
+    if (!user) {
+      if (demoMode) {
+        userId = DEMO_USER_ID;
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
+    } else {
+      userId = user.id;
+    }
+
+    // First verify the item exists and belongs to the user
+    const { data: existingItem, error: fetchError } = await supabase
+      .from('portfolio_items')
+      .select('id, title, user_id')
+      .eq('id', itemId)
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError || !existingItem) {
+      logger.warn('Gallery DELETE - item not found or unauthorized', {
+        itemId,
+        userId,
+        demo: demoMode,
+      });
+      return NextResponse.json(
+        { success: false, error: 'Gallery item not found or unauthorized' },
+        { status: 404 }
+      );
+    }
+
+    // Delete the item
+    const { error: deleteError } = await supabase
+      .from('portfolio_items')
+      .delete()
+      .eq('id', itemId)
+      .eq('user_id', userId);
+
+    if (deleteError) {
+      logger.error('Gallery DELETE error - database', {
+        error: deleteError.message,
+        itemId,
+        userId,
+      });
+      return NextResponse.json(
+        { success: false, error: 'Failed to delete gallery item' },
+        { status: 500 }
+      );
+    }
+
+    logger.info('Gallery item deleted', {
+      itemId,
+      title: existingItem.title,
+      userId,
+      demo: demoMode,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Gallery item deleted successfully',
+      deletedId: itemId,
+      demo: demoMode,
+    });
+  } catch (error) {
+    logger.error('Gallery DELETE error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

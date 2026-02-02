@@ -1872,7 +1872,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                         <div>
                           <Label htmlFor="apiKey">API Key</Label>
                           <div className="mt-1 flex gap-2">
-                            <input id="apiKey" type="password" className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" defaultValue="STRIPE_KEY_PLACEHOLDER" readOnly />
+                            <input id="apiKey" type="password" className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" defaultValue={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} readOnly />
                             <button className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
                               <Copy className="w-4 h-4" />
                             </button>

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 import { useAIDesigns, AIDesign as DBAIDesign } from '@/lib/hooks/use-ai-designs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -147,8 +148,8 @@ const colorClasses: Record<string, { text: string; bg: string; bgDark: string }>
   fuchsia: { text: 'text-fuchsia-500', bg: 'bg-fuchsia-100', bgDark: 'dark:bg-fuchsia-900/30' },
 }
 
-// Mock data for collections only (until collections hook is ready)
-const mockCollections: Collection[] = [
+// Fallback mock data for collections (used in demo mode or when database is empty)
+const fallbackCollections: Collection[] = [
   { id: '1', name: 'Fantasy Worlds', description: 'Epic fantasy landscapes and characters', itemCount: 24, isPrivate: false, createdAt: '2024-12-01' },
   { id: '2', name: 'Architecture', description: 'Modern and futuristic buildings', itemCount: 18, isPrivate: false, createdAt: '2024-11-15' },
   { id: '3', name: 'Character Designs', description: 'Character concepts and portraits', itemCount: 32, isPrivate: true, createdAt: '2024-12-10' },
@@ -289,8 +290,71 @@ export default function AIDesignClient() {
     deleteDesign
   } = useAIDesigns([])
 
-  // Keep mock data for collections until hook
-  const [collections, setCollections] = useState<Collection[]>(mockCollections)
+  // Collections state with database loading
+  const [collections, setCollections] = useState<Collection[]>(fallbackCollections)
+  const [isLoadingCollections, setIsLoadingCollections] = useState(true)
+
+  // Load collections from database
+  useEffect(() => {
+    const loadCollections = async () => {
+      try {
+        setIsLoadingCollections(true)
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+          // Use fallback for unauthenticated users (demo mode)
+          setCollections(fallbackCollections)
+          return
+        }
+
+        // Fetch collections from ai_image_collections table
+        const { data: dbCollections, error } = await supabase
+          .from('ai_image_collections')
+          .select(`
+            id,
+            name,
+            description,
+            is_public,
+            created_at,
+            ai_collection_images(count)
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          console.error('Error loading collections:', error)
+          // Fall back to mock data on error
+          setCollections(fallbackCollections)
+          return
+        }
+
+        if (dbCollections && dbCollections.length > 0) {
+          // Map database records to Collection interface
+          const mappedCollections: Collection[] = dbCollections.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            description: c.description || '',
+            coverImage: undefined,
+            itemCount: c.ai_collection_images?.[0]?.count || 0,
+            isPrivate: !c.is_public,
+            createdAt: c.created_at
+          }))
+          setCollections(mappedCollections)
+        } else {
+          // Use fallback if no collections exist
+          setCollections(fallbackCollections)
+        }
+      } catch (err) {
+        console.error('Error loading collections:', err)
+        setCollections(fallbackCollections)
+      } finally {
+        setIsLoadingCollections(false)
+      }
+    }
+
+    loadCollections()
+  }, [])
 
   // Derive prompt history from real generations
   const promptHistory = useMemo(() => {
@@ -508,21 +572,59 @@ export default function AIDesignClient() {
     toast.info('Settings loaded')
   }
 
-  // Create collection (client-side only - no hook available yet)
+  // Create collection - saves to database
   const handleCreateCollection = async (name: string, description: string) => {
     try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        // Fallback to client-side only for demo mode
+        const newCollection: Collection = {
+          id: crypto.randomUUID(),
+          name,
+          description,
+          itemCount: 0,
+          isPrivate: false,
+          createdAt: new Date().toISOString()
+        }
+        setCollections(prev => [newCollection, ...prev])
+        toast.success('Collection created (demo mode)')
+        return
+      }
+
+      // Insert into database
+      const { data: dbCollection, error } = await supabase
+        .from('ai_image_collections')
+        .insert({
+          user_id: user.id,
+          name,
+          description,
+          is_public: false
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error creating collection:', error)
+        toast.error('Failed to create collection')
+        return
+      }
+
+      // Add to local state
       const newCollection: Collection = {
-        id: crypto.randomUUID(),
-        name,
-        description,
+        id: dbCollection.id,
+        name: dbCollection.name,
+        description: dbCollection.description || '',
         itemCount: 0,
-        isPrivate: false,
-        createdAt: new Date().toISOString()
+        isPrivate: !dbCollection.is_public,
+        createdAt: dbCollection.created_at
       }
 
       setCollections(prev => [newCollection, ...prev])
       toast.success('Collection created')
     } catch (err: unknown) {
+      console.error('Error creating collection:', err)
       toast.error('Failed to create collection')
     }
   }
@@ -704,7 +806,7 @@ export default function AIDesignClient() {
                 <span className="text-xs text-gray-500 dark:text-gray-400">Collections</span>
               </div>
               <div className="text-xl font-bold text-gray-900 dark:text-white">
-                {mockCollections.length}
+                {collections.length}
               </div>
               <div className="flex items-center gap-1 text-xs text-indigo-600">
                 <span>Organized</span>

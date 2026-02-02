@@ -392,7 +392,7 @@ export default function SalesClient() {
   const [showSendQuoteDialog, setShowSendQuoteDialog] = useState(false)
   const [editingStageIndex, setEditingStageIndex] = useState<number | null>(null)
   const [editingStageData, setEditingStageData] = useState({ name: '', probability: 0 })
-  const [apiKey, setApiKey] = useState('sk_live_xxxxxxxxxxxx')
+  const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '')
   const [hubSpotEmail, setHubSpotEmail] = useState('')
   const [hubSpotApiKey, setHubSpotApiKey] = useState('')
   const [quoteRecipientEmail, setQuoteRecipientEmail] = useState('')
@@ -869,12 +869,12 @@ export default function SalesClient() {
       }
       // Reset all settings to defaults via Supabase
       await supabase.from('crm_settings').update({
-        api_key: 'sk_live_xxxxxxxxxxxx',
+        api_key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
         webhook_url: '',
         webhook_events: ['deal.created', 'deal.won'],
         reset_at: new Date().toISOString()
       }).eq('type', 'sales')
-      setApiKey('sk_live_xxxxxxxxxxxx')
+      setApiKey(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '')
       setWebhookConfig({ url: '', events: ['deal.created', 'deal.won'] })
     })()
     toast.promise(resetPromise, {

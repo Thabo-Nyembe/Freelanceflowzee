@@ -1142,6 +1142,140 @@ async function handleCreateFromTemplate(
 }
 
 // ========================================================================
+// PATCH - Partial update contract
+// ========================================================================
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const session = await getServerSession()
+    const demoMode = isDemoMode(request)
+    const url = new URL(request.url)
+
+    // Get contract ID from searchParams or body
+    let contractId = url.searchParams.get('id')
+
+    // Determine effective user ID
+    let effectiveUserId: string | null = null
+
+    if (session?.user) {
+      const userEmail = session.user.email
+      const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
+      effectiveUserId = isDemoAccount || demoMode ? DEMO_USER_ID : (session.user as { authId?: string; id: string }).authId || session.user.id
+    } else if (demoMode) {
+      effectiveUserId = DEMO_USER_ID
+    } else {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json().catch(() => ({}))
+
+    // Allow contractId from body if not in searchParams
+    if (!contractId && body.contractId) {
+      contractId = body.contractId
+    }
+    if (!contractId && body.id) {
+      contractId = body.id
+    }
+
+    if (!contractId) {
+      return NextResponse.json(
+        { success: false, error: 'Contract ID is required (via query param ?id= or in request body)' },
+        { status: 400 }
+      )
+    }
+
+    // Extract update data (excluding id fields)
+    const { contractId: _cid, id: _id, ...updateData } = body
+
+    // Allowed fields to update via PATCH
+    const allowedFields = [
+      'title', 'description', 'scope', 'value', 'currency',
+      'start_date', 'end_date', 'payment_terms', 'payment_schedule', 'terms',
+      'client_id', 'client_name', 'client_email', 'status'
+    ]
+    const sanitizedUpdate: Record<string, unknown> = {}
+
+    for (const field of allowedFields) {
+      if (updateData[field] !== undefined) {
+        sanitizedUpdate[field] = updateData[field]
+      }
+    }
+
+    if (Object.keys(sanitizedUpdate).length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'No valid fields to update' },
+        { status: 400 }
+      )
+    }
+
+    // Add updated_at timestamp
+    sanitizedUpdate.updated_at = new Date().toISOString()
+
+    // Demo mode response
+    if (demoMode || effectiveUserId === DEMO_USER_ID) {
+      const demoContract = demoContracts.find(c => c.id === contractId)
+      if (!demoContract) {
+        return NextResponse.json(
+          { success: false, error: 'Contract not found' },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        demo: true,
+        data: {
+          ...demoContract,
+          ...sanitizedUpdate,
+          id: contractId
+        },
+        message: 'Contract updated (demo mode)'
+      })
+    }
+
+    // Update contract in database
+    const { data: contract, error } = await supabase
+      .from('contracts')
+      .update(sanitizedUpdate)
+      .eq('id', contractId)
+      .eq('user_id', effectiveUserId)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to update contract', { error, contractId })
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { success: false, error: 'Contract not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json(
+        { success: false, error: 'Failed to update contract' },
+        { status: 500 }
+      )
+    }
+
+    logger.info('Contract updated via PATCH', { contractId, fields: Object.keys(sanitizedUpdate) })
+
+    return NextResponse.json({
+      success: true,
+      data: contract,
+      message: 'Contract updated successfully'
+    })
+  } catch (error) {
+    logger.error('Contracts PATCH error', { error })
+    return NextResponse.json(
+      { success: false, error: 'Failed to update contract' },
+      { status: 500 }
+    )
+  }
+}
+
+// ========================================================================
 // PUT - Update contract
 // ========================================================================
 export async function PUT(request: NextRequest) {

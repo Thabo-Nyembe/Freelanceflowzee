@@ -1954,8 +1954,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                         <div>
                           <Label>Bearer Token</Label>
                           <div className="flex items-center gap-2 mt-1">
-                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" disabled className="font-mono" />
-                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('STRIPE_KEY_PLACEHOLDER'); toast.success('Copied') }}><Copy className="w-4 h-4" /></Button>
+                            <Input type="password" value={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} disabled className="font-mono" />
+                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''); toast.success('Copied') }}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <Button variant="outline" className="w-full" onClick={handleRegenerateToken} disabled={isLoading}>

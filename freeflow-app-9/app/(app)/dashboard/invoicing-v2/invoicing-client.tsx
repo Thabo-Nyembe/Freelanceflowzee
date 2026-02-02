@@ -2096,7 +2096,7 @@ export default function InvoicingClient() {
                         <div>
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
-                            <Input type="password" defaultValue="STRIPE_KEY_PLACEHOLDER" className="flex-1" />
+                            <Input type="password" defaultValue={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} className="flex-1" />
                             <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(true)}>Regenerate</Button>
                           </div>
                         </div>

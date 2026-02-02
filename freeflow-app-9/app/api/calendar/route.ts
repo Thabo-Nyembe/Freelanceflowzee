@@ -371,3 +371,176 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// =====================================================
+// PATCH - Update calendar events
+// =====================================================
+export async function PATCH(request: NextRequest) {
+  try {
+    // Check for demo mode via query param, cookie, or header
+    const { searchParams } = new URL(request.url);
+    const isDemoMode =
+      searchParams.get('demo') === 'true' ||
+      request.cookies.get('demo_mode')?.value === 'true' ||
+      request.headers.get('X-Demo-Mode') === 'true';
+
+    // Try NextAuth session first
+    const session = await getServerSession();
+    const userEmail = session?.user?.email;
+
+    // Check for demo account or demo mode
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io';
+
+    if (isDemoAccount || isDemoMode) {
+      const body = await request.json();
+      const eventId = searchParams.get('id') || body.id;
+
+      if (!eventId) {
+        return NextResponse.json(
+          { error: 'Event ID is required' },
+          { status: 400 }
+        );
+      }
+
+      // Return mock updated event for demo mode
+      const demoEvents = getDemoEvents();
+      const existingEvent = demoEvents.find(e => e.id === eventId);
+
+      if (!existingEvent) {
+        return NextResponse.json(
+          { error: 'Event not found' },
+          { status: 404 }
+        );
+      }
+
+      const updatedEvent = {
+        ...existingEvent,
+        ...body,
+        id: eventId, // Ensure ID is preserved
+        updated_at: new Date().toISOString(),
+      };
+
+      return NextResponse.json({ event: updatedEvent, demo: true });
+    }
+
+    // Fall back to Supabase auth for non-demo users
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const eventId = searchParams.get('id') || body.id;
+
+    if (!eventId) {
+      return NextResponse.json(
+        { error: 'Event ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Extract update fields from body
+    const { id, ...updates } = body;
+
+    const event = await calendarService.updateEvent(eventId, user.id, {
+      title: updates.title,
+      description: updates.description,
+      start_time: updates.start_time,
+      end_time: updates.end_time,
+      all_day: updates.all_day,
+      location: updates.location,
+      location_type: updates.location_type,
+      video_url: updates.video_url,
+      color: updates.color,
+      visibility: updates.visibility,
+      recurrence_rule: updates.recurrence_rule,
+      recurrence_end: updates.recurrence_end,
+      client_id: updates.client_id,
+      project_id: updates.project_id,
+      attendees: updates.attendees,
+      reminders: updates.reminders,
+    });
+
+    return NextResponse.json({ event });
+  } catch (error) {
+    logger.error('Calendar PATCH error', { error });
+    return NextResponse.json(
+      { error: error.message || 'Failed to update event' },
+      { status: 500 }
+    );
+  }
+}
+
+// =====================================================
+// DELETE - Delete calendar events
+// =====================================================
+export async function DELETE(request: NextRequest) {
+  try {
+    // Check for demo mode via query param, cookie, or header
+    const { searchParams } = new URL(request.url);
+    const isDemoMode =
+      searchParams.get('demo') === 'true' ||
+      request.cookies.get('demo_mode')?.value === 'true' ||
+      request.headers.get('X-Demo-Mode') === 'true';
+
+    // Try NextAuth session first
+    const session = await getServerSession();
+    const userEmail = session?.user?.email;
+
+    // Check for demo account or demo mode
+    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io';
+
+    const eventId = searchParams.get('id');
+
+    if (!eventId) {
+      return NextResponse.json(
+        { error: 'Event ID is required' },
+        { status: 400 }
+      );
+    }
+
+    if (isDemoAccount || isDemoMode) {
+      // Check if event exists in demo data
+      const demoEvents = getDemoEvents();
+      const existingEvent = demoEvents.find(e => e.id === eventId);
+
+      if (!existingEvent) {
+        return NextResponse.json(
+          { error: 'Event not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Event deleted successfully',
+        demo: true
+      });
+    }
+
+    // Fall back to Supabase auth for non-demo users
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const deleteRecurring = searchParams.get('delete_recurring') === 'true';
+
+    await calendarService.deleteEvent(eventId, user.id, deleteRecurring);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Event deleted successfully'
+    });
+  } catch (error) {
+    logger.error('Calendar DELETE error', { error });
+    return NextResponse.json(
+      { error: error.message || 'Failed to delete event' },
+      { status: 500 }
+    );
+  }
+}

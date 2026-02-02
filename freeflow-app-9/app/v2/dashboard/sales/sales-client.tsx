@@ -2173,9 +2173,9 @@ export default function SalesClient() {
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="sk_live_xxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Input type="password" value={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => {
-                              navigator.clipboard.writeText('sk_live_xxxxxxxxxxxx')
+                              navigator.clipboard.writeText(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '')
                               toast.success('API key copied to clipboard!')
                             }}>Copy</Button>
                             <Button variant="outline" onClick={() => {
