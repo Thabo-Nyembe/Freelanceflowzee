@@ -37,8 +37,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 // Types
 type ExpenseStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'reimbursed' | 'processing'
@@ -215,6 +218,7 @@ const mockExpensesActivities = [
 // Quick actions will be defined inside component to access state
 
 export default function ExpensesClient({ initialExpenses }: ExpensesClientProps) {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('reports')
   const [statusFilter, setStatusFilter] = useState<ExpenseStatus | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | 'all'>('all')

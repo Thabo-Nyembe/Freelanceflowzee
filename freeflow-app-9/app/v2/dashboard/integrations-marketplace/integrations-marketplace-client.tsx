@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -472,7 +473,84 @@ const mockIntegrationsActivities = [
 
 export default function IntegrationsMarketplaceClient({ initialIntegrations, initialStats }: IntegrationsMarketplaceClientProps) {
   const { integrations, stats, createIntegration, updateIntegration, deleteIntegration, connectIntegration, disconnectIntegration } = useMarketplaceIntegrations(initialIntegrations, initialStats)
+  const supabase = createClient()
+
+  // State combining real DB data with mock fallback
   const [apps, setApps] = useState<AppListing[]>(mockApps)
+  const [isDataLoaded, setIsDataLoaded] = useState(false)
+
+  // Fetch real integration data from API on mount
+  useEffect(() => {
+    const fetchIntegrationData = async () => {
+      try {
+        // Fetch available integrations from API
+        const availableRes = await fetch('/api/integrations?action=available')
+        if (availableRes.ok) {
+          const availableData = await availableRes.json()
+          if (availableData.integrations && availableData.integrations.length > 0) {
+            // Merge with existing apps
+            const dbApps = availableData.integrations.map((int: any) => ({
+              ...mockApps.find(a => a.slug === int.type) || mockApps[0],
+              id: int.id || `app-${int.type}`,
+              name: int.name,
+              slug: int.type,
+              shortDescription: int.description || '',
+              category: int.category || 'productivity',
+              status: int.status === 'connected' ? 'installed' as const : 'available' as const,
+            }))
+            setApps(prev => {
+              const existingIds = new Set(dbApps.map((a: any) => a.id))
+              return [...dbApps, ...prev.filter(a => !existingIds.has(a.id))]
+            })
+          }
+        }
+
+        // Fetch user's connected integrations
+        const connectedRes = await fetch('/api/integrations')
+        if (connectedRes.ok) {
+          const connectedData = await connectedRes.json()
+          if (connectedData.integrations && connectedData.integrations.length > 0) {
+            const connectedTypes = new Set(connectedData.integrations.map((i: any) => i.type))
+            setApps(prev => prev.map(app => ({
+              ...app,
+              status: connectedTypes.has(app.slug) ? 'installed' as const : app.status
+            })))
+          }
+        }
+
+        // Fetch integration stats
+        const statsRes = await fetch('/api/integrations?action=stats')
+        if (statsRes.ok) {
+          const statsData = await statsRes.json()
+          // Could update stats display here
+        }
+
+        setIsDataLoaded(true)
+      } catch (error) {
+        console.error('Error fetching integration data:', error)
+        setIsDataLoaded(true) // Still mark as loaded to show fallback
+      }
+    }
+
+    fetchIntegrationData()
+  }, [])
+
+  // Sync real integrations with local apps state
+  useEffect(() => {
+    if (integrations.length > 0) {
+      const connectedIds = new Set(
+        integrations
+          .filter(i => i.status === 'connected')
+          .map(i => i.provider || i.name.toLowerCase().replace(/\s+/g, '-'))
+      )
+      setApps(prev => prev.map(app => ({
+        ...app,
+        status: connectedIds.has(app.slug) || connectedIds.has(app.name.toLowerCase())
+          ? 'installed' as const
+          : app.status === 'installed' ? 'installed' as const : app.status
+      })))
+    }
+  }, [integrations])
   const [activeTab, setActiveTab] = useState('discover')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<AppCategory | 'all'>('all')
@@ -581,65 +659,236 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
     return count.toString()
   }
 
-  // Handlers
-  const handleInstall = (app: AppListing, plan: PricingPlan) => {
-    // Update app status to installed
-    setApps(prev => prev.map(a =>
-      a.id === app.id
-        ? { ...a, status: 'installed' as const, currentPlan: plan.name, installCount: a.installCount + 1 }
-        : a
-    ))
-    toast.success(`${app.name} installed successfully with ${plan.name} plan`)
-    setShowInstallDialog(false)
-    setSelectedApp(null)
-  }
+  // Handlers - Real Supabase/API operations
+  const handleInstall = useCallback(async (app: AppListing, plan: PricingPlan) => {
+    toast.promise(
+      (async () => {
+        try {
+          // Create integration record in Supabase
+          const newIntegration = await createIntegration({
+            name: app.name,
+            provider: app.slug,
+            category: app.category as any,
+            status: 'connected',
+            pricing: plan.name,
+            features: plan.features,
+            installs_count: app.installCount + 1,
+            rating: app.rating,
+          })
+
+          // Also call API for backend processing
+          const res = await fetch('/api/integrations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'create',
+              type: app.slug,
+              name: app.name,
+              description: app.shortDescription,
+              settings: { plan: plan.name, features: plan.features }
+            })
+          })
+
+          if (!res.ok) {
+            const errorData = await res.json()
+            throw new Error(errorData.error || 'Installation failed')
+          }
+
+          // Update local state
+          setApps(prev => prev.map(a =>
+            a.id === app.id
+              ? { ...a, status: 'installed' as const, currentPlan: plan.name, installCount: a.installCount + 1 }
+              : a
+          ))
+
+          setShowInstallDialog(false)
+          setSelectedApp(null)
+          return { success: true }
+        } catch (error) {
+          throw error
+        }
+      })(),
+      {
+        loading: `Installing ${app.name}...`,
+        success: `${app.name} installed successfully with ${plan.name} plan`,
+        error: `Failed to install ${app.name}`
+      }
+    )
+  }, [createIntegration])
 
   // Uninstall app handler
-  const handleUninstallApp = (app: AppListing) => {
-    setApps(prev => prev.map(a =>
-      a.id === app.id
-        ? { ...a, status: 'available' as const, currentPlan: undefined }
-        : a
-    ))
-    toast.success(`${app.name} uninstalled successfully`)
-    setShowUninstallDialog(false)
-    setSelectedAppForAction(null)
-  }
+  const handleUninstallApp = useCallback(async (app: AppListing) => {
+    toast.promise(
+      (async () => {
+        try {
+          // Find integration record
+          const integration = integrations.find(i =>
+            i.provider === app.slug || i.name.toLowerCase() === app.name.toLowerCase()
+          )
+
+          if (integration) {
+            await deleteIntegration(integration.id)
+          }
+
+          // Also call API
+          await fetch('/api/integrations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'disconnect',
+              integrationId: app.slug
+            })
+          })
+
+          setApps(prev => prev.map(a =>
+            a.id === app.id
+              ? { ...a, status: 'available' as const, currentPlan: undefined }
+              : a
+          ))
+
+          setShowUninstallDialog(false)
+          setSelectedAppForAction(null)
+          return { success: true }
+        } catch (error) {
+          throw error
+        }
+      })(),
+      {
+        loading: `Uninstalling ${app.name}...`,
+        success: `${app.name} uninstalled successfully`,
+        error: `Failed to uninstall ${app.name}`
+      }
+    )
+  }, [integrations, deleteIntegration])
 
   // Reconnect app handler
-  const handleReconnectApp = (app: AppListing) => {
-    setApps(prev => prev.map(a =>
-      a.id === app.id
-        ? { ...a, status: 'installed' as const }
-        : a
-    ))
-    toast.success(`${app.name} reconnected successfully`)
-    setShowReconnectDialog(false)
-    setSelectedAppForAction(null)
-  }
+  const handleReconnectApp = useCallback(async (app: AppListing) => {
+    toast.promise(
+      (async () => {
+        try {
+          const integration = integrations.find(i =>
+            i.provider === app.slug || i.name.toLowerCase() === app.name.toLowerCase()
+          )
+
+          if (integration) {
+            await connectIntegration(integration.id)
+          } else {
+            // Create new connection
+            await fetch('/api/integrations', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'connect',
+                integrationId: app.slug,
+                apiKey: `auto_reconnect_${Date.now()}`
+              })
+            })
+          }
+
+          setApps(prev => prev.map(a =>
+            a.id === app.id
+              ? { ...a, status: 'installed' as const }
+              : a
+          ))
+
+          setShowReconnectDialog(false)
+          setSelectedAppForAction(null)
+          return { success: true }
+        } catch (error) {
+          throw error
+        }
+      })(),
+      {
+        loading: `Reconnecting ${app.name}...`,
+        success: `${app.name} reconnected successfully`,
+        error: `Failed to reconnect ${app.name}`
+      }
+    )
+  }, [integrations, connectIntegration])
 
   // Disconnect app handler
-  const handleDisconnectApp = (app: AppListing) => {
-    setApps(prev => prev.map(a =>
-      a.id === app.id
-        ? { ...a, status: 'pending' as const }
-        : a
-    ))
-    toast.success(`${app.name} disconnected successfully`)
-    setShowDisconnectDialog(false)
-    setSelectedAppForAction(null)
-  }
+  const handleDisconnectApp = useCallback(async (app: AppListing) => {
+    toast.promise(
+      (async () => {
+        try {
+          const integration = integrations.find(i =>
+            i.provider === app.slug || i.name.toLowerCase() === app.name.toLowerCase()
+          )
+
+          if (integration) {
+            await disconnectIntegration(integration.id)
+          }
+
+          await fetch('/api/integrations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'disconnect',
+              integrationId: app.slug
+            })
+          })
+
+          setApps(prev => prev.map(a =>
+            a.id === app.id
+              ? { ...a, status: 'pending' as const }
+              : a
+          ))
+
+          setShowDisconnectDialog(false)
+          setSelectedAppForAction(null)
+          return { success: true }
+        } catch (error) {
+          throw error
+        }
+      })(),
+      {
+        loading: `Disconnecting ${app.name}...`,
+        success: `${app.name} disconnected successfully`,
+        error: `Failed to disconnect ${app.name}`
+      }
+    )
+  }, [integrations, disconnectIntegration])
 
   // Disconnect all apps handler
-  const handleDisconnectAllApps = () => {
-    setApps(prev => prev.map(a =>
-      a.status === 'installed'
-        ? { ...a, status: 'available' as const, currentPlan: undefined }
-        : a
-    ))
-    toast.success('All apps disconnected successfully')
-    setShowDisconnectAllDialog(false)
-  }
+  const handleDisconnectAllApps = useCallback(async () => {
+    const installedApps = apps.filter(a => a.status === 'installed')
+    if (installedApps.length === 0) {
+      toast.info('No installed apps to disconnect')
+      setShowDisconnectAllDialog(false)
+      return
+    }
+
+    toast.promise(
+      (async () => {
+        try {
+          for (const app of installedApps) {
+            const integration = integrations.find(i =>
+              i.provider === app.slug || i.name.toLowerCase() === app.name.toLowerCase()
+            )
+            if (integration) {
+              await disconnectIntegration(integration.id)
+            }
+          }
+
+          setApps(prev => prev.map(a =>
+            a.status === 'installed'
+              ? { ...a, status: 'available' as const, currentPlan: undefined }
+              : a
+          ))
+
+          setShowDisconnectAllDialog(false)
+          return { success: true }
+        } catch (error) {
+          throw error
+        }
+      })(),
+      {
+        loading: 'Disconnecting all apps...',
+        success: 'All apps disconnected successfully',
+        error: 'Failed to disconnect some apps'
+      }
+    )
+  }, [apps, integrations, disconnectIntegration])
 
   const renderStars = (rating: number) => {
     return (

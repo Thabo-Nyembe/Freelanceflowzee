@@ -37,7 +37,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // Types
 type ProjectStatus = 'planning' | 'active' | 'review' | 'completed' | 'on_hold'
@@ -249,6 +249,7 @@ const getActivityIcon = (type: Activity['type']) => {
 }
 
 export default function ProjectsHubClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('projects')
   const [viewType, setViewType] = useState<'board' | 'list' | 'timeline'>('board')
   const [searchQuery, setSearchQuery] = useState('')
@@ -789,6 +790,10 @@ export default function ProjectsHubClient() {
             <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search projects..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div>
             <Button variant="outline" onClick={() => setShowFilterDialog(true)}><Filter className="h-4 w-4 mr-2" />Filter</Button>
             <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => setShowNewProjectDialog(true)}><Plus className="h-4 w-4 mr-2" />New Project</Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -2082,37 +2087,41 @@ export default function ProjectsHubClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          {/* AI Insights Panel */}
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockProjectsAIInsights as unknown}
-              onInsightAction={(insight: any) => toast.info(insight.title || 'AI Insight')}
-            />
-          </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Projects Intelligence" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* AI Insights Panel */}
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockProjectsAIInsights as unknown}
+                  onInsightAction={(insight: any) => toast.info(insight.title || 'AI Insight')}
+                />
+              </div>
 
-          {/* Team Collaboration & Activity */}
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockProjectsCollaborators.map(c => ({ ...c, color: c.color || '#6366f1' }))}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockProjectsPredictions as unknown}
-            />
-          </div>
-        </div>
+              {/* Team Collaboration & Activity */}
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockProjectsCollaborators.map(c => ({ ...c, color: c.color || '#6366f1' }))}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockProjectsPredictions as unknown}
+                />
+              </div>
+            </div>
 
-        {/* Activity Feed & Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockProjectsActivities as unknown}
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={mockProjectsQuickActions as unknown}
-          />
-        </div>
+            {/* Activity Feed & Quick Actions */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockProjectsActivities as unknown}
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={mockProjectsQuickActions as unknown}
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Project Detail Dialog */}
         <Dialog open={showProjectDialog} onOpenChange={setShowProjectDialog}>

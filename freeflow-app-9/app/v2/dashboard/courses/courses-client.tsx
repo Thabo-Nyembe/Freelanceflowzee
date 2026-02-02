@@ -34,6 +34,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // ============================================================================
 // UDEMY/COURSERA-LEVEL LMS - Learning Management System
 // Features: Course builder, Curriculum, Quizzes, Analytics, Certificates
@@ -555,6 +561,7 @@ const mockCoursesActivities = [
 // Quick actions will be defined inside the component to access state setters
 
 export default function CoursesClient() {
+  const insightsPanel = useInsightsPanel(false)
   const supabase = createClient()
   const [activeView, setActiveView] = useState<'courses' | 'curriculum' | 'students' | 'analytics' | 'reviews'>('courses')
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
@@ -1236,6 +1243,10 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white w-64"
+            />
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
             />
             <Button
               onClick={() => setShowCreateCourseDialog(true)}
@@ -2521,6 +2532,33 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
             variant="grid"
           />
         </div>
+
+        {/* Collapsible Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Course Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockCoursesAIInsights}
+                  title="Course Intelligence"
+                  onInsightAction={(insight) => {
+                    toast.info(insight.title, { description: insight.description })
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockCoursesCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockCoursesPredictions}
+                  title="Course Predictions"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Create Course Dialog */}

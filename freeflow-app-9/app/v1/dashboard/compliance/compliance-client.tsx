@@ -46,6 +46,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
@@ -203,6 +209,8 @@ const copyToClipboard = async (text: string) => {
 }
 
 export default function ComplianceClient() {
+  // Collapsible insights panel state
+  const insightsPanel = useInsightsPanel(false)
   // Demo mode detection for investor demos
   const { data: nextAuthSession, status: sessionStatus } = useSession()
   const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
@@ -1683,6 +1691,10 @@ export default function ComplianceClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={handleExport} aria-label="Export data">
                   <Download className="w-4 h-4 mr-2" />
                 Export Report
@@ -4308,6 +4320,50 @@ export default function ComplianceClient() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Enhanced Competitive Upgrade Components - Collapsible */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel
+          title="Compliance Intelligence & Analytics"
+          defaultOpen={true}
+          className="mt-8 max-w-[1800px] mx-auto px-6"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={complianceAIInsights}
+                title="Compliance Intelligence"
+                onInsightAction={(id) => toast.success(`Insight action: ${id}`)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={complianceCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={compliancePredictions}
+                title="Compliance Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={complianceActivities}
+              title="Compliance Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={complianceQuickActionsBase.map(action => ({
+                ...action,
+                onClick: () => toast.success(`Action: ${action.label}`)
+              }))}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
     </div>
   )
 }

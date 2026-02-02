@@ -92,6 +92,7 @@ import { format, formatDistanceToNow, isAfter, isBefore, isToday, addDays } from
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // TanStack Query hooks for real database operations
 import {
@@ -366,6 +367,9 @@ function downloadFile(content: string, filename: string, mimeType: string): void
 // ============================================================================
 
 export function TasksClient() {
+  // Insights panel hook
+  const insightsPanel = useInsightsPanel(false)
+
   // Fetch tasks from Supabase with TanStack Query
   const { data: tasksData, isLoading, error, refetch } = useTasks()
 
@@ -864,6 +868,7 @@ export function TasksClient() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
             {/* Export Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -1437,6 +1442,76 @@ export function TasksClient() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Collapsible Insights Panel */}
+        <CollapsibleInsightsPanel
+          title="Task Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <ListTodo className="h-4 w-4 text-blue-600" />
+                Task Statistics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Total Tasks</span>
+                <span className="font-semibold">{stats?.total || tasks.length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">In Progress</span>
+                <span className="font-semibold text-blue-600">{stats?.in_progress || tasks.filter(t => t.status === 'in_progress').length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Completed</span>
+                <span className="font-semibold text-green-600">{stats?.completed || tasks.filter(t => t.status === 'completed').length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Overdue</span>
+                <span className="font-semibold text-red-600">{stats?.overdue || tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'completed').length}</span>
+              </div>
+              {stats?.completionRate !== undefined && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Completion Rate</span>
+                  <span className="font-semibold">{Math.round(stats.completionRate)}%</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                AI Recommendations
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {(stats?.overdue || 0) > 0 && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {stats?.overdue} overdue task(s) - prioritize these immediately
+                </p>
+              )}
+              {tasks.filter(t => t.priority === 'urgent').length > 0 && (
+                <p className="text-sm text-amber-600 dark:text-amber-400">
+                  {tasks.filter(t => t.priority === 'urgent').length} urgent task(s) need attention
+                </p>
+              )}
+              {(stats?.completionRate || 0) >= 80 && (
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  Great progress! Completion rate is at {Math.round(stats?.completionRate || 0)}%
+                </p>
+              )}
+              {tasks.length === 0 && (
+                <p className="text-sm text-blue-600 dark:text-blue-400">
+                  No tasks yet - create your first task to get started!
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </CollapsibleInsightsPanel>
       </div>
     </div>
   )

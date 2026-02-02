@@ -72,6 +72,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Import mock data from centralized adapters
 
 
@@ -477,6 +483,7 @@ const mockAuditActivities = [
 ]
 
 export default function AuditClient({ initialEvents, initialComplianceChecks }: AuditClientProps) {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('events')
   const [selectedAction, setSelectedAction] = useState<AuditAction | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -1105,6 +1112,10 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
             <p className="text-slate-400">Security Information and Event Management • Splunk-Level Analysis</p>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button
               variant={isStreaming ? "destructive" : "default"}
               onClick={() => setIsStreaming(!isStreaming)}
@@ -2529,41 +2540,45 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockAuditAIInsights}
-              title="Audit Intelligence"
-              onInsightAction={(insight) => toast.info(`${insight.title} action initiated`)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockAuditCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockAuditPredictions}
-              title="Audit Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockAuditAIInsights}
+                  title="Audit Intelligence"
+                  onInsightAction={(insight) => toast.info(`${insight.title} action initiated`)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockAuditCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockAuditPredictions}
+                  title="Audit Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockAuditActivities}
-            title="Audit Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={[
-              { id: '1', label: 'Run Audit', icon: 'play', action: handleRunAudit, variant: 'default' as const },
-              { id: '2', label: 'Export', icon: 'download', action: handleExportAudit, variant: 'outline' as const },
-              { id: '3', label: 'Schedule', icon: 'calendar', action: handleScheduleAudit, variant: 'default' as const },
-            ]}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockAuditActivities}
+                title="Audit Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={[
+                  { id: '1', label: 'Run Audit', icon: 'play', action: handleRunAudit, variant: 'default' as const },
+                  { id: '2', label: 'Export', icon: 'download', action: handleExportAudit, variant: 'outline' as const },
+                  { id: '3', label: 'Schedule', icon: 'calendar', action: handleScheduleAudit, variant: 'default' as const },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Event Detail Dialog */}
         <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>

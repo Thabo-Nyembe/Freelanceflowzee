@@ -38,6 +38,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // ============================================================================
 // TYPE DEFINITIONS - Monday.com Level Milestone Management
 // ============================================================================
@@ -701,6 +707,7 @@ export default function MilestonesClient() {
   const [showRisksDialog, setShowRisksDialog] = useState(false)
   const [showArchiveDialog, setShowArchiveDialog] = useState(false)
   const [showPurgeDialog, setShowPurgeDialog] = useState(false)
+  const insightsPanel = useInsightsPanel(false)
 
   // Quick actions with proper dialog openers
   const milestonesQuickActions = [

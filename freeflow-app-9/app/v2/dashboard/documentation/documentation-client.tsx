@@ -44,6 +44,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Type definitions
 interface DocSpace {
   id: string
@@ -347,6 +353,7 @@ const mockDocsActivities = [
 ]
 
 export default function DocumentationClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSpace, setSelectedSpace] = useState<DocSpace | null>(null)
@@ -858,6 +865,10 @@ export default function DocumentationClient() {
                     className="pl-10 w-64 bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </div>
+                <InsightsToggleButton
+                  isOpen={insightsPanel.isOpen}
+                  onToggle={insightsPanel.toggle}
+                />
                 <Button onClick={() => setShowNewSpace(true)} className="bg-white text-purple-600 hover:bg-purple-50">
                   <Plus className="h-4 w-4 mr-2" />
                   New Space
@@ -2210,6 +2221,33 @@ export default function DocumentationClient() {
             variant="grid"
           />
         </div>
+
+        {/* Collapsible Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Documentation Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockDocsAIInsights}
+                  title="Documentation Intelligence"
+                  onInsightAction={(insight) => {
+                    toast.info(insight.title, { description: insight.description })
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockDocsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockDocsPredictions}
+                  title="Documentation Predictions"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Version History Dialog */}
         <Dialog open={showVersions} onOpenChange={setShowVersions}>

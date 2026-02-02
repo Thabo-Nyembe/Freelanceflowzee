@@ -20,9 +20,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock,
   MapPin, Users, Video, Bell, Download, Share2, Search, Settings,
-  List, CalendarDays, Link2, CheckCircle2, Edit2, Trash2, Copy, Zap
+  List, CalendarDays, Link2, CheckCircle2, Edit2, Trash2, Copy, Zap, TrendingUp, Activity
 } from 'lucide-react'
 import { useCalendarEvents, type CalendarEvent, type EventType, type EventStatus, type CreateCalendarEventInput } from '@/lib/hooks/use-calendar-events'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // ============================================================================
 // CONSTANTS
@@ -122,6 +123,7 @@ interface CalendarClientProps {
 }
 
 export default function CalendarClient({ initialEvents = [] }: CalendarClientProps) {
+  const insightsPanel = useInsightsPanel(false)
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'agenda'>('month')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
@@ -485,6 +487,7 @@ export default function CalendarClient({ initialEvents = [] }: CalendarClientPro
             <p className="text-gray-600 dark:text-gray-400">Manage your schedule and events</p>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
             <Button variant="outline" onClick={() => setShowQuickAddDialog(true)}>
               <Zap className="h-4 w-4 mr-2" />
               Quick Add
@@ -932,6 +935,83 @@ export default function CalendarClient({ initialEvents = [] }: CalendarClientPro
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Collapsible Insights Panel */}
+        <CollapsibleInsightsPanel
+          title="Calendar Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4 text-blue-600" />
+                Event Statistics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Total Events</span>
+                <span className="font-semibold">{stats.total}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Today</span>
+                <span className="font-semibold text-blue-600">{stats.today}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">This Week</span>
+                <span className="font-semibold">{stats.thisWeek}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Upcoming</span>
+                <span className="font-semibold text-green-600">{stats.upcoming}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Confirmed</span>
+                <span className="font-semibold">{stats.confirmed}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Hours This Week</span>
+                <span className="font-semibold">{stats.hoursThisWeek}h</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Activity className="h-4 w-4 text-green-600" />
+                AI Recommendations
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {stats.today > 5 && (
+                <p className="text-sm text-amber-600 dark:text-amber-400">
+                  Busy day ahead with {stats.today} events - consider prioritizing
+                </p>
+              )}
+              {parseFloat(stats.hoursThisWeek) > 40 && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  Over 40 hours of meetings this week - consider blocking focus time
+                </p>
+              )}
+              {stats.upcoming === 0 && (
+                <p className="text-sm text-blue-600 dark:text-blue-400">
+                  No upcoming events scheduled - great time for planning
+                </p>
+              )}
+              {stats.confirmed < stats.total && (
+                <p className="text-sm text-amber-600 dark:text-amber-400">
+                  {stats.total - stats.confirmed} event(s) pending confirmation
+                </p>
+              )}
+              {stats.today === 0 && (
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  No events today - enjoy your free time!
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </CollapsibleInsightsPanel>
       </div>
     </div>
   )

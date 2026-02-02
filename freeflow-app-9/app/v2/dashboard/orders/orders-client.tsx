@@ -76,6 +76,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 
 
@@ -622,6 +623,7 @@ const mockOrdersActivities = [
 // Quick actions will be defined inside the component with dialog handlers
 
 export default function OrdersClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('orders')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all')
@@ -945,6 +947,10 @@ export default function OrdersClient() {
               <Plus className="w-4 h-4 mr-2" />
               Create Order
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -1996,37 +2002,41 @@ export default function OrdersClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockOrdersAIInsights}
-              title="Order Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockOrdersCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockOrdersPredictions}
-              title="Order Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Order Intelligence" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockOrdersAIInsights}
+                  title="Order Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockOrdersCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockOrdersPredictions}
+                  title="Order Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockOrdersActivities}
-            title="Order Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={quickActionsWithHandlers}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockOrdersActivities}
+                title="Order Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={quickActionsWithHandlers}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* New Order Dialog */}
         <Dialog open={showNewOrderDialog} onOpenChange={setShowNewOrderDialog}>

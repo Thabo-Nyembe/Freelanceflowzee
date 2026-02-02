@@ -34,6 +34,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // ============================================================================
 // TYPE DEFINITIONS - Auth0 Level API Management
 // ============================================================================
@@ -874,6 +880,7 @@ const mockApiKeysQuickActions = [
 // ============================================================================
 
 export default function ApiKeysClient() {
+  const insightsPanel = useInsightsPanel(false)
   // Supabase hook for real data
   const {
     keys: apiKeysFromDb,
@@ -1095,6 +1102,10 @@ export default function ApiKeysClient() {
                 <Plus className="w-4 h-4 mr-2" />
                 Generate Key
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
         </div>
@@ -3135,6 +3146,31 @@ export default function ApiKeysClient() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="API Key Security Insights" defaultOpen={true}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[
+                    { id: '1', type: 'warning', title: 'Expiring Keys', description: '3 API keys will expire within the next 30 days.', priority: 'high', timestamp: new Date().toISOString(), category: 'Security' },
+                    { id: '2', type: 'success', title: 'Security Score', description: 'Your API security posture is rated excellent (92/100).', priority: 'medium', timestamp: new Date().toISOString(), category: 'Security' },
+                    { id: '3', type: 'info', title: 'Usage Patterns', description: 'API usage is 15% higher than last month average.', priority: 'low', timestamp: new Date().toISOString(), category: 'Analytics' },
+                  ]}
+                />
+              </div>
+              <ActivityFeed
+                activities={[
+                  { id: '1', user: 'Security', action: 'rotated', target: 'production key', timestamp: '2h ago', type: 'success' },
+                  { id: '2', user: 'Admin', action: 'created', target: 'new API key', timestamp: '6h ago', type: 'info' },
+                  { id: '3', user: 'System', action: 'blocked', target: 'suspicious request', timestamp: '1d ago', type: 'warning' },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
     </div>
   )

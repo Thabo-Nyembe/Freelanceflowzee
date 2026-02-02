@@ -34,6 +34,7 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 const logger = createFeatureLogger('PerformanceAnalytics')
 
@@ -41,6 +42,7 @@ export default function PerformanceAnalyticsPage() {
   // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
+  const insightsPanel = useInsightsPanel(false)
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -313,8 +315,52 @@ export default function PerformanceAnalyticsPage() {
               <Download className="h-4 w-4 mr-2" />
               Export Report
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
+
+        {/* AI Insights Panel */}
+        <CollapsibleInsightsPanel
+          title="Performance Insights"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-emerald-200 dark:border-emerald-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-emerald-900 dark:text-emerald-300">Revenue Trend</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                  Revenue increased by {performanceMetrics.revenue.change}% compared to last period. Strong growth trajectory maintained.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-blue-900 dark:text-blue-300">Productivity Score</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-blue-700 dark:text-blue-400">
+                  Team efficiency at {performanceMetrics.productivity.efficiency}% with {performanceMetrics.productivity.billableHours} billable hours logged.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border-purple-200 dark:border-purple-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-purple-900 dark:text-purple-300">Client Health</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-purple-700 dark:text-purple-400">
+                  {performanceMetrics.clients.retention}% retention rate with {performanceMetrics.clients.satisfaction} satisfaction score.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </CollapsibleInsightsPanel>
 
         {/* Key Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">

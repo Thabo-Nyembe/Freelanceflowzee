@@ -72,8 +72,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -541,6 +540,7 @@ interface DbPoll {
 // ============================================================================
 
 export default function PollsClient() {
+  const insightsPanel = useInsightsPanel(false)
   // Hooks
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
@@ -824,6 +824,10 @@ export default function PollsClient() {
                 <Plus className="w-4 h-4" />
                 Create Form
               </button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
 
@@ -2150,37 +2154,41 @@ export default function PollsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockPollsAIInsights}
-              title="Survey Intelligence"
-              onInsightAction={(insight) => toast.info("Insight: " + insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockPollsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockPollsPredictions}
-              title="Response Rate Forecast"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Survey Intelligence" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockPollsAIInsights}
+                  title="Survey Intelligence"
+                  onInsightAction={(insight) => toast.info("Insight: " + insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockPollsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockPollsPredictions}
+                  title="Response Rate Forecast"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockPollsActivities}
-            title="Survey Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={pollsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockPollsActivities}
+                title="Survey Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={pollsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Create Form Dialog */}

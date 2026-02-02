@@ -65,8 +65,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 // Types
 type IdeaStatus = 'new' | 'under_review' | 'planned' | 'in_progress' | 'shipped' | 'declined' | 'duplicate'
@@ -468,6 +471,7 @@ interface FeedbackClientProps {
 }
 
 export default function FeedbackClient({ initialFeedback }: FeedbackClientProps) {
+  const insightsPanel = useInsightsPanel(false)
 
   const { user } = useAuth()
 

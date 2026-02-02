@@ -67,6 +67,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
@@ -601,6 +607,7 @@ const mockAppStoreActivities = [
 // ============================================================================
 
 export default function AppStoreClient() {
+  const insightsPanel = useInsightsPanel(false)
 
   const [activeTab, setActiveTab] = useState('discover')
   const [apps, setApps] = useState<App[]>(mockApps)
@@ -1008,6 +1015,10 @@ export default function AppStoreClient() {
                 <Package className="w-4 h-4 mr-2" />
                 My Apps
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
 
@@ -3370,6 +3381,31 @@ export default function AppStoreClient() {
           )}
         </DialogContent>
       </Dialog>
+
+        {/* Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="App Store Insights" defaultOpen={true}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[
+                    { id: '1', type: 'success', title: 'Popular Apps', description: 'Your installed apps are performing well with high engagement.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Usage' },
+                    { id: '2', type: 'info', title: 'New Releases', description: '5 new apps matching your interests were released this week.', priority: 'low', timestamp: new Date().toISOString(), category: 'Discovery' },
+                    { id: '3', type: 'warning', title: 'Updates Available', description: '3 of your installed apps have pending updates.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Maintenance' },
+                  ]}
+                />
+              </div>
+              <ActivityFeed
+                activities={[
+                  { id: '1', user: 'You', action: 'installed', target: 'new app', timestamp: '1h ago', type: 'success' },
+                  { id: '2', user: 'System', action: 'updated', target: 'Productivity Suite', timestamp: '3h ago', type: 'info' },
+                  { id: '3', user: 'App Store', action: 'featured', target: 'recommended apps', timestamp: '1d ago', type: 'info' },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
     </div>
   )
 }

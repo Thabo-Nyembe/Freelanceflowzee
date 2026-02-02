@@ -71,6 +71,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 import { useCampaigns } from '@/lib/hooks/use-campaigns'
 
 // ============================================================================
@@ -238,6 +240,7 @@ interface Notification {
 // ============================================================================
 
 export default function NotificationsClient() {
+  const insightsPanel = useInsightsPanel(false)
   const { notifications: dbNotifications, loading, createNotification, updateNotification, deleteNotification, refetch } = useNotifications()
   const { campaigns: dbCampaigns, loading: campaignsLoading } = useCampaigns({ status: 'all' })
 
@@ -252,7 +255,6 @@ export default function NotificationsClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [channelFilter, setChannelFilter] = useState<string>('all')
-  const [showInsights, setShowInsights] = useState(false)
   const [showCreateCampaign, setShowCreateCampaign] = useState(false)
   const [showCreateAutomation, setShowCreateAutomation] = useState(false)
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
@@ -717,24 +719,10 @@ export default function NotificationsClient() {
             <Button variant="outline" onClick={() => {
               toast.success('Filters panel opened')
             }}><Filter className="h-4 w-4 mr-2" />Filters</Button>
-            <Button
-              variant={showInsights ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setShowInsights(!showInsights)}
-              className={`hidden md:flex items-center gap-2 ${showInsights ? 'bg-white text-violet-600 hover:bg-white/90' : 'text-violet-100 hover:text-white hover:bg-white/10'}`}
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Smart Insights</span>
-            </Button>
-            <Button
-              variant={showInsights ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setShowInsights(!showInsights)}
-              className={`hidden md:flex items-center gap-2 ${showInsights ? 'bg-white text-violet-600 hover:bg-white/90' : 'text-violet-100 hover:text-white hover:bg-white/10'}`}
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Smart Insights</span>
-            </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => setShowCreateCampaign(true)}>
               <Plus className="h-4 w-4 mr-2" />New Campaign
             </Button>
@@ -743,22 +731,14 @@ export default function NotificationsClient() {
 
 
         {/* Collapsible Smart Insights Panel */}
-        <AnimatePresence>
-          {showInsights && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden mb-6"
-            >
-              <AIInsightsPanel
-                insights={computedInsights}
-                className="mb-0"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Smart Insights" defaultOpen={true} className="mb-6">
+            <AIInsightsPanel
+              insights={computedInsights}
+              className="mb-0"
+            />
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">

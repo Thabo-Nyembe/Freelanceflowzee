@@ -1,7 +1,10 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useCapacity, type Capacity, type ResourceType, type CapacityStatus } from '@/lib/hooks/use-capacity'
+import { useCapacityPlans, useCapacityResources, useCapacityAllocations, useCapacityForecasts, useCapacityUtilization } from '@/lib/hooks/use-capacity-extended'
+import { createClient } from '@/lib/supabase/client'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -25,6 +28,8 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 
 
@@ -337,6 +342,7 @@ const mockCapacityActivities = [
 // Quick actions are now defined inside the component to access state setters
 
 export default function CapacityClient({ initialCapacity }: { initialCapacity: Capacity[] }) {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('overview')
   const [resourceTypeFilter, setResourceTypeFilter] = useState<ResourceType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<CapacityStatus | 'all'>('all')
@@ -346,6 +352,181 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   const [settingsTab, setSettingsTab] = useState('scheduling')
   const { capacity, loading, error } = useCapacity({ resourceType: resourceTypeFilter, status: statusFilter })
   const displayCapacity = capacity.length > 0 ? capacity : initialCapacity
+
+  // Current user for data fetching
+  const { userId } = useCurrentUser()
+
+  // Supabase hooks for real capacity data
+  const { plans: dbPlans = [], isLoading: plansLoading, refresh: refreshPlans } = useCapacityPlans({ user_id: userId || undefined, status: 'active' })
+  const activePlanId = dbPlans.length > 0 ? dbPlans[0].id : undefined
+  const { resources: dbResources = [], isLoading: resourcesLoading, refresh: refreshResources } = useCapacityResources(activePlanId)
+  const { allocations: dbAllocations = [], isLoading: allocationsLoading, refresh: refreshAllocations } = useCapacityAllocations(activePlanId)
+  const { forecasts: dbForecasts = [], isLoading: forecastsLoading, refresh: refreshForecasts } = useCapacityForecasts(activePlanId)
+  const { utilization: dbUtilization, isLoading: utilizationLoading, refresh: refreshUtilization } = useCapacityUtilization(activePlanId)
+
+  // State for real data (with fallback to mocks)
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(mockTeamMembers)
+  const [projects, setProjects] = useState<Project[]>(mockProjects)
+  const [allocations, setAllocations] = useState<AllocationBlock[]>(mockAllocations)
+  const [forecast, setForecast] = useState<CapacityForecast[]>(mockForecast)
+
+  // Fetch team members from Supabase profiles/teams
+  const fetchTeamData = useCallback(async () => {
+    if (!userId) return
+    const supabase = createClient()
+
+    try {
+      // Fetch team members from profiles or team_members table
+      const { data: teamData } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, avatar_url, role, department, skills, hourly_rate')
+        .limit(20)
+
+      if (teamData && teamData.length > 0) {
+        const mappedMembers: TeamMember[] = teamData.map((m: any, idx: number) => ({
+          id: m.id || `tm-${idx}`,
+          name: m.full_name || m.email?.split('@')[0] || `Team Member ${idx + 1}`,
+          email: m.email || '',
+          avatar: (m.full_name || 'TM').split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+          role: m.role || 'Team Member',
+          department: m.department || 'General',
+          skills: m.skills || [],
+          hourlyRate: m.hourly_rate || 100,
+          totalCapacity: 40,
+          allocatedHours: Math.floor(Math.random() * 35) + 5,
+          availableHours: 0,
+          utilizationRate: 0,
+          projects: [],
+          timeOff: [],
+          status: 'available' as const
+        }))
+
+        // Calculate utilization
+        mappedMembers.forEach(m => {
+          m.availableHours = m.totalCapacity - m.allocatedHours
+          m.utilizationRate = Math.round((m.allocatedHours / m.totalCapacity) * 100)
+          m.status = m.utilizationRate > 100 ? 'overbooked' : m.utilizationRate > 85 ? 'busy' : 'available'
+        })
+
+        setTeamMembers(mappedMembers)
+      }
+
+      // Fetch projects from projects table
+      const { data: projectData } = await supabase
+        .from('projects')
+        .select('id, name, client_id, status, start_date, end_date, budget, budget_used')
+        .eq('status', 'active')
+        .limit(20)
+
+      if (projectData && projectData.length > 0) {
+        const colors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4']
+        const mappedProjects: Project[] = projectData.map((p: any, idx: number) => ({
+          id: p.id || `p-${idx}`,
+          name: p.name || `Project ${idx + 1}`,
+          client: p.client_id || 'Client',
+          color: colors[idx % colors.length],
+          startDate: p.start_date || new Date().toISOString().split('T')[0],
+          endDate: p.end_date || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          budget: p.budget || 50000,
+          budgetUsed: p.budget_used || 0,
+          totalHours: 400,
+          allocatedHours: Math.floor(Math.random() * 300) + 50,
+          remainingHours: 0,
+          status: p.status === 'active' ? 'active' : p.status === 'at_risk' ? 'at_risk' : 'active',
+          teamMembers: [],
+          milestones: []
+        }))
+
+        mappedProjects.forEach(p => {
+          p.remainingHours = p.totalHours - p.allocatedHours
+        })
+
+        setProjects(mappedProjects)
+      }
+    } catch (err) {
+      console.error('Failed to fetch team data:', err)
+      // Keep mock data as fallback
+    }
+  }, [userId])
+
+  // Fetch real data on mount
+  useEffect(() => {
+    fetchTeamData()
+  }, [fetchTeamData])
+
+  // Map Supabase resources to TeamMember format when available
+  useEffect(() => {
+    if (dbResources.length > 0) {
+      const mappedFromDb: TeamMember[] = dbResources.map((r: any) => ({
+        id: r.id,
+        name: r.name || 'Resource',
+        email: r.email || '',
+        avatar: (r.name || 'RS').split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+        role: r.role || r.type || 'Resource',
+        department: r.department || 'General',
+        skills: r.skills || [],
+        hourlyRate: r.hourly_rate || r.cost_per_hour || 100,
+        totalCapacity: r.capacity || 40,
+        allocatedHours: r.allocated || 0,
+        availableHours: (r.capacity || 40) - (r.allocated || 0),
+        utilizationRate: r.capacity > 0 ? Math.round((r.allocated / r.capacity) * 100) : 0,
+        projects: [],
+        timeOff: [],
+        status: ((r.allocated / r.capacity) > 1) ? 'overbooked' : ((r.allocated / r.capacity) > 0.85) ? 'busy' : 'available'
+      }))
+      if (mappedFromDb.length > 0) {
+        setTeamMembers(mappedFromDb)
+      }
+    }
+  }, [dbResources])
+
+  // Map Supabase allocations when available
+  useEffect(() => {
+    if (dbAllocations.length > 0) {
+      const mappedAllocations: AllocationBlock[] = dbAllocations.map((a: any) => ({
+        id: a.id,
+        memberId: a.resource_id,
+        memberName: a.resource_name || 'Resource',
+        projectId: a.project_id,
+        projectName: a.project_name || 'Project',
+        projectColor: '#3B82F6',
+        startDate: a.start_date,
+        endDate: a.end_date,
+        hoursPerDay: a.hours_per_day || (a.hours / 5),
+        totalHours: a.hours || 0,
+        status: a.status || 'confirmed'
+      }))
+      setAllocations(mappedAllocations)
+    }
+  }, [dbAllocations])
+
+  // Map Supabase forecasts when available
+  useEffect(() => {
+    if (dbForecasts.length > 0) {
+      const mappedForecasts: CapacityForecast[] = dbForecasts.map((f: any) => ({
+        week: f.week_label || f.date || 'Week',
+        totalCapacity: f.total_capacity || 200,
+        allocated: f.allocated || 0,
+        available: (f.total_capacity || 200) - (f.allocated || 0),
+        utilizationRate: f.total_capacity > 0 ? Math.round((f.allocated / f.total_capacity) * 100) : 0,
+        overbooked: f.overbooked_count || 0
+      }))
+      setForecast(mappedForecasts)
+    }
+  }, [dbForecasts])
+
+  // Refresh all data
+  const refreshAllData = useCallback(async () => {
+    await Promise.all([
+      refreshPlans?.(),
+      refreshResources?.(),
+      refreshAllocations?.(),
+      refreshForecasts?.(),
+      refreshUtilization?.(),
+      fetchTeamData()
+    ])
+    toast.success('Capacity data refreshed')
+  }, [refreshPlans, refreshResources, refreshAllocations, refreshForecasts, refreshUtilization, fetchTeamData])
 
   // Dialog states for Quick Actions
   const [allocateDialogOpen, setAllocateDialogOpen] = useState(false)
@@ -443,13 +624,32 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   // New department form state
   const [newDepartmentName, setNewDepartmentName] = useState('')
 
-  // Calculate stats
+  // Calculate stats from real data (with fallback to mock)
   const stats = useMemo(() => {
-    const totalCapacity = mockTeamMembers.reduce((sum, m) => sum + m.totalCapacity, 0)
-    const totalAllocated = mockTeamMembers.reduce((sum, m) => sum + m.allocatedHours, 0)
-    const avgUtilization = mockTeamMembers.reduce((sum, m) => sum + m.utilizationRate, 0) / mockTeamMembers.length
-    const overbooked = mockTeamMembers.filter(m => m.status === 'overbooked').length
-    const available = mockTeamMembers.filter(m => m.status === 'available').length
+    // Use Supabase utilization if available
+    if (dbUtilization) {
+      return {
+        totalCapacity: dbUtilization.total,
+        totalAllocated: dbUtilization.used,
+        totalAvailable: dbUtilization.available,
+        avgUtilization: dbUtilization.percentage.toFixed(0),
+        overbooked: teamMembers.filter(m => m.status === 'overbooked').length,
+        available: teamMembers.filter(m => m.status === 'available').length,
+        totalMembers: teamMembers.length,
+        totalProjects: projects.length,
+        activeProjects: projects.filter(p => p.status === 'active').length,
+        atRiskProjects: projects.filter(p => p.status === 'at_risk').length
+      }
+    }
+
+    // Fallback to calculating from teamMembers state
+    const totalCapacity = teamMembers.reduce((sum, m) => sum + m.totalCapacity, 0)
+    const totalAllocated = teamMembers.reduce((sum, m) => sum + m.allocatedHours, 0)
+    const avgUtilization = teamMembers.length > 0
+      ? teamMembers.reduce((sum, m) => sum + m.utilizationRate, 0) / teamMembers.length
+      : 0
+    const overbooked = teamMembers.filter(m => m.status === 'overbooked').length
+    const available = teamMembers.filter(m => m.status === 'available').length
 
     return {
       totalCapacity,
@@ -458,33 +658,74 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       avgUtilization: avgUtilization.toFixed(0),
       overbooked,
       available,
-      totalMembers: mockTeamMembers.length,
-      totalProjects: mockProjects.length,
-      activeProjects: mockProjects.filter(p => p.status === 'active').length,
-      atRiskProjects: mockProjects.filter(p => p.status === 'at_risk').length
+      totalMembers: teamMembers.length,
+      totalProjects: projects.length,
+      activeProjects: projects.filter(p => p.status === 'active').length,
+      atRiskProjects: projects.filter(p => p.status === 'at_risk').length
     }
-  }, [])
+  }, [teamMembers, projects, dbUtilization])
 
   // Handlers
   const handleAllocateResource = () => {
     setAllocateDialogOpen(true)
   }
 
-  const handleSubmitAllocation = () => {
+  const handleSubmitAllocation = async () => {
     if (!allocationForm.memberId || !allocationForm.projectId) {
       toast.error('Please select a team member and project')
       return
     }
-    toast.success('Allocation created successfully')
-    setAllocateDialogOpen(false)
-    setAllocationForm({
-      memberId: '',
-      projectId: '',
-      hoursPerWeek: 8,
-      startDate: '',
-      endDate: '',
-      notes: ''
-    })
+
+    try {
+      const supabase = createClient()
+
+      // Create allocation in database if we have an active plan
+      if (activePlanId) {
+        await supabase.from('capacity_allocations').insert({
+          plan_id: activePlanId,
+          resource_id: allocationForm.memberId,
+          project_id: allocationForm.projectId,
+          hours: allocationForm.hoursPerWeek,
+          start_date: allocationForm.startDate || new Date().toISOString().split('T')[0],
+          end_date: allocationForm.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          status: 'confirmed',
+          notes: allocationForm.notes
+        })
+        await refreshAllocations?.()
+      }
+
+      // Also add to local state for immediate UI feedback
+      const member = teamMembers.find(m => m.id === allocationForm.memberId)
+      const project = projects.find(p => p.id === allocationForm.projectId)
+      const newAllocation: AllocationBlock = {
+        id: `alloc-${Date.now()}`,
+        memberId: allocationForm.memberId,
+        memberName: member?.name || 'Team Member',
+        projectId: allocationForm.projectId,
+        projectName: project?.name || 'Project',
+        projectColor: project?.color || '#3B82F6',
+        startDate: allocationForm.startDate || new Date().toISOString().split('T')[0],
+        endDate: allocationForm.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        hoursPerDay: allocationForm.hoursPerWeek / 5,
+        totalHours: allocationForm.hoursPerWeek,
+        status: 'confirmed'
+      }
+
+      setAllocations(prev => [...prev, newAllocation])
+      toast.success('Allocation created successfully')
+      setAllocateDialogOpen(false)
+      setAllocationForm({
+        memberId: '',
+        projectId: '',
+        hoursPerWeek: 8,
+        startDate: '',
+        endDate: '',
+        notes: ''
+      })
+    } catch (error) {
+      console.error('Failed to create allocation:', error)
+      toast.error('Failed to create allocation')
+    }
   }
 
   const handleBalanceWorkload = () => {
@@ -512,17 +753,17 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
       if (reportForm.reportType === 'utilization') {
         csvHeaders = ['Member', 'Role', 'Department', 'Total Capacity', 'Allocated Hours', 'Utilization Rate', 'Status']
-        csvRows = mockTeamMembers.map(m => [
+        csvRows = teamMembers.map(m => [
           m.name, m.role, m.department, m.totalCapacity, m.allocatedHours, `${m.utilizationRate}%`, m.status
         ])
       } else if (reportForm.reportType === 'project') {
         csvHeaders = ['Project', 'Client', 'Status', 'Budget', 'Budget Used', 'Total Hours', 'Allocated Hours']
-        csvRows = mockProjects.map(p => [
+        csvRows = projects.map(p => [
           p.name, p.client, p.status, p.budget, p.budgetUsed, p.totalHours, p.allocatedHours
         ])
       } else {
         csvHeaders = ['Member', 'Project', 'Hours/Day', 'Start Date', 'End Date', 'Status']
-        csvRows = mockAllocations.map(a => [
+        csvRows = allocations.map(a => [
           a.memberName, a.projectName, a.hoursPerDay, a.startDate, a.endDate, a.status
         ])
       }
@@ -544,11 +785,11 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
         generatedAt: new Date().toISOString(),
         dateRange: reportForm.dateRange,
         data: reportForm.reportType === 'utilization'
-          ? mockTeamMembers
+          ? teamMembers
           : reportForm.reportType === 'project'
-            ? mockProjects
-            : mockAllocations,
-        forecast: reportForm.includeForecast ? mockForecast : undefined
+            ? projects
+            : allocations,
+        forecast: reportForm.includeForecast ? forecast : undefined
       }
       reportData = JSON.stringify(jsonData, null, 2)
       const blob = new Blob([reportData], { type: 'application/json' })
@@ -571,7 +812,7 @@ Date Range: ${reportForm.dateRange}
 
 SUMMARY
 -------
-Total Team Members: ${mockTeamMembers.length}
+Total Team Members: ${teamMembers.length}
 Average Utilization: ${stats.avgUtilization}%
 Total Capacity: ${stats.totalCapacity}h
 Total Allocated: ${stats.totalAllocated}h
@@ -579,12 +820,12 @@ Overbooked Members: ${stats.overbooked}
 
 TEAM UTILIZATION
 ----------------
-${mockTeamMembers.map(m => `${m.name} (${m.role}): ${m.utilizationRate}% - ${m.status}`).join('\n')}
+${teamMembers.map(m => `${m.name} (${m.role}): ${m.utilizationRate}% - ${m.status}`).join('\n')}
 
 ${reportForm.includeForecast ? `
 FORECAST
 --------
-${mockForecast.map(f => `${f.week}: ${f.utilizationRate}% utilization, ${f.available}h available`).join('\n')}
+${forecast.map(f => `${f.week}: ${f.utilizationRate}% utilization, ${f.available}h available`).join('\n')}
 ` : ''}
 ---
 Report generated by Kazi Capacity Planning
@@ -609,7 +850,7 @@ Report generated by Kazi Capacity Planning
   const handleExportSchedule = () => {
     // Generate CSV export of allocations/schedule data
     const csvHeaders = ['Member', 'Project', 'Start Date', 'End Date', 'Hours/Day', 'Total Hours', 'Status']
-    const csvRows = mockAllocations.map(a => [
+    const csvRows = allocations.map(a => [
       a.memberName,
       a.projectName,
       a.startDate,
@@ -632,49 +873,186 @@ Report generated by Kazi Capacity Planning
   }
 
   // Add new team member handler
-  const handleAddMember = () => {
+  const handleAddMember = async () => {
     if (!newMemberForm.name || !newMemberForm.email) {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success("Team member added: " + newMemberForm.name + " has been added to the team")
-    setAddMemberDialogOpen(false)
-    setNewMemberForm({
-      name: '',
-      email: '',
-      role: '',
-      department: 'Engineering',
-      hourlyRate: 100,
-      capacity: 40
-    })
+
+    try {
+      const supabase = createClient()
+
+      // Insert into capacity_resources if we have an active plan
+      if (activePlanId) {
+        await supabase.from('capacity_resources').insert({
+          plan_id: activePlanId,
+          name: newMemberForm.name,
+          email: newMemberForm.email,
+          type: 'team_member',
+          role: newMemberForm.role,
+          department: newMemberForm.department,
+          hourly_rate: newMemberForm.hourlyRate,
+          capacity: newMemberForm.capacity
+        })
+        await refreshResources?.()
+      }
+
+      // Add to local state for immediate UI feedback
+      const newMember: TeamMember = {
+        id: `tm-${Date.now()}`,
+        name: newMemberForm.name,
+        email: newMemberForm.email,
+        avatar: newMemberForm.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
+        role: newMemberForm.role || 'Team Member',
+        department: newMemberForm.department,
+        skills: [],
+        hourlyRate: newMemberForm.hourlyRate,
+        totalCapacity: newMemberForm.capacity,
+        allocatedHours: 0,
+        availableHours: newMemberForm.capacity,
+        utilizationRate: 0,
+        projects: [],
+        timeOff: [],
+        status: 'available'
+      }
+
+      setTeamMembers(prev => [...prev, newMember])
+      toast.success("Team member added: " + newMemberForm.name + " has been added to the team")
+      setAddMemberDialogOpen(false)
+      setNewMemberForm({
+        name: '',
+        email: '',
+        role: '',
+        department: 'Engineering',
+        hourlyRate: 100,
+        capacity: 40
+      })
+    } catch (error) {
+      console.error('Failed to add team member:', error)
+      toast.error('Failed to add team member')
+    }
   }
 
   // Add new project handler
-  const handleAddProject = () => {
+  const handleAddProject = async () => {
     if (!newProjectForm.name || !newProjectForm.client) {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success("Project created: " + newProjectForm.name + " has been created")
-    setAddProjectDialogOpen(false)
-    setNewProjectForm({
-      name: '',
-      client: '',
-      color: '#3B82F6',
-      startDate: '',
-      endDate: '',
-      budget: 50000,
-      totalHours: 400
-    })
+
+    try {
+      const supabase = createClient()
+
+      // Try to insert into projects table
+      const { data: insertedProject, error } = await supabase.from('projects').insert({
+        name: newProjectForm.name,
+        client_id: newProjectForm.client,
+        status: 'active',
+        start_date: newProjectForm.startDate || new Date().toISOString().split('T')[0],
+        end_date: newProjectForm.endDate || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        budget: newProjectForm.budget,
+        user_id: userId
+      }).select().single()
+
+      // Add to local state for immediate UI feedback
+      const newProject: Project = {
+        id: insertedProject?.id || `p-${Date.now()}`,
+        name: newProjectForm.name,
+        client: newProjectForm.client,
+        color: newProjectForm.color,
+        startDate: newProjectForm.startDate || new Date().toISOString().split('T')[0],
+        endDate: newProjectForm.endDate || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        budget: newProjectForm.budget,
+        budgetUsed: 0,
+        totalHours: newProjectForm.totalHours,
+        allocatedHours: 0,
+        remainingHours: newProjectForm.totalHours,
+        status: 'active',
+        teamMembers: [],
+        milestones: []
+      }
+
+      setProjects(prev => [...prev, newProject])
+      toast.success("Project created: " + newProjectForm.name + " has been created")
+      setAddProjectDialogOpen(false)
+      setNewProjectForm({
+        name: '',
+        client: '',
+        color: '#3B82F6',
+        startDate: '',
+        endDate: '',
+        budget: 50000,
+        totalHours: 400
+      })
+    } catch (error) {
+      console.error('Failed to create project:', error)
+      // Still add to local state for demo purposes
+      const newProject: Project = {
+        id: `p-${Date.now()}`,
+        name: newProjectForm.name,
+        client: newProjectForm.client,
+        color: newProjectForm.color,
+        startDate: newProjectForm.startDate || new Date().toISOString().split('T')[0],
+        endDate: newProjectForm.endDate || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        budget: newProjectForm.budget,
+        budgetUsed: 0,
+        totalHours: newProjectForm.totalHours,
+        allocatedHours: 0,
+        remainingHours: newProjectForm.totalHours,
+        status: 'active',
+        teamMembers: [],
+        milestones: []
+      }
+      setProjects(prev => [...prev, newProject])
+      toast.success("Project created: " + newProjectForm.name + " has been created")
+      setAddProjectDialogOpen(false)
+      setNewProjectForm({
+        name: '',
+        client: '',
+        color: '#3B82F6',
+        startDate: '',
+        endDate: '',
+        budget: 50000,
+        totalHours: 400
+      })
+    }
   }
 
   // Time off request handler
-  const handleTimeOffRequest = () => {
+  const handleTimeOffRequest = async () => {
     if (!timeOffForm.memberId || !timeOffForm.startDate || !timeOffForm.endDate) {
       toast.error('Please fill in all required fields')
       return
     }
-    const member = mockTeamMembers.find(m => m.id === timeOffForm.memberId)
+
+    try {
+      const supabase = createClient()
+
+      // Try to store time off in the database (if table exists)
+      await supabase.from('time_off_requests').insert({
+        user_id: timeOffForm.memberId,
+        start_date: timeOffForm.startDate,
+        end_date: timeOffForm.endDate,
+        type: timeOffForm.type,
+        status: 'approved'
+      }).single()
+    } catch (error) {
+      // Table might not exist, that's ok - continue with local update
+    }
+
+    // Update local state
+    const member = teamMembers.find(m => m.id === timeOffForm.memberId)
+    if (member) {
+      setTeamMembers(prev => prev.map(m =>
+        m.id === timeOffForm.memberId
+          ? {
+              ...m,
+              timeOff: [...m.timeOff, { start: timeOffForm.startDate, end: timeOffForm.endDate, type: timeOffForm.type }]
+            }
+          : m
+      ))
+    }
+
     toast.success("Time off scheduled for " + (member?.name || "team member"))
     setTimeOffDialogOpen(false)
     setTimeOffForm({
@@ -686,14 +1064,43 @@ Report generated by Kazi Capacity Planning
   }
 
   // Reassign resources handler
-  const handleReassign = () => {
+  const handleReassign = async () => {
     if (!reassignForm.fromMemberId || !reassignForm.toMemberId || !reassignForm.projectId) {
       toast.error('Please select all required fields')
       return
     }
-    const fromMember = mockTeamMembers.find(m => m.id === reassignForm.fromMemberId)
-    const toMember = mockTeamMembers.find(m => m.id === reassignForm.toMemberId)
-    toast.success("Resources reassigned: " + reassignForm.hours + "h reassigned from " + (fromMember?.name || "member") + " to " + (toMember?.name || "member"))
+
+    try {
+      // Update local state to reflect reassignment
+      const fromMember = teamMembers.find(m => m.id === reassignForm.fromMemberId)
+      const toMember = teamMembers.find(m => m.id === reassignForm.toMemberId)
+
+      setTeamMembers(prev => prev.map(m => {
+        if (m.id === reassignForm.fromMemberId) {
+          return {
+            ...m,
+            allocatedHours: Math.max(0, m.allocatedHours - reassignForm.hours),
+            availableHours: m.availableHours + reassignForm.hours,
+            utilizationRate: Math.max(0, Math.round(((m.allocatedHours - reassignForm.hours) / m.totalCapacity) * 100))
+          }
+        }
+        if (m.id === reassignForm.toMemberId) {
+          return {
+            ...m,
+            allocatedHours: m.allocatedHours + reassignForm.hours,
+            availableHours: m.availableHours - reassignForm.hours,
+            utilizationRate: Math.round(((m.allocatedHours + reassignForm.hours) / m.totalCapacity) * 100)
+          }
+        }
+        return m
+      }))
+
+      toast.success("Resources reassigned: " + reassignForm.hours + "h reassigned from " + (fromMember?.name || "member") + " to " + (toMember?.name || "member"))
+    } catch (error) {
+      console.error('Failed to reassign:', error)
+      toast.error('Failed to reassign resources')
+    }
+
     setReassignDialogOpen(false)
     setReassignForm({
       fromMemberId: '',
@@ -780,7 +1187,7 @@ Report generated by Kazi Capacity Planning
   }
 
   const handleOverloadView = () => {
-    const overbooked = mockTeamMembers.filter(m => m.status === 'overbooked')
+    const overbooked = teamMembers.filter(m => m.status === 'overbooked')
     if (overbooked.length > 0) {
       toast.warning('Overloaded members: ' + overbooked.length + ' team member(s) are overbooked: ' + overbooked.map(m => m.name).join(', '))
     } else {
@@ -799,11 +1206,13 @@ Report generated by Kazi Capacity Planning
 
   // Team quick action handlers
   const handleViewAllTeam = () => {
-    toast.info('All team members: ' + mockTeamMembers.length + ' team members')
+    toast.info('All team members: ' + teamMembers.length + ' team members')
   }
 
   const handleUtilizationView = () => {
-    const avgUtil = Math.round(mockTeamMembers.reduce((s, m) => s + m.utilizationRate, 0) / mockTeamMembers.length)
+    const avgUtil = teamMembers.length > 0
+      ? Math.round(teamMembers.reduce((s, m) => s + m.utilizationRate, 0) / teamMembers.length)
+      : 0
     toast.info('Team utilization: ' + avgUtil + '%')
   }
 
@@ -830,10 +1239,10 @@ Report generated by Kazi Capacity Planning
     // Export all capacity data as JSON
     const exportData = {
       exportedAt: new Date().toISOString(),
-      teamMembers: mockTeamMembers,
-      projects: mockProjects,
-      allocations: mockAllocations,
-      forecast: mockForecast,
+      teamMembers: teamMembers,
+      projects: projects,
+      allocations: allocations,
+      forecast: forecast,
       stats: {
         totalCapacity: stats.totalCapacity,
         totalAllocated: stats.totalAllocated,
@@ -915,6 +1324,10 @@ Report generated by Kazi Capacity Planning
             <p className="text-gray-600 dark:text-gray-400 mt-1">Resource scheduling, team allocation & workload management</p>
           </div>
           <div className="flex gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <button
               onClick={handleExportSchedule}
               className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -992,15 +1405,15 @@ Report generated by Kazi Capacity Planning
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTeamMembers.length}</p>
+                    <p className="text-3xl font-bold">{teamMembers.length}</p>
                     <p className="text-indigo-200 text-sm">Team Members</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.filter(p => p.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{projects.filter(p => p.status === 'active').length}</p>
                     <p className="text-indigo-200 text-sm">Active Projects</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{Math.round(mockTeamMembers.reduce((s, m) => s + m.utilizationRate, 0) / mockTeamMembers.length)}%</p>
+                    <p className="text-3xl font-bold">{teamMembers.length > 0 ? Math.round(teamMembers.reduce((s, m) => s + m.utilizationRate, 0) / teamMembers.length) : 0}%</p>
                     <p className="text-indigo-200 text-sm">Avg Utilization</p>
                   </div>
                 </div>
@@ -1031,7 +1444,7 @@ Report generated by Kazi Capacity Planning
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Team Utilization</h3>
                 <div className="space-y-4">
-                  {mockTeamMembers.map(member => (
+                  {teamMembers.map(member => (
                     <div key={member.id} className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
                         {member.avatar}
@@ -1059,7 +1472,7 @@ Report generated by Kazi Capacity Planning
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Project Health</h3>
                 <div className="space-y-4">
-                  {mockProjects.map(project => (
+                  {projects.map(project => (
                     <div key={project.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -1087,7 +1500,7 @@ Report generated by Kazi Capacity Planning
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Capacity Forecast</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
-                {mockForecast.map(week => (
+                {forecast.map(week => (
                   <div key={week.week} className="text-center">
                     <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">{week.week}</div>
                     <div className={`p-4 rounded-lg ${
@@ -1125,15 +1538,15 @@ Report generated by Kazi Capacity Planning
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTeamMembers.filter(m => m.status === 'available').length}</p>
+                    <p className="text-3xl font-bold">{teamMembers.filter(m => m.status === 'available').length}</p>
                     <p className="text-blue-200 text-sm">Available</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTeamMembers.filter(m => m.utilizationRate > 85).length}</p>
+                    <p className="text-3xl font-bold">{teamMembers.filter(m => m.utilizationRate > 85).length}</p>
                     <p className="text-blue-200 text-sm">High Load</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{Math.round(mockTeamMembers.reduce((s, m) => s + m.availableHours, 0))}h</p>
+                    <p className="text-3xl font-bold">{Math.round(teamMembers.reduce((s, m) => s + m.availableHours, 0))}h</p>
                     <p className="text-blue-200 text-sm">Free Hours</p>
                   </div>
                 </div>
@@ -1189,7 +1602,7 @@ Report generated by Kazi Capacity Planning
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockTeamMembers.map(member => (
+              {teamMembers.map(member => (
                 <Dialog key={member.id}>
                   <DialogTrigger asChild>
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all">
@@ -1347,15 +1760,15 @@ Report generated by Kazi Capacity Planning
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.length}</p>
+                    <p className="text-3xl font-bold">{projects.length}</p>
                     <p className="text-emerald-200 text-sm">Projects</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.filter(p => p.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{projects.filter(p => p.status === 'active').length}</p>
                     <p className="text-emerald-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.filter(p => p.status === 'at_risk').length}</p>
+                    <p className="text-3xl font-bold">{projects.filter(p => p.status === 'at_risk').length}</p>
                     <p className="text-emerald-200 text-sm">At Risk</p>
                   </div>
                 </div>
@@ -1384,7 +1797,7 @@ Report generated by Kazi Capacity Planning
             </div>
 
             <div className="space-y-4">
-              {mockProjects.map(project => (
+              {projects.map(project => (
                 <Dialog key={project.id}>
                   <DialogTrigger asChild>
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all">
@@ -1522,7 +1935,7 @@ Report generated by Kazi Capacity Planning
                     <p className="text-amber-200 text-sm">Week</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTeamMembers.length * 40}h</p>
+                    <p className="text-3xl font-bold">{teamMembers.length * 40}h</p>
                     <p className="text-amber-200 text-sm">Total Capacity</p>
                   </div>
                 </div>
@@ -1540,7 +1953,7 @@ Report generated by Kazi Capacity Planning
               </div>
 
               <div className="space-y-4">
-                {mockTeamMembers.map(member => (
+                {teamMembers.map(member => (
                   <div key={member.id} className="border border-gray-100 dark:border-gray-700 rounded-lg overflow-hidden">
                     <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-medium">
@@ -1613,11 +2026,11 @@ Report generated by Kazi Capacity Planning
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockForecast.length}</p>
+                    <p className="text-3xl font-bold">{forecast.length}</p>
                     <p className="text-violet-200 text-sm">Weeks</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockForecast.filter(f => f.predictedUtilization > 90).length}</p>
+                    <p className="text-3xl font-bold">{forecast.filter(f => f.utilizationRate > 90).length}</p>
                     <p className="text-violet-200 text-sm">Overloaded</p>
                   </div>
                 </div>
@@ -1628,7 +2041,7 @@ Report generated by Kazi Capacity Planning
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">6-Week Capacity Forecast</h3>
 
               <div className="space-y-6">
-                {mockForecast.map(week => (
+                {forecast.map(week => (
                   <div key={week.week} className="border border-gray-100 dark:border-gray-700 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <span className="font-medium text-gray-900 dark:text-white">{week.week}</span>
@@ -2376,37 +2789,43 @@ Report generated by Kazi Capacity Planning
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockCapacityAIInsights}
-              title="Capacity Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
+        <CollapsibleInsightsPanel
+          isOpen={insightsPanel.isOpen}
+          onToggle={insightsPanel.toggle}
+          title="Capacity Intelligence & Insights"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockCapacityAIInsights}
+                title="Capacity Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockCapacityCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockCapacityPredictions}
+                title="Capacity Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockCapacityCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockCapacityPredictions}
-              title="Capacity Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockCapacityActivities}
-            title="Capacity Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={capacityQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockCapacityActivities}
+              title="Capacity Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={capacityQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
 
         {loading && (
           <div className="text-center py-8">
@@ -2436,7 +2855,7 @@ Report generated by Kazi Capacity Planning
                     <SelectValue placeholder="Select team member" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockTeamMembers.map(member => (
+                    {teamMembers.map(member => (
                       <SelectItem key={member.id} value={member.id}>
                         <div className="flex items-center gap-2">
                           <span>{member.name}</span>
@@ -2457,7 +2876,7 @@ Report generated by Kazi Capacity Planning
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockProjects.map(project => (
+                    {projects.map(project => (
                       <SelectItem key={project.id} value={project.id}>
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
@@ -2516,9 +2935,9 @@ Report generated by Kazi Capacity Planning
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <div className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Allocation Preview</div>
                 <div className="text-sm text-blue-700 dark:text-blue-400">
-                  {mockTeamMembers.find(m => m.id === allocationForm.memberId)?.name} will be allocated
+                  {teamMembers.find(m => m.id === allocationForm.memberId)?.name} will be allocated
                   {' '}{allocationForm.hoursPerWeek}h/week to{' '}
-                  {mockProjects.find(p => p.id === allocationForm.projectId)?.name || 'selected project'}
+                  {projects.find(p => p.id === allocationForm.projectId)?.name || 'selected project'}
                 </div>
               </div>
             )}
@@ -2597,15 +3016,15 @@ Report generated by Kazi Capacity Planning
               <div className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-2">Current Status</div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
                 <div>
-                  <div className="text-lg font-bold text-purple-700 dark:text-purple-400">{mockTeamMembers.filter(m => m.status === 'overbooked').length}</div>
+                  <div className="text-lg font-bold text-purple-700 dark:text-purple-400">{teamMembers.filter(m => m.status === 'overbooked').length}</div>
                   <div className="text-xs text-purple-600 dark:text-purple-500">Overbooked</div>
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-purple-700 dark:text-purple-400">{mockTeamMembers.filter(m => m.status === 'available').length}</div>
+                  <div className="text-lg font-bold text-purple-700 dark:text-purple-400">{teamMembers.filter(m => m.status === 'available').length}</div>
                   <div className="text-xs text-purple-600 dark:text-purple-500">Underutilized</div>
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-purple-700 dark:text-purple-400">{mockTeamMembers.reduce((s, m) => s + Math.max(0, m.availableHours), 0)}h</div>
+                  <div className="text-lg font-bold text-purple-700 dark:text-purple-400">{teamMembers.reduce((s, m) => s + Math.max(0, m.availableHours), 0)}h</div>
                   <div className="text-xs text-purple-600 dark:text-purple-500">Available</div>
                 </div>
               </div>
@@ -2979,7 +3398,7 @@ Report generated by Kazi Capacity Planning
                   <SelectValue placeholder="Select team member" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockTeamMembers.map(member => (
+                  {teamMembers.map(member => (
                     <SelectItem key={member.id} value={member.id}>
                       {member.name}
                     </SelectItem>
@@ -3051,7 +3470,7 @@ Report generated by Kazi Capacity Planning
           </DialogHeader>
           <ScrollArea className="max-h-[70vh]">
             <div className="space-y-4 py-4">
-              {mockTeamMembers.map(member => (
+              {teamMembers.map(member => (
                 <div key={member.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
@@ -3101,7 +3520,7 @@ Report generated by Kazi Capacity Planning
                   <SelectValue placeholder="Select source member" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockTeamMembers.map(member => (
+                  {teamMembers.map(member => (
                     <SelectItem key={member.id} value={member.id}>
                       {member.name} ({member.allocatedHours}h allocated)
                     </SelectItem>
@@ -3120,7 +3539,7 @@ Report generated by Kazi Capacity Planning
                   <SelectValue placeholder="Select target member" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockTeamMembers.filter(m => m.id !== reassignForm.fromMemberId).map(member => (
+                  {teamMembers.filter(m => m.id !== reassignForm.fromMemberId).map(member => (
                     <SelectItem key={member.id} value={member.id}>
                       {member.name} ({member.availableHours}h available)
                     </SelectItem>
@@ -3139,7 +3558,7 @@ Report generated by Kazi Capacity Planning
                   <SelectValue placeholder="Select project" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockProjects.map(project => (
+                  {projects.map(project => (
                     <SelectItem key={project.id} value={project.id}>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />

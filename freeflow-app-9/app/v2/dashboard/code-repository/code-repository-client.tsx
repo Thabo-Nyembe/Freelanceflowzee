@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,7 +44,11 @@ import {
   Loader2,
   FileCode,
   Folder,
-  ChevronRight
+  ChevronRight,
+  TrendingUp,
+  Activity,
+  BarChart3,
+  Zap
 } from 'lucide-react'
 
 // Types
@@ -514,6 +519,9 @@ const formatDate = (dateString: string) => {
 }
 
 export default function CodeRepositoryClient() {
+  // Insights Panel Hook
+  const insightsPanel = useInsightsPanel(false)
+
   // State for dialogs
   const [createRepoDialogOpen, setCreateRepoDialogOpen] = useState(false)
   const [cloneRepoDialogOpen, setCloneRepoDialogOpen] = useState(false)
@@ -874,6 +882,7 @@ export default function CodeRepositoryClient() {
           <p className="text-muted-foreground">Manage your code, branches, and pull requests</p>
         </div>
         <div className="flex items-center gap-2">
+          <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
           <Button variant="outline" onClick={handleRefreshData} disabled={isLoading}>
             {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
             Refresh
@@ -2103,6 +2112,54 @@ export default function CodeRepositoryClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Collapsible Insights Panel */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="AI Insights & Analytics" defaultOpen={true}>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Commits</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">2,847</div>
+                <p className="text-xs text-muted-foreground">+23% from last month</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Build Speed</CardTitle>
+                <Zap className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">3.2min</div>
+                <p className="text-xs text-muted-foreground">Average build time</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Code Coverage</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">87.4%</div>
+                <p className="text-xs text-muted-foreground">Test coverage score</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Contributors</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">12</div>
+                <p className="text-xs text-muted-foreground">This week</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -17,7 +17,7 @@ import {
   Layers, Calendar, BarChart3, Bell, Folder, Edit, Trash2, Copy, Eye, History, Star, TrendingUp,
   Webhook, Terminal, Key, Shield, AlertCircle, Download, Workflow,
   LayoutGrid, List, Sparkles,
-  Sliders, Archive
+  Sliders, Archive, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -31,6 +31,17 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
+// Database Query Imports
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Connectors')
 
 // ============================================================================
 // TYPE DEFINITIONS - Zapier Level Integration Platform
@@ -646,36 +657,11 @@ const mockConnectorsActivities = [
   { id: '3', user: 'API Specialist', action: 'Upgraded', target: 'Salesforce API to v58', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockConnectorsQuickActions = [
-  { id: '1', label: 'New Zap', icon: 'plus', action: () => {
-    // Real functionality: Open a new Zap creation dialog
-    toast.success('Zap creation modal opened')
-  }, variant: 'default' as const },
-  { id: '2', label: 'Test', icon: 'play', action: () => {
-    // Real functionality: Run test on selected Zap
-    toast.promise(
-      fetch('/api/connectors/test', { method: 'POST' }).then(res => {
-        if (!res.ok) throw new Error('Test execution failed')
-        return res.json()
-      }),
-      {
-        loading: 'Running test...',
-        success: 'Test completed successfully',
-        error: 'Test failed'
-      }
-    )
-  }, variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'list', action: () => {
-    // Real functionality: Fetch and display logs
-    toast.promise(
-      fetch('/api/connectors/logs').then(res => res.json()),
-      {
-        loading: 'Loading logs...',
-        success: 'Logs loaded',
-        error: 'Failed to load logs'
-      }
-    )
-  }, variant: 'outline' as const },
+// Quick actions will be built inside the component to access handlers
+const mockConnectorsQuickActionsConfig = [
+  { id: '1', label: 'New Zap', icon: 'plus', actionKey: 'newZap', variant: 'default' as const },
+  { id: '2', label: 'Test', icon: 'play', actionKey: 'test', variant: 'default' as const },
+  { id: '3', label: 'Logs', icon: 'list', actionKey: 'logs', variant: 'outline' as const },
 ]
 
 // ============================================================================
@@ -683,6 +669,7 @@ const mockConnectorsQuickActions = [
 // ============================================================================
 
 export default function ConnectorsClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedZap, setSelectedZap] = useState<Zap | null>(null)
@@ -693,48 +680,184 @@ export default function ConnectorsClient() {
   const [statusFilter, setStatusFilter] = useState<ZapStatus | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Dashboard stats
-  const stats = useMemo(() => ({
-    totalZaps: mockZaps.length,
-    activeZaps: mockZaps.filter(z => z.status === 'on').length,
-    totalTasks: mockZaps.reduce((sum, z) => sum + z.task_count, 0),
-    tasksThisMonth: mockZaps.reduce((sum, z) => sum + z.task_count_this_month, 0),
-    avgSuccessRate: mockZaps.reduce((sum, z) => sum + z.success_rate, 0) / mockZaps.length,
-    connectedApps: mockApps.filter(a => a.is_connected).length,
-    totalApps: mockApps.length,
-    errorZaps: mockZaps.filter(z => z.status === 'error').length
-  }), [])
+  // Loading and error states
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
-  // Filtered data
+  // Real data states - initialized with mock data as fallback
+  const [apps, setApps] = useState<App[]>(mockApps)
+  const [zaps, setZaps] = useState<Zap[]>(mockZaps)
+  const [tasks, setTasks] = useState<TaskHistory[]>(mockTasks)
+  const [templates, setTemplates] = useState<Template[]>(mockTemplates)
+  const [folders, setFolders] = useState<Folder[]>(mockFolders)
+  const [integrations, setIntegrations] = useState<any[]>([])
+
+  // Load data from database on mount
+  useEffect(() => {
+    const loadConnectorData = async () => {
+      if (userLoading) return
+
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Fetch integrations from API
+        const [integrationsRes, availableRes] = await Promise.all([
+          fetch('/api/integrations').then(res => res.json()),
+          fetch('/api/integrations?action=available').then(res => res.json())
+        ])
+
+        if (integrationsRes.success && integrationsRes.integrations) {
+          setIntegrations(integrationsRes.integrations)
+
+          // Map integrations to apps format and merge with available apps
+          const connectedIds = new Set(integrationsRes.integrations.map((i: any) => i.type))
+          const updatedApps = mockApps.map(app => ({
+            ...app,
+            is_connected: connectedIds.has(app.id) ||
+                         connectedIds.has(app.name.toLowerCase()) ||
+                         app.is_connected,
+            connection_count: integrationsRes.integrations.filter(
+              (i: any) => i.type === app.id || i.type === app.name.toLowerCase()
+            ).length || app.connection_count,
+            last_synced_at: integrationsRes.integrations.find(
+              (i: any) => i.type === app.id || i.type === app.name.toLowerCase()
+            )?.last_sync_at || app.last_synced_at
+          }))
+          setApps(updatedApps)
+        }
+
+        // Fetch task history if available
+        try {
+          const tasksRes = await fetch('/api/integrations/webhooks?action=deliveries&limit=50').then(res => res.json())
+          if (tasksRes.success && tasksRes.deliveries) {
+            // Map webhook deliveries to task format
+            const mappedTasks: TaskHistory[] = tasksRes.deliveries.map((d: any) => ({
+              id: d.id,
+              zap_id: d.webhook_id,
+              zap_name: d.webhook_name || 'Webhook Delivery',
+              status: d.status === 'delivered' ? 'success' : d.status === 'failed' ? 'error' : 'held' as TaskStatus,
+              trigger_event: d.event_type || 'Webhook triggered',
+              trigger_data: d.payload || {},
+              action_results: [],
+              started_at: d.created_at,
+              completed_at: d.delivered_at || d.created_at,
+              duration_seconds: d.response_time_ms ? d.response_time_ms / 1000 : 0,
+              data_in_bytes: JSON.stringify(d.payload || {}).length,
+              data_out_bytes: 0,
+              error_message: d.error_message || null,
+              replay_of: null,
+              replayed_at: null
+            }))
+            if (mappedTasks.length > 0) {
+              setTasks(mappedTasks)
+            }
+          }
+        } catch (taskErr) {
+          // Tasks API may not exist, continue with mock data
+          logger.warn('Task history fetch failed, using mock data', { error: taskErr })
+        }
+
+        // Fetch templates if available
+        try {
+          const templatesRes = await fetch('/api/integrations-management?action=templates&limit=10').then(res => res.json())
+          if (templatesRes.success && templatesRes.templates && templatesRes.templates.length > 0) {
+            const mappedTemplates: Template[] = templatesRes.templates.map((t: any) => ({
+              id: t.id,
+              name: t.template_name || t.name,
+              description: t.description,
+              apps: mockApps.slice(0, 2), // Placeholder - would need to map properly
+              trigger_name: t.trigger_name || 'Custom Trigger',
+              action_names: t.action_names || ['Custom Action'],
+              usage_count: t.usage_count || 0,
+              category: t.category || 'Custom',
+              is_featured: t.is_featured || false,
+              created_by: t.created_by || 'Community',
+              rating: t.rating || 4.5,
+              review_count: t.review_count || 0
+            }))
+            setTemplates(mappedTemplates)
+          }
+        } catch (templateErr) {
+          // Templates API may not exist, continue with mock data
+          logger.warn('Templates fetch failed, using mock data', { error: templateErr })
+        }
+
+        setIsLoading(false)
+        announce('Connectors dashboard loaded successfully', 'polite')
+      } catch (err) {
+        logger.error('Failed to load connector data', { error: err, userId })
+        setError(err instanceof Error ? err.message : 'Failed to load connector data')
+        setIsLoading(false)
+        announce('Error loading connectors dashboard', 'assertive')
+      }
+    }
+
+    loadConnectorData()
+  }, [userId, userLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Dashboard stats - now using state instead of mock data
+  const stats = useMemo(() => ({
+    totalZaps: zaps.length,
+    activeZaps: zaps.filter(z => z.status === 'on').length,
+    totalTasks: zaps.reduce((sum, z) => sum + z.task_count, 0),
+    tasksThisMonth: zaps.reduce((sum, z) => sum + z.task_count_this_month, 0),
+    avgSuccessRate: zaps.length > 0 ? zaps.reduce((sum, z) => sum + z.success_rate, 0) / zaps.length : 0,
+    connectedApps: apps.filter(a => a.is_connected).length,
+    totalApps: apps.length,
+    errorZaps: zaps.filter(z => z.status === 'error').length
+  }), [zaps, apps])
+
+  // Filtered data - now using state
   const filteredZaps = useMemo(() => {
-    return mockZaps.filter(zap => {
+    return zaps.filter(zap => {
       const matchesSearch = zap.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            zap.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || zap.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [searchQuery, statusFilter, zaps])
 
   const filteredApps = useMemo(() => {
-    return mockApps.filter(app => {
+    return apps.filter(app => {
       const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = categoryFilter === 'all' || app.category === categoryFilter
       return matchesSearch && matchesCategory
     })
-  }, [searchQuery, categoryFilter])
+  }, [searchQuery, categoryFilter, apps])
 
-  const categories = [...new Set(mockApps.map(a => a.category))]
+  const categories = [...new Set(apps.map(a => a.category))]
 
-  // Handlers
-  const handleAddConnector = () => {
-    // Real functionality: Open modal dialog for adding new connector
-    toast.success('Connector setup wizard opened')
+  // Handlers with real API integration
+  const handleAddConnector = async () => {
+    // Real functionality: Open connector setup or show available integrations
+    toast.info('Opening connector setup wizard...')
+    try {
+      const res = await fetch('/api/integrations?action=available')
+      const data = await res.json()
+      if (data.success && data.integrations) {
+        toast.success(`${data.integrations.length} connectors available to connect`)
+        setActiveTab('apps')
+      }
+    } catch (err) {
+      toast.error('Failed to load available connectors')
+    }
   }
 
-  const handleConfigureConnector = (n: string) => {
-    // Real functionality: Fetch connector configuration
+  const handleConfigureConnector = async (n: string) => {
+    // Real functionality: Fetch and show connector configuration
     toast.promise(
-      fetch(`/api/connectors/${encodeURIComponent(n)}`).then(res => res.json()),
+      fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'configure', integrationId: n })
+      }).then(async res => {
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed to load settings')
+        return data
+      }),
       {
         loading: `Loading settings for "${n}"...`,
         success: `Settings loaded for "${n}"`,
@@ -743,27 +866,84 @@ export default function ConnectorsClient() {
     )
   }
 
-  const handleTestConnector = (n: string) => {
-    // Real functionality: Execute test against connector
+  const handleConnectApp = async (app: App) => {
+    // Real functionality: Connect to an integration
     toast.promise(
-      fetch(`/api/connectors/${encodeURIComponent(n)}/test`, { method: 'POST' }).then(res => {
-        if (!res.ok) throw new Error(`Connection test failed for "${n}"`)
-        return res.json()
+      fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          type: app.id,
+          name: app.name,
+          description: app.description
+        })
+      }).then(async res => {
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed to connect')
+
+        // Update local state
+        setApps(prev => prev.map(a =>
+          a.id === app.id ? { ...a, is_connected: true, connection_count: a.connection_count + 1 } : a
+        ))
+        setIntegrations(prev => [...prev, data.integration])
+
+        return data
+      }),
+      {
+        loading: `Connecting to ${app.name}...`,
+        success: `${app.name} connected successfully`,
+        error: (err) => `Failed to connect to ${app.name}: ${err.message}`
+      }
+    )
+  }
+
+  const handleTestConnector = async (n: string) => {
+    // Real functionality: Test integration connection
+    toast.promise(
+      fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'test', integrationId: n })
+      }).then(async res => {
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Test failed')
+        return data
       }),
       {
         loading: `Testing "${n}"...`,
-        success: `"${n}" test passed`,
+        success: (data) => `"${n}" test passed - Response: ${data.details?.responseTime || 'OK'}`,
         error: (err) => `"${n}" test failed: ${err.message}`
       }
     )
   }
 
-  const handleDisconnect = (n: string) => {
-    // Real functionality: Send disconnect request to API
+  const handleDisconnect = async (n: string) => {
+    // Find the integration ID for this connector
+    const integration = integrations.find(i => i.name === n || i.type === n)
+
     toast.promise(
-      fetch(`/api/connectors/${encodeURIComponent(n)}/disconnect`, {
+      fetch('/api/integrations', {
         method: 'POST',
-      }).then(res => res.json()),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'disconnect',
+          integration_id: integration?.id || n
+        })
+      }).then(async res => {
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed to disconnect')
+
+        // Update local state
+        setApps(prev => prev.map(a =>
+          a.name === n || a.id === n
+            ? { ...a, is_connected: false, last_synced_at: null }
+            : a
+        ))
+        setIntegrations(prev => prev.filter(i => i.name !== n && i.type !== n))
+
+        return data
+      }),
       {
         loading: `Disconnecting "${n}"...`,
         success: `"${n}" disconnected successfully`,
@@ -772,17 +952,147 @@ export default function ConnectorsClient() {
     )
   }
 
-  const handleRefreshConnector = (n: string) => {
-    // Real functionality: Trigger connector sync/refresh
+  const handleRefreshConnector = async (n: string) => {
+    // Find the integration ID for this connector
+    const integration = integrations.find(i => i.name === n || i.type === n)
+
     toast.promise(
-      fetch(`/api/connectors/${encodeURIComponent(n)}/refresh`, {
+      fetch('/api/integrations', {
         method: 'POST',
-      }).then(res => res.json()),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync',
+          integration_id: integration?.id || n
+        })
+      }).then(async res => {
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Sync failed')
+
+        // Update last synced time
+        setApps(prev => prev.map(a =>
+          a.name === n || a.id === n
+            ? { ...a, last_synced_at: new Date().toISOString() }
+            : a
+        ))
+
+        return data
+      }),
       {
-        loading: `Refreshing "${n}"...`,
-        success: `"${n}" refreshed successfully`,
-        error: `Failed to refresh "${n}"`
+        loading: `Syncing "${n}"...`,
+        success: `"${n}" synced successfully`,
+        error: `Failed to sync "${n}"`
       }
+    )
+  }
+
+  const handleToggleZap = async (zap: Zap) => {
+    const newStatus = zap.status === 'on' ? 'off' : 'on'
+    const integration = integrations.find(i => i.name === zap.trigger.app.name)
+
+    toast.promise(
+      fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: newStatus === 'on' ? 'activate' : 'deactivate',
+          integration_id: integration?.id || zap.id
+        })
+      }).then(async res => {
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed to update')
+
+        // Update local state
+        setZaps(prev => prev.map(z =>
+          z.id === zap.id ? { ...z, status: newStatus as ZapStatus } : z
+        ))
+
+        return data
+      }),
+      {
+        loading: newStatus === 'on' ? `Activating "${zap.name}"...` : `Pausing "${zap.name}"...`,
+        success: newStatus === 'on' ? `"${zap.name}" is now active` : `"${zap.name}" paused`,
+        error: `Failed to ${newStatus === 'on' ? 'activate' : 'pause'} "${zap.name}"`
+      }
+    )
+  }
+
+  const handleDeleteIntegration = async (integrationId: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) return
+
+    toast.promise(
+      fetch(`/api/integrations?id=${encodeURIComponent(integrationId)}`, {
+        method: 'DELETE'
+      }).then(async res => {
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed to delete')
+
+        // Update local state
+        setIntegrations(prev => prev.filter(i => i.id !== integrationId))
+        setApps(prev => prev.map(a =>
+          a.id === integrationId || a.name === name
+            ? { ...a, is_connected: false }
+            : a
+        ))
+
+        return data
+      }),
+      {
+        loading: `Deleting "${name}"...`,
+        success: `"${name}" deleted successfully`,
+        error: `Failed to delete "${name}"`
+      }
+    )
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header Skeleton */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 p-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 animate-pulse" />
+                <div className="space-y-2">
+                  <div className="h-8 w-48 bg-white/20 rounded animate-pulse" />
+                  <div className="h-4 w-64 bg-white/10 rounded animate-pulse" />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Loader2 className="w-6 h-6 text-white animate-spin" />
+                <span className="text-white/80">Loading connectors...</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+
+          {/* Content Skeleton */}
+          <ListSkeleton items={5} />
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="max-w-2xl mx-auto mt-20">
+            <ErrorEmptyState
+              error={error}
+              onRetry={() => window.location.reload()}
+            />
+          </div>
+        </div>
+      </div>
     )
   }
 
@@ -804,6 +1114,11 @@ export default function ConnectorsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              />
               <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => {
                 // Real functionality: Fetch task history and navigate to history tab
                 setActiveTab('history')
@@ -948,7 +1263,7 @@ export default function ConnectorsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockTasks.slice(0, 5).map(task => (
+                    {tasks.slice(0, 5).map(task => (
                       <div
                         key={task.id}
                         className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
@@ -986,7 +1301,7 @@ export default function ConnectorsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockFolders.map(folder => (
+                    {folders.map(folder => (
                       <div key={folder.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                         <div className="flex items-center gap-3">
                           <div
@@ -1015,7 +1330,7 @@ export default function ConnectorsClient() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mockZaps.filter(z => z.status === 'on').slice(0, 3).map((zap, index) => (
+                  {zaps.filter(z => z.status === 'on').slice(0, 3).map((zap, index) => (
                     <div key={zap.id} className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                       <div className="flex items-center gap-2 mb-3">
                         <div className="w-6 h-6 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white text-xs font-bold">
@@ -1184,12 +1499,12 @@ export default function ConnectorsClient() {
                           Edit
                         </Button>
                         {zap.status === 'on' ? (
-                          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleDisconnect(zap.name) }}>
+                          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleToggleZap(zap) }}>
                             <Pause className="w-4 h-4 mr-2" />
                             Pause
                           </Button>
                         ) : (
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={(e) => { e.stopPropagation(); handleTestConnector(zap.name) }}>
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={(e) => { e.stopPropagation(); handleToggleZap(zap) }}>
                             <Play className="w-4 h-4 mr-2" />
                             Turn On
                           </Button>
@@ -1260,7 +1575,7 @@ export default function ConnectorsClient() {
                       variant={app.is_connected ? 'outline' : 'default'}
                       className="w-full"
                       size="sm"
-                      onClick={(e) => { e.stopPropagation(); app.is_connected ? handleConfigureConnector(app.name) : handleAddConnector() }}
+                      onClick={(e) => { e.stopPropagation(); app.is_connected ? handleConfigureConnector(app.name) : handleConnectApp(app) }}
                     >
                       {app.is_connected ? 'Manage Connection' : 'Connect'}
                     </Button>
@@ -1304,7 +1619,7 @@ export default function ConnectorsClient() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                      {mockTasks.map(task => (
+                      {tasks.map(task => (
                         <tr
                           key={task.id}
                           className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
@@ -1356,7 +1671,7 @@ export default function ConnectorsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockTemplates.map(template => (
+              {templates.map(template => (
                 <Card key={template.id} className="border-0 shadow-sm hover:shadow-lg transition-all cursor-pointer dark:bg-gray-800">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1888,37 +2203,55 @@ export default function ConnectorsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockConnectorsAIInsights}
-              title="Integration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
+        <CollapsibleInsightsPanel
+          isOpen={insightsPanel.isOpen}
+          onToggle={insightsPanel.toggle}
+          title="Integration Intelligence & Insights"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockConnectorsAIInsights}
+                title="Integration Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockConnectorsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockConnectorsPredictions}
+                title="Zap Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockConnectorsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockConnectorsPredictions}
-              title="Zap Forecasts"
-            />
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockConnectorsActivities}
-            title="Integration Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={mockConnectorsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <ActivityFeed
+              activities={mockConnectorsActivities}
+              title="Integration Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={mockConnectorsQuickActionsConfig.map(action => ({
+                ...action,
+                action: action.actionKey === 'newZap'
+                  ? handleAddConnector
+                  : action.actionKey === 'test'
+                    ? () => handleTestConnector(integrations[0]?.name || 'All Integrations')
+                    : () => {
+                        toast.promise(
+                          fetch('/api/integrations/webhooks?action=logs&limit=50').then(res => res.json()),
+                          { loading: 'Loading logs...', success: 'Logs loaded', error: 'Failed to load logs' }
+                        )
+                      }
+              }))}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
 
         {/* Zap Detail Dialog */}
         <Dialog open={!!selectedZap} onOpenChange={() => setSelectedZap(null)}>
@@ -2049,15 +2382,11 @@ export default function ConnectorsClient() {
 
                   <Button className="w-full" size="lg" onClick={() => {
                     if (selectedApp.is_connected) {
-                      toast.promise(
-                        fetch(`/api/connectors/apps/${encodeURIComponent(selectedApp.id)}/settings`).then(res => res.json()),
-                        { loading: `Loading "${selectedApp.name}" settings...`, success: `"${selectedApp.name}" settings loaded`, error: 'Failed to load settings' }
-                      )
+                      handleConfigureConnector(selectedApp.name)
+                      setSelectedApp(null)
                     } else {
-                      toast.promise(
-                        fetch(`/api/connectors/apps/${encodeURIComponent(selectedApp.id)}/connect`, { method: 'POST' }).then(res => res.json()),
-                        { loading: `Connecting to ${selectedApp.name}...`, success: `Connected to ${selectedApp.name}`, error: `Failed to connect to ${selectedApp.name}` }
-                      )
+                      handleConnectApp(selectedApp)
+                      setSelectedApp(null)
                     }
                   }}>
                     {selectedApp.is_connected ? 'Manage Connection' : `Connect ${selectedApp.name}`}

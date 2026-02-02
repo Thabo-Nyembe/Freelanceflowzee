@@ -81,6 +81,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Types
 type LeadStatus = 'new' | 'contacted' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost'
 type LeadStage = 'subscriber' | 'lead' | 'mql' | 'sql' | 'opportunity' | 'customer' | 'evangelist'
@@ -628,6 +634,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   // Status change dialog state
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
   const [selectedNewStatus, setSelectedNewStatus] = useState<LeadStatus>('new')
+  const insightsPanel = useInsightsPanel(false)
 
   // Team members for assignment
   const teamMembers = [
@@ -1536,6 +1543,10 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
               <Plus className="w-4 h-4 mr-2" />
               Add Lead
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -2799,48 +2810,54 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockLeadGenAIInsights}
-              title="Lead Gen Intelligence"
-              onInsightAction={(insight) => {
-                if (insight.type === 'warning') {
-                  // Handle warning insights - show stale leads
-                  setSelectedStatus('all')
-                  toast.info('Showing Inactive Leads')
-                } else if (insight.type === 'success') {
-                  // Handle success insights - show dashboard
-                  toast.success('Great Progress!')
-                } else {
-                  toast.info(insight.title)
-                }
-              }}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockLeadGenCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockLeadGenPredictions}
-              title="Pipeline Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Lead Generation Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockLeadGenAIInsights}
+                  title="Lead Gen Intelligence"
+                  onInsightAction={(insight) => {
+                    if (insight.type === 'warning') {
+                      setSelectedStatus('all')
+                      toast.info('Showing Inactive Leads')
+                    } else if (insight.type === 'success') {
+                      toast.success('Great Progress!')
+                    } else {
+                      toast.info(insight.title)
+                    }
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockLeadGenCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockLeadGenPredictions}
+                  title="Pipeline Forecasts"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockLeadGenActivities}
-            title="Lead Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={leadGenQuickActions}
-            variant="grid"
-          />
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Activity & Quick Actions" defaultOpen={true} className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ActivityFeed
+                activities={mockLeadGenActivities}
+                title="Lead Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={leadGenQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Lead Detail Dialog */}
         <Dialog open={isLeadDialogOpen} onOpenChange={setIsLeadDialogOpen}>

@@ -70,6 +70,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
@@ -301,7 +307,7 @@ const getAppStoreQuickActions = (
 // ============================================================================
 
 export default function AppStoreClient() {
-
+  const insightsPanel = useInsightsPanel(false)
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('discover')
   const [apps, setApps] = useState<App[]>([])
@@ -871,6 +877,10 @@ export default function AppStoreClient() {
                 <Package className="w-4 h-4 mr-2" />
                 My Apps
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
 
@@ -1903,37 +1913,41 @@ export default function AppStoreClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={emptyAppStoreAIInsights}
-              title="App Store Intelligence"
-              onInsightAction={handleInsightAction}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={emptyAppStoreCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={emptyAppStorePredictions}
-              title="App Store Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={emptyAppStoreAIInsights}
+                  title="App Store Intelligence"
+                  onInsightAction={handleInsightAction}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={emptyAppStoreCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={emptyAppStorePredictions}
+                  title="App Store Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={emptyAppStoreActivities}
-            title="App Store Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={appStoreQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={emptyAppStoreActivities}
+                title="App Store Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={appStoreQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* App Detail Dialog */}

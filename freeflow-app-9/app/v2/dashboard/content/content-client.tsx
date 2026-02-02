@@ -30,6 +30,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -331,7 +333,7 @@ const mockContentActivities = [
 ]
 
 export default function ContentClient() {
-
+  const insightsPanel = useInsightsPanel(false)
 
   // View and filter state
   const [activeView, setActiveView] = useState<'entries' | 'assets' | 'types' | 'locales' | 'webhooks' | 'settings'>('entries')
@@ -1266,6 +1268,10 @@ export default function ContentClient() {
             <p className="text-gray-600 dark:text-gray-400">Headless CMS with localization, versioning & webhooks</p>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <input
               type="text"
               placeholder="Search content..."
@@ -1880,37 +1886,43 @@ export default function ContentClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockContentAIInsights}
-              title="Content Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
+        <CollapsibleInsightsPanel
+          isOpen={insightsPanel.isOpen}
+          onToggle={insightsPanel.toggle}
+          title="Content Intelligence & Insights"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockContentAIInsights}
+                title="Content Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockContentCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockContentPredictions}
+                title="Content Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockContentCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockContentPredictions}
-              title="Content Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockContentActivities}
-            title="Content Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={contentQuickActionsWithHandlers}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockContentActivities}
+              title="Content Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={contentQuickActionsWithHandlers}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
       </div>
 
       {/* Create Content Dialog */}

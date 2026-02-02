@@ -70,6 +70,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -706,6 +712,7 @@ const defaultCollectionForm: CollectionFormData = {
 }
 
 export default function AssetsClient({ initialAssets, initialCollections }: AssetsClientProps) {
+  const insightsPanel = useInsightsPanel(false)
 
   // Supabase hooks
   const { data: dbAssets, loading: assetsLoading, refetch: refetchAssets } = useAssets()
@@ -1000,6 +1007,10 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button variant="outline" size="sm" onClick={handleSync}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Sync
@@ -1987,38 +1998,42 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockAssetsAIInsights}
-              title="Asset Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockAssetsCollaborators}
-              maxVisible={4}
-              showStatus={true}
-            />
-            <PredictiveAnalytics
-              predictions={mockAssetsPredictions}
-              title="Asset Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockAssetsAIInsights}
+                  title="Asset Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockAssetsCollaborators}
+                  maxVisible={4}
+                  showStatus={true}
+                />
+                <PredictiveAnalytics
+                  predictions={mockAssetsPredictions}
+                  title="Asset Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockAssetsActivities}
-            title="Asset Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={quickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockAssetsActivities}
+                title="Asset Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={quickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Asset Detail Dialog */}
         <Dialog open={isAssetDialogOpen} onOpenChange={setIsAssetDialogOpen}>

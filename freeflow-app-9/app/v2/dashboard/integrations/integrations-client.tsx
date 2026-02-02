@@ -76,6 +76,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Types
 type ZapStatus = 'active' | 'paused' | 'error' | 'draft' | 'completed' | 'failed' | 'archived'
 type TaskStatus = 'success' | 'failed' | 'running' | 'waiting'
@@ -318,6 +324,7 @@ export default function IntegrationsClient() {
     url: '',
     events: []
   })
+  const insightsPanel = useInsightsPanel(false)
 
   // Hooks for real data
   const {
@@ -1175,6 +1182,10 @@ export default function IntegrationsClient() {
               <Plus className="w-4 h-4 mr-2" />
               Create Zap
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -2191,37 +2202,45 @@ export default function IntegrationsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockIntegrationsAIInsights}
-              title="Integrations Intelligence"
-              onInsightAction={(_insight) => handleAiInsightAction(insight)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockIntegrationsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockIntegrationsPredictions}
-              title="Integration Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Integrations Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockIntegrationsAIInsights}
+                  title="Integrations Intelligence"
+                  onInsightAction={(_insight) => handleAiInsightAction(insight)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockIntegrationsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockIntegrationsPredictions}
+                  title="Integration Forecasts"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockIntegrationsActivities}
-            title="Integration Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={mockIntegrationsQuickActions}
-            variant="grid"
-          />
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Activity & Quick Actions" defaultOpen={true} className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ActivityFeed
+                activities={mockIntegrationsActivities}
+                title="Integration Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={mockIntegrationsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Zap Detail Dialog */}
         <Dialog open={!!selectedZap} onOpenChange={() => setSelectedZap(null)}>

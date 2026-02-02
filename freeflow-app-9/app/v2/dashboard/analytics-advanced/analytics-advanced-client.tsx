@@ -11,6 +11,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 export const dynamic = 'force-dynamic';
 
@@ -91,6 +97,7 @@ const analyticsAdvancedActivities = [
 // Quick actions will be defined inside the component to use state setters
 
 export default function AnalyticsAdvancedClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -801,6 +808,10 @@ export default function AnalyticsAdvancedClient() {
               >
                 Export Report
               </button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
         </ScrollReveal>
@@ -1118,6 +1129,24 @@ export default function AnalyticsAdvancedClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+        {/* Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Analytics Insights" defaultOpen={true}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={analyticsAdvancedAIInsights}
+                />
+              </div>
+              <ActivityFeed
+                activities={analyticsAdvancedActivities}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
+      </div>
     </div>
   )
 }

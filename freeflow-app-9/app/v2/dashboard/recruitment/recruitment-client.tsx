@@ -68,6 +68,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // Types
 type JobStatus = 'draft' | 'open' | 'on-hold' | 'filled' | 'cancelled'
@@ -679,6 +680,7 @@ const mockTalentPool: TalentPoolCandidate[] = [
 ]
 
 export default function RecruitmentClient() {
+  const insightsPanel = useInsightsPanel(false)
   // Define adapter variables locally (removed mock data imports)
   const recruitmentAIInsights: any[] = []
   const recruitmentCollaborators: any[] = []
@@ -1225,6 +1227,10 @@ export default function RecruitmentClient() {
                 <Plus className="w-4 h-4 mr-2" />
                 Post Job
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
 
@@ -2006,37 +2012,41 @@ export default function RecruitmentClient() {
           </Tabs>
 
           {/* Enhanced Competitive Upgrade Components */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-            <div className="lg:col-span-2">
-              <AIInsightsPanel
-                insights={recruitmentAIInsights}
-                title="Recruitment Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title)}
-              />
-            </div>
-            <div className="space-y-6">
-              <CollaborationIndicator
-                collaborators={recruitmentCollaborators}
-                maxVisible={4}
-              />
-              <PredictiveAnalytics
-                predictions={recruitmentPredictions}
-                title="Hiring Forecasts"
-              />
-            </div>
-          </div>
+          {insightsPanel.isOpen && (
+            <CollapsibleInsightsPanel title="Recruitment Intelligence" defaultOpen={true} className="mt-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <AIInsightsPanel
+                    insights={recruitmentAIInsights}
+                    title="Recruitment Intelligence"
+                    onInsightAction={(insight) => toast.info(insight.title)}
+                  />
+                </div>
+                <div className="space-y-6">
+                  <CollaborationIndicator
+                    collaborators={recruitmentCollaborators}
+                    maxVisible={4}
+                  />
+                  <PredictiveAnalytics
+                    predictions={recruitmentPredictions}
+                    title="Hiring Forecasts"
+                  />
+                </div>
+              </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <ActivityFeed
-              activities={recruitmentActivities}
-              title="Recruitment Activity"
-              maxItems={5}
-            />
-            <QuickActionsToolbar
-              actions={recruitmentQuickActions}
-              variant="grid"
-            />
-          </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <ActivityFeed
+                  activities={recruitmentActivities}
+                  title="Recruitment Activity"
+                  maxItems={5}
+                />
+                <QuickActionsToolbar
+                  actions={recruitmentQuickActions}
+                  variant="grid"
+                />
+              </div>
+            </CollapsibleInsightsPanel>
+          )}
         </div>
       </div>
 

@@ -74,6 +74,8 @@ const QuickActionsToolbar = dynamic(
   }
 )
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 import { Textarea } from '@/components/ui/textarea'
 
 // Initialize Supabase client once at module level
@@ -322,6 +324,7 @@ const defaultDeploymentForm = {
 
 export default function DeploymentsClient() {
   const router = useRouter()
+  const insightsPanel = useInsightsPanel(false)
 
   // Demo mode detection
   const { data: nextAuthSession, status: sessionStatus } = useSession()
@@ -1260,6 +1263,7 @@ export default function DeploymentsClient() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input placeholder="Search deployments..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
+            <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
             <Button variant="outline" onClick={() => router.push('/dashboard/ci-cd-v2')}><GitBranch className="h-4 w-4 mr-2" />CI/CD Pipelines</Button>
             <Button variant="outline" onClick={() => router.push('/dashboard/releases-v2')}><Tag className="h-4 w-4 mr-2" />Releases</Button>
             <Button variant="outline" onClick={() => setShowEnvDialog(true)}><Lock className="h-4 w-4 mr-2" />Environment</Button>
@@ -2388,37 +2392,43 @@ export default function DeploymentsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={[]}
-              title="Deployment Intelligence"
-              onInsightAction={handleInsightAction}
-            />
+        <CollapsibleInsightsPanel
+          title="Deployment Insights"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={[]}
+                title="Deployment Intelligence"
+                onInsightAction={handleInsightAction}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={[]}
+                title="Deploy Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={[]}
-              title="Deploy Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
-            title="Deploy Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={deploymentsQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
+              title="Deploy Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={deploymentsQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
 
         {/* Build Logs Dialog */}
         <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>

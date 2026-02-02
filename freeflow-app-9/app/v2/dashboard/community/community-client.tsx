@@ -50,6 +50,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 
 import {
   CommunityAnnouncements,
@@ -492,6 +494,7 @@ const getModActionColor = (type: ModActionType): string => {
 // ============== MAIN COMPONENT ==============
 
 export default function CommunityClient() {
+  const insightsPanel = useInsightsPanel(false)
   // Define adapter variables locally (removed mock data imports)
   const communityAIInsights: any[] = []
   const communityCollaborators: any[] = []
@@ -1450,6 +1453,11 @@ export default function CommunityClient() {
                 </div>
               </div>
             </div>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+              className="text-white hover:bg-white/20"
+            />
             <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => setShowServerSettings(true)}>
               <ChevronDown className="w-4 h-4" />
             </Button>
@@ -2801,37 +2809,43 @@ export default function CommunityClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={communityAIInsights}
-              title="Community Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
+        <CollapsibleInsightsPanel
+          isOpen={insightsPanel.isOpen}
+          onToggle={insightsPanel.toggle}
+          title="Community Intelligence & Insights"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={communityAIInsights}
+                title="Community Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={communityCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={communityPredictions}
+                title="Community Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={communityCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={communityPredictions}
-              title="Community Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={communityActivities}
-            title="Community Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={communityQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={communityActivities}
+              title="Community Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={communityQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
       </div>
 
       {/* Member Profile Dialog */}

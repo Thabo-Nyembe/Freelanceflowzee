@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { useBuilds, useBuildPipelines } from '@/lib/hooks/use-builds'
+import { useBuilds, useBuildPipelines, useBuildMutations, useBuildArtifacts, formatDuration as formatBuildDuration } from '@/lib/hooks/use-builds'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -76,6 +77,12 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 // ============================================================================
 // TYPE DEFINITIONS - GitHub Actions Level CI/CD
@@ -778,22 +785,189 @@ const mockBuildsActivities = [
 // ============================================================================
 
 export default function BuildsClient() {
-  // Supabase hooks for real data
-  const { builds: dbBuilds, loading: buildsLoading, refetch: refetchBuilds } = useBuilds()
-  const { pipelines: dbPipelines, loading: pipelinesLoading } = useBuildPipelines()
+  const insightsPanel = useInsightsPanel(false)
 
-  // Use real data with mock fallback
-  const activeBuilds = dbBuilds && dbBuilds.length > 0 ? dbBuilds.map(b => ({
-    ...b,
-    id: b.id,
-    name: b.commit_message || `Build #${b.build_number}`,
-    status: b.status as BuildStatus,
-    total_duration_seconds: b.duration_seconds,
-    coverage_percentage: b.coverage_percentage,
-    repository: 'main',
-    commit_hash: b.commit_hash || '',
-    author: { name: b.author_name || 'Unknown', avatar: b.author_name?.charAt(0) || 'U' }
-  })) : mockBuilds
+  // ============================================================================
+  // SUPABASE HOOKS - Real-time build data with mutations
+  // ============================================================================
+  const { builds: dbBuilds, loading: buildsLoading, refetch: refetchBuilds, stats: dbStats } = useBuilds()
+  const { pipelines: dbPipelines, loading: pipelinesLoading, activePipelines } = useBuildPipelines()
+  const { data: dbArtifacts } = useBuildArtifacts(undefined, true)
+  const { triggerBuild, cancelBuild: cancelBuildMutation, retryBuild: retryBuildMutation, isTriggering, isCancelling, isRetrying } = useBuildMutations()
+
+  // Supabase client for real-time subscriptions
+  const supabase = createClient()
+
+  // Real-time deployment status tracking
+  const [deploymentStatus, setDeploymentStatus] = useState<{ [key: string]: string }>({})
+  const [realtimeBuildLogs, setRealtimeBuildLogs] = useState<string[]>([])
+
+  // ============================================================================
+  // REAL-TIME SUBSCRIPTIONS
+  // ============================================================================
+
+  useEffect(() => {
+    // Set up real-time subscription for build updates
+    const buildChannel = supabase
+      .channel('builds-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'builds' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          toast.info(`New build started: #${payload.new.build_number}`)
+          refetchBuilds()
+        } else if (payload.eventType === 'UPDATE') {
+          const newBuild = payload.new
+          if (newBuild.status === 'success') {
+            toast.success(`Build #${newBuild.build_number} completed successfully!`)
+          } else if (newBuild.status === 'failed') {
+            toast.error(`Build #${newBuild.build_number} failed`)
+          }
+          refetchBuilds()
+        }
+      })
+      .subscribe()
+
+    // Set up real-time subscription for deployments
+    const deployChannel = supabase
+      .channel('deployments-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'deployments' }, (payload) => {
+        if (payload.eventType === 'UPDATE') {
+          setDeploymentStatus(prev => ({
+            ...prev,
+            [payload.new.environment]: payload.new.status
+          }))
+          if (payload.new.status === 'deployed') {
+            toast.success(`Deployed to ${payload.new.environment}!`)
+          }
+        }
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(buildChannel)
+      supabase.removeChannel(deployChannel)
+    }
+  }, [refetchBuilds])
+
+  // ============================================================================
+  // BUILD TRIGGER HANDLERS
+  // ============================================================================
+
+  const handleTriggerNewBuild = useCallback(async (pipelineId?: string, branch: string = 'main') => {
+    try {
+      const buildData = {
+        pipeline_id: pipelineId || (activePipelines[0]?.id),
+        build_number: (dbBuilds?.length || 0) + 1,
+        branch,
+        commit_hash: `${Date.now().toString(16).substring(0, 8)}`,
+        commit_message: 'Manual build trigger',
+        author_name: 'Manual Trigger',
+        author_email: 'user@example.com',
+        status: 'pending',
+        duration_seconds: 0,
+        tests_passed: 0,
+        tests_failed: 0,
+        tests_total: 0,
+        coverage_percentage: 0,
+        artifacts_count: 0,
+        metadata: { triggered_by: 'manual', timestamp: new Date().toISOString() }
+      }
+
+      await triggerBuild(buildData as any)
+      toast.success('Build triggered successfully!')
+      refetchBuilds()
+    } catch (err) {
+      toast.error('Failed to trigger build')
+      console.error(err)
+    }
+  }, [triggerBuild, dbBuilds, activePipelines, refetchBuilds])
+
+  const handleCancelBuildAction = useCallback(async (buildId: string) => {
+    try {
+      await cancelBuildMutation(buildId)
+      toast.success('Build cancelled')
+      refetchBuilds()
+    } catch (err) {
+      toast.error('Failed to cancel build')
+    }
+  }, [cancelBuildMutation, refetchBuilds])
+
+  const handleRetryBuildAction = useCallback(async (build: any) => {
+    try {
+      await retryBuildMutation({
+        pipeline_id: build.pipeline_id,
+        build_number: (dbBuilds?.length || 0) + 1,
+        branch: build.branch,
+        commit_hash: build.commit_hash,
+        commit_message: `Retry: ${build.commit_message}`,
+        author_name: build.author_name,
+        author_email: build.author_email,
+        metadata: { retry_of: build.id, original_build_number: build.build_number }
+      } as any)
+      toast.success('Build retry started!')
+      refetchBuilds()
+    } catch (err) {
+      toast.error('Failed to retry build')
+    }
+  }, [retryBuildMutation, dbBuilds, refetchBuilds])
+
+  // ============================================================================
+  // MERGED DATA - Real Supabase data with mock fallback
+  // ============================================================================
+
+  // Transform database builds to match component interface
+  const activeBuilds = useMemo(() => {
+    if (dbBuilds && dbBuilds.length > 0) {
+      return dbBuilds.map((b, idx) => ({
+        ...mockBuilds[idx % mockBuilds.length], // Fallback for missing fields
+        id: b.id,
+        build_number: b.build_number,
+        workflow_name: dbPipelines?.find(p => p.id === b.pipeline_id)?.pipeline_name || 'CI Pipeline',
+        workflow_file: '.github/workflows/ci.yml',
+        status: b.status as BuildStatus,
+        trigger: 'push' as WorkflowTrigger,
+        branch: b.branch,
+        commit_hash: b.commit_hash || '',
+        commit_message: b.commit_message || `Build #${b.build_number}`,
+        author_name: b.author_name || 'Unknown',
+        author_email: b.author_email || '',
+        author_avatar: '',
+        jobs: [],
+        total_duration_seconds: b.duration_seconds,
+        started_at: b.started_at || b.created_at,
+        completed_at: b.completed_at,
+        created_at: b.created_at,
+        tests_total: b.tests_total,
+        tests_passed: b.tests_passed,
+        tests_failed: b.tests_failed,
+        tests_skipped: 0,
+        coverage_percentage: b.coverage_percentage,
+        artifacts_count: b.artifacts_count,
+        logs_size_bytes: 0,
+        run_attempt: 1
+      }))
+    }
+    return mockBuilds
+  }, [dbBuilds, dbPipelines])
+
+  // All artifacts merged
+  const allArtifacts = useMemo(() => {
+    if (dbArtifacts && dbArtifacts.length > 0) {
+      return dbArtifacts.map(a => ({
+        id: a.id,
+        name: a.artifact_name,
+        type: a.artifact_type as ArtifactType,
+        build_id: a.build_id,
+        build_number: dbBuilds?.find(b => b.id === a.build_id)?.build_number || 0,
+        workflow_name: 'CI Pipeline',
+        size_bytes: a.file_size,
+        download_count: a.download_count,
+        expires_at: a.expires_at || '',
+        created_at: a.created_at,
+        is_expired: a.expires_at ? new Date(a.expires_at) < new Date() : false
+      }))
+    }
+    return mockArtifacts
+  }, [dbArtifacts, dbBuilds])
 
   const [activeTab, setActiveTab] = useState('builds')
   const [searchQuery, setSearchQuery] = useState('')
@@ -902,39 +1076,73 @@ export default function BuildsClient() {
     const avgDuration = activeBuilds.reduce((acc: number, b: any) => acc + (b.total_duration_seconds || b.duration_seconds || 0), 0) / (total || 1)
     const buildsWithCoverage = activeBuilds.filter((b: any) => (b.coverage_percentage || 0) > 0)
     const avgCoverage = buildsWithCoverage.length > 0 ? buildsWithCoverage.reduce((acc: number, b: any) => acc + (b.coverage_percentage || 0), 0) / buildsWithCoverage.length : 0
-    const totalArtifacts = mockArtifacts.length
+    const totalArtifacts = allArtifacts.length
     const activeRunners = mockRunners.filter(r => r.status !== 'offline').length
+
+    // Use database stats if available
+    if (dbStats && dbStats.total > 0) {
+      return {
+        total: dbStats.total,
+        success: dbStats.success,
+        failed: dbStats.failed,
+        running: dbStats.running,
+        successRate: dbStats.successRate,
+        avgDuration: dbStats.avgDuration,
+        avgCoverage: dbStats.avgCoverage || 0,
+        totalArtifacts,
+        activeRunners,
+        totalRunners: mockRunners.length
+      }
+    }
 
     return {
       total,
       success,
       failed,
       running,
-      successRate: Math.round((success / total) * 100),
+      successRate: total > 0 ? Math.round((success / total) * 100) : 0,
       avgDuration,
       avgCoverage: avgCoverage || 0,
       totalArtifacts,
       activeRunners,
       totalRunners: mockRunners.length
     }
-  }, [])
+  }, [activeBuilds, allArtifacts, dbStats])
 
-  // Handlers
-  const handleTriggerBuild = () => {
-    toast.info('Build triggered')
-  }
+  // Handlers - using real Supabase mutations
+  const handleTriggerBuild = useCallback(() => {
+    handleTriggerNewBuild()
+  }, [handleTriggerNewBuild])
 
-  const handleCancelBuild = (build: Build) => {
-    toast.success(`Build cancelled: ${build.name} has been cancelled`)
-  }
+  const handleCancelBuild = useCallback((build: Build) => {
+    handleCancelBuildAction(build.id)
+  }, [handleCancelBuildAction])
 
-  const handleRetryBuild = (build: Build) => {
-    toast.info(`Retrying build: ${build.name}`)
-  }
+  const handleRetryBuild = useCallback((build: Build) => {
+    handleRetryBuildAction(build)
+  }, [handleRetryBuildAction])
 
-  const handleDownloadArtifact = (artifactName: string) => {
-    toast.success(`Download started: ${artifactName}`)
-  }
+  const handleDownloadArtifact = useCallback(async (artifactName: string, artifactId?: string) => {
+    try {
+      // Try to get download URL from Supabase
+      if (artifactId) {
+        const artifact = allArtifacts.find(a => a.id === artifactId)
+        if (artifact) {
+          // Simulate download - in production this would use a real storage URL
+          toast.success(`Downloading: ${artifactName}`)
+          // Update download count
+          await supabase
+            .from('build_artifacts')
+            .update({ download_count: (artifact.download_count || 0) + 1 })
+            .eq('id', artifactId)
+        }
+      } else {
+        toast.success(`Download started: ${artifactName}`)
+      }
+    } catch (err) {
+      toast.error('Download failed')
+    }
+  }, [allArtifacts])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -951,15 +1159,34 @@ export default function BuildsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
+            {(buildsLoading || pipelinesLoading) && (
+              <span className="text-sm text-gray-500 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading...
+              </span>
+            )}
             <Button variant="outline" size="sm" onClick={() => {
-              toast.info('Refreshing...')
-            }}>
-              <RefreshCw className="w-4 h-4 mr-2" />
+              refetchBuilds()
+              toast.info('Refreshing builds...')
+            }} disabled={buildsLoading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${buildsLoading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
-            <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => setShowRunWorkflowDialog(true)}>
-              <Play className="w-4 h-4 mr-2" />
-              Run Workflow
+            <Button
+              className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white"
+              onClick={() => handleTriggerNewBuild()}
+              disabled={isTriggering}
+            >
+              {isTriggering ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Play className="w-4 h-4 mr-2" />
+              )}
+              {isTriggering ? 'Triggering...' : 'Run Workflow'}
             </Button>
           </div>
         </div>
@@ -1795,37 +2022,41 @@ export default function BuildsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockBuildsAIInsights}
-              title="Build Intelligence"
-              onInsightAction={(insight) => toast.success(`${insight.title} action completed`)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockBuildsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockBuildsPredictions}
-              title="Build Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockBuildsAIInsights}
+                  title="Build Intelligence"
+                  onInsightAction={(insight) => toast.success(`${insight.title} action completed`)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockBuildsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockBuildsPredictions}
+                  title="Build Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockBuildsActivities}
-            title="Build Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={buildsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockBuildsActivities}
+                title="Build Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={buildsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Build Detail Dialog */}
         <Dialog open={!!selectedBuild} onOpenChange={() => setSelectedBuild(null)}>

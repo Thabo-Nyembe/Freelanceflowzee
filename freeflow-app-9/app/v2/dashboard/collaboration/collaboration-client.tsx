@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { useCollaboration, CollaborationSession } from '@/lib/hooks/use-collaboration'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -76,6 +78,8 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // Types
 type BoardType = 'whiteboard' | 'flowchart' | 'mindmap' | 'wireframe' | 'kanban' | 'brainstorm' | 'retrospective'
@@ -409,6 +413,258 @@ const mockCollabQuickActions = [
 ]
 
 export default function CollaborationClient() {
+  const insightsPanel = useInsightsPanel(false)
+  // ============================================================================
+  // SUPABASE HOOKS - Real-time collaboration data
+  // ============================================================================
+  const { sessions: dbSessions, loading: sessionsLoading, createSession, updateSession, deleteSession, refetch: refetchSessions } = useCollaboration()
+
+  // Additional real-time state for collaborators and presence
+  const [collaborators, setCollaborators] = useState<TeamMember[]>([])
+  const [sharedDocuments, setSharedDocuments] = useState<SharedFile[]>([])
+  const [activeSessions, setActiveSessions] = useState<CollaborationSession[]>([])
+  const [realtimePresence, setRealtimePresence] = useState<Map<string, PresenceStatus>>(new Map())
+  const [isLoadingRealtime, setIsLoadingRealtime] = useState(true)
+
+  // Supabase client for real-time subscriptions
+  const supabase = createClient()
+
+  // ============================================================================
+  // REAL-TIME DATA FETCHING
+  // ============================================================================
+
+  // Fetch shared documents from Supabase
+  useEffect(() => {
+    async function fetchSharedDocuments() {
+      try {
+        const { data, error } = await supabase
+          .from('shared_documents')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50)
+
+        if (error) throw error
+
+        if (data && data.length > 0) {
+          const documents: SharedFile[] = data.map(doc => ({
+            id: doc.id,
+            name: doc.name || doc.document_name || 'Untitled',
+            type: (doc.file_type || doc.type || 'document') as FileType,
+            size: doc.file_size || doc.size || 0,
+            uploadedBy: mockMembers[0], // Fallback to mock member
+            uploadedAt: doc.created_at,
+            modifiedAt: doc.updated_at || doc.created_at,
+            sharedWith: doc.shared_with || [],
+            channelId: doc.channel_id,
+            downloadCount: doc.download_count || 0,
+            version: doc.version || 1,
+            isStarred: doc.is_starred || false
+          }))
+          setSharedDocuments(documents)
+        }
+      } catch (err) {
+        console.error('Error fetching shared documents:', err)
+      }
+    }
+
+    fetchSharedDocuments()
+
+    // Set up real-time subscription for shared documents
+    const channel = supabase
+      .channel('shared-documents-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_documents' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const newDoc = payload.new
+          setSharedDocuments(prev => [{
+            id: newDoc.id,
+            name: newDoc.name || newDoc.document_name || 'Untitled',
+            type: (newDoc.file_type || newDoc.type || 'document') as FileType,
+            size: newDoc.file_size || newDoc.size || 0,
+            uploadedBy: mockMembers[0],
+            uploadedAt: newDoc.created_at,
+            modifiedAt: newDoc.updated_at || newDoc.created_at,
+            sharedWith: newDoc.shared_with || [],
+            channelId: newDoc.channel_id,
+            downloadCount: newDoc.download_count || 0,
+            version: newDoc.version || 1,
+            isStarred: newDoc.is_starred || false
+          }, ...prev])
+          toast.success('New document shared!')
+        } else if (payload.eventType === 'UPDATE') {
+          setSharedDocuments(prev => prev.map(doc =>
+            doc.id === payload.new.id ? { ...doc, ...payload.new } : doc
+          ))
+        } else if (payload.eventType === 'DELETE') {
+          setSharedDocuments(prev => prev.filter(doc => doc.id !== payload.old.id))
+        }
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
+  // Fetch collaborators and presence
+  useEffect(() => {
+    async function fetchCollaborators() {
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('*')
+          .limit(20)
+
+        if (error) throw error
+
+        if (data && data.length > 0) {
+          const members: TeamMember[] = data.map((member, idx) => ({
+            id: member.id,
+            name: member.full_name || member.name || `Team Member ${idx + 1}`,
+            email: member.email || '',
+            avatar: member.avatar_url,
+            role: (member.role || 'member') as 'owner' | 'admin' | 'member' | 'guest',
+            presence: (member.status || 'offline') as PresenceStatus,
+            cursorColor: `#${Math.floor(Math.random()*16777215).toString(16)}`,
+            lastActive: member.last_seen || member.updated_at || new Date().toISOString(),
+            department: member.department,
+            title: member.title || member.job_title
+          }))
+          setCollaborators(members)
+        }
+      } catch (err) {
+        console.error('Error fetching collaborators:', err)
+      } finally {
+        setIsLoadingRealtime(false)
+      }
+    }
+
+    fetchCollaborators()
+
+    // Set up presence channel for real-time user status
+    const presenceChannel = supabase.channel('collaboration-presence', {
+      config: {
+        presence: {
+          key: 'user_id',
+        },
+      },
+    })
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState()
+        const newPresence = new Map<string, PresenceStatus>()
+        Object.entries(state).forEach(([key, value]) => {
+          const presenceData = value as any[]
+          if (presenceData.length > 0) {
+            newPresence.set(key, presenceData[0].status || 'online')
+          }
+        })
+        setRealtimePresence(newPresence)
+      })
+      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+        toast.info(`${newPresences[0]?.user_name || 'Someone'} joined the collaboration`)
+      })
+      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+        toast.info(`${leftPresences[0]?.user_name || 'Someone'} left the collaboration`)
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({
+            user_id: 'current_user',
+            status: 'online',
+            online_at: new Date().toISOString()
+          })
+        }
+      })
+
+    return () => {
+      presenceChannel.unsubscribe()
+    }
+  }, [])
+
+  // Transform database sessions to active sessions
+  useEffect(() => {
+    if (dbSessions && dbSessions.length > 0) {
+      const active = dbSessions.filter(s => s.is_active || s.status === 'active')
+      setActiveSessions(active)
+    }
+  }, [dbSessions])
+
+  // ============================================================================
+  // MUTATION HANDLERS
+  // ============================================================================
+
+  const handleCreateBoard = useCallback(async (name: string, type: BoardType, description?: string) => {
+    try {
+      await createSession({
+        session_name: name,
+        session_type: type === 'whiteboard' ? 'whiteboard' : 'document',
+        description: description,
+        is_active: true,
+        status: 'active',
+        participant_count: 1,
+        max_participants: 50,
+        active_participants: 1,
+        access_type: 'invite_only',
+        default_role: 'editor',
+        can_invite_others: true,
+        can_edit: true,
+        can_comment: true,
+        chat_enabled: true,
+        video_enabled: false,
+        audio_enabled: false,
+        screen_share_enabled: true,
+        recording_enabled: false,
+        is_recording: false,
+        notify_on_join: true,
+        notify_on_change: false,
+        notify_on_comment: true,
+        total_edits: 0,
+        total_comments: 0,
+        conflict_resolution_strategy: 'last_write_wins',
+        has_conflicts: false,
+        api_enabled: true,
+        is_scheduled: false,
+        language: 'en',
+        change_count: 0,
+        comment_count: 0,
+        annotation_count: 0,
+        message_count: 0,
+        version: 1
+      })
+      toast.success(`Board "${name}" created successfully!`)
+      refetchSessions()
+    } catch (err) {
+      toast.error('Failed to create board')
+      console.error(err)
+    }
+  }, [createSession, refetchSessions])
+
+  const handleEndSession = useCallback(async (sessionId: string) => {
+    try {
+      await updateSession({
+        id: sessionId,
+        is_active: false,
+        status: 'ended',
+        ended_at: new Date().toISOString()
+      } as any, sessionId)
+      toast.success('Session ended')
+      refetchSessions()
+    } catch (err) {
+      toast.error('Failed to end session')
+    }
+  }, [updateSession, refetchSessions])
+
+  const handleDeleteSession = useCallback(async (sessionId: string) => {
+    try {
+      await deleteSession(sessionId)
+      toast.success('Session deleted')
+      refetchSessions()
+    } catch (err) {
+      toast.error('Failed to delete session')
+    }
+  }, [deleteSession, refetchSessions])
+
   const [activeTab, setActiveTab] = useState('boards')
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -468,32 +724,71 @@ export default function CollaborationClient() {
   const [emojiTarget, setEmojiTarget] = useState<'message' | 'chat'>('chat')
   const [selectedEmoji, setSelectedEmoji] = useState<string>('')
 
+  // ============================================================================
+  // MERGED DATA - Real Supabase data with mock fallback
+  // ============================================================================
+
+  // Transform database sessions to Board format
+  const sessionBoards: Board[] = useMemo(() => {
+    if (!dbSessions || dbSessions.length === 0) return []
+    return dbSessions.map((session, idx) => ({
+      id: session.id,
+      name: session.session_name || `Session ${idx + 1}`,
+      description: session.description,
+      type: (session.session_type === 'whiteboard' ? 'whiteboard' :
+             session.session_type === 'code' ? 'flowchart' :
+             session.session_type === 'design' ? 'wireframe' : 'kanban') as BoardType,
+      status: (session.is_active ? 'active' : 'archived') as BoardStatus,
+      createdAt: session.created_at,
+      updatedAt: session.updated_at,
+      createdBy: collaborators[0] || mockMembers[0],
+      members: collaborators.length > 0 ? collaborators.slice(0, session.participant_count || 1) : mockMembers.slice(0, 3),
+      isStarred: false,
+      isLocked: session.access_type === 'restricted',
+      isPublic: session.access_type === 'public',
+      viewCount: session.total_edits || 0,
+      commentCount: session.comment_count || 0,
+      elementCount: session.change_count || 0,
+      version: session.version || 1,
+      tags: session.tags || [],
+      teamId: 't1',
+      teamName: 'Main Team',
+      channelId: 'c1'
+    }))
+  }, [dbSessions, collaborators])
+
+  // Use real data with mock fallback
+  const allBoards = sessionBoards.length > 0 ? [...sessionBoards, ...mockBoards] : mockBoards
+  const allMembers = collaborators.length > 0 ? collaborators : mockMembers
+  const allFiles = sharedDocuments.length > 0 ? sharedDocuments : mockFiles
+
   const filteredBoards = useMemo(() => {
-    return mockBoards.filter(board => {
+    return allBoards.filter(board => {
       return board.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
              board.description?.toLowerCase().includes(searchQuery.toLowerCase())
     })
-  }, [searchQuery])
+  }, [searchQuery, allBoards])
 
   const stats = useMemo(() => ({
-    totalBoards: mockBoards.length,
-    activeBoards: mockBoards.filter(b => b.status === 'active').length,
-    totalMembers: mockMembers.length,
-    onlineNow: mockMembers.filter(m => m.presence === 'online').length,
+    totalBoards: allBoards.length,
+    activeBoards: allBoards.filter(b => b.status === 'active').length,
+    totalMembers: allMembers.length,
+    onlineNow: allMembers.filter(m => m.presence === 'online' || realtimePresence.get(m.id) === 'online').length,
     totalChannels: mockChannels.length,
     unreadMessages: mockChannels.reduce((sum, c) => sum + c.unreadCount, 0),
     scheduledMeetings: mockMeetings.filter(m => m.status === 'scheduled').length,
-    sharedFiles: mockFiles.length
-  }), [])
+    sharedFiles: allFiles.length,
+    activeSessions: activeSessions.length
+  }), [allBoards, allMembers, realtimePresence, allFiles, activeSessions])
 
   const statsCards = [
     { label: 'Boards', value: stats.totalBoards.toString(), icon: Layout, color: 'from-blue-500 to-blue-600' },
     { label: 'Online', value: stats.onlineNow.toString(), icon: Users, color: 'from-green-500 to-green-600' },
+    { label: 'Sessions', value: stats.activeSessions.toString(), icon: Zap, color: 'from-emerald-500 to-emerald-600' },
     { label: 'Channels', value: stats.totalChannels.toString(), icon: Hash, color: 'from-purple-500 to-purple-600' },
     { label: 'Unread', value: stats.unreadMessages.toString(), icon: MessageSquare, color: 'from-amber-500 to-amber-600' },
     { label: 'Meetings', value: stats.scheduledMeetings.toString(), icon: Video, color: 'from-cyan-500 to-cyan-600' },
     { label: 'Files', value: stats.sharedFiles.toString(), icon: FileText, color: 'from-rose-500 to-rose-600' },
-    { label: 'Teams', value: mockTeams.length.toString(), icon: Users, color: 'from-indigo-500 to-indigo-600' },
     { label: 'Activity', value: mockActivities.length.toString(), icon: TrendingUp, color: 'from-teal-500 to-teal-600' }
   ]
 
@@ -587,6 +882,10 @@ export default function CollaborationClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input placeholder="Search everything..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
@@ -615,14 +914,14 @@ export default function CollaborationClient() {
           ))}
         </div>
 
-        {/* Online Members Bar */}
+        {/* Online Members Bar - Real-time Presence */}
         <Card className="border-gray-200 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <span className="text-sm font-medium">Online now:</span>
+                <span className="text-sm font-medium">Online now{sessionsLoading || isLoadingRealtime ? ' (loading...)' : ''}:</span>
                 <div className="flex -space-x-2">
-                  {mockMembers.filter(m => m.presence === 'online').map(member => (
+                  {allMembers.filter(m => m.presence === 'online' || realtimePresence.get(m.id) === 'online').map(member => (
                     <div key={member.id} className="relative">
                       <Avatar className="w-8 h-8 border-2 border-white">
                         <AvatarFallback style={{ backgroundColor: member.cursorColor }} className="text-white text-xs">
@@ -633,7 +932,7 @@ export default function CollaborationClient() {
                     </div>
                   ))}
                 </div>
-                <span className="text-sm text-gray-500">{mockMembers.filter(m => m.presence === 'online').length} collaborating</span>
+                <span className="text-sm text-gray-500">{allMembers.filter(m => m.presence === 'online' || realtimePresence.get(m.id) === 'online').length} collaborating</span>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => {
@@ -688,11 +987,11 @@ export default function CollaborationClient() {
                     <div className="text-xs text-white/70">Active</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockBoards.filter(b => b.isStarred).length}</div>
+                    <div className="text-2xl font-bold">{allBoards.filter(b => b.isStarred).length}</div>
                     <div className="text-xs text-white/70">Starred</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockMembers.filter(m => m.presence === 'online').length}</div>
+                    <div className="text-2xl font-bold">{allMembers.filter(m => m.presence === 'online' || realtimePresence.get(m.id) === 'online').length}</div>
                     <div className="text-xs text-white/70">Online Now</div>
                   </div>
                 </div>
@@ -1088,15 +1387,15 @@ export default function CollaborationClient() {
                     <div className="text-xs text-white/70">Total Files</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockFiles.filter(f => f.isStarred).length}</div>
+                    <div className="text-2xl font-bold">{allFiles.filter(f => f.isStarred).length}</div>
                     <div className="text-xs text-white/70">Starred</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{formatSize(mockFiles.reduce((sum, f) => sum + f.size, 0))}</div>
+                    <div className="text-2xl font-bold">{formatSize(allFiles.reduce((sum, f) => sum + f.size, 0))}</div>
                     <div className="text-xs text-white/70">Total Size</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockFiles.reduce((sum, f) => sum + f.downloadCount, 0)}</div>
+                    <div className="text-2xl font-bold">{allFiles.reduce((sum, f) => sum + f.downloadCount, 0)}</div>
                     <div className="text-xs text-white/70">Downloads</div>
                   </div>
                 </div>
@@ -1136,7 +1435,7 @@ export default function CollaborationClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockFiles.map(file => {
+                  {allFiles.map(file => {
                     const FileIcon = getFileIcon(file.type)
                     return (
                       <div key={file.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -1910,37 +2209,43 @@ export default function CollaborationClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockCollabAIInsights}
-              title="Collaboration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
+        <CollapsibleInsightsPanel
+          isOpen={insightsPanel.isOpen}
+          onToggle={insightsPanel.toggle}
+          title="Collaboration Intelligence & Insights"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockCollabAIInsights}
+                title="Collaboration Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockCollabCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockCollabPredictions}
+                title="Team Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockCollabCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockCollabPredictions}
-              title="Team Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockCollabActivities}
-            title="Collaboration Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={mockCollabQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockCollabActivities}
+              title="Collaboration Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={mockCollabQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
 
         {/* New Meeting Dialog */}
         <Dialog open={showNewMeeting} onOpenChange={setShowNewMeeting}>

@@ -57,8 +57,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -260,6 +259,7 @@ const getQuickActions = (
 ]
 
 export default function PerformanceClient() {
+  const insightsPanel = useInsightsPanel(false)
   // Get user ID
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
@@ -653,6 +653,10 @@ export default function PerformanceClient() {
                 <Play className="h-5 w-5" />
                 Run Audit
               </button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
 
@@ -2367,25 +2371,29 @@ export default function PerformanceClient() {
       </Dialog>
 
       {/* AI-Powered Performance Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        <AIInsightsPanel
-          insights={mockPerfAIInsights}
-          onAskQuestion={(q) => toast.info('Question Submitted')}
-        />
-        <PredictiveAnalytics predictions={mockPerfPredictions} />
-      </div>
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="Performance Insights" defaultOpen={true} className="mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AIInsightsPanel
+              insights={mockPerfAIInsights}
+              onAskQuestion={(q) => toast.info('Question Submitted')}
+            />
+            <PredictiveAnalytics predictions={mockPerfPredictions} />
+          </div>
 
-      {/* Activity Feed */}
-      <div className="mt-6">
-        <ActivityFeed
-          activities={mockPerfActivities}
-          maxItems={5}
-          showFilters={true}
-        />
-      </div>
+          {/* Activity Feed */}
+          <div className="mt-6">
+            <ActivityFeed
+              activities={mockPerfActivities}
+              maxItems={5}
+              showFilters={true}
+            />
+          </div>
 
-      {/* Quick Actions Toolbar */}
-      <QuickActionsToolbar actions={getQuickActions(setShowRunDialog, setShowViewReportDialog, setShowCompareTestsDialog, setShowExportDataDialog)} />
+          {/* Quick Actions Toolbar */}
+          <QuickActionsToolbar actions={getQuickActions(setShowRunDialog, setShowViewReportDialog, setShowCompareTestsDialog, setShowExportDataDialog)} />
+        </CollapsibleInsightsPanel>
+      )}
     </div>
   )
 }

@@ -30,8 +30,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -287,7 +286,7 @@ interface ProfileSettings {
 }
 
 export default function ProfileClient() {
-
+  const insightsPanel = useInsightsPanel(false)
   const { user } = useAuth()
 
   // UI State
@@ -1094,6 +1093,10 @@ export default function ProfileClient() {
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Profile
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
 
@@ -2625,37 +2628,41 @@ export default function ProfileClient() {
           </Tabs>
 
           {/* Enhanced Competitive Upgrade Components */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-            <div className="lg:col-span-2">
-              <AIInsightsPanel
-                insights={profileInsights}
-                title="Profile Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title)}
-              />
-            </div>
-            <div className="space-y-6">
-              <CollaborationIndicator
-                collaborators={profileCollaborators}
-                maxVisible={4}
-              />
-              <PredictiveAnalytics
-                predictions={profilePredictions}
-                title="Career Forecasts"
-              />
-            </div>
-          </div>
+          {insightsPanel.isOpen && (
+            <CollapsibleInsightsPanel title="Profile Intelligence" defaultOpen={true} className="mt-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <AIInsightsPanel
+                    insights={profileInsights}
+                    title="Profile Intelligence"
+                    onInsightAction={(insight) => toast.info(insight.title)}
+                  />
+                </div>
+                <div className="space-y-6">
+                  <CollaborationIndicator
+                    collaborators={profileCollaborators}
+                    maxVisible={4}
+                  />
+                  <PredictiveAnalytics
+                    predictions={profilePredictions}
+                    title="Career Forecasts"
+                  />
+                </div>
+              </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <ActivityFeed
-              activities={profileActivities}
-              title="Profile Activity"
-              maxItems={5}
-            />
-            <QuickActionsToolbar
-              actions={quickActions}
-              variant="grid"
-            />
-          </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <ActivityFeed
+                  activities={profileActivities}
+                  title="Profile Activity"
+                  maxItems={5}
+                />
+                <QuickActionsToolbar
+                  actions={quickActions}
+                  variant="grid"
+                />
+              </div>
+            </CollapsibleInsightsPanel>
+          )}
 
           {/* Analytics Dialog */}
           <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>

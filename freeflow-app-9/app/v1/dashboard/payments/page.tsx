@@ -29,6 +29,7 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { formatCurrency, getStatusColor } from '@/lib/client-zone-utils'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 const logger = createFeatureLogger('ClientZonePayments')
 
@@ -64,6 +65,7 @@ export default function PaymentsPage() {
 
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
+  const insightsPanel = useInsightsPanel(false)
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -342,7 +344,45 @@ export default function PaymentsPage() {
               </p>
             </div>
           </div>
+          <InsightsToggleButton
+            isOpen={insightsPanel.isOpen}
+            onToggle={insightsPanel.toggle}
+          />
         </motion.div>
+
+        {/* AI Insights Panel */}
+        <CollapsibleInsightsPanel
+          title="Payment Insights"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-purple-900">Payment Trends</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-purple-700">
+                  {milestones.length > 0
+                    ? `${milestones.filter(m => m.status === 'released').length} of ${milestones.length} milestones released (${Math.round((milestones.filter(m => m.status === 'released').length / milestones.length) * 100)}%)`
+                    : 'No payment data available yet'}
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-amber-900">Escrow Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-amber-700">
+                  {totals.inEscrow > 0
+                    ? `${formatCurrency(totals.inEscrow)} secured in escrow across ${milestones.filter(m => m.status === 'in-escrow').length} milestones`
+                    : 'No funds currently in escrow'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </CollapsibleInsightsPanel>
 
         {/* Payment Summary Cards */}
         <motion.div

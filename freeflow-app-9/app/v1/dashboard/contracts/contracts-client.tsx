@@ -25,6 +25,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -153,6 +159,8 @@ const contractsPredictions: { id: string; title: string; prediction: string; con
 const contractsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' | 'update' }[] = []
 
 export default function ContractsClient({ initialContracts }: { initialContracts: Contract[] }) {
+  // Collapsible insights panel state
+  const insightsPanel = useInsightsPanel(false)
   // Team and activity data hooks
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
@@ -882,6 +890,10 @@ export default function ContractsClient({ initialContracts }: { initialContracts
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1.5">
                 <Shield className="h-4 w-4" />
                 <span className="text-sm">SOC 2 Type II</span>
@@ -2968,6 +2980,50 @@ export default function ContractsClient({ initialContracts }: { initialContracts
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Enhanced Competitive Upgrade Components - Collapsible */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel
+          title="Contract Intelligence & Analytics"
+          defaultOpen={true}
+          className="mt-8 max-w-7xl mx-auto px-8"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={contractsAIInsights}
+                title="Contract Intelligence"
+                onInsightAction={(id) => toast.success(`Insight action: ${id}`)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={contractsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={contractsPredictions}
+                title="Contract Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={contractsActivities}
+              title="Contract Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={[
+                { id: 'new', icon: <Plus className="h-4 w-4" />, label: 'New Envelope', onClick: () => setShowNewContract(true) },
+                { id: 'templates', icon: <FileText className="h-4 w-4" />, label: 'Templates', onClick: () => setActiveTab('templates') },
+              ]}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
     </div>
   )
 }

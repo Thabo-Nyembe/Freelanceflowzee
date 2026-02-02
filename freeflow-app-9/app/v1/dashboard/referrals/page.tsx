@@ -26,6 +26,7 @@ import {
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { KAZI_CLIENT_DATA } from '@/lib/client-zone-utils'
@@ -66,6 +67,7 @@ interface Reward {
 export default function ReferralsPage() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
+  const insightsPanel = useInsightsPanel(false)
 
   // Fetch referral data using database hooks
   const { referrals: dbReferrals, isLoading: referralsLoading } = useMyReferrals(userId)
@@ -313,14 +315,20 @@ export default function ReferralsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="flex items-center space-x-4">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 text-white">
-            <Gift className="h-8 w-8" />
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 text-white">
+              <Gift className="h-8 w-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Referral & Rewards Program</h1>
+              <p className="text-gray-600 mt-1">Share KAZI with your network and earn rewards</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Referral & Rewards Program</h1>
-            <p className="text-gray-600 mt-1">Share KAZI with your network and earn rewards</p>
-          </div>
+          <InsightsToggleButton
+            isOpen={insightsPanel.isOpen}
+            onToggle={insightsPanel.toggle}
+          />
         </div>
       </motion.div>
 
@@ -661,6 +669,47 @@ export default function ReferralsPage() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Insights Panel */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel
+          title="Referral Insights & Analytics"
+          defaultOpen={true}
+          className="mt-8"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Referral Performance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{referrals.filter(r => r.status === 'earned').length}</div>
+                <p className="text-xs text-muted-foreground">Successful referrals this month</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {referrals.length > 0 ? Math.round((referrals.filter(r => r.status !== 'pending').length / referrals.length) * 100) : 0}%
+                </div>
+                <p className="text-xs text-muted-foreground">Referral to signup rate</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Points Available</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{loyaltyPoints}</div>
+                <p className="text-xs text-muted-foreground">Ready to redeem</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
     </div>
   )
 }

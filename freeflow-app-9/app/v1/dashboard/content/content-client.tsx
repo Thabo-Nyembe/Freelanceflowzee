@@ -31,6 +31,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Import types for properly typed empty arrays
 import type { AIInsight, Collaborator, Prediction } from '@/components/ui/competitive-upgrades'
 import type { ActivityItem as ExtendedActivityItem } from '@/components/ui/competitive-upgrades-extended'
@@ -242,6 +248,7 @@ const contentPredictions: Prediction[] = []
 const contentActivities: ExtendedActivityItem[] = []
 
 export default function ContentClient() {
+  const insightsPanel = useInsightsPanel(false)
   const router = useRouter()
 
   // View and filter state
@@ -960,6 +967,10 @@ export default function ContentClient() {
               <Plus className="w-4 h-4 mr-2" />
               New Entry
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -1584,37 +1595,41 @@ export default function ContentClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={contentAIInsights}
-              title="Content Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={contentCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={contentPredictions}
-              title="Content Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={contentAIInsights}
+                  title="Content Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={contentCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={contentPredictions}
+                  title="Content Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={contentActivities}
-            title="Content Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={contentQuickActionsWithHandlers}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={contentActivities}
+                title="Content Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={contentQuickActionsWithHandlers}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Create Content Dialog */}

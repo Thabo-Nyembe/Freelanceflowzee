@@ -65,6 +65,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -472,6 +478,7 @@ const mockFAQQuickActions = [
 // ============================================================================
 
 export default function FAQClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('articles')
   const [collections] = useState<Collection[]>(mockCollections)
   const [searchQueries] = useState<SearchQuery[]>(mockSearchQueries)

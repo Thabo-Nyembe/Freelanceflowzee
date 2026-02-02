@@ -59,6 +59,20 @@ import {
   UserPlus,
 } from 'lucide-react'
 
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 // Types
 type BadgeRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
 type BadgeCategory = 'milestone' | 'achievement' | 'collaboration' | 'technical' | 'leadership' | 'community'
@@ -128,6 +142,9 @@ const categoryIcons: Record<BadgeCategory, React.ReactNode> = {
 }
 
 export function BadgesClient() {
+  // Insights panel state
+  const insightsPanel = useInsightsPanel(false)
+
   // State
   const [activeTab, setActiveTab] = useState('my-badges')
   const [searchQuery, setSearchQuery] = useState('')
@@ -1110,6 +1127,7 @@ export function BadgesClient() {
             <Plus className="h-4 w-4 mr-2" />
             Create Badge
           </Button>
+          <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
         </div>
       </div>
 
@@ -1151,6 +1169,45 @@ export function BadgesClient() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Enhanced Competitive Upgrade Components */}
+      <CollapsibleInsightsPanel
+        title="Badge Insights & Analytics"
+        defaultOpen={insightsPanel.isOpen}
+        onOpenChange={insightsPanel.setIsOpen}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <AIInsightsPanel
+              insights={[]}
+              title="Badge Intelligence"
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+            />
+          </div>
+          <div className="space-y-6">
+            <CollaborationIndicator
+              collaborators={[]}
+              maxVisible={4}
+            />
+            <PredictiveAnalytics
+              predictions={[]}
+              title="Achievement Forecasts"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ActivityFeed
+            activities={[]}
+            title="Badge Activity"
+            maxItems={5}
+          />
+          <QuickActionsToolbar
+            actions={[]}
+            variant="grid"
+          />
+        </div>
+      </CollapsibleInsightsPanel>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-4 mb-6">

@@ -40,6 +40,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 // Types
 type ContactType = 'lead' | 'prospect' | 'customer' | 'partner' | 'vendor'
@@ -160,6 +165,7 @@ const mockCrmActivitiesFeed: any[] = []
 const mockCrmQuickActions: any[] = []
 
 export default function CrmClient() {
+  const insightsPanel = useInsightsPanel(false)
   // Define adapter variables locally (removed mock data imports)
   const crmContacts: any[] = []
   const crmCompanies: any[] = []
@@ -1132,6 +1138,10 @@ export default function CrmClient() {
             <Button variant="outline" size="icon" onClick={() => setShowFilterDialog(true)}>
               <Filter className="w-4 h-4" />
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button onClick={handleAddContact} className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Add Contact
@@ -3522,6 +3532,33 @@ export default function CrmClient() {
 
         {/* Quick Actions Toolbar */}
         <QuickActionsToolbar actions={mockCrmQuickActions} />
+
+        {/* Collapsible Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="CRM Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockAIInsights}
+                  title="CRM Intelligence"
+                  onInsightAction={(insight) => {
+                    toast.info(insight.title, { description: insight.description })
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockCrmCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockCrmPredictions}
+                  title="CRM Predictions"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Filter Dialog */}
         <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>

@@ -32,6 +32,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // GitHub Releases level interfaces
 type ReleaseType = 'stable' | 'prerelease' | 'draft' | 'rc' | 'beta' | 'alpha'
 type AssetType = 'binary' | 'source' | 'checksum' | 'signature' | 'documentation' | 'other'
@@ -220,6 +226,8 @@ const defaultChangelogForm: Partial<Changelog> = {
 }
 
 export default function ChangelogClient() {
+  // Collapsible insights panel state
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('releases')
   const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
@@ -846,6 +854,10 @@ export default function ChangelogClient() {
               <p className="text-gray-400">Manage releases, assets, and changelogs</p>
             </div>
             <div className="flex gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800" onClick={handleSubscribeUpdates}>
                 <Bell className="h-4 w-4 mr-2" />
                 Watch
@@ -3077,6 +3089,50 @@ Thanks to all contributors!`}
             <Loader2 className="h-5 w-5 animate-spin text-slate-600" />
             <span className="text-sm text-gray-600 dark:text-gray-400">Loading releases...</span>
           </div>
+        )}
+
+        {/* Enhanced Competitive Upgrade Components - Collapsible */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel
+            title="Changelog Intelligence & Analytics"
+            defaultOpen={true}
+            className="mt-8 px-8"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[]}
+                  title="Release Intelligence"
+                  onInsightAction={(id) => toast.success(`Insight action: ${id}`)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={[]}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={[]}
+                  title="Release Forecasts"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={[]}
+                title="Release Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={[
+                  { id: 'create', icon: <Plus className="h-4 w-4" />, label: 'Draft Release', onClick: () => setIsCreateDialogOpen(true) },
+                  { id: 'refresh', icon: <RefreshCw className="h-4 w-4" />, label: 'Refresh', onClick: () => refetch() },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
         )}
       </div>
     </div>

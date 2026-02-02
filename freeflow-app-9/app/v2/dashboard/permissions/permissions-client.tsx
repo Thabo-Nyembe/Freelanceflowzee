@@ -72,6 +72,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 // Okta-level types
 type UserStatus = 'active' | 'pending' | 'staged' | 'suspended' | 'deprovisioned' | 'locked'
 type GroupType = 'okta' | 'app' | 'built_in' | 'custom'
@@ -248,6 +250,7 @@ const mockPermissionsActivities = [
 // Quick actions will be defined inside the component to access state setters
 
 export default function PermissionsClient({ initialRoles, initialPermissions }: PermissionsClientProps) {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('users')
   const [searchQuery, setSearchQuery] = useState('')
   const [userStatusFilter, setUserStatusFilter] = useState<UserStatus | 'all'>('all')
@@ -676,6 +679,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               <UserPlus className="w-4 h-4" />
               Add User
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -2007,51 +2014,55 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockPermissionsAIInsights}
-              title="Security Intelligence"
-              onInsightAction={(insight) => {
-                switch (insight.type) {
-                  case 'warning':
-                    toast.warning(insight.title)
-                    break
-                  case 'success':
-                    toast.success(insight.title)
-                    break
-                  case 'info':
-                    toast.info(insight.title)
-                    break
-                  default:
-                    toast.success(`${insight.title} action completed`)
-                }
-              }}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockPermissionsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockPermissionsPredictions}
-              title="Access Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Security Intelligence" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockPermissionsAIInsights}
+                  title="Security Intelligence"
+                  onInsightAction={(insight) => {
+                    switch (insight.type) {
+                      case 'warning':
+                        toast.warning(insight.title)
+                        break
+                      case 'success':
+                        toast.success(insight.title)
+                        break
+                      case 'info':
+                        toast.info(insight.title)
+                        break
+                      default:
+                        toast.success(`${insight.title} action completed`)
+                    }
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockPermissionsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockPermissionsPredictions}
+                  title="Access Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockPermissionsActivities}
-            title="Security Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={permissionsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockPermissionsActivities}
+                title="Security Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={permissionsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* User Detail Dialog */}
         <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>

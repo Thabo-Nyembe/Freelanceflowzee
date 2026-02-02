@@ -43,6 +43,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 // Import React icons
 
 
@@ -290,6 +292,9 @@ const initialFormState: WorkflowFormState = {
 
 export default function AutomationsClient({ initialWorkflows }: { initialWorkflows: AutomationWorkflow[] }) {
   const router = useRouter()
+  // Insights panel state
+  const insightsPanel = useInsightsPanel(false)
+
   // Team and activity data hooks
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
@@ -1110,6 +1115,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
                 <Dialog open={showNewWorkflow} onOpenChange={setShowNewWorkflow}>
                   <DialogTrigger asChild>
                     <Button className="bg-white text-emerald-600 hover:bg-white/90">
@@ -2738,50 +2744,56 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={[]}
-              title="Automation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
+        <CollapsibleInsightsPanel
+          title="Automation Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={[]}
+                title="Automation Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={teamMembers.map(member => ({
+                  id: member.id,
+                  name: member.name,
+                  avatar: member.avatar_url || undefined,
+                  status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+                }))}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={[]}
+                title="Automation Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={teamMembers.map(member => ({
-                id: member.id,
-                name: member.name,
-                avatar: member.avatar_url || undefined,
-                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
-              }))}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={[]}
-              title="Automation Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activityLogs.slice(0, 10).map(log => ({
-              id: log.id,
-              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
-              title: log.action,
-              description: log.resource_name || undefined,
-              user: { name: log.user_name || 'System', avatar: undefined },
-              timestamp: log.created_at,
-              isUnread: log.status === 'pending'
-            }))}
-            title="Automation Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={quickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={activityLogs.slice(0, 10).map(log => ({
+                id: log.id,
+                type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+                title: log.action,
+                description: log.resource_name || undefined,
+                user: { name: log.user_name || 'System', avatar: undefined },
+                timestamp: log.created_at,
+                isUnread: log.status === 'pending'
+              }))}
+              title="Automation Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={quickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
 
         {/* Workflow Detail Modal */}
         {selectedWorkflow && (

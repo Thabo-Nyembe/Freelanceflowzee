@@ -38,6 +38,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
 
@@ -224,6 +230,7 @@ const defaultDeploymentForm = {
 }
 
 export default function DeploymentsClient() {
+  const insightsPanel = useInsightsPanel(false)
   // MIGRATED: Batch #16 - Removed mock data, using database hooks
 
   // Integrate useDeployments hook with filter support
@@ -833,6 +840,10 @@ export default function DeploymentsClient() {
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => fetchDeployments()}><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                  <InsightsToggleButton
+                    isOpen={insightsPanel.isOpen}
+                    onToggle={insightsPanel.toggle}
+                  />
                   <Button className="bg-white text-purple-700 hover:bg-purple-50" onClick={() => setShowCreateDialog(true)}><Rocket className="h-4 w-4 mr-2" />Deploy Now</Button>
                 </div>
               </div>
@@ -2231,6 +2242,33 @@ export default function DeploymentsClient() {
             variant="grid"
           />
         </div>
+
+        {/* Collapsible Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Deployment Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[]}
+                  title="Deployment Intelligence"
+                  onInsightAction={(insight) => {
+                    toast.info(insight.title, { description: insight.description })
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={[]}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={[]}
+                  title="Deployment Predictions"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Build Logs Dialog */}
         <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>

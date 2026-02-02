@@ -40,8 +40,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 // ============================================================================
 // TYPE DEFINITIONS - Typeform Level Form Builder
@@ -277,6 +280,7 @@ const mockFormsActivities = [
 // ============================================================================
 
 export default function FormsClient({ initialForms }: { initialForms: Form[] }) {
+  const insightsPanel = useInsightsPanel(false)
 
   const [activeTab, setActiveTab] = useState('dashboard')
   const [settingsTab, setSettingsTab] = useState('general')

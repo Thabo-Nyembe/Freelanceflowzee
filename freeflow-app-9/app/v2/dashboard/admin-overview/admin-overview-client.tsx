@@ -11,6 +11,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 export const dynamic = 'force-dynamic';
 
@@ -88,6 +94,7 @@ const adminOverviewActivities = [
 // Quick actions will be defined inside the component to use state
 
 export default function AdminOverviewClient() {
+  const insightsPanel = useInsightsPanel(false)
   const router = useRouter()
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
@@ -385,6 +392,10 @@ export default function AdminOverviewClient() {
                   >
                     {refreshing ? 'Refreshing...' : 'Refresh'}
                   </button>
+                  <InsightsToggleButton
+                    isOpen={insightsPanel.isOpen}
+                    onToggle={insightsPanel.toggle}
+                  />
                 </div>
               </div>
 
@@ -1080,6 +1091,23 @@ export default function AdminOverviewClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+        {/* Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Dashboard Insights" defaultOpen={true}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={adminOverviewAIInsights}
+                />
+              </div>
+              <ActivityFeed
+                activities={adminOverviewActivities}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
     </div>
   )
 }

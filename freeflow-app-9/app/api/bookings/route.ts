@@ -224,3 +224,244 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to process booking request' }, { status: 500 })
   }
 }
+
+// PATCH - Partial update booking
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    const body = await request.json()
+
+    if (!id) {
+      return NextResponse.json({ error: 'Booking ID is required' }, { status: 400 })
+    }
+
+    // Remove protected fields
+    const { id: _id, user_id: _userId, created_at: _createdAt, ...updateData } = body
+    updateData.updated_at = new Date().toISOString()
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .update(updateData)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Bookings PATCH error', { error, id })
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+      }
+      throw error
+    }
+
+    logger.info('Booking updated', { id, fields: Object.keys(updateData) })
+    return NextResponse.json({
+      success: true,
+      data,
+      message: 'Booking updated successfully'
+    })
+  } catch (error) {
+    logger.error('Bookings PATCH error', { error })
+    return NextResponse.json({ error: 'Failed to update booking' }, { status: 500 })
+  }
+}
+
+// PUT - Full update or status change
+export async function PUT(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    const action = searchParams.get('action')
+    const body = await request.json()
+
+    if (!id) {
+      return NextResponse.json({ error: 'Booking ID is required' }, { status: 400 })
+    }
+
+    // Handle specific actions
+    if (action) {
+      let updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
+
+      switch (action) {
+        case 'confirm':
+          updateData.status = 'confirmed'
+          updateData.confirmed_at = new Date().toISOString()
+          break
+        case 'cancel':
+          updateData.status = 'cancelled'
+          updateData.cancelled_at = new Date().toISOString()
+          updateData.cancellation_reason = body.reason || null
+          break
+        case 'complete':
+          updateData.status = 'completed'
+          updateData.completed_at = new Date().toISOString()
+          break
+        case 'reschedule':
+          if (!body.date || !body.time) {
+            return NextResponse.json({ error: 'New date and time required for reschedule' }, { status: 400 })
+          }
+          updateData.booking_date = body.date
+          updateData.booking_time = body.time
+          updateData.status = 'rescheduled'
+          updateData.rescheduled_at = new Date().toISOString()
+          break
+        case 'no-show':
+          updateData.status = 'no_show'
+          updateData.no_show_at = new Date().toISOString()
+          break
+        default:
+          return NextResponse.json({ error: `Invalid action: ${action}` }, { status: 400 })
+      }
+
+      const { data, error } = await supabase
+        .from('bookings')
+        .update(updateData)
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+        }
+        throw error
+      }
+
+      logger.info('Booking action completed', { id, action })
+      return NextResponse.json({
+        success: true,
+        data,
+        action,
+        message: `Booking ${action} successful`
+      })
+    }
+
+    // Full update
+    const { id: _id, user_id: _userId, created_at: _createdAt, ...updateData } = body
+    updateData.updated_at = new Date().toISOString()
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .update(updateData)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+      }
+      throw error
+    }
+
+    logger.info('Booking fully updated', { id })
+    return NextResponse.json({
+      success: true,
+      data,
+      message: 'Booking updated successfully'
+    })
+  } catch (error) {
+    logger.error('Bookings PUT error', { error })
+    return NextResponse.json({ error: 'Failed to update booking' }, { status: 500 })
+  }
+}
+
+// DELETE - Cancel or remove booking
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    const permanent = searchParams.get('permanent') === 'true'
+
+    if (!id) {
+      return NextResponse.json({ error: 'Booking ID is required' }, { status: 400 })
+    }
+
+    if (permanent) {
+      // Hard delete - only for cancelled/completed bookings
+      const { data: booking } = await supabase
+        .from('bookings')
+        .select('status')
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .single()
+
+      if (booking && !['cancelled', 'completed', 'no_show'].includes(booking.status)) {
+        return NextResponse.json({
+          error: 'Only cancelled, completed, or no-show bookings can be permanently deleted'
+        }, { status: 400 })
+      }
+
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      logger.info('Booking permanently deleted', { id })
+      return NextResponse.json({
+        success: true,
+        message: 'Booking permanently deleted',
+        id
+      })
+    } else {
+      // Soft delete - cancel the booking
+      const { data, error } = await supabase
+        .from('bookings')
+        .update({
+          status: 'cancelled',
+          cancelled_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+        }
+        throw error
+      }
+
+      logger.info('Booking cancelled', { id })
+      return NextResponse.json({
+        success: true,
+        data,
+        message: 'Booking cancelled successfully',
+        id
+      })
+    }
+  } catch (error) {
+    logger.error('Bookings DELETE error', { error })
+    return NextResponse.json({ error: 'Failed to delete booking' }, { status: 500 })
+  }
+}

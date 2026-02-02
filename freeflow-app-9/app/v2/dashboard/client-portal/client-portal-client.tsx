@@ -12,6 +12,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 import { useClients } from '@/lib/hooks/use-clients'
 import { useProjects } from '@/lib/hooks/use-projects'
 
@@ -266,6 +268,7 @@ const clientPortalActivities: any[] = []
 // Quick actions will be defined inside the component to access state setters
 
 export default function ClientPortalClient() {
+  const insightsPanel = useInsightsPanel(false)
   logger.debug('Component mounting')
 
   const { announce } = useAnnouncer()
@@ -876,15 +879,21 @@ export default function ClientPortalClient() {
         <div className="container mx-auto px-4 space-y-6">
 
           {/* V2 Competitive Upgrade Components */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <AIInsightsPanel insights={clientPortalAIInsights} />
-            <PredictiveAnalytics predictions={clientPortalPredictions} />
-            <CollaborationIndicator collaborators={clientPortalCollaborators} />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <QuickActionsToolbar actions={clientPortalQuickActions} />
-            <ActivityFeed activities={clientPortalActivities} />
-          </div>
+          <CollapsibleInsightsPanel
+            isOpen={insightsPanel.isOpen}
+            onToggle={insightsPanel.toggle}
+            title="Client Portal Intelligence & Insights"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              <AIInsightsPanel insights={clientPortalAIInsights} />
+              <PredictiveAnalytics predictions={clientPortalPredictions} />
+              <CollaborationIndicator collaborators={clientPortalCollaborators} />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <QuickActionsToolbar actions={clientPortalQuickActions} />
+              <ActivityFeed activities={clientPortalActivities} />
+            </div>
+          </CollapsibleInsightsPanel>
           <CardSkeleton />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <CardSkeleton />
@@ -917,6 +926,10 @@ export default function ClientPortalClient() {
                 </p>
               </div>
             </div>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button onClick={() => setIsAddClientModalOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Client

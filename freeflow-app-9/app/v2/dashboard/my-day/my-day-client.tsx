@@ -76,6 +76,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Types
 type TaskPriority = 'p1' | 'p2' | 'p3' | 'p4'
 type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled'
@@ -415,6 +421,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
   const [showDeleteTaskDialog, setShowDeleteTaskDialog] = useState(false)
   const [showFocusSessionDialog, setShowFocusSessionDialog] = useState(false)
   const [showReviewDialog, setShowReviewDialog] = useState(false)
+  const insightsPanel = useInsightsPanel(false)
 
   // Form states for dialogs
   const [newTaskTitle, setNewTaskTitle] = useState('')

@@ -36,6 +36,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Supabase hooks for real marketplace data
 import { useMarketplaceApps, useFeaturedApps, type MarketplaceApp } from '@/lib/hooks/use-marketplace'
 
@@ -403,6 +409,7 @@ export default function MarketplaceClient() {
   const [dbApiKeys, setDbApiKeys] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const insightsPanel = useInsightsPanel(false)
 
   // Database integration
   const { create: createCouponMutation, isLoading: creatingCoupon } = useCreateCoupon()

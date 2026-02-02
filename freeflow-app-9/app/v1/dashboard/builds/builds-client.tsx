@@ -83,6 +83,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // ============================================================================
 // TYPE DEFINITIONS - GitHub Actions Level CI/CD
 // ============================================================================
@@ -330,6 +336,8 @@ const buildsActivities: { id: string; action: string; timestamp: string }[] = []
 
 export default function BuildsClient() {
   const router = useRouter()
+  // Collapsible insights panel state
+  const insightsPanel = useInsightsPanel(false)
   // MIGRATED: Database hooks for builds data (Supabase)
   const { builds: databaseBuilds = [], isLoading: buildsLoading, error: buildsError, refetch: refetchBuilds } = useBuilds()
   const { pipelines: databasePipelines = [], activePipelines = [], isLoading: pipelinesLoading, error: pipelinesError } = useBuildPipelines()
@@ -686,6 +694,10 @@ export default function BuildsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button variant="outline" size="sm" onClick={() => refetchBuilds()}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
@@ -1928,6 +1940,50 @@ export default function BuildsClient() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Enhanced Competitive Upgrade Components - Collapsible */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel
+            title="Build Intelligence & Analytics"
+            defaultOpen={true}
+            className="mt-8"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[]}
+                  title="Build Intelligence"
+                  onInsightAction={(id) => toast.success(`Insight action: ${id}`)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={[]}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={[]}
+                  title="Build Forecasts"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={[]}
+                title="Build Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={[
+                  { id: 'trigger', icon: <Play className="h-4 w-4" />, label: 'Trigger Build', onClick: () => handleTriggerBuild() },
+                  { id: 'refresh', icon: <RefreshCw className="h-4 w-4" />, label: 'Refresh', onClick: () => refetchBuilds() },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
     </div>
   )

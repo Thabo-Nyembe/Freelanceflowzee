@@ -56,6 +56,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -186,6 +192,7 @@ export default function GalleryClient() {
   const [copiedLink, setCopiedLink] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const insightsPanel = useInsightsPanel(false)
 
   // New dialog states for real functionality
   const [showFollowDialog, setShowFollowDialog] = useState(false)
@@ -819,6 +826,11 @@ export default function GalleryClient() {
                 >
                   <Settings className="w-5 h-5 text-white" />
                 </button>
+                <InsightsToggleButton
+                  isOpen={insightsPanel.isOpen}
+                  onToggle={insightsPanel.toggle}
+                  className="bg-white/20 hover:bg-white/30 text-white border-0"
+                />
               </div>
             </div>
 
@@ -1933,37 +1945,45 @@ export default function GalleryClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockGalleryAIInsights}
-              title="Gallery Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockGalleryCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockGalleryPredictions}
-              title="Gallery Metrics Forecast"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Gallery Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockGalleryAIInsights}
+                  title="Gallery Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockGalleryCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockGalleryPredictions}
+                  title="Gallery Metrics Forecast"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockGalleryActivities}
-            title="Gallery Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={galleryQuickActions}
-            variant="grid"
-          />
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Activity & Quick Actions" defaultOpen={true} className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ActivityFeed
+                activities={mockGalleryActivities}
+                title="Gallery Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={galleryQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Photo Detail Dialog */}
         <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>

@@ -27,6 +27,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 // Import mock data from centralized adapters
 
 
@@ -652,6 +654,7 @@ const mockCertsActivities = [
 // Quick actions are now defined inside the component to access state setters
 
 export default function CertificationsClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [activeView, setActiveView] = useState<'credentials' | 'badges' | 'skills' | 'pathways' | 'verification'>('credentials')
   const [selectedCredential, setSelectedCredential] = useState<Credential | null>(null)
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null)
@@ -1160,6 +1163,10 @@ Verification URL: https://freeflow.app/verify/CERT-${Date.now()}
             <p className="text-gray-600 dark:text-gray-400">Digital badges, skills endorsements & verified credentials</p>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <input
               type="text"
               placeholder="Search credentials..."
@@ -2308,37 +2315,43 @@ Verification URL: https://freeflow.app/verify/CERT-${Date.now()}
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockCertsAIInsights}
-              title="Certification Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
+        <CollapsibleInsightsPanel
+          isOpen={insightsPanel.isOpen}
+          onToggle={insightsPanel.toggle}
+          title="Certification Intelligence & Insights"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockCertsAIInsights}
+                title="Certification Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockCertsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockCertsPredictions}
+                title="Certification Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockCertsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockCertsPredictions}
-              title="Certification Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockCertsActivities}
-            title="Certification Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={certsQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockCertsActivities}
+              title="Certification Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={certsQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
 
         {/* Database Certifications Section */}
         {dbCertifications && dbCertifications.length > 0 && (

@@ -37,6 +37,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 // Data hooks for real Supabase data
 
 
@@ -216,6 +218,7 @@ const defaultAccountForm = {
 }
 
 export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budget[] }) {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [settingsTab, setSettingsTab] = useState('general')
   const [currentMonth, setCurrentMonth] = useState(new Date())
@@ -691,6 +694,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} className="bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm border-white/30" />
                 <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-1">
                   <Button size="sm" variant="ghost" className="text-white hover:bg-white/20" onClick={() => navigateMonth('prev')}>
                     <ChevronLeft className="w-4 h-4" />
@@ -2308,40 +2312,78 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={budgetsAIInsights}
-              title="Budget Intelligence"
-              onInsightAction={(_insight) => {
-                toast.success(_insight.title + ': ' + _insight.description)
-              }}
-            />
+        {/* Enhanced Competitive Upgrade Components - Wrapped in Collapsible Panel */}
+        <CollapsibleInsightsPanel
+          title="Budget Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={budgetsAIInsights}
+                title="Budget Intelligence"
+                onInsightAction={(_insight) => {
+                  toast.success(_insight.title + ': ' + _insight.description)
+                }}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={budgetsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={budgetsPredictions}
+                title="Budget Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={budgetsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={budgetsPredictions}
-              title="Budget Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={budgetsActivities}
-            title="Budget Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={budgetsQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={budgetsActivities}
+              title="Budget Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={budgetsQuickActions}
+              variant="grid"
+            />
+          </div>
+
+          {/* Additional Budget Analytics */}
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm mt-6">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-blue-600" />
+                Budget Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Total Budgets</span>
+                <span className="font-semibold">{stats.budgetsCount}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Total Budgeted</span>
+                <span className="font-semibold">{formatCurrency(stats.totalBudgeted)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Total Spent</span>
+                <span className="font-semibold text-red-600">{formatCurrency(stats.totalSpent)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Available</span>
+                <span className="font-semibold text-green-600">{formatCurrency(stats.totalAvailable)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Spending Rate</span>
+                <span className="font-semibold">{stats.spendingRate}%</span>
+              </div>
+            </CardContent>
+          </Card>
+        </CollapsibleInsightsPanel>
 
         {/* Transaction Detail Modal */}
         {selectedTransaction && (

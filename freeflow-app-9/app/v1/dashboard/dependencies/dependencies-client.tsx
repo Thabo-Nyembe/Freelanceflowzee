@@ -60,6 +60,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
@@ -214,6 +216,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
   // Team and activity data hooks
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
+  const insightsPanel = useInsightsPanel(false)
 
   // Transform team members to collaborators format
   const dependenciesCollaborators = teamMembers.map(member => ({
@@ -923,6 +926,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} className="bg-white/20 hover:bg-white/30 text-white border-0" />
               <span className="px-3 py-1 rounded-full bg-white/20 text-sm font-medium backdrop-blur">
                 Dependabot Level
               </span>
@@ -2335,37 +2339,43 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={dependenciesAIInsights}
-              title="Dependencies Intelligence"
-              onInsightAction={handleApplyInsight}
-            />
+        <CollapsibleInsightsPanel
+          title="Dependency Security Insights"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={dependenciesAIInsights}
+                title="Dependencies Intelligence"
+                onInsightAction={handleApplyInsight}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={dependenciesCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={dependenciesPredictions}
+                title="Security Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={dependenciesCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={dependenciesPredictions}
-              title="Security Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={dependenciesActivities}
-            title="Dependency Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={dependenciesQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={dependenciesActivities}
+              title="Dependency Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={dependenciesQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
       </div>
 
       {/* Vulnerability Detail Dialog */}

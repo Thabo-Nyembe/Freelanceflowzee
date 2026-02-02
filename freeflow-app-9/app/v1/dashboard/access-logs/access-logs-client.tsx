@@ -83,6 +83,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 import { Switch } from '@/components/ui/switch'
 import { CardDescription } from '@/components/ui/card'
 
@@ -224,6 +226,9 @@ interface DbAccessLog {
 }
 
 export default function AccessLogsClient() {
+  // Insights panel state
+  const insightsPanel = useInsightsPanel(false)
+
   // Auth and user ID
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
@@ -869,6 +874,10 @@ export default function AccessLogsClient() {
             <Button variant="outline" size="icon" onClick={handleExportLogs}>
               <Download className="w-4 h-4" />
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -1925,37 +1934,43 @@ export default function AccessLogsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockLogsAIInsights}
-              title="Access Log Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
+        <CollapsibleInsightsPanel
+          title="Access Log Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockLogsAIInsights}
+                title="Access Log Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockLogsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockLogsPredictions}
+                title="Log Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockLogsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockLogsPredictions}
-              title="Log Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockLogsActivities}
-            title="Access Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={mockLogsQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockLogsActivities}
+              title="Access Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={mockLogsQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
       </div>
 
       {/* Log Detail Dialog */}

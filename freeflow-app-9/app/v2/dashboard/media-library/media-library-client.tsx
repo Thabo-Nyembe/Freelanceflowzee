@@ -105,6 +105,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -653,6 +659,7 @@ export default function MediaLibraryClient({
   const [reportDateRange, setReportDateRange] = useState('30')
   const [reportFormat, setReportFormat] = useState('pdf')
   const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+  const insightsPanel = useInsightsPanel(false)
   const [showCloudImportDialog, setShowCloudImportDialog] = useState(false)
   const [showUrlImportDialog, setShowUrlImportDialog] = useState(false)
   const [showCloudBrowserDialog, setShowCloudBrowserDialog] = useState(false)

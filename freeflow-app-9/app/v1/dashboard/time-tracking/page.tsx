@@ -58,6 +58,7 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 interface TimeEntry {
   id: string
@@ -98,6 +99,7 @@ export default function TimeTrackingPage() {
   const userId = user?.id
   const logger = useLogger()
   const { announce } = useAccessibility()
+  const insightsPanel = useInsightsPanel(false)
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -898,19 +900,22 @@ export default function TimeTrackingPage() {
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
 
       <div className="max-w-7xl mx-auto relative">
-        <div className="mb-8 flex items-center gap-4">
-          <div className="relative">
-            <GlowEffect className="absolute -inset-2 bg-gradient-to-r from-emerald-500/50 to-teal-500/50 rounded-lg blur opacity-75" />
-            <div className="relative p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg">
-              <Clock className="h-8 w-8 text-white" />
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <GlowEffect className="absolute -inset-2 bg-gradient-to-r from-emerald-500/50 to-teal-500/50 rounded-lg blur opacity-75" />
+              <div className="relative p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg">
+                <Clock className="h-8 w-8 text-white" />
+              </div>
+            </div>
+            <div>
+              <TextShimmer className="text-4xl font-bold text-gray-900 dark:text-white mb-2" duration={2}>
+                Time Tracking
+              </TextShimmer>
+              <p className="text-gray-600 dark:text-gray-400">Track time across projects and tasks</p>
             </div>
           </div>
-          <div>
-            <TextShimmer className="text-4xl font-bold text-gray-900 dark:text-white mb-2" duration={2}>
-              Time Tracking
-            </TextShimmer>
-            <p className="text-gray-600 dark:text-gray-400">Track time across projects and tasks</p>
-          </div>
+          <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -1223,6 +1228,35 @@ export default function TimeTrackingPage() {
             </div>
           </div>
         </div>
+
+        {/* Insights Panel */}
+        <CollapsibleInsightsPanel
+          title="Time Tracking Insights"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+          className="mt-6"
+        >
+          <div className="space-y-4">
+            <div className="p-4 rounded-lg bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
+              <h4 className="font-semibold text-emerald-700 dark:text-emerald-400 mb-2">Productivity Insights</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Track your time patterns to optimize productivity. You have logged {timeEntries.length} entries this period.
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
+              <h4 className="font-semibold text-blue-700 dark:text-blue-400 mb-2">Focus Recommendations</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Based on your time data, consider scheduling deep work sessions in the morning for maximum productivity.
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+              <h4 className="font-semibold text-purple-700 dark:text-purple-400 mb-2">Project Distribution</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                You are tracking time across {projects.length} projects. Review allocation to ensure balanced workload.
+              </p>
+            </div>
+          </div>
+        </CollapsibleInsightsPanel>
       </div>
 
       {/* Delete Entry AlertDialog */}

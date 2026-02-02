@@ -33,8 +33,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 // AWS DataPipeline/Fivetran level interfaces
 interface DataSource {
@@ -220,6 +223,7 @@ interface DataExport {
 }
 
 export default function DataExportClient() {
+  const insightsPanel = useInsightsPanel(false)
   // Auth
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
@@ -1846,6 +1850,10 @@ export default function DataExportClient() {
                 <History className="w-4 h-4 mr-2" />
                 Job History
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button
                 className="bg-white text-green-600 hover:bg-green-50"
                 onClick={() => setShowNewPipelineHeaderDialog(true)}
@@ -3336,6 +3344,33 @@ export default function DataExportClient() {
             variant="grid"
           />
         </div>
+
+        {/* Collapsible Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Data Export Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={dataExportAIInsights}
+                  title="Pipeline Intelligence"
+                  onInsightAction={(insight) => {
+                    toast.info(insight.title, { description: insight.description })
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={dataExportCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={dataExportPredictions}
+                  title="Pipeline Predictions"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* New Pipeline Quick Dialog */}

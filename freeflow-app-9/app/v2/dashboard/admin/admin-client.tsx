@@ -62,6 +62,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -214,7 +220,7 @@ const statusColors = {
 // Quick actions are now defined inside the component to access state setters
 
 export default function AdminClient({ initialSettings }: { initialSettings: AdminSetting[] }) {
-
+  const insightsPanel = useInsightsPanel(false)
 
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
@@ -860,6 +866,10 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <Terminal className="w-4 h-4" />
               Console
             </button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -3147,6 +3157,31 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Admin Insights & Analytics" defaultOpen={true}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[
+                    { id: '1', type: 'info', title: 'System Health', description: 'All critical services are operating within normal parameters.', priority: 'medium', timestamp: new Date().toISOString(), category: 'System' },
+                    { id: '2', type: 'success', title: 'Security Status', description: 'No security incidents detected in the last 24 hours.', priority: 'high', timestamp: new Date().toISOString(), category: 'Security' },
+                    { id: '3', type: 'warning', title: 'Pending Updates', description: 'Several feature flags are awaiting review and deployment.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Deployments' },
+                  ]}
+                />
+              </div>
+              <ActivityFeed
+                activities={[
+                  { id: '1', user: 'System', action: 'deployed', target: 'v2.4.1', timestamp: '2h ago', type: 'success' },
+                  { id: '2', user: 'Admin', action: 'updated', target: 'feature flags', timestamp: '4h ago', type: 'info' },
+                  { id: '3', user: 'Scheduler', action: 'completed', target: 'backup job', timestamp: '6h ago', type: 'success' },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
     </div>
   )

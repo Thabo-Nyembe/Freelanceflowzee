@@ -70,6 +70,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -488,6 +494,8 @@ const mockBackupsActivities = [
 // Quick actions are now defined inside the component to access state setters
 
 export default function BackupsClient() {
+  const insightsPanel = useInsightsPanel(false)
+
   // Use the backups hook for real data
   const {
     backups,
@@ -1001,6 +1009,10 @@ export default function BackupsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -2002,38 +2014,42 @@ export default function BackupsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockBackupsAIInsights}
-              title="Backup Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockBackupsCollaborators}
-              maxVisible={4}
-              showStatus={true}
-            />
-            <PredictiveAnalytics
-              predictions={mockBackupsPredictions}
-              title="Storage Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockBackupsAIInsights}
+                  title="Backup Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockBackupsCollaborators}
+                  maxVisible={4}
+                  showStatus={true}
+                />
+                <PredictiveAnalytics
+                  predictions={mockBackupsPredictions}
+                  title="Storage Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockBackupsActivities}
-            title="Backup Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={backupsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockBackupsActivities}
+                title="Backup Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={backupsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Job Detail Dialog */}
         <Dialog open={!!selectedJob} onOpenChange={() => setSelectedJob(null)}>

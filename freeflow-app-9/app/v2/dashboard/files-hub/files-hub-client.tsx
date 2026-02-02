@@ -76,8 +76,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 // Types
 type FileType = 'folder' | 'document' | 'image' | 'video' | 'audio' | 'archive' | 'code' | 'spreadsheet' | 'presentation' | 'other'
@@ -444,7 +447,7 @@ interface DbFolder {
 }
 
 export default function FilesHubClient() {
-
+  const insightsPanel = useInsightsPanel(false)
 
   // UI State
   const [activeTab, setActiveTab] = useState('files')

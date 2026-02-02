@@ -893,3 +893,281 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+// ============================================================================
+// PATCH - Update payment or request refund
+// ============================================================================
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    const { action, paymentIntentId, transactionId, ...data } = body
+
+    if (!paymentIntentId && !transactionId) {
+      return NextResponse.json(
+        { error: 'paymentIntentId or transactionId required' },
+        { status: 400 }
+      )
+    }
+
+    const supabase = createAdminClient()
+
+    switch (action) {
+      case 'request-refund': {
+        const { reason, amount } = data
+
+        if (!isStripeConfigured) {
+          // Mock refund for development
+          const { error } = await supabase
+            .from('payments')
+            .update({
+              status: 'refund_requested',
+              refund_reason: reason,
+              refund_requested_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .eq('stripe_payment_intent_id', paymentIntentId)
+
+          if (error) throw error
+
+          logger.info('Refund requested (mock)', { paymentIntentId, reason })
+          return NextResponse.json({
+            success: true,
+            message: 'Refund request submitted',
+            status: 'refund_requested'
+          })
+        }
+
+        // Process refund via Stripe
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+
+        if (paymentIntent.status !== 'succeeded') {
+          return NextResponse.json(
+            { error: 'Can only refund succeeded payments' },
+            { status: 400 }
+          )
+        }
+
+        const refundAmount = amount ? Math.round(amount * 100) : paymentIntent.amount
+        const refund = await stripe.refunds.create({
+          payment_intent: paymentIntentId,
+          amount: refundAmount,
+          reason: 'requested_by_customer',
+          metadata: {
+            user_id: session.user.id,
+            reason: reason || 'Customer requested refund'
+          }
+        })
+
+        // Update payment record
+        await supabase
+          .from('payments')
+          .update({
+            status: refund.status === 'succeeded' ? 'refunded' : 'refund_pending',
+            refunded_amount: refundAmount / 100,
+            refund_reason: reason,
+            stripe_refund_id: refund.id,
+            refunded_at: refund.status === 'succeeded' ? new Date().toISOString() : null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('stripe_payment_intent_id', paymentIntentId)
+
+        logger.info('Refund processed', {
+          paymentIntentId,
+          refundId: refund.id,
+          amount: refundAmount / 100,
+          status: refund.status
+        })
+
+        return NextResponse.json({
+          success: true,
+          refund: {
+            id: refund.id,
+            amount: refundAmount / 100,
+            status: refund.status,
+            currency: refund.currency.toUpperCase()
+          },
+          message: 'Refund processed successfully'
+        })
+      }
+
+      case 'update-metadata': {
+        if (!isStripeConfigured) {
+          return NextResponse.json({ success: true, message: 'Metadata updated (mock)' })
+        }
+
+        await stripe.paymentIntents.update(paymentIntentId, {
+          metadata: data.metadata
+        })
+
+        logger.info('Payment metadata updated', { paymentIntentId })
+        return NextResponse.json({ success: true, message: 'Payment metadata updated' })
+      }
+
+      case 'capture': {
+        // For payments that require manual capture
+        if (!isStripeConfigured) {
+          return NextResponse.json({ success: true, message: 'Payment captured (mock)' })
+        }
+
+        const captured = await stripe.paymentIntents.capture(paymentIntentId, {
+          amount_to_capture: data.amount ? Math.round(data.amount * 100) : undefined
+        })
+
+        await supabase
+          .from('payments')
+          .update({
+            status: 'succeeded',
+            captured_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('stripe_payment_intent_id', paymentIntentId)
+
+        logger.info('Payment captured', { paymentIntentId, amount: captured.amount / 100 })
+        return NextResponse.json({
+          success: true,
+          amount: captured.amount / 100,
+          message: 'Payment captured successfully'
+        })
+      }
+
+      default:
+        return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 })
+    }
+  } catch (error) {
+    logger.error('Payment PATCH failed', { error: error.message })
+    return NextResponse.json(
+      { error: error.message || 'Failed to update payment' },
+      { status: 500 }
+    )
+  }
+}
+
+// ============================================================================
+// DELETE - Cancel payment intent
+// ============================================================================
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    const searchParams = request.nextUrl.searchParams
+    const paymentIntentId = searchParams.get('paymentIntentId')
+
+    if (!paymentIntentId) {
+      return NextResponse.json(
+        { error: 'paymentIntentId required' },
+        { status: 400 }
+      )
+    }
+
+    const supabase = createAdminClient()
+
+    if (!isStripeConfigured) {
+      // Mock cancellation for development
+      const { error } = await supabase
+        .from('payments')
+        .update({
+          status: 'cancelled',
+          cancelled_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('stripe_payment_intent_id', paymentIntentId)
+
+      if (error) throw error
+
+      logger.info('Payment cancelled (mock)', { paymentIntentId })
+      return NextResponse.json({
+        success: true,
+        message: 'Payment cancelled',
+        paymentIntentId
+      })
+    }
+
+    // Check payment intent status
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+
+    if (paymentIntent.status === 'succeeded') {
+      return NextResponse.json(
+        { error: 'Cannot cancel a succeeded payment. Use refund instead.' },
+        { status: 400 }
+      )
+    }
+
+    if (['canceled', 'cancelled'].includes(paymentIntent.status)) {
+      return NextResponse.json(
+        { error: 'Payment is already cancelled' },
+        { status: 400 }
+      )
+    }
+
+    // Cancel the payment intent
+    const cancelled = await stripe.paymentIntents.cancel(paymentIntentId, {
+      cancellation_reason: 'requested_by_customer'
+    })
+
+    // Update payment record
+    await supabase
+      .from('payments')
+      .update({
+        status: 'cancelled',
+        cancelled_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('stripe_payment_intent_id', paymentIntentId)
+
+    // Revoke any granted access
+    const { itemId } = paymentIntent.metadata || {}
+    if (itemId) {
+      await supabase
+        .from('user_content_access')
+        .update({
+          is_active: false,
+          revoked_at: new Date().toISOString(),
+          revoked_reason: 'payment_cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('transaction_id', `txn_${paymentIntentId}`)
+    }
+
+    logger.info('Payment cancelled', { paymentIntentId, status: cancelled.status })
+
+    return NextResponse.json({
+      success: true,
+      message: 'Payment cancelled successfully',
+      paymentIntentId,
+      status: cancelled.status
+    })
+  } catch (error) {
+    logger.error('Payment DELETE failed', { error: error.message })
+
+    // Handle specific Stripe errors
+    if (error.type === 'StripeInvalidRequestError') {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      )
+    }
+
+    return NextResponse.json(
+      { error: 'Failed to cancel payment' },
+      { status: 500 }
+    )
+  }
+}

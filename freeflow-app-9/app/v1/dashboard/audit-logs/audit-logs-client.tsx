@@ -89,6 +89,8 @@ import {
   type QuickAction,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 // Initialize Supabase client once at module level (for operations not covered by hooks)
 const supabase = createClient()
 
@@ -297,6 +299,8 @@ const formatDuration = (ms: number): string => {
 // ============================================================================
 
 export default function AuditLogsClient() {
+  // Insights panel state
+  const insightsPanel = useInsightsPanel(false)
 
   // Demo mode detection
   const { data: nextAuthSession, status: sessionStatus } = useSession()
@@ -1090,6 +1094,7 @@ export default function AuditLogsClient() {
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
+            <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
           </div>
         </div>
 
@@ -2167,37 +2172,43 @@ export default function AuditLogsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={[] as AIInsight[]}
-              title="Audit Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
+        <CollapsibleInsightsPanel
+          title="Audit Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={[] as AIInsight[]}
+                title="Audit Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={[] as Collaborator[]}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={[] as Prediction[]}
+                title="Audit Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={[] as Collaborator[]}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={[] as Prediction[]}
-              title="Audit Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={[] as ActivityItem[]}
-            title="Audit Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={[] as QuickAction[]}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={[] as ActivityItem[]}
+              title="Audit Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={[] as QuickAction[]}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
 
         {/* Log Detail Dialog */}
         <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>

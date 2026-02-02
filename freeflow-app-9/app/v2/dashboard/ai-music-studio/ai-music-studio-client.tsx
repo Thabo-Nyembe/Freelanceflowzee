@@ -11,6 +11,9 @@ export const dynamic = 'force-dynamic';
 
 import AIMusicStudio from '@/components/ai/ai-music-studio'
 import { toast } from 'sonner'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { TrendingUp, Activity, BarChart3, Zap } from 'lucide-react'
 
 
 
@@ -88,5 +91,69 @@ const aiMusicStudioQuickActions = [
 ]
 
 export default function AiMusicStudioClient() {
-  return <AIMusicStudio />
+  const insightsPanel = useInsightsPanel(false)
+
+  return (
+    <div className="space-y-6">
+      {/* Header with Insights Toggle */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">AI Music Studio</h1>
+          <p className="text-muted-foreground">Create and compose music with AI</p>
+        </div>
+        <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
+      </div>
+
+      {/* Main Content */}
+      <AIMusicStudio />
+
+      {/* Collapsible Insights Panel */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="AI Insights & Analytics" defaultOpen={true}>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Tracks Created</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">847</div>
+                <p className="text-xs text-muted-foreground">+18% from last month</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Composition Speed</CardTitle>
+                <Zap className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">4.8s</div>
+                <p className="text-xs text-muted-foreground">Average generation time</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Audio Quality</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">96.1%</div>
+                <p className="text-xs text-muted-foreground">AI quality assessment</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Sessions</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">15</div>
+                <p className="text-xs text-muted-foreground">Current active users</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
+    </div>
+  )
 }

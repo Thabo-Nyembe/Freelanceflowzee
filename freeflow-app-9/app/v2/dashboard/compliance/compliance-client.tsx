@@ -43,6 +43,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 // ServiceNow GRC level interfaces
 interface ComplianceFramework {
   id: string
@@ -495,6 +497,7 @@ const mockComplianceActivities = [
 const mockEvidence = mockControls.flatMap(c => c.evidence || [])
 
 export default function ComplianceClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('frameworks')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFramework, setSelectedFramework] = useState<ComplianceFramework | null>(null)
@@ -958,6 +961,11 @@ export default function ComplianceClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              />
               <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={handleExport} aria-label="Export data">
                   <Download className="w-4 h-4 mr-2" />
                 Export Report
@@ -2254,37 +2262,43 @@ export default function ComplianceClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockComplianceAIInsights}
-              title="Compliance Intelligence"
-              onInsightAction={(insight) => toast.success(`${insight.title} action completed`)}
-            />
+        <CollapsibleInsightsPanel
+          isOpen={insightsPanel.isOpen}
+          onToggle={insightsPanel.toggle}
+          title="Compliance Intelligence & Insights"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockComplianceAIInsights}
+                title="Compliance Intelligence"
+                onInsightAction={(insight) => toast.success(`${insight.title} action completed`)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockComplianceCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockCompliancePredictions}
+                title="Compliance Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockComplianceCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockCompliancePredictions}
-              title="Compliance Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockComplianceActivities}
-            title="Compliance Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={complianceQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockComplianceActivities}
+              title="Compliance Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={complianceQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
       </div>
 
       {/* Control Detail Dialog */}

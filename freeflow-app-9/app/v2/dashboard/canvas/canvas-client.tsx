@@ -27,6 +27,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -155,6 +161,7 @@ const mockCanvasActivities = [
 // Quick actions are defined inside the component to access state setters
 
 export default function CanvasClient({ initialCanvases }: { initialCanvases: Canvas[] }) {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
@@ -1232,6 +1239,10 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1.5">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 <span className="text-sm">{stats.activeCollaborators} online</span>
@@ -2381,37 +2392,41 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockCanvasAIInsights}
-              title="Canvas Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockCanvasCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockCanvasPredictions}
-              title="Design Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockCanvasAIInsights}
+                  title="Canvas Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockCanvasCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockCanvasPredictions}
+                  title="Design Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockCanvasActivities}
-            title="Canvas Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={canvasQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockCanvasActivities}
+                title="Canvas Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={canvasQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* New Board Modal */}

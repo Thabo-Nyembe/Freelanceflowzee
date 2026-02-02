@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -16,6 +16,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import {
   Mail,
@@ -59,7 +60,9 @@ import {
   Star,
   Inbox,
   Bell,
-  Download
+  Download,
+  Loader2,
+  Trash2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -73,6 +76,19 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('EmailMarketingClient')
 
 // Types
 type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'paused' | 'failed' | 'cancelled'
@@ -699,6 +715,92 @@ interface EmailMarketingClientProps {
   initialTemplates?: EmailTemplate[]
 }
 
+// Database types for API responses
+interface DBCampaign {
+  id: string
+  name: string
+  subject: string
+  preheader?: string
+  type: CampaignType
+  status: CampaignStatus
+  from_name: string
+  from_email: string
+  reply_to?: string
+  template_id?: string
+  segment_id?: string
+  recipient_count: number
+  sent_count: number
+  delivered_count: number
+  opened_count: number
+  clicked_count: number
+  bounced_count: number
+  unsubscribed_count: number
+  open_rate: number
+  click_rate: number
+  scheduled_at?: string
+  sent_at?: string
+  created_at: string
+}
+
+interface DBSubscriber {
+  id: string
+  email: string
+  first_name?: string
+  last_name?: string
+  status: SubscriberStatus
+  tags: string[]
+  engagement_score: number
+  emails_sent: number
+  emails_opened: number
+  emails_clicked: number
+  last_opened_at?: string
+  last_clicked_at?: string
+  subscribed_at: string
+  location: { city?: string; country?: string }
+  source: string
+}
+
+interface DBTemplate {
+  id: string
+  name: string
+  category?: TemplateCategory
+  thumbnail_url?: string
+  is_public: boolean
+  usage_count: number
+  created_at: string
+}
+
+interface DBAutomation {
+  id: string
+  name: string
+  trigger: AutomationTrigger
+  status: 'active' | 'paused' | 'draft'
+  sent_count: number
+  opened_count: number
+  created_at: string
+}
+
+interface DBSegment {
+  id: string
+  name: string
+  description?: string
+  subscriber_count: number
+  created_at: string
+}
+
+interface EmailMarketingStats {
+  total_campaigns: number
+  total_subscribers: number
+  active_subscribers: number
+  total_templates: number
+  emails_sent: number
+  emails_delivered: number
+  emails_opened: number
+  emails_clicked: number
+  average_open_rate: number
+  average_click_rate: number
+}
+
 // ============================================================================
 // ENHANCED COMPETITIVE UPGRADE MOCK DATA - Mailchimp Level
 // ============================================================================
@@ -777,6 +879,21 @@ export default function EmailMarketingClient({
   initialSubscribers = mockSubscribers,
   initialTemplates = mockTemplates
 }: EmailMarketingClientProps) {
+  const insightsPanel = useInsightsPanel(false)
+  // Auth and loading states
+  const { user, isLoading: userLoading } = useCurrentUser()
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Real database state
+  const [campaigns, setCampaigns] = useState<DBCampaign[]>([])
+  const [subscribers, setSubscribers] = useState<DBSubscriber[]>([])
+  const [templates, setTemplates] = useState<DBTemplate[]>([])
+  const [automations, setAutomations] = useState<DBAutomation[]>([])
+  const [segments, setSegments] = useState<DBSegment[]>([])
+  const [marketingStats, setMarketingStats] = useState<EmailMarketingStats | null>(null)
+
   const [activeTab, setActiveTab] = useState('campaigns')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
@@ -801,6 +918,8 @@ export default function EmailMarketingClient({
   const [automationAnalyticsDialogOpen, setAutomationAnalyticsDialogOpen] = useState(false)
   const [integrationDialogOpen, setIntegrationDialogOpen] = useState(false)
   const [selectedIntegration, setSelectedIntegration] = useState<string | null>(null)
+  const [deleteConfirmDialogOpen, setDeleteConfirmDialogOpen] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<{ type: string; id: string; name: string } | null>(null)
 
   // Form states
   const [newCampaignName, setNewCampaignName] = useState('')
@@ -816,8 +935,399 @@ export default function EmailMarketingClient({
   const [scheduleDate, setScheduleDate] = useState('')
   const [scheduleTime, setScheduleTime] = useState('')
 
-  // Calculate stats
+  // Feature flags
+  const activeEmailAIEnabled = true
+
+  // Fetch all email marketing data
+  const fetchEmailMarketingData = useCallback(async () => {
+    if (!user?.id) return
+
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      const [campaignsRes, subscribersRes, templatesRes, automationsRes, segmentsRes, statsRes] = await Promise.all([
+        fetch('/api/email-marketing?type=campaigns'),
+        fetch('/api/email-marketing?type=subscribers'),
+        fetch('/api/email-marketing?type=templates'),
+        fetch('/api/email-marketing?type=automations'),
+        fetch('/api/email-marketing?type=segments'),
+        fetch('/api/email-marketing?type=stats')
+      ])
+
+      if (!campaignsRes.ok || !subscribersRes.ok || !templatesRes.ok || !automationsRes.ok || !segmentsRes.ok || !statsRes.ok) {
+        throw new Error('Failed to fetch email marketing data')
+      }
+
+      const [campaignsData, subscribersData, templatesData, automationsData, segmentsData, statsData] = await Promise.all([
+        campaignsRes.json(),
+        subscribersRes.json(),
+        templatesRes.json(),
+        automationsRes.json(),
+        segmentsRes.json(),
+        statsRes.json()
+      ])
+
+      setCampaigns(campaignsData.data || [])
+      setSubscribers(subscribersData.data || [])
+      setTemplates(templatesData.data || [])
+      setAutomations(automationsData.data || [])
+      setSegments(segmentsData.data || [])
+      setMarketingStats(statsData.data || null)
+
+      logger.info('Email marketing data loaded', {
+        campaigns: campaignsData.data?.length || 0,
+        subscribers: subscribersData.data?.length || 0,
+        templates: templatesData.data?.length || 0
+      })
+
+      toast.success(`Loaded ${campaignsData.data?.length || 0} campaigns, ${subscribersData.data?.length || 0} subscribers`)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load email marketing data'
+      setError(errorMessage)
+      logger.error('Failed to load email marketing data', { error: errorMessage })
+      toast.error('Failed to load email marketing data')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [user?.id])
+
+  // Initial data fetch
+  useEffect(() => {
+    if (!userLoading && user?.id) {
+      fetchEmailMarketingData()
+    } else if (!userLoading && !user) {
+      setIsLoading(false)
+    }
+  }, [user?.id, userLoading, fetchEmailMarketingData])
+
+  // CRUD Operations
+  const handleCreateCampaign = async () => {
+    if (!newCampaignName || !newCampaignSubject) {
+      toast.error('Please fill in campaign name and subject')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/email-marketing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-campaign',
+          name: newCampaignName,
+          subject: newCampaignSubject,
+          type: newCampaignType,
+          from_name: 'FreeFlow Team',
+          from_email: 'hello@freeflow.com',
+          html_content: '<p>Your email content here</p>',
+          editor: 'drag-drop'
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to create campaign')
+
+      const result = await response.json()
+      toast.success('Campaign created successfully')
+      setCreateCampaignDialogOpen(false)
+      setNewCampaignName('')
+      setNewCampaignSubject('')
+      setNewCampaignType('newsletter')
+      fetchEmailMarketingData()
+    } catch (err) {
+      toast.error('Failed to create campaign')
+      logger.error('Failed to create campaign', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCreateSubscriber = async (email: string, firstName?: string, lastName?: string) => {
+    if (!email) {
+      toast.error('Please provide an email address')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/email-marketing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-subscriber',
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          source: 'manual'
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to add subscriber')
+
+      toast.success('Subscriber added successfully')
+      fetchEmailMarketingData()
+    } catch (err) {
+      toast.error('Failed to add subscriber')
+      logger.error('Failed to add subscriber', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCreateTemplate = async () => {
+    if (!newTemplateName) {
+      toast.error('Please provide a template name')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/email-marketing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-template',
+          name: newTemplateName,
+          category: newTemplateCategory,
+          html_content: '<p>Template content here</p>',
+          is_public: false
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to create template')
+
+      toast.success('Template created successfully')
+      setCreateTemplateDialogOpen(false)
+      setNewTemplateName('')
+      setNewTemplateCategory('newsletter')
+      fetchEmailMarketingData()
+    } catch (err) {
+      toast.error('Failed to create template')
+      logger.error('Failed to create template', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCreateAutomation = async () => {
+    if (!newAutomationName) {
+      toast.error('Please provide an automation name')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/email-marketing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-automation',
+          name: newAutomationName,
+          trigger: newAutomationTrigger,
+          trigger_label: newAutomationTrigger.replace('_', ' '),
+          delay_hours: 24,
+          automation_action: 'send_email',
+          emails_count: 1
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to create automation')
+
+      toast.success('Automation created successfully')
+      setCreateAutomationDialogOpen(false)
+      setNewAutomationName('')
+      setNewAutomationTrigger('signup')
+      fetchEmailMarketingData()
+    } catch (err) {
+      toast.error('Failed to create automation')
+      logger.error('Failed to create automation', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCreateSegment = async () => {
+    if (!newSegmentName) {
+      toast.error('Please provide a segment name')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/email-marketing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-segment',
+          name: newSegmentName,
+          description: newListDescription,
+          criteria: { conditions: [] }
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to create segment')
+
+      toast.success('Segment created successfully')
+      setCreateSegmentDialogOpen(false)
+      setNewSegmentName('')
+      setNewListDescription('')
+      fetchEmailMarketingData()
+    } catch (err) {
+      toast.error('Failed to create segment')
+      logger.error('Failed to create segment', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteItem = async () => {
+    if (!itemToDelete) return
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/email-marketing/${itemToDelete.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: itemToDelete.type })
+      })
+
+      if (!response.ok) throw new Error(`Failed to delete ${itemToDelete.type}`)
+
+      toast.success(`${itemToDelete.type} deleted successfully`)
+      setDeleteConfirmDialogOpen(false)
+      setItemToDelete(null)
+      fetchEmailMarketingData()
+    } catch (err) {
+      toast.error(`Failed to delete ${itemToDelete.type}`)
+      logger.error('Failed to delete item', { error: err, item: itemToDelete })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleScheduleCampaign = async (campaignId: string, scheduledAt: string) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/email-marketing/${campaignId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'schedule',
+          scheduled_at: scheduledAt
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to schedule campaign')
+
+      toast.success('Campaign scheduled successfully')
+      setScheduleCampaignDialogOpen(false)
+      fetchEmailMarketingData()
+    } catch (err) {
+      toast.error('Failed to schedule campaign')
+      logger.error('Failed to schedule campaign', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleSendCampaignNow = async (campaignId: string) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/email-marketing/${campaignId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send' })
+      })
+
+      if (!response.ok) throw new Error('Failed to send campaign')
+
+      toast.success('Campaign is being sent')
+      setSendCampaignDialogOpen(false)
+      fetchEmailMarketingData()
+    } catch (err) {
+      toast.error('Failed to send campaign')
+      logger.error('Failed to send campaign', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDuplicateCampaign = async (campaign: DBCampaign) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/email-marketing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-campaign',
+          name: `${campaign.name} (Copy)`,
+          subject: campaign.subject,
+          type: campaign.type,
+          from_name: campaign.from_name,
+          from_email: campaign.from_email,
+          html_content: '<p>Duplicated content</p>',
+          editor: 'drag-drop'
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to duplicate campaign')
+
+      toast.success('Campaign duplicated successfully')
+      setDuplicateCampaignDialogOpen(false)
+      fetchEmailMarketingData()
+    } catch (err) {
+      toast.error('Failed to duplicate campaign')
+      logger.error('Failed to duplicate campaign', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleToggleAutomationStatus = async (automationId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'paused' : 'active'
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/email-marketing/automations/${automationId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      })
+
+      if (!response.ok) throw new Error('Failed to update automation')
+
+      toast.success(`Automation ${newStatus === 'active' ? 'activated' : 'paused'}`)
+      fetchEmailMarketingData()
+    } catch (err) {
+      toast.error('Failed to update automation status')
+      logger.error('Failed to toggle automation status', { error: err })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Calculate stats from real database data or fallback to mock data
   const stats = useMemo(() => {
+    // Use real stats from API if available
+    if (marketingStats) {
+      const totalSent = marketingStats.emails_sent || 0
+      const totalDelivered = marketingStats.emails_delivered || 0
+      const engagedSubscribers = subscribers.filter(s => s.engagement_score > 50).length
+      const totalSubscribersCount = subscribers.length || 1
+
+      return {
+        totalSent,
+        totalDelivered,
+        openRate: marketingStats.average_open_rate || 0,
+        clickRate: marketingStats.average_click_rate || 0,
+        bounceRate: totalSent > 0 ? ((totalSent - totalDelivered) / totalSent) * 100 : 0,
+        totalUnsubscribes: subscribers.filter(s => s.status === 'unsubscribed').length,
+        activeSubscribers: marketingStats.active_subscribers || 0,
+        totalLists: marketingStats.total_subscribers || 0,
+        engagedRate: (engagedSubscribers / totalSubscribersCount) * 100
+      }
+    }
+
+    // Fallback to mock data calculation
     const sentCampaigns = initialCampaigns.filter(c => c.status === 'sent')
     const totalSent = sentCampaigns.reduce((sum, c) => sum + c.stats.sent, 0)
     const totalDelivered = sentCampaigns.reduce((sum, c) => sum + c.stats.delivered, 0)
@@ -844,16 +1354,103 @@ export default function EmailMarketingClient({
       totalLists,
       engagedRate: (initialSubscribers.filter(s => s.engagementLevel === 'highly_engaged' || s.engagementLevel === 'engaged').length / initialSubscribers.length) * 100
     }
-  }, [initialCampaigns, initialSubscribers])
+  }, [initialCampaigns, initialSubscribers, marketingStats, subscribers])
+
+  // Use real campaigns if available, otherwise fallback to mock
+  const activeCampaigns = useMemo(() => {
+    return campaigns.length > 0 ? campaigns : initialCampaigns.map(c => ({
+      id: c.id,
+      name: c.name,
+      subject: c.subject,
+      preheader: c.previewText,
+      type: c.type,
+      status: c.status,
+      from_name: c.fromName,
+      from_email: c.fromEmail,
+      reply_to: c.replyTo,
+      template_id: c.templateId,
+      segment_id: c.segmentId,
+      recipient_count: c.stats.sent,
+      sent_count: c.stats.sent,
+      delivered_count: c.stats.delivered,
+      opened_count: c.stats.uniqueOpens,
+      clicked_count: c.stats.uniqueClicks,
+      bounced_count: c.stats.bounces,
+      unsubscribed_count: c.stats.unsubscribes,
+      open_rate: c.stats.delivered > 0 ? (c.stats.uniqueOpens / c.stats.delivered) * 100 : 0,
+      click_rate: c.stats.delivered > 0 ? (c.stats.uniqueClicks / c.stats.delivered) * 100 : 0,
+      scheduled_at: c.scheduledAt,
+      sent_at: c.sentAt,
+      created_at: c.createdAt
+    }))
+  }, [campaigns, initialCampaigns])
 
   const filteredCampaigns = useMemo(() => {
-    return initialCampaigns.filter(campaign => {
+    return activeCampaigns.filter(campaign => {
       const matchesSearch = campaign.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         campaign.subject.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesFilter = campaignFilter === 'all' || campaign.status === campaignFilter
       return matchesSearch && matchesFilter
     })
-  }, [initialCampaigns, searchQuery, campaignFilter])
+  }, [activeCampaigns, searchQuery, campaignFilter])
+
+  // Use real subscribers if available
+  const activeSubscribers = useMemo(() => {
+    return subscribers.length > 0 ? subscribers : initialSubscribers.map(s => ({
+      id: s.id,
+      email: s.email,
+      first_name: s.firstName,
+      last_name: s.lastName,
+      status: s.status,
+      tags: s.tags,
+      engagement_score: s.openRate,
+      emails_sent: s.totalOpens + s.totalClicks,
+      emails_opened: s.totalOpens,
+      emails_clicked: s.totalClicks,
+      last_opened_at: s.lastOpened,
+      last_clicked_at: s.lastClicked,
+      subscribed_at: s.signupDate,
+      location: s.location,
+      source: s.source
+    }))
+  }, [subscribers, initialSubscribers])
+
+  // Use real templates if available
+  const activeTemplates = useMemo(() => {
+    return templates.length > 0 ? templates : initialTemplates.map(t => ({
+      id: t.id,
+      name: t.name,
+      category: t.category,
+      thumbnail_url: t.thumbnail,
+      is_public: !t.isCustom,
+      usage_count: t.useCount,
+      created_at: t.createdAt
+    }))
+  }, [templates, initialTemplates])
+
+  // Use real automations if available
+  const activeAutomations = useMemo(() => {
+    return automations.length > 0 ? automations : mockAutomations.map(a => ({
+      id: a.id,
+      name: a.name,
+      trigger: a.trigger,
+      status: a.status,
+      sent_count: a.stats.enrolled,
+      opened_count: a.stats.converted,
+      created_at: a.createdAt
+    }))
+  }, [automations])
+
+  // Use real segments if available
+  const activeSegments = useMemo(() => {
+    return segments.length > 0 ? segments : mockSegments.map(s => ({
+      id: s.id,
+      name: s.name,
+      description: `${s.rules.length} rules`,
+      subscriber_count: s.subscriberCount,
+      created_at: s.createdAt
+    }))
+  }, [segments])
 
   const statCards = [
     { label: 'Emails Sent', value: stats.totalSent.toLocaleString(), change: 18.5, icon: Send, color: 'from-rose-500 to-pink-600' },
@@ -866,21 +1463,60 @@ export default function EmailMarketingClient({
     { label: 'Engaged Rate', value: `${stats.engagedRate.toFixed(1)}%`, change: 4.8, icon: Star, color: 'from-indigo-500 to-purple-600' }
   ]
 
-  // Handlers
-  const handleSendCampaign = (campaignName: string) => {
-    toast.success("Sending campaign - " + campaignName + " is being sent...")
-  }
-
-  const handleScheduleCampaign = (campaignName: string) => {
-    toast.success("Campaign scheduled - " + campaignName + " has been scheduled")
-  }
-
-  const handleDuplicateCampaign = (campaignName: string) => {
-    toast.success("Campaign duplicated - " + campaignName + " (copy) created")
-  }
-
+  // Export subscribers handler
   const handleExportSubscribers = () => {
-    toast.success('Exporting subscribers')
+    const csvContent = activeSubscribers.map(s =>
+      `${s.email},${s.first_name || ''},${s.last_name || ''},${s.status},${s.engagement_score}`
+    ).join('\n')
+    const header = 'Email,First Name,Last Name,Status,Engagement Score\n'
+    const blob = new Blob([header + csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `subscribers-export-${Date.now()}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Subscribers exported successfully')
+  }
+
+  // Loading state
+  if (isLoading || userLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50/30 to-purple-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-6">
+        <div className="max-w-[1800px] mx-auto space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg">
+              <Mail className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Email Marketing</h1>
+              <p className="text-gray-600 dark:text-gray-400">Loading your email marketing data...</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50/30 to-purple-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-6">
+        <div className="max-w-[1800px] mx-auto">
+          <ErrorEmptyState
+            error={error}
+            onRetry={fetchEmailMarketingData}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -975,7 +1611,7 @@ export default function EmailMarketingClient({
                     <p className="text-purple-200 text-sm">Campaigns</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCampaigns.filter(c => c.status === 'sent').length}</p>
+                    <p className="text-3xl font-bold">{activeCampaigns.filter(c => c.status === 'sent').length}</p>
                     <p className="text-purple-200 text-sm">Sent</p>
                   </div>
                 </div>
@@ -1008,7 +1644,7 @@ export default function EmailMarketingClient({
 
             <div className="grid gap-4">
               {filteredCampaigns.map((campaign) => (
-                <Card key={campaign.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedCampaign(campaign)}>
+                <Card key={campaign.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedCampaign(campaign as any)}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -1021,52 +1657,59 @@ export default function EmailMarketingClient({
                           <Badge className={getCampaignTypeColor(campaign.type)}>
                             {campaign.type}
                           </Badge>
-                          {campaign.abTest?.enabled && (
-                            <Badge variant="outline" className="gap-1">
-                              <TestTube2 className="w-3 h-3" />
-                              A/B Test
-                            </Badge>
-                          )}
                         </div>
                         <p className="text-gray-600 dark:text-gray-400 mb-2">{campaign.subject}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-500">{campaign.previewText}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-500">{campaign.preheader || ''}</p>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setItemToDelete({ type: 'campaign', id: campaign.id, name: campaign.name })
+                            setDeleteConfirmDialogOpen(true)
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                      </div>
                     </div>
 
                     {campaign.status === 'sent' && (
                       <div className="mt-4 pt-4 border-t grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                         <div>
                           <p className="text-sm text-gray-500">Sent</p>
-                          <p className="font-semibold">{campaign.stats.sent.toLocaleString()}</p>
+                          <p className="font-semibold">{campaign.sent_count.toLocaleString()}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Delivered</p>
-                          <p className="font-semibold">{((campaign.stats.delivered / campaign.stats.sent) * 100).toFixed(1)}%</p>
+                          <p className="font-semibold">{campaign.sent_count > 0 ? ((campaign.delivered_count / campaign.sent_count) * 100).toFixed(1) : 0}%</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Opened</p>
-                          <p className="font-semibold text-blue-600">{((campaign.stats.uniqueOpens / campaign.stats.delivered) * 100).toFixed(1)}%</p>
+                          <p className="font-semibold text-blue-600">{campaign.open_rate.toFixed(1)}%</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Clicked</p>
-                          <p className="font-semibold text-purple-600">{((campaign.stats.uniqueClicks / campaign.stats.delivered) * 100).toFixed(1)}%</p>
+                          <p className="font-semibold text-purple-600">{campaign.click_rate.toFixed(1)}%</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Bounced</p>
-                          <p className="font-semibold text-amber-600">{campaign.stats.bounces}</p>
+                          <p className="font-semibold text-amber-600">{campaign.bounced_count}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Unsubscribed</p>
-                          <p className="font-semibold text-red-600">{campaign.stats.unsubscribes}</p>
+                          <p className="font-semibold text-red-600">{campaign.unsubscribed_count}</p>
                         </div>
                       </div>
                     )}
 
-                    {campaign.status === 'scheduled' && campaign.scheduledAt && (
+                    {campaign.status === 'scheduled' && campaign.scheduled_at && (
                       <div className="mt-4 pt-4 border-t flex items-center gap-2 text-sm text-gray-500">
                         <Calendar className="w-4 h-4" />
-                        Scheduled for {new Date(campaign.scheduledAt).toLocaleString()}
+                        Scheduled for {new Date(campaign.scheduled_at).toLocaleString()}
                       </div>
                     )}
 
@@ -1074,9 +1717,9 @@ export default function EmailMarketingClient({
                       <div className="mt-4 pt-4 border-t">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm text-gray-500">Sending progress</span>
-                          <span className="text-sm font-medium">{((campaign.stats.sent / stats.totalLists) * 100).toFixed(0)}%</span>
+                          <span className="text-sm font-medium">{stats.totalLists > 0 ? ((campaign.sent_count / stats.totalLists) * 100).toFixed(0) : 0}%</span>
                         </div>
-                        <Progress value={(campaign.stats.sent / stats.totalLists) * 100} className="h-2" />
+                        <Progress value={stats.totalLists > 0 ? (campaign.sent_count / stats.totalLists) * 100 : 0} className="h-2" />
                       </div>
                     )}
                   </CardContent>
@@ -1097,11 +1740,11 @@ export default function EmailMarketingClient({
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSubscribers.length}</p>
+                    <p className="text-3xl font-bold">{activeSubscribers.length}</p>
                     <p className="text-blue-200 text-sm">Total</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSubscribers.filter(s => s.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{activeSubscribers.filter(s => s.status === 'subscribed').length}</p>
                     <p className="text-blue-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -1159,37 +1802,39 @@ export default function EmailMarketingClient({
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Recent Subscribers</CardTitle>
-                      <Button variant="outline" size="sm" onClick={() => setViewAllSubscribersDialogOpen(true)}>View All</Button>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={handleExportSubscribers}>
+                          <Download className="w-4 h-4 mr-2" />
+                          Export
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => setViewAllSubscribersDialogOpen(true)}>View All</Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {initialSubscribers.map((subscriber) => (
+                      {activeSubscribers.slice(0, 10).map((subscriber) => (
                         <div
                           key={subscriber.id}
                           className="p-3 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-                          onClick={() => setSelectedSubscriber(subscriber)}
+                          onClick={() => setSelectedSubscriber(subscriber as any)}
                         >
                           <div className="flex items-center gap-3">
                             <Avatar>
-                              <AvatarImage src={subscriber.avatar} alt="User avatar" />
-                              <AvatarFallback>{subscriber.firstName[0]}{subscriber.lastName[0]}</AvatarFallback>
+                              <AvatarFallback>{(subscriber.first_name || subscriber.email)[0].toUpperCase()}{(subscriber.last_name || '')[0]?.toUpperCase() || ''}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
-                                <p className="font-medium">{subscriber.firstName} {subscriber.lastName}</p>
+                                <p className="font-medium">{subscriber.first_name || ''} {subscriber.last_name || subscriber.email}</p>
                                 <Badge className={getSubscriberStatusColor(subscriber.status)} variant="secondary">
                                   {subscriber.status}
-                                </Badge>
-                                <Badge className={getEngagementColor(subscriber.engagementLevel)} variant="secondary">
-                                  {subscriber.engagementLevel.replace('_', ' ')}
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-500">{subscriber.email}</p>
                             </div>
                             <div className="text-right text-sm">
-                              <p className="text-gray-500">{subscriber.openRate}% opens</p>
-                              <p className="text-gray-500">{subscriber.clickRate}% clicks</p>
+                              <p className="text-gray-500">{subscriber.emails_opened || 0} opens</p>
+                              <p className="text-gray-500">{subscriber.emails_clicked || 0} clicks</p>
                             </div>
                           </div>
                         </div>
@@ -1206,14 +1851,26 @@ export default function EmailMarketingClient({
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {mockSegments.map((segment) => (
+                      {activeSegments.map((segment) => (
                         <div key={segment.id} className="p-3 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium">{segment.name}</p>
-                              <p className="text-sm text-gray-500">{segment.subscriberCount.toLocaleString()} subscribers</p>
+                              <p className="text-sm text-gray-500">{segment.subscriber_count.toLocaleString()} subscribers</p>
                             </div>
-                            <Target className="w-5 h-5 text-gray-400" />
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setItemToDelete({ type: 'segment', id: segment.id, name: segment.name })
+                                  setDeleteConfirmDialogOpen(true)
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                              </Button>
+                              <Target className="w-5 h-5 text-gray-400" />
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -1265,11 +1922,11 @@ export default function EmailMarketingClient({
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAutomations.length}</p>
+                    <p className="text-3xl font-bold">{activeAutomations.length}</p>
                     <p className="text-emerald-200 text-sm">Automations</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAutomations.filter(a => a.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{activeAutomations.filter(a => a.status === 'active').length}</p>
                     <p className="text-emerald-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -1288,12 +1945,12 @@ export default function EmailMarketingClient({
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {mockAutomations.map((automation) => (
-                <Card key={automation.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedAutomation(automation)}>
+              {activeAutomations.map((automation) => (
+                <Card key={automation.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedAutomation(automation as any)}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 text-white">
                           {getAutomationTriggerIcon(automation.trigger)}
                         </div>
                         <div>
@@ -1301,52 +1958,33 @@ export default function EmailMarketingClient({
                           <p className="text-sm text-gray-500 capitalize">{automation.trigger.replace('_', ' ')} trigger</p>
                         </div>
                       </div>
-                      <Badge className={automation.status === 'active' ? 'bg-green-100 text-green-700' : automation.status === 'paused' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}>
-                        {automation.status === 'active' ? <Play className="w-3 h-3 mr-1" /> : automation.status === 'paused' ? <Pause className="w-3 h-3 mr-1" /> : <Edit className="w-3 h-3 mr-1" />}
-                        {automation.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleToggleAutomationStatus(automation.id, automation.status)
+                          }}
+                          disabled={isSubmitting}
+                        >
+                          {automation.status === 'active' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                        </Button>
+                        <Badge className={automation.status === 'active' ? 'bg-green-100 text-green-700' : automation.status === 'paused' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}>
+                          {automation.status === 'active' ? <Play className="w-3 h-3 mr-1" /> : automation.status === 'paused' ? <Pause className="w-3 h-3 mr-1" /> : <Edit className="w-3 h-3 mr-1" />}
+                          {automation.status}
+                        </Badge>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2 mb-4">
-                      {automation.steps.slice(0, 5).map((step, idx) => (
-                        <div key={idx} className="flex items-center">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            step.type === 'email' ? 'bg-blue-100 text-blue-600' :
-                            step.type === 'delay' ? 'bg-gray-100 text-gray-600' :
-                            step.type === 'condition' ? 'bg-purple-100 text-purple-600' :
-                            'bg-green-100 text-green-600'
-                          }`}>
-                            {step.type === 'email' ? <Mail className="w-4 h-4" /> :
-                             step.type === 'delay' ? <Clock className="w-4 h-4" /> :
-                             step.type === 'condition' ? <Target className="w-4 h-4" /> :
-                             <Zap className="w-4 h-4" />}
-                          </div>
-                          {idx < automation.steps.length - 1 && idx < 4 && (
-                            <div className="w-4 h-0.5 bg-gray-200" />
-                          )}
-                        </div>
-                      ))}
-                      {automation.steps.length > 5 && (
-                        <span className="text-xs text-gray-500">+{automation.steps.length - 5}</span>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-center">
+                    <div className="grid grid-cols-2 gap-4 text-center">
                       <div>
-                        <p className="text-lg font-semibold">{automation.stats.enrolled.toLocaleString()}</p>
-                        <p className="text-xs text-gray-500">Enrolled</p>
+                        <p className="text-lg font-semibold">{automation.sent_count.toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">Emails Sent</p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold">{automation.stats.inProgress.toLocaleString()}</p>
-                        <p className="text-xs text-gray-500">In Progress</p>
-                      </div>
-                      <div>
-                        <p className="text-lg font-semibold">{automation.stats.completed.toLocaleString()}</p>
-                        <p className="text-xs text-gray-500">Completed</p>
-                      </div>
-                      <div>
-                        <p className="text-lg font-semibold text-green-600">{((automation.stats.converted / automation.stats.enrolled) * 100).toFixed(1)}%</p>
-                        <p className="text-xs text-gray-500">Converted</p>
+                        <p className="text-lg font-semibold text-green-600">{automation.sent_count > 0 ? ((automation.opened_count / automation.sent_count) * 100).toFixed(1) : 0}%</p>
+                        <p className="text-xs text-gray-500">Open Rate</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1369,22 +2007,34 @@ export default function EmailMarketingClient({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {initialTemplates.map((template) => (
+              {activeTemplates.map((template) => (
                 <Card key={template.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer group">
                   <CardContent className="p-0">
-                    <div className={`h-40 bg-gradient-to-br ${getTemplateCategoryColor(template.category)} rounded-t-lg flex items-center justify-center`}>
+                    <div className={`h-40 bg-gradient-to-br ${getTemplateCategoryColor(template.category || 'newsletter')} rounded-t-lg flex items-center justify-center relative`}>
                       <LayoutTemplate className="w-16 h-16 text-white/80" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 hover:bg-white/30"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setItemToDelete({ type: 'template', id: template.id, name: template.name })
+                          setDeleteConfirmDialogOpen(true)
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4 text-white" />
+                      </Button>
                     </div>
                     <div className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-medium">{template.name}</h3>
-                        {template.isCustom && (
+                        {!template.is_public && (
                           <Badge variant="outline" className="text-xs">Custom</Badge>
                         )}
                       </div>
                       <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span className="capitalize">{template.category}</span>
-                        <span>Used {template.useCount}x</span>
+                        <span className="capitalize">{template.category || 'general'}</span>
+                        <span>Used {template.usage_count}x</span>
                       </div>
                     </div>
                   </CardContent>
@@ -2055,17 +2705,11 @@ export default function EmailMarketingClient({
                   setCreateCampaignDialogOpen(false)
                   setNewCampaignName('')
                   setNewCampaignSubject('')
-                }} className="flex-1">Cancel</Button>
-                <Button onClick={() => {
-                  if (newCampaignName && newCampaignSubject) {
-                    toast.success("Campaign created - " + newCampaignName + " has been created as a draft")
-                    setCreateCampaignDialogOpen(false)
-                    setNewCampaignName('')
-                    setNewCampaignSubject('')
-                  } else {
-                    toast.error('Please fill in all fields')
-                  }
-                }} className="flex-1 bg-gradient-to-r from-rose-500 to-pink-600">Create Campaign</Button>
+                }} className="flex-1" disabled={isSubmitting}>Cancel</Button>
+                <Button onClick={handleCreateCampaign} className="flex-1 bg-gradient-to-r from-rose-500 to-pink-600" disabled={isSubmitting}>
+                  {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                  Create Campaign
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -2208,16 +2852,11 @@ export default function EmailMarketingClient({
                 <Button variant="outline" onClick={() => {
                   setCreateSegmentDialogOpen(false)
                   setNewSegmentName('')
-                }} className="flex-1">Cancel</Button>
-                <Button onClick={() => {
-                  if (newSegmentName) {
-                    toast.success("Segment created - " + newSegmentName + " has been created")
-                    setCreateSegmentDialogOpen(false)
-                    setNewSegmentName('')
-                  } else {
-                    toast.error('Please enter a segment name')
-                  }
-                }} className="flex-1">Create Segment</Button>
+                }} className="flex-1" disabled={isSubmitting}>Cancel</Button>
+                <Button onClick={handleCreateSegment} className="flex-1" disabled={isSubmitting}>
+                  {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                  Create Segment
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -2268,16 +2907,11 @@ export default function EmailMarketingClient({
                 <Button variant="outline" onClick={() => {
                   setCreateAutomationDialogOpen(false)
                   setNewAutomationName('')
-                }} className="flex-1">Cancel</Button>
-                <Button onClick={() => {
-                  if (newAutomationName) {
-                    toast.success("Automation created - " + newAutomationName + " has been created. Add steps to complete setup.")
-                    setCreateAutomationDialogOpen(false)
-                    setNewAutomationName('')
-                  } else {
-                    toast.error('Please enter an automation name')
-                  }
-                }} className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600">Create Automation</Button>
+                }} className="flex-1" disabled={isSubmitting}>Cancel</Button>
+                <Button onClick={handleCreateAutomation} className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600" disabled={isSubmitting}>
+                  {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                  Create Automation
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -2324,16 +2958,11 @@ export default function EmailMarketingClient({
                 <Button variant="outline" onClick={() => {
                   setCreateTemplateDialogOpen(false)
                   setNewTemplateName('')
-                }} className="flex-1">Cancel</Button>
-                <Button onClick={() => {
-                  if (newTemplateName) {
-                    toast.success("Template created - " + newTemplateName + " has been created. Opening editor...")
-                    setCreateTemplateDialogOpen(false)
-                    setNewTemplateName('')
-                  } else {
-                    toast.error('Please enter a template name')
-                  }
-                }} className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600">Create Template</Button>
+                }} className="flex-1" disabled={isSubmitting}>Cancel</Button>
+                <Button onClick={handleCreateTemplate} className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600" disabled={isSubmitting}>
+                  {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                  Create Template
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -2775,6 +3404,54 @@ export default function EmailMarketingClient({
                   </div>
                 </>
               )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteConfirmDialogOpen} onOpenChange={setDeleteConfirmDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete {itemToDelete?.type}
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{itemToDelete?.name}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-center gap-2 text-red-700 dark:text-red-400">
+                  <AlertCircle className="w-5 h-5" />
+                  <span className="font-medium">Warning</span>
+                </div>
+                <p className="text-sm text-red-600 dark:text-red-500 mt-1">
+                  This will permanently delete the {itemToDelete?.type} and all associated data.
+                </p>
+              </div>
+              <DialogFooter className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setDeleteConfirmDialogOpen(false)
+                    setItemToDelete(null)
+                  }}
+                  className="flex-1"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteItem}
+                  className="flex-1"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                  Delete
+                </Button>
+              </DialogFooter>
             </div>
           </DialogContent>
         </Dialog>

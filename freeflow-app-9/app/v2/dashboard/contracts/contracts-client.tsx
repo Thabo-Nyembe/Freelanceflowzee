@@ -23,6 +23,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -166,6 +168,7 @@ const mockContractsActivities = [
 ]
 
 export default function ContractsClient({ initialContracts }: { initialContracts: Contract[] }) {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedEnvelope, setSelectedEnvelope] = useState<Envelope | null>(null)
@@ -657,6 +660,11 @@ Status: Generated Document
                 <Lock className="h-4 w-4" />
                 <span className="text-sm">256-bit AES</span>
               </div>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              />
               <Button onClick={() => setShowNewContract(true)} className="bg-white text-purple-600 hover:bg-purple-50">
                 <Plus className="h-4 w-4 mr-2" />
                 New Envelope
@@ -2092,41 +2100,47 @@ Status: Generated Document
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockContractsAIInsights}
-              title="Contract Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
+        <CollapsibleInsightsPanel
+          isOpen={insightsPanel.isOpen}
+          onToggle={insightsPanel.toggle}
+          title="Contract Intelligence & Insights"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={mockContractsAIInsights}
+                title="Contract Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={mockContractsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={mockContractsPredictions}
+                title="Contract Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockContractsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockContractsPredictions}
-              title="Contract Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockContractsActivities}
-            title="Contract Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={[
-              { id: '1', label: 'New Contract', icon: 'file-plus', action: () => setShowNewContract(true), variant: 'default' as const },
-              { id: '2', label: 'Send for Signing', icon: 'send', action: () => setShowSendForSigningDialog(true), variant: 'default' as const },
-              { id: '3', label: 'Templates', icon: 'copy', action: () => setShowTemplatesDialog(true), variant: 'outline' as const },
-            ]}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={mockContractsActivities}
+              title="Contract Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={[
+                { id: '1', label: 'New Contract', icon: 'file-plus', action: () => setShowNewContract(true), variant: 'default' as const },
+                { id: '2', label: 'Send for Signing', icon: 'send', action: () => setShowSendForSigningDialog(true), variant: 'default' as const },
+                { id: '3', label: 'Templates', icon: 'copy', action: () => setShowTemplatesDialog(true), variant: 'outline' as const },
+              ]}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
       </div>
 
       {/* Envelope Detail Modal */}

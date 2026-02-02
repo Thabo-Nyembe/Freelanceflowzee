@@ -32,6 +32,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // ============================================================================
 // TYPE DEFINITIONS - Google Calendar Level Platform
 // ============================================================================
@@ -200,6 +206,7 @@ const formatDateRange = (start: string, end: string) => {
 // ============================================================================
 
 export default function CalendarClient({ initialEvents }: { initialEvents: CalendarEvent[] }) {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('calendar')
   const [settingsTab, setSettingsTab] = useState('general')
   const [eventTypeFilter, setEventTypeFilter] = useState<EventType | 'all'>('all')
@@ -509,6 +516,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <InsightsToggleButton
+                  isOpen={insightsPanel.isOpen}
+                  onToggle={insightsPanel.toggle}
+                />
                 <Dialog open={showNewEvent} onOpenChange={setShowNewEvent}>
                   <DialogTrigger asChild>
                     <Button className="bg-white text-teal-600 hover:bg-white/90">
@@ -1832,37 +1843,41 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={calendarAIInsights}
-              title="Calendar Intelligence"
-              onInsightAction={(insight) => toast.info(`Action: ${insight.title}`)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={calendarCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={calendarPredictions}
-              title="Schedule Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={calendarAIInsights}
+                  title="Calendar Intelligence"
+                  onInsightAction={(insight) => toast.info(`Action: ${insight.title}`)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={calendarCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={calendarPredictions}
+                  title="Schedule Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={calendarActivities}
-            title="Calendar Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={calendarQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={calendarActivities}
+                title="Calendar Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={calendarQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Event Detail Modal */}
         {selectedEvent && (

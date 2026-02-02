@@ -11,6 +11,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
@@ -186,6 +187,7 @@ const referralsQuickActions = [
 ]
 
 export default function ReferralsClient() {
+  const insightsPanel = useInsightsPanel(false)
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -810,6 +812,10 @@ export default function ReferralsClient() {
               <Plus className="h-4 w-4 mr-2" />
               Create Referral
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
       </motion.div>
@@ -823,18 +829,7 @@ export default function ReferralsClient() {
         >
           <LiquidGlassCard variant="gradient" hoverEffect={true} className="relative overflow-hidden">
             <div className="p-6 space-y-4">
-              
-        {/* V2 Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <AIInsightsPanel insights={referralsAIInsights} />
-          <PredictiveAnalytics predictions={referralsPredictions} />
-          <CollaborationIndicator collaborators={referralsCollaborators} />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <QuickActionsToolbar actions={referralsQuickActions} />
-          <ActivityFeed activities={referralsActivities} />
-        </div>
-<div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <Award className="h-8 w-8 text-yellow-600" />
                 <Badge variant="outline" className="bg-yellow-50 text-yellow-800">Active</Badge>
               </div>
@@ -1180,6 +1175,21 @@ export default function ReferralsClient() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* V2 Competitive Upgrade Components - Collapsible Insights Panel */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="Referral Insights" defaultOpen={true} className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <AIInsightsPanel insights={referralsAIInsights} />
+            <PredictiveAnalytics predictions={referralsPredictions} />
+            <CollaborationIndicator collaborators={referralsCollaborators} />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <QuickActionsToolbar actions={referralsQuickActions} />
+            <ActivityFeed activities={referralsActivities} />
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
 
       {/* ============================================================================ */}
       {/* DIALOG: CREATE REFERRAL */}

@@ -77,6 +77,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -765,6 +771,7 @@ export default function KnowledgeBaseClient() {
   const [advancedSearchDateTo, setAdvancedSearchDateTo] = useState('')
   const [searchResults, setSearchResults] = useState<Page[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const insightsPanel = useInsightsPanel(false)
 
   // Fetch articles from Supabase
   const fetchData = useCallback(async () => {
@@ -1278,6 +1285,10 @@ export default function KnowledgeBaseClient() {
               <Plus className="w-4 h-4 mr-2" />
               Create Page
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -2145,37 +2156,45 @@ export default function KnowledgeBaseClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockKnowledgeBaseAIInsights}
-              title="Knowledge Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockKnowledgeBaseCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockKnowledgeBasePredictions}
-              title="Content Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Knowledge Base Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockKnowledgeBaseAIInsights}
+                  title="Knowledge Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockKnowledgeBaseCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockKnowledgeBasePredictions}
+                  title="Content Forecasts"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockKnowledgeBaseActivities}
-            title="Knowledge Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={knowledgeBaseQuickActions}
-            variant="grid"
-          />
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Activity & Quick Actions" defaultOpen={true} className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ActivityFeed
+                activities={mockKnowledgeBaseActivities}
+                title="Knowledge Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={knowledgeBaseQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Page Detail Dialog */}

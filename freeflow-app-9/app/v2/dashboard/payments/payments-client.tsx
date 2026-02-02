@@ -11,6 +11,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -49,8 +50,9 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { formatCurrency, getStatusColor } from '@/lib/client-zone-utils'
-import { usePayments, usePaymentMethods, usePaymentsRealtime } from '@/lib/hooks/use-payments-extended'
+import { usePayments, usePaymentMethods, usePaymentsRealtime, usePaymentAnalytics } from '@/lib/hooks/use-payments-extended'
 import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
+import { createClient } from '@/lib/supabase/client'
 
 const logger = createFeatureLogger('ClientZonePayments')
 
@@ -290,6 +292,7 @@ const getPaymentsQuickActions = (
 ]
 
 export default function PaymentsClient() {
+  const insightsPanel = useInsightsPanel(false)
   const router = useRouter()
 
   const { userId, loading: userLoading } = useCurrentUser()
@@ -299,6 +302,18 @@ export default function PaymentsClient() {
   const { data: dbPayments = [], total: totalPayments, isLoading: paymentsLoading, refresh: refreshPayments } = usePayments(userId || undefined)
   const { data: dbPaymentMethods = [], isLoading: methodsLoading, refresh: refreshMethods } = usePaymentMethods(userId || undefined)
   const { payments: realtimePayments } = usePaymentsRealtime(userId || undefined)
+  const { data: paymentAnalytics = [], isLoading: analyticsLoading, refresh: refreshAnalytics } = usePaymentAnalytics({ period: 'monthly', limit: 12 })
+
+  // Revenue statistics from real data
+  const [revenueStats, setRevenueStats] = useState({
+    totalRevenue: 0,
+    pendingRevenue: 0,
+    releasedRevenue: 0,
+    refundedAmount: 0,
+    thisMonthRevenue: 0,
+    lastMonthRevenue: 0,
+    growthPercentage: 0
+  })
 
   // Supabase mutation hook for CRUD
   const paymentMutation = useSupabaseMutation({
@@ -646,8 +661,11 @@ export default function PaymentsClient() {
     try {
       setIsLoading(true)
       // Refresh data from Supabase hooks
-      await refreshPayments()
-      await refreshMethods()
+      await Promise.all([
+        refreshPayments(),
+        refreshMethods(),
+        refreshAnalytics()
+      ])
 
       // Use the activePayments from hook (real data or mock fallback)
       setPaymentHistory(activePayments)
@@ -661,7 +679,7 @@ export default function PaymentsClient() {
       logger.error('Failed to refresh payments', { error })
       toast.error('Failed to refresh payments')
     }
-  }, [refreshPayments, refreshMethods, activePayments, announce])
+  }, [refreshPayments, refreshMethods, refreshAnalytics, activePayments, announce])
 
   // Handle Search
   const handleSearch = (query: string) => {
@@ -704,6 +722,77 @@ export default function PaymentsClient() {
     toast.info("Transaction: " + payment.transactionId + " of " + formatCurrency(payment.amount) + " on " + new Date(payment.date).toLocaleDateString())
   }
 
+  // Fetch revenue stats from Supabase
+  useEffect(() => {
+    const fetchRevenueStats = async () => {
+      if (!userId) return
+      const supabase = createClient()
+
+      try {
+        // Get all payments for the user
+        const { data: payments } = await supabase
+          .from('payments')
+          .select('amount, status, payment_type, created_at')
+          .eq('user_id', userId)
+
+        if (!payments || payments.length === 0) return
+
+        const now = new Date()
+        const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
+
+        let totalRevenue = 0
+        let pendingRevenue = 0
+        let releasedRevenue = 0
+        let refundedAmount = 0
+        let thisMonthRevenue = 0
+        let lastMonthRevenue = 0
+
+        payments.forEach((p: any) => {
+          const amount = p.amount || 0
+          const paymentDate = new Date(p.created_at)
+
+          // Total by status
+          if (p.status === 'completed' || p.status === 'released') {
+            releasedRevenue += amount
+            totalRevenue += amount
+          } else if (p.status === 'pending' || p.status === 'in-escrow') {
+            pendingRevenue += amount
+            totalRevenue += amount
+          } else if (p.status === 'refunded' || p.payment_type === 'return') {
+            refundedAmount += amount
+          }
+
+          // Monthly breakdown
+          if (paymentDate >= thisMonth) {
+            thisMonthRevenue += amount
+          } else if (paymentDate >= lastMonth && paymentDate <= lastMonthEnd) {
+            lastMonthRevenue += amount
+          }
+        })
+
+        const growthPercentage = lastMonthRevenue > 0
+          ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
+          : 0
+
+        setRevenueStats({
+          totalRevenue,
+          pendingRevenue,
+          releasedRevenue,
+          refundedAmount,
+          thisMonthRevenue,
+          lastMonthRevenue,
+          growthPercentage: Math.round(growthPercentage)
+        })
+      } catch (error) {
+        logger.error('Failed to fetch revenue stats', { error })
+      }
+    }
+
+    fetchRevenueStats()
+  }, [userId])
+
   // Load Payments Data - Synced with Supabase hooks
   useEffect(() => {
     // When Supabase hooks finish loading, update local state
@@ -716,16 +805,38 @@ export default function PaymentsClient() {
     }
   }, [paymentsLoading, methodsLoading, activePayments, announce])
 
-  // Calculate totals
-  const totals = {
-    inEscrow: milestones
+  // Calculate totals - prefer Supabase data, fallback to milestones
+  const totals = useMemo(() => {
+    // Use revenue stats from Supabase if available
+    if (revenueStats.totalRevenue > 0) {
+      return {
+        inEscrow: revenueStats.pendingRevenue,
+        released: revenueStats.releasedRevenue,
+        total: revenueStats.totalRevenue,
+        refunded: revenueStats.refundedAmount,
+        thisMonth: revenueStats.thisMonthRevenue,
+        growth: revenueStats.growthPercentage
+      }
+    }
+
+    // Fallback to milestone-based calculation
+    const inEscrow = milestones
       .filter((m) => m.status === 'in-escrow')
-      .reduce((sum, m) => sum + m.amount, 0),
-    released: milestones
+      .reduce((sum, m) => sum + m.amount, 0)
+    const released = milestones
       .filter((m) => m.status === 'released')
-      .reduce((sum, m) => sum + m.amount, 0),
-    total: milestones.reduce((sum, m) => sum + m.amount, 0)
-  }
+      .reduce((sum, m) => sum + m.amount, 0)
+    const total = milestones.reduce((sum, m) => sum + m.amount, 0)
+
+    return {
+      inEscrow,
+      released,
+      total,
+      refunded: 0,
+      thisMonth: 0,
+      growth: 0
+    }
+  }, [milestones, revenueStats])
 
   // Handle Release Payment
   const handleReleasePayment = (milestone: Milestone) => {
@@ -964,6 +1075,10 @@ export default function PaymentsClient() {
               <Plus className="h-4 w-4" />
               Add Payment
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </motion.div>
 
@@ -1452,6 +1567,21 @@ export default function PaymentsClient() {
             </Card>
           )}
         </motion.div>
+
+        {/* Collapsible Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Payment Insights" defaultOpen={true} className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <AIInsightsPanel insights={paymentsAIInsights} />
+              <PredictiveAnalytics predictions={paymentsPredictions} />
+              <CollaborationIndicator collaborators={paymentsCollaborators} />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <QuickActionsToolbar actions={paymentsQuickActions} />
+              <ActivityFeed activities={paymentsActivities} />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Release Payment Dialog */}
         <Dialog open={showReleaseDialog} onOpenChange={setShowReleaseDialog}>

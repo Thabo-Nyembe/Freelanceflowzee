@@ -56,6 +56,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -388,6 +394,7 @@ export default function MessagingClient() {
   const dataFileInputRef = useRef<HTMLInputElement>(null)
   const [isExportingData, setIsExportingData] = useState(false)
   const [isImportingData, setIsImportingData] = useState(false)
+  const insightsPanel = useInsightsPanel(false)
 
   // Export messaging data handler
   const handleExportData = () => {

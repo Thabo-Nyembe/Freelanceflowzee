@@ -91,6 +91,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Hooks
 import { useApiEndpoints } from '@/lib/hooks/use-api-endpoints'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
@@ -348,6 +354,7 @@ interface ApiKeyFormData {
 }
 
 export default function ApiClient() {
+  const insightsPanel = useInsightsPanel(false)
   // Use real hooks for DB operations
   const {
     endpoints: dbEndpoints,
@@ -852,6 +859,10 @@ export default function ApiClient() {
               <Plus className="w-4 h-4 mr-2" />
               New Endpoint
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -6001,6 +6012,31 @@ export default function ApiClient() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="API Management Insights" defaultOpen={true}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[
+                    { id: '1', type: 'success', title: 'API Health', description: 'All endpoints performing within expected latency thresholds.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Performance' },
+                    { id: '2', type: 'warning', title: 'Rate Limiting', description: '2 API keys approaching rate limit. Consider upgrading quotas.', priority: 'high', timestamp: new Date().toISOString(), category: 'Usage' },
+                    { id: '3', type: 'info', title: 'Documentation', description: 'API docs were accessed 150 times this week.', priority: 'low', timestamp: new Date().toISOString(), category: 'Analytics' },
+                  ]}
+                />
+              </div>
+              <ActivityFeed
+                activities={[
+                  { id: '1', user: 'Developer', action: 'created', target: 'new endpoint', timestamp: '1h ago', type: 'info' },
+                  { id: '2', user: 'System', action: 'rotated', target: 'API key', timestamp: '4h ago', type: 'success' },
+                  { id: '3', user: 'Monitor', action: 'flagged', target: 'slow response', timestamp: '6h ago', type: 'warning' },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
     </div>
   )

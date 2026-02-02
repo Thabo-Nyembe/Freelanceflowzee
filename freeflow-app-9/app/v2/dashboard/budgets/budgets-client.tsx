@@ -37,6 +37,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Import mock data from centralized adapters
 
 
@@ -316,6 +322,7 @@ const defaultAccountForm = {
 }
 
 export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budget[] }) {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [settingsTab, setSettingsTab] = useState('general')
   const [currentMonth, setCurrentMonth] = useState(new Date())
@@ -805,6 +812,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <InsightsToggleButton
+                  isOpen={insightsPanel.isOpen}
+                  onToggle={insightsPanel.toggle}
+                />
                 <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-1">
                   <Button size="sm" variant="ghost" className="text-white hover:bg-white/20" onClick={() => navigateMonth('prev')}>
                     <ChevronLeft className="w-4 h-4" />
@@ -2267,37 +2278,41 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockBudgetsAIInsights}
-              title="Budget Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockBudgetsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockBudgetsPredictions}
-              title="Budget Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockBudgetsAIInsights}
+                  title="Budget Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockBudgetsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockBudgetsPredictions}
+                  title="Budget Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockBudgetsActivities}
-            title="Budget Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={budgetsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockBudgetsActivities}
+                title="Budget Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={budgetsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Transaction Detail Modal */}
         {selectedTransaction && (

@@ -86,6 +86,7 @@ import {
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // Supabase hooks for real data
 import { useProjects, Project as SupabaseProject } from '@/lib/hooks/use-projects'
@@ -188,6 +189,7 @@ const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
 
 export default function ProjectsClientV1() {
   const router = useRouter()
+  const insightsPanel = useInsightsPanel(false)
 
   // Supabase hook for real data - NO mock data
   const {
@@ -823,6 +825,7 @@ export default function ProjectsClientV1() {
           </div>
 
           <div className="flex items-center gap-3">
+            <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
             <Button variant="outline" onClick={() => handleExportProjectData()}>
               <Download className="h-4 w-4 mr-2" />
               Export CSV
@@ -1403,6 +1406,70 @@ export default function ProjectsClientV1() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Collapsible Insights Panel */}
+        <CollapsibleInsightsPanel
+          title="Project Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-blue-600" />
+                Project Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Active Projects</span>
+                <span className="font-semibold">{computedStats.active}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Completion Rate</span>
+                <span className="font-semibold">{computedStats.total > 0 ? Math.round((computedStats.completed / computedStats.total) * 100) : 0}%</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Budget Utilization</span>
+                <span className="font-semibold">{computedStats.totalBudget > 0 ? Math.round((computedStats.totalSpent / computedStats.totalBudget) * 100) : 0}%</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Avg Progress</span>
+                <span className="font-semibold">{computedStats.avgProgress}%</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Activity className="h-4 w-4 text-green-600" />
+                AI Recommendations
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {computedStats.pending > 0 && (
+                <p className="text-sm text-amber-600 dark:text-amber-400">
+                  {computedStats.pending} project(s) pending - consider allocating resources
+                </p>
+              )}
+              {computedStats.avgProgress < 50 && computedStats.active > 0 && (
+                <p className="text-sm text-blue-600 dark:text-blue-400">
+                  Average progress below 50% - review timelines and milestones
+                </p>
+              )}
+              {computedStats.totalSpent > computedStats.totalBudget * 0.8 && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  Budget utilization over 80% - monitor expenses closely
+                </p>
+              )}
+              {computedStats.completed > 0 && (
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  {computedStats.completed} project(s) completed - great progress!
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </CollapsibleInsightsPanel>
       </div>
     </div>
   )

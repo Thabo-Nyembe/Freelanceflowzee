@@ -60,6 +60,7 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
@@ -206,6 +207,9 @@ const formatDate = (date: string) => {
 
 
 export default function AddOnsClient() {
+  // Insights panel state
+  const insightsPanel = useInsightsPanel(false)
+
   // Team and activity data hooks
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
@@ -554,6 +558,10 @@ export default function AddOnsClient() {
               <Store className="w-4 h-4 mr-2" />
               Browse Store
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -1747,50 +1755,56 @@ export default function AddOnsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={[]}
-              title="Add-On Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
+        <CollapsibleInsightsPanel
+          title="Add-On Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={[]}
+                title="Add-On Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={teamMembers.map(member => ({
+                  id: member.id,
+                  name: member.name,
+                  avatar: member.avatar_url || undefined,
+                  status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+                }))}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={[]}
+                title="Add-On Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={teamMembers.map(member => ({
-                id: member.id,
-                name: member.name,
-                avatar: member.avatar_url || undefined,
-                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
-              }))}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={[]}
-              title="Add-On Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activityLogs.slice(0, 10).map(log => ({
-              id: log.id,
-              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
-              title: log.action,
-              description: log.resource_name || undefined,
-              user: { name: log.user_name || 'System', avatar: undefined },
-              timestamp: log.created_at,
-              isUnread: log.status === 'pending'
-            }))}
-            title="Add-On Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={mockAddOnsQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={activityLogs.slice(0, 10).map(log => ({
+                id: log.id,
+                type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+                title: log.action,
+                description: log.resource_name || undefined,
+                user: { name: log.user_name || 'System', avatar: undefined },
+                timestamp: log.created_at,
+                isUnread: log.status === 'pending'
+              }))}
+              title="Add-On Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={mockAddOnsQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
 
         {/* Add-on Detail Dialog */}
         <Dialog open={showAddOnDialog} onOpenChange={setShowAddOnDialog}>

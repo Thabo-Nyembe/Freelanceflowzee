@@ -1,7 +1,10 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 
-import { useState, useMemo, useCallback } from 'react'
+// Initialize Supabase client
+const supabase = createClient()
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -75,7 +78,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // TestRail-level types
 type TestStatus = 'passed' | 'failed' | 'blocked' | 'untested' | 'retest' | 'skipped'
@@ -316,6 +319,151 @@ const mockQAActivities = [
 // Quick actions are defined inside the component to access state setters
 
 export default function QAClient({ initialTestCases }: QAClientProps) {
+  const insightsPanel = useInsightsPanel(false)
+  // Real Supabase data states
+  const [dbTestSuites, setDbTestSuites] = useState<TestSuite[]>([])
+  const [dbTestRuns, setDbTestRuns] = useState<TestRun[]>([])
+  const [dbMilestones, setDbMilestones] = useState<Milestone[]>([])
+  const [dbDefects, setDbDefects] = useState<Defect[]>([])
+  const [dbTestCases, setDbTestCases] = useState<TestCase[]>([])
+  const [dataLoading, setDataLoading] = useState(true)
+
+  // Fetch QA data from Supabase
+  useEffect(() => {
+    const fetchQAData = async () => {
+      setDataLoading(true)
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        // Fetch test suites
+        const { data: suites } = await supabase
+          .from('qa_test_suites')
+          .select('*')
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+
+        if (suites && suites.length > 0) {
+          setDbTestSuites(suites.map((s: any) => ({
+            id: s.id,
+            name: s.name || 'Unnamed Suite',
+            description: s.description || '',
+            parentId: s.parent_id,
+            testCaseCount: s.test_case_count || 0,
+            passRate: s.pass_rate || 0,
+            createdAt: s.created_at
+          })))
+        }
+
+        // Fetch test runs
+        const { data: runs } = await supabase
+          .from('qa_test_runs')
+          .select('*')
+          .is('deleted_at', null)
+          .order('started_at', { ascending: false })
+
+        if (runs && runs.length > 0) {
+          setDbTestRuns(runs.map((r: any) => ({
+            id: r.id,
+            name: r.name || 'Unnamed Run',
+            description: r.description || '',
+            milestoneId: r.milestone_id,
+            assignedTo: r.assigned_to || 'Unassigned',
+            status: r.status || 'active',
+            config: r.config || 'Default',
+            passedCount: r.passed_count || 0,
+            failedCount: r.failed_count || 0,
+            blockedCount: r.blocked_count || 0,
+            untestedCount: r.untested_count || 0,
+            totalCount: r.total_count || 0,
+            startedAt: r.started_at,
+            completedAt: r.completed_at
+          })))
+        }
+
+        // Fetch milestones
+        const { data: milestones } = await supabase
+          .from('qa_milestones')
+          .select('*')
+          .is('deleted_at', null)
+          .order('due_date', { ascending: true })
+
+        if (milestones && milestones.length > 0) {
+          setDbMilestones(milestones.map((m: any) => ({
+            id: m.id,
+            name: m.name || 'Unnamed Milestone',
+            description: m.description || '',
+            status: m.status || 'open',
+            dueDate: m.due_date || new Date().toISOString(),
+            startDate: m.start_date || new Date().toISOString(),
+            completedRuns: m.completed_runs || 0,
+            totalRuns: m.total_runs || 0,
+            passRate: m.pass_rate || 0
+          })))
+        }
+
+        // Fetch defects
+        const { data: defects } = await supabase
+          .from('qa_defects')
+          .select('*')
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+
+        if (defects && defects.length > 0) {
+          setDbDefects(defects.map((d: any) => ({
+            id: d.id,
+            title: d.title || 'Untitled Defect',
+            testCaseId: d.test_case_id || '',
+            severity: d.severity || 'major',
+            status: d.status || 'open',
+            assignedTo: d.assigned_to || 'Unassigned',
+            createdAt: d.created_at
+          })))
+        }
+
+        // Fetch test cases for real data display
+        const { data: testCases } = await supabase
+          .from('qa_test_cases')
+          .select('*')
+          .is('deleted_at', null)
+          .order('updated_at', { ascending: false })
+          .limit(50)
+
+        if (testCases && testCases.length > 0) {
+          setDbTestCases(testCases.map((tc: any) => ({
+            id: tc.id,
+            suiteId: tc.suite_id || 'suite_1',
+            title: tc.test_name || 'Unnamed Test',
+            type: tc.test_type || 'functional',
+            priority: tc.priority || 'medium',
+            status: tc.status || 'untested',
+            preconditions: tc.preconditions,
+            steps: tc.test_steps || [],
+            expectedResult: tc.expected_result || '',
+            estimate: tc.duration_seconds ? `${Math.ceil(tc.duration_seconds / 60)}m` : '5m',
+            automationStatus: tc.is_automated ? 'automated' : 'manual',
+            refs: tc.refs || [],
+            createdBy: tc.assignee_email || 'user@company.com',
+            updatedAt: tc.updated_at
+          })))
+        }
+
+      } catch (error) {
+        console.error('Error fetching QA data:', error)
+      } finally {
+        setDataLoading(false)
+      }
+    }
+
+    fetchQAData()
+  }, [])
+
+  // Use real data if available, otherwise fall back to mock data
+  const activeSuites = dbTestSuites.length > 0 ? dbTestSuites : mockSuites
+  const activeTestRuns = dbTestRuns.length > 0 ? dbTestRuns : mockRuns
+  const activeMilestones = dbMilestones.length > 0 ? dbMilestones : mockMilestones
+  const activeDefects = dbDefects.length > 0 ? dbDefects : mockDefects
+  const activeTestCases = dbTestCases.length > 0 ? dbTestCases : mockTestCases
 
   const [activeTab, setActiveTab] = useState('cases')
   const [settingsTab, setSettingsTab] = useState('general')
@@ -398,14 +546,14 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     isExecuting
   } = useQAMutations()
 
-  // Calculate stats
-  const totalTests = mockTestCases.length
-  const passedTests = mockTestCases.filter(t => t.status === 'passed').length
-  const failedTests = mockTestCases.filter(t => t.status === 'failed').length
-  const automatedTests = mockTestCases.filter(t => t.automationStatus === 'automated').length
-  const overallPassRate = (passedTests / totalTests) * 100
-  const activeRuns = mockRuns.filter(r => r.status === 'active').length
-  const openDefects = mockDefects.filter(d => d.status === 'open' || d.status === 'in_progress').length
+  // Calculate stats using real data when available
+  const totalTests = activeTestCases.length
+  const passedTests = activeTestCases.filter(t => t.status === 'passed').length
+  const failedTests = activeTestCases.filter(t => t.status === 'failed').length
+  const automatedTests = activeTestCases.filter(t => t.automationStatus === 'automated').length
+  const overallPassRate = totalTests > 0 ? (passedTests / totalTests) * 100 : 0
+  const activeRuns = activeTestRuns.filter(r => r.status === 'active').length
+  const openDefects = activeDefects.filter(d => d.status === 'open' || d.status === 'in_progress').length
 
   // Quick actions with dialog openers
   const qaQuickActions = [
@@ -416,7 +564,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   ]
 
   const filteredTestCases = useMemo(() => {
-    return mockTestCases.filter(test => {
+    return activeTestCases.filter(test => {
       const matchesStatus = status === 'all' || test.status === status
       const matchesType = testType === 'all' || test.type === testType
       const matchesSearch = !searchQuery ||
@@ -424,7 +572,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         test.id.toLowerCase().includes(searchQuery.toLowerCase())
       return matchesStatus && matchesType && matchesSearch
     })
-  }, [status, testType, searchQuery])
+  }, [status, testType, searchQuery, activeTestCases])
 
   const getStatusColor = (s: TestStatus) => {
     switch (s) {
@@ -968,6 +1116,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               <Plus className="w-4 h-4" />
               Add Test Case
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -1016,7 +1168,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               <p className="text-xs text-green-100">Open Defects</p>
             </div>
             <div className="bg-white/20 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold">{mockMilestones.length}</p>
+              <p className="text-2xl font-bold">{activeMilestones.length}</p>
               <p className="text-xs text-green-100">Milestones</p>
             </div>
           </div>
@@ -1194,8 +1346,8 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 <Milestone className="w-4 h-4 text-teal-500" />
                 <span className="text-xs text-gray-500">Milestones</span>
               </div>
-              <p className="text-2xl font-bold">{mockMilestones.length}</p>
-              <p className="text-xs text-gray-500">{mockMilestones.filter(m => m.status === 'started').length} active</p>
+              <p className="text-2xl font-bold">{activeMilestones.length}</p>
+              <p className="text-xs text-gray-500">{activeMilestones.filter(m => m.status === 'started').length} active</p>
             </CardContent>
           </Card>
         </div>
@@ -1250,7 +1402,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="divide-y">
-                      {mockSuites.map((suite) => (
+                      {activeSuites.map((suite) => (
                         <div
                           key={suite.id}
                           className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${selectedSuite?.id === suite.id ? 'bg-green-50 dark:bg-green-900/20' : ''}`}
@@ -1395,9 +1547,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.length}</p><p className="text-xs text-blue-100">Total Runs</p></div>
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.filter(r => r.status === 'active').length}</p><p className="text-xs text-blue-100">Active</p></div>
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.filter(r => r.status === 'completed').length}</p><p className="text-xs text-blue-100">Completed</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{activeTestRuns.length}</p><p className="text-xs text-blue-100">Total Runs</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{activeTestRuns.filter(r => r.status === 'active').length}</p><p className="text-xs text-blue-100">Active</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{activeTestRuns.filter(r => r.status === 'completed').length}</p><p className="text-xs text-blue-100">Completed</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">87%</p><p className="text-xs text-blue-100">Avg Pass Rate</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">2.3h</p><p className="text-xs text-blue-100">Avg Duration</p></div>
               </div>
@@ -1406,8 +1558,8 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             {/* Run Status Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
-                { status: 'Active', count: mockRuns.filter(r => r.status === 'active').length, icon: PlayCircle, color: 'blue', desc: 'Currently running' },
-                { status: 'Completed', count: mockRuns.filter(r => r.status === 'completed').length, icon: CheckCircle2, color: 'green', desc: 'Successfully finished' },
+                { status: 'Active', count: activeTestRuns.filter(r => r.status === 'active').length, icon: PlayCircle, color: 'blue', desc: 'Currently running' },
+                { status: 'Completed', count: activeTestRuns.filter(r => r.status === 'completed').length, icon: CheckCircle2, color: 'green', desc: 'Successfully finished' },
                 { status: 'Scheduled', count: 2, icon: Calendar, color: 'purple', desc: 'Upcoming runs' },
                 { status: 'Failed', count: 1, icon: XCircle, color: 'red', desc: 'Needs attention' },
               ].map((stat, i) => (
@@ -1430,7 +1582,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             <div className="space-y-4">
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {mockRuns.map((run) => {
+                {activeTestRuns.map((run) => {
                   const progress = ((run.passedCount + run.failedCount + run.blockedCount) / run.totalCount) * 100
                   const passRate = run.totalCount > 0 ? (run.passedCount / (run.passedCount + run.failedCount)) * 100 : 0
 
@@ -1507,7 +1659,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {mockMilestones.map((milestone) => (
+                {activeMilestones.map((milestone) => (
                   <Card key={milestone.id} className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
@@ -1566,10 +1718,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.length}</p><p className="text-xs text-red-100">Total</p></div>
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.filter(d => d.status === 'open').length}</p><p className="text-xs text-red-100">Open</p></div>
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.filter(d => d.severity === 'critical').length}</p><p className="text-xs text-red-100">Critical</p></div>
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.filter(d => d.status === 'resolved').length}</p><p className="text-xs text-red-100">Resolved</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{activeDefects.length}</p><p className="text-xs text-red-100">Total</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{activeDefects.filter(d => d.status === 'open').length}</p><p className="text-xs text-red-100">Open</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{activeDefects.filter(d => d.severity === 'critical').length}</p><p className="text-xs text-red-100">Critical</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{activeDefects.filter(d => d.status === 'resolved').length}</p><p className="text-xs text-red-100">Resolved</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">2.4d</p><p className="text-xs text-red-100">Avg Resolve</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">89%</p><p className="text-xs text-red-100">Fix Rate</p></div>
               </div>
@@ -1578,9 +1730,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             {/* Severity Distribution */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
-                { severity: 'Critical', count: mockDefects.filter(d => d.severity === 'critical').length, color: 'red', icon: AlertTriangle },
-                { severity: 'Major', count: mockDefects.filter(d => d.severity === 'major').length, color: 'orange', icon: Bug },
-                { severity: 'Minor', count: mockDefects.filter(d => d.severity === 'minor').length, color: 'yellow', icon: AlertTriangle },
+                { severity: 'Critical', count: activeDefects.filter(d => d.severity === 'critical').length, color: 'red', icon: AlertTriangle },
+                { severity: 'Major', count: activeDefects.filter(d => d.severity === 'major').length, color: 'orange', icon: Bug },
+                { severity: 'Minor', count: activeDefects.filter(d => d.severity === 'minor').length, color: 'yellow', icon: AlertTriangle },
                 { severity: 'Low', count: 2, color: 'green', icon: Bug },
               ].map((sev, i) => (
                 <Card key={i} className={`border-${sev.color}-200 dark:border-${sev.color}-800`}>
@@ -1613,7 +1765,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y">
-                  {mockDefects.map((defect) => (
+                  {activeDefects.map((defect) => (
                     <div key={defect.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-3">
@@ -1793,7 +1945,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <CardHeader><CardTitle>Pass Rate by Suite</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockSuites.map((suite) => (
+                      {activeSuites.map((suite) => (
                         <div key={suite.id} className="space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="font-medium">{suite.name}</span>
@@ -1856,7 +2008,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                             <AlertTriangle className="w-4 h-4 text-orange-500" />
                             Blocked
                           </span>
-                          <span className="font-semibold text-orange-600">{mockTestCases.filter(t => t.status === 'blocked').length}</span>
+                          <span className="font-semibold text-orange-600">{activeTestCases.filter(t => t.status === 'blocked').length}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -2284,37 +2436,41 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockQAAIInsights}
-              title="QA Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockQACollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockQAPredictions}
-              title="Testing Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="QA Intelligence" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockQAAIInsights}
+                  title="QA Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockQACollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockQAPredictions}
+                  title="Testing Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockQAActivities}
-            title="QA Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={qaQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockQAActivities}
+                title="QA Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={qaQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Test Case Detail Dialog */}
         <Dialog open={!!selectedTestCase} onOpenChange={() => setSelectedTestCase(null)}>

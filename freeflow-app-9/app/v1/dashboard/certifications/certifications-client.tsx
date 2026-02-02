@@ -29,6 +29,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Import mock data from centralized adapters
 
 
@@ -161,6 +167,8 @@ const certsActivities: { id: string; user: string; action: string; target: strin
 // Quick actions are defined inside the component to access state setters
 
 export default function CertificationsClient() {
+  // Collapsible insights panel state
+  const insightsPanel = useInsightsPanel(false)
   const [activeView, setActiveView] = useState<'credentials' | 'badges' | 'skills' | 'pathways' | 'verification'>('credentials')
   const [selectedCredential, setSelectedCredential] = useState<Credential | null>(null)
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null)
@@ -649,6 +657,10 @@ export default function CertificationsClient() {
             <p className="text-gray-600 dark:text-gray-400">Digital badges, skills endorsements & verified credentials</p>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <input
               type="text"
               placeholder="Search credentials..."
@@ -2068,6 +2080,50 @@ export default function CertificationsClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Enhanced Competitive Upgrade Components - Collapsible */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel
+          title="Certifications Intelligence & Analytics"
+          defaultOpen={true}
+          className="mt-8"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={certsAIInsights}
+                title="Certification Intelligence"
+                onInsightAction={(id) => toast.success(`Insight action: ${id}`)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={certsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={certsPredictions}
+                title="Certification Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={certsActivities}
+              title="Certification Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={[
+                { id: 'add', icon: <span>+</span>, label: 'Add Credential', onClick: () => { resetForm(); setShowCreateDialog(true) } },
+                { id: 'refresh', icon: <span>↻</span>, label: 'Refresh', onClick: () => refetch() },
+              ]}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
     </div>
   )
 }

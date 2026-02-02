@@ -19,6 +19,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 const logger = createFeatureLogger('Team')
 
@@ -114,6 +115,7 @@ export default function TeamClient() {
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
+  const insightsPanel = useInsightsPanel(false)
 
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [selectedRole, setSelectedRole] = useState<string>('all')
@@ -1078,6 +1080,7 @@ export default function TeamClient() {
             <p className="text-gray-600 dark:text-gray-300 mt-2">Manage and collaborate with your team members</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
             <Button variant="outline" size="sm" onClick={handleTeamAnalytics}>
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
@@ -2126,6 +2129,72 @@ export default function TeamClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Collapsible Insights Panel */}
+      <div className="container mx-auto px-6 pb-6">
+        <CollapsibleInsightsPanel
+          title="Team Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Users className="h-4 w-4 text-blue-600" />
+                Team Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Total Members</span>
+                <span className="font-semibold">{members.length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Online Now</span>
+                <span className="font-semibold text-green-600">{members.filter(m => m.status === 'online').length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Busy</span>
+                <span className="font-semibold text-amber-600">{members.filter(m => m.status === 'busy').length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Departments</span>
+                <span className="font-semibold">{[...new Set(members.map(m => m.department))].length}</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Activity className="h-4 w-4 text-green-600" />
+                AI Recommendations
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {members.filter(m => m.status === 'offline').length > members.length * 0.5 && (
+                <p className="text-sm text-amber-600 dark:text-amber-400">
+                  Over 50% of team members offline - check availability
+                </p>
+              )}
+              {members.length === 0 && (
+                <p className="text-sm text-blue-600 dark:text-blue-400">
+                  No team members yet - invite collaborators to get started
+                </p>
+              )}
+              {members.length > 0 && members.filter(m => m.status === 'online').length === members.length && (
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  All team members are online - great time for collaboration!
+                </p>
+              )}
+              {members.length > 0 && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Team is ready - {members.filter(m => m.projects > 0).length} member(s) assigned to projects
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </CollapsibleInsightsPanel>
+      </div>
     </div>
   )
 }

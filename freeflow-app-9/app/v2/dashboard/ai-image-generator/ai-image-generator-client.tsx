@@ -11,6 +11,9 @@ export const dynamic = 'force-dynamic';
 
 import AIImageGenerator from '@/components/ai/ai-image-generator'
 import { toast } from 'sonner'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { TrendingUp, Activity, BarChart3, Zap } from 'lucide-react'
 
 
 
@@ -97,5 +100,69 @@ const aiImageGeneratorQuickActions = [
 ]
 
 export default function AiImageGeneratorClient() {
-  return <AIImageGenerator />
+  const insightsPanel = useInsightsPanel(false)
+
+  return (
+    <div className="space-y-6">
+      {/* Header with Insights Toggle */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">AI Image Generator</h1>
+          <p className="text-muted-foreground">Create stunning images with AI</p>
+        </div>
+        <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
+      </div>
+
+      {/* Main Content */}
+      <AIImageGenerator />
+
+      {/* Collapsible Insights Panel */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="AI Insights & Analytics" defaultOpen={true}>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Images Generated</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">1,284</div>
+                <p className="text-xs text-muted-foreground">+12% from last month</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Generation Speed</CardTitle>
+                <Zap className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">2.3s</div>
+                <p className="text-xs text-muted-foreground">Average generation time</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Quality Score</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">94.2%</div>
+                <p className="text-xs text-muted-foreground">AI quality assessment</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Sessions</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">23</div>
+                <p className="text-xs text-muted-foreground">Current active users</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
+    </div>
+  )
 }

@@ -81,6 +81,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Import mock data from centralized adapters
 
 
@@ -669,7 +675,7 @@ const mockAuditActivities = [
 // ============================================================================
 
 export default function AuditLogsClient() {
-
+  const insightsPanel = useInsightsPanel(false)
 
   // UI State
   const [activeTab, setActiveTab] = useState('events')
@@ -1154,6 +1160,10 @@ export default function AuditLogsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button
               variant={isLiveMode ? 'default' : 'outline'}
               size="sm"
@@ -2271,41 +2281,45 @@ export default function AuditLogsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockAuditAIInsights}
-              title="Audit Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockAuditCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockAuditPredictions}
-              title="Audit Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockAuditAIInsights}
+                  title="Audit Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockAuditCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockAuditPredictions}
+                  title="Audit Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockAuditActivities}
-            title="Audit Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={[
-              { id: '1', label: 'Search Logs', icon: 'search', action: () => setShowSearchDialog(true), variant: 'default' as const },
-              { id: '2', label: 'Create Alert', icon: 'bell', action: () => setShowCreateRuleDialog(true), variant: 'default' as const },
-              { id: '3', label: 'Export Data', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
-            ]}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockAuditActivities}
+                title="Audit Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={[
+                  { id: '1', label: 'Search Logs', icon: 'search', action: () => setShowSearchDialog(true), variant: 'default' as const },
+                  { id: '2', label: 'Create Alert', icon: 'bell', action: () => setShowCreateRuleDialog(true), variant: 'default' as const },
+                  { id: '3', label: 'Export Data', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Log Detail Dialog */}
         <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>

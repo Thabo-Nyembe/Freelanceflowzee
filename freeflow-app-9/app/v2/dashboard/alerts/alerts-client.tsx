@@ -67,6 +67,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -349,6 +355,7 @@ const mockAlertsActivities = [
 // Quick actions defined inside component to access state setters
 
 export default function AlertsClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('alerts')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSeverity, setSelectedSeverity] = useState<AlertSeverity | 'all'>('all')
@@ -738,6 +745,10 @@ export default function AlertsClient() {
               <Plus className="h-4 w-4 mr-2" />
               Create Alert
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -2879,6 +2890,31 @@ export default function AlertsClient() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Incident Insights & Analytics" defaultOpen={true}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[
+                    { id: '1', type: 'warning', title: 'Alert Trend', description: 'Critical alerts increased by 15% this week. Review monitoring thresholds.', priority: 'high', timestamp: new Date().toISOString(), category: 'Alerts' },
+                    { id: '2', type: 'success', title: 'Response Time', description: 'Average incident response time improved to 4.2 minutes.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Performance' },
+                    { id: '3', type: 'info', title: 'On-Call Coverage', description: 'All shifts covered for the next 2 weeks.', priority: 'low', timestamp: new Date().toISOString(), category: 'Scheduling' },
+                  ]}
+                />
+              </div>
+              <ActivityFeed
+                activities={[
+                  { id: '1', user: 'On-Call Team', action: 'resolved', target: 'INC-2024-001', timestamp: '30m ago', type: 'success' },
+                  { id: '2', user: 'Monitoring', action: 'triggered', target: 'CPU alert', timestamp: '1h ago', type: 'warning' },
+                  { id: '3', user: 'System', action: 'auto-resolved', target: 'network latency', timestamp: '2h ago', type: 'info' },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
     </div>
   )

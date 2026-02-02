@@ -18,6 +18,11 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+import {
   FileText, Plus, Search, Eye, Edit3, Copy, Trash2, Share2, Settings,
   BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown,
   Type, List, Hash, Star, Calendar, Upload, ToggleLeft, AlignLeft, MessageSquare,
@@ -379,6 +384,9 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const [isDisconnectingIntegration, setIsDisconnectingIntegration] = useState(false)
   const [isDeletingWebhook, setIsDeletingWebhook] = useState(false)
   const [isLoadingResponses, setIsLoadingResponses] = useState(false)
+
+  // Insights Panel Hook
+  const insightsPanel = useInsightsPanel(false)
 
   // Supabase Hook
   const { forms, loading, error, createForm, updateForm, deleteForm, mutating, refetch } = useForms({
@@ -1429,6 +1437,10 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <InsightsToggleButton
+                  isOpen={insightsPanel.isOpen}
+                  onToggle={insightsPanel.toggle}
+                />
                 <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setShowTemplatesDialog(true)}>
                   <Wand2 className="h-5 w-5 mr-2" />
                   Templates
@@ -1794,6 +1806,86 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Form Insights Panel - Collapsible */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel
+            title="Forms Intelligence & Analytics"
+            defaultOpen={true}
+            className="mt-8"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                      <TrendingUp className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <span className="text-sm font-medium">Completion Trend</span>
+                  </div>
+                  <p className="text-2xl font-bold">{stats.avgCompletionRate.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground">Average completion rate</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="text-sm font-medium">This Week</span>
+                  </div>
+                  <p className="text-2xl font-bold">{stats.responsesThisWeek}</p>
+                  <p className="text-xs text-muted-foreground">Responses received</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                      <Target className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <span className="text-sm font-medium">Conversion Rate</span>
+                  </div>
+                  <p className="text-2xl font-bold">{stats.conversionRate.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground">Views to submissions</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                      <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <span className="text-sm font-medium">Avg Time</span>
+                  </div>
+                  <p className="text-2xl font-bold">{stats.avgTimeToComplete}m</p>
+                  <p className="text-xs text-muted-foreground">To complete form</p>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-lg">
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-indigo-600" />
+                AI Insights
+              </h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                  <span>Your forms have a {stats.avgCompletionRate > 50 ? 'healthy' : 'below average'} completion rate. {stats.avgCompletionRate < 50 ? 'Consider reducing form fields.' : 'Great job!'}</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Activity className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                  <span>{stats.active} active forms generating {stats.totalSubmissions} total submissions across {stats.totalViews} views.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Zap className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                  <span>Average form completion time is {stats.avgTimeToComplete} minutes. {stats.avgTimeToComplete > 5 ? 'Consider shortening long forms.' : 'This is within optimal range.'}</span>
+                </li>
+              </ul>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Create Form Dialog */}
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>

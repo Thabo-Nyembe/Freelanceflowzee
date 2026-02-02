@@ -71,6 +71,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 import { downloadAsCsv, apiPost } from '@/lib/button-handlers'
 
 
@@ -237,6 +239,7 @@ export default function CustomerSuccessClient() {
   const { customerSuccess: dbCustomerSuccess, isLoading: loading, error, refetch } = useCustomerSuccess()
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
+  const insightsPanel = useInsightsPanel(false)
 
   // Map DB data to UI types using useMemo
   const customers = useMemo(() => {
@@ -699,6 +702,7 @@ export default function CustomerSuccessClient() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} className="bg-white/10 hover:bg-white/20 text-white border-0" />
               <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0 relative" onClick={() => setShowRiskAlertsDialog(true)}>
                 <Bell className="h-4 w-4 mr-2" />
                 Alerts
@@ -1775,37 +1779,43 @@ export default function CustomerSuccessClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={[]}
-              title="Customer Success Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
-            />
+        <CollapsibleInsightsPanel
+          title="Customer Success Insights"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={[]}
+                title="Customer Success Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={[]}
+                title="Success Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={[]}
-              title="Success Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
-            title="Customer Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={mockCSQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
+              title="Customer Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={mockCSQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
       </div>
 
       {/* Customer Detail Dialog */}

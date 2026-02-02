@@ -79,6 +79,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -406,6 +412,7 @@ const initialFormState: AllocationForm = {
 }
 
 export default function AllocationClient() {
+  const insightsPanel = useInsightsPanel(false)
 
   // Supabase hooks - Allocations
   const { allocations: dbAllocations, stats: dbStats, isLoading, refetch } = useAllocations()
@@ -739,6 +746,10 @@ export default function AllocationClient() {
               <Plus className="w-4 h-4 mr-2" />
               New Allocation
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -3954,6 +3965,31 @@ export default function AllocationClient() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Resource Allocation Insights" defaultOpen={true}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[
+                    { id: '1', type: 'warning', title: 'Over-Allocation Risk', description: 'Several team members are allocated above 100% capacity this sprint.', priority: 'high', timestamp: new Date().toISOString(), category: 'Capacity' },
+                    { id: '2', type: 'success', title: 'Utilization Improved', description: 'Team utilization rate increased to 85%, up from 78% last month.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Performance' },
+                    { id: '3', type: 'info', title: 'Upcoming Time Off', description: '3 team members have approved time off in the next 2 weeks.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Scheduling' },
+                  ]}
+                />
+              </div>
+              <ActivityFeed
+                activities={[
+                  { id: '1', user: 'PM', action: 'created', target: 'new allocation', timestamp: '1h ago', type: 'info' },
+                  { id: '2', user: 'System', action: 'flagged', target: 'capacity warning', timestamp: '3h ago', type: 'warning' },
+                  { id: '3', user: 'HR', action: 'approved', target: 'time off request', timestamp: '5h ago', type: 'success' },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
     </div>
   )

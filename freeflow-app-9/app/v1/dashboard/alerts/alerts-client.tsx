@@ -67,6 +67,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -172,6 +178,7 @@ const alertsActivities: { id: string; user: string; action: string; target: stri
 // Quick actions will be defined inside the component to access state
 
 export default function AlertsClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('alerts')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSeverity, setSelectedSeverity] = useState<AlertSeverity | 'all'>('all')
@@ -630,6 +637,10 @@ export default function AlertsClient() {
               <Plus className="h-4 w-4 mr-2" />
               Create Alert
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -2037,39 +2048,43 @@ export default function AlertsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={alertsAIInsights}
-              title="Alert Intelligence"
-              onInsightAction={(_insight) => {
-                toast.success(`Insight: ${insight.title}`, { description: insight.description })
-              }}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={alertsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={alertsPredictions}
-              title="Alert Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={alertsAIInsights}
+                  title="Alert Intelligence"
+                  onInsightAction={(_insight) => {
+                    toast.success(`Insight: ${insight.title}`, { description: insight.description })
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={alertsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={alertsPredictions}
+                  title="Alert Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={alertsActivities}
-            title="Alert Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={quickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={alertsActivities}
+                title="Alert Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={quickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Alert Detail Dialog */}
         <Dialog open={!!selectedAlert} onOpenChange={() => setSelectedAlert(null)}>

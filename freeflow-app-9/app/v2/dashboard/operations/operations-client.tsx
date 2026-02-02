@@ -11,6 +11,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -103,6 +104,7 @@ const operationsActivities: any[] = []
 // Quick actions are defined inside the component to use dialog state setters
 
 export default function OperationsClient() {
+  const insightsPanel = useInsightsPanel(false)
   const router = useRouter()
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
@@ -788,6 +790,11 @@ export default function OperationsClient() {
                   <RefreshCw className="w-4 h-4" />
                   Refresh
                 </button>
+
+                <InsightsToggleButton
+                  isOpen={insightsPanel.isOpen}
+                  onToggle={insightsPanel.toggle}
+                />
               </div>
             </div>
 
@@ -1116,6 +1123,21 @@ export default function OperationsClient() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Collapsible Insights Panel */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="Operations Insights" defaultOpen={true} className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <AIInsightsPanel insights={operationsAIInsights} />
+            <PredictiveAnalytics predictions={operationsPredictions} />
+            <CollaborationIndicator collaborators={operationsCollaborators} />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <QuickActionsToolbar actions={operationsQuickActions} />
+            <ActivityFeed activities={operationsActivities} />
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
 
       {/* Delete User Confirmation Dialog */}
       <AlertDialog open={!!deleteUser} onOpenChange={() => setDeleteUser(null)}>

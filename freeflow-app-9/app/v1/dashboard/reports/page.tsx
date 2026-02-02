@@ -78,6 +78,7 @@ import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -371,6 +372,7 @@ export default function ReportsPage() {
   // A+++ UTILITIES
   const { announce } = useAnnouncer()
   const { userId, userName, loading: userLoading } = useCurrentUser()
+  const insightsPanel = useInsightsPanel(false)
 
   // STATE
   const [state, dispatch] = useReducer(reportsReducer, {
@@ -1417,10 +1419,16 @@ export default function ReportsPage() {
                 </p>
               </div>
             </div>
-            <Button onClick={() => setIsCreateModalOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Report
-            </Button>
+            <div className="flex items-center gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
+              <Button onClick={() => setIsCreateModalOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Report
+              </Button>
+            </div>
           </div>
         </ScrollReveal>
 
@@ -2098,6 +2106,70 @@ export default function ReportsPage() {
           </div>
         )}
           </>
+        )}
+
+        {/* Insights Panel */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel
+            title="Reports Insights & Analytics"
+            defaultOpen={true}
+            className="mt-8"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <LiquidGlassCard className="p-4">
+                <h4 className="text-sm font-medium text-muted-foreground">Total Reports</h4>
+                <p className="text-2xl font-bold mt-1">{stats.totalReports}</p>
+                <p className="text-xs text-muted-foreground mt-1">Across all categories</p>
+              </LiquidGlassCard>
+              <LiquidGlassCard className="p-4">
+                <h4 className="text-sm font-medium text-muted-foreground">Ready Reports</h4>
+                <p className="text-2xl font-bold mt-1 text-green-600">{stats.readyReports}</p>
+                <p className="text-xs text-muted-foreground mt-1">Available for download</p>
+              </LiquidGlassCard>
+              <LiquidGlassCard className="p-4">
+                <h4 className="text-sm font-medium text-muted-foreground">Scheduled</h4>
+                <p className="text-2xl font-bold mt-1 text-blue-600">{stats.scheduledReports}</p>
+                <p className="text-xs text-muted-foreground mt-1">Auto-generating reports</p>
+              </LiquidGlassCard>
+              <LiquidGlassCard className="p-4">
+                <h4 className="text-sm font-medium text-muted-foreground">Data Points</h4>
+                <p className="text-2xl font-bold mt-1 text-purple-600">{stats.totalDataPoints.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground mt-1">Total analyzed</p>
+              </LiquidGlassCard>
+            </div>
+            {financialData && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <LiquidGlassCard className="p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Top Services by Revenue</h4>
+                  <div className="space-y-2">
+                    {financialData.insights.topServices.slice(0, 3).map((service) => (
+                      <div key={service.service} className="flex justify-between items-center">
+                        <span className="text-sm">{service.service}</span>
+                        <span className="text-sm font-medium">${service.revenue.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </LiquidGlassCard>
+                <LiquidGlassCard className="p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Key Financial Metrics</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Total Profit</span>
+                      <span className="text-sm font-medium text-green-600">${financialData.profitability.totalProfit.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Average Margin</span>
+                      <span className="text-sm font-medium">{financialData.profitability.averageMargin}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Growth Rate</span>
+                      <span className="text-sm font-medium text-blue-600">+{financialData.insights.growthRate}%</span>
+                    </div>
+                  </div>
+                </LiquidGlassCard>
+              </div>
+            )}
+          </CollapsibleInsightsPanel>
         )}
 
         {/* Create Report Modal */}

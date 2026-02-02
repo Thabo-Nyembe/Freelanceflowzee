@@ -36,6 +36,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Types
 type MaintenanceStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'on_hold' | 'overdue'
 type MaintenanceType = 'preventive' | 'corrective' | 'emergency' | 'upgrade' | 'inspection' | 'calibration'
@@ -653,6 +659,7 @@ export default function MaintenanceClient() {
     startDate: '',
     notes: ''
   })
+  const insightsPanel = useInsightsPanel(false)
 
   // Fetch maintenance windows from Supabase
   const fetchMaintenanceWindows = useCallback(async () => {

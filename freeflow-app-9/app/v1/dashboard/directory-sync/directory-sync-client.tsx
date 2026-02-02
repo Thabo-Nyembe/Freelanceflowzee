@@ -68,6 +68,17 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { useDirectorySync, type DirectoryProvider, type DirectoryConnection } from '@/lib/hooks/use-directory-sync'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
+
 // Demo organization ID - in production, this would come from the user's session
 const DEMO_ORG_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -122,6 +133,7 @@ export default function DirectorySyncClient() {
     getProviderLabel,
     getProviderIcon
   } = useDirectorySync()
+  const insightsPanel = useInsightsPanel(false)
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedProvider, setSelectedProvider] = useState<DirectoryProvider>('azure_ad')
@@ -391,13 +403,15 @@ export default function DirectorySyncClient() {
             </p>
           </div>
 
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add Connection
-              </Button>
-            </DialogTrigger>
+          <div className="flex items-center gap-3">
+            <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add Connection
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add Directory Connection</DialogTitle>
@@ -537,6 +551,7 @@ export default function DirectorySyncClient() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Stats Overview */}
@@ -1011,6 +1026,45 @@ export default function DirectorySyncClient() {
             )}
           </Card>
         </div>
+
+        {/* Enhanced Competitive Upgrade Components */}
+        <CollapsibleInsightsPanel
+          title="Directory Sync Insights"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={[]}
+                title="Directory Intelligence"
+                onInsightAction={() => {}}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={[]}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={[]}
+                title="Sync Forecasts"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={[]}
+              title="Sync Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={[]}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
       </div>
     </div>
   )

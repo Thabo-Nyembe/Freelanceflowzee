@@ -66,6 +66,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -629,6 +635,7 @@ export default function GrowthHubClient() {
   const [goalForm, setGoalForm] = useState({
     name: '', metric: '', targetValue: '', targetDate: ''
   })
+  const insightsPanel = useInsightsPanel(false)
 
   // Supabase hooks
   const { data: dbExperiments, isLoading: expLoading, refresh: refreshExperiments } = useGrowthExperiments(userId || undefined)
@@ -1166,6 +1173,10 @@ export default function GrowthHubClient() {
                 <Plus className="w-4 h-4 mr-2" />
                 New Analysis
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
         </div>
@@ -2132,37 +2143,45 @@ export default function GrowthHubClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockGrowthAIInsights}
-              title="Growth Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockGrowthCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockGrowthPredictions}
-              title="Growth Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Growth Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockGrowthAIInsights}
+                  title="Growth Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockGrowthCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockGrowthPredictions}
+                  title="Growth Forecasts"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockGrowthActivities}
-            title="Growth Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={growthQuickActions}
-            variant="grid"
-          />
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Activity & Quick Actions" defaultOpen={true} className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ActivityFeed
+                activities={mockGrowthActivities}
+                title="Growth Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={growthQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Funnel Detail Dialog */}

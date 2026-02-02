@@ -75,6 +75,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // Types
 type PayRunStatus = 'draft' | 'pending_approval' | 'approved' | 'processing' | 'completed' | 'failed' | 'cancelled'
@@ -653,6 +654,7 @@ const formatCurrencyDetailed = (amount: number) => {
 }
 
 export default function PayrollClient() {
+  const insightsPanel = useInsightsPanel(false)
   // Define adapter variables locally (removed mock data imports)
   const payrollAIInsights: any[] = []
   const payrollCollaborators: any[] = []
@@ -1030,6 +1032,10 @@ export default function PayrollClient() {
               <Plus className="w-4 h-4 mr-2" />
               Run Payroll
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -2197,37 +2203,41 @@ export default function PayrollClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={payrollAIInsights}
-              title="Payroll Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={payrollCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={payrollPredictions}
-              title="Payroll Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Payroll Intelligence" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={payrollAIInsights}
+                  title="Payroll Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={payrollCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={payrollPredictions}
+                  title="Payroll Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={payrollActivities}
-            title="Payroll Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={payrollQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={payrollActivities}
+                title="Payroll Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={payrollQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Pay Run Detail Dialog */}
         <Dialog open={showPayRunDialog} onOpenChange={setShowPayRunDialog}>

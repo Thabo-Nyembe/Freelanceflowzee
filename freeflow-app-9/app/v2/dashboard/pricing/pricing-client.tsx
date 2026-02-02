@@ -70,8 +70,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // Types
 type BillingPeriod = 'monthly' | 'quarterly' | 'annual' | 'lifetime'
@@ -470,7 +469,7 @@ const mockPricingActivities = [
 export default function PricingClient({
   initialPlans = mockPlans
 }: PricingClientProps) {
-
+  const insightsPanel = useInsightsPanel(false)
 
   // Core UI state
   const [activeTab, setActiveTab] = useState('plans')
@@ -851,6 +850,10 @@ export default function PricingClient({
               <Plus className="w-4 h-4 mr-2" />
               Create Plan
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -2134,37 +2137,41 @@ export default function PricingClient({
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockPricingAIInsights}
-              title="Pricing Intelligence"
-              onInsightAction={(insight) => toast.info("Insight: " + insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockPricingCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockPricingPredictions}
-              title="Revenue Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Pricing Intelligence" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockPricingAIInsights}
+                  title="Pricing Intelligence"
+                  onInsightAction={(insight) => toast.info("Insight: " + insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockPricingCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockPricingPredictions}
+                  title="Revenue Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockPricingActivities}
-            title="Pricing Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={pricingQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockPricingActivities}
+                title="Pricing Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={pricingQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Plan Detail Dialog */}
         <Dialog open={!!selectedPlan} onOpenChange={() => setSelectedPlan(null)}>

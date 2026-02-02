@@ -56,6 +56,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -441,6 +447,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   // Quick action dialogs
   const [showStockCountDialog, setShowStockCountDialog] = useState(false)
   const [showPrintLabelsDialog, setShowPrintLabelsDialog] = useState(false)
+  const insightsPanel = useInsightsPanel(false)
 
   // Quick actions with proper dialog openers
   const inventoryQuickActions = [
@@ -897,6 +904,11 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 <Plus className="w-4 h-4" />
                 Add Product
               </button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+                className="bg-white/20 hover:bg-white/30 text-white border-0"
+              />
             </div>
           </div>
 
@@ -2077,41 +2089,45 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          {/* AI Insights Panel */}
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockInventoryAIInsights}
-              title="Inventory Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Inventory Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockInventoryAIInsights}
+                  title="Inventory Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockInventoryCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockInventoryPredictions}
+                  title="Inventory Forecasts"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
-          {/* Team Collaboration & Activity */}
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockInventoryCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockInventoryPredictions}
-              title="Inventory Forecasts"
-            />
-          </div>
-        </div>
-
-        {/* Activity Feed & Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockInventoryActivities}
-            title="Warehouse Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={inventoryQuickActions}
-            variant="grid"
-          />
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Activity & Quick Actions" defaultOpen={true} className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ActivityFeed
+                activities={mockInventoryActivities}
+                title="Warehouse Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={inventoryQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Product Detail/Create Dialog */}

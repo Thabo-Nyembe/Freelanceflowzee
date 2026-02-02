@@ -73,6 +73,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import {
   DropdownMenu,
@@ -576,6 +582,7 @@ export default function LearningClient() {
     description: '',
     is_public: false
   })
+  const insightsPanel = useInsightsPanel(false)
 
   // Supabase hooks
   const { paths: dbPaths, loading: pathsLoading, createPath, updatePath, deletePath, mutating: pathsMutating } = useLearning()
@@ -1096,6 +1103,11 @@ Verification: https://freeflow.app/verify/${certificateId}
                   <span className="text-sm font-medium">{stats.weeklyProgress}/{stats.weeklyGoal}h</span>
                 </div>
               </div>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+                className="bg-white/20 hover:bg-white/30 text-white border-0"
+              />
             </div>
           </div>
 
@@ -2285,37 +2297,45 @@ Verification: https://freeflow.app/verify/${certificateId}
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockLearningAIInsights}
-              title="Learning Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockLearningCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockLearningPredictions}
-              title="Learning Progress Forecast"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Learning Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockLearningAIInsights}
+                  title="Learning Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockLearningCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockLearningPredictions}
+                  title="Learning Progress Forecast"
+                />
+              </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockLearningActivities}
-            title="Learning Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={learningQuickActions}
-            variant="grid"
-          />
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Activity & Quick Actions" defaultOpen={true} className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ActivityFeed
+                activities={mockLearningActivities}
+                title="Learning Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={learningQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Course Detail Dialog */}

@@ -73,6 +73,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 
 
 // Database Types
@@ -319,7 +321,8 @@ const bugsActivities: { id: string; user: string; action: string; target: string
 // Quick actions will be defined inside the component to access state setters
 
 export default function BugsClient() {
-
+  // Insights panel state
+  const insightsPanel = useInsightsPanel(false)
 
   // UI State
   const [activeTab, setActiveTab] = useState('list')
@@ -973,6 +976,7 @@ export default function BugsClient() {
               <Plus className="w-4 h-4 mr-2" />
               Report Bug
             </Button>
+            <InsightsToggleButton isOpen={insightsPanel.isOpen} onToggle={insightsPanel.toggle} />
           </div>
         </div>
 
@@ -2105,37 +2109,43 @@ export default function BugsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={bugsAIInsights}
-              title="Bug Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
+        <CollapsibleInsightsPanel
+          title="Bug Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={bugsAIInsights}
+                title="Bug Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={bugsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={bugsPredictions}
+                title="Bug Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={bugsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={bugsPredictions}
-              title="Bug Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={bugsActivities}
-            title="Bug Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={bugsQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={bugsActivities}
+              title="Bug Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={bugsQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
 
         {/* Bug Detail Dialog */}
         <Dialog open={!!selectedBug} onOpenChange={() => setSelectedBug(null)}>

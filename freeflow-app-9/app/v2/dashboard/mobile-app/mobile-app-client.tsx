@@ -42,6 +42,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -244,6 +250,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const [submitReviewForm, setSubmitReviewForm] = useState({ buildId: '', notes: '' })
   const [pushNotificationForm, setPushNotificationForm] = useState({ title: '', message: '', targetAudience: 'all' })
   const [metadataForm, setMetadataForm] = useState({ appName: 'FreeFlow Mobile', description: '', keywords: '', category: 'productivity' })
+  const insightsPanel = useInsightsPanel(false)
 
   // Quick Actions array (defined inside component to access state setters)
   const mobileAppQuickActions = [

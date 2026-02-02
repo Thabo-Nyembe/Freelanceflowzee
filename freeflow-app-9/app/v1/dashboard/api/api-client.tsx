@@ -125,6 +125,8 @@ const QuickActionsToolbar = dynamic(
   }
 )
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+
 // Hooks
 import { useApiEndpoints } from '@/lib/hooks/use-api-endpoints'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
@@ -307,6 +309,9 @@ interface ApiKeyFormData {
 }
 
 export default function ApiClient() {
+  // Insights panel state
+  const insightsPanel = useInsightsPanel(false)
+
   // Use real hooks for DB operations
   const {
     endpoints: dbEndpoints,
@@ -1183,6 +1188,10 @@ export default KaziApiClient;`
               <Plus className="w-4 h-4 mr-2" />
               New Endpoint
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -3022,64 +3031,70 @@ export default KaziApiClient;`
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={emptyApiAIInsights}
-              title="API Intelligence"
-              onInsightAction={async (insight) => {
-                // Real insight action - based on insight type
-                if (insight.type === 'warning' && insight.category === 'Usage') {
-                  // Redirect to usage settings
-                  toast.warning(insight.title)
-                } else if (insight.type === 'success' && insight.category === 'Performance') {
-                  // Show performance details
-                  toast.success(insight.title)
-                } else {
-                  toast.info(insight.title)
-                }
-              }}
-            />
+        <CollapsibleInsightsPanel
+          title="API Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={emptyApiAIInsights}
+                title="API Intelligence"
+                onInsightAction={async (insight) => {
+                  // Real insight action - based on insight type
+                  if (insight.type === 'warning' && insight.category === 'Usage') {
+                    // Redirect to usage settings
+                    toast.warning(insight.title)
+                  } else if (insight.type === 'success' && insight.category === 'Performance') {
+                    // Show performance details
+                    toast.success(insight.title)
+                  } else {
+                    toast.info(insight.title)
+                  }
+                }}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={teamMembers.map(member => ({
+                  id: member.id,
+                  name: member.name,
+                  avatar: member.avatar_url || undefined,
+                  status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+                  role: member.role || 'Team Member'
+                }))}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={emptyApiPredictions}
+                title="API Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={teamMembers.map(member => ({
-                id: member.id,
-                name: member.name,
-                avatar: member.avatar_url || undefined,
-                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
-                role: member.role || 'Team Member'
-              }))}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={emptyApiPredictions}
-              title="API Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activityLogs.slice(0, 10).map(log => ({
-              id: log.id,
-              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
-              title: log.action,
-              user: {
-                id: log.user_id || 'system',
-                name: log.user_name || 'System',
-                avatar: undefined
-              },
-              timestamp: log.created_at
-            }))}
-            title="API Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={emptyApiQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={activityLogs.slice(0, 10).map(log => ({
+                id: log.id,
+                type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+                title: log.action,
+                user: {
+                  id: log.user_id || 'system',
+                  name: log.user_name || 'System',
+                  avatar: undefined
+                },
+                timestamp: log.created_at
+              }))}
+              title="API Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={emptyApiQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
 
         {/* Endpoint Detail Dialog */}
         <Dialog open={!!selectedEndpoint} onOpenChange={() => setSelectedEndpoint(null)}>

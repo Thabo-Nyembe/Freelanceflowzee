@@ -44,6 +44,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 // Intercom / Customer.io / OneSignal level interfaces
 interface Campaign {
@@ -399,6 +405,8 @@ const mockEvents: EventTracking[] = [
 ]
 
 export default function BroadcastsClient({ initialBroadcasts }: { initialBroadcasts: Broadcast[] }) {
+  const insightsPanel = useInsightsPanel(false)
+
   // Define adapter variables locally (removed mock data imports)
   const broadcastsAIInsights: any[] = []
   const broadcastsCollaborators: any[] = []
@@ -787,6 +795,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <p className="text-gray-600 dark:text-gray-400 mt-1">Engage your audience with targeted messaging campaigns</p>
           </div>
           <div className="flex gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <button
               onClick={() => setShowImportContactsDialog(true)}
               className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -2183,37 +2195,41 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={broadcastsAIInsights}
-              title="Broadcast Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={broadcastsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={broadcastsPredictions}
-              title="Broadcast Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={broadcastsAIInsights}
+                  title="Broadcast Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={broadcastsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={broadcastsPredictions}
+                  title="Broadcast Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={broadcastsActivities}
-            title="Broadcast Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={broadcastsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={broadcastsActivities}
+                title="Broadcast Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={broadcastsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {(loading || isLoading) && (
           <div className="text-center py-8">

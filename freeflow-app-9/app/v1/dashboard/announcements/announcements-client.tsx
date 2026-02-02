@@ -103,6 +103,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // Types
 type AnnouncementStatus = 'draft' | 'scheduled' | 'published' | 'archived'
@@ -214,6 +215,9 @@ const typeColors: Record<AnnouncementType, string> = {
 }
 
 export default function AnnouncementsClient() {
+  // Insights panel state
+  const insightsPanel = useInsightsPanel(false)
+
   // Demo mode detection for investor demos
   const { data: nextAuthSession, status: sessionStatus } = useSession()
   const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
@@ -1439,6 +1443,11 @@ export default function AnnouncementsClient() {
               <Plus className="h-4 w-4 mr-2" />
               New Announcement
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+              className="bg-white/10 text-white hover:bg-white/20 border-white/20"
+            />
           </div>
 
           {/* Stats */}
@@ -2777,37 +2786,43 @@ export default function AnnouncementsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={announcementsAIInsights}
-              title="Announcements Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
+        <CollapsibleInsightsPanel
+          title="Announcement Insights & Analytics"
+          defaultOpen={insightsPanel.isOpen}
+          onOpenChange={insightsPanel.setIsOpen}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={announcementsAIInsights}
+                title="Announcements Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={announcementsCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={announcementsPredictions}
+                title="Engagement Forecasts"
+              />
+            </div>
           </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={announcementsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={announcementsPredictions}
-              title="Engagement Forecasts"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={announcementsActivities}
-            title="Announcement Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={announcementsQuickActions}
-            variant="grid"
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={announcementsActivities}
+              title="Announcement Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={announcementsQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
       </div>
 
       {/* Announcement Detail Dialog */}
