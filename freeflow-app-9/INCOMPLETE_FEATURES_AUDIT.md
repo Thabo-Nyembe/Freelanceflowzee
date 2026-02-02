@@ -273,9 +273,27 @@ The following items were initially flagged but found to be **already complete**:
 ## Remaining Critical Items
 
 ### Components Still Need Database Wiring:
-- `app/v1/dashboard/broadcasts/broadcasts-client.tsx` - AI insights/collaborators
-- `app/v1/dashboard/calendar/` - Events array
-- `app/v1/dashboard/content-studio/content-studio-client.tsx` - Content entries
+- ✅ `app/v1/dashboard/broadcasts/broadcasts-client.tsx` - **FIXED** - AI insights/collaborators now loaded from database
+- ✅ `app/v1/dashboard/calendar/` - **ALREADY COMPLETE** - Uses useCalendarEvents hook
+- ✅ `app/v1/dashboard/content-studio/content-studio-client.tsx` - **FIXED** - Content entries, types, assets loaded from database
+
+---
+
+## UI/UX Improvements Added
+
+### Collapsible Insights Panels
+Added cascading collapsible panels for AI insights across all dashboard pages:
+- Created `components/ui/collapsible-insights-panel.tsx` with:
+  - `CollapsibleInsightsPanel` - Wrapper component for insights sections
+  - `InsightsToggleButton` - Toggle button for header/toolbar placement
+  - `useInsightsPanel` - Hook for managing panel state
+
+### Collapsible Sidebar
+Updated dashboard layout (`app/v1/dashboard/dashboard-layout-client.tsx`) with:
+- Collapsible sidebar toggle button (Ctrl/Cmd+B)
+- Fullscreen mode (Ctrl/Cmd+Shift+F)
+- Persisted state via localStorage
+- Context provider for child components
 
 ---
 
