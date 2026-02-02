@@ -494,6 +494,140 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   const isUpdating = isLoading
   const isDeleting = isLoading
 
+  // CRM data state - contacts, accounts, opportunities, forecasts
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [accounts, setAccounts] = useState<Account[]>([])
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([])
+  const [forecasts, setForecasts] = useState<any[]>([])
+  const [crmDataLoading, setCrmDataLoading] = useState(true)
+
+  // Load CRM data from database
+  useEffect(() => {
+    const loadCrmData = async () => {
+      const supabase = (await import('@/lib/supabase/client')).createClient()
+
+      try {
+        // Load contacts
+        const { data: contactsData, error: contactsError } = await supabase
+          .from('contacts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100)
+
+        if (!contactsError && contactsData) {
+          setContacts(contactsData.map(c => ({
+            id: c.id,
+            firstName: c.first_name || '',
+            lastName: c.last_name || '',
+            email: c.email || '',
+            phone: c.phone || '',
+            mobile: c.mobile || '',
+            title: c.title || '',
+            department: c.department || '',
+            accountId: c.account_id || '',
+            leadSource: c.lead_source || 'other',
+            ownerId: c.owner_id || '',
+            mailingAddress: c.mailing_address || { street: '', city: '', state: '', postalCode: '', country: '' },
+            doNotCall: c.do_not_call || false,
+            doNotEmail: c.do_not_email || false,
+            hasOptedOutOfFax: c.has_opted_out_of_fax || false,
+            leadScore: c.lead_score || 0,
+            lastActivityDate: c.last_activity_date || '',
+            createdDate: c.created_at,
+            lastModifiedDate: c.updated_at,
+            tags: c.tags || [],
+            customFields: c.custom_fields || {}
+          })))
+        }
+
+        // Load accounts
+        const { data: accountsData, error: accountsError } = await supabase
+          .from('accounts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100)
+
+        if (!accountsError && accountsData) {
+          setAccounts(accountsData.map(a => ({
+            id: a.id,
+            name: a.name || '',
+            type: a.type || 'prospect',
+            industry: a.industry || '',
+            website: a.website || '',
+            phone: a.phone || '',
+            annualRevenue: a.annual_revenue || 0,
+            employees: a.employees || 0,
+            description: a.description || '',
+            billingAddress: a.billing_address || { street: '', city: '', state: '', postalCode: '', country: '' },
+            shippingAddress: a.shipping_address || { street: '', city: '', state: '', postalCode: '', country: '' },
+            parentAccountId: a.parent_account_id,
+            ownerId: a.owner_id || '',
+            rating: a.rating || 'cold',
+            sla: a.sla,
+            accountSource: a.account_source || 'other',
+            contacts: a.contact_ids || [],
+            opportunities: a.opportunity_ids || [],
+            createdDate: a.created_at,
+            lastActivityDate: a.last_activity_date || ''
+          })))
+        }
+
+        // Load opportunities
+        const { data: oppsData, error: oppsError } = await supabase
+          .from('opportunities')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100)
+
+        if (!oppsError && oppsData) {
+          setOpportunities(oppsData.map(o => ({
+            id: o.id,
+            name: o.name || '',
+            accountId: o.account_id || '',
+            contactId: o.contact_id || '',
+            amount: o.amount || 0,
+            stage: o.stage || 'lead',
+            probability: o.probability || 0,
+            closeDate: o.close_date || '',
+            type: o.type || 'new-business',
+            leadSource: o.lead_source || 'other',
+            nextStep: o.next_step || '',
+            description: o.description || '',
+            ownerId: o.owner_id || '',
+            ownerName: o.owner_name || '',
+            campaignId: o.campaign_id,
+            forecastCategory: o.forecast_category || 'pipeline',
+            competitors: o.competitors || [],
+            products: o.products || [],
+            createdDate: o.created_at,
+            lastStageChangeDate: o.last_stage_change_date || '',
+            stageDuration: o.stage_duration || {},
+            isClosed: o.stage === 'closed-won' || o.stage === 'closed-lost',
+            isWon: o.stage === 'closed-won'
+          })))
+        }
+
+        // Load forecasts
+        const { data: forecastsData, error: forecastsError } = await supabase
+          .from('forecasts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20)
+
+        if (!forecastsError && forecastsData) {
+          setForecasts(forecastsData)
+        }
+
+      } catch (err) {
+        console.error('[Customers] Error loading CRM data:', err)
+      } finally {
+        setCrmDataLoading(false)
+      }
+    }
+
+    loadCrmData()
+  }, [])
+
   // Fetch clients on mount
   useEffect(() => {
     refetch()
@@ -690,22 +824,17 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
     )
   }
 
-  // Stats - Now purely from database data
+  // Stats - Now using data loaded from database
   const stats = useMemo(() => {
-    const contacts: any[] = []
-    const accounts: any[] = []
-    const opportunities: any[] = []
-    const forecasts: any[] = []
-
-    const totalPipeline = (opportunities || []).filter(o => !o.isClosed).reduce((sum, o) => sum + o.amount, 0)
-    const weightedPipeline = (opportunities || []).filter(o => !o.isClosed).reduce((sum, o) => sum + (o.amount * o.probability / 100), 0)
-    const closedWon = (opportunities || []).filter(o => o.isWon).reduce((sum, o) => sum + o.amount, 0)
-    const totalQuota = (forecasts || []).reduce((sum, f) => sum + f.quotaAmount, 0)
-    const openTasksCount = (tasks || []).filter(t => t.status !== 'completed').length
-    const activeCampaignsCount = (campaigns || []).filter(c => c.status === 'active').length
-    const closedOpps = (opportunities || []).filter(o => o.isClosed)
-    const wonOpps = (opportunities || []).filter(o => o.isWon)
-    const openOpps = (opportunities || []).filter(o => !o.isClosed)
+    const totalPipeline = opportunities.filter(o => !o.isClosed).reduce((sum, o) => sum + o.amount, 0)
+    const weightedPipeline = opportunities.filter(o => !o.isClosed).reduce((sum, o) => sum + (o.amount * o.probability / 100), 0)
+    const closedWon = opportunities.filter(o => o.isWon).reduce((sum, o) => sum + o.amount, 0)
+    const totalQuota = forecasts.reduce((sum, f) => sum + (f.quota_amount || f.quotaAmount || 0), 0)
+    const openTasksCount = tasks.filter(t => t.status !== 'completed').length
+    const activeCampaignsCount = campaigns.filter(c => c.status === 'active').length
+    const closedOpps = opportunities.filter(o => o.isClosed)
+    const wonOpps = opportunities.filter(o => o.isWon)
+    const openOpps = opportunities.filter(o => !o.isClosed)
 
     return {
       totalContacts: contacts.length,
@@ -719,34 +848,33 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
       quotaAttainment: totalQuota > 0 ? (closedWon / totalQuota * 100) : 0,
       openTasks: openTasksCount,
       activeCampaigns: activeCampaignsCount,
-      avgLeadScore: contacts.length > 0 ? (contacts || []).reduce((sum, c) => sum + (c.leadScore || 0), 0) / contacts.length : 0
+      avgLeadScore: contacts.length > 0 ? contacts.reduce((sum, c) => sum + (c.leadScore || 0), 0) / contacts.length : 0
     }
-  }, [tasks, campaigns])
+  }, [tasks, campaigns, contacts, accounts, opportunities, forecasts])
 
-  // Filtered opportunities by stage
+  // Filtered opportunities by stage - using loaded data
   const filteredOpportunities = useMemo(() => {
-    const opportunities: any[] = []
-    const accounts: any[] = []
-    return (opportunities || []).filter(opp => {
+    return opportunities.filter(opp => {
       if (stageFilter !== 'all' && opp.stage !== stageFilter) return false
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
-        const account = (accounts || []).find(a => a.id === opp.accountId)
+        const account = accounts.find(a => a.id === opp.accountId)
         if (!opp.name.toLowerCase().includes(query) && !account?.name.toLowerCase().includes(query)) return false
       }
       return true
     })
-  }, [stageFilter, searchQuery])
+  }, [stageFilter, searchQuery, opportunities, accounts])
 
-  // Pipeline grouped by stage
+  // Pipeline grouped by stage - using loaded data
   const pipelineByStage = useMemo(() => {
-    const opportunities: any[] = []
     const grouped: Record<DealStage, Opportunity[]> = { 'lead': [], 'qualified': [], 'proposal': [], 'negotiation': [], 'closed-won': [], 'closed-lost': [] }
-    ;(opportunities || []).filter(o => !o.isClosed).forEach(opp => {
-      grouped[opp.stage].push(opp)
+    opportunities.filter(o => !o.isClosed).forEach(opp => {
+      if (grouped[opp.stage]) {
+        grouped[opp.stage].push(opp)
+      }
     })
     return grouped
-  }, [])
+  }, [opportunities])
 
   const statCards = [
     { label: 'Total Pipeline', value: formatCurrency(stats.totalPipeline), icon: DollarSign, color: 'from-violet-500 to-purple-600', change: '+12%' },

@@ -156,17 +156,15 @@ interface AIsuggestion {
 }
 
 // ============================================================================
-// MOCK DATA - INTERCOM LEVEL
+// DATA LOADING - Now using database hooks
 // ============================================================================
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
-const TEAM_MEMBERS: TeamMember[] = []
-
-const SAVED_REPLIES: SavedReply[] = []
-
-const CONVERSATIONS: Conversation[] = []
-
-const AI_SUGGESTIONS: AIsuggestion[] = []
+// Default AI suggestions (loaded from database when available)
+const DEFAULT_AI_SUGGESTIONS: AIsuggestion[] = [
+  { id: '1', content: 'Thanks for reaching out! I\'d be happy to help you with that.', confidence: 0.92, category: 'response' },
+  { id: '2', content: 'Let me check on that for you and get back to you shortly.', confidence: 0.88, category: 'response' },
+  { id: '3', content: 'Would you like me to schedule a call to discuss this further?', confidence: 0.85, category: 'action' },
+]
 
 // ============================================================================
 // MAIN COMPONENT - INTERCOM LEVEL CHAT
@@ -178,8 +176,73 @@ interface ChatClientProps {
 
 export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   // Team and activity data hooks
-  const { members: teamMembers } = useTeam()
+  const { members: teamMembersData, loading: teamLoading } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
+
+  // Convert team members to ChatClient format
+  const teamMembers: TeamMember[] = useMemo(() => {
+    if (!teamMembersData || teamMembersData.length === 0) return []
+    return teamMembersData.map(member => ({
+      id: member.id,
+      name: member.full_name || member.email?.split('@')[0] || 'Team Member',
+      email: member.email || '',
+      avatar: member.avatar_url || undefined,
+      role: (member.role as 'admin' | 'agent' | 'manager') || 'agent',
+      status: member.status === 'active' ? 'online' : 'offline',
+      assignedConversations: 0,
+      resolvedToday: 0,
+      avgResponseTime: 5
+    }))
+  }, [teamMembersData])
+
+  // Saved replies state - loaded from database
+  const [savedReplies, setSavedReplies] = useState<SavedReply[]>([])
+  const [savedRepliesLoading, setSavedRepliesLoading] = useState(true)
+
+  // Load saved replies from database
+  useEffect(() => {
+    const loadSavedReplies = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('saved_replies')
+          .select('*')
+          .order('usage_count', { ascending: false })
+          .limit(20)
+
+        if (error) {
+          console.error('[Chat] Failed to load saved replies:', error.message)
+          // Provide default saved replies
+          setSavedReplies([
+            { id: '1', name: 'Greeting', content: 'Hi! Thanks for reaching out. How can I help you today?', category: 'General', shortcut: '/hi', usageCount: 45 },
+            { id: '2', name: 'Follow Up', content: 'Just following up on our previous conversation. Is there anything else you need?', category: 'General', shortcut: '/followup', usageCount: 32 },
+            { id: '3', name: 'Thank You', content: 'Thank you for your patience. I appreciate your understanding!', category: 'General', shortcut: '/thanks', usageCount: 28 },
+          ])
+        } else if (data && data.length > 0) {
+          setSavedReplies(data.map(reply => ({
+            id: reply.id,
+            name: reply.name || 'Untitled',
+            content: reply.content || '',
+            category: reply.category || 'General',
+            shortcut: reply.shortcut || '',
+            usageCount: reply.usage_count || 0,
+            lastUsed: reply.last_used_at
+          })))
+        } else {
+          // No saved replies in database, use defaults
+          setSavedReplies([
+            { id: '1', name: 'Greeting', content: 'Hi! Thanks for reaching out. How can I help you today?', category: 'General', shortcut: '/hi', usageCount: 0 },
+            { id: '2', name: 'Follow Up', content: 'Just following up on our previous conversation. Is there anything else you need?', category: 'General', shortcut: '/followup', usageCount: 0 },
+          ])
+        }
+      } catch (err) {
+        console.error('[Chat] Error loading saved replies:', err)
+      } finally {
+        setSavedRepliesLoading(false)
+      }
+    }
+
+    loadSavedReplies()
+  }, [])
 
   // State
   const [activeTab, setActiveTab] = useState('inbox')
@@ -245,8 +308,78 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
     fetchUser()
   }, [])
 
-  // Form state for conversations
-  const [conversations, setConversations] = useState<Conversation[]>(CONVERSATIONS)
+  // Form state for conversations - load from database
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [conversationsLoading, setConversationsLoading] = useState(true)
+
+  // Load conversations from database
+  useEffect(() => {
+    const loadConversations = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('chat_conversations')
+          .select(`
+            *,
+            customer:customer_id (id, name, email, avatar_url, company),
+            assignee:assignee_id (id, full_name, email, avatar_url)
+          `)
+          .order('updated_at', { ascending: false })
+          .limit(50)
+
+        if (error) {
+          console.error('[Chat] Failed to load conversations:', error.message)
+        } else if (data && data.length > 0) {
+          setConversations(data.map(conv => ({
+            id: conv.id,
+            customer: {
+              id: conv.customer?.id || conv.customer_id,
+              name: conv.customer?.name || 'Unknown Customer',
+              email: conv.customer?.email || '',
+              avatar: conv.customer?.avatar_url,
+              company: conv.customer?.company,
+              customAttributes: {},
+              tags: [],
+              firstSeen: conv.created_at,
+              lastSeen: conv.updated_at,
+              totalConversations: 1,
+              lifetimeValue: 0,
+              isOnline: false,
+              notes: [],
+              segments: []
+            },
+            status: conv.status || 'open',
+            priority: conv.priority || 'normal',
+            assignee: conv.assignee ? {
+              id: conv.assignee.id,
+              name: conv.assignee.full_name || 'Agent',
+              email: conv.assignee.email || '',
+              avatar: conv.assignee.avatar_url,
+              role: 'agent',
+              status: 'online',
+              assignedConversations: 0,
+              resolvedToday: 0,
+              avgResponseTime: 5
+            } : undefined,
+            tags: conv.tags || [],
+            subject: conv.subject,
+            lastMessage: conv.last_message || '',
+            lastMessageAt: conv.updated_at,
+            unreadCount: conv.unread_count || 0,
+            isStarred: conv.is_starred || false,
+            channel: conv.channel || 'chat',
+            messagesCount: conv.messages_count || 0,
+            createdAt: conv.created_at
+          })))
+        }
+      } catch (err) {
+        console.error('[Chat] Error loading conversations:', err)
+      } finally {
+        setConversationsLoading(false)
+      }
+    }
+
+    loadConversations()
+  }, [])
 
   const messageInputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -258,21 +391,23 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
   const displayMessages = chatMessages || []
 
-  // Stats calculation
+  // Stats calculation - using actual data from hooks
   const stats = useMemo(() => ({
-    totalConversations: CONVERSATIONS.length,
-    openConversations: CONVERSATIONS.filter(c => c.status === 'open').length,
-    unassigned: CONVERSATIONS.filter(c => !c.assignee && c.status === 'open').length,
-    avgResponseTime: Math.round(TEAM_MEMBERS.reduce((sum, tm) => sum + tm.avgResponseTime, 0) / TEAM_MEMBERS.length),
-    resolvedToday: TEAM_MEMBERS.reduce((sum, tm) => sum + tm.resolvedToday, 0),
-    onlineAgents: TEAM_MEMBERS.filter(tm => tm.status === 'online').length,
+    totalConversations: conversations.length,
+    openConversations: conversations.filter(c => c.status === 'open').length,
+    unassigned: conversations.filter(c => !c.assignee && c.status === 'open').length,
+    avgResponseTime: teamMembers.length > 0
+      ? Math.round(teamMembers.reduce((sum, tm) => sum + tm.avgResponseTime, 0) / teamMembers.length)
+      : 5,
+    resolvedToday: teamMembers.reduce((sum, tm) => sum + tm.resolvedToday, 0),
+    onlineAgents: teamMembers.filter(tm => tm.status === 'online').length,
     totalMessages: displayMessages.length,
     unreadMessages: displayMessages.filter(m => !m.is_read).length
-  }), [displayMessages])
+  }), [displayMessages, conversations, teamMembers])
 
-  // Filter conversations
+  // Filter conversations - using actual data
   const filteredConversations = useMemo(() => {
-    return CONVERSATIONS.filter(conv => {
+    return conversations.filter(conv => {
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
         if (!conv.customer.name.toLowerCase().includes(query) &&
@@ -284,12 +419,12 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       }
 
       if (inboxFilter === 'open') return conv.status === 'open'
-      if (inboxFilter === 'mine') return conv.assignee?.id === 'tm1' // Current user
+      if (inboxFilter === 'mine') return conv.assignee?.id === userId // Current user
       if (inboxFilter === 'unassigned') return !conv.assignee && conv.status === 'open'
 
       return true
     })
-  }, [searchQuery, inboxFilter])
+  }, [searchQuery, inboxFilter, conversations, userId])
 
   // Handlers - Wired to Supabase
   const handleSendMessage = useCallback(async () => {

@@ -39,50 +39,68 @@ async function handleLikePost(postId: string, userId: string = 'user-1', unlike:
     // Try to persist to database
     if (unlike) {
       // Remove like
-      await supabase
+      const { error: deleteError } = await supabase
         .from('post_likes')
         .delete()
         .match({ post_id: postId, user_id: userId })
-        .catch(() => null)
+
+      if (deleteError) {
+        console.error('[Community API] Failed to delete like:', deleteError.message)
+      }
 
       // Decrement likes count
-      const { data: post } = await supabase
+      const { data: post, error: fetchError } = await supabase
         .from('community_posts')
         .select('likes_count')
         .eq('id', postId)
         .single()
-        .catch(() => ({ data: null }))
+
+      if (fetchError) {
+        console.error('[Community API] Failed to fetch post for unlike:', fetchError.message)
+      }
 
       if (post) {
         totalLikes = Math.max(0, (post.likes_count || 0) - 1)
-        await supabase
+        const { error: updateError } = await supabase
           .from('community_posts')
           .update({ likes_count: totalLikes })
           .eq('id', postId)
-          .catch(() => null)
+
+        if (updateError) {
+          console.error('[Community API] Failed to update likes count:', updateError.message)
+        }
       }
     } else {
       // Add like
-      await supabase
+      const { error: upsertError } = await supabase
         .from('post_likes')
         .upsert({ post_id: postId, user_id: userId, created_at: new Date().toISOString() })
-        .catch(() => null)
+
+      if (upsertError) {
+        console.error('[Community API] Failed to upsert like:', upsertError.message)
+      }
 
       // Increment likes count
-      const { data: post } = await supabase
+      const { data: post, error: fetchError } = await supabase
         .from('community_posts')
         .select('likes_count')
         .eq('id', postId)
         .single()
-        .catch(() => ({ data: null }))
+
+      if (fetchError) {
+        console.error('[Community API] Failed to fetch post for like:', fetchError.message)
+      }
 
       if (post) {
         totalLikes = (post.likes_count || 0) + 1
-        await supabase
+        const { error: updateError } = await supabase
           .from('community_posts')
           .update({ likes_count: totalLikes })
           .eq('id', postId)
-          .catch(() => null)
+
+        if (updateError) {
+          console.error('[Community API] Failed to update likes count:', updateError.message)
+        }
       }
     }
 
@@ -121,16 +139,22 @@ async function handleBookmarkPost(postId: string, userId: string = 'user-1', unb
 
     // Try to persist to database
     if (unbookmark) {
-      await supabase
+      const { error: deleteError } = await supabase
         .from('post_bookmarks')
         .delete()
         .match({ post_id: postId, user_id: userId })
-        .catch(() => null)
+
+      if (deleteError) {
+        console.error('[Community API] Failed to delete bookmark:', deleteError.message)
+      }
 
       // Decrement bookmarks count
-      await supabase.rpc('decrement_bookmarks', { post_id_param: postId }).catch(() => null)
+      const { error: rpcError } = await supabase.rpc('decrement_bookmarks', { post_id_param: postId })
+      if (rpcError) {
+        console.error('[Community API] Failed to decrement bookmarks:', rpcError.message)
+      }
     } else {
-      await supabase
+      const { error: upsertError } = await supabase
         .from('post_bookmarks')
         .upsert({
           post_id: postId,
@@ -138,10 +162,16 @@ async function handleBookmarkPost(postId: string, userId: string = 'user-1', unb
           collection: 'Saved Posts',
           created_at: new Date().toISOString()
         })
-        .catch(() => null)
+
+      if (upsertError) {
+        console.error('[Community API] Failed to upsert bookmark:', upsertError.message)
+      }
 
       // Increment bookmarks count
-      await supabase.rpc('increment_bookmarks', { post_id_param: postId }).catch(() => null)
+      const { error: rpcError } = await supabase.rpc('increment_bookmarks', { post_id_param: postId })
+      if (rpcError) {
+        console.error('[Community API] Failed to increment bookmarks:', rpcError.message)
+      }
     }
 
     const result = {
@@ -170,18 +200,51 @@ async function handleBookmarkPost(postId: string, userId: string = 'user-1', unb
 // Share post
 async function handleSharePost(postId: string, data: any): Promise<NextResponse> {
   try {
-    const result = {
-      postId,
-      shareMethod: data?.method || 'link',  // link, email, social
-      platform: data?.platform,  // twitter, linkedin, facebook
-      timestamp: new Date().toISOString(),
-      shareUrl: `https://kazi.app/community/post/${postId}`,
-      totalShares: 1  // Would be actual count from database
+    const supabase = await createClient()
+
+    // Track share in database
+    const { error: shareError } = await supabase
+      .from('post_shares')
+      .insert({
+        post_id: postId,
+        user_id: data?.userId || 'anonymous',
+        share_method: data?.method || 'link',
+        platform: data?.platform || null,
+        created_at: new Date().toISOString()
+      })
+
+    if (shareError) {
+      console.error('[Community API] Failed to track share:', shareError.message)
     }
 
-    // In production: Track share analytics
-    // await db.posts.incrementShares(postId)
-    // await db.analytics.trackShare(postId, data)
+    // Increment shares count on post
+    const { data: post, error: fetchError } = await supabase
+      .from('community_posts')
+      .select('shares_count')
+      .eq('id', postId)
+      .single()
+
+    let totalShares = 1
+    if (!fetchError && post) {
+      totalShares = (post.shares_count || 0) + 1
+      const { error: updateError } = await supabase
+        .from('community_posts')
+        .update({ shares_count: totalShares })
+        .eq('id', postId)
+
+      if (updateError) {
+        console.error('[Community API] Failed to update shares count:', updateError.message)
+      }
+    }
+
+    const result = {
+      postId,
+      shareMethod: data?.method || 'link',
+      platform: data?.platform,
+      timestamp: new Date().toISOString(),
+      shareUrl: `https://kazi.app/community/post/${postId}`,
+      totalShares
+    }
 
     return NextResponse.json({
       success: true,
@@ -277,14 +340,17 @@ async function handleConnectionAction(memberId: string, userId: string = 'user-1
 
     if (disconnect) {
       // Remove connection
-      await supabase
+      const { error: deleteError } = await supabase
         .from('member_connections')
         .delete()
         .or(`and(requester_id.eq.${userId},recipient_id.eq.${memberId}),and(requester_id.eq.${memberId},recipient_id.eq.${userId})`)
-        .catch(() => null)
+
+      if (deleteError) {
+        console.error('[Community API] Failed to remove connection:', deleteError.message)
+      }
     } else {
       // Create connection request
-      await supabase
+      const { error: upsertError } = await supabase
         .from('member_connections')
         .upsert({
           requester_id: userId,
@@ -292,7 +358,10 @@ async function handleConnectionAction(memberId: string, userId: string = 'user-1
           status: 'pending',
           created_at: new Date().toISOString()
         })
-        .catch(() => null)
+
+      if (upsertError) {
+        console.error('[Community API] Failed to create connection:', upsertError.message)
+      }
     }
 
     const result = {
@@ -332,70 +401,94 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
 
     if (unfollow) {
       // Remove follow
-      await supabase
+      const { error: deleteError } = await supabase
         .from('member_follows')
         .delete()
         .match({ follower_id: userId, following_id: memberId })
-        .catch(() => null)
+
+      if (deleteError) {
+        console.error('[Community API] Failed to remove follow:', deleteError.message)
+      }
 
       // Update follower count
-      const { data: member } = await supabase
+      const { data: member, error: fetchError } = await supabase
         .from('community_members')
         .select('followers')
         .eq('user_id', memberId)
         .single()
-        .catch(() => ({ data: null }))
+
+      if (fetchError) {
+        console.error('[Community API] Failed to fetch member for unfollow:', fetchError.message)
+      }
 
       if (member) {
         totalFollowers = Math.max(0, (member.followers || 0) - 1)
-        await supabase
+        const { error: updateError } = await supabase
           .from('community_members')
           .update({ followers: totalFollowers })
           .eq('user_id', memberId)
-          .catch(() => null)
+
+        if (updateError) {
+          console.error('[Community API] Failed to update follower count:', updateError.message)
+        }
       }
     } else {
       // Add follow
-      await supabase
+      const { error: upsertError } = await supabase
         .from('member_follows')
         .upsert({
           follower_id: userId,
           following_id: memberId,
           created_at: new Date().toISOString()
         })
-        .catch(() => null)
+
+      if (upsertError) {
+        console.error('[Community API] Failed to add follow:', upsertError.message)
+      }
 
       // Update follower count
-      const { data: member } = await supabase
+      const { data: member, error: fetchError } = await supabase
         .from('community_members')
         .select('followers')
         .eq('user_id', memberId)
         .single()
-        .catch(() => ({ data: null }))
+
+      if (fetchError) {
+        console.error('[Community API] Failed to fetch member for follow:', fetchError.message)
+      }
 
       if (member) {
         totalFollowers = (member.followers || 0) + 1
-        await supabase
+        const { error: updateError } = await supabase
           .from('community_members')
           .update({ followers: totalFollowers })
           .eq('user_id', memberId)
-          .catch(() => null)
+
+        if (updateError) {
+          console.error('[Community API] Failed to update follower count:', updateError.message)
+        }
       }
 
       // Update following count for user
-      const { data: userMember } = await supabase
+      const { data: userMember, error: userFetchError } = await supabase
         .from('community_members')
         .select('following')
         .eq('user_id', userId)
         .single()
-        .catch(() => ({ data: null }))
+
+      if (userFetchError) {
+        console.error('[Community API] Failed to fetch user member:', userFetchError.message)
+      }
 
       if (userMember) {
-        await supabase
+        const { error: userUpdateError } = await supabase
           .from('community_members')
           .update({ following: (userMember.following || 0) + 1 })
           .eq('user_id', userId)
-          .catch(() => null)
+
+        if (userUpdateError) {
+          console.error('[Community API] Failed to update following count:', userUpdateError.message)
+        }
       }
     }
 

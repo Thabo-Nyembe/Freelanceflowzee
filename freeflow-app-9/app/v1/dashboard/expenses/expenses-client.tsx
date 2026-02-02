@@ -549,10 +549,98 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
   // Use Supabase data as the source of truth
   const expenses = dbExpenses || []
-  // Mileage, per diem, and policies are managed via direct Supabase calls in their handlers
-  const policies: Policy[] = []
-  const mileage: MileageEntry[] = []
-  const perDiems: PerDiem[] = []
+
+  // Mileage, per diem, and policies state - loaded from database
+  const [policies, setPolicies] = useState<Policy[]>([])
+  const [mileage, setMileage] = useState<MileageEntry[]>([])
+  const [perDiems, setPerDiems] = useState<PerDiem[]>([])
+  const [dataLoading, setDataLoading] = useState(true)
+
+  // Load policies, mileage, and per diems from database
+  React.useEffect(() => {
+    const loadExpenseData = async () => {
+      const supabaseClient = createClient()
+      try {
+        // Load policies
+        const { data: policiesData, error: policiesError } = await supabaseClient
+          .from('expense_policies')
+          .select('*')
+          .order('category')
+
+        if (policiesError) {
+          console.error('[Expenses] Failed to load policies:', policiesError.message)
+        } else if (policiesData && policiesData.length > 0) {
+          setPolicies(policiesData.map(p => ({
+            id: p.id,
+            name: p.name || 'Policy',
+            category: p.category || 'other',
+            maxAmount: p.max_amount || 0,
+            requiresReceipt: p.requires_receipt ?? true,
+            requiresApproval: p.requires_approval ?? true,
+            approvalThreshold: p.approval_threshold || 100,
+            notes: p.notes || ''
+          })))
+        } else {
+          // Default policies if none exist
+          setPolicies([
+            { id: '1', name: 'Travel Policy', category: 'travel', maxAmount: 500, requiresReceipt: true, requiresApproval: true, approvalThreshold: 200, notes: 'All travel expenses over $200 require manager approval' },
+            { id: '2', name: 'Meals Policy', category: 'meals', maxAmount: 75, requiresReceipt: true, requiresApproval: false, approvalThreshold: 75, notes: 'Daily meal limit of $75 per person' },
+            { id: '3', name: 'Software Policy', category: 'software', maxAmount: 1000, requiresReceipt: true, requiresApproval: true, approvalThreshold: 100, notes: 'Software purchases require IT approval' },
+          ])
+        }
+
+        // Load mileage entries
+        const { data: mileageData, error: mileageError } = await supabaseClient
+          .from('mileage_entries')
+          .select('*')
+          .order('date', { ascending: false })
+          .limit(50)
+
+        if (mileageError) {
+          console.error('[Expenses] Failed to load mileage:', mileageError.message)
+        } else if (mileageData) {
+          setMileage(mileageData.map(m => ({
+            id: m.id,
+            date: m.date,
+            origin: m.origin || '',
+            destination: m.destination || '',
+            distance: m.distance || 0,
+            rate: m.rate || 0.655,
+            purpose: m.purpose || '',
+            status: m.status || 'pending'
+          })))
+        }
+
+        // Load per diem entries
+        const { data: perDiemData, error: perDiemError } = await supabaseClient
+          .from('per_diem_entries')
+          .select('*')
+          .order('start_date', { ascending: false })
+          .limit(50)
+
+        if (perDiemError) {
+          console.error('[Expenses] Failed to load per diem:', perDiemError.message)
+        } else if (perDiemData) {
+          setPerDiems(perDiemData.map(pd => ({
+            id: pd.id,
+            location: pd.location || '',
+            startDate: pd.start_date,
+            endDate: pd.end_date,
+            dailyRate: pd.daily_rate || 0,
+            totalAmount: pd.total_amount || 0,
+            meals: pd.meals || { breakfast: true, lunch: true, dinner: true },
+            status: pd.status || 'pending'
+          })))
+        }
+      } catch (err) {
+        console.error('[Expenses] Error loading expense data:', err)
+      } finally {
+        setDataLoading(false)
+      }
+    }
+
+    loadExpenseData()
+  }, [])
 
   // State for quick filter functionality
   const [userIdFilter, setUserIdFilter] = useState<string | null>(null)
