@@ -79,6 +79,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // ============================================================================
 // TYPE DEFINITIONS - Intercom Guide Level Knowledge Base
 // ============================================================================
@@ -806,6 +812,7 @@ const mockHelpCenterActivities = [
 export default function HelpCenterClient() {
   const supabase = createClient()
   const [activeTab, setActiveTab] = useState('articles')
+  const insightsPanel = useInsightsPanel(false)
   const [articles, setArticles] = useState<Article[]>(mockArticles)
   const [categories, setCategories] = useState<Category[]>(mockCategories)
   const [collections, setCollections] = useState<Collection[]>(mockCollections)
@@ -2336,6 +2343,10 @@ ${exportData.categories.map(c => `- **${c.name}**: ${c.articleCount} articles
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Analytics
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={handleCreateArticle}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Article
@@ -3185,37 +3196,41 @@ ${exportData.categories.map(c => `- **${c.name}**: ${c.articleCount} articles
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockHelpCenterAIInsights}
-              title="Help Center Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockHelpCenterCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockHelpCenterPredictions}
-              title="Content Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockHelpCenterAIInsights}
+                  title="Help Center Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockHelpCenterCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockHelpCenterPredictions}
+                  title="Content Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockHelpCenterActivities}
-            title="Help Center Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={helpCenterQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockHelpCenterActivities}
+                title="Help Center Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={helpCenterQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Article Detail Dialog */}

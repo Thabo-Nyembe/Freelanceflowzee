@@ -81,6 +81,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -473,6 +479,7 @@ export default function InvoicingClient() {
   const isLoading = invoicesLoading || clientsLoading || userLoading
 
   const [activeTab, setActiveTab] = useState('invoices')
+  const insightsPanel = useInsightsPanel(false)
   const [settingsTab, setSettingsTab] = useState('general')
   const [report] = useState<Report>({
     period: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
@@ -837,6 +844,10 @@ export default function InvoicingClient() {
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button className="bg-white text-emerald-600 hover:bg-emerald-50" onClick={handleCreateInvoice}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Invoice
@@ -1967,68 +1978,72 @@ export default function InvoicingClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={invoicingAIInsights}
-              title="Invoicing Intelligence"
-              onInsightAction={(insight) => {
-                logger.info('AI Insight action triggered', { insight: insight.title })
-                // Handle different insight types with real actions
-                if (insight.type === 'opportunity') {
-                  // For cash flow projections, export projection data
-                  const projectionData = {
-                    type: 'cash_flow_projection',
-                    title: insight.title,
-                    description: insight.description,
-                    confidence: insight.confidence,
-                    generatedAt: new Date().toISOString(),
-                    projectedData: {
-                      currentMonth: stats.totalInvoiced,
-                      projectedNextMonth: stats.totalInvoiced * (1 + (insight.confidence * 0.2)),
-                      pendingReceivables: stats.totalPending
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={invoicingAIInsights}
+                  title="Invoicing Intelligence"
+                  onInsightAction={(insight) => {
+                    logger.info('AI Insight action triggered', { insight: insight.title })
+                    // Handle different insight types with real actions
+                    if (insight.type === 'opportunity') {
+                      // For cash flow projections, export projection data
+                      const projectionData = {
+                        type: 'cash_flow_projection',
+                        title: insight.title,
+                        description: insight.description,
+                        confidence: insight.confidence,
+                        generatedAt: new Date().toISOString(),
+                        projectedData: {
+                          currentMonth: stats.totalInvoiced,
+                          projectedNextMonth: stats.totalInvoiced * (1 + (insight.confidence * 0.2)),
+                          pendingReceivables: stats.totalPending
+                        }
+                      }
+                      const blob = new Blob([JSON.stringify(projectionData, null, 2)], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `insight-${insight.id}-${new Date().toISOString().split('T')[0]}.json`
+                      document.body.appendChild(a)
+                      a.click()
+                      document.body.removeChild(a)
+                      URL.revokeObjectURL(url)
+                      toast.success('Projection data exported!')
+                    } else if (insight.type === 'alert') {
+                      // For alerts, open send reminders dialog
+                      setShowSendRemindersDialog(true)
                     }
-                  }
-                  const blob = new Blob([JSON.stringify(projectionData, null, 2)], { type: 'application/json' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `insight-${insight.id}-${new Date().toISOString().split('T')[0]}.json`
-                  document.body.appendChild(a)
-                  a.click()
-                  document.body.removeChild(a)
-                  URL.revokeObjectURL(url)
-                  toast.success('Projection data exported!')
-                } else if (insight.type === 'alert') {
-                  // For alerts, open send reminders dialog
-                  setShowSendRemindersDialog(true)
-                }
-              }}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={invoicingCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={invoicingPredictions}
-              title="Revenue Forecasts"
-            />
-          </div>
-        </div>
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={invoicingCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={invoicingPredictions}
+                  title="Revenue Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={invoicingActivities}
-            title="Invoicing Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={invoicingQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={invoicingActivities}
+                title="Invoicing Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={invoicingQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Invoice Detail Dialog */}

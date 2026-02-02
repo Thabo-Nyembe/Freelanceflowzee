@@ -11,6 +11,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 import * as React from 'react'
 import { useMemo, useState, useCallback, useEffect } from 'react'
@@ -250,6 +255,8 @@ export default function AdvancedMicroFeaturesClient() {
   const { announce } = useAnnouncer()
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
+
+  const insightsPanel = useInsightsPanel(false)
 
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
@@ -834,15 +841,19 @@ export default function AdvancedMicroFeaturesClient() {
       <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
 
         {/* V2 Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <AIInsightsPanel insights={advancedMicroFeaturesAIInsights} />
-          <PredictiveAnalytics predictions={advancedMicroFeaturesPredictions} />
-          <CollaborationIndicator collaborators={advancedMicroFeaturesCollaborators} />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <QuickActionsToolbar actions={advancedMicroFeaturesQuickActions} />
-          <ActivityFeed activities={advancedMicroFeaturesActivities} />
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              <AIInsightsPanel insights={advancedMicroFeaturesAIInsights} />
+              <PredictiveAnalytics predictions={advancedMicroFeaturesPredictions} />
+              <CollaborationIndicator collaborators={advancedMicroFeaturesCollaborators} />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <QuickActionsToolbar actions={advancedMicroFeaturesQuickActions} />
+              <ActivityFeed activities={advancedMicroFeaturesActivities} />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 -left-4 w-72 h-72 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
           <div className="absolute bottom-1/4 -right-4 w-72 h-72 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
@@ -929,6 +940,11 @@ export default function AdvancedMicroFeaturesClient() {
                       Production Ready
                     </Badge>
                   </ContextualTooltip>
+
+                  <InsightsToggleButton
+                    isOpen={insightsPanel.isOpen}
+                    onToggle={insightsPanel.toggle}
+                  />
                 </div>
               </div>
             </div>
@@ -1476,6 +1492,21 @@ export default function AdvancedMicroFeaturesClient() {
             </TabsContent>
           </Tabs>
         </AnimatedElement>
+
+        {/* V2 Competitive Upgrade Components */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              <AIInsightsPanel insights={advancedMicroFeaturesAIInsights} />
+              <PredictiveAnalytics predictions={advancedMicroFeaturesPredictions} />
+              <CollaborationIndicator collaborators={advancedMicroFeaturesCollaborators} />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <QuickActionsToolbar actions={advancedMicroFeaturesQuickActions} />
+              <ActivityFeed activities={advancedMicroFeaturesActivities} />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* New Item Dialog */}

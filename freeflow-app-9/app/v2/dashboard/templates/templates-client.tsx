@@ -83,6 +83,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -422,6 +428,8 @@ const mockTemplatesActivities = [
 // Quick actions will be defined inside the component to access state setters
 
 export default function TemplatesClient() {
+  const insightsPanel = useInsightsPanel(false)
+
   const [activeTab, setActiveTab] = useState('gallery')
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<TemplateCategory | 'all'>('all')
@@ -663,6 +671,10 @@ export default function TemplatesClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button variant="outline" className="gap-2">
               <Wand2 className="w-4 h-4" />
               AI Generate
@@ -1951,37 +1963,41 @@ export default function TemplatesClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockTemplatesAIInsights}
-              title="Template Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockTemplatesCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockTemplatesPredictions}
-              title="Template Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockTemplatesAIInsights}
+                  title="Template Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockTemplatesCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockTemplatesPredictions}
+                  title="Template Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockTemplatesActivities}
-            title="Template Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={templatesQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockTemplatesActivities}
+                title="Template Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={templatesQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Template Detail Dialog */}
         <Dialog open={!!selectedTemplate} onOpenChange={() => setSelectedTemplate(null)}>

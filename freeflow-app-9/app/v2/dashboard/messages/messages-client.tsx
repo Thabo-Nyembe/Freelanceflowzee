@@ -41,7 +41,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -250,6 +254,8 @@ const messagesActivities = [
 ]
 
 export default function MessagesClient() {
+  const insightsPanel = useInsightsPanel(false)
+
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [messageInput, setMessageInput] = useState('')
@@ -2143,35 +2149,23 @@ export default function MessagesClient() {
               <Plus className="w-4 h-4 mr-2" />
               New Message
             </Button>
-            <Button
-              variant={showInsights ? 'secondary' : 'outline'}
-              onClick={() => setShowInsights(!showInsights)}
-              className="gap-2"
-            >
-              <Sparkles className={`w-4 h-4 ${showInsights ? 'text-primary' : 'text-muted-foreground'}`} />
-              {showInsights ? 'Hide Insights' : 'Smart Insights'}
-            </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
         {/* AI Insights Panel */}
-        <AnimatePresence>
-          {showInsights && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="overflow-hidden"
-            >
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <AIInsightsPanel insights={messagesAIInsights} />
-                <PredictiveAnalytics predictions={messagesPredictions} />
-                <CollaborationIndicator collaborators={messagesCollaborators} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <AIInsightsPanel insights={messagesAIInsights} />
+              <PredictiveAnalytics predictions={messagesPredictions} />
+              <CollaborationIndicator collaborators={messagesCollaborators} />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -3736,37 +3730,41 @@ export default function MessagesClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={[]}
-              title="Messaging Intelligence"
-              onInsightAction={(insight) => handleAIInsightAction(insight)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={[]}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={[]}
-              title="Communication Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[]}
+                  title="Messaging Intelligence"
+                  onInsightAction={(insight) => handleAIInsightAction(insight)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={[]}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={[]}
+                  title="Communication Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={[]}
-            title="Message Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={[]}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={[]}
+                title="Message Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={[]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Invite Team Members Dialog */}

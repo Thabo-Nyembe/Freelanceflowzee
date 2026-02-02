@@ -44,9 +44,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
-
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 // Salesforce Sales Cloud level types
 type DealStage = 'prospecting' | 'qualification' | 'needs_analysis' | 'value_proposition' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'
@@ -449,6 +451,7 @@ const defaultDealForm = {
 }
 
 export default function SalesClient() {
+  const insightsPanel = useInsightsPanel(false)
 
   // Use the sales hook for real data
   const {
@@ -845,6 +848,10 @@ export default function SalesClient() {
                 <Plus className="w-4 h-4 mr-2" />
                 New Deal
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
 
@@ -2308,38 +2315,40 @@ export default function SalesClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          {/* AI Insights Panel */}
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockSalesAIInsights}
-              title="Sales Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* AI Insights Panel */}
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockSalesAIInsights}
+                  title="Sales Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
 
-          {/* Team Collaboration & Activity */}
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockSalesCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockSalesPredictions}
-              title="Sales Forecasts"
-            />
-          </div>
-        </div>
+              {/* Team Collaboration & Activity */}
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockSalesCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockSalesPredictions}
+                  title="Sales Forecasts"
+                />
+              </div>
+            </div>
 
-        {/* Activity Feed & Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockSalesActivities}
-            title="Sales Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={[
+            {/* Activity Feed & Quick Actions */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockSalesActivities}
+                title="Sales Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={[
               {
                 id: '1',
                 label: 'Log Call',
@@ -2421,7 +2430,9 @@ END:VCALENDAR`
             ]}
             variant="grid"
           />
-        </div>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Opportunity Detail Dialog */}

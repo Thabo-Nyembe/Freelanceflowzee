@@ -35,6 +35,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // ============================================================================
 // TYPE DEFINITIONS - Zapier Level Integration Platform
 // ============================================================================
@@ -591,6 +597,7 @@ const fetchAnalytics = async (): Promise<{ tasks_today: number; success_rate: nu
 // ============================================================================
 
 export default function ConnectorsClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedZap, setSelectedZap] = useState<Zap | null>(null)
@@ -1239,6 +1246,10 @@ export default function ConnectorsClient() {
             <TabsTrigger value="templates" className="rounded-lg">Templates</TabsTrigger>
             <TabsTrigger value="settings" className="rounded-lg">Settings</TabsTrigger>
           </TabsList>
+          <InsightsToggleButton
+            isOpen={insightsPanel.isOpen}
+            onToggle={insightsPanel.toggle}
+          />
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6 mt-6">
@@ -2348,37 +2359,41 @@ export default function ConnectorsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={connectorsAIInsights}
-              title="Integration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={connectorsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={connectorsPredictions}
-              title="Zap Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={connectorsAIInsights}
+                  title="Integration Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={connectorsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={connectorsPredictions}
+                  title="Zap Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={connectorsActivities}
-            title="Integration Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={connectorsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={connectorsActivities}
+                title="Integration Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={connectorsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Zap Detail Dialog */}
         <Dialog open={!!selectedZap} onOpenChange={() => setSelectedZap(null)}>

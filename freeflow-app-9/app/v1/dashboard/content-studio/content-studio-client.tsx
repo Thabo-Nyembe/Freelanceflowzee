@@ -38,6 +38,12 @@ import {
   ActivityFeed,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -252,6 +258,9 @@ export default function ContentStudioClient() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [statusFilter, setStatusFilter] = useState<EntryStatus | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Collapsible insights panel state
+  const insightsPanel = useInsightsPanel(false)
 
   // Database-loaded content data
   const [entries, setEntries] = useState<ContentEntry[]>([])
@@ -916,6 +925,11 @@ export default function ContentStudioClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              />
               <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => setActiveTab('settings')}>
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
@@ -2032,58 +2046,66 @@ export default function ContentStudioClient() {
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={contentAIInsights}
-              title="Content Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={contentCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={contentPredictions}
-              title="Content Forecasts"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={contentActivities}
-            title="Content Activity"
-            maxItems={5}
-          />
-          <Card className="border-0 shadow-sm dark:bg-gray-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="w-5 h-5 text-purple-600" />
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-                <Button variant="outline" className="justify-start" onClick={() => setShowNewEntryDialog(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Entry
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => setShowBulkPublishDialog(true)}>
-                  <Upload className="w-4 h-4 mr-2" />
-                  Bulk Publish
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => setShowExportDialog(true)}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Export All
-                </Button>
+        {/* Enhanced Competitive Upgrade Components - Collapsible */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel
+            title="Content Intelligence & Analytics"
+            defaultOpen={true}
+            className="mt-8"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={contentAIInsights}
+                  title="Content Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+                />
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={contentCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={contentPredictions}
+                  title="Content Forecasts"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={contentActivities}
+                title="Content Activity"
+                maxItems={5}
+              />
+              <Card className="border-0 shadow-sm dark:bg-gray-800">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-purple-600" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                    <Button variant="outline" className="justify-start" onClick={() => setShowNewEntryDialog(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Entry
+                    </Button>
+                    <Button variant="outline" className="justify-start" onClick={() => setShowBulkPublishDialog(true)}>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Bulk Publish
+                    </Button>
+                    <Button variant="outline" className="justify-start" onClick={() => setShowExportDialog(true)}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Export All
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Entry Detail Dialog */}
         <Dialog open={!!selectedEntry} onOpenChange={() => setSelectedEntry(null)}>

@@ -44,6 +44,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -403,6 +409,7 @@ const mockSprintsActivities = [
 
 export default function SprintsClient() {
   const [activeTab, setActiveTab] = useState('sprints')
+  const insightsPanel = useInsightsPanel(false)
   const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null)
   const [selectedTask, setSelectedTask] = useState<SprintTask | null>(null)
   const [viewMode, setViewMode] = useState<'list' | 'board'>('list')
@@ -1150,6 +1157,10 @@ export default function SprintsClient() {
               <RefreshCw className="w-4 h-4 mr-2" />
               Sync
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button onClick={handleCreateSprint} className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Create Sprint
@@ -2610,37 +2621,41 @@ export default function SprintsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockSprintsAIInsights}
-              title="Sprint Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockSprintsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockSprintsPredictions}
-              title="Sprint Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockSprintsAIInsights}
+                  title="Sprint Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockSprintsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockSprintsPredictions}
+                  title="Sprint Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockSprintsActivities}
-            title="Sprint Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={quickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockSprintsActivities}
+                title="Sprint Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={quickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Sprint Detail Dialog */}
         <Dialog open={!!selectedSprint} onOpenChange={() => setSelectedSprint(null)}>

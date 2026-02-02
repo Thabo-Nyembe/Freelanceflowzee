@@ -43,6 +43,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -323,6 +329,8 @@ const mockDocumentsActivities = [
 // Quick actions will be defined inside the component to use state handlers
 
 export default function DocumentsClient({ initialDocuments }: { initialDocuments: Document[] }) {
+  const insightsPanel = useInsightsPanel(false)
+
   const [activeTab, setActiveTab] = useState('dashboard')
   const [statusFilter, setStatusFilter] = useState<DocumentFile['status'] | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<DocumentFile['type'] | 'all'>('all')
@@ -708,6 +716,10 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                     </div>
                   </DialogContent>
                 </Dialog>
+                <InsightsToggleButton
+                  isOpen={insightsPanel.isOpen}
+                  onToggle={insightsPanel.toggle}
+                />
                 <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setShowDocSettingsDialog(true)}>
                   <Settings className="h-5 w-5" />
                 </Button>
@@ -2292,49 +2304,53 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockDocumentsAIInsights}
-              title="Document Intelligence"
-              onInsightAction={(_insight) => {
-                if (insight.type === 'warning') {
-                  setStatusFilter('archived')
-                  setActiveTab('documents')
-                } else if (insight.type === 'info') {
-                  setActiveTab('documents')
-                }
-                toast.success(`${insight.title} - Action completed`)
-              }}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockDocumentsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockDocumentsPredictions}
-              title="Storage Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockDocumentsAIInsights}
+                  title="Document Intelligence"
+                  onInsightAction={(_insight) => {
+                    if (insight.type === 'warning') {
+                      setStatusFilter('archived')
+                      setActiveTab('documents')
+                    } else if (insight.type === 'info') {
+                      setActiveTab('documents')
+                    }
+                    toast.success(`${insight.title} - Action completed`)
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockDocumentsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockDocumentsPredictions}
+                  title="Storage Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockDocumentsActivities}
-            title="Document Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={[
-              { id: '1', label: 'New Document', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
-              { id: '2', label: 'Upload Files', icon: 'upload', action: () => setShowUploadDialog(true), variant: 'default' as const },
-              { id: '3', label: 'Create Folder', icon: 'folder', action: () => setShowCreateFolderDialog(true), variant: 'outline' as const },
-            ]}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockDocumentsActivities}
+                title="Document Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={[
+                  { id: '1', label: 'New Document', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+                  { id: '2', label: 'Upload Files', icon: 'upload', action: () => setShowUploadDialog(true), variant: 'default' as const },
+                  { id: '3', label: 'Create Folder', icon: 'folder', action: () => setShowCreateFolderDialog(true), variant: 'outline' as const },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Document Detail Modal */}
         {selectedDocument && (

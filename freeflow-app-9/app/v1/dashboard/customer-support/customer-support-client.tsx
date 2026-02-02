@@ -66,6 +66,12 @@ const QuickActionsToolbar = dynamic(
   }
 )
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -214,6 +220,7 @@ const initialTicketForm: TicketFormState = {
 
 
 export default function CustomerSupportClient({ initialAgents, initialConversations, initialStats }: CustomerSupportClientProps) {
+  const insightsPanel = useInsightsPanel(false)
   // MIGRATED: Batch #13 - Removed mock data, using database hooks
   const { agents: dbAgents, conversations: dbConversations, stats: dbStats } = useCustomerSupport(
     initialAgents || [],
@@ -829,6 +836,10 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
+          <InsightsToggleButton
+            isOpen={insightsPanel.isOpen}
+            onToggle={insightsPanel.toggle}
+          />
 
           {/* Tickets Tab */}
           <TabsContent value="tickets">
@@ -2414,25 +2425,29 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       </Dialog>
 
       {/* AI-Powered Support Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        <AIInsightsPanel
-          insights={[]}
-          onAskQuestion={handleAIQuestion}
-        />
-        <PredictiveAnalytics predictions={[]} />
-      </div>
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AIInsightsPanel
+              insights={[]}
+              onAskQuestion={handleAIQuestion}
+            />
+            <PredictiveAnalytics predictions={[]} />
+          </div>
 
-      {/* Activity Feed */}
-      <div className="mt-6">
-        <ActivityFeed
-          activities={[]}
-          maxItems={5}
-          showFilters={true}
-        />
-      </div>
+          {/* Activity Feed */}
+          <div className="mt-6">
+            <ActivityFeed
+              activities={[]}
+              maxItems={5}
+              showFilters={true}
+            />
+          </div>
 
-      {/* Quick Actions Toolbar */}
-      <QuickActionsToolbar actions={supportQuickActions} />
+          {/* Quick Actions Toolbar */}
+          <QuickActionsToolbar actions={supportQuickActions} />
+        </CollapsibleInsightsPanel>
+      )}
 
       {/* Create Ticket Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>

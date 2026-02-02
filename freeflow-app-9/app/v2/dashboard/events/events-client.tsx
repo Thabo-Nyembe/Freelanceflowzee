@@ -80,6 +80,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -580,6 +586,8 @@ const mockRegistrations: Registration[] = [
 ]
 
 export default function EventsClient() {
+  const insightsPanel = useInsightsPanel(false)
+
   // Define adapter variables locally (removed mock data imports)
   const eventsAIInsights: any[] = []
   const eventsCollaborators: any[] = []
@@ -1291,6 +1299,10 @@ export default function EventsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button variant="outline" size="sm" onClick={handleExportAttendees}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
@@ -2635,37 +2647,41 @@ export default function EventsClient() {
           </Tabs>
 
           {/* Enhanced Competitive Upgrade Components */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-            <div className="lg:col-span-2">
-              <AIInsightsPanel
-                insights={eventsAIInsights}
-                title="Event Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title)}
-              />
-            </div>
-            <div className="space-y-6">
-              <CollaborationIndicator
-                collaborators={eventsCollaborators}
-                maxVisible={4}
-              />
-              <PredictiveAnalytics
-                predictions={eventsPredictions}
-                title="Event Forecasts"
-              />
-            </div>
-          </div>
+          {insightsPanel.isOpen && (
+            <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <AIInsightsPanel
+                    insights={eventsAIInsights}
+                    title="Event Intelligence"
+                    onInsightAction={(insight) => toast.info(insight.title)}
+                  />
+                </div>
+                <div className="space-y-6">
+                  <CollaborationIndicator
+                    collaborators={eventsCollaborators}
+                    maxVisible={4}
+                  />
+                  <PredictiveAnalytics
+                    predictions={eventsPredictions}
+                    title="Event Forecasts"
+                  />
+                </div>
+              </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <ActivityFeed
-              activities={eventsActivities}
-              title="Event Activity"
-              maxItems={5}
-            />
-            <QuickActionsToolbar
-              actions={eventsQuickActions}
-              variant="grid"
-            />
-          </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <ActivityFeed
+                  activities={eventsActivities}
+                  title="Event Activity"
+                  maxItems={5}
+                />
+                <QuickActionsToolbar
+                  actions={eventsQuickActions}
+                  variant="grid"
+                />
+              </div>
+            </CollapsibleInsightsPanel>
+          )}
         </div>
       </div>
 

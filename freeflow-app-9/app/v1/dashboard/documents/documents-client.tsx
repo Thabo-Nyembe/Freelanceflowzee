@@ -47,6 +47,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -283,6 +289,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
 
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [statusFilter, setStatusFilter] = useState<DocumentFile['status'] | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<DocumentFile['type'] | 'all'>('all')
@@ -1600,6 +1607,10 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   <List className="h-4 w-4" />
                 </button>
               </div>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
 
@@ -3019,68 +3030,72 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={documentsAIInsights}
-              title="Document Intelligence"
-              onInsightAction={(insight) => {
-                // Store insight action in localStorage and navigate based on insight type
-                const insightActions = JSON.parse(localStorage.getItem('document_insights_actions') || '[]')
-                insightActions.push({ insightId: insight.id || Date.now(), action: 'viewed', timestamp: new Date().toISOString() })
-                localStorage.setItem('document_insights_actions', JSON.stringify(insightActions))
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={documentsAIInsights}
+                  title="Document Intelligence"
+                  onInsightAction={(insight) => {
+                    // Store insight action in localStorage and navigate based on insight type
+                    const insightActions = JSON.parse(localStorage.getItem('document_insights_actions') || '[]')
+                    insightActions.push({ insightId: insight.id || Date.now(), action: 'viewed', timestamp: new Date().toISOString() })
+                    localStorage.setItem('document_insights_actions', JSON.stringify(insightActions))
 
-                // Navigate based on insight category
-                if (insight.category === 'storage' || insight.title?.toLowerCase().includes('storage')) {
-                  setActiveTab('settings')
-                  setSettingsTab('storage')
-                } else if (insight.category === 'sharing' || insight.title?.toLowerCase().includes('share')) {
-                  setActiveTab('shared')
-                } else if (insight.category === 'organization' || insight.title?.toLowerCase().includes('folder')) {
-                  setActiveTab('folders')
-                } else {
-                  setActiveTab('documents')
-                }
-                toast.success(insight.title || 'AI Insight Applied', { description: insight.description || 'Navigating to relevant section' })
-              }}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={teamMembers.map(member => ({
-                id: member.id,
-                name: member.name,
-                avatar: member.avatar_url || undefined,
-                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
-              }))}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={documentsPredictions}
-              title="Storage Forecasts"
-            />
-          </div>
-        </div>
+                    // Navigate based on insight category
+                    if (insight.category === 'storage' || insight.title?.toLowerCase().includes('storage')) {
+                      setActiveTab('settings')
+                      setSettingsTab('storage')
+                    } else if (insight.category === 'sharing' || insight.title?.toLowerCase().includes('share')) {
+                      setActiveTab('shared')
+                    } else if (insight.category === 'organization' || insight.title?.toLowerCase().includes('folder')) {
+                      setActiveTab('folders')
+                    } else {
+                      setActiveTab('documents')
+                    }
+                    toast.success(insight.title || 'AI Insight Applied', { description: insight.description || 'Navigating to relevant section' })
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={teamMembers.map(member => ({
+                    id: member.id,
+                    name: member.name,
+                    avatar: member.avatar_url || undefined,
+                    status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+                  }))}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={documentsPredictions}
+                  title="Storage Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activityLogs.slice(0, 10).map(log => ({
-              id: log.id,
-              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
-              title: log.action,
-              description: log.resource_name || undefined,
-              user: { name: log.user_name || 'System', avatar: undefined },
-              timestamp: log.created_at,
-              isUnread: log.status === 'pending'
-            }))}
-            title="Document Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={documentsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={activityLogs.slice(0, 10).map(log => ({
+                  id: log.id,
+                  type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+                  title: log.action,
+                  description: log.resource_name || undefined,
+                  user: { name: log.user_name || 'System', avatar: undefined },
+                  timestamp: log.created_at,
+                  isUnread: log.status === 'pending'
+                }))}
+                title="Document Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={documentsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Document Detail Modal */}
         {selectedDocument && (

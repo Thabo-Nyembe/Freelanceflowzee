@@ -23,6 +23,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -181,6 +187,8 @@ interface PricingPlan {
 // Competitive upgrade components data defined locally after stats calculation
 
 export default function BillingClient({ initialBilling }: { initialBilling: BillingTransaction[] }) {
+  const insightsPanel = useInsightsPanel(false)
+
   const [activeTab, setActiveTab] = useState('dashboard')
   const [showInsights, setShowInsights] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -654,6 +662,10 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                 <Shield className="h-4 w-4" />
                 <span className="text-sm">PCI Compliant</span>
               </div>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button onClick={() => setShowNewSubscriptionModal(true)} className="bg-white text-indigo-600 hover:bg-indigo-50">
                 <Plus className="h-4 w-4 mr-2" />
                 New Subscription
@@ -2141,37 +2153,41 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockBillingAIInsights}
-              title="Billing Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockBillingCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockBillingPredictions}
-              title="Revenue Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockBillingAIInsights}
+                  title="Billing Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockBillingCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockBillingPredictions}
+                  title="Revenue Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockBillingActivities}
-            title="Billing Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={billingQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockBillingActivities}
+                title="Billing Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={billingQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* New Subscription Modal */}

@@ -38,6 +38,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -387,6 +393,9 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   const [activeTab, setActiveTab] = useState('contacts')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
+
+  // Collapsible insights panel state
+  const insightsPanel = useInsightsPanel(false)
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null)
   const [showAddContact, setShowAddContact] = useState(false)
@@ -1300,6 +1309,10 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button variant="outline" onClick={handleRefresh} disabled={isLoading} aria-label="Refresh">
                   <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />Refresh
             </Button>
@@ -2793,56 +2806,64 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={[]}
-              title="Customer Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={teamMembers.map(member => ({
-                id: member.id,
-                name: member.name,
-                avatar: member.avatar_url || undefined,
-                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
-              }))}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={[]}
-              title="Customer Metrics Forecast"
-            />
-          </div>
-        </div>
+        {/* Enhanced Competitive Upgrade Components - Collapsible */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel
+            title="Customer Intelligence & Analytics"
+            defaultOpen={true}
+            className="mt-8"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[]}
+                  title="Customer Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={teamMembers.map(member => ({
+                    id: member.id,
+                    name: member.name,
+                    avatar: member.avatar_url || undefined,
+                    status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+                  }))}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={[]}
+                  title="Customer Metrics Forecast"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activityLogs.slice(0, 10).map(log => ({
-              id: log.id,
-              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
-              title: log.action,
-              description: log.resource_name || undefined,
-              user: { name: log.user_name || 'System', avatar: undefined },
-              timestamp: log.created_at,
-              isUnread: log.status === 'pending'
-            }))}
-            title="Customer Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={[
-              { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => setShowAddContact(true) },
-              { id: '2', label: 'Log Activity', icon: 'Activity', shortcut: 'L', action: () => handleLogActivity() },
-              { id: '3', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => { setShowEmailDialog(true); setEmailRecipient(selectedContact) } },
-              { id: '4', label: 'Schedule Call', icon: 'Phone', shortcut: 'C', action: () => handleScheduleMeeting(selectedContact?.firstName ? `${selectedContact.firstName} ${selectedContact.lastName}` : undefined) },
-            ]}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={activityLogs.slice(0, 10).map(log => ({
+                  id: log.id,
+                  type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+                  title: log.action,
+                  description: log.resource_name || undefined,
+                  user: { name: log.user_name || 'System', avatar: undefined },
+                  timestamp: log.created_at,
+                  isUnread: log.status === 'pending'
+                }))}
+                title="Customer Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={[
+                  { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => setShowAddContact(true) },
+                  { id: '2', label: 'Log Activity', icon: 'Activity', shortcut: 'L', action: () => handleLogActivity() },
+                  { id: '3', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => { setShowEmailDialog(true); setEmailRecipient(selectedContact) } },
+                  { id: '4', label: 'Schedule Call', icon: 'Phone', shortcut: 'C', action: () => handleScheduleMeeting(selectedContact?.firstName ? `${selectedContact.firstName} ${selectedContact.lastName}` : undefined) },
+                ]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Contact Detail Dialog */}
         <Dialog open={!!selectedContact} onOpenChange={() => setSelectedContact(null)}>

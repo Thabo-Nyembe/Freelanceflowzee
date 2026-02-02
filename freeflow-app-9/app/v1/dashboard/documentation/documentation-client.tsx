@@ -50,6 +50,12 @@ import {
   type QuickAction,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Type definitions
 interface DocSpace {
   id: string
@@ -205,6 +211,7 @@ const getDocsQuickActions = (
 ]
 
 export default function DocumentationClient() {
+  const insightsPanel = useInsightsPanel(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSpace, setSelectedSpace] = useState<DocSpace | null>(null)
@@ -1457,6 +1464,10 @@ export default function DocumentationClient() {
                     <Plus className="h-4 w-4 mr-2" />
                     New Page
                   </Button>
+                  <InsightsToggleButton
+                    isOpen={insightsPanel.isOpen}
+                    onToggle={insightsPanel.toggle}
+                  />
                 </div>
               </div>
             </div>
@@ -2797,37 +2808,41 @@ export default function DocumentationClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={[] as AIInsight[]}
-              title="Documentation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={[] as Collaborator[]}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={[] as Prediction[]}
-              title="Documentation Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[] as AIInsight[]}
+                  title="Documentation Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={[] as Collaborator[]}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={[] as Prediction[]}
+                  title="Documentation Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={[] as ActivityItem[]}
-            title="Documentation Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={[] as QuickAction[]}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={[] as ActivityItem[]}
+                title="Documentation Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={[] as QuickAction[]}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Version History Dialog - Shows document versions from Supabase */}
         <Dialog open={showVersions} onOpenChange={setShowVersions}>

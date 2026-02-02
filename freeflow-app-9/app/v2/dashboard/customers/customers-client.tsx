@@ -39,8 +39,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 import { useCustomers, useCustomerMutations, type Customer, type CustomerSegment, type CustomerStatus } from '@/lib/hooks/use-customers'
 import { useTasks } from '@/lib/hooks/use-tasks'
@@ -399,6 +402,8 @@ const mockCustomersActivities = [
 // ============================================================================
 
 export default function CustomersClient({ initialCustomers }: { initialCustomers: Customer[] }) {
+  const insightsPanel = useInsightsPanel(false)
+
   const [activeTab, setActiveTab] = useState('contacts')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
@@ -970,6 +975,10 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => setShowAddContact(true)}>
               <UserPlus className="h-4 w-4 mr-2" />Add Contact
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -2325,37 +2334,41 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockCustomersAIInsights}
-              title="Customer Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockCustomersCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockCustomersPredictions}
-              title="Customer Metrics Forecast"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockCustomersAIInsights}
+                  title="Customer Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockCustomersCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockCustomersPredictions}
+                  title="Customer Metrics Forecast"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockCustomersActivities}
-            title="Customer Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={quickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockCustomersActivities}
+                title="Customer Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={quickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Contact Detail Dialog */}
         <Dialog open={!!selectedContact} onOpenChange={() => setSelectedContact(null)}>

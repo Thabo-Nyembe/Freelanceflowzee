@@ -65,6 +65,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // MIGRATED: Batch #12 - Removed mock data adapters
 
 import { useChat, type ChatMessage, type RoomType } from '@/lib/hooks/use-chat'
@@ -249,6 +255,9 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   const [inboxFilter, setInboxFilter] = useState<'all' | 'open' | 'mine' | 'unassigned'>('all')
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Collapsible insights panel state
+  const insightsPanel = useInsightsPanel(false)
   const [newMessage, setNewMessage] = useState('')
   const [showCustomerPanel, setShowCustomerPanel] = useState(true)
   const [showSavedReplies, setShowSavedReplies] = useState(false)
@@ -2072,9 +2081,15 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                   </Badge>
                 </div>
               </div>
-              <Button size="sm" variant="ghost" onClick={() => setShowSettingsPanel(true)}>
-                <Settings className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <InsightsToggleButton
+                  isOpen={insightsPanel.isOpen}
+                  onToggle={insightsPanel.toggle}
+                />
+                <Button size="sm" variant="ghost" onClick={() => setShowSettingsPanel(true)}>
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
             {/* Search */}
@@ -2491,51 +2506,59 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       </div>
       )}
 
-      {/* Enhanced Competitive Upgrade Components */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 px-6">
-        <div className="lg:col-span-2">
-          <AIInsightsPanel
-            insights={[]}
-            title="Chat Intelligence"
-            onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-          />
-        </div>
-        <div className="space-y-6">
-          <CollaborationIndicator
-            collaborators={teamMembers.map(member => ({
-              id: member.id,
-              name: member.name,
-              avatar: member.avatar_url || undefined,
-              status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
-            }))}
-            maxVisible={4}
-          />
-          <PredictiveAnalytics
-            predictions={[]}
-            title="Chat Forecasts"
-          />
-        </div>
-      </div>
+      {/* Enhanced Competitive Upgrade Components - Collapsible */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel
+          title="Chat Intelligence & Analytics"
+          defaultOpen={true}
+          className="mt-8 mx-6"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={[]}
+                title="Chat Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={teamMembers.map(member => ({
+                  id: member.id,
+                  name: member.avatar_url || undefined,
+                  avatar: member.avatar_url || undefined,
+                  status: member.status === 'online' ? 'online' as const : member.status === 'away' ? 'away' as const : 'offline' as const
+                }))}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={[]}
+                title="Chat Forecasts"
+              />
+            </div>
+          </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 px-6 pb-6">
-        <ActivityFeed
-          activities={activityLogs.slice(0, 10).map(log => ({
-            id: log.id,
-            type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
-            title: log.action,
-            description: log.resource_name || undefined,
-            user: { name: log.user_name || 'System', avatar: undefined },
-            timestamp: log.created_at,
-            isUnread: log.status === 'pending'
-          }))}
-          title="Chat Activity"
-          maxItems={5}
-        />
-        <QuickActionsToolbar
-          actions={[]}
-          variant="grid"
-        />
-      </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={activityLogs.slice(0, 10).map(log => ({
+                id: log.id,
+                type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+                title: log.action,
+                description: log.resource_name || undefined,
+                user: { name: log.user_name || 'System', avatar: undefined },
+                timestamp: log.created_at,
+                isUnread: log.status === 'pending'
+              }))}
+              title="Chat Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={[]}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
 
       {/* Saved Replies Dialog */}
       <Dialog open={showSavedReplies} onOpenChange={setShowSavedReplies}>

@@ -78,6 +78,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -333,6 +339,7 @@ const initialFormState: AllocationForm = {
 }
 
 export default function AllocationClient() {
+  const insightsPanel = useInsightsPanel(false)
 
   // Supabase hooks
   const { allocations: dbAllocations, stats: dbStats, isLoading, refetch } = useAllocations()
@@ -792,6 +799,10 @@ export default function AllocationClient() {
               Settings
             </TabsTrigger>
           </TabsList>
+          <InsightsToggleButton
+            isOpen={insightsPanel.isOpen}
+            onToggle={insightsPanel.toggle}
+          />
 
           {/* Allocations Tab */}
           <TabsContent value="allocations" className="mt-6">
@@ -1753,37 +1764,41 @@ export default function AllocationClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={allocationAIInsights}
-              title="Allocation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={allocationCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={allocationPredictions}
-              title="Capacity Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={allocationAIInsights}
+                  title="Allocation Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={allocationCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={allocationPredictions}
+                  title="Capacity Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={allocationActivities}
-            title="Allocation Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={allocationQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={allocationActivities}
+                title="Allocation Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={allocationQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Allocation Detail Dialog */}
         <Dialog open={!!selectedAllocation} onOpenChange={() => setSelectedAllocation(null)}>

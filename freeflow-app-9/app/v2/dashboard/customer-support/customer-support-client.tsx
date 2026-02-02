@@ -36,6 +36,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -271,6 +277,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
 
   const [activeTab, setActiveTab] = useState('tickets')
+  const insightsPanel = useInsightsPanel(false)
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
   const [showTicketDialog, setShowTicketDialog] = useState(false)
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'all'>('all')
@@ -699,6 +706,10 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 <Bot className="h-4 w-4 mr-2" />
                 Export
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button className="bg-white text-emerald-600 hover:bg-emerald-50" onClick={() => setShowCreateDialog(true)}>
                 <MessageSquare className="h-4 w-4 mr-2" />
                 New Ticket
@@ -2311,25 +2322,29 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       </Dialog>
 
       {/* AI-Powered Support Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        <AIInsightsPanel
-          insights={mockSupportAIInsights}
-          onAskQuestion={(q) => toast.info("Question Submitted: " + q)}
-        />
-        <PredictiveAnalytics predictions={mockSupportPredictions} />
-      </div>
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AIInsightsPanel
+              insights={mockSupportAIInsights}
+              onAskQuestion={(q) => toast.info("Question Submitted: " + q)}
+            />
+            <PredictiveAnalytics predictions={mockSupportPredictions} />
+          </div>
 
-      {/* Activity Feed */}
-      <div className="mt-6">
-        <ActivityFeed
-          activities={mockSupportActivities}
-          maxItems={5}
-          showFilters={true}
-        />
-      </div>
+          {/* Activity Feed */}
+          <div className="mt-6">
+            <ActivityFeed
+              activities={mockSupportActivities}
+              maxItems={5}
+              showFilters={true}
+            />
+          </div>
 
-      {/* Quick Actions Toolbar */}
-      <QuickActionsToolbar actions={supportQuickActions} />
+          {/* Quick Actions Toolbar */}
+          <QuickActionsToolbar actions={supportQuickActions} />
+        </CollapsibleInsightsPanel>
+      )}
 
       {/* Create Ticket Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>

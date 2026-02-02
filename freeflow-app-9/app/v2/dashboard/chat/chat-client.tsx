@@ -63,6 +63,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 import { useChat, type ChatMessage, type RoomType } from '@/lib/hooks/use-chat'
 
@@ -249,6 +255,8 @@ interface ChatClientProps {
 }
 
 export default function ChatClient({ initialChatMessages }: ChatClientProps) {
+  const insightsPanel = useInsightsPanel(false)
+
   // Define adapter variables locally (removed mock data imports)
   const chatAIInsights: any[] = []
   const chatCollaborators: any[] = []
@@ -1505,6 +1513,10 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                   </Badge>
                 </div>
               </div>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button size="sm" variant="ghost" onClick={() => setShowSettingsPanel(true)}>
                 <Settings className="h-4 w-4" />
               </Button>
@@ -1907,37 +1919,41 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       )}
 
       {/* Enhanced Competitive Upgrade Components */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 px-6">
-        <div className="lg:col-span-2">
-          <AIInsightsPanel
-            insights={chatAIInsights}
-            title="Chat Intelligence"
-            onInsightAction={(insight) => toast.info(insight.title)}
-          />
-        </div>
-        <div className="space-y-6">
-          <CollaborationIndicator
-            collaborators={chatCollaborators}
-            maxVisible={4}
-          />
-          <PredictiveAnalytics
-            predictions={chatPredictions}
-            title="Chat Forecasts"
-          />
-        </div>
-      </div>
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8 mx-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={chatAIInsights}
+                title="Chat Intelligence"
+                onInsightAction={(insight) => toast.info(insight.title)}
+              />
+            </div>
+            <div className="space-y-6">
+              <CollaborationIndicator
+                collaborators={chatCollaborators}
+                maxVisible={4}
+              />
+              <PredictiveAnalytics
+                predictions={chatPredictions}
+                title="Chat Forecasts"
+              />
+            </div>
+          </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 px-6 pb-6">
-        <ActivityFeed
-          activities={chatActivities}
-          title="Chat Activity"
-          maxItems={5}
-        />
-        <QuickActionsToolbar
-          actions={chatQuickActions}
-          variant="grid"
-        />
-      </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <ActivityFeed
+              activities={chatActivities}
+              title="Chat Activity"
+              maxItems={5}
+            />
+            <QuickActionsToolbar
+              actions={chatQuickActions}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
 
       {/* Saved Replies Dialog */}
       <Dialog open={showSavedReplies} onOpenChange={setShowSavedReplies}>

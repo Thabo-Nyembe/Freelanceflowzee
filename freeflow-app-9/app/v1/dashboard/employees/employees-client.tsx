@@ -48,6 +48,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 // Types
 type EmployeeStatus = 'active' | 'on_leave' | 'terminated' | 'onboarding'
@@ -217,6 +223,7 @@ interface HRIntegration {
 
 // Mock Data
 export default function EmployeesClient() {
+  const insightsPanel = useInsightsPanel(false)
   // Define adapter variables locally (removed mock data imports)
   const employeesAIInsights: any[] = []
   const employeesCollaborators: any[] = []
@@ -628,6 +635,10 @@ export default function EmployeesClient() {
             <TabsTrigger value="learning" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"><BookOpen className="h-4 w-4 mr-2" />Learning</TabsTrigger>
             <TabsTrigger value="settings" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"><Settings className="h-4 w-4 mr-2" />Settings</TabsTrigger>
           </TabsList>
+          <InsightsToggleButton
+            isOpen={insightsPanel.isOpen}
+            onToggle={insightsPanel.toggle}
+          />
 
           {/* Directory Tab */}
           <TabsContent value="directory" className="mt-6 space-y-6">
@@ -2306,37 +2317,41 @@ export default function EmployeesClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={employeesAIInsights}
-              title="HR Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={employeesCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={employeesPredictions}
-              title="Workforce Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={employeesAIInsights}
+                  title="HR Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={employeesCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={employeesPredictions}
+                  title="Workforce Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={employeesActivities}
-            title="HR Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={employeesQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={employeesActivities}
+                title="HR Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={employeesQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Profile Dialog */}
         <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>

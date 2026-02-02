@@ -50,6 +50,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // ============== MAILCHIMP-LEVEL INTERFACES ==============
 
 type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'running' | 'paused' | 'completed' | 'archived'
@@ -328,6 +334,9 @@ export default function CampaignsClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<CampaignType | 'all'>('all')
+
+  // Collapsible insights panel state
+  const insightsPanel = useInsightsPanel(false)
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [showCampaignDialog, setShowCampaignDialog] = useState(false)
   const [showNewCampaignDialog, setShowNewCampaignDialog] = useState(false)
@@ -652,6 +661,10 @@ export default function CampaignsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                 <Sparkles className="w-4 h-4 mr-2" />
                 AI Content
@@ -2507,26 +2520,32 @@ export default function CampaignsClient() {
         </DialogContent>
       </Dialog>
 
-      {/* AI-Powered Campaign Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        <AIInsightsPanel
-          insights={[]}
-          onAskQuestion={(q) => toast.info('Question submitted', { description: q.substring(0, 50) + '...' })}
-        />
-        <PredictiveAnalytics predictions={[]} />
-      </div>
+      {/* AI-Powered Campaign Insights - Collapsible */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel
+          title="Campaign Intelligence & Analytics"
+          defaultOpen={true}
+          className="mt-8"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AIInsightsPanel
+              insights={[]}
+              onAskQuestion={(q) => toast.info('Question submitted', { description: q.substring(0, 50) + '...' })}
+            />
+            <PredictiveAnalytics predictions={[]} />
+          </div>
 
-      {/* Activity Feed */}
-      <div className="mt-6">
-        <ActivityFeed
-          activities={[]}
-          maxItems={5}
-          showFilters={true}
-        />
-      </div>
+          <div className="mt-6">
+            <ActivityFeed
+              activities={[]}
+              maxItems={5}
+              showFilters={true}
+            />
+          </div>
 
-      {/* Quick Actions Toolbar */}
-      <QuickActionsToolbar actions={campaignQuickActions} />
+          <QuickActionsToolbar actions={campaignQuickActions} />
+        </CollapsibleInsightsPanel>
+      )}
 
       {/* Send Test Email Dialog */}
       <Dialog open={showSendTestDialog} onOpenChange={(open) => {

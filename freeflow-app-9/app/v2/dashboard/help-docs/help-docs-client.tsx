@@ -43,6 +43,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Database Types
 interface DbHelpArticle {
   id: string
@@ -429,6 +435,9 @@ export default function HelpDocsClient() {
   const [userId, setUserId] = useState<string | null>(null)
   const { data: dbArticles = [], isLoading, refresh: refreshArticles } = useHelpArticles()
   const { data: dbCategories = [], refresh: refreshCategories } = useHelpCategories()
+
+  // Insights Panel Hook
+  const insightsPanel = useInsightsPanel(false)
 
   // UI State
   const [activeTab, setActiveTab] = useState('home')
@@ -1032,6 +1041,10 @@ export default function HelpDocsClient() {
               <p className="text-sky-100 text-lg">Search our knowledge base or browse categories below</p>
             </div>
             <div className="flex gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => setShowChatbot(true)}>
                 <Bot className="w-4 h-4 mr-2" />
                 AI Assistant
@@ -2487,37 +2500,41 @@ export default function HelpDocsClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockHelpDocsAIInsights}
-              title="Help Center Intelligence"
-              onInsightAction={handleInsightAction}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockHelpDocsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockHelpDocsPredictions}
-              title="Documentation Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockHelpDocsAIInsights}
+                  title="Help Center Intelligence"
+                  onInsightAction={handleInsightAction}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockHelpDocsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockHelpDocsPredictions}
+                  title="Documentation Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockHelpDocsActivities}
-            title="Help Center Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={helpDocsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockHelpDocsActivities}
+                title="Help Center Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={helpDocsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Article Dialog */}

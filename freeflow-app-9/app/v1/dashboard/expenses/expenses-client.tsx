@@ -43,6 +43,12 @@ import {
 //   QuickActionsToolbar,
 // } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -265,6 +271,9 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const [statusFilter, setStatusFilter] = useState<ExpenseStatus | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Collapsible insights panel state
+  const insightsPanel = useInsightsPanel(false)
   const [selectedReport, setSelectedReport] = useState<ExpenseReport | null>(null)
   const [showReportDialog, setShowReportDialog] = useState(false)
   const [showNewExpenseDialog, setShowNewExpenseDialog] = useState(false)
@@ -1554,6 +1563,10 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
               <p className="text-purple-100 mt-1">Track, submit, and manage expense reports</p>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
               <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={handleExportExpenses}>
                 <Download className="h-4 w-4 mr-2" />
                 Export
@@ -3065,39 +3078,50 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Competitive Upgrade Components - TEMPORARILY DISABLED DUE TO RADIX UI INFINITE LOOP */}
-        {/* NOTE: Radix UI ref issue in competitive-upgrades - tracked separately, not blocking */}
-        {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockExpensesAIInsights}
-              title="Expense Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockExpensesCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockExpensesPredictions}
-              title="Spend Forecasts"
-            />
-          </div>
-        </div>
+        {/* Enhanced Competitive Upgrade Components - Collapsible */}
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel
+            title="Expense Intelligence & Analytics"
+            defaultOpen={true}
+            className="mt-8"
+          >
+            {/* NOTE: Radix UI ref issue in competitive-upgrades - components temporarily disabled */}
+            {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockExpensesAIInsights}
+                  title="Expense Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockExpensesCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockExpensesPredictions}
+                  title="Spend Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockExpensesActivities}
-            title="Expense Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={mockExpensesQuickActions}
-            variant="grid"
-          />
-        </div> */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockExpensesActivities}
+                title="Expense Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={mockExpensesQuickActions}
+                variant="grid"
+              />
+            </div> */}
+            <div className="text-center text-gray-500 py-8">
+              AI Insights components temporarily disabled for maintenance
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Report Detail Dialog */}

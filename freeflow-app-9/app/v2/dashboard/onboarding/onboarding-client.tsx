@@ -80,6 +80,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 // Types
 type FlowStatus = 'active' | 'paused' | 'draft' | 'archived'
@@ -254,6 +259,8 @@ export default function OnboardingClient() {
   const onboardingPredictions: any[] = []
   const onboardingActivities: any[] = []
   const onboardingQuickActions: any[] = []
+
+  const insightsPanel = useInsightsPanel(false)
 
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -763,6 +770,10 @@ export default function OnboardingClient() {
               <Plus className="w-4 h-4" />
               Create Flow
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -2044,37 +2055,41 @@ export default function OnboardingClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={onboardingAIInsights}
-              title="Onboarding Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={onboardingCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={onboardingPredictions}
-              title="User Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={onboardingAIInsights}
+                  title="Onboarding Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={onboardingCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={onboardingPredictions}
+                  title="User Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={onboardingActivities}
-            title="Onboarding Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={onboardingQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={onboardingActivities}
+                title="Onboarding Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={onboardingQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Flow Detail Dialog */}
         <Dialog open={!!selectedFlow} onOpenChange={() => setSelectedFlow(null)}>

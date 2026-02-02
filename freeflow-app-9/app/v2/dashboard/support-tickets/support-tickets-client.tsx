@@ -38,6 +38,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -165,6 +171,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
 
 
   const [showInsights, setShowInsights] = useState(false)
+  const insightsPanel = useInsightsPanel(false)
 
   const [activeTab, setActiveTab] = useState('inbox')
   const [activeView, setActiveView] = useState<'unassigned' | 'mine' | 'pending' | 'solved' | 'all'>('all')
@@ -336,16 +343,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
             <p className="text-muted-foreground">Zendesk-style ticket management and customer support</p>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowInsights(!showInsights)}
-              className={`px-4 py-2 rounded-lg border flex items-center gap-2 transition-colors ${showInsights
-                ? 'bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-800'
-                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-            >
-              <Sparkles className="w-4 h-4" />
-              Smart Insights
-            </button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <button
               onClick={() => setActiveTab('settings')}
               className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -365,22 +366,14 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
 
 
         {/* Collapsible Smart Insights Panel */}
-        <AnimatePresence>
-          {showInsights && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <AIInsightsPanel
-                insights={mockSupportTicketsAIInsights}
-                className="mb-6"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <AIInsightsPanel
+              insights={mockSupportTicketsAIInsights}
+              className="mb-6"
+            />
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
@@ -1947,37 +1940,41 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockSupportTicketsAIInsights}
-              title="Support Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockSupportTicketsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockSupportTicketsPredictions}
-              title="Ticket Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Extended Insights" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockSupportTicketsAIInsights}
+                  title="Support Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockSupportTicketsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockSupportTicketsPredictions}
+                  title="Ticket Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockSupportTicketsActivities}
-            title="Support Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={quickActionsWithDialogs}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockSupportTicketsActivities}
+                title="Support Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={quickActionsWithDialogs}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Create Ticket Modal */}
         <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>

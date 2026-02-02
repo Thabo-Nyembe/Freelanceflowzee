@@ -68,6 +68,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // ============================================================================
 // TYPES & INTERFACES - HubSpot Level Marketing Platform
 // ============================================================================
@@ -869,6 +875,8 @@ const getScoreColor = (score: number) => {
 // ============================================================================
 
 export default function MarketingClient() {
+  const insightsPanel = useInsightsPanel(false)
+
   const [activeTab, setActiveTab] = useState('campaigns')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
@@ -1274,6 +1282,10 @@ export default function MarketingClient() {
                 className="pl-10 w-64"
               />
             </div>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white" onClick={() => setShowNewCampaignDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               New Campaign
@@ -2153,39 +2165,43 @@ export default function MarketingClient() {
             {/* COMPETITIVE UPGRADES - AI-POWERED ANALYTICS (Beats HubSpot/Salesforce) */}
             {/* ============================================================== */}
 
-            {/* AI Insights & Predictive Analytics Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-              {/* AI Insights Panel - Like ThoughtSpot/Salesforce Einstein */}
-              <AIInsightsPanel
-                insights={mockAIInsights}
-                className="h-full"
-              />
+            {insightsPanel.isOpen && (
+              <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-6">
+                {/* AI Insights & Predictive Analytics Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* AI Insights Panel - Like ThoughtSpot/Salesforce Einstein */}
+                  <AIInsightsPanel
+                    insights={mockAIInsights}
+                    className="h-full"
+                  />
 
-              {/* Predictive Analytics - Like Salesforce Einstein */}
-              <PredictiveAnalytics
-                predictions={mockPredictions}
-                className="h-full"
-              />
-            </div>
+                  {/* Predictive Analytics - Like Salesforce Einstein */}
+                  <PredictiveAnalytics
+                    predictions={mockPredictions}
+                    className="h-full"
+                  />
+                </div>
 
-            {/* Data Storytelling - Like Tableau/Google Analytics Intelligence */}
-            <DataStory
-              title="Marketing Performance Story"
-              subtitle="AI-generated insights from your marketing data"
-              segments={mockStorySegments}
-              className="mt-6"
-            />
+                {/* Data Storytelling - Like Tableau/Google Analytics Intelligence */}
+                <DataStory
+                  title="Marketing Performance Story"
+                  subtitle="AI-generated insights from your marketing data"
+                  segments={mockStorySegments}
+                  className="mt-6"
+                />
 
-            {/* Activity Feed - Like Slack + Notion Combined */}
-            <div className="mt-6">
-              <ActivityFeed
-                activities={mockActivities}
-                onMarkRead={(id) => toast.success('Marked as read')}
-                onMarkAllRead={() => toast.success('All marked as read')}
-                onPin={(id) => toast.success('Activity pinned')}
-                onArchive={(id) => toast.success('Activity archived')}
-              />
-            </div>
+                {/* Activity Feed - Like Slack + Notion Combined */}
+                <div className="mt-6">
+                  <ActivityFeed
+                    activities={mockActivities}
+                    onMarkRead={(id) => toast.success('Marked as read')}
+                    onMarkAllRead={() => toast.success('All marked as read')}
+                    onPin={(id) => toast.success('Activity pinned')}
+                    onArchive={(id) => toast.success('Activity archived')}
+                  />
+                </div>
+              </CollapsibleInsightsPanel>
+            )}
           </TabsContent>
         </Tabs>
 

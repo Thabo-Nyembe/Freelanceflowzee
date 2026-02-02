@@ -73,6 +73,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 import { useTeam } from '@/lib/hooks/use-team'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -222,6 +228,7 @@ const emptyActivities: Array<{
 // Quick actions are now defined inside the component to access state setters
 
 export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
+  const insightsPanel = useInsightsPanel(false)
   // Use the activity logs hook for real data
   const { logs: activityLogs, isLoading, error, refetch } = useActivityLogs(initialLogs)
 
@@ -1448,6 +1455,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 <Download className="w-4 h-4" />
                 Export
               </button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
 
@@ -2663,70 +2674,74 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={emptyAIInsights}
-              title="Logs Intelligence"
-              onInsightAction={async (insight) => {
-                // Handle AI insight action
-                if (insight.type === 'suggestion' && insight.actionLabel) {
-                  // For suggestions, apply the recommended filter or action
-                  if (insight.actionLabel.toLowerCase().includes('filter')) {
-                    setActiveTab('logs')
-                  } else if (insight.actionLabel.toLowerCase().includes('export')) {
-                    setShowExportDialog(true)
-                  } else if (insight.actionLabel.toLowerCase().includes('alert')) {
-                    setShowAlertDialog(true)
-                  }
-                } else if (insight.type === 'warning') {
-                  // For warnings, navigate to the relevant section
-                  setLevelFilter('error')
-                  setActiveTab('logs')
-                }
-                // Log the insight action
-                try {
-                  await fetch('/api/logs', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      action: 'log',
-                      level: 'info',
-                      source: 'system',
-                      message: `AI insight action taken: ${insight.title}`,
-                      details: { insightId: insight.id, insightType: insight.type }
-                    })
-                  })
-                } catch {
-                  // Continue even if logging fails
-                }
-                toast.success(`Applied: ${insight.title || 'AI Insight'}`)
-              }}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={logsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={emptyPredictions}
-              title="System Metrics Forecast"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={emptyAIInsights}
+                  title="Logs Intelligence"
+                  onInsightAction={async (insight) => {
+                    // Handle AI insight action
+                    if (insight.type === 'suggestion' && insight.actionLabel) {
+                      // For suggestions, apply the recommended filter or action
+                      if (insight.actionLabel.toLowerCase().includes('filter')) {
+                        setActiveTab('logs')
+                      } else if (insight.actionLabel.toLowerCase().includes('export')) {
+                        setShowExportDialog(true)
+                      } else if (insight.actionLabel.toLowerCase().includes('alert')) {
+                        setShowAlertDialog(true)
+                      }
+                    } else if (insight.type === 'warning') {
+                      // For warnings, navigate to the relevant section
+                      setLevelFilter('error')
+                      setActiveTab('logs')
+                    }
+                    // Log the insight action
+                    try {
+                      await fetch('/api/logs', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          action: 'log',
+                          level: 'info',
+                          source: 'system',
+                          message: `AI insight action taken: ${insight.title}`,
+                          details: { insightId: insight.id, insightType: insight.type }
+                        })
+                      })
+                    } catch {
+                      // Continue even if logging fails
+                    }
+                    toast.success(`Applied: ${insight.title || 'AI Insight'}`)
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={logsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={emptyPredictions}
+                  title="System Metrics Forecast"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={logsActivitiesData}
-            title="System Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={logsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={logsActivitiesData}
+                title="System Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={logsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* Log Detail Dialog */}

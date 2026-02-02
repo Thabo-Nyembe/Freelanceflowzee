@@ -57,6 +57,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Mock Imports Removed
 
 
@@ -179,6 +185,7 @@ const mockFinancialQuickActions: any[] = []
 export default function FinancialClient({ initialFinancial }: { initialFinancial: FinancialRecord[] }) {
   const [activeTab, setActiveTab] = useState('overview')
   const [showInsights, setShowInsights] = useState(false)
+  const insightsPanel = useInsightsPanel(false)
   const [selectedPeriod, setSelectedPeriod] = useState('this-year')
   const [showNewTransactionDialog, setShowNewTransactionDialog] = useState(false)
   const [showNewAccountDialog, setShowNewAccountDialog] = useState(false)
@@ -1321,6 +1328,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
               <Sparkles className={`w-4 h-4 ${showInsights ? 'text-primary' : 'text-muted-foreground'}`} />
               {showInsights ? 'Hide Insights' : 'Smart Insights'}
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
           </div>
         </div>
 
@@ -3174,23 +3185,27 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
         </Dialog>
 
         {/* AI-Powered Financial Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <AIInsightsPanel
-            insights={mockAIInsights}
-          />
-          <PredictiveAnalytics predictions={mockFinancialPredictions} />
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <AIInsightsPanel
+                insights={mockAIInsights}
+              />
+              <PredictiveAnalytics predictions={mockFinancialPredictions} />
+            </div>
 
-        {/* Activity Feed */}
-        <div className="mt-6">
-          <ActivityFeed
-            activities={mockFinancialActivities}
-            maxItems={5}
-          />
-        </div>
+            {/* Activity Feed */}
+            <div className="mt-6">
+              <ActivityFeed
+                activities={mockFinancialActivities}
+                maxItems={5}
+              />
+            </div>
 
-        {/* Quick Actions Toolbar */}
-        <QuickActionsToolbar actions={mockFinancialQuickActions} />
+            {/* Quick Actions Toolbar */}
+            <QuickActionsToolbar actions={mockFinancialQuickActions} />
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Bank Account Options Dialog */}
         <Dialog open={showBankAccountOptionsDialog} onOpenChange={setShowBankAccountOptionsDialog}>

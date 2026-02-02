@@ -60,6 +60,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -321,6 +327,7 @@ const mockProductsActivities = [
 
 export default function ProductsClient({ initialProducts }: ProductsClientProps) {
   const [activeTab, setActiveTab] = useState('catalog')
+  const insightsPanel = useInsightsPanel(false)
   const [selectedCategory, setSelectedCategory] = useState<ProductStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -847,6 +854,10 @@ ${activeProducts.map(p => `- ${p.name} (${p.status}): $${(p.prices[0]?.unitAmoun
               <Download className="w-4 h-4" />
               Export
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button className="bg-violet-600 hover:bg-violet-700 gap-2" onClick={() => setShowCreateProduct(true)}>
               <Plus className="w-4 h-4" />
               Add Product
@@ -2129,64 +2140,68 @@ ${activeProducts.map(p => `- ${p.name} (${p.status}): $${(p.prices[0]?.unitAmoun
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockProductsAIInsights}
-              title="Product Intelligence"
-              onInsightAction={(insight) => {
-                // Generate insight report
-                const insightReport = {
-                  insight: {
-                    id: insight.id,
-                    title: insight.title,
-                    description: insight.description,
-                    type: insight.type,
-                    priority: insight.priority,
-                    category: insight.category
-                  },
-                  actionTaken: 'viewed',
-                  timestamp: new Date().toISOString()
-                }
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockProductsAIInsights}
+                  title="Product Intelligence"
+                  onInsightAction={(insight) => {
+                    // Generate insight report
+                    const insightReport = {
+                      insight: {
+                        id: insight.id,
+                        title: insight.title,
+                        description: insight.description,
+                        type: insight.type,
+                        priority: insight.priority,
+                        category: insight.category
+                      },
+                      actionTaken: 'viewed',
+                      timestamp: new Date().toISOString()
+                    }
 
-                // Download insight report
-                const blob = new Blob([JSON.stringify(insightReport, null, 2)], { type: 'application/json' })
-                const url = URL.createObjectURL(blob)
-                const link = document.createElement('a')
-                link.href = url
-                link.download = `insight-${insight.id}-${Date.now()}.json`
-                document.body.appendChild(link)
-                link.click()
-                document.body.removeChild(link)
-                URL.revokeObjectURL(url)
+                    // Download insight report
+                    const blob = new Blob([JSON.stringify(insightReport, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const link = document.createElement('a')
+                    link.href = url
+                    link.download = `insight-${insight.id}-${Date.now()}.json`
+                    document.body.appendChild(link)
+                    link.click()
+                    document.body.removeChild(link)
+                    URL.revokeObjectURL(url)
 
-                toast.success(`Insight "${insight.title}" exported for review`)
-              }}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockProductsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockProductsPredictions}
-              title="Product Forecasts"
-            />
-          </div>
-        </div>
+                    toast.success(`Insight "${insight.title}" exported for review`)
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockProductsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockProductsPredictions}
+                  title="Product Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockProductsActivities}
-            title="Product Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={mockProductsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockProductsActivities}
+                title="Product Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={mockProductsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Product Detail Dialog */}
         <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>

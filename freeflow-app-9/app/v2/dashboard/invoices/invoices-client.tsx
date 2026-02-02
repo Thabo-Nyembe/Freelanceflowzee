@@ -22,9 +22,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
-
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -126,6 +128,8 @@ const mockInvoicesActivities = [
 // Quick actions - will be populated with state setters inside component
 
 export default function InvoicesClient({ initialInvoices }: { initialInvoices: Invoice[] }) {
+  const insightsPanel = useInsightsPanel(false)
+
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [dateRange, setDateRange] = useState<'all' | '7days' | '30days' | '90days'>('all')
@@ -748,6 +752,10 @@ Generated: ${new Date().toLocaleString()}
                 <Plus className="h-4 w-4 mr-2" />
                 New Invoice
               </Button>
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+              />
             </div>
           </div>
 
@@ -1992,63 +2000,67 @@ Generated: ${new Date().toLocaleString()}
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          {/* AI Insights Panel */}
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockInvoicesAIInsights}
-              title="Invoice Intelligence"
-              onInsightAction={(insight) => {
-                // Take action based on insight category
-                switch (insight.category) {
-                  case 'Collections':
-                    // Open send reminders dialog for overdue invoices
-                    setShowSendRemindersDialog(true)
-                    toast.info('Opening reminder dialog', { description: insight.description })
-                    break
-                  case 'Performance':
-                    // Switch to settings tab to view analytics
-                    setActiveTab('settings')
-                    setSettingsTab('advanced')
-                    toast.success('Viewing performance data', { description: insight.description })
-                    break
-                  case 'Forecast':
-                    // Show export dialog for revenue report
-                    setShowExportReportDialog(true)
-                    toast.info('Generate revenue report', { description: insight.description })
-                    break
-                  default:
-                    toast.info(insight.title, { description: insight.description })
-                }
-              }}
-            />
-          </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* AI Insights Panel */}
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockInvoicesAIInsights}
+                  title="Invoice Intelligence"
+                  onInsightAction={(insight) => {
+                    // Take action based on insight category
+                    switch (insight.category) {
+                      case 'Collections':
+                        // Open send reminders dialog for overdue invoices
+                        setShowSendRemindersDialog(true)
+                        toast.info('Opening reminder dialog', { description: insight.description })
+                        break
+                      case 'Performance':
+                        // Switch to settings tab to view analytics
+                        setActiveTab('settings')
+                        setSettingsTab('advanced')
+                        toast.success('Viewing performance data', { description: insight.description })
+                        break
+                      case 'Forecast':
+                        // Show export dialog for revenue report
+                        setShowExportReportDialog(true)
+                        toast.info('Generate revenue report', { description: insight.description })
+                        break
+                      default:
+                        toast.info(insight.title, { description: insight.description })
+                    }
+                  }}
+                />
+              </div>
 
-          {/* Team Collaboration & Activity */}
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockInvoicesCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockInvoicesPredictions}
-              title="Revenue Forecasts"
-            />
-          </div>
-        </div>
+              {/* Team Collaboration & Activity */}
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockInvoicesCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockInvoicesPredictions}
+                  title="Revenue Forecasts"
+                />
+              </div>
+            </div>
 
-        {/* Activity Feed & Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockInvoicesActivities}
-            title="Billing Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={invoicesQuickActions}
-            variant="grid"
-          />
-        </div>
+            {/* Activity Feed & Quick Actions */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockInvoicesActivities}
+                title="Billing Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={invoicesQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Bulk Actions Bar */}
         {selectedInvoices.length > 0 && (

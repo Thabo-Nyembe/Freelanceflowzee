@@ -62,6 +62,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 
 
 
@@ -314,6 +320,8 @@ export default function AIAssistantClient() {
   // Settings toggle states
   const [streamResponses, setStreamResponses] = useState(true)
   const [saveHistory, setSaveHistory] = useState(true)
+
+  const insightsPanel = useInsightsPanel(false)
 
   // Form states
   const [assistantForm, setAssistantForm] = useState<AssistantFormState>({
@@ -993,6 +1001,11 @@ export default function AIAssistantClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <InsightsToggleButton
+                isOpen={insightsPanel.isOpen}
+                onToggle={insightsPanel.toggle}
+                className="bg-white/20 hover:bg-white/30 text-white border-0"
+              />
               <button
                 onClick={() => setShowSettings(true)}
                 className="p-2.5 bg-white/20 rounded-xl hover:bg-white/30 transition-colors backdrop-blur-sm"
@@ -1941,34 +1954,38 @@ export default function AIAssistantClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={[]}
-              title="AI Intelligence"
-              onInsightAction={(insight) => toast.info('Insight action: ' + insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={[]}
-              maxVisible={4}
-            />
-            {/* <PredictiveAnalytics predictions={[]} title="Assistant Forecasts" /> - Hidden until data available */}
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={[]}
+                  title="AI Intelligence"
+                  onInsightAction={(insight) => toast.info('Insight action: ' + insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={[]}
+                  maxVisible={4}
+                />
+                {/* <PredictiveAnalytics predictions={[]} title="Assistant Forecasts" /> - Hidden until data available */}
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={[]}
-            title="AI Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={quickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={[]}
+                title="AI Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={quickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
       </div>
 
       {/* New Assistant Dialog */}

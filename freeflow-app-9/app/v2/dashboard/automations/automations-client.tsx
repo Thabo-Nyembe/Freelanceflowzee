@@ -38,6 +38,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Import mock data from centralized adapters
 
 
@@ -357,6 +363,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const [workflowTypeFilter, setWorkflowTypeFilter] = useState<WorkflowType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<WorkflowStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const insightsPanel = useInsightsPanel(false)
   const [showNewWorkflow, setShowNewWorkflow] = useState(false)
   const [selectedWorkflow, setSelectedWorkflow] = useState<AutomationWorkflow | null>(null)
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
@@ -1675,6 +1682,11 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setShowExportLogsDialog(true)}>
                   <Download className="h-5 w-5" />
                 </Button>
+                <InsightsToggleButton
+                  isOpen={insightsPanel.isOpen}
+                  onToggle={insightsPanel.toggle}
+                  className="bg-white/20 hover:bg-white/30 text-white border-0"
+                />
                 <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setActiveTab('settings')}>
                   <Settings className="h-5 w-5" />
                 </Button>
@@ -3112,37 +3124,41 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockAutomationsAIInsights}
-              title="Automation Intelligence"
-              onInsightAction={(insight) => handleInsightAction(insight)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockAutomationsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockAutomationsPredictions}
-              title="Automation Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockAutomationsAIInsights}
+                  title="Automation Intelligence"
+                  onInsightAction={(insight) => handleInsightAction(insight)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockAutomationsCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockAutomationsPredictions}
+                  title="Automation Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockAutomationsActivities}
-            title="Automation Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={automationsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockAutomationsActivities}
+                title="Automation Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={automationsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Workflow Detail Modal */}
         {selectedWorkflow && (

@@ -32,6 +32,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Import mock data from centralized adapters
 
 
@@ -423,6 +429,8 @@ function generateBookingPredictions(bookings: Booking[]): Array<{ id: string; ti
 // Quick actions will be defined inside the component to access state setters
 
 export default function BookingsClient({ initialBookings }: { initialBookings: Booking[] }) {
+  const insightsPanel = useInsightsPanel(false)
+
   const [bookingTypeFilter, setBookingTypeFilter] = useState<BookingType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<BookingStatus | 'all'>('all')
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<PaymentStatus | 'all'>('all')
@@ -1069,6 +1077,10 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <InsightsToggleButton
+                  isOpen={insightsPanel.isOpen}
+                  onToggle={insightsPanel.toggle}
+                />
                 <Dialog open={showNewBooking} onOpenChange={setShowNewBooking}>
                   <DialogTrigger asChild>
                     <button className="px-4 py-2 bg-white text-sky-600 rounded-lg font-medium hover:bg-white/90 transition-all flex items-center gap-2">
@@ -3745,52 +3757,56 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         </Dialog>
 
         {/* Enhanced Competitive Upgrade Components - Using Real Data */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={generateBookingInsights(displayBookings)}
-              title="Booking Intelligence"
-              onInsightAction={(insight) => {
-                // Handle insight actions with real functionality
-                if (insight.category === 'Action Required' && insight.title.includes('Pending')) {
-                  handleConfirmAllPending()
-                } else if (insight.category === 'Engagement' && insight.title.includes('Reminder')) {
-                  handleSendAllReminders()
-                } else {
-                  toast.info(insight.title, { description: insight.description })
-                }
-              }}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={teamMembers.map((m, i) => ({
-                id: m.id,
-                name: m.name,
-                avatar: `/avatars/${m.name.toLowerCase().replace(' ', '-')}.jpg`,
-                status: (i === 0 ? 'online' : i === 1 ? 'online' : 'away') as const,
-                role: m.role
-              }))}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={generateBookingPredictions(displayBookings)}
-              title="Booking Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={generateBookingInsights(displayBookings)}
+                  title="Booking Intelligence"
+                  onInsightAction={(insight) => {
+                    // Handle insight actions with real functionality
+                    if (insight.category === 'Action Required' && insight.title.includes('Pending')) {
+                      handleConfirmAllPending()
+                    } else if (insight.category === 'Engagement' && insight.title.includes('Reminder')) {
+                      handleSendAllReminders()
+                    } else {
+                      toast.info(insight.title, { description: insight.description })
+                    }
+                  }}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={teamMembers.map((m, i) => ({
+                    id: m.id,
+                    name: m.name,
+                    avatar: `/avatars/${m.name.toLowerCase().replace(' ', '-')}.jpg`,
+                    status: (i === 0 ? 'online' : i === 1 ? 'online' : 'away') as const,
+                    role: m.role
+                  }))}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={generateBookingPredictions(displayBookings)}
+                  title="Booking Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={generateActivityFeed(displayBookings)}
-            title="Booking Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={bookingsQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={generateActivityFeed(displayBookings)}
+                title="Booking Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={bookingsQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Quick Stats Footer */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border">

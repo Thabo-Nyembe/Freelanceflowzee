@@ -79,6 +79,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 // Screen Recording
 import { ScreenRecordingClient } from '@/app/(app)/dashboard/screen-recording-v2/screen-recording-client'
 
@@ -357,6 +363,7 @@ export default function VideoStudioClient() {
   const [renderJobs] = useState<RenderJob[]>(mockRenderJobs)
   const [effects] = useState<Effect[]>(mockEffects)
   const [searchQuery, setSearchQuery] = useState('')
+  const insightsPanel = useInsightsPanel(false)
   const [selectedProject, setSelectedProject] = useState<VideoProject | null>(null)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all')
@@ -1519,6 +1526,10 @@ export default function VideoStudioClient() {
             <Button variant="outline" size="icon" onClick={() => setShowFilterDialog(true)}>
               <Filter className="w-4 h-4" />
             </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={() => setShowNewProjectDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               New Project
@@ -2718,37 +2729,41 @@ export default function VideoStudioClient() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockVideoStudioAIInsights}
-              title="Studio Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title)}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockVideoStudioCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockVideoStudioPredictions}
-              title="Production Forecasts"
-            />
-          </div>
-        </div>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AIInsightsPanel
+                  insights={mockVideoStudioAIInsights}
+                  title="Studio Intelligence"
+                  onInsightAction={(insight) => toast.info(insight.title)}
+                />
+              </div>
+              <div className="space-y-6">
+                <CollaborationIndicator
+                  collaborators={mockVideoStudioCollaborators}
+                  maxVisible={4}
+                />
+                <PredictiveAnalytics
+                  predictions={mockVideoStudioPredictions}
+                  title="Production Forecasts"
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockVideoStudioActivities}
-            title="Studio Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={mockVideoStudioQuickActions}
-            variant="grid"
-          />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <ActivityFeed
+                activities={mockVideoStudioActivities}
+                title="Studio Activity"
+                maxItems={5}
+              />
+              <QuickActionsToolbar
+                actions={mockVideoStudioQuickActions}
+                variant="grid"
+              />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* Project Detail Dialog */}
         <Dialog open={!!selectedProject} onOpenChange={() => setSelectedProject(null)}>

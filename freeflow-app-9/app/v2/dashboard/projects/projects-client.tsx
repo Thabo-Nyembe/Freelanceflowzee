@@ -38,6 +38,12 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  CollapsibleInsightsPanel,
+  InsightsToggleButton,
+  useInsightsPanel
+} from '@/components/ui/collapsible-insights-panel'
+
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -199,6 +205,7 @@ export default function ProjectsClient() {
   const [newProjectBudget, setNewProjectBudget] = useState('')
   const [createLoading, setCreateLoading] = useState(false)
   const [showInsights, setShowInsights] = useState(false) // Default hidden for "cascade" effect
+  const insightsPanel = useInsightsPanel(false)
 
   // Share dialog state
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
@@ -680,14 +687,10 @@ export default function ProjectsClient() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
-            <Button
-              variant={showInsights ? "secondary" : "outline"}
-              onClick={() => setShowInsights(!showInsights)}
-              className="transition-all duration-300"
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              {showInsights ? 'Hide Insights' : 'Smart Insights'}
-            </Button>
+            <InsightsToggleButton
+              isOpen={insightsPanel.isOpen}
+              onToggle={insightsPanel.toggle}
+            />
             <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={() => setShowCreateModal(true)}>
               <Plus className="h-4 w-4 mr-2" />
               New Project
@@ -790,31 +793,23 @@ export default function ProjectsClient() {
         {/* ================================================================
             V2 COMPETITIVE UPGRADE COMPONENTS (COLLAPSIBLE)
             ================================================================ */}
-        <AnimatePresence>
-          {showInsights && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <AIInsightsPanel insights={projectsAIInsights} />
-                <PredictiveAnalytics predictions={projectsPredictions} />
-                <CollaborationIndicator collaborators={projectsCollaborators} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {insightsPanel.isOpen && (
+          <CollapsibleInsightsPanel title="Insights & Analytics" defaultOpen={true} className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              <AIInsightsPanel insights={projectsAIInsights} />
+              <PredictiveAnalytics predictions={projectsPredictions} />
+              <CollaborationIndicator collaborators={projectsCollaborators} />
+            </div>
 
-        {/* ================================================================
-            QUICK ACTIONS & ACTIVITY
-            ================================================================ */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <QuickActionsToolbar actions={projectsQuickActions} />
-          <ActivityFeed activities={projectsActivities} />
-        </div>
+            {/* ================================================================
+                QUICK ACTIONS & ACTIVITY
+                ================================================================ */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <QuickActionsToolbar actions={projectsQuickActions} />
+              <ActivityFeed activities={projectsActivities} />
+            </div>
+          </CollapsibleInsightsPanel>
+        )}
 
         {/* ================================================================
             MAIN CONTENT WITH TABS
