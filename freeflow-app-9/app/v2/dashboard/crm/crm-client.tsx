@@ -343,17 +343,17 @@ export default function CrmClient() {
   // Real-time subscriptions
   useRealtimeSubscription({
     table: 'crm_contacts',
-    onUpdate: () => refetchContacts()
+    onUpdate: () => refreshContacts()
   })
 
   useRealtimeSubscription({
     table: 'crm_deals',
-    onUpdate: () => refetchDeals()
+    onUpdate: () => refreshDeals()
   })
 
   useRealtimeSubscription({
     table: 'crm_activities',
-    onUpdate: () => refetchActivities()
+    onUpdate: () => refreshActivities()
   })
 
   // Settings

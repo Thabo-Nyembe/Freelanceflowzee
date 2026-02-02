@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Play,
   Pause,
@@ -12,7 +12,12 @@ import {
   Edit,
   Trash2,
   Plus,
-  Clock
+  Clock,
+  Repeat,
+  Gauge,
+  Download,
+  Loader2,
+  AlertCircle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
@@ -97,6 +102,14 @@ export function AudioViewer({
   const [editingComment, setEditingComment] = useState<Comment | null>(null)
   const [commentTimestamp, setCommentTimestamp] = useState(0)
 
+  // New state for enhanced features
+  const [playbackSpeed, setPlaybackSpeed] = useState(1)
+  const [isLooping, setIsLooping] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loopStart, setLoopStart] = useState<number | null>(null)
+  const [loopEnd, setLoopEnd] = useState<number | null>(null)
+
   const audioRef = useRef<HTMLAudioElement>(null)
   const waveformCanvasRef = useRef<HTMLCanvasElement>(null)
   const progressBarRef = useRef<HTMLDivElement>(null)
@@ -109,8 +122,12 @@ export function AudioViewer({
     const audio = audioRef.current
     if (!audio) return
 
+    setIsLoading(true)
+    setLoadError(null)
+
     const handleLoadedMetadata = () => {
       setDuration(audio.duration)
+      setIsLoading(false)
       logger.info('Audio metadata loaded', {
         duration: audio.duration,
         src
@@ -119,23 +136,58 @@ export function AudioViewer({
 
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime)
+      // Handle A/B loop
+      if (isLooping && loopEnd !== null && audio.currentTime >= loopEnd) {
+        audio.currentTime = loopStart ?? 0
+      }
     }
 
     const handleEnded = () => {
-      setIsPlaying(false)
+      if (isLooping) {
+        audio.currentTime = loopStart ?? 0
+        audio.play()
+      } else {
+        setIsPlaying(false)
+      }
       logger.info('Audio playback ended')
+    }
+
+    const handleCanPlay = () => {
+      setIsLoading(false)
+    }
+
+    const handleError = () => {
+      setIsLoading(false)
+      setLoadError('Failed to load audio file')
+      logger.error('Audio load error', { src })
+    }
+
+    const handleWaiting = () => {
+      setIsLoading(true)
+    }
+
+    const handlePlaying = () => {
+      setIsLoading(false)
     }
 
     audio.addEventListener('loadedmetadata', handleLoadedMetadata)
     audio.addEventListener('timeupdate', handleTimeUpdate)
     audio.addEventListener('ended', handleEnded)
+    audio.addEventListener('canplay', handleCanPlay)
+    audio.addEventListener('error', handleError)
+    audio.addEventListener('waiting', handleWaiting)
+    audio.addEventListener('playing', handlePlaying)
 
     return () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
       audio.removeEventListener('timeupdate', handleTimeUpdate)
       audio.removeEventListener('ended', handleEnded)
+      audio.removeEventListener('canplay', handleCanPlay)
+      audio.removeEventListener('error', handleError)
+      audio.removeEventListener('waiting', handleWaiting)
+      audio.removeEventListener('playing', handlePlaying)
     }
-  }, [src])
+  }, [src, isLooping, loopStart, loopEnd])
 
   // ============================================================================
   // WAVEFORM GENERATION
@@ -282,6 +334,116 @@ export function AudioViewer({
     audio.currentTime = Math.min(duration, audio.currentTime + 10)
   }
 
+  // Playback speed control
+  const changePlaybackSpeed = useCallback(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2]
+    const currentIndex = speeds.indexOf(playbackSpeed)
+    const nextIndex = (currentIndex + 1) % speeds.length
+    const newSpeed = speeds[nextIndex]
+
+    audio.playbackRate = newSpeed
+    setPlaybackSpeed(newSpeed)
+    logger.info('Playback speed changed', { speed: newSpeed })
+  }, [playbackSpeed])
+
+  // Toggle loop
+  const toggleLoop = useCallback(() => {
+    setIsLooping(prev => !prev)
+    if (!isLooping) {
+      // Start loop from current position
+      setLoopStart(currentTime)
+      setLoopEnd(null)
+    } else {
+      setLoopStart(null)
+      setLoopEnd(null)
+    }
+    logger.info('Loop toggled', { isLooping: !isLooping })
+  }, [isLooping, currentTime])
+
+  // Set loop end point
+  const setLoopEndPoint = useCallback(() => {
+    if (isLooping && loopStart !== null && currentTime > loopStart) {
+      setLoopEnd(currentTime)
+      logger.info('Loop end set', { loopStart, loopEnd: currentTime })
+    }
+  }, [isLooping, loopStart, currentTime])
+
+  // Download audio
+  const downloadAudio = useCallback(async () => {
+    try {
+      const response = await fetch(src)
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = title.replace(/[^a-z0-9]/gi, '_') + '.mp3'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      logger.info('Audio downloaded', { title })
+    } catch (error) {
+      logger.error('Download failed', { error })
+    }
+  }, [src, title])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle if not typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return
+      }
+
+      switch (e.key) {
+        case ' ':
+          e.preventDefault()
+          togglePlayPause()
+          break
+        case 'ArrowLeft':
+          e.preventDefault()
+          skipBackward()
+          break
+        case 'ArrowRight':
+          e.preventDefault()
+          skipForward()
+          break
+        case 'ArrowUp':
+          e.preventDefault()
+          setVolume(prev => [Math.min(100, prev[0] + 10)])
+          if (audioRef.current) audioRef.current.volume = Math.min(1, (volume[0] + 10) / 100)
+          break
+        case 'ArrowDown':
+          e.preventDefault()
+          setVolume(prev => [Math.max(0, prev[0] - 10)])
+          if (audioRef.current) audioRef.current.volume = Math.max(0, (volume[0] - 10) / 100)
+          break
+        case 'm':
+        case 'M':
+          toggleMute()
+          break
+        case 'l':
+        case 'L':
+          toggleLoop()
+          break
+        case 's':
+        case 'S':
+          changePlaybackSpeed()
+          break
+        case 'c':
+        case 'C':
+          handleAddCommentClick()
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [togglePlayPause, skipBackward, skipForward, toggleMute, toggleLoop, changePlaybackSpeed, volume])
+
   // ============================================================================
   // COMMENT MANAGEMENT
   // ============================================================================
@@ -404,15 +566,37 @@ export function AudioViewer({
   return (
     <div className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6 ${className}`}>
       {/* Audio Title */}
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {formatTime(duration)} total
-        </p>
+      <div className="mb-4 flex items-start justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {formatTime(duration)} total {playbackSpeed !== 1 && `• ${playbackSpeed}x speed`}
+            {isLooping && ' • Loop enabled'}
+          </p>
+        </div>
+        <Button variant="ghost" size="sm" onClick={downloadAudio} title="Download audio">
+          <Download className="w-4 h-4" />
+        </Button>
       </div>
 
+      {/* Error State */}
+      {loadError && (
+        <div className="mb-4 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-red-700 dark:text-red-300">
+          <AlertCircle className="w-5 h-5" />
+          <span>{loadError}</span>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {isLoading && !loadError && (
+        <div className="mb-4 flex items-center justify-center py-8">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          <span className="ml-2 text-gray-500">Loading audio...</span>
+        </div>
+      )}
+
       {/* Hidden Audio Element */}
-      <audio ref={audioRef} src={src} />
+      <audio ref={audioRef} src={src} preload="metadata" />
 
       {/* Waveform Display */}
       <div className="relative mb-4">
@@ -463,7 +647,8 @@ export function AudioViewer({
             variant="outline"
             size="sm"
             onClick={skipBackward}
-            disabled={currentTime === 0}
+            disabled={currentTime === 0 || isLoading}
+            title="Skip back 10s (←)"
           >
             <SkipBack className="w-4 h-4" />
           </Button>
@@ -472,8 +657,12 @@ export function AudioViewer({
             variant="default"
             size="sm"
             onClick={togglePlayPause}
+            disabled={isLoading || !!loadError}
+            title="Play/Pause (Space)"
           >
-            {isPlaying ? (
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : isPlaying ? (
               <Pause className="w-4 h-4" />
             ) : (
               <Play className="w-4 h-4 ml-0.5" />
@@ -484,9 +673,31 @@ export function AudioViewer({
             variant="outline"
             size="sm"
             onClick={skipForward}
-            disabled={currentTime >= duration}
+            disabled={currentTime >= duration || isLoading}
+            title="Skip forward 10s (→)"
           >
             <SkipForward className="w-4 h-4" />
+          </Button>
+
+          {/* Playback Speed */}
+          <Button
+            variant={playbackSpeed !== 1 ? "secondary" : "ghost"}
+            size="sm"
+            onClick={changePlaybackSpeed}
+            title="Change speed (S)"
+          >
+            <Gauge className="w-4 h-4 mr-1" />
+            {playbackSpeed}x
+          </Button>
+
+          {/* Loop Toggle */}
+          <Button
+            variant={isLooping ? "secondary" : "ghost"}
+            size="sm"
+            onClick={toggleLoop}
+            title="Toggle loop (L)"
+          >
+            <Repeat className={`w-4 h-4 ${isLooping ? 'text-blue-600' : ''}`} />
           </Button>
         </div>
 
@@ -495,6 +706,7 @@ export function AudioViewer({
             variant="ghost"
             size="sm"
             onClick={toggleMute}
+            title="Mute (M)"
           >
             {isMuted ? (
               <VolumeX className="w-4 h-4" />
@@ -514,11 +726,31 @@ export function AudioViewer({
             variant="default"
             size="sm"
             onClick={handleAddCommentClick}
+            title="Add comment (C)"
           >
             <Plus className="w-4 h-4 mr-1" />
             Add Comment
           </Button>
         </div>
+      </div>
+
+      {/* Loop Region Indicator */}
+      {isLooping && loopStart !== null && (
+        <div className="mb-4 p-2 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded text-sm text-blue-700 dark:text-blue-300 flex items-center justify-between">
+          <span>
+            Loop: {formatTime(loopStart)} → {loopEnd !== null ? formatTime(loopEnd) : 'Click to set end point'}
+          </span>
+          {loopEnd === null && (
+            <Button variant="ghost" size="sm" onClick={setLoopEndPoint}>
+              Set End Point
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Keyboard Shortcuts Help */}
+      <div className="mb-4 text-xs text-gray-400 dark:text-gray-500">
+        Shortcuts: Space (play), ←/→ (skip), ↑/↓ (volume), M (mute), L (loop), S (speed), C (comment)
       </div>
 
       {/* Comments List */}

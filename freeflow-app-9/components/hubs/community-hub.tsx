@@ -41,8 +41,11 @@ import {
   Briefcase,
   Zap,
   Crown,
-  Target
+  Target,
+  Palette
 } from 'lucide-react'
+import CreatorMarketplace from '@/components/community/creator-marketplace'
+import SocialWall from '@/components/community/social-wall'
 
 // Types
 interface CommunityMember {
@@ -416,8 +419,9 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
 
       {/* Tabs */}
       <Tabs defaultValue="feed" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="feed">Community Feed</TabsTrigger>
+          <TabsTrigger value="portfolios">Portfolios</TabsTrigger>
           <TabsTrigger value="members">Members</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
         </TabsList>
@@ -585,6 +589,25 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
               ))}
             </div>
           </div>
+        </TabsContent>
+
+        {/* Portfolios Tab */}
+        <TabsContent value="portfolios" className="mt-6">
+          <CreatorMarketplace
+            currentUserId={currentUserId}
+            onViewPortfolio={(portfolioId) => {
+              logger.info('Viewing portfolio', { portfolioId })
+            }}
+            onContactCreator={(creatorId) => {
+              const member = members.find(m => m.id === creatorId)
+              if (member) handleOpenMessage(member)
+            }}
+            onHireCreator={(creatorId) => {
+              toast.success('Starting contract', {
+                description: 'Opening contract creation flow'
+              })
+            }}
+          />
         </TabsContent>
 
         {/* Members Tab */}
