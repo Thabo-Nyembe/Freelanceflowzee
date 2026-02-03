@@ -155,6 +155,16 @@ const sidebarItems: SidebarItem[] = [
     icon: Music
   },
   {
+    name: 'AI Business Advisor',
+    href: '/dashboard/ai-business-advisor',
+    icon: TrendingUp
+  },
+  {
+    name: 'AI Content Studio',
+    href: '/dashboard/ai-content-studio',
+    icon: Sparkles
+  },
+  {
     name: 'AI Settings',
     href: '/dashboard/ai-settings-v2',
     icon: Settings
