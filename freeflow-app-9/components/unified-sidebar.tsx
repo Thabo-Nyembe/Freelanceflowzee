@@ -37,7 +37,34 @@ import {
   Inbox,
   Handshake,
   Kanban,
-  Quote
+  Quote,
+  Laptop,
+  Building,
+  Car,
+  Truck,
+  Package,
+  Utensils,
+  Dumbbell,
+  Shirt,
+  Bus,
+  Baby,
+  Activity,
+  Music,
+  Printer,
+  Phone,
+  Archive,
+  Coffee,
+  Warehouse,
+  Lock,
+  HandHeart,
+  Leaf,
+  Lightbulb,
+  ShoppingCart,
+  Gift,
+  Award,
+  AlertCircle,
+  Store,
+  Layout
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -192,6 +219,200 @@ const sidebarItems: SidebarItem[] = [
     name: 'Quotes',
     href: '/dashboard/quotes-v2',
     icon: FileText
+  },
+  // Facilities & Operations
+  {
+    name: 'Equipment',
+    href: '/dashboard/equipment-v2',
+    icon: Laptop
+  },
+  {
+    name: 'Visitors',
+    href: '/dashboard/visitors-v2',
+    icon: Users
+  },
+  {
+    name: 'Facilities',
+    href: '/dashboard/facilities-v2',
+    icon: Building
+  },
+  {
+    name: 'Parking',
+    href: '/dashboard/parking-v2',
+    icon: Car
+  },
+  {
+    name: 'Fleet',
+    href: '/dashboard/fleet-v2',
+    icon: Truck
+  },
+  {
+    name: 'Lockers',
+    href: '/dashboard/lockers-v2',
+    icon: Package
+  },
+  {
+    name: 'Cafeteria',
+    href: '/dashboard/cafeteria-v2',
+    icon: Utensils
+  },
+  {
+    name: 'Gym',
+    href: '/dashboard/gym-v2',
+    icon: Dumbbell
+  },
+  {
+    name: 'Library',
+    href: '/dashboard/library-v2',
+    icon: BookOpen
+  },
+  {
+    name: 'Laundry',
+    href: '/dashboard/laundry-v2',
+    icon: Shirt
+  },
+  {
+    name: 'Shuttle',
+    href: '/dashboard/shuttle-v2',
+    icon: Bus
+  },
+  {
+    name: 'Childcare',
+    href: '/dashboard/childcare-v2',
+    icon: Baby
+  },
+  {
+    name: 'Wellness',
+    href: '/dashboard/wellness-v2',
+    icon: Activity
+  },
+  {
+    name: 'Concierge',
+    href: '/dashboard/concierge-v2',
+    icon: Bell
+  },
+  {
+    name: 'Auditorium',
+    href: '/dashboard/auditorium-v2',
+    icon: Music
+  },
+  {
+    name: 'Printing',
+    href: '/dashboard/printing-v2',
+    icon: Printer
+  },
+  {
+    name: 'Reception',
+    href: '/dashboard/reception-v2',
+    icon: Phone
+  },
+  {
+    name: 'Storage',
+    href: '/dashboard/storage-v2',
+    icon: Archive
+  },
+  {
+    name: 'Vending',
+    href: '/dashboard/vending-v2',
+    icon: Coffee
+  },
+  {
+    name: 'Breakroom',
+    href: '/dashboard/breakroom-v2',
+    icon: Coffee
+  },
+  {
+    name: 'Garage',
+    href: '/dashboard/garage-v2',
+    icon: Warehouse
+  },
+  {
+    name: 'Access Control',
+    href: '/dashboard/access-control-v2',
+    icon: Lock
+  },
+  // Employee Programs
+  {
+    name: 'Volunteering',
+    href: '/dashboard/volunteering-v2',
+    icon: HandHeart
+  },
+  {
+    name: 'Sustainability',
+    href: '/dashboard/sustainability-v2',
+    icon: Leaf
+  },
+  {
+    name: 'Patents',
+    href: '/dashboard/patents-v2',
+    icon: Lightbulb
+  },
+  {
+    name: 'Procurement',
+    href: '/dashboard/procurement-v2',
+    icon: ShoppingCart
+  },
+  {
+    name: 'Rewards',
+    href: '/dashboard/rewards-v2',
+    icon: Gift
+  },
+  {
+    name: 'Suggestions',
+    href: '/dashboard/suggestions-v2',
+    icon: Lightbulb
+  },
+  {
+    name: 'Recognition',
+    href: '/dashboard/recognition-v2',
+    icon: Award
+  },
+  {
+    name: 'Complaints',
+    href: '/dashboard/complaints-v2',
+    icon: AlertCircle
+  },
+  {
+    name: 'Ideas',
+    href: '/dashboard/ideas-v2',
+    icon: Lightbulb
+  },
+  {
+    name: 'Mentorship',
+    href: '/dashboard/mentorship-v2',
+    icon: Users
+  },
+  {
+    name: 'Benefits',
+    href: '/dashboard/benefits-v2',
+    icon: Heart
+  },
+  // Platform Features
+  {
+    name: 'Seller Hub',
+    href: '/dashboard/seller-v2',
+    icon: Store
+  },
+  {
+    name: 'Components',
+    href: '/dashboard/components-showcase-v2',
+    icon: Layout
+  },
+  {
+    name: 'Features Hub',
+    href: '/dashboard/features-hub-v2',
+    icon: Zap
+  },
+  // System Monitoring
+  {
+    name: 'Performance',
+    href: '/dashboard/performance-monitoring-v2',
+    icon: Activity
+  },
+  {
+    name: 'System Health',
+    href: '/dashboard/system-health-v2',
+    icon: Heart
   }
 ]
 
