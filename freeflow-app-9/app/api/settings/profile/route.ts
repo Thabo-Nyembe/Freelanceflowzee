@@ -684,3 +684,33 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }, { status: 500 })
   }
 }
+
+/**
+ * PATCH /api/settings/profile?category={category} - Update specific settings category
+ */
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
+
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required'
+      }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const category = searchParams.get('category') || 'profile'
+
+    const body = await request.json()
+
+    return handleUpdateSettings(category, body, userId, supabase)
+  } catch (error) {
+    return NextResponse.json({
+      success: false,
+      error: error.message || 'Failed to update settings'
+    }, { status: 500 })
+  }
+}

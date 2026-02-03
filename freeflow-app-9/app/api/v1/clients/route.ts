@@ -124,3 +124,121 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
+
+/**
+ * PATCH /api/v1/clients?id={clientId} - Update an existing client
+ */
+export async function PATCH(request: NextRequest) {
+  const startTime = Date.now()
+
+  const { context, error } = await validateApiKey(request)
+  if (error) return error
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  if (!hasPermission(context, 'write')) {
+    return NextResponse.json({ error: 'Insufficient permissions - write access required' }, { status: 403 })
+  }
+
+  const supabase = await createClient()
+
+  try {
+    const { searchParams } = new URL(request.url)
+    const clientId = searchParams.get('id')
+
+    if (!clientId) {
+      return NextResponse.json({ error: 'Client ID is required' }, { status: 400 })
+    }
+
+    const body = await request.json()
+
+    // Build update object with only provided fields
+    const updateData: Record<string, unknown> = {}
+    const allowedFields = ['name', 'email', 'phone', 'company', 'address', 'website', 'status', 'notes', 'tags']
+    
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updateData[field] = body[field]
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
+    }
+
+    updateData.updated_at = new Date().toISOString()
+
+    const { data, error: updateError } = await supabase
+      .from('clients')
+      .update(updateData)
+      .eq('id', clientId)
+      .eq('user_id', context.userId) // Ensure user owns this client
+      .select()
+      .single()
+
+    if (updateError) throw updateError
+
+    if (!data) {
+      return NextResponse.json({ error: 'Client not found or access denied' }, { status: 404 })
+    }
+
+    const latency = Date.now() - startTime
+    await logApiRequest(context, request, 200, latency)
+
+    const response = NextResponse.json({ data })
+    return withRateLimitHeaders(response, context)
+
+  } catch (err) {
+    const latency = Date.now() - startTime
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+    await logApiRequest(context, request, 500, latency, errorMessage)
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}
+
+/**
+ * DELETE /api/v1/clients?id={clientId} - Delete a client
+ */
+export async function DELETE(request: NextRequest) {
+  const startTime = Date.now()
+
+  const { context, error } = await validateApiKey(request)
+  if (error) return error
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  if (!hasPermission(context, 'delete')) {
+    return NextResponse.json({ error: 'Insufficient permissions - delete access required' }, { status: 403 })
+  }
+
+  const supabase = await createClient()
+
+  try {
+    const { searchParams } = new URL(request.url)
+    const clientId = searchParams.get('id')
+
+    if (!clientId) {
+      return NextResponse.json({ error: 'Client ID is required' }, { status: 400 })
+    }
+
+    const { error: deleteError } = await supabase
+      .from('clients')
+      .delete()
+      .eq('id', clientId)
+      .eq('user_id', context.userId) // Ensure user owns this client
+
+    if (deleteError) throw deleteError
+
+    const latency = Date.now() - startTime
+    await logApiRequest(context, request, 200, latency)
+
+    const response = NextResponse.json({ success: true, message: 'Client deleted successfully' })
+    return withRateLimitHeaders(response, context)
+
+  } catch (err) {
+    const latency = Date.now() - startTime
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+    await logApiRequest(context, request, 500, latency, errorMessage)
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}

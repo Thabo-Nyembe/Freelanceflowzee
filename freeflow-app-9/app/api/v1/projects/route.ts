@@ -126,3 +126,122 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
+
+/**
+ * PATCH /api/v1/projects?id={projectId} - Update an existing project
+ */
+export async function PATCH(request: NextRequest) {
+  const startTime = Date.now()
+
+  const { context, error } = await validateApiKey(request)
+  if (error) return error
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  if (!hasPermission(context, 'write')) {
+    return NextResponse.json({ error: 'Insufficient permissions - write access required' }, { status: 403 })
+  }
+
+  const supabase = await createClient()
+
+  try {
+    const { searchParams } = new URL(request.url)
+    const projectId = searchParams.get('id')
+
+    if (!projectId) {
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
+    }
+
+    const body = await request.json()
+
+    // Build update object with only provided fields
+    const updateData: Record<string, unknown> = {}
+    const allowedFields = ['name', 'description', 'status', 'client_id', 'budget', 'deadline', 'priority', 'tags']
+
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updateData[field] = body[field]
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
+    }
+
+    updateData.updated_at = new Date().toISOString()
+
+    const { data, error: updateError } = await supabase
+      .from('projects')
+      .update(updateData)
+      .eq('id', projectId)
+      .eq('user_id', context.userId) // Ensure user owns this project
+      .select()
+      .single()
+
+    if (updateError) throw updateError
+
+    if (!data) {
+      return NextResponse.json({ error: 'Project not found or access denied' }, { status: 404 })
+    }
+
+    const latency = Date.now() - startTime
+    await logApiRequest(context, request, 200, latency)
+
+    const response = NextResponse.json({ data })
+    return withRateLimitHeaders(response, context)
+
+  } catch (err) {
+    const latency = Date.now() - startTime
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+    await logApiRequest(context, request, 500, latency, errorMessage)
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}
+
+/**
+ * DELETE /api/v1/projects?id={projectId} - Delete a project (soft delete via archived_at)
+ */
+export async function DELETE(request: NextRequest) {
+  const startTime = Date.now()
+
+  const { context, error } = await validateApiKey(request)
+  if (error) return error
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  if (!hasPermission(context, 'delete')) {
+    return NextResponse.json({ error: 'Insufficient permissions - delete access required' }, { status: 403 })
+  }
+
+  const supabase = await createClient()
+
+  try {
+    const { searchParams } = new URL(request.url)
+    const projectId = searchParams.get('id')
+
+    if (!projectId) {
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
+    }
+
+    // Soft delete by setting archived_at timestamp
+    const { error: deleteError } = await supabase
+      .from('projects')
+      .update({ archived_at: new Date().toISOString() })
+      .eq('id', projectId)
+      .eq('user_id', context.userId) // Ensure user owns this project
+
+    if (deleteError) throw deleteError
+
+    const latency = Date.now() - startTime
+    await logApiRequest(context, request, 200, latency)
+
+    const response = NextResponse.json({ success: true, message: 'Project archived successfully' })
+    return withRateLimitHeaders(response, context)
+
+  } catch (err) {
+    const latency = Date.now() - startTime
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+    await logApiRequest(context, request, 500, latency, errorMessage)
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}
