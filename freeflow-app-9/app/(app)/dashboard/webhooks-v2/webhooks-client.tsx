@@ -253,6 +253,27 @@ export default function WebhooksClient({
   const [selectedTestEvent, setSelectedTestEvent] = useState('user.created')
   const [webhookToTest, setWebhookToTest] = useState<string | null>(null)
 
+  // Group event types by category for display
+  const groupedEvents = useMemo(() => {
+    const eventTypes = [
+      { id: '1', name: 'user.created', description: 'Fired when a new user is created', category: 'Users', subscriberCount: 12, totalDeliveries: 2450, avgResponseTime: 145 },
+      { id: '2', name: 'user.updated', description: 'Fired when user profile is updated', category: 'Users', subscriberCount: 8, totalDeliveries: 1890, avgResponseTime: 132 },
+      { id: '3', name: 'user.deleted', description: 'Fired when a user is deleted', category: 'Users', subscriberCount: 5, totalDeliveries: 342, avgResponseTime: 98 },
+      { id: '4', name: 'order.created', description: 'Fired when a new order is placed', category: 'Orders', subscriberCount: 15, totalDeliveries: 5680, avgResponseTime: 167 },
+      { id: '5', name: 'order.updated', description: 'Fired when order status changes', category: 'Orders', subscriberCount: 14, totalDeliveries: 8920, avgResponseTime: 154 },
+      { id: '6', name: 'order.completed', description: 'Fired when order is completed', category: 'Orders', subscriberCount: 11, totalDeliveries: 3450, avgResponseTime: 142 },
+      { id: '7', name: 'payment.succeeded', description: 'Fired when payment is successful', category: 'Payments', subscriberCount: 18, totalDeliveries: 4560, avgResponseTime: 189 },
+      { id: '8', name: 'payment.failed', description: 'Fired when payment fails', category: 'Payments', subscriberCount: 16, totalDeliveries: 890, avgResponseTime: 112 },
+      { id: '9', name: 'invoice.created', description: 'Fired when invoice is generated', category: 'Invoices', subscriberCount: 7, totalDeliveries: 1230, avgResponseTime: 134 },
+      { id: '10', name: 'project.created', description: 'Fired when a project is created', category: 'Projects', subscriberCount: 9, totalDeliveries: 780, avgResponseTime: 156 },
+    ]
+    return eventTypes.reduce((acc, event) => {
+      if (!acc[event.category]) acc[event.category] = []
+      acc[event.category].push(event)
+      return acc
+    }, {} as Record<string, typeof eventTypes>)
+  }, [])
+
   // Form state for create/edit webhook
   const [formData, setFormData] = useState({
     name: '',

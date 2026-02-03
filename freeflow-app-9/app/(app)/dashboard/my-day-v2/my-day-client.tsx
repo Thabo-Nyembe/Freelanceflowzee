@@ -818,7 +818,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     { label: 'This Week', value: stats.tasksCompletedThisWeek, icon: BarChart3, color: 'from-blue-500 to-indigo-600', change: '+8' },
     { label: 'Streak', value: `${stats.streakDays} days`, icon: Flame, color: 'from-orange-500 to-red-600', change: '+1' },
     { label: 'On-time Rate', value: `${stats.onTimeCompletionRate}%`, icon: TrendingUp, color: 'from-teal-500 to-cyan-600', change: '+3%' },
-    { label: 'Karma', value: stats.karmaPoints.toLocaleString(), icon: Award, color: 'from-pink-500 to-rose-600', change: '+127' }
+    { label: 'Karma', value: (stats.karmaPoints ?? 0).toLocaleString(), icon: Award, color: 'from-pink-500 to-rose-600', change: '+127' }
   ]
 
   // Render task item

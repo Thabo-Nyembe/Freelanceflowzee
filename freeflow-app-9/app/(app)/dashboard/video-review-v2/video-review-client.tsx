@@ -782,8 +782,8 @@ export function VideoReviewClient() {
           <div className="border-t bg-card p-4 space-y-3">
             {/* Timeline */}
             <VideoTimeline
+              video={video}
               currentTimeMs={currentTime}
-              durationMs={duration}
               comments={filteredComments}
               markers={markers}
               onSeek={seek}
@@ -875,9 +875,9 @@ export function VideoReviewClient() {
           'fixed right-0 top-[57px] bottom-0 w-[400px] border-l bg-card flex flex-col transition-transform',
           showSidebar ? 'translate-x-0' : 'translate-x-full'
         )}>
-          {/* Sidebar Header */}
-          <div className="border-b p-4">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
+            {/* Sidebar Header */}
+            <div className="border-b p-4">
               <TabsList className="w-full">
                 <TabsTrigger value="comments" className="flex-1 gap-2">
                   <MessageSquare className="h-4 w-4" />
@@ -889,11 +889,10 @@ export function VideoReviewClient() {
                   Review
                 </TabsTrigger>
               </TabsList>
-            </Tabs>
-          </div>
+            </div>
 
-          {/* Sidebar Content */}
-          <TabsContent value="comments" className="flex-1 flex flex-col m-0">
+            {/* Sidebar Content */}
+            <TabsContent value="comments" className="flex-1 flex flex-col m-0">
             {/* Stats Bar */}
             <div className="flex items-center gap-4 px-4 py-2 border-b text-sm">
               <span className="text-muted-foreground">
@@ -1007,14 +1006,15 @@ export function VideoReviewClient() {
                 </Button>
               </div>
             </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="workflow" className="flex-1 m-0 p-4 overflow-auto">
-            <ReviewWorkflow
-              session={reviewSession}
-              onCreateSession={() => setShowCreateSessionDialog(true)}
-            />
-          </TabsContent>
+            <TabsContent value="workflow" className="flex-1 m-0 p-4 overflow-auto">
+              <ReviewWorkflow
+                session={reviewSession}
+                onCreateSession={() => setShowCreateSessionDialog(true)}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
