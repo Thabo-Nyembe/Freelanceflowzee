@@ -141,30 +141,34 @@ export function useInvoices(
   filters?: InvoiceFilters,
   options?: Omit<UseQueryOptions, 'queryKey' | 'queryFn'>
 ) {
+  const isDemo = isDemoMode()
+  const emptyData = { data: [], pagination: { page: 1, pageSize: 10, total: 0, totalPages: 0 } }
+
   return useQuery({
     queryKey: ['invoices', page, pageSize, filters],
     queryFn: async () => {
-      // Check for demo mode first
-      if (isDemoMode()) {
+      // Demo mode: return demo invoices
+      if (isDemo) {
         return getDemoInvoices()
       }
 
+      // Regular users: fetch from API
       try {
         const response = await invoicesClient.getInvoices(page, pageSize, filters)
 
         if (!response.success || !response.data) {
-          // Fall back to demo data on error
-          return getDemoInvoices()
+          // Return empty data for regular users (not demo data)
+          return emptyData
         }
 
         return response.data
       } catch {
-        // Fall back to demo data on exception
-        return getDemoInvoices()
+        // Return empty data on exception
+        return emptyData
       }
     },
-    // Return demo data immediately while loading
-    placeholderData: getDemoInvoices(),
+    // Only use demo placeholder for demo mode
+    placeholderData: isDemo ? getDemoInvoices() : emptyData,
     staleTime: STALE_TIMES.USER_DATA,
     ...userDataQueryOptions,
     ...options
@@ -378,61 +382,56 @@ export function useGenerateInvoicePDF() {
  * Get invoice statistics
  */
 export function useInvoiceStats() {
+  const isDemo = isDemoMode()
+  const demoStats = {
+    total_invoices: 24,
+    total_revenue: 156750,
+    outstanding_amount: 23450,
+    overdue_amount: 5200,
+    paid_this_month: 45600,
+    average_invoice_value: 6531,
+    payment_rate: 89,
+    status_breakdown: { draft: 3, sent: 8, paid: 10, overdue: 3 },
+    monthly_revenue: [
+      { month: 'Jan', revenue: 12500, invoices: 4 },
+      { month: 'Feb', revenue: 18200, invoices: 5 },
+      { month: 'Mar', revenue: 15800, invoices: 4 }
+    ]
+  }
+  const emptyStats = {
+    total_invoices: 0,
+    total_revenue: 0,
+    outstanding_amount: 0,
+    overdue_amount: 0,
+    paid_this_month: 0,
+    average_invoice_value: 0,
+    payment_rate: 0,
+    status_breakdown: { draft: 0, sent: 0, paid: 0, overdue: 0 },
+    monthly_revenue: []
+  }
+
   return useQuery({
     queryKey: ['invoice-stats'],
     queryFn: async () => {
-      // Demo mode support
-      if (isDemoMode()) {
-        return {
-          total_invoices: 24,
-          total_revenue: 156750,
-          outstanding_amount: 23450,
-          overdue_amount: 5200,
-          paid_this_month: 45600,
-          average_invoice_value: 6531,
-          payment_rate: 89,
-          status_breakdown: { draft: 3, sent: 8, paid: 10, overdue: 3 },
-          monthly_revenue: [
-            { month: 'Jan', revenue: 12500, invoices: 4 },
-            { month: 'Feb', revenue: 18200, invoices: 5 },
-            { month: 'Mar', revenue: 15800, invoices: 4 }
-          ]
-        }
+      // Demo mode: return demo stats
+      if (isDemo) {
+        return demoStats
       }
 
+      // Regular users: fetch from API
       try {
         const response = await invoicesClient.getInvoiceStats()
 
         if (!response.success || !response.data) {
-          // Return demo stats on error
-          return {
-            total_invoices: 24,
-            total_revenue: 156750,
-            outstanding_amount: 23450,
-            overdue_amount: 5200,
-            paid_this_month: 45600,
-            average_invoice_value: 6531,
-            payment_rate: 89,
-            status_breakdown: { draft: 3, sent: 8, paid: 10, overdue: 3 },
-            monthly_revenue: []
-          }
+          return emptyStats
         }
 
         return response.data
       } catch {
-        return {
-          total_invoices: 24,
-          total_revenue: 156750,
-          outstanding_amount: 23450,
-          overdue_amount: 5200,
-          paid_this_month: 45600,
-          average_invoice_value: 6531,
-          payment_rate: 89,
-          status_breakdown: { draft: 3, sent: 8, paid: 10, overdue: 3 },
-          monthly_revenue: []
-        }
+        return emptyStats
       }
     },
+    placeholderData: isDemo ? demoStats : emptyStats,
     staleTime: STALE_TIMES.ANALYTICS,
     ...analyticsQueryOptions,
     refetchInterval: 60000 // Refetch every minute

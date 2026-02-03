@@ -247,7 +247,7 @@ export default function AIDesignClient() {
     stats: dbStats,
     isLoading,
     error: designsError,
-    refetch: fetchDesigns
+    fetchDesigns
   } = useAIDesigns([], {
     style: selectedStyle !== 'photorealistic' ? selectedStyle as DBAIDesign['style'] : undefined,
     status: 'completed' // Focus on completed designs

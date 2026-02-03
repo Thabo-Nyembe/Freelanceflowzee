@@ -16,6 +16,88 @@ import {
   FileFilters,
   StorageStats
 } from './files-client'
+import { isDemoMode } from './base-client'
+
+// Demo files data for showcase
+function getDemoFiles() {
+  const now = new Date()
+  const items: FileItem[] = [
+    {
+      id: 'demo-file-1',
+      user_id: 'demo',
+      name: 'project-proposal.pdf',
+      original_name: 'Project Proposal Q1 2024.pdf',
+      mime_type: 'application/pdf',
+      size: 2540000,
+      storage_path: '/files/demo/project-proposal.pdf',
+      folder_id: null,
+      is_public: false,
+      is_starred: true,
+      is_deleted: false,
+      metadata: {},
+      created_at: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-file-2',
+      user_id: 'demo',
+      name: 'design-mockups.zip',
+      original_name: 'Design Mockups v2.zip',
+      mime_type: 'application/zip',
+      size: 15800000,
+      storage_path: '/files/demo/design-mockups.zip',
+      folder_id: null,
+      is_public: false,
+      is_starred: false,
+      is_deleted: false,
+      metadata: {},
+      created_at: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-file-3',
+      user_id: 'demo',
+      name: 'brand-guidelines.png',
+      original_name: 'Brand Guidelines 2024.png',
+      mime_type: 'image/png',
+      size: 4200000,
+      storage_path: '/files/demo/brand-guidelines.png',
+      folder_id: null,
+      is_public: true,
+      is_starred: true,
+      is_deleted: false,
+      metadata: {},
+      created_at: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-file-4',
+      user_id: 'demo',
+      name: 'meeting-recording.mp4',
+      original_name: 'Client Meeting Recording.mp4',
+      mime_type: 'video/mp4',
+      size: 85000000,
+      storage_path: '/files/demo/meeting-recording.mp4',
+      folder_id: null,
+      is_public: false,
+      is_starred: false,
+      is_deleted: false,
+      metadata: {},
+      created_at: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ]
+
+  return {
+    items,
+    pagination: {
+      page: 1,
+      pageSize: 50,
+      total: items.length,
+      totalPages: 1
+    }
+  }
+}
 
 /**
  * Get all files with pagination and filters
@@ -26,15 +108,27 @@ export function useFiles(
   filters?: FileFilters,
   options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>
 ) {
+  const isDemo = isDemoMode()
+  const emptyData = { items: [], pagination: { page: 1, pageSize: 50, total: 0, totalPages: 0 } }
+
   return useQuery({
     queryKey: ['files', page, pageSize, filters],
     queryFn: async () => {
+      // Demo mode: return demo files
+      if (isDemo) {
+        return getDemoFiles()
+      }
+
+      // Regular users: fetch from API
       const response = await filesClient.getFiles(page, pageSize, filters)
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to fetch files')
+        // Return empty data for regular users on error (not demo data)
+        return emptyData
       }
       return response.data
     },
+    // Only use demo placeholder for demo mode
+    placeholderData: isDemo ? getDemoFiles() : emptyData,
     ...options
   })
 }
@@ -309,15 +403,45 @@ export function useCreateFolder() {
 export function useStorageStats(
   options?: Omit<UseQueryOptions<StorageStats>, 'queryKey' | 'queryFn'>
 ) {
+  const isDemo = isDemoMode()
+  const demoStats: StorageStats = {
+    total_files: 24,
+    total_size_bytes: 256000000, // 256 MB
+    starred_files: 5,
+    shared_files: 8,
+    storage_limit_bytes: 5000000000, // 5 GB
+    storage_used_percentage: 5.12
+  }
+  const emptyStats: StorageStats = {
+    total_files: 0,
+    total_size_bytes: 0,
+    starred_files: 0,
+    shared_files: 0,
+    storage_limit_bytes: 5000000000,
+    storage_used_percentage: 0
+  }
+
   return useQuery({
     queryKey: ['storage-stats'],
     queryFn: async () => {
-      const response = await filesClient.getStorageStats()
-      if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to fetch storage stats')
+      // Demo mode: return demo stats
+      if (isDemo) {
+        return demoStats
       }
-      return response.data
+
+      // Regular users: fetch from API
+      try {
+        const response = await filesClient.getStorageStats()
+        if (!response.success || !response.data) {
+          return emptyStats
+        }
+        return response.data
+      } catch {
+        return emptyStats
+      }
     },
+    // Only use demo placeholder for demo mode
+    placeholderData: isDemo ? demoStats : emptyStats,
     ...options
   })
 }

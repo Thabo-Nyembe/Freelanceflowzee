@@ -2147,19 +2147,19 @@ export default function TeamClient() {
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Total Members</span>
-                <span className="font-semibold">{members.length}</span>
+                <span className="font-semibold">{teamMembers.length}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Online Now</span>
-                <span className="font-semibold text-green-600">{members.filter(m => m.status === 'online').length}</span>
+                <span className="font-semibold text-green-600">{teamMembers.filter(m => m.status === 'online').length}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Busy</span>
-                <span className="font-semibold text-amber-600">{members.filter(m => m.status === 'busy').length}</span>
+                <span className="font-semibold text-amber-600">{teamMembers.filter(m => m.status === 'busy').length}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Departments</span>
-                <span className="font-semibold">{[...new Set(members.map(m => m.department))].length}</span>
+                <span className="font-semibold">{[...new Set(teamMembers.map(m => m.department))].length}</span>
               </div>
             </CardContent>
           </Card>
@@ -2171,24 +2171,24 @@ export default function TeamClient() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {members.filter(m => m.status === 'offline').length > members.length * 0.5 && (
+              {teamMembers.filter(m => m.status === 'offline').length > teamMembers.length * 0.5 && (
                 <p className="text-sm text-amber-600 dark:text-amber-400">
                   Over 50% of team members offline - check availability
                 </p>
               )}
-              {members.length === 0 && (
+              {teamMembers.length === 0 && (
                 <p className="text-sm text-blue-600 dark:text-blue-400">
                   No team members yet - invite collaborators to get started
                 </p>
               )}
-              {members.length > 0 && members.filter(m => m.status === 'online').length === members.length && (
+              {teamMembers.length > 0 && teamMembers.filter(m => m.status === 'online').length === teamMembers.length && (
                 <p className="text-sm text-green-600 dark:text-green-400">
                   All team members are online - great time for collaboration!
                 </p>
               )}
-              {members.length > 0 && (
+              {teamMembers.length > 0 && (
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Team is ready - {members.filter(m => m.projects > 0).length} member(s) assigned to projects
+                  Team is ready - {teamMembers.filter(m => m.projects > 0).length} member(s) assigned to projects
                 </p>
               )}
             </CardContent>

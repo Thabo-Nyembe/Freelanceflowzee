@@ -103,28 +103,31 @@ export function useEvents(
   filters?: EventFilters,
   options?: Omit<UseQueryOptions<CalendarEvent[]>, 'queryKey' | 'queryFn'>
 ) {
+  const isDemo = isDemoMode()
+  const emptyEvents: CalendarEvent[] = []
+
   return useQuery({
     queryKey: ['calendar-events', startDate, endDate, filters],
     queryFn: async () => {
-      // Check for demo mode (works on client side)
-      if (isDemoMode()) {
+      // Demo mode: return demo events
+      if (isDemo) {
         return getDemoEvents()
       }
 
+      // Regular users: fetch from API
       try {
         const response = await calendarClient.getEvents(startDate, endDate, filters)
         if (!response.success || !response.data) {
-          // Always fall back to demo data on any error
-          return getDemoEvents()
+          // Return empty data for regular users (not demo data)
+          return emptyEvents
         }
         return response.data
       } catch {
-        // Always fall back to demo data on any error
-        return getDemoEvents()
+        return emptyEvents
       }
     },
-    // Return demo data immediately while loading
-    placeholderData: getDemoEvents(),
+    // Only use demo placeholder for demo mode
+    placeholderData: isDemo ? getDemoEvents() : emptyEvents,
     ...options
   })
 }
@@ -401,24 +404,40 @@ export function useUpdateBookingStatus() {
 export function useCalendarStats(
   options?: Omit<UseQueryOptions<CalendarStats>, 'queryKey' | 'queryFn'>
 ) {
+  const isDemo = isDemoMode()
+  const emptyStats: CalendarStats = {
+    total_events: 0,
+    upcoming_events: 0,
+    recurring_events: 0,
+    this_week_events: 0,
+    this_month_events: 0,
+    total_bookings: 0,
+    pending_bookings: 0,
+    confirmed_bookings: 0,
+    busiest_day: 'Monday',
+    average_events_per_week: 0
+  }
+
   return useQuery({
     queryKey: ['calendar-stats'],
     queryFn: async () => {
-      // Demo mode support
-      if (isDemoMode()) {
+      // Demo mode: return demo stats
+      if (isDemo) {
         return getDemoStats()
       }
 
+      // Regular users: fetch from API
       try {
         const response = await calendarClient.getCalendarStats()
         if (!response.success || !response.data) {
-          return getDemoStats()
+          return emptyStats
         }
         return response.data
       } catch {
-        return getDemoStats()
+        return emptyStats
       }
     },
+    placeholderData: isDemo ? getDemoStats() : emptyStats,
     staleTime: 30000, // Stats are fresh for 30 seconds
     ...options
   })

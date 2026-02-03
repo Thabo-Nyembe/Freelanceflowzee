@@ -98,6 +98,100 @@ interface CommunityHubProps {
 // MIGRATED: Batch #10 - Removed mock data, using database hooks
 const logger = createFeatureLogger('CommunityHub')
 
+// Demo/fallback data for when database is unavailable
+const MOCK_MEMBERS: CommunityMember[] = [
+  {
+    id: 'demo-member-1',
+    name: 'Alex Johnson',
+    username: '@alexj',
+    avatar: '/avatars/demo-1.jpg',
+    bio: 'Full-stack developer passionate about building great products',
+    location: 'San Francisco, CA',
+    skills: ['React', 'Node.js', 'TypeScript', 'AWS'],
+    rating: 4.9,
+    projects: 24,
+    joined: '2023-06-15',
+    verified: true,
+    online: true
+  },
+  {
+    id: 'demo-member-2',
+    name: 'Sarah Chen',
+    username: '@sarahc',
+    avatar: '/avatars/demo-2.jpg',
+    bio: 'UX/UI designer creating beautiful and intuitive experiences',
+    location: 'New York, NY',
+    skills: ['Figma', 'UI Design', 'User Research', 'Prototyping'],
+    rating: 4.8,
+    projects: 31,
+    joined: '2023-03-20',
+    verified: true,
+    online: false
+  },
+  {
+    id: 'demo-member-3',
+    name: 'Marcus Williams',
+    username: '@marcusw',
+    avatar: '/avatars/demo-3.jpg',
+    bio: 'Mobile developer specializing in iOS and Android apps',
+    location: 'Austin, TX',
+    skills: ['Swift', 'Kotlin', 'Flutter', 'Firebase'],
+    rating: 4.7,
+    projects: 18,
+    joined: '2023-09-01',
+    verified: false,
+    online: true
+  }
+]
+
+const MOCK_POSTS: Post[] = [
+  {
+    id: 'demo-post-1',
+    author: MOCK_MEMBERS[0],
+    content: 'Just launched our new project management feature! Check it out and let me know what you think. #productivity #launch',
+    tags: ['productivity', 'launch', 'feature'],
+    likes: 42,
+    comments: 8,
+    shares: 5,
+    bookmarked: false,
+    liked: false,
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    type: 'text'
+  },
+  {
+    id: 'demo-post-2',
+    author: MOCK_MEMBERS[1],
+    content: 'Looking for a React developer to collaborate on an exciting fintech project. Remote-friendly, competitive rates.',
+    tags: ['react', 'fintech', 'hiring'],
+    likes: 28,
+    comments: 15,
+    shares: 12,
+    bookmarked: false,
+    liked: false,
+    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+    type: 'job',
+    projectData: {
+      title: 'Fintech Dashboard',
+      description: 'Building a modern trading dashboard',
+      skills: ['React', 'TypeScript', 'D3.js'],
+      budget: '$5,000 - $10,000'
+    }
+  },
+  {
+    id: 'demo-post-3',
+    author: MOCK_MEMBERS[2],
+    content: 'What\'s the best approach for handling offline-first mobile apps? Looking for architecture recommendations.',
+    tags: ['mobile', 'architecture', 'question'],
+    likes: 35,
+    comments: 22,
+    shares: 3,
+    bookmarked: false,
+    liked: false,
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    type: 'question'
+  }
+]
+
 export default function CommunityHub({ currentUserId, onPostCreate, onMemberConnect }: CommunityHubProps) {
   const [posts, setPosts] = useState<Post[]>([])
   const [members, setMembers] = useState<CommunityMember[]>([])

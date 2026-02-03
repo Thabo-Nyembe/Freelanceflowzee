@@ -2079,7 +2079,7 @@ export function BadgesClient() {
               </div>
               <ScrollArea className="h-[300px] border rounded-lg p-2">
                 <div className="space-y-2">
-                  {mockTeamMembers.map((member) => {
+                  {teamMembers.map((member) => {
                     const isSelected = selectedMembers.includes(member.id)
                     return (
                       <div
