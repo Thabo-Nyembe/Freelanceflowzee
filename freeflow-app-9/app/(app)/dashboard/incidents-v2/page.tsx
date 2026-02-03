@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import AssetsClient from './assets-client'
+import IncidentsClient from './incidents-client'
 
 export default function Page() {
-  return <AssetsClient />
+  return <IncidentsClient />
 }
