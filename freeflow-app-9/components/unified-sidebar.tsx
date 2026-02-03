@@ -808,6 +808,125 @@ const sidebarItems: SidebarItem[] = [
     name: 'Recruitment',
     href: '/dashboard/recruitment-v2',
     icon: UserPlus
+  },
+  {
+    name: 'Onboarding',
+    href: '/dashboard/onboarding-v2',
+    icon: UserPlus
+  },
+  {
+    name: 'Payroll',
+    href: '/dashboard/payroll-v2',
+    icon: DollarSign
+  },
+  {
+    name: 'Leave Management',
+    href: '/dashboard/leave-management-v2',
+    icon: Calendar
+  },
+  {
+    name: 'Training',
+    href: '/dashboard/training-v2',
+    icon: GraduationCap
+  },
+  // IT Support
+  {
+    name: 'Helpdesk',
+    href: '/dashboard/helpdesk-v2',
+    icon: Phone
+  },
+  {
+    name: 'Tickets',
+    href: '/dashboard/tickets-v2',
+    icon: FileText
+  },
+  {
+    name: 'Incidents',
+    href: '/dashboard/incidents-v2',
+    icon: AlertCircle
+  },
+  {
+    name: 'IT Assets',
+    href: '/dashboard/assets-v2',
+    icon: Laptop
+  },
+  // Compliance & Legal
+  {
+    name: 'Audits',
+    href: '/dashboard/audits-v2',
+    icon: FileText
+  },
+  {
+    name: 'Policies',
+    href: '/dashboard/policies-v2',
+    icon: FileText
+  },
+  {
+    name: 'Contracts',
+    href: '/dashboard/contracts-v2',
+    icon: FileText
+  },
+  {
+    name: 'Risks',
+    href: '/dashboard/risks-v2',
+    icon: AlertTriangle
+  },
+  {
+    name: 'Compliance Tracking',
+    href: '/dashboard/compliance-tracking-v2',
+    icon: CheckSquare
+  },
+  // Customer Success
+  {
+    name: 'Customer Service',
+    href: '/dashboard/customer-service-v2',
+    icon: Users
+  },
+  {
+    name: 'Customer Success',
+    href: '/dashboard/customer-success-v2',
+    icon: TrendingUp
+  },
+  {
+    name: 'Feedback Surveys',
+    href: '/dashboard/feedback-surveys-v2',
+    icon: MessageSquare
+  },
+  {
+    name: 'Knowledge Base',
+    href: '/dashboard/knowledge-base-v2',
+    icon: BookOpen
+  },
+  {
+    name: 'Live Chat',
+    href: '/dashboard/live-chat-v2',
+    icon: MessageSquare
+  },
+  // Operations
+  {
+    name: 'Inventory',
+    href: '/dashboard/inventory-v2',
+    icon: Package
+  },
+  {
+    name: 'Supply Chain',
+    href: '/dashboard/supply-chain-v2',
+    icon: Truck
+  },
+  {
+    name: 'Quality Control',
+    href: '/dashboard/quality-control-v2',
+    icon: CheckSquare
+  },
+  {
+    name: 'Maintenance Schedules',
+    href: '/dashboard/maintenance-schedules-v2',
+    icon: Clock
+  },
+  {
+    name: 'Work Orders',
+    href: '/dashboard/work-orders-v2',
+    icon: Briefcase
   }
 ]
 
