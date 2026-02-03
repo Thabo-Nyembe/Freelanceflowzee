@@ -64,7 +64,26 @@ import {
   Award,
   AlertCircle,
   Store,
-  Layout
+  Layout,
+  Wallet,
+  Receipt,
+  Calculator,
+  PiggyBank,
+  LineChart,
+  Map,
+  ListChecks,
+  Rocket,
+  Bug,
+  TestTube,
+  ShieldAlert,
+  FileWarning,
+  ShieldCheck,
+  ScanSearch,
+  GraduationCap,
+  Target as SkillsIcon,
+  Star,
+  UserMinus,
+  UserPlus
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -413,6 +432,105 @@ const sidebarItems: SidebarItem[] = [
     name: 'System Health',
     href: '/dashboard/system-health-v2',
     icon: Heart
+  },
+  // Finance
+  {
+    name: 'Budgets',
+    href: '/dashboard/budgets-v2',
+    icon: Wallet
+  },
+  {
+    name: 'Financial Reports',
+    href: '/dashboard/financial-reports-v2',
+    icon: Receipt
+  },
+  {
+    name: 'Taxes',
+    href: '/dashboard/taxes-v2',
+    icon: Calculator
+  },
+  {
+    name: 'Revenue Tracking',
+    href: '/dashboard/revenue-tracking-v2',
+    icon: PiggyBank
+  },
+  {
+    name: 'Cost Analysis',
+    href: '/dashboard/cost-analysis-v2',
+    icon: LineChart
+  },
+  // Product
+  {
+    name: 'Roadmap',
+    href: '/dashboard/roadmap-v2',
+    icon: Map
+  },
+  {
+    name: 'Features Backlog',
+    href: '/dashboard/features-backlog-v2',
+    icon: ListChecks
+  },
+  {
+    name: 'Releases',
+    href: '/dashboard/releases-v2',
+    icon: Rocket
+  },
+  {
+    name: 'Bugs Tracking',
+    href: '/dashboard/bugs-tracking-v2',
+    icon: Bug
+  },
+  {
+    name: 'Testing',
+    href: '/dashboard/testing-v2',
+    icon: TestTube
+  },
+  // Security
+  {
+    name: 'Access Logs',
+    href: '/dashboard/access-logs-v2',
+    icon: ShieldAlert
+  },
+  {
+    name: 'Vulnerabilities',
+    href: '/dashboard/vulnerabilities-v2',
+    icon: FileWarning
+  },
+  {
+    name: 'Security Policies',
+    href: '/dashboard/security-policies-v2',
+    icon: ShieldCheck
+  },
+  {
+    name: 'Penetration Testing',
+    href: '/dashboard/penetration-testing-v2',
+    icon: ScanSearch
+  },
+  // HR
+  {
+    name: 'Certifications',
+    href: '/dashboard/certifications-v2',
+    icon: GraduationCap
+  },
+  {
+    name: 'Skills Matrix',
+    href: '/dashboard/skills-matrix-v2',
+    icon: SkillsIcon
+  },
+  {
+    name: 'Performance Reviews',
+    href: '/dashboard/performance-reviews-v2',
+    icon: Star
+  },
+  {
+    name: 'Offboarding',
+    href: '/dashboard/offboarding-v2',
+    icon: UserMinus
+  },
+  {
+    name: 'Recruitment',
+    href: '/dashboard/recruitment-v2',
+    icon: UserPlus
   }
 ]
 
