@@ -1,0 +1,335 @@
+openapi: 3.0.3
+info:
+  title: KAZI Platform API
+  description: Complete REST API for the KAZI freelance management platform
+  version: 1.0.0
+  contact:
+    name: KAZI Support
+    email: support@kaziplatform.com
+
+servers:
+  - url: https://api.kaziplatform.com/v1
+    description: Production server
+  - url: http://localhost:9323/api
+    description: Development server
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+        client_id:
+          type: string
+        status:
+          type: string
+          enum: [draft, sent, paid, overdue, cancelled]
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+              quantity:
+                type: number
+              rate:
+                type: number
+        total:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+
+paths:
+  /v1/invoices:
+    get:
+      summary: Get invoices
+      tags: [Invoices]
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Invoice'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Invoice'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create invoice
+      tags: [Invoices]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [client_id, items]
+              properties:
+                client_id:
+                  type: string
+                items:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+
+    patch:
+      summary: Update invoice (partial)
+      tags: [Invoices]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: string
+                status:
+                  type: string
+                notes:
+                  type: string
+            examples:
+              updateStatus:
+                value:
+                  id: "inv-123"
+                  status: "paid"
+      responses:
+        '200':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    delete:
+      summary: Delete invoice
+      tags: [Invoices]
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /music:
+    patch:
+      summary: Update music track
+      tags: [Music]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [trackId]
+              properties:
+                trackId:
+                  type: string
+                name:
+                  type: string
+                genre:
+                  type: string
+            examples:
+              rename:
+                value:
+                  trackId: "track-123"
+                  name: "New Track Name"
+      responses:
+        '200':
+          description: Updated
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+    delete:
+      summary: Delete music track
+      tags: [Music]
+      parameters:
+        - name: trackId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+
+  /collaboration/comments:
+    patch:
+      summary: Update comment
+      tags: [Collaboration]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [commentId]
+              properties:
+                commentId:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Updated
+        '403':
+          description: Not comment owner
+
+    delete:
+      summary: Delete comment
+      tags: [Collaboration]
+      parameters:
+        - name: commentId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+
+  /mobile-app:
+    patch:
+      summary: Update mobile app resource
+      tags: [Mobile App]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, id]
+              properties:
+                type:
+                  type: string
+                  enum: [device, screen, build, test]
+                id:
+                  type: string
+      responses:
+        '200':
+          description: Updated
+
+    delete:
+      summary: Delete mobile app resource
+      tags: [Mobile App]
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+
+  /settings:
+    patch:
+      summary: Update settings (alias for PUT)
+      tags: [Settings]
+      description: Supports partial updates to user settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated
+
+    delete:
+      summary: Delete API key or terminate session
+      tags: [Settings]
+      parameters:
+        - name: category
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [api-key, session]
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+
+components:
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
