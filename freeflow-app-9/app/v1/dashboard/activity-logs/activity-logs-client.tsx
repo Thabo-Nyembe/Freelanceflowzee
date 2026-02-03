@@ -464,24 +464,38 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     })
   }, [logsAsLogEntries, searchQuery, levelFilter, sourceFilter])
 
-  // Loading state - placed after all hooks
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
-  }
+  // Parser settings state - MUST be before early returns
+  const [parserSettings, setParserSettings] = useState<Record<string, boolean>>({
+    'JSON Parser': true,
+    'Nginx Parser': true,
+    'Apache Parser': false,
+    'Syslog Parser': true,
+    'Custom Regex': true
+  })
 
-  // Error state - placed after all hooks
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-4">
-        <p className="text-red-500">Error loading data</p>
-        <Button onClick={() => refetch()}>Retry</Button>
-      </div>
-    )
-  }
+  // Alert rules state - MUST be before early returns
+  const [alertRules, setAlertRules] = useState<Record<string, boolean>>({
+    'High Error Rate': true,
+    'Slow Response Time': true,
+    'Service Down': true,
+    'Memory Pressure': false,
+    'Disk Full': true
+  })
+
+  // Load parser and alert settings from localStorage - MUST be before early returns
+  useEffect(() => {
+    try {
+      const storedParsers = localStorage.getItem('log-parsers')
+      if (storedParsers) setParserSettings(JSON.parse(storedParsers))
+      const storedAlerts = localStorage.getItem('log-alert-rules')
+      if (storedAlerts) setAlertRules(JSON.parse(storedAlerts))
+    } catch (err) {
+      console.error('Failed to load settings:', err)
+    }
+  }, [])
+
+  // NOTE: Removed early returns for loading/error states to avoid hooks order issues
+  // Loading and error states are now handled in the main render with conditional rendering
 
   const getLevelColor = (level: LogLevel) => {
     switch (level) {
@@ -1190,35 +1204,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     )
   }, [savedQueries])
 
-  // Parser settings state
-  const [parserSettings, setParserSettings] = useState<Record<string, boolean>>({
-    'JSON Parser': true,
-    'Nginx Parser': true,
-    'Apache Parser': false,
-    'Syslog Parser': true,
-    'Custom Regex': true
-  })
-
-  // Alert rules state
-  const [alertRules, setAlertRules] = useState<Record<string, boolean>>({
-    'High Error Rate': true,
-    'Slow Response Time': true,
-    'Service Down': true,
-    'Memory Pressure': false,
-    'Disk Full': true
-  })
-
-  // Load parser and alert settings from localStorage
-  useEffect(() => {
-    try {
-      const storedParsers = localStorage.getItem('log-parsers')
-      if (storedParsers) setParserSettings(JSON.parse(storedParsers))
-      const storedAlerts = localStorage.getItem('log-alert-rules')
-      if (storedAlerts) setAlertRules(JSON.parse(storedAlerts))
-    } catch (err) {
-      console.error('Failed to load settings:', err)
-    }
-  }, [])
+  // Note: parserSettings and alertRules hooks moved to before early returns
 
   const handleToggleParser = useCallback((parserName: string, enabled: boolean) => {
     const updated = { ...parserSettings, [parserName]: enabled }
@@ -1327,6 +1313,19 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
+      {/* Handle loading state */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-50">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+        </div>
+      )}
+      {/* Handle error state */}
+      {error && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/80 z-50">
+          <p className="text-red-500">Error loading data</p>
+          <Button onClick={() => refetch()}>Retry</Button>
+        </div>
+      )}
       {/* Premium Header */}
       <div className="bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
         <div className="max-w-[1800px] mx-auto px-6 py-8">

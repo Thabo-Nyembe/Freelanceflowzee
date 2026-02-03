@@ -728,12 +728,12 @@ export default function ResourcesClient() {
 
   // Quick actions for the toolbar
   const resourcesQuickActions = [
-    { id: '1', label: 'Add Resource', icon: UserPlus, onClick: () => setShowAddResourceModal(true), variant: 'primary' as const },
-    { id: '2', label: 'Export Data', icon: Download, onClick: handleExportResources, variant: 'secondary' as const },
-    { id: '3', label: 'View Schedule', icon: Calendar, onClick: () => setActiveTab('schedule'), variant: 'secondary' as const },
-    { id: '4', label: 'Skills Matrix', icon: Star, onClick: () => setActiveTab('skills'), variant: 'secondary' as const },
-    { id: '5', label: 'Refresh', icon: RefreshCw, onClick: handleSyncResources, variant: 'ghost' as const },
-    { id: '6', label: 'Share Report', icon: Share2, onClick: () => shareContent({ title: 'Resource Report', text: 'Team resource allocation report', url: window.location.href }), variant: 'ghost' as const },
+    { id: '1', label: 'Add Resource', icon: <UserPlus className="h-4 w-4" />, action: () => setShowAddResourceModal(true) },
+    { id: '2', label: 'Export Data', icon: <Download className="h-4 w-4" />, action: handleExportResources },
+    { id: '3', label: 'View Schedule', icon: <CalendarDays className="h-4 w-4" />, action: () => setActiveTab('schedule') },
+    { id: '4', label: 'Skills Matrix', icon: <Star className="h-4 w-4" />, action: () => setActiveTab('skills') },
+    { id: '5', label: 'Refresh', icon: <RefreshCw className="h-4 w-4" />, action: handleSyncResources },
+    { id: '6', label: 'Share Report', icon: <Share2 className="h-4 w-4" />, action: () => shareContent({ title: 'Resource Report', text: 'Team resource allocation report', url: window.location.href }) },
   ]
 
   return (
