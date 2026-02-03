@@ -78,6 +78,13 @@ export function useInvoices(options: UseInvoicesOptions = {}) {
       const params = new URLSearchParams()
       if (status && status !== 'all') params.set('status', status)
       if (limit) params.set('limit', String(limit))
+      // Check for demo mode from URL or cookie
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.get('demo') === 'true') params.set('demo', 'true')
+        const demoCookie = document.cookie.split(';').find(c => c.trim().startsWith('demo_mode='))
+        if (demoCookie?.includes('true')) params.set('demo', 'true')
+      }
 
       // Fetch via API (uses service role key, bypasses RLS)
       const response = await fetch(`/api/invoices?${params.toString()}`, {

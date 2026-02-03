@@ -12,6 +12,38 @@
 import { createClient } from '@/lib/supabase/client'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+/**
+ * Check if demo mode is enabled via URL param, cookie, or localStorage
+ */
+export function isDemoMode(): boolean {
+  if (typeof window === 'undefined') return false
+
+  // Check URL param
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('demo') === 'true') return true
+
+  // Check cookie
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'demo_mode' && value === 'true') return true
+  }
+
+  // Check localStorage
+  try {
+    if (localStorage.getItem('demo_mode') === 'true') return true
+  } catch {}
+
+  return false
+}
+
+/**
+ * Get demo user ID for demo mode
+ */
+export function getDemoUserId(): string {
+  return '00000000-0000-0000-0000-000000000001'
+}
+
 export interface ApiResponse<T> {
   data?: T
   error?: string

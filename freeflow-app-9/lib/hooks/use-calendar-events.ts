@@ -181,6 +181,8 @@ export function useCalendarEvents(options: UseCalendarEventsOptions = {}) {
       const params = new URLSearchParams()
       if (status && status !== 'all') params.set('status', status)
       if (limit) params.set('limit', String(limit))
+      // Add demo mode parameter if enabled
+      if (isDemoModeEnabled()) params.set('demo', 'true')
 
       const response = await fetch(`/api/calendar?${params.toString()}`, {
         credentials: 'include'
