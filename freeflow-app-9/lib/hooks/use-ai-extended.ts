@@ -16,7 +16,7 @@ export function useAIAnalysis(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -36,16 +36,16 @@ export function useAIAnalysis(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, error, refresh: fetch }
+  return { data, isLoading, error, refresh: loadData }
 }
 
 export function useAIAnalytics(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -65,9 +65,9 @@ export function useAIAnalytics(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, error, refresh: fetch }
+  return { data, isLoading, error, refresh: loadData }
 }
 
 // ============================================
@@ -78,7 +78,7 @@ export function useAIApiKeys(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -98,7 +98,7 @@ export function useAIApiKeys(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
   const create = useCallback(async (input: any) => {
     try {
@@ -129,7 +129,7 @@ export function useAIApiKeys(userId?: string) {
     }
   }, [])
 
-  return { data, isLoading, error, create, remove, refresh: fetch }
+  return { data, isLoading, error, create, remove, refresh: loadData }
 }
 
 // ============================================
@@ -140,7 +140,7 @@ export function useAIAssetCollections(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -160,7 +160,7 @@ export function useAIAssetCollections(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
   const create = useCallback(async (input: any) => {
     try {
@@ -178,13 +178,13 @@ export function useAIAssetCollections(userId?: string) {
     }
   }, [userId])
 
-  return { data, isLoading, error, create, refresh: fetch }
+  return { data, isLoading, error, create, refresh: loadData }
 }
 
 export function useAIAssetDownloads(assetId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!assetId) { setIsLoading(false); return }
@@ -200,15 +200,15 @@ export function useAIAssetDownloads(assetId?: string) {
     }
   }, [assetId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIAssetLikes(assetId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!assetId) { setIsLoading(false); return }
@@ -224,15 +224,15 @@ export function useAIAssetLikes(assetId?: string) {
     }
   }, [assetId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIAssetVersions(assetId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!assetId) { setIsLoading(false); return }
@@ -249,9 +249,9 @@ export function useAIAssetVersions(assetId?: string) {
     }
   }, [assetId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -262,7 +262,7 @@ export function useAIBrandAssets(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -281,15 +281,15 @@ export function useAIBrandAssets(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, error, refresh: fetch }
+  return { data, isLoading, error, refresh: loadData }
 }
 
 export function useAIBrandGuidelines(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -305,15 +305,15 @@ export function useAIBrandGuidelines(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIBrandVoices(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -329,9 +329,9 @@ export function useAIBrandVoices(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -341,7 +341,7 @@ export function useAIBrandVoices(userId?: string) {
 export function useAIChatHistory(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -358,15 +358,15 @@ export function useAIChatHistory(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIConversationBookmarks(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -382,15 +382,15 @@ export function useAIConversationBookmarks(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIConversationShares(conversationId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!conversationId) { setIsLoading(false); return }
@@ -406,9 +406,9 @@ export function useAIConversationShares(conversationId?: string) {
     }
   }, [conversationId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -418,7 +418,7 @@ export function useAIConversationShares(conversationId?: string) {
 export function useAICodeStats(userId?: string) {
   const [data, setData] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -435,9 +435,9 @@ export function useAICodeStats(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -447,7 +447,7 @@ export function useAICodeStats(userId?: string) {
 export function useAICollaboration(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -463,9 +463,9 @@ export function useAICollaboration(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -475,7 +475,7 @@ export function useAICollaboration(userId?: string) {
 export function useAICollectionAssets(collectionId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!collectionId) { setIsLoading(false); return }
@@ -491,15 +491,15 @@ export function useAICollectionAssets(collectionId?: string) {
     }
   }, [collectionId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAICollectionImages(collectionId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!collectionId) { setIsLoading(false); return }
@@ -515,9 +515,9 @@ export function useAICollectionImages(collectionId?: string) {
     }
   }, [collectionId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -527,7 +527,7 @@ export function useAICollectionImages(collectionId?: string) {
 export function useAIColorPalettes(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -543,9 +543,9 @@ export function useAIColorPalettes(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -555,7 +555,7 @@ export function useAIColorPalettes(userId?: string) {
 export function useAIConfigs(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -571,9 +571,9 @@ export function useAIConfigs(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -583,7 +583,7 @@ export function useAIConfigs(userId?: string) {
 export function useAIContentTemplates(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -597,15 +597,15 @@ export function useAIContentTemplates(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIContentVariations(contentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!contentId) { setIsLoading(false); return }
@@ -621,9 +621,9 @@ export function useAIContentVariations(contentId?: string) {
     }
   }, [contentId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -633,7 +633,7 @@ export function useAIContentVariations(contentId?: string) {
 export function useAICreateApiKeys(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -649,15 +649,15 @@ export function useAICreateApiKeys(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAICreateAssets(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -674,15 +674,15 @@ export function useAICreateAssets(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAICreateCollaborationSessions(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -698,15 +698,15 @@ export function useAICreateCollaborationSessions(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAICreateCostTracking(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -723,15 +723,15 @@ export function useAICreateCostTracking(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAICreateFavorites(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -747,15 +747,15 @@ export function useAICreateFavorites(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAICreateFileUploads(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -772,15 +772,15 @@ export function useAICreateFileUploads(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAICreateGenerationHistory(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -797,15 +797,15 @@ export function useAICreateGenerationHistory(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAICreateGenerations(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -822,15 +822,15 @@ export function useAICreateGenerations(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAICreateModelUsage(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -846,15 +846,15 @@ export function useAICreateModelUsage(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAICreatePreferences(userId?: string) {
   const [data, setData] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -871,15 +871,15 @@ export function useAICreatePreferences(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAICreateTemplates(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -893,9 +893,9 @@ export function useAICreateTemplates(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -905,7 +905,7 @@ export function useAICreateTemplates(userId?: string) {
 export function useAIDesignConcepts(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -922,15 +922,15 @@ export function useAIDesignConcepts(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIDesignProjects(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -947,9 +947,9 @@ export function useAIDesignProjects(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -959,7 +959,7 @@ export function useAIDesignProjects(userId?: string) {
 export function useAIEmailSequences(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -975,9 +975,9 @@ export function useAIEmailSequences(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -987,7 +987,7 @@ export function useAIEmailSequences(userId?: string) {
 export function useAIEnhancedTools() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -1002,9 +1002,9 @@ export function useAIEnhancedTools() {
     }
   }, [])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1014,7 +1014,7 @@ export function useAIEnhancedTools() {
 export function useAIFeatureUsage(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1030,15 +1030,15 @@ export function useAIFeatureUsage(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIFeatures() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -1053,9 +1053,9 @@ export function useAIFeatures() {
     }
   }, [])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1065,7 +1065,7 @@ export function useAIFeatures() {
 export function useAIGeneratedAssets(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1082,15 +1082,15 @@ export function useAIGeneratedAssets(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIGeneratedContent(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1107,15 +1107,15 @@ export function useAIGeneratedContent(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIGeneratedCopy(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1132,15 +1132,15 @@ export function useAIGeneratedCopy(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIGeneratedImages(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1157,15 +1157,15 @@ export function useAIGeneratedImages(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIGenerationHistory(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1182,9 +1182,9 @@ export function useAIGenerationHistory(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1194,7 +1194,7 @@ export function useAIGenerationHistory(userId?: string) {
 export function useAIImageCollections(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1210,15 +1210,15 @@ export function useAIImageCollections(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIImagePresets(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -1232,9 +1232,9 @@ export function useAIImagePresets(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1244,7 +1244,7 @@ export function useAIImagePresets(userId?: string) {
 export function useAIInsights(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1261,15 +1261,15 @@ export function useAIInsights(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIRecommendations(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1286,9 +1286,9 @@ export function useAIRecommendations(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1298,7 +1298,7 @@ export function useAIRecommendations(userId?: string) {
 export function useAIMessageAttachments(messageId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
@@ -1314,15 +1314,15 @@ export function useAIMessageAttachments(messageId?: string) {
     }
   }, [messageId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIMessageFeedback(messageId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
@@ -1338,9 +1338,9 @@ export function useAIMessageFeedback(messageId?: string) {
     }
   }, [messageId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1350,7 +1350,7 @@ export function useAIMessageFeedback(messageId?: string) {
 export function useAIModelConfigs() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -1365,15 +1365,15 @@ export function useAIModelConfigs() {
     }
   }, [])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIModels() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -1388,9 +1388,9 @@ export function useAIModels() {
     }
   }, [])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1400,7 +1400,7 @@ export function useAIModels() {
 export function useAIOperations(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1417,9 +1417,9 @@ export function useAIOperations(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1429,7 +1429,7 @@ export function useAIOperations(userId?: string) {
 export function useAIProjectAnalyses(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
@@ -1446,9 +1446,9 @@ export function useAIProjectAnalyses(projectId?: string) {
     }
   }, [projectId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1458,7 +1458,7 @@ export function useAIProjectAnalyses(projectId?: string) {
 export function useAIPromptTemplates(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -1472,9 +1472,9 @@ export function useAIPromptTemplates(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1484,7 +1484,7 @@ export function useAIPromptTemplates(userId?: string) {
 export function useAIProviders() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -1499,9 +1499,9 @@ export function useAIProviders() {
     }
   }, [])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1511,7 +1511,7 @@ export function useAIProviders() {
 export function useAIQuickActions(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -1525,9 +1525,9 @@ export function useAIQuickActions(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1537,7 +1537,7 @@ export function useAIQuickActions(userId?: string) {
 export function useAISwipeFile(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1553,9 +1553,9 @@ export function useAISwipeFile(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1565,7 +1565,7 @@ export function useAISwipeFile(userId?: string) {
 export function useAIToolFavorites(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1581,15 +1581,15 @@ export function useAIToolFavorites(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIToolMetrics() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -1603,15 +1603,15 @@ export function useAIToolMetrics() {
     }
   }, [])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIToolReviews(toolId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!toolId) { setIsLoading(false); return }
@@ -1628,15 +1628,15 @@ export function useAIToolReviews(toolId?: string) {
     }
   }, [toolId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIToolUsage(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1652,15 +1652,15 @@ export function useAIToolUsage(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAITools() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -1675,9 +1675,9 @@ export function useAITools() {
     }
   }, [])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1687,7 +1687,7 @@ export function useAITools() {
 export function useAIUsageDaily(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1705,15 +1705,15 @@ export function useAIUsageDaily(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIUsageLogs(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1731,15 +1731,15 @@ export function useAIUsageLogs(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIUsageRecords(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1756,15 +1756,15 @@ export function useAIUsageRecords(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIUsageStats(userId?: string) {
   const [data, setData] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1781,9 +1781,9 @@ export function useAIUsageStats(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1793,7 +1793,7 @@ export function useAIUsageStats(userId?: string) {
 export function useAIVoiceSettings(userId?: string) {
   const [data, setData] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1810,9 +1810,9 @@ export function useAIVoiceSettings(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -1822,7 +1822,7 @@ export function useAIVoiceSettings(userId?: string) {
 export function useAIWorkflowSteps(workflowId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!workflowId) { setIsLoading(false); return }
@@ -1839,15 +1839,15 @@ export function useAIWorkflowSteps(workflowId?: string) {
     }
   }, [workflowId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAIWorkflows(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -1864,7 +1864,7 @@ export function useAIWorkflows(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }

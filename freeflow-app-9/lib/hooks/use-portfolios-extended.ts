@@ -11,33 +11,33 @@ import { createClient } from '@/lib/supabase/client'
 export function usePortfolio(portfolioId?: string) {
   const [portfolio, setPortfolio] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!portfolioId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('portfolios').select('*, portfolio_items(*), portfolio_categories(*), portfolio_testimonials(*)').eq('id', portfolioId).single(); setPortfolio(data) } finally { setIsLoading(false) }
   }, [portfolioId])
-  useEffect(() => { fetch() }, [fetch])
-  return { portfolio, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { portfolio, isLoading, refresh: loadData }
 }
 
 export function usePortfolioBySlug(slug?: string) {
   const [portfolio, setPortfolio] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!slug) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('portfolios').select('*, portfolio_items(*), portfolio_categories(*), portfolio_testimonials(*)').eq('slug', slug).eq('is_public', true).single(); setPortfolio(data) } finally { setIsLoading(false) }
   }, [slug])
-  useEffect(() => { fetch() }, [fetch])
-  return { portfolio, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { portfolio, isLoading, refresh: loadData }
 }
 
 export function usePortfolios(options?: { owner_id?: string; is_public?: boolean; search?: string; limit?: number }) {
   const [portfolios, setPortfolios] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -49,14 +49,14 @@ export function usePortfolios(options?: { owner_id?: string; is_public?: boolean
       setPortfolios(data || [])
     } finally { setIsLoading(false) }
   }, [options?.owner_id, options?.is_public, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { portfolios, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { portfolios, isLoading, refresh: loadData }
 }
 
 export function usePortfolioItems(portfolioId?: string, options?: { category_id?: string; is_featured?: boolean }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!portfolioId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -68,27 +68,27 @@ export function usePortfolioItems(portfolioId?: string, options?: { category_id?
       setItems(data || [])
     } finally { setIsLoading(false) }
   }, [portfolioId, options?.category_id, options?.is_featured])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function usePortfolioCategories(portfolioId?: string) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!portfolioId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('portfolio_categories').select('*, portfolio_items(count)').eq('portfolio_id', portfolioId).order('order', { ascending: true }); setCategories(data || []) } finally { setIsLoading(false) }
   }, [portfolioId])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function usePortfolioTestimonials(portfolioId?: string, options?: { is_approved?: boolean }) {
   const [testimonials, setTestimonials] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!portfolioId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -99,27 +99,27 @@ export function usePortfolioTestimonials(portfolioId?: string, options?: { is_ap
       setTestimonials(data || [])
     } finally { setIsLoading(false) }
   }, [portfolioId, options?.is_approved])
-  useEffect(() => { fetch() }, [fetch])
-  return { testimonials, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { testimonials, isLoading, refresh: loadData }
 }
 
 export function usePortfolioSettings(portfolioId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!portfolioId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('portfolio_settings').select('*').eq('portfolio_id', portfolioId).single(); setSettings(data?.settings || {}) } finally { setIsLoading(false) }
   }, [portfolioId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function usePortfolioViews(portfolioId?: string, options?: { from_date?: string; to_date?: string }) {
   const [views, setViews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!portfolioId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -131,40 +131,40 @@ export function usePortfolioViews(portfolioId?: string, options?: { from_date?: 
       setViews(data || [])
     } finally { setIsLoading(false) }
   }, [portfolioId, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { views, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { views, isLoading, refresh: loadData }
 }
 
 export function useMyPortfolios(userId?: string) {
   const [portfolios, setPortfolios] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('portfolios').select('*, portfolio_items(count)').eq('owner_id', userId).order('updated_at', { ascending: false }); setPortfolios(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { portfolios, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { portfolios, isLoading, refresh: loadData }
 }
 
 export function useFeaturedItems(portfolioId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!portfolioId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('portfolio_items').select('*, portfolio_categories(*)').eq('portfolio_id', portfolioId).eq('is_featured', true).order('order', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
   }, [portfolioId])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function usePortfolioStats(portfolioId?: string) {
   const [stats, setStats] = useState<{ viewCount: number; itemCount: number; testimonialCount: number; categoryCount: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!portfolioId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -183,6 +183,6 @@ export function usePortfolioStats(portfolioId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [portfolioId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useFont(fontId?: string) {
   const [font, setFont] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!fontId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('fonts').select('*, font_families(*), font_licenses(*)').eq('id', fontId).single(); setFont(data) } finally { setIsLoading(false) }
   }, [fontId])
-  useEffect(() => { fetch() }, [fetch])
-  return { font, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { font, isLoading, refresh: loadData }
 }
 
 export function useFonts(options?: { family_id?: string; style?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [fonts, setFonts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useFonts(options?: { family_id?: string; style?: string; is_acti
       setFonts(data || [])
     } finally { setIsLoading(false) }
   }, [options?.family_id, options?.style, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { fonts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { fonts, isLoading, refresh: loadData }
 }
 
 export function useFontFamilies(options?: { category?: string; search?: string; limit?: number }) {
   const [families, setFamilies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -55,40 +55,40 @@ export function useFontFamilies(options?: { category?: string; search?: string; 
       setFamilies(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { families, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { families, isLoading, refresh: loadData }
 }
 
 export function useFontFamily(familyId?: string) {
   const [family, setFamily] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!familyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('font_families').select('*, fonts(*)').eq('id', familyId).single(); setFamily(data) } finally { setIsLoading(false) }
   }, [familyId])
-  useEffect(() => { fetch() }, [fetch])
-  return { family, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { family, isLoading, refresh: loadData }
 }
 
 export function useUserFonts(userId?: string) {
   const [fonts, setFonts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('user_fonts').select('*, fonts(*, font_families(*))').eq('user_id', userId).order('added_at', { ascending: false }); setFonts(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { fonts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { fonts, isLoading, refresh: loadData }
 }
 
 export function useUserFontUploads(userId?: string, options?: { status?: string; limit?: number }) {
   const [uploads, setUploads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -99,26 +99,26 @@ export function useUserFontUploads(userId?: string, options?: { status?: string;
       setUploads(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { uploads, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { uploads, isLoading, refresh: loadData }
 }
 
 export function usePopularFonts(limit?: number) {
   const [fonts, setFonts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('fonts').select('*, font_families(*)').eq('is_active', true).order('download_count', { ascending: false }).limit(limit || 20); setFonts(data || []) } finally { setIsLoading(false) }
   }, [limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { fonts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { fonts, isLoading, refresh: loadData }
 }
 
 export function useFontCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -127,8 +127,8 @@ export function useFontCategories() {
       setCategories(uniqueCategories as string[])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useHasUserFont(userId?: string, fontId?: string) {

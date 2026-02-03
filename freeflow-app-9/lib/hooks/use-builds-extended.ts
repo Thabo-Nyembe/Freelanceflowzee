@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useBuild(buildId?: string) {
   const [build, setBuild] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!buildId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('builds').select('*, build_logs(*), build_artifacts(*)').eq('id', buildId).single(); setBuild(data) } finally { setIsLoading(false) }
   }, [buildId])
-  useEffect(() => { fetch() }, [fetch])
-  return { build, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { build, isLoading, refresh: loadData }
 }
 
 export function useBuilds(options?: { project_id?: string; status?: string; branch?: string; triggered_by?: string; limit?: number }) {
   const [builds, setBuilds] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,60 +37,60 @@ export function useBuilds(options?: { project_id?: string; status?: string; bran
       setBuilds(data || [])
     } finally { setIsLoading(false) }
   }, [options?.project_id, options?.status, options?.branch, options?.triggered_by, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { builds, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { builds, isLoading, refresh: loadData }
 }
 
 export function useBuildLogs(buildId?: string) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!buildId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('build_logs').select('*').eq('build_id', buildId).order('timestamp', { ascending: true }); setLogs(data || []) } finally { setIsLoading(false) }
   }, [buildId])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useBuildArtifacts(buildId?: string) {
   const [artifacts, setArtifacts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!buildId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('build_artifacts').select('*').eq('build_id', buildId).order('created_at', { ascending: false }); setArtifacts(data || []) } finally { setIsLoading(false) }
   }, [buildId])
-  useEffect(() => { fetch() }, [fetch])
-  return { artifacts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { artifacts, isLoading, refresh: loadData }
 }
 
 export function useBuildConfigs(projectId?: string) {
   const [configs, setConfigs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('build_configs').select('*').eq('project_id', projectId).eq('is_active', true).order('name', { ascending: true }); setConfigs(data || []) } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { configs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { configs, isLoading, refresh: loadData }
 }
 
 export function useRecentBuilds(projectId?: string, limit?: number) {
   const [builds, setBuilds] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('builds').select('*').eq('project_id', projectId).order('created_at', { ascending: false }).limit(limit || 10); setBuilds(data || []) } finally { setIsLoading(false) }
   }, [projectId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { builds, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { builds, isLoading, refresh: loadData }
 }
 
 export function useBuildRealtime(buildId?: string) {
@@ -117,7 +117,7 @@ export function useBuildRealtime(buildId?: string) {
 export function useBuildStats(projectId?: string) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; successRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -132,6 +132,6 @@ export function useBuildStats(projectId?: string) {
       setStats({ total, byStatus, successRate })
     } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

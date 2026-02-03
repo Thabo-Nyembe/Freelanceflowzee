@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function useTimesheet(timesheetId?: string) {
   const [timesheet, setTimesheet] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timesheets').select('*, timesheet_entries(*, timesheet_projects(*), timesheet_categories(*)), timesheet_approvals(*, users(*))').eq('id', timesheetId).single(); setTimesheet(data) } finally { setIsLoading(false) }
   }, [timesheetId])
-  useEffect(() => { fetch() }, [fetch])
-  return { timesheet, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timesheet, isLoading, refresh: loadData }
 }
 
 export function useTimesheets(options?: { user_id?: string; status?: string; period_type?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [timesheets, setTimesheets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -53,14 +53,14 @@ export function useTimesheets(options?: { user_id?: string; status?: string; per
       setTimesheets(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.status, options?.period_type, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { timesheets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timesheets, isLoading, refresh: loadData }
 }
 
 export function useMyTimesheets(userId?: string, options?: { status?: string; limit?: number }) {
   const [timesheets, setTimesheets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -72,15 +72,15 @@ export function useMyTimesheets(userId?: string, options?: { status?: string; li
       setTimesheets(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { timesheets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timesheets, isLoading, refresh: loadData }
 }
 
 export function useTimesheetEntries(timesheetId?: string, options?: { date?: string; project_id?: string; is_billable?: boolean }) {
   const [entries, setEntries] = useState<any[]>([])
   const [totals, setTotals] = useState<{ total: number; billable: number; nonBillable: number }>({ total: 0, billable: 0, nonBillable: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
@@ -97,28 +97,28 @@ export function useTimesheetEntries(timesheetId?: string, options?: { date?: str
       setTotals({ total, billable, nonBillable: total - billable })
     } finally { setIsLoading(false) }
   }, [timesheetId, options?.date, options?.project_id, options?.is_billable])
-  useEffect(() => { fetch() }, [fetch])
-  return { entries, totals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { entries, totals, isLoading, refresh: loadData }
 }
 
 export function useTimesheetApprovals(timesheetId?: string) {
   const [approvals, setApprovals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timesheet_approvals').select('*, users(*)').eq('timesheet_id', timesheetId).order('created_at', { ascending: false }); setApprovals(data || []) } finally { setIsLoading(false) }
   }, [timesheetId])
-  useEffect(() => { fetch() }, [fetch])
-  return { approvals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { approvals, isLoading, refresh: loadData }
 }
 
 export function usePendingApprovals(approverId?: string, options?: { limit?: number }) {
   const [timesheets, setTimesheets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!approverId) { setIsLoading(false); return }
@@ -128,14 +128,14 @@ export function usePendingApprovals(approverId?: string, options?: { limit?: num
       setTimesheets(data || [])
     } finally { setIsLoading(false) }
   }, [approverId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { timesheets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timesheets, isLoading, refresh: loadData }
 }
 
 export function useTimesheetProjects(options?: { is_active?: boolean; search?: string }) {
   const [projects, setProjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -147,14 +147,14 @@ export function useTimesheetProjects(options?: { is_active?: boolean; search?: s
       setProjects(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active, options?.search])
-  useEffect(() => { fetch() }, [fetch])
-  return { projects, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { projects, isLoading, refresh: loadData }
 }
 
 export function useTimesheetCategories(options?: { is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -165,14 +165,14 @@ export function useTimesheetCategories(options?: { is_active?: boolean }) {
       setCategories(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useTimesheetStats(userId?: string, options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -198,14 +198,14 @@ export function useTimesheetStats(userId?: string, options?: { from_date?: strin
       })
     } finally { setIsLoading(false) }
   }, [userId, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useCurrentTimesheet(userId?: string, periodType: string = 'weekly') {
   const [timesheet, setTimesheet] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -225,14 +225,14 @@ export function useCurrentTimesheet(userId?: string, periodType: string = 'weekl
       setTimesheet(data)
     } finally { setIsLoading(false) }
   }, [userId, periodType])
-  useEffect(() => { fetch() }, [fetch])
-  return { timesheet, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timesheet, isLoading, refresh: loadData }
 }
 
 export function useDailyHours(timesheetId?: string) {
   const [dailyHours, setDailyHours] = useState<Record<string, { total: number; billable: number }>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
@@ -248,6 +248,6 @@ export function useDailyHours(timesheetId?: string) {
       setDailyHours(daily)
     } finally { setIsLoading(false) }
   }, [timesheetId])
-  useEffect(() => { fetch() }, [fetch])
-  return { dailyHours, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { dailyHours, isLoading, refresh: loadData }
 }

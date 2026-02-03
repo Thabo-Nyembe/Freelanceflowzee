@@ -450,7 +450,7 @@ export function useRecurringTemplate(id: string | null) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetch = useCallback(async () => {
+  const loadTemplate = useCallback(async () => {
     if (!id) {
       setTemplate(null);
       return;
@@ -460,7 +460,7 @@ export function useRecurringTemplate(id: string | null) {
       setIsLoading(true);
       setError(null);
 
-      const response = await globalThis.fetch(`/api/recurring-invoices/${id}`);
+      const response = await fetch(`/api/recurring-invoices/${id}`);
       const result = await response.json();
 
       if (!response.ok) {
@@ -477,10 +477,10 @@ export function useRecurringTemplate(id: string | null) {
   }, [id]);
 
   useEffect(() => {
-    fetch();
-  }, [fetch]);
+    loadTemplate();
+  }, [loadTemplate]);
 
-  return { template, isLoading, error, refetch: fetch };
+  return { template, isLoading, error, refetch: loadTemplate };
 }
 
 // ============ Frequency Display Helpers ============

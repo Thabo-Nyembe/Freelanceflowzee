@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useSnapshots(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useSnapshots(entityId?: string, entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useSnapshotById(snapshotId?: string) {
   const [snapshot, setSnapshot] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!snapshotId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function useSnapshotById(snapshotId?: string) {
       setSnapshot(data)
     } finally { setIsLoading(false) }
   }, [snapshotId])
-  useEffect(() => { fetch() }, [fetch])
-  return { snapshot, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { snapshot, isLoading, refresh: loadData }
 }
 
 export function useSnapshotCount(entityId?: string, entityType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -51,6 +51,6 @@ export function useSnapshotCount(entityId?: string, entityType?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }

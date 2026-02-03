@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useTier(tierId?: string) {
   const [tier, setTier] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tierId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tiers').select('*, tier_features(*), tier_limits(*), tier_pricing(*)').eq('id', tierId).single(); setTier(data) } finally { setIsLoading(false) }
   }, [tierId])
-  useEffect(() => { fetch() }, [fetch])
-  return { tier, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tier, isLoading, refresh: loadData }
 }
 
 export function useTiers(options?: { tier_type?: string; is_public?: boolean; status?: string; limit?: number }) {
   const [tiers, setTiers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useTiers(options?: { tier_type?: string; is_public?: boolean; st
       setTiers(data || [])
     } finally { setIsLoading(false) }
   }, [options?.tier_type, options?.is_public, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tiers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tiers, isLoading, refresh: loadData }
 }
 
 export function usePublicTiers(options?: { tier_type?: string }) {
   const [tiers, setTiers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -53,15 +53,15 @@ export function usePublicTiers(options?: { tier_type?: string }) {
       setTiers(data || [])
     } finally { setIsLoading(false) }
   }, [options?.tier_type])
-  useEffect(() => { fetch() }, [fetch])
-  return { tiers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tiers, isLoading, refresh: loadData }
 }
 
 export function useTierFeatures(tierId?: string) {
   const [features, setFeatures] = useState<any[]>([])
   const [featureMap, setFeatureMap] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tierId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -73,15 +73,15 @@ export function useTierFeatures(tierId?: string) {
       setFeatureMap(map)
     } finally { setIsLoading(false) }
   }, [tierId])
-  useEffect(() => { fetch() }, [fetch])
-  return { features, featureMap, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { features, featureMap, isLoading, refresh: loadData }
 }
 
 export function useTierLimits(tierId?: string) {
   const [limits, setLimits] = useState<any[]>([])
   const [limitMap, setLimitMap] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tierId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -93,14 +93,14 @@ export function useTierLimits(tierId?: string) {
       setLimitMap(map)
     } finally { setIsLoading(false) }
   }, [tierId])
-  useEffect(() => { fetch() }, [fetch])
-  return { limits, limitMap, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { limits, limitMap, isLoading, refresh: loadData }
 }
 
 export function useTierPricing(tierId?: string, options?: { billing_period?: string }) {
   const [pricing, setPricing] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tierId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -111,15 +111,15 @@ export function useTierPricing(tierId?: string, options?: { billing_period?: str
       setPricing(data || [])
     } finally { setIsLoading(false) }
   }, [tierId, options?.billing_period])
-  useEffect(() => { fetch() }, [fetch])
-  return { pricing, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { pricing, isLoading, refresh: loadData }
 }
 
 export function useTierSubscription(entityType?: string, entityId?: string) {
   const [subscription, setSubscription] = useState<any>(null)
   const [tier, setTier] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -129,15 +129,15 @@ export function useTierSubscription(entityType?: string, entityId?: string) {
       setTier(data?.tiers || null)
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { subscription, tier, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { subscription, tier, isLoading, refresh: loadData }
 }
 
 export function useFeatureAccess(entityType?: string, entityId?: string, featureKey?: string) {
   const [hasAccess, setHasAccess] = useState(false)
   const [feature, setFeature] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId || !featureKey) { setIsLoading(false); return }
     setIsLoading(true)
@@ -148,8 +148,8 @@ export function useFeatureAccess(entityType?: string, entityId?: string, feature
       setHasAccess(feat?.is_enabled || false)
     } finally { setIsLoading(false) }
   }, [entityType, entityId, featureKey])
-  useEffect(() => { fetch() }, [fetch])
-  return { hasAccess, feature, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { hasAccess, feature, isLoading, refresh: loadData }
 }
 
 export function useLimitCheck(entityType?: string, entityId?: string, limitKey?: string, currentUsage?: number) {
@@ -157,7 +157,7 @@ export function useLimitCheck(entityType?: string, entityId?: string, limitKey?:
   const [limit, setLimit] = useState<number | null>(null)
   const [remaining, setRemaining] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId || !limitKey || currentUsage === undefined) { setIsLoading(false); return }
     setIsLoading(true)
@@ -175,8 +175,8 @@ export function useLimitCheck(entityType?: string, entityId?: string, limitKey?:
       }
     } finally { setIsLoading(false) }
   }, [entityType, entityId, limitKey, currentUsage])
-  useEffect(() => { fetch() }, [fetch])
-  return { withinLimit, limit, remaining, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { withinLimit, limit, remaining, isLoading, refresh: loadData }
 }
 
 export function useTierComparison(tierIds?: string[]) {
@@ -184,7 +184,7 @@ export function useTierComparison(tierIds?: string[]) {
   const [allFeatures, setAllFeatures] = useState<string[]>([])
   const [allLimits, setAllLimits] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tierIds || tierIds.length === 0) { setIsLoading(false); return }
     setIsLoading(true)
@@ -201,18 +201,18 @@ export function useTierComparison(tierIds?: string[]) {
       setAllLimits([...limits])
     } finally { setIsLoading(false) }
   }, [tierIds])
-  useEffect(() => { fetch() }, [fetch])
-  return { comparison, allFeatures, allLimits, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comparison, allFeatures, allLimits, isLoading, refresh: loadData }
 }
 
 export function useDefaultTier() {
   const [tier, setTier] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('tiers').select('*, tier_features(*), tier_limits(*), tier_pricing(*)').eq('is_default', true).eq('status', 'active').single(); setTier(data) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { tier, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tier, isLoading, refresh: loadData }
 }

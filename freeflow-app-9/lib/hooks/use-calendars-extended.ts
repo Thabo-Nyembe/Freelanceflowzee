@@ -24,35 +24,35 @@ function isDemoModeEnabled(): boolean {
 export function useCalendar(calendarId?: string) {
   const [calendar, setCalendar] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!calendarId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('calendars').select('*').eq('id', calendarId).single(); setCalendar(data) } finally { setIsLoading(false) }
   }, [calendarId])
-  useEffect(() => { fetch() }, [fetch])
-  return { calendar, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { calendar, isLoading, refresh: loadData }
 }
 
 export function useCalendars(userId?: string) {
   const [calendars, setCalendars] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('calendars').select('*').eq('user_id', userId).order('is_default', { ascending: false }).order('name', { ascending: true }); setCalendars(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { calendars, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { calendars, isLoading, refresh: loadData }
 }
 
 export function useCalendarEvents(calendarId?: string, options?: { start_date?: string; end_date?: string; limit?: number }) {
   const [events, setEvents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!calendarId) { setIsLoading(false); return }
@@ -65,14 +65,14 @@ export function useCalendarEvents(calendarId?: string, options?: { start_date?: 
       setEvents(data || [])
     } finally { setIsLoading(false) }
   }, [calendarId, options?.start_date, options?.end_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { events, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { events, isLoading, refresh: loadData }
 }
 
 export function useAllCalendarEvents(userId?: string, options?: { start_date?: string; end_date?: string }) {
   const [events, setEvents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -87,28 +87,28 @@ export function useAllCalendarEvents(userId?: string, options?: { start_date?: s
       setEvents(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.start_date, options?.end_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { events, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { events, isLoading, refresh: loadData }
 }
 
 export function useSharedCalendars(userId?: string) {
   const [calendars, setCalendars] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('calendar_sharing').select('*, calendars(*)').eq('shared_with_id', userId); setCalendars(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { calendars, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { calendars, isLoading, refresh: loadData }
 }
 
 export function useUpcomingEvents(userId?: string, limit?: number) {
   const [events, setEvents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -121,14 +121,14 @@ export function useUpcomingEvents(userId?: string, limit?: number) {
       setEvents(data || [])
     } finally { setIsLoading(false) }
   }, [userId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { events, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { events, isLoading, refresh: loadData }
 }
 
 export function useTodayEvents(userId?: string) {
   const [events, setEvents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -143,6 +143,6 @@ export function useTodayEvents(userId?: string) {
       setEvents(data || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { events, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { events, isLoading, refresh: loadData }
 }

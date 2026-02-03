@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useThreads(channelId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function useThreads(channelId?: string, status?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [channelId, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useThreadMessages(threadId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!threadId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useThreadMessages(threadId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [threadId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useThreadParticipants(threadId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!threadId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,6 +53,6 @@ export function useThreadParticipants(threadId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [threadId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

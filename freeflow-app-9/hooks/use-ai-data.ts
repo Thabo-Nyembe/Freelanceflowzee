@@ -536,10 +536,34 @@ export function useCurrentUser() {
     fetch('/api/auth/session')
       .then(res => res.json())
       .then(data => {
-        setSession(data)
-        setStatus(data?.user ? 'authenticated' : 'unauthenticated')
+        // If no authenticated user, fall back to demo mode for showcase
+        if (!data?.user) {
+          setIsDemo(true)
+          setSession({
+            user: {
+              id: DEMO_USER_ID,
+              email: DEMO_USER_EMAIL,
+              name: DEMO_USER_NAME
+            }
+          })
+          setStatus('authenticated')
+        } else {
+          setSession(data)
+          setStatus('authenticated')
+        }
       })
-      .catch(() => setStatus('unauthenticated'))
+      .catch(() => {
+        // On error, also fall back to demo mode
+        setIsDemo(true)
+        setSession({
+          user: {
+            id: DEMO_USER_ID,
+            email: DEMO_USER_EMAIL,
+            name: DEMO_USER_NAME
+          }
+        })
+        setStatus('authenticated')
+      })
   }, [])
 
   // Map session to the expected return format

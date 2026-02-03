@@ -24,7 +24,7 @@ function isDemoModeEnabled(): boolean {
 export function useModerationQueue(options?: { status?: string; content_type?: string; priority?: string; assigned_to?: string; limit?: number }) {
   const [queue, setQueue] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -38,28 +38,28 @@ export function useModerationQueue(options?: { status?: string; content_type?: s
       setQueue(data || [])
     } finally { setIsLoading(false) }
   }, [options?.status, options?.content_type, options?.priority, options?.assigned_to, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { queue, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { queue, isLoading, refresh: loadData }
 }
 
 export function useQueueItem(itemId?: string) {
   const [item, setItem] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('moderation_queue').select('*, moderation_actions(*), moderation_reports(*)').eq('id', itemId).single(); setItem(data) } finally { setIsLoading(false) }
   }, [itemId])
-  useEffect(() => { fetch() }, [fetch])
-  return { item, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { item, isLoading, refresh: loadData }
 }
 
 export function usePendingQueue(moderatorId?: string) {
   const [queue, setQueue] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -70,28 +70,28 @@ export function usePendingQueue(moderatorId?: string) {
       setQueue(data || [])
     } finally { setIsLoading(false) }
   }, [moderatorId])
-  useEffect(() => { fetch() }, [fetch])
-  return { queue, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { queue, isLoading, refresh: loadData }
 }
 
 export function useModerationActions(itemId?: string) {
   const [actions, setActions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('moderation_actions').select('*').eq('queue_item_id', itemId).order('created_at', { ascending: false }); setActions(data || []) } finally { setIsLoading(false) }
   }, [itemId])
-  useEffect(() => { fetch() }, [fetch])
-  return { actions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { actions, isLoading, refresh: loadData }
 }
 
 export function useModerationRules(options?: { rule_type?: string; is_active?: boolean }) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -103,14 +103,14 @@ export function useModerationRules(options?: { rule_type?: string; is_active?: b
       setRules(data || [])
     } finally { setIsLoading(false) }
   }, [options?.rule_type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { rules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rules, isLoading, refresh: loadData }
 }
 
 export function useModerationAppeals(options?: { status?: string; user_id?: string; limit?: number }) {
   const [appeals, setAppeals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -122,14 +122,14 @@ export function useModerationAppeals(options?: { status?: string; user_id?: stri
       setAppeals(data || [])
     } finally { setIsLoading(false) }
   }, [options?.status, options?.user_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { appeals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { appeals, isLoading, refresh: loadData }
 }
 
 export function useModerationLogs(options?: { moderator_id?: string; action_type?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -143,14 +143,14 @@ export function useModerationLogs(options?: { moderator_id?: string; action_type
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [options?.moderator_id, options?.action_type, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useModerationReports(options?: { status?: string; report_type?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -162,14 +162,14 @@ export function useModerationReports(options?: { status?: string; report_type?: 
       setReports(data || [])
     } finally { setIsLoading(false) }
   }, [options?.status, options?.report_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reports, isLoading, refresh: loadData }
 }
 
 export function useModerationStats() {
   const [stats, setStats] = useState<{ pending: number; inReview: number; resolved: number; appeals: number; todayActions: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -187,14 +187,14 @@ export function useModerationStats() {
       setStats({ pending, inReview, resolved, appeals: appealsRes.data?.length || 0, todayActions: actionsRes.data?.length || 0 })
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useUserModerationHistory(userId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -204,6 +204,6 @@ export function useUserModerationHistory(userId?: string) {
       setHistory(reports || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }

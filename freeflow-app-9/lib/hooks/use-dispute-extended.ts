@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useDispute(disputeId?: string) {
   const [dispute, setDispute] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!disputeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('disputes').select('*, dispute_messages(*), dispute_evidence(*), dispute_resolutions(*)').eq('id', disputeId).single(); setDispute(data) } finally { setIsLoading(false) }
   }, [disputeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { dispute, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { dispute, isLoading, refresh: loadData }
 }
 
 export function useDisputes(options?: { user_id?: string; status?: string; type?: string; limit?: number }) {
   const [disputes, setDisputes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useDisputes(options?: { user_id?: string; status?: string; type?
       setDisputes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.status, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { disputes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { disputes, isLoading, refresh: loadData }
 }
 
 export function useDisputeMessages(disputeId?: string, options?: { include_internal?: boolean }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!disputeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,53 +54,53 @@ export function useDisputeMessages(disputeId?: string, options?: { include_inter
       setMessages(data || [])
     } finally { setIsLoading(false) }
   }, [disputeId, options?.include_internal])
-  useEffect(() => { fetch() }, [fetch])
-  return { messages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { messages, isLoading, refresh: loadData }
 }
 
 export function useDisputeEvidence(disputeId?: string) {
   const [evidence, setEvidence] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!disputeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('dispute_evidence').select('*').eq('dispute_id', disputeId).order('submitted_at', { ascending: true }); setEvidence(data || []) } finally { setIsLoading(false) }
   }, [disputeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { evidence, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { evidence, isLoading, refresh: loadData }
 }
 
 export function useDisputeResolution(disputeId?: string) {
   const [resolution, setResolution] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!disputeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('dispute_resolutions').select('*').eq('dispute_id', disputeId).single(); setResolution(data) } finally { setIsLoading(false) }
   }, [disputeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { resolution, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { resolution, isLoading, refresh: loadData }
 }
 
 export function useOpenDisputes(userId?: string) {
   const [disputes, setDisputes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('disputes').select('*').or(`initiated_by.eq.${userId},against_user_id.eq.${userId}`).in('status', ['open', 'in_review', 'escalated']).order('created_at', { ascending: false }); setDisputes(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { disputes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { disputes, isLoading, refresh: loadData }
 }
 
 export function useDisputeStats(options?: { user_id?: string }) {
   const [stats, setStats] = useState<{ total: number; open: number; resolved: number; escalated: number; byType: Record<string, number>; avgResolutionDays: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -118,18 +118,18 @@ export function useDisputeStats(options?: { user_id?: string }) {
       setStats({ total, open, resolved, escalated, byType, avgResolutionDays })
     } finally { setIsLoading(false) }
   }, [options?.user_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useEscalatedDisputes(limit?: number) {
   const [disputes, setDisputes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('disputes').select('*').eq('status', 'escalated').order('escalated_at', { ascending: false }).limit(limit || 20); setDisputes(data || []) } finally { setIsLoading(false) }
   }, [limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { disputes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { disputes, isLoading, refresh: loadData }
 }

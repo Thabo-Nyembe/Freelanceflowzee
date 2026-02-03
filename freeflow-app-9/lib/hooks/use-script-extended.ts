@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useScript(scriptId?: string) {
   const [script, setScript] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scriptId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useScript(scriptId?: string) {
       setScript(data)
     } finally { setIsLoading(false) }
   }, [scriptId])
-  useEffect(() => { fetch() }, [fetch])
-  return { script, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { script, isLoading, refresh: loadData }
 }
 
 export function useScripts(options?: { scriptType?: string; language?: string; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useScripts(options?: { scriptType?: string; language?: string; i
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.scriptType, options?.language, options?.isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useScriptExecutions(scriptId?: string, limit = 50) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scriptId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useScriptExecutions(scriptId?: string, limit = 50) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [scriptId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useActiveScripts(scriptType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -71,14 +71,14 @@ export function useActiveScripts(scriptType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [scriptType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useScriptStats(scriptId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scriptId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -90,6 +90,6 @@ export function useScriptStats(scriptId?: string) {
       setStats({ total, successful, failed: total - successful, successRate: total > 0 ? (successful / total) * 100 : 0, avgDuration })
     } finally { setIsLoading(false) }
   }, [scriptId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

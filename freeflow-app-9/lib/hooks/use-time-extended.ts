@@ -23,7 +23,7 @@ function isDemoModeEnabled(): boolean {
 export function useTimeEntries(userId?: string, projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function useTimeEntries(userId?: string, projectId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTimeSheets(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
@@ -54,6 +54,6 @@ export function useTimeSheets(userId?: string, status?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

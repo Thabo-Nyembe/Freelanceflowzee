@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useStudent(studentId?: string) {
   const [student, setStudent] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!studentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('students').select('*, student_enrollments(*), student_achievements(*), users(*)').eq('id', studentId).single(); setStudent(data) } finally { setIsLoading(false) }
   }, [studentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { student, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { student, isLoading, refresh: loadData }
 }
 
 export function useStudents(options?: { program_id?: string; status?: string; level?: string; search?: string; limit?: number }) {
   const [students, setStudents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useStudents(options?: { program_id?: string; status?: string; le
       setStudents(data || [])
     } finally { setIsLoading(false) }
   }, [options?.program_id, options?.status, options?.level, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { students, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { students, isLoading, refresh: loadData }
 }
 
 export function useStudentEnrollments(studentId?: string, options?: { status?: string; semester?: string }) {
   const [enrollments, setEnrollments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!studentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,14 +56,14 @@ export function useStudentEnrollments(studentId?: string, options?: { status?: s
       setEnrollments(data || [])
     } finally { setIsLoading(false) }
   }, [studentId, options?.status, options?.semester])
-  useEffect(() => { fetch() }, [fetch])
-  return { enrollments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { enrollments, isLoading, refresh: loadData }
 }
 
 export function useStudentGrades(studentId?: string, options?: { course_id?: string; grade_type?: string; limit?: number }) {
   const [grades, setGrades] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!studentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -75,14 +75,14 @@ export function useStudentGrades(studentId?: string, options?: { course_id?: str
       setGrades(data || [])
     } finally { setIsLoading(false) }
   }, [studentId, options?.course_id, options?.grade_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { grades, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { grades, isLoading, refresh: loadData }
 }
 
 export function useStudentGPA(studentId?: string) {
   const [gpa, setGPA] = useState<{ gpa: number; totalCredits: number; letterGrade: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!studentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -103,15 +103,15 @@ export function useStudentGPA(studentId?: string) {
       setGPA({ gpa: Math.round(gpaValue * 100) / 100, totalCredits, letterGrade })
     } finally { setIsLoading(false) }
   }, [studentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { gpa, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { gpa, isLoading, refresh: loadData }
 }
 
 export function useStudentAttendance(studentId?: string, options?: { course_id?: string; from_date?: string; to_date?: string }) {
   const [attendance, setAttendance] = useState<any[]>([])
   const [stats, setStats] = useState<{ total: number; present: number; absent: number; late: number; rate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!studentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -130,14 +130,14 @@ export function useStudentAttendance(studentId?: string, options?: { course_id?:
       setStats({ total, present, absent, late, rate: total > 0 ? (present / total) * 100 : 0 })
     } finally { setIsLoading(false) }
   }, [studentId, options?.course_id, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { attendance, stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { attendance, stats, isLoading, refresh: loadData }
 }
 
 export function useStudentProgress(studentId?: string, courseId?: string) {
   const [progress, setProgress] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!studentId || !courseId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -146,15 +146,15 @@ export function useStudentProgress(studentId?: string, courseId?: string) {
       setProgress(data)
     } finally { setIsLoading(false) }
   }, [studentId, courseId])
-  useEffect(() => { fetch() }, [fetch])
-  return { progress, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { progress, isLoading, refresh: loadData }
 }
 
 export function useStudentAchievements(studentId?: string, options?: { achievement_type?: string; limit?: number }) {
   const [achievements, setAchievements] = useState<any[]>([])
   const [totalPoints, setTotalPoints] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!studentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -167,14 +167,14 @@ export function useStudentAchievements(studentId?: string, options?: { achieveme
       setTotalPoints(achievementList.reduce((sum, a) => sum + (a.points || 0), 0))
     } finally { setIsLoading(false) }
   }, [studentId, options?.achievement_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { achievements, totalPoints, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { achievements, totalPoints, isLoading, refresh: loadData }
 }
 
 export function useCourseStudents(courseId?: string, options?: { status?: string }) {
   const [students, setStudents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!courseId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -185,7 +185,7 @@ export function useCourseStudents(courseId?: string, options?: { status?: string
       setStudents((data || []).map(e => ({ ...e.students, enrollment: e })))
     } finally { setIsLoading(false) }
   }, [courseId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { students, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { students, isLoading, refresh: loadData }
 }
 

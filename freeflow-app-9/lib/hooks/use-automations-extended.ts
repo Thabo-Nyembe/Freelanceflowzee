@@ -24,7 +24,7 @@ function isDemoModeEnabled(): boolean {
 export function useAutomation(automationId?: string) {
   const [automation, setAutomation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!automationId) { setIsLoading(false); return }
@@ -34,14 +34,14 @@ export function useAutomation(automationId?: string) {
       setAutomation(data)
     } finally { setIsLoading(false) }
   }, [automationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { automation, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { automation, isLoading, refresh: loadData }
 }
 
 export function useAutomations(userId?: string, options?: { isActive?: boolean; triggerType?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -54,14 +54,14 @@ export function useAutomations(userId?: string, options?: { isActive?: boolean; 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.isActive, options?.triggerType, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAutomationRuns(automationId?: string, options?: { status?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!automationId) { setIsLoading(false); return }
@@ -73,14 +73,14 @@ export function useAutomationRuns(automationId?: string, options?: { status?: st
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [automationId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAutomationStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; active: number; inactive: number; totalRuns: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -93,14 +93,14 @@ export function useAutomationStats(userId?: string) {
       setStats({ total, active, inactive: total - active, totalRuns })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useActiveAutomations(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -110,8 +110,8 @@ export function useActiveAutomations(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAutomationRunsRealtime(automationId?: string) {
@@ -134,7 +134,7 @@ export function useAutomationWithRuns(automationId?: string) {
   const [automation, setAutomation] = useState<any>(null)
   const [runs, setRuns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!automationId) { setIsLoading(false); return }
@@ -148,6 +148,6 @@ export function useAutomationWithRuns(automationId?: string) {
       setRuns(runsRes.data || [])
     } finally { setIsLoading(false) }
   }, [automationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { automation, runs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { automation, runs, isLoading, refresh: loadData }
 }

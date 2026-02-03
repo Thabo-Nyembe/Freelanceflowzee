@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useChat(chatId?: string) {
   const [chat, setChat] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!chatId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('chats').select('*, chat_participants(*)').eq('id', chatId).single(); setChat(data) } finally { setIsLoading(false) }
   }, [chatId])
-  useEffect(() => { fetch() }, [fetch])
-  return { chat, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { chat, isLoading, refresh: loadData }
 }
 
 export function useChats(userId?: string, options?: { type?: string; limit?: number }) {
   const [chats, setChats] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,21 +37,21 @@ export function useChats(userId?: string, options?: { type?: string; limit?: num
       setChats(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { chats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { chats, isLoading, refresh: loadData }
 }
 
 export function useChatMessages(chatId?: string, options?: { limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!chatId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('chat_messages').select('*').eq('chat_id', chatId).eq('is_deleted', false).order('created_at', { ascending: false }).limit(options?.limit || 50); setMessages((data || []).reverse()) } finally { setIsLoading(false) }
   }, [chatId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { messages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { messages, isLoading, refresh: loadData }
 }
 
 export function useChatMessagesRealtime(chatId?: string) {
@@ -76,20 +76,20 @@ export function useChatMessagesRealtime(chatId?: string) {
 export function useChatParticipants(chatId?: string) {
   const [participants, setParticipants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!chatId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('chat_participants').select('*').eq('chat_id', chatId).order('joined_at', { ascending: true }); setParticipants(data || []) } finally { setIsLoading(false) }
   }, [chatId])
-  useEffect(() => { fetch() }, [fetch])
-  return { participants, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { participants, isLoading, refresh: loadData }
 }
 
 export function useUnreadCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -100,8 +100,8 @@ export function useUnreadCount(userId?: string) {
       setCount(unreadCount || 0)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useTypingIndicator(chatId?: string, userId?: string) {

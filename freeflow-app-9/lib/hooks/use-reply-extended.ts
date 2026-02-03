@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useReplies(parentId?: string, parentType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function useReplies(parentId?: string, parentType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [parentId, parentType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useReplyCount(parentId?: string, parentType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!parentId || !parentType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useReplyCount(parentId?: string, parentType?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [parentId, parentType])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useNestedReplies(replyId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!replyId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,6 +53,6 @@ export function useNestedReplies(replyId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [replyId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

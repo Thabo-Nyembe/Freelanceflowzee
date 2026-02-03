@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useUsage(entityId?: string, entityType?: string, usageType?: string) {
   const [usage, setUsage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !usageType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useUsage(entityId?: string, entityType?: string, usageType?: str
       setUsage(data)
     } finally { setIsLoading(false) }
   }, [entityId, entityType, usageType])
-  useEffect(() => { fetch() }, [fetch])
-  return { usage, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { usage, isLoading, refresh: loadData }
 }
 
 export function useUsageHistory(entityId?: string, entityType?: string, usageType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !usageType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,15 +35,15 @@ export function useUsageHistory(entityId?: string, entityType?: string, usageTyp
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType, usageType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useUsageSummary(entityId?: string, entityType?: string, usageType?: string) {
   const [total, setTotal] = useState(0)
   const [average, setAverage] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !usageType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,6 +55,6 @@ export function useUsageSummary(entityId?: string, entityType?: string, usageTyp
       setAverage(count > 0 ? sum / count : 0)
     } finally { setIsLoading(false) }
   }, [entityId, entityType, usageType])
-  useEffect(() => { fetch() }, [fetch])
-  return { total, average, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { total, average, isLoading, refresh: loadData }
 }

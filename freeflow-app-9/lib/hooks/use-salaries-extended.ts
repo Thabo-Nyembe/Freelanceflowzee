@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useSalary(salaryId?: string) {
   const [salary, setSalary] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!salaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('salaries').select('*, salary_components(*), salary_deductions(*), salary_structures(*), salary_grades(*), users(*)').eq('id', salaryId).single(); setSalary(data) } finally { setIsLoading(false) }
   }, [salaryId])
-  useEffect(() => { fetch() }, [fetch])
-  return { salary, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { salary, isLoading, refresh: loadData }
 }
 
 export function useSalaries(options?: { employee_id?: string; structure_id?: string; grade_id?: string; status?: string; effective_date?: string; limit?: number }) {
   const [salaries, setSalaries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -40,14 +40,14 @@ export function useSalaries(options?: { employee_id?: string; structure_id?: str
       setSalaries(data || [])
     } finally { setIsLoading(false) }
   }, [options?.employee_id, options?.structure_id, options?.grade_id, options?.status, options?.effective_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { salaries, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { salaries, isLoading, refresh: loadData }
 }
 
 export function useEmployeeSalary(employeeId?: string, effectiveDate?: string) {
   const [salary, setSalary] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -57,40 +57,40 @@ export function useEmployeeSalary(employeeId?: string, effectiveDate?: string) {
       setSalary(data)
     } finally { setIsLoading(false) }
   }, [employeeId, effectiveDate])
-  useEffect(() => { fetch() }, [fetch])
-  return { salary, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { salary, isLoading, refresh: loadData }
 }
 
 export function useSalaryComponents(salaryId?: string) {
   const [components, setComponents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!salaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('salary_components').select('*').eq('salary_id', salaryId); setComponents(data || []) } finally { setIsLoading(false) }
   }, [salaryId])
-  useEffect(() => { fetch() }, [fetch])
-  return { components, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { components, isLoading, refresh: loadData }
 }
 
 export function useSalaryDeductions(salaryId?: string) {
   const [deductions, setDeductions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!salaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('salary_deductions').select('*').eq('salary_id', salaryId); setDeductions(data || []) } finally { setIsLoading(false) }
   }, [salaryId])
-  useEffect(() => { fetch() }, [fetch])
-  return { deductions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deductions, isLoading, refresh: loadData }
 }
 
 export function useSalaryHistory(employeeId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -102,14 +102,14 @@ export function useSalaryHistory(employeeId?: string, options?: { from_date?: st
       setHistory(data || [])
     } finally { setIsLoading(false) }
   }, [employeeId, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useSalaryStructures(options?: { is_active?: boolean }) {
   const [structures, setStructures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -119,14 +119,14 @@ export function useSalaryStructures(options?: { is_active?: boolean }) {
       setStructures(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { structures, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { structures, isLoading, refresh: loadData }
 }
 
 export function useSalaryGrades(structureId?: string, options?: { is_active?: boolean }) {
   const [grades, setGrades] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -137,14 +137,14 @@ export function useSalaryGrades(structureId?: string, options?: { is_active?: bo
       setGrades(data || [])
     } finally { setIsLoading(false) }
   }, [structureId, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { grades, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { grades, isLoading, refresh: loadData }
 }
 
 export function useSalaryCalculation(salaryId?: string) {
   const [calculation, setCalculation] = useState<{ baseSalary: number; componentsTotal: number; gross: number; deductionsTotal: number; net: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!salaryId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -158,14 +158,14 @@ export function useSalaryCalculation(salaryId?: string) {
       setCalculation({ baseSalary: data.base_salary, componentsTotal, gross, deductionsTotal, net })
     } finally { setIsLoading(false) }
   }, [salaryId])
-  useEffect(() => { fetch() }, [fetch])
-  return { calculation, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { calculation, isLoading, refresh: loadData }
 }
 
 export function useSalaryStats() {
   const [stats, setStats] = useState<{ totalEmployees: number; averageSalary: number; minSalary: number; maxSalary: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -177,7 +177,7 @@ export function useSalaryStats() {
       setStats({ totalEmployees: amounts.length, averageSalary: Math.round(average * 100) / 100, minSalary: Math.min(...amounts), maxSalary: Math.max(...amounts) })
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 

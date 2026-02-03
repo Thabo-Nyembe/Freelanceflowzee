@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useTax(taxId?: string) {
   const [tax, setTax] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!taxId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('taxes').select('*, tax_rates(*), tax_rules(*), tax_exemptions(*)').eq('id', taxId).single(); setTax(data) } finally { setIsLoading(false) }
   }, [taxId])
-  useEffect(() => { fetch() }, [fetch])
-  return { tax, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tax, isLoading, refresh: loadData }
 }
 
 export function useTaxes(options?: { tax_type?: string; jurisdiction?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [taxes, setTaxes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,15 +37,15 @@ export function useTaxes(options?: { tax_type?: string; jurisdiction?: string; i
       setTaxes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.tax_type, options?.jurisdiction, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { taxes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { taxes, isLoading, refresh: loadData }
 }
 
 export function useTaxRates(taxId?: string, options?: { effective_date?: string; category?: string }) {
   const [rates, setRates] = useState<any[]>([])
   const [currentRate, setCurrentRate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!taxId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -64,14 +64,14 @@ export function useTaxRates(taxId?: string, options?: { effective_date?: string;
       setCurrentRate(current || null)
     } finally { setIsLoading(false) }
   }, [taxId, options?.effective_date, options?.category])
-  useEffect(() => { fetch() }, [fetch])
-  return { rates, currentRate, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rates, currentRate, isLoading, refresh: loadData }
 }
 
 export function useTaxRules(taxId?: string, options?: { rule_type?: string; is_active?: boolean }) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!taxId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -83,14 +83,14 @@ export function useTaxRules(taxId?: string, options?: { rule_type?: string; is_a
       setRules(data || [])
     } finally { setIsLoading(false) }
   }, [taxId, options?.rule_type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { rules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rules, isLoading, refresh: loadData }
 }
 
 export function useTaxExemptions(options?: { entity_type?: string; entity_id?: string; tax_id?: string; status?: string }) {
   const [exemptions, setExemptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -103,14 +103,14 @@ export function useTaxExemptions(options?: { entity_type?: string; entity_id?: s
       setExemptions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.entity_id, options?.tax_id, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { exemptions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { exemptions, isLoading, refresh: loadData }
 }
 
 export function useTaxFilings(options?: { tax_id?: string; status?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [filings, setFilings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -123,14 +123,14 @@ export function useTaxFilings(options?: { tax_id?: string; status?: string; from
       setFilings(data || [])
     } finally { setIsLoading(false) }
   }, [options?.tax_id, options?.status, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { filings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { filings, isLoading, refresh: loadData }
 }
 
 export function useApplicableTaxes(params?: { jurisdiction?: string; category?: string; entity_type?: string; entity_id?: string }) {
   const [taxes, setTaxes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -147,14 +147,14 @@ export function useApplicableTaxes(params?: { jurisdiction?: string; category?: 
       setTaxes(result)
     } finally { setIsLoading(false) }
   }, [params?.jurisdiction, params?.category, params?.entity_type, params?.entity_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { taxes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { taxes, isLoading, refresh: loadData }
 }
 
 export function useJurisdictions() {
   const [jurisdictions, setJurisdictions] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -163,7 +163,7 @@ export function useJurisdictions() {
       setJurisdictions(unique)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { jurisdictions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { jurisdictions, isLoading, refresh: loadData }
 }
 

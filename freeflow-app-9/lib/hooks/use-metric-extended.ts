@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useMetrics(entityId?: string, entityType?: string, metricName?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -21,14 +21,14 @@ export function useMetrics(entityId?: string, entityType?: string, metricName?: 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType, metricName])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useLatestMetric(entityId?: string, entityType?: string, metricName?: string) {
   const [metric, setMetric] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !metricName) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useLatestMetric(entityId?: string, entityType?: string, metricNa
       setMetric(data)
     } finally { setIsLoading(false) }
   }, [entityId, entityType, metricName])
-  useEffect(() => { fetch() }, [fetch])
-  return { metric, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { metric, isLoading, refresh: loadData }
 }
 
 export function useMetricTimeSeries(entityId?: string, entityType?: string, metricName?: string, since?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !metricName || !since) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,6 +53,6 @@ export function useMetricTimeSeries(entityId?: string, entityType?: string, metr
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType, metricName, since])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

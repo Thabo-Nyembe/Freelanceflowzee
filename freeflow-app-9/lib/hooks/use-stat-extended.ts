@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useStats(entityId?: string, entityType?: string, period?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -21,14 +21,14 @@ export function useStats(entityId?: string, entityType?: string, period?: string
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType, period])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useStatSummary(entityId?: string, entityType?: string, statName?: string) {
   const [summary, setSummary] = useState<any>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !statName) { setIsLoading(false); return }
     setIsLoading(true)
@@ -40,14 +40,14 @@ export function useStatSummary(entityId?: string, entityType?: string, statName?
       setSummary({ sum, avg, max: Math.max(...values, 0), min: Math.min(...values, 0), count: values.length })
     } finally { setIsLoading(false) }
   }, [entityId, entityType, statName])
-  useEffect(() => { fetch() }, [fetch])
-  return { summary, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { summary, isLoading, refresh: loadData }
 }
 
 export function useStatsByPeriod(entityId?: string, entityType?: string, period?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !period) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,6 +56,6 @@ export function useStatsByPeriod(entityId?: string, entityType?: string, period?
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType, period])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

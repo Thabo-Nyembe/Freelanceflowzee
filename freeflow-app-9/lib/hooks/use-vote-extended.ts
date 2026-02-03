@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useVotes(itemId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,8 +21,8 @@ export function useVotes(itemId?: string, itemType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [itemId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useVoteScore(itemId?: string, itemType?: string) {
@@ -30,7 +30,7 @@ export function useVoteScore(itemId?: string, itemType?: string) {
   const [upvotes, setUpvotes] = useState(0)
   const [downvotes, setDownvotes] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -43,14 +43,14 @@ export function useVoteScore(itemId?: string, itemType?: string) {
       setScore(ups - downs)
     } finally { setIsLoading(false) }
   }, [itemId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { score, upvotes, downvotes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { score, upvotes, downvotes, isLoading, refresh: loadData }
 }
 
 export function useUserVote(userId?: string, itemId?: string, itemType?: string) {
   const [vote, setVote] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -59,6 +59,6 @@ export function useUserVote(userId?: string, itemId?: string, itemType?: string)
       setVote(data?.vote_type || null)
     } finally { setIsLoading(false) }
   }, [userId, itemId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { vote, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vote, isLoading, refresh: loadData }
 }

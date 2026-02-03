@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useRequests(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function useRequests(userId?: string, status?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useRequestById(requestId?: string) {
   const [request, setRequest] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useRequestById(requestId?: string) {
       setRequest(data)
     } finally { setIsLoading(false) }
   }, [requestId])
-  useEffect(() => { fetch() }, [fetch])
-  return { request, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { request, isLoading, refresh: loadData }
 }
 
 export function useRequestCount(userId?: string, status?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,6 +55,6 @@ export function useRequestCount(userId?: string, status?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [userId, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }

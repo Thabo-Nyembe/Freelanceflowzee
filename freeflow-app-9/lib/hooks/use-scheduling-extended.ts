@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function useSchedulingSlot(slotId?: string) {
   const [slot, setSlot] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!slotId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('scheduling_slots').select('*').eq('id', slotId).single(); setSlot(data) } finally { setIsLoading(false) }
   }, [slotId])
-  useEffect(() => { fetch() }, [fetch])
-  return { slot, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { slot, isLoading, refresh: loadData }
 }
 
 export function useSchedulingSlots(options?: { user_id?: string; is_available?: boolean; date?: string; limit?: number }) {
   const [slots, setSlots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -51,14 +51,14 @@ export function useSchedulingSlots(options?: { user_id?: string; is_available?: 
       setSlots(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.is_available, options?.date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { slots, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { slots, isLoading, refresh: loadData }
 }
 
 export function useSchedulingRules(options?: { user_id?: string; is_active?: boolean }) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -70,14 +70,14 @@ export function useSchedulingRules(options?: { user_id?: string; is_active?: boo
       setRules(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { rules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rules, isLoading, refresh: loadData }
 }
 
 export function useSchedulingBlocks(options?: { user_id?: string; block_type?: string }) {
   const [blocks, setBlocks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -89,20 +89,20 @@ export function useSchedulingBlocks(options?: { user_id?: string; block_type?: s
       setBlocks(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.block_type])
-  useEffect(() => { fetch() }, [fetch])
-  return { blocks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { blocks, isLoading, refresh: loadData }
 }
 
 export function useSchedulingPreferences(userId?: string) {
   const [preferences, setPreferences] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('scheduling_preferences').select('*').eq('user_id', userId).maybeSingle(); setPreferences(data) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { preferences, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { preferences, isLoading, refresh: loadData }
 }

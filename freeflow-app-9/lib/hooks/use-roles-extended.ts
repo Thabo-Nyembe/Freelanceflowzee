@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function useRole(roleId?: string) {
   const [role, setRole] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!roleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('roles').select('*, role_permissions(*), role_groups(*)').eq('id', roleId).single(); setRole(data) } finally { setIsLoading(false) }
   }, [roleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { role, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { role, isLoading, refresh: loadData }
 }
 
 export function useRoles(options?: { group_id?: string; is_active?: boolean; is_system?: boolean; search?: string; limit?: number }) {
   const [roles, setRoles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -52,14 +52,14 @@ export function useRoles(options?: { group_id?: string; is_active?: boolean; is_
       setRoles(data || [])
     } finally { setIsLoading(false) }
   }, [options?.group_id, options?.is_active, options?.is_system, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { roles, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { roles, isLoading, refresh: loadData }
 }
 
 export function useUserRoles(userId?: string) {
   const [roles, setRoles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -69,14 +69,14 @@ export function useUserRoles(userId?: string) {
       setRoles(data || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { roles, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { roles, isLoading, refresh: loadData }
 }
 
 export function useRoleUsers(roleId?: string, options?: { limit?: number }) {
   const [users, setUsers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!roleId) { setIsLoading(false); return }
@@ -86,28 +86,28 @@ export function useRoleUsers(roleId?: string, options?: { limit?: number }) {
       setUsers(data || [])
     } finally { setIsLoading(false) }
   }, [roleId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { users, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { users, isLoading, refresh: loadData }
 }
 
 export function useRolePermissions(roleId?: string) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!roleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('role_permissions').select('*, permissions(*)').eq('role_id', roleId); setPermissions(data || []) } finally { setIsLoading(false) }
   }, [roleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { permissions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { permissions, isLoading, refresh: loadData }
 }
 
 export function useRoleGroups(options?: { is_active?: boolean }) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -118,14 +118,14 @@ export function useRoleGroups(options?: { is_active?: boolean }) {
       setGroups(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { groups, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { groups, isLoading, refresh: loadData }
 }
 
 export function useRoleTemplates(options?: { category?: string; is_active?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -137,14 +137,14 @@ export function useRoleTemplates(options?: { category?: string; is_active?: bool
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function useUserPermissions(userId?: string) {
   const [permissions, setPermissions] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -158,14 +158,14 @@ export function useUserPermissions(userId?: string) {
       setPermissions([...new Set(permCodes)])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { permissions, isLoading, refresh: fetch, hasPermission: (code: string) => permissions.includes(code) }
+  useEffect(() => { loadData() }, [loadData])
+  return { permissions, isLoading, refresh: loadData, hasPermission: (code: string) => permissions.includes(code) }
 }
 
 export function useRoleHierarchy(roleId?: string) {
   const [hierarchy, setHierarchy] = useState<{ parents: any[]; children: any[] }>({ parents: [], children: [] })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!roleId) { setIsLoading(false); return }
@@ -181,14 +181,14 @@ export function useRoleHierarchy(roleId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [roleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { hierarchy, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { hierarchy, isLoading, refresh: loadData }
 }
 
 export function useRoleStats() {
   const [stats, setStats] = useState<{ total: number; active: number; system: number; assignments: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -202,7 +202,7 @@ export function useRoleStats() {
       setStats({ total: total.count || 0, active: active.count || 0, system: system.count || 0, assignments: assignments.count || 0 })
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 

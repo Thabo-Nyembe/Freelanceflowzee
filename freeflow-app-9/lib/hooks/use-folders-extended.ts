@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useFolder(folderId?: string) {
   const [folder, setFolder] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!folderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('folders').select('*, folder_permissions(*), files(*)').eq('id', folderId).single(); setFolder(data) } finally { setIsLoading(false) }
   }, [folderId])
-  useEffect(() => { fetch() }, [fetch])
-  return { folder, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { folder, isLoading, refresh: loadData }
 }
 
 export function useFolders(options?: { owner_id?: string; parent_id?: string | null; is_deleted?: boolean; limit?: number }) {
   const [folders, setFolders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,40 +39,40 @@ export function useFolders(options?: { owner_id?: string; parent_id?: string | n
       setFolders(data || [])
     } finally { setIsLoading(false) }
   }, [options?.owner_id, options?.parent_id, options?.is_deleted, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { folders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { folders, isLoading, refresh: loadData }
 }
 
 export function useRootFolders(userId?: string) {
   const [folders, setFolders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('folders').select('*').eq('owner_id', userId).is('parent_id', null).eq('is_deleted', false).order('name', { ascending: true }); setFolders(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { folders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { folders, isLoading, refresh: loadData }
 }
 
 export function useSubfolders(parentId?: string) {
   const [folders, setFolders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!parentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('folders').select('*').eq('parent_id', parentId).eq('is_deleted', false).order('name', { ascending: true }); setFolders(data || []) } finally { setIsLoading(false) }
   }, [parentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { folders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { folders, isLoading, refresh: loadData }
 }
 
 export function useFolderContents(folderId?: string) {
   const [contents, setContents] = useState<{ folders: any[]; files: any[] } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!folderId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -84,53 +84,53 @@ export function useFolderContents(folderId?: string) {
       setContents({ folders: foldersResult.data || [], files: filesResult.data || [] })
     } finally { setIsLoading(false) }
   }, [folderId])
-  useEffect(() => { fetch() }, [fetch])
-  return { contents, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { contents, isLoading, refresh: loadData }
 }
 
 export function useFolderShares(folderId?: string) {
   const [shares, setShares] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!folderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('folder_shares').select('*').eq('folder_id', folderId).order('shared_at', { ascending: false }); setShares(data || []) } finally { setIsLoading(false) }
   }, [folderId])
-  useEffect(() => { fetch() }, [fetch])
-  return { shares, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { shares, isLoading, refresh: loadData }
 }
 
 export function useSharedFolders(userId?: string) {
   const [folders, setFolders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('folder_shares').select('*, folders(*)').eq('shared_with', userId).order('shared_at', { ascending: false }); setFolders(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { folders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { folders, isLoading, refresh: loadData }
 }
 
 export function useStarredFolders(userId?: string) {
   const [folders, setFolders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('folders').select('*').eq('owner_id', userId).eq('is_starred', true).eq('is_deleted', false).order('name', { ascending: true }); setFolders(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { folders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { folders, isLoading, refresh: loadData }
 }
 
 export function useFolderBreadcrumbs(folderId?: string) {
   const [breadcrumbs, setBreadcrumbs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!folderId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -149,19 +149,19 @@ export function useFolderBreadcrumbs(folderId?: string) {
       setBreadcrumbs(crumbs)
     } finally { setIsLoading(false) }
   }, [folderId])
-  useEffect(() => { fetch() }, [fetch])
-  return { breadcrumbs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { breadcrumbs, isLoading, refresh: loadData }
 }
 
 export function useTrashFolders(userId?: string) {
   const [folders, setFolders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('folders').select('*').eq('owner_id', userId).eq('is_deleted', true).order('deleted_at', { ascending: false }); setFolders(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { folders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { folders, isLoading, refresh: loadData }
 }

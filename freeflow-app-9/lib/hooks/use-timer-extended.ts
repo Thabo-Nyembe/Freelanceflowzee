@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function useTimer(timerId?: string) {
   const [timer, setTimer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!timerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timers').select('*').eq('id', timerId).single(); setTimer(data) } finally { setIsLoading(false) }
   }, [timerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { timer, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timer, isLoading, refresh: loadData }
 }
 
 export function useTimers(options?: { user_id?: string; project_id?: string; status?: string; limit?: number }) {
   const [timers, setTimers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
@@ -51,28 +51,28 @@ export function useTimers(options?: { user_id?: string; project_id?: string; sta
       setTimers(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.project_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { timers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timers, isLoading, refresh: loadData }
 }
 
 export function useActiveTimer(userId?: string) {
   const [timer, setTimer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timers').select('*').eq('user_id', userId).eq('status', 'running').order('started_at', { ascending: false }).limit(1).single(); setTimer(data) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { timer, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timer, isLoading, refresh: loadData }
 }
 
 export function useTimerEntries(options?: { user_id?: string; project_id?: string; date?: string; limit?: number }) {
   const [entries, setEntries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
@@ -85,34 +85,34 @@ export function useTimerEntries(options?: { user_id?: string; project_id?: strin
       setEntries(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.project_id, options?.date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { entries, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { entries, isLoading, refresh: loadData }
 }
 
 export function useTimerSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timer_settings').select('*').eq('user_id', userId).single(); setSettings(data) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function useTodayTimers(userId?: string) {
   const [timers, setTimers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const today = new Date().toISOString().split('T')[0]; const { data } = await supabase.from('timers').select('*').eq('user_id', userId).gte('created_at', today).order('created_at', { ascending: false }); setTimers(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { timers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timers, isLoading, refresh: loadData }
 }

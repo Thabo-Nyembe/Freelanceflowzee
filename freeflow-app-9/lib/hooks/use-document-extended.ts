@@ -10,59 +10,59 @@ import { createClient } from '@/lib/supabase/client'
 export function useDocumentActivity(documentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!documentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_activity').select('*').eq('document_id', documentId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [documentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDocumentComments(documentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!documentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_comments').select('*').eq('document_id', documentId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [documentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDocumentRequests(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_requests').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDocumentShares(documentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!documentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_shares').select('*').eq('document_id', documentId).eq('is_active', true); setData(result || []) } finally { setIsLoading(false) }
   }, [documentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDocumentTemplates(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -72,32 +72,32 @@ export function useDocumentTemplates(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDocumentTranslations(documentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!documentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_translations').select('*').eq('document_id', documentId).order('language', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [documentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDocumentVersions(documentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!documentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_versions').select('*').eq('document_id', documentId).order('version_number', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [documentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

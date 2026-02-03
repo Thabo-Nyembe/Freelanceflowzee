@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useFavorites(userId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,8 +21,8 @@ export function useFavorites(userId?: string, itemType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useIsFavorited(userId?: string, itemId?: string, itemType?: string) {
@@ -44,7 +44,7 @@ export function useIsFavorited(userId?: string, itemId?: string, itemType?: stri
 export function useFavoriteCount(itemId?: string, itemType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,6 +53,6 @@ export function useFavoriteCount(itemId?: string, itemType?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [itemId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }

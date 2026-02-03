@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useCamera(cameraId?: string) {
   const [camera, setCamera] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!cameraId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cameras').select('*').eq('id', cameraId).single(); setCamera(data) } finally { setIsLoading(false) }
   }, [cameraId])
-  useEffect(() => { fetch() }, [fetch])
-  return { camera, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { camera, isLoading, refresh: loadData }
 }
 
 export function useCameras(options?: { user_id?: string; status?: string; is_active?: boolean; limit?: number }) {
   const [cameras, setCameras] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useCameras(options?: { user_id?: string; status?: string; is_act
       setCameras(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.status, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { cameras, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { cameras, isLoading, refresh: loadData }
 }
 
 export function useCameraRecordings(cameraId?: string, options?: { date_from?: string; date_to?: string; limit?: number }) {
   const [recordings, setRecordings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!cameraId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useCameraRecordings(cameraId?: string, options?: { date_from?: s
       setRecordings(data || [])
     } finally { setIsLoading(false) }
   }, [cameraId, options?.date_from, options?.date_to, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { recordings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { recordings, isLoading, refresh: loadData }
 }
 
 export function useCameraAlerts(cameraId?: string, options?: { is_acknowledged?: boolean; limit?: number }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!cameraId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -73,27 +73,27 @@ export function useCameraAlerts(cameraId?: string, options?: { is_acknowledged?:
       setAlerts(data || [])
     } finally { setIsLoading(false) }
   }, [cameraId, options?.is_acknowledged, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useOnlineCameras(userId?: string) {
   const [cameras, setCameras] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cameras').select('*').eq('user_id', userId).eq('status', 'online').eq('is_active', true).order('name', { ascending: true }); setCameras(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { cameras, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { cameras, isLoading, refresh: loadData }
 }
 
 export function useCameraStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; online: number; recording: number; alerts: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -109,8 +109,8 @@ export function useCameraStats(userId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useCameraRealtime(cameraId?: string) {

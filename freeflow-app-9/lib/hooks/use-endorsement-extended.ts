@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useEndorsements(userId?: string, skillId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function useEndorsements(userId?: string, skillId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, skillId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEndorsementCount(userId?: string, skillId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,8 +39,8 @@ export function useEndorsementCount(userId?: string, skillId?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [userId, skillId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useHasEndorsed(endorserId?: string, endorsedUserId?: string, skillId?: string) {

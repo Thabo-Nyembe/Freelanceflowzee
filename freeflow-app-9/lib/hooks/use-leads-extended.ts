@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useLead(leadId?: string) {
   const [lead, setLead] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!leadId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('leads').select('*, lead_sources(*), lead_stages(*), lead_activities(*), lead_scores(*)').eq('id', leadId).single(); setLead(data) } finally { setIsLoading(false) }
   }, [leadId])
-  useEffect(() => { fetch() }, [fetch])
-  return { lead, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { lead, isLoading, refresh: loadData }
 }
 
 export function useLeads(options?: { owner_id?: string; stage_id?: string; source_id?: string; status?: string; limit?: number }) {
   const [leads, setLeads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,27 +37,27 @@ export function useLeads(options?: { owner_id?: string; stage_id?: string; sourc
       setLeads(data || [])
     } finally { setIsLoading(false) }
   }, [options?.owner_id, options?.stage_id, options?.source_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { leads, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { leads, isLoading, refresh: loadData }
 }
 
 export function useLeadsByStage(stageId?: string) {
   const [leads, setLeads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!stageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('leads').select('*, lead_sources(*)').eq('stage_id', stageId).order('score', { ascending: false }); setLeads(data || []) } finally { setIsLoading(false) }
   }, [stageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { leads, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { leads, isLoading, refresh: loadData }
 }
 
 export function useLeadActivities(leadId?: string, options?: { type?: string; limit?: number }) {
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!leadId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -68,32 +68,32 @@ export function useLeadActivities(leadId?: string, options?: { type?: string; li
       setActivities(data || [])
     } finally { setIsLoading(false) }
   }, [leadId, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { activities, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { activities, isLoading, refresh: loadData }
 }
 
 export function useLeadSources() {
   const [sources, setSources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('lead_sources').select('*').order('name', { ascending: true }); setSources(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { sources, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sources, isLoading, refresh: loadData }
 }
 
 export function useLeadStages() {
   const [stages, setStages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('lead_stages').select('*').order('order', { ascending: true }); setStages(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { stages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stages, isLoading, refresh: loadData }
 }
 
 export function useLeadSearch(query?: string, options?: { owner_id?: string; limit?: number }) {
@@ -117,7 +117,7 @@ export function useLeadSearch(query?: string, options?: { owner_id?: string; lim
 export function useLeadPipeline() {
   const [pipeline, setPipeline] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -128,27 +128,27 @@ export function useLeadPipeline() {
       setPipeline(pipelineData)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { pipeline, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { pipeline, isLoading, refresh: loadData }
 }
 
 export function useLeadScoreHistory(leadId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!leadId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('lead_scores').select('*').eq('lead_id', leadId).order('created_at', { ascending: false }); setHistory(data || []) } finally { setIsLoading(false) }
   }, [leadId])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useMyLeads(userId?: string, options?: { status?: string }) {
   const [leads, setLeads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -159,6 +159,6 @@ export function useMyLeads(userId?: string, options?: { status?: string }) {
       setLeads(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { leads, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { leads, isLoading, refresh: loadData }
 }

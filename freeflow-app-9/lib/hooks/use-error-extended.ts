@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useErrorLog(errorId?: string) {
   const [error, setError] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!errorId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('error_logs').select('*, error_resolutions(*)').eq('id', errorId).single(); setError(data) } finally { setIsLoading(false) }
   }, [errorId])
-  useEffect(() => { fetch() }, [fetch])
-  return { error, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { error, isLoading, refresh: loadData }
 }
 
 export function useErrorLogs(options?: { type?: string; severity?: string; status?: string; source?: string; limit?: number }) {
   const [errors, setErrors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useErrorLogs(options?: { type?: string; severity?: string; statu
       setErrors(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.severity, options?.status, options?.source, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { errors, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { errors, isLoading, refresh: loadData }
 }
 
 export function useRecentErrors(options?: { limit?: number; severity?: string }) {
   const [errors, setErrors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -54,14 +54,14 @@ export function useRecentErrors(options?: { limit?: number; severity?: string })
       setErrors(data || [])
     } finally { setIsLoading(false) }
   }, [options?.limit, options?.severity])
-  useEffect(() => { fetch() }, [fetch])
-  return { errors, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { errors, isLoading, refresh: loadData }
 }
 
 export function useUnresolvedErrors(options?: { severity?: string }) {
   const [errors, setErrors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -71,14 +71,14 @@ export function useUnresolvedErrors(options?: { severity?: string }) {
       setErrors(data || [])
     } finally { setIsLoading(false) }
   }, [options?.severity])
-  useEffect(() => { fetch() }, [fetch])
-  return { errors, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { errors, isLoading, refresh: loadData }
 }
 
 export function useErrorReports(options?: { status?: string; priority?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -89,14 +89,14 @@ export function useErrorReports(options?: { status?: string; priority?: string; 
       setReports(data || [])
     } finally { setIsLoading(false) }
   }, [options?.status, options?.priority, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reports, isLoading, refresh: loadData }
 }
 
 export function useErrorAlerts(options?: { is_active?: boolean }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -106,27 +106,27 @@ export function useErrorAlerts(options?: { is_active?: boolean }) {
       setAlerts(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useErrorResolutions(errorId?: string) {
   const [resolutions, setResolutions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!errorId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('error_resolutions').select('*').eq('error_id', errorId).order('resolved_at', { ascending: false }); setResolutions(data || []) } finally { setIsLoading(false) }
   }, [errorId])
-  useEffect(() => { fetch() }, [fetch])
-  return { resolutions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { resolutions, isLoading, refresh: loadData }
 }
 
 export function useErrorStats(options?: { days?: number }) {
   const [stats, setStats] = useState<{ total: number; bySeverity: Record<string, number>; byType: Record<string, number>; byStatus: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -141,14 +141,14 @@ export function useErrorStats(options?: { days?: number }) {
       setStats({ total, bySeverity, byType, byStatus })
     } finally { setIsLoading(false) }
   }, [options?.days])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useErrorTrends(options?: { days?: number }) {
   const [trends, setTrends] = useState<{ date: string; count: number; critical: number }[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -165,6 +165,6 @@ export function useErrorTrends(options?: { days?: number }) {
       setTrends(Object.entries(byDate).map(([date, stats]) => ({ date, ...stats })).sort((a, b) => a.date.localeCompare(b.date)))
     } finally { setIsLoading(false) }
   }, [options?.days])
-  useEffect(() => { fetch() }, [fetch])
-  return { trends, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { trends, isLoading, refresh: loadData }
 }

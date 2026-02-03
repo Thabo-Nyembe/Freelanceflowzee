@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useDebugSession(sessionId?: string) {
   const [session, setSession] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sessionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useDebugSession(sessionId?: string) {
       setSession(data)
     } finally { setIsLoading(false) }
   }, [sessionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { session, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { session, isLoading, refresh: loadData }
 }
 
 export function useDebugSessions(options?: { sessionType?: string; status?: string; userId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useDebugSessions(options?: { sessionType?: string; status?: stri
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.sessionType, options?.status, options?.userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDebugLogs(sessionId?: string, level?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sessionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,14 +56,14 @@ export function useDebugLogs(sessionId?: string, level?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [sessionId, level])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBreakpoints(sessionId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sessionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -72,14 +72,14 @@ export function useBreakpoints(sessionId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [sessionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDebugSnapshots(sessionId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sessionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -88,6 +88,6 @@ export function useDebugSnapshots(sessionId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [sessionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function usePreset(presetId?: string) {
   const [preset, setPreset] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!presetId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function usePreset(presetId?: string) {
       setPreset(data)
     } finally { setIsLoading(false) }
   }, [presetId])
-  useEffect(() => { fetch() }, [fetch])
-  return { preset, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { preset, isLoading, refresh: loadData }
 }
 
 export function usePresets(options?: { presetType?: string; category?: string; isPublic?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function usePresets(options?: { presetType?: string; category?: string; i
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.presetType, options?.category, options?.isPublic])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDefaultPreset(presetType?: string, workspaceId?: string) {
   const [preset, setPreset] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!presetType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,14 +56,14 @@ export function useDefaultPreset(presetType?: string, workspaceId?: string) {
       setPreset(data)
     } finally { setIsLoading(false) }
   }, [presetType, workspaceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { preset, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { preset, isLoading, refresh: loadData }
 }
 
 export function useMyPresets(userId?: string, presetType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -74,6 +74,6 @@ export function useMyPresets(userId?: string, presetType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, presetType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

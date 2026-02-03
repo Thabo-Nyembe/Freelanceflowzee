@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useDrafts(userId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -21,14 +21,14 @@ export function useDrafts(userId?: string, entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDraft(draftId?: string, userId?: string) {
   const [draft, setDraft] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!draftId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useDraft(draftId?: string, userId?: string) {
       setDraft(data)
     } finally { setIsLoading(false) }
   }, [draftId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { draft, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { draft, isLoading, refresh: loadData }
 }
 
 export function useDraftCount(userId?: string, entityType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,6 +55,6 @@ export function useDraftCount(userId?: string, entityType?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [userId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }

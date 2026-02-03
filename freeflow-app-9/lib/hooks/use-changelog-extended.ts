@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useChangelog(changelogId?: string) {
   const [changelog, setChangelog] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!changelogId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useChangelog(changelogId?: string) {
       setChangelog(data)
     } finally { setIsLoading(false) }
   }, [changelogId])
-  useEffect(() => { fetch() }, [fetch])
-  return { changelog, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { changelog, isLoading, refresh: loadData }
 }
 
 export function useChangelogs(options?: { productId?: string; isPublished?: boolean; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useChangelogs(options?: { productId?: string; isPublished?: bool
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.productId, options?.isPublished, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useLatestChangelog(productId?: string) {
   const [changelog, setChangelog] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -54,8 +54,8 @@ export function useLatestChangelog(productId?: string) {
       setChangelog(data)
     } finally { setIsLoading(false) }
   }, [productId])
-  useEffect(() => { fetch() }, [fetch])
-  return { changelog, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { changelog, isLoading, refresh: loadData }
 }
 
 export function useChangelogSearch(query?: string, productId?: string) {

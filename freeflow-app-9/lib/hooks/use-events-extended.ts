@@ -98,7 +98,7 @@ export interface ExtendedEventRegistrationRecord {
 export function useEvent(eventId?: string) {
   const [event, setEvent] = useState<ExtendedEventRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
@@ -108,14 +108,14 @@ export function useEvent(eventId?: string) {
       setEvent(data as ExtendedEventRecord | null)
     } finally { setIsLoading(false) }
   }, [eventId])
-  useEffect(() => { fetch() }, [fetch])
-  return { event, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { event, isLoading, refresh: loadData }
 }
 
 export function useEvents(options?: { organizerId?: string; calendarId?: string; startDate?: string; endDate?: string; status?: string; limit?: number }) {
   const [data, setData] = useState<ExtendedEventRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
@@ -130,14 +130,14 @@ export function useEvents(options?: { organizerId?: string; calendarId?: string;
       setData((result as ExtendedEventRecord[]) || [])
     } finally { setIsLoading(false) }
   }, [options?.organizerId, options?.calendarId, options?.startDate, options?.endDate, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEventAttendees(eventId?: string, options?: { status?: string }) {
   const [data, setData] = useState<EventAttendeeRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
@@ -149,14 +149,14 @@ export function useEventAttendees(eventId?: string, options?: { status?: string 
       setData((result as EventAttendeeRecord[]) || [])
     } finally { setIsLoading(false) }
   }, [eventId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEventAttachments(eventId?: string) {
   const [data, setData] = useState<EventAttachmentRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
@@ -166,14 +166,14 @@ export function useEventAttachments(eventId?: string) {
       setData((result as EventAttachmentRecord[]) || [])
     } finally { setIsLoading(false) }
   }, [eventId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEventRecurrence(eventId?: string) {
   const [recurrence, setRecurrence] = useState<EventRecurrenceRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
@@ -183,14 +183,14 @@ export function useEventRecurrence(eventId?: string) {
       setRecurrence(data as EventRecurrenceRecord | null)
     } finally { setIsLoading(false) }
   }, [eventId])
-  useEffect(() => { fetch() }, [fetch])
-  return { recurrence, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { recurrence, isLoading, refresh: loadData }
 }
 
 export function useEventRegistrations(eventId?: string, options?: { status?: string; limit?: number }) {
   const [data, setData] = useState<ExtendedEventRegistrationRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
@@ -202,14 +202,14 @@ export function useEventRegistrations(eventId?: string, options?: { status?: str
       setData((result as ExtendedEventRegistrationRecord[]) || [])
     } finally { setIsLoading(false) }
   }, [eventId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useUserEvents(userId?: string, options?: { upcoming?: boolean; limit?: number }) {
   const [data, setData] = useState<ExtendedEventRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -221,14 +221,14 @@ export function useUserEvents(userId?: string, options?: { upcoming?: boolean; l
       setData((result as ExtendedEventRecord[]) || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.upcoming, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEventViewCount(eventId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
@@ -238,8 +238,8 @@ export function useEventViewCount(eventId?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [eventId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useEventWithDetails(eventId?: string) {
@@ -248,7 +248,7 @@ export function useEventWithDetails(eventId?: string) {
   const [attachments, setAttachments] = useState<EventAttachmentRecord[]>([])
   const [recurrence, setRecurrence] = useState<EventRecurrenceRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
@@ -266,8 +266,8 @@ export function useEventWithDetails(eventId?: string) {
       setRecurrence(recurrenceRes.data as EventRecurrenceRecord | null)
     } finally { setIsLoading(false) }
   }, [eventId])
-  useEffect(() => { fetch() }, [fetch])
-  return { event, attendees, attachments, recurrence, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { event, attendees, attachments, recurrence, isLoading, refresh: loadData }
 }
 
 export function useEventsRealtime(organizerId?: string) {

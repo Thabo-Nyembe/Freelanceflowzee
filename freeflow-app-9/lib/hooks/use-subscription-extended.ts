@@ -53,7 +53,7 @@ export interface SubscriptionPlanRecord {
 export function useSubscriptions(userId?: string, status?: string) {
   const [data, setData] = useState<SubscriptionRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -64,14 +64,14 @@ export function useSubscriptions(userId?: string, status?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useSubscriptionPlans(isActive?: boolean) {
   const [data, setData] = useState<SubscriptionPlanRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -81,6 +81,6 @@ export function useSubscriptionPlans(isActive?: boolean) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

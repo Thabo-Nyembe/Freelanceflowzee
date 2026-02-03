@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useLabel(labelId?: string) {
   const [label, setLabel] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!labelId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useLabel(labelId?: string) {
       setLabel(data)
     } finally { setIsLoading(false) }
   }, [labelId])
-  useEffect(() => { fetch() }, [fetch])
-  return { label, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { label, isLoading, refresh: loadData }
 }
 
 export function useLabels(options?: { labelType?: string; workspaceId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useLabels(options?: { labelType?: string; workspaceId?: string }
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.labelType, options?.workspaceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEntityLabels(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,8 +53,8 @@ export function useEntityLabels(entityType?: string, entityId?: string) {
       setData(result?.map(el => el.labels) || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useLabelSearch(query?: string, labelType?: string) {

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useVendor(vendorId?: string) {
   const [vendor, setVendor] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!vendorId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('vendors').select('*').eq('id', vendorId).single(); setVendor(data) } finally { setIsLoading(false) }
   }, [vendorId])
-  useEffect(() => { fetch() }, [fetch])
-  return { vendor, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vendor, isLoading, refresh: loadData }
 }
 
 export function useVendors(options?: { user_id?: string; type?: string; status?: string; limit?: number }) {
   const [vendors, setVendors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useVendors(options?: { user_id?: string; type?: string; status?:
       setVendors(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { vendors, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vendors, isLoading, refresh: loadData }
 }
 
 export function useVendorContracts(vendorId?: string) {
   const [contracts, setContracts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!vendorId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('vendor_contracts').select('*').eq('vendor_id', vendorId).order('start_date', { ascending: false }); setContracts(data || []) } finally { setIsLoading(false) }
   }, [vendorId])
-  useEffect(() => { fetch() }, [fetch])
-  return { contracts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { contracts, isLoading, refresh: loadData }
 }
 
 export function useVendorPayments(vendorId?: string, options?: { date_from?: string; date_to?: string }) {
   const [payments, setPayments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!vendorId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -68,27 +68,27 @@ export function useVendorPayments(vendorId?: string, options?: { date_from?: str
       setPayments(data || [])
     } finally { setIsLoading(false) }
   }, [vendorId, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { payments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { payments, isLoading, refresh: loadData }
 }
 
 export function useVendorProducts(vendorId?: string) {
   const [products, setProducts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!vendorId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('vendor_products').select('*').eq('vendor_id', vendorId).order('name', { ascending: true }); setProducts(data || []) } finally { setIsLoading(false) }
   }, [vendorId])
-  useEffect(() => { fetch() }, [fetch])
-  return { products, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { products, isLoading, refresh: loadData }
 }
 
 export function useActiveVendors(options?: { type?: string; limit?: number }) {
   const [vendors, setVendors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -98,18 +98,18 @@ export function useActiveVendors(options?: { type?: string; limit?: number }) {
       setVendors(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { vendors, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vendors, isLoading, refresh: loadData }
 }
 
 export function useTopVendors(options?: { limit?: number }) {
   const [vendors, setVendors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('vendors').select('*').eq('status', 'active').order('rating', { ascending: false }).limit(options?.limit || 10); setVendors(data || []) } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { vendors, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vendors, isLoading, refresh: loadData }
 }

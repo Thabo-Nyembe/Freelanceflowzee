@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useSnapshot(snapshotId?: string) {
   const [snapshot, setSnapshot] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!snapshotId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('snapshots').select('*, snapshot_items(*), snapshot_tags(*), users(*)').eq('id', snapshotId).single(); setSnapshot(data) } finally { setIsLoading(false) }
   }, [snapshotId])
-  useEffect(() => { fetch() }, [fetch])
-  return { snapshot, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { snapshot, isLoading, refresh: loadData }
 }
 
 export function useSnapshots(options?: { entity_type?: string; entity_id?: string; snapshot_type?: string; created_by?: string; status?: string; tag?: string; from_date?: string; to_date?: string; search?: string; limit?: number }) {
   const [snapshots, setSnapshots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -45,27 +45,27 @@ export function useSnapshots(options?: { entity_type?: string; entity_id?: strin
       setSnapshots(result)
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.entity_id, options?.snapshot_type, options?.created_by, options?.status, options?.tag, options?.from_date, options?.to_date, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { snapshots, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { snapshots, isLoading, refresh: loadData }
 }
 
 export function useSnapshotItems(snapshotId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!snapshotId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('snapshot_items').select('*').eq('snapshot_id', snapshotId); setItems(data || []) } finally { setIsLoading(false) }
   }, [snapshotId])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useSnapshotSchedules(options?: { entity_type?: string; is_active?: boolean }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -76,14 +76,14 @@ export function useSnapshotSchedules(options?: { entity_type?: string; is_active
       setSchedules(data || [])
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedules, isLoading, refresh: loadData }
 }
 
 export function useSnapshotComparisons(snapshotId?: string) {
   const [comparisons, setComparisons] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!snapshotId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -92,27 +92,27 @@ export function useSnapshotComparisons(snapshotId?: string) {
       setComparisons(data || [])
     } finally { setIsLoading(false) }
   }, [snapshotId])
-  useEffect(() => { fetch() }, [fetch])
-  return { comparisons, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comparisons, isLoading, refresh: loadData }
 }
 
 export function useSnapshotExports(snapshotId?: string) {
   const [exports, setExports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!snapshotId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('snapshot_exports').select('*').eq('snapshot_id', snapshotId).order('exported_at', { ascending: false }); setExports(data || []) } finally { setIsLoading(false) }
   }, [snapshotId])
-  useEffect(() => { fetch() }, [fetch])
-  return { exports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { exports, isLoading, refresh: loadData }
 }
 
 export function useEntitySnapshots(entityType?: string, entityId?: string, options?: { limit?: number }) {
   const [snapshots, setSnapshots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -121,14 +121,14 @@ export function useEntitySnapshots(entityType?: string, entityId?: string, optio
       setSnapshots(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { snapshots, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { snapshots, isLoading, refresh: loadData }
 }
 
 export function useLatestSnapshot(entityType?: string, entityId?: string) {
   const [snapshot, setSnapshot] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -137,14 +137,14 @@ export function useLatestSnapshot(entityType?: string, entityId?: string) {
       setSnapshot(data)
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { snapshot, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { snapshot, isLoading, refresh: loadData }
 }
 
 export function useSnapshotStats(options?: { entity_type?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; scheduled: number; manual: number; restored: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -162,7 +162,7 @@ export function useSnapshotStats(options?: { entity_type?: string; from_date?: s
       })
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 

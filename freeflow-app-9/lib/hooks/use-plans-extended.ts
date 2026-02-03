@@ -11,33 +11,33 @@ import { createClient } from '@/lib/supabase/client'
 export function usePlan(planId?: string) {
   const [plan, setPlan] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plans').select('*, plan_features(*), plan_limits(*), plan_pricing(*)').eq('id', planId).single(); setPlan(data) } finally { setIsLoading(false) }
   }, [planId])
-  useEffect(() => { fetch() }, [fetch])
-  return { plan, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plan, isLoading, refresh: loadData }
 }
 
 export function usePlanBySlug(slug?: string) {
   const [plan, setPlan] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!slug) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plans').select('*, plan_features(*), plan_limits(*), plan_pricing(*)').eq('slug', slug).eq('is_active', true).single(); setPlan(data) } finally { setIsLoading(false) }
   }, [slug])
-  useEffect(() => { fetch() }, [fetch])
-  return { plan, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plan, isLoading, refresh: loadData }
 }
 
 export function usePlans(options?: { is_active?: boolean; is_public?: boolean }) {
   const [plans, setPlans] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -48,40 +48,40 @@ export function usePlans(options?: { is_active?: boolean; is_public?: boolean })
       setPlans(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active, options?.is_public])
-  useEffect(() => { fetch() }, [fetch])
-  return { plans, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plans, isLoading, refresh: loadData }
 }
 
 export function usePlanFeatures(planId?: string) {
   const [features, setFeatures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plan_features').select('*').eq('plan_id', planId).order('feature_name', { ascending: true }); setFeatures(data || []) } finally { setIsLoading(false) }
   }, [planId])
-  useEffect(() => { fetch() }, [fetch])
-  return { features, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { features, isLoading, refresh: loadData }
 }
 
 export function usePlanLimits(planId?: string) {
   const [limits, setLimits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plan_limits').select('*').eq('plan_id', planId).order('limit_name', { ascending: true }); setLimits(data || []) } finally { setIsLoading(false) }
   }, [planId])
-  useEffect(() => { fetch() }, [fetch])
-  return { limits, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { limits, isLoading, refresh: loadData }
 }
 
 export function usePlanPricing(planId?: string, options?: { currency?: string }) {
   const [pricing, setPricing] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -92,53 +92,53 @@ export function usePlanPricing(planId?: string, options?: { currency?: string })
       setPricing(data || [])
     } finally { setIsLoading(false) }
   }, [planId, options?.currency])
-  useEffect(() => { fetch() }, [fetch])
-  return { pricing, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { pricing, isLoading, refresh: loadData }
 }
 
 export function useSubscription(subscriptionId?: string) {
   const [subscription, setSubscription] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!subscriptionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plan_subscriptions').select('*, plans(*, plan_features(*), plan_limits(*)), plan_pricing(*)').eq('id', subscriptionId).single(); setSubscription(data) } finally { setIsLoading(false) }
   }, [subscriptionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { subscription, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { subscription, isLoading, refresh: loadData }
 }
 
 export function useUserSubscription(userId?: string) {
   const [subscription, setSubscription] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plan_subscriptions').select('*, plans(*, plan_features(*), plan_limits(*)), plan_pricing(*)').eq('user_id', userId).eq('status', 'active').single(); setSubscription(data) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { subscription, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { subscription, isLoading, refresh: loadData }
 }
 
 export function useOrganizationSubscription(organizationId?: string) {
   const [subscription, setSubscription] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plan_subscriptions').select('*, plans(*, plan_features(*), plan_limits(*)), plan_pricing(*)').eq('organization_id', organizationId).eq('status', 'active').single(); setSubscription(data) } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { subscription, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { subscription, isLoading, refresh: loadData }
 }
 
 export function useSubscriptionUsage(subscriptionId?: string, options?: { limit_key?: string; from_date?: string }) {
   const [usage, setUsage] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!subscriptionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -150,14 +150,14 @@ export function useSubscriptionUsage(subscriptionId?: string, options?: { limit_
       setUsage(data || [])
     } finally { setIsLoading(false) }
   }, [subscriptionId, options?.limit_key, options?.from_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { usage, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { usage, isLoading, refresh: loadData }
 }
 
 export function useLimitCheck(subscriptionId?: string, limitKey?: string) {
   const [check, setCheck] = useState<{ allowed: boolean; current: number; limit: number; percentage: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!subscriptionId || !limitKey) { setIsLoading(false); return }
     setIsLoading(true)
@@ -173,18 +173,18 @@ export function useLimitCheck(subscriptionId?: string, limitKey?: string) {
       setCheck({ allowed: current < limit.limit_value, current, limit: limit.limit_value, percentage })
     } finally { setIsLoading(false) }
   }, [subscriptionId, limitKey])
-  useEffect(() => { fetch() }, [fetch])
-  return { check, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { check, isLoading, refresh: loadData }
 }
 
 export function usePublicPlans() {
   const [plans, setPlans] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('plans').select('*, plan_features(*), plan_limits(*), plan_pricing(*)').eq('is_active', true).eq('is_public', true).order('tier', { ascending: true }); setPlans(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { plans, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plans, isLoading, refresh: loadData }
 }

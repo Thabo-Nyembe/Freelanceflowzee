@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useDoc(docId?: string) {
   const [doc, setDoc] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('docs').select('*, doc_pages(*), doc_contributors(*)').eq('id', docId).single(); setDoc(data) } finally { setIsLoading(false) }
   }, [docId])
-  useEffect(() => { fetch() }, [fetch])
-  return { doc, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { doc, isLoading, refresh: loadData }
 }
 
 export function useDocs(options?: { project_id?: string; type?: string; status?: string; is_public?: boolean; search?: string; limit?: number }) {
   const [docs, setDocs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,66 +38,66 @@ export function useDocs(options?: { project_id?: string; type?: string; status?:
       setDocs(data || [])
     } finally { setIsLoading(false) }
   }, [options?.project_id, options?.type, options?.status, options?.is_public, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { docs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { docs, isLoading, refresh: loadData }
 }
 
 export function useDocPage(pageId?: string) {
   const [page, setPage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('doc_pages').select('*').eq('id', pageId).single(); setPage(data) } finally { setIsLoading(false) }
   }, [pageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { page, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { page, isLoading, refresh: loadData }
 }
 
 export function useDocPages(docId?: string) {
   const [pages, setPages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('doc_pages').select('*').eq('doc_id', docId).order('order', { ascending: true }); setPages(data || []) } finally { setIsLoading(false) }
   }, [docId])
-  useEffect(() => { fetch() }, [fetch])
-  return { pages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { pages, isLoading, refresh: loadData }
 }
 
 export function useDocVersions(docId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('doc_versions').select('*').eq('doc_id', docId).order('version', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
   }, [docId])
-  useEffect(() => { fetch() }, [fetch])
-  return { versions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { versions, isLoading, refresh: loadData }
 }
 
 export function useDocContributors(docId?: string) {
   const [contributors, setContributors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('doc_contributors').select('*, users:user_id(*)').eq('doc_id', docId); setContributors(data || []) } finally { setIsLoading(false) }
   }, [docId])
-  useEffect(() => { fetch() }, [fetch])
-  return { contributors, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { contributors, isLoading, refresh: loadData }
 }
 
 export function useDocFeedback(docId?: string, options?: { page_id?: string; type?: string }) {
   const [feedback, setFeedback] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -109,14 +109,14 @@ export function useDocFeedback(docId?: string, options?: { page_id?: string; typ
       setFeedback(data || [])
     } finally { setIsLoading(false) }
   }, [docId, options?.page_id, options?.type])
-  useEffect(() => { fetch() }, [fetch])
-  return { feedback, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { feedback, isLoading, refresh: loadData }
 }
 
 export function usePublicDocs(options?: { type?: string; search?: string; limit?: number }) {
   const [docs, setDocs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -127,14 +127,14 @@ export function usePublicDocs(options?: { type?: string; search?: string; limit?
       setDocs(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { docs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { docs, isLoading, refresh: loadData }
 }
 
 export function useDocPageHierarchy(docId?: string) {
   const [hierarchy, setHierarchy] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -146,19 +146,19 @@ export function useDocPageHierarchy(docId?: string) {
       setHierarchy(buildTree(data || []))
     } finally { setIsLoading(false) }
   }, [docId])
-  useEffect(() => { fetch() }, [fetch])
-  return { hierarchy, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { hierarchy, isLoading, refresh: loadData }
 }
 
 export function useUserDocs(userId?: string, options?: { limit?: number }) {
   const [docs, setDocs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('docs').select('*').eq('owner_id', userId).order('updated_at', { ascending: false }).limit(options?.limit || 50); setDocs(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { docs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { docs, isLoading, refresh: loadData }
 }

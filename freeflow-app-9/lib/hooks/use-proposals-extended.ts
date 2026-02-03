@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useProposal(proposalId?: string) {
   const [proposal, setProposal] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!proposalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('proposals').select('*, proposal_items(*), proposal_versions(*), proposal_comments(*), proposal_signatures(*), users(*), clients(*)').eq('id', proposalId).single(); setProposal(data) } finally { setIsLoading(false) }
   }, [proposalId])
-  useEffect(() => { fetch() }, [fetch])
-  return { proposal, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { proposal, isLoading, refresh: loadData }
 }
 
 export function useProposals(options?: { author_id?: string; client_id?: string; organization_id?: string; status?: string; search?: string; limit?: number }) {
   const [proposals, setProposals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,40 +38,40 @@ export function useProposals(options?: { author_id?: string; client_id?: string;
       setProposals(data || [])
     } finally { setIsLoading(false) }
   }, [options?.author_id, options?.client_id, options?.organization_id, options?.status, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { proposals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { proposals, isLoading, refresh: loadData }
 }
 
 export function useProposalItems(proposalId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!proposalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('proposal_items').select('*').eq('proposal_id', proposalId).order('order', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
   }, [proposalId])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useProposalVersions(proposalId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!proposalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('proposal_versions').select('*, users(*)').eq('proposal_id', proposalId).order('version', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
   }, [proposalId])
-  useEffect(() => { fetch() }, [fetch])
-  return { versions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { versions, isLoading, refresh: loadData }
 }
 
 export function useProposalComments(proposalId?: string, options?: { is_internal?: boolean }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!proposalId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -82,27 +82,27 @@ export function useProposalComments(proposalId?: string, options?: { is_internal
       setComments(data || [])
     } finally { setIsLoading(false) }
   }, [proposalId, options?.is_internal])
-  useEffect(() => { fetch() }, [fetch])
-  return { comments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comments, isLoading, refresh: loadData }
 }
 
 export function useProposalSignatures(proposalId?: string) {
   const [signatures, setSignatures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!proposalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('proposal_signatures').select('*').eq('proposal_id', proposalId).order('signed_at', { ascending: false }); setSignatures(data || []) } finally { setIsLoading(false) }
   }, [proposalId])
-  useEffect(() => { fetch() }, [fetch])
-  return { signatures, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { signatures, isLoading, refresh: loadData }
 }
 
 export function useProposalTemplates(options?: { category?: string; search?: string; limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -113,14 +113,14 @@ export function useProposalTemplates(options?: { category?: string; search?: str
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function useMyProposals(userId?: string, options?: { status?: string; limit?: number }) {
   const [proposals, setProposals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -131,14 +131,14 @@ export function useMyProposals(userId?: string, options?: { status?: string; lim
       setProposals(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { proposals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { proposals, isLoading, refresh: loadData }
 }
 
 export function useClientProposals(clientId?: string, options?: { status?: string; limit?: number }) {
   const [proposals, setProposals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!clientId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -149,14 +149,14 @@ export function useClientProposals(clientId?: string, options?: { status?: strin
       setProposals(data || [])
     } finally { setIsLoading(false) }
   }, [clientId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { proposals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { proposals, isLoading, refresh: loadData }
 }
 
 export function usePendingProposals(options?: { author_id?: string; organization_id?: string; limit?: number }) {
   const [proposals, setProposals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -167,14 +167,14 @@ export function usePendingProposals(options?: { author_id?: string; organization
       setProposals(data || [])
     } finally { setIsLoading(false) }
   }, [options?.author_id, options?.organization_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { proposals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { proposals, isLoading, refresh: loadData }
 }
 
 export function useProposalStats(options?: { author_id?: string; organization_id?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; draft: number; sent: number; accepted: number; declined: number; totalValue: number; acceptedValue: number; conversionRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -197,14 +197,14 @@ export function useProposalStats(options?: { author_id?: string; organization_id
       setStats({ total, draft, sent, accepted, declined, totalValue, acceptedValue, conversionRate })
     } finally { setIsLoading(false) }
   }, [options?.author_id, options?.organization_id, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useExpiringProposals(options?: { days?: number; author_id?: string }) {
   const [proposals, setProposals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -216,6 +216,6 @@ export function useExpiringProposals(options?: { days?: number; author_id?: stri
       setProposals(data || [])
     } finally { setIsLoading(false) }
   }, [options?.days, options?.author_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { proposals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { proposals, isLoading, refresh: loadData }
 }

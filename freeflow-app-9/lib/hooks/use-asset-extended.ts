@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useAssets(userId?: string, assetType?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -22,14 +22,14 @@ export function useAssets(userId?: string, assetType?: string, status?: string) 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, assetType, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAssetLibrary(libraryId?: string, assetType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!libraryId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -40,14 +40,14 @@ export function useAssetLibrary(libraryId?: string, assetType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [libraryId, assetType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAssetVersions(assetId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!assetId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,6 +56,6 @@ export function useAssetVersions(assetId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [assetId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

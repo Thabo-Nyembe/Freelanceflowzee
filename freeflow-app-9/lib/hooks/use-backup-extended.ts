@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useBackups(status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -20,14 +20,14 @@ export function useBackups(status?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBackupSchedules(isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,6 +37,6 @@ export function useBackupSchedules(isActive?: boolean) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

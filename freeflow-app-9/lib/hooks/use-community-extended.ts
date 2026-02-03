@@ -23,63 +23,63 @@ function isDemoModeEnabled(): boolean {
 export function useCommunityAnalytics(communityId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!communityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('community_analytics').select('*').eq('community_id', communityId).single(); setData(result) } finally { setIsLoading(false) }
   }, [communityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCommunityComments(postId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!postId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('community_comments').select('*').eq('post_id', postId).order('created_at', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [postId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCommunityConnections(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('community_connections').select('*').or(`user_id.eq.${userId},connected_user_id.eq.${userId}`).eq('status', 'accepted'); setData(result || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCommunityEventAttendees(eventId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('community_event_attendees').select('*').eq('event_id', eventId); setData(result || []) } finally { setIsLoading(false) }
   }, [eventId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCommunityEvents(communityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
@@ -90,28 +90,28 @@ export function useCommunityEvents(communityId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [communityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCommunityGroupMembers(groupId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!groupId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('community_group_members').select('*').eq('group_id', groupId); setData(result || []) } finally { setIsLoading(false) }
   }, [groupId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCommunityGroups(communityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
@@ -122,56 +122,56 @@ export function useCommunityGroups(communityId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [communityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCommunityLikes(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('community_likes').select('*').eq('user_id', userId); setData(result || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCommunityMembers(communityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!communityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('community_members').select('*').eq('community_id', communityId); setData(result || []) } finally { setIsLoading(false) }
   }, [communityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCommunityPostLikes(postId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!postId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('community_post_likes').select('*').eq('post_id', postId); setData(result || []) } finally { setIsLoading(false) }
   }, [postId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCommunityPosts(communityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
@@ -182,20 +182,20 @@ export function useCommunityPosts(communityId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [communityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCommunityShares(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('community_shares').select('*').eq('user_id', userId).order('shared_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

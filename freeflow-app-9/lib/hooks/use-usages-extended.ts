@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useUsage(usageId?: string) {
   const [usage, setUsage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!usageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('usages').select('*, usage_metrics(*), users(*)').eq('id', usageId).single(); setUsage(data) } finally { setIsLoading(false) }
   }, [usageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { usage, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { usage, isLoading, refresh: loadData }
 }
 
 export function useUsages(options?: { user_id?: string; resource_type?: string; metric_name?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [usages, setUsages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,8 +38,8 @@ export function useUsages(options?: { user_id?: string; resource_type?: string; 
       setUsages(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.resource_type, options?.metric_name, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { usages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { usages, isLoading, refresh: loadData }
 }
 
 function getPeriodStart(period: string): Date {
@@ -57,7 +57,7 @@ function getPeriodStart(period: string): Date {
 export function useUsageSummary(userId?: string, period: string = 'monthly') {
   const [summary, setSummary] = useState<Record<string, Record<string, number>>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -72,14 +72,14 @@ export function useUsageSummary(userId?: string, period: string = 'monthly') {
       setSummary(result)
     } finally { setIsLoading(false) }
   }, [userId, period])
-  useEffect(() => { fetch() }, [fetch])
-  return { summary, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { summary, isLoading, refresh: loadData }
 }
 
 export function useUsageMetrics(options?: { is_billable?: boolean }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -89,27 +89,27 @@ export function useUsageMetrics(options?: { is_billable?: boolean }) {
       setMetrics(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_billable])
-  useEffect(() => { fetch() }, [fetch])
-  return { metrics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { metrics, isLoading, refresh: loadData }
 }
 
 export function useUsageLimits(userId?: string) {
   const [limits, setLimits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('usage_limits').select('*').eq('user_id', userId).eq('is_active', true); setLimits(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { limits, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { limits, isLoading, refresh: loadData }
 }
 
 export function useLimitStatus(userId?: string, resourceType?: string, metricName?: string) {
   const [status, setStatus] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !resourceType || !metricName) { setIsLoading(false); return }
     setIsLoading(true)
@@ -130,15 +130,15 @@ export function useLimitStatus(userId?: string, resourceType?: string, metricNam
       })
     } finally { setIsLoading(false) }
   }, [userId, resourceType, metricName])
-  useEffect(() => { fetch() }, [fetch])
-  return { status, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { status, isLoading, refresh: loadData }
 }
 
 export function useUsageAlerts(userId?: string, options?: { alert_type?: string; is_read?: boolean; limit?: number }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -151,27 +151,27 @@ export function useUsageAlerts(userId?: string, options?: { alert_type?: string;
       setUnreadCount(data?.filter(a => !a.is_read).length || 0)
     } finally { setIsLoading(false) }
   }, [userId, options?.alert_type, options?.is_read, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, unreadCount, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, unreadCount, isLoading, refresh: loadData }
 }
 
 export function useUsageReports(userId?: string, options?: { limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('usage_reports').select('*').eq('user_id', userId).order('generated_at', { ascending: false }).limit(options?.limit || 20); setReports(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reports, isLoading, refresh: loadData }
 }
 
 export function useUsageBilling(userId?: string, options?: { status?: string; limit?: number }) {
   const [billing, setBilling] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -182,14 +182,14 @@ export function useUsageBilling(userId?: string, options?: { status?: string; li
       setBilling(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { billing, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { billing, isLoading, refresh: loadData }
 }
 
 export function useResourceUsage(userId?: string, resourceType?: string, options?: { period?: string }) {
   const [usage, setUsage] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !resourceType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -203,14 +203,14 @@ export function useResourceUsage(userId?: string, resourceType?: string, options
       setUsage(result)
     } finally { setIsLoading(false) }
   }, [userId, resourceType, options?.period])
-  useEffect(() => { fetch() }, [fetch])
-  return { usage, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { usage, isLoading, refresh: loadData }
 }
 
 export function useAllLimitStatuses(userId?: string) {
   const [statuses, setStatuses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -232,14 +232,14 @@ export function useAllLimitStatuses(userId?: string) {
       setStatuses(results)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { statuses, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { statuses, isLoading, refresh: loadData }
 }
 
 export function useUsageTrend(userId?: string, metricName?: string, options?: { days?: number }) {
   const [trend, setTrend] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !metricName) { setIsLoading(false); return }
     setIsLoading(true)
@@ -256,6 +256,6 @@ export function useUsageTrend(userId?: string, metricName?: string, options?: { 
       setTrend(Object.entries(dailyTotals).map(([date, total]) => ({ date, total })))
     } finally { setIsLoading(false) }
   }, [userId, metricName, options?.days])
-  useEffect(() => { fetch() }, [fetch])
-  return { trend, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { trend, isLoading, refresh: loadData }
 }

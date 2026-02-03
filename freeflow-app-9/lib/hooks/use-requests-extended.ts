@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useRequest(requestId?: string) {
   const [request, setRequest] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('requests').select('*, request_types(*), request_comments(*), request_attachments(*), request_approvals(*), requester:requester_id(*), assignee:assignee_id(*)').eq('id', requestId).single(); setRequest(data) } finally { setIsLoading(false) }
   }, [requestId])
-  useEffect(() => { fetch() }, [fetch])
-  return { request, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { request, isLoading, refresh: loadData }
 }
 
 export function useRequests(options?: { requester_id?: string; assignee_id?: string; type_id?: string; status?: string; priority?: string; category?: string; search?: string; limit?: number }) {
   const [requests, setRequests] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -40,14 +40,14 @@ export function useRequests(options?: { requester_id?: string; assignee_id?: str
       setRequests(data || [])
     } finally { setIsLoading(false) }
   }, [options?.requester_id, options?.assignee_id, options?.type_id, options?.status, options?.priority, options?.category, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { requests, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { requests, isLoading, refresh: loadData }
 }
 
 export function useMyRequests(userId?: string, options?: { status?: string; limit?: number }) {
   const [requests, setRequests] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -58,14 +58,14 @@ export function useMyRequests(userId?: string, options?: { status?: string; limi
       setRequests(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { requests, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { requests, isLoading, refresh: loadData }
 }
 
 export function useAssignedRequests(userId?: string, options?: { status?: string; priority?: string; limit?: number }) {
   const [requests, setRequests] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -77,14 +77,14 @@ export function useAssignedRequests(userId?: string, options?: { status?: string
       setRequests(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.priority, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { requests, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { requests, isLoading, refresh: loadData }
 }
 
 export function useRequestTypes(options?: { category?: string; is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -95,14 +95,14 @@ export function useRequestTypes(options?: { category?: string; is_active?: boole
       setTypes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useRequestComments(requestId?: string, options?: { is_internal?: boolean }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -113,53 +113,53 @@ export function useRequestComments(requestId?: string, options?: { is_internal?:
       setComments(data || [])
     } finally { setIsLoading(false) }
   }, [requestId, options?.is_internal])
-  useEffect(() => { fetch() }, [fetch])
-  return { comments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comments, isLoading, refresh: loadData }
 }
 
 export function useRequestAttachments(requestId?: string) {
   const [attachments, setAttachments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('request_attachments').select('*, users(*)').eq('request_id', requestId).order('created_at', { ascending: false }); setAttachments(data || []) } finally { setIsLoading(false) }
   }, [requestId])
-  useEffect(() => { fetch() }, [fetch])
-  return { attachments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { attachments, isLoading, refresh: loadData }
 }
 
 export function useRequestHistory(requestId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('request_history').select('*, users(*)').eq('request_id', requestId).order('created_at', { ascending: false }); setHistory(data || []) } finally { setIsLoading(false) }
   }, [requestId])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useRequestApprovals(requestId?: string) {
   const [approvals, setApprovals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('request_approvals').select('*, approver:approver_id(*)').eq('request_id', requestId).order('level', { ascending: true }); setApprovals(data || []) } finally { setIsLoading(false) }
   }, [requestId])
-  useEffect(() => { fetch() }, [fetch])
-  return { approvals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { approvals, isLoading, refresh: loadData }
 }
 
 export function usePendingApprovals(approverId?: string, options?: { limit?: number }) {
   const [approvals, setApprovals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!approverId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -168,14 +168,14 @@ export function usePendingApprovals(approverId?: string, options?: { limit?: num
       setApprovals(data || [])
     } finally { setIsLoading(false) }
   }, [approverId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { approvals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { approvals, isLoading, refresh: loadData }
 }
 
 export function useRequestStats(options?: { requester_id?: string; assignee_id?: string; type_id?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; open: number; inProgress: number; completed: number; closed: number; byPriority: { [key: string]: number } } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -197,6 +197,6 @@ export function useRequestStats(options?: { requester_id?: string; assignee_id?:
       setStats({ total, open, inProgress, completed, closed, byPriority })
     } finally { setIsLoading(false) }
   }, [options?.requester_id, options?.assignee_id, options?.type_id, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

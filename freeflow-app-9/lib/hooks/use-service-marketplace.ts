@@ -288,7 +288,7 @@ export function useServiceCategories() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -316,9 +316,9 @@ export function useServiceCategories() {
     }
   }, []);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { loadData(); }, [loadData]);
 
-  return { categories, isLoading, error, refresh: fetch };
+  return { categories, isLoading, error, refresh: loadData };
 }
 
 // ============ MARKETPLACE SEARCH HOOK ============
@@ -386,7 +386,7 @@ export function useServiceListing(idOrSlug?: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetch = useCallback(async () => {
+  const loadListing = useCallback(async () => {
     if (!idOrSlug) {
       setIsLoading(false);
       return;
@@ -399,7 +399,7 @@ export function useServiceListing(idOrSlug?: string) {
       const params = new URLSearchParams();
       params.set(isUUID ? 'id' : 'slug', idOrSlug);
 
-      const response = await window.fetch(`/api/marketplace/listings?${params.toString()}`);
+      const response = await fetch(`/api/marketplace/listings?${params.toString()}`);
       const result = await response.json();
 
       if (!response.ok) throw new Error(result.error || 'Failed to fetch listing');
@@ -412,9 +412,9 @@ export function useServiceListing(idOrSlug?: string) {
     }
   }, [idOrSlug]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { loadListing(); }, [loadListing]);
 
-  return { listing, isLoading, error, refresh: fetch };
+  return { listing, isLoading, error, refresh: loadListing };
 }
 
 // ============ MY LISTINGS HOOK ============
@@ -423,14 +423,14 @@ export function useMyListings(options?: { status?: ServiceListing['status'] }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetch = useCallback(async () => {
+  const loadListings = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams();
       if (options?.status) params.set('status', options.status);
 
-      const response = await window.fetch(`/api/marketplace/listings?${params.toString()}`);
+      const response = await fetch(`/api/marketplace/listings?${params.toString()}`);
       const result = await response.json();
 
       if (!response.ok) throw new Error(result.error || 'Failed to fetch listings');
@@ -443,9 +443,9 @@ export function useMyListings(options?: { status?: ServiceListing['status'] }) {
     }
   }, [options?.status]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { loadListings(); }, [loadListings]);
 
-  return { listings, isLoading, error, refresh: fetch };
+  return { listings, isLoading, error, refresh: loadListings };
 }
 
 // ============ LISTING MUTATIONS HOOK ============
@@ -457,7 +457,7 @@ export function useListingMutations() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await window.fetch('/api/marketplace/listings', {
+      const response = await fetch('/api/marketplace/listings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -478,7 +478,7 @@ export function useListingMutations() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await window.fetch('/api/marketplace/listings', {
+      const response = await fetch('/api/marketplace/listings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ...data }),
@@ -499,7 +499,7 @@ export function useListingMutations() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await window.fetch('/api/marketplace/listings', {
+      const response = await fetch('/api/marketplace/listings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status }),
@@ -520,7 +520,7 @@ export function useListingMutations() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await window.fetch(`/api/marketplace/listings?id=${id}`, {
+      const response = await fetch(`/api/marketplace/listings?id=${id}`, {
         method: 'DELETE',
       });
       const result = await response.json();
@@ -557,7 +557,7 @@ export function useServiceOrders(options?: {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetch = useCallback(async () => {
+  const loadOrders = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -567,7 +567,7 @@ export function useServiceOrders(options?: {
       if (options?.page) params.set('page', String(options.page));
       if (options?.limit) params.set('limit', String(options.limit));
 
-      const response = await window.fetch(`/api/marketplace/orders?${params.toString()}`);
+      const response = await fetch(`/api/marketplace/orders?${params.toString()}`);
       const result = await response.json();
 
       if (!response.ok) throw new Error(result.error || 'Failed to fetch orders');
@@ -581,9 +581,9 @@ export function useServiceOrders(options?: {
     }
   }, [options?.role, options?.status, options?.page, options?.limit]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { loadOrders(); }, [loadOrders]);
 
-  return { orders, pagination, isLoading, error, refresh: fetch };
+  return { orders, pagination, isLoading, error, refresh: loadOrders };
 }
 
 // ============ SINGLE ORDER HOOK ============
@@ -592,7 +592,7 @@ export function useServiceOrder(orderId?: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetch = useCallback(async () => {
+  const loadOrder = useCallback(async () => {
     if (!orderId) {
       setIsLoading(false);
       return;
@@ -601,7 +601,7 @@ export function useServiceOrder(orderId?: string) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await window.fetch(`/api/marketplace/orders?id=${orderId}`);
+      const response = await fetch(`/api/marketplace/orders?id=${orderId}`);
       const result = await response.json();
 
       if (!response.ok) throw new Error(result.error || 'Failed to fetch order');
@@ -614,9 +614,9 @@ export function useServiceOrder(orderId?: string) {
     }
   }, [orderId]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { loadOrder(); }, [loadOrder]);
 
-  return { order, isLoading, error, refresh: fetch };
+  return { order, isLoading, error, refresh: loadOrder };
 }
 
 // ============ ORDER MUTATIONS HOOK ============
@@ -634,7 +634,7 @@ export function useOrderMutations() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await window.fetch('/api/marketplace/orders', {
+      const response = await fetch('/api/marketplace/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -687,7 +687,7 @@ export function useOrderMutations() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await window.fetch('/api/marketplace/orders', {
+      const response = await fetch('/api/marketplace/orders', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: orderId, action, data }),
@@ -864,7 +864,7 @@ export function useSavedListings() {
   const [listings, setListings] = useState<ServiceListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetch = useCallback(async () => {
+  const loadSavedListings = useCallback(async () => {
     setIsLoading(true);
     try {
       const supabase = createClient();
@@ -882,14 +882,14 @@ export function useSavedListings() {
 
       if (data) {
         setSavedIds(new Set(data.map(d => d.listing_id)));
-        setListings(data.map(d => d.listing).filter(Boolean));
+        setListings(data.map(d => d.listing as ServiceListing).filter(Boolean));
       }
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { loadSavedListings(); }, [loadSavedListings]);
 
   const toggleSave = useCallback(async (listingId: string) => {
     const supabase = createClient();
@@ -931,7 +931,7 @@ export function useSavedListings() {
 
   const isSaved = useCallback((listingId: string) => savedIds.has(listingId), [savedIds]);
 
-  return { listings, savedIds, isLoading, toggleSave, isSaved, refresh: fetch };
+  return { listings, savedIds, isLoading, toggleSave, isSaved, refresh: loadSavedListings };
 }
 
 // ============ SELLER STATS HOOK ============
@@ -949,7 +949,7 @@ export function useSellerStats() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetch = useCallback(async () => {
+  const loadStats = useCallback(async () => {
     setIsLoading(true);
     try {
       const supabase = createClient();
@@ -992,9 +992,9 @@ export function useSellerStats() {
     }
   }, []);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { loadStats(); }, [loadStats]);
 
-  return { stats, isLoading, refresh: fetch };
+  return { stats, isLoading, refresh: loadStats };
 }
 
 // ============ BUYER STATS HOOK ============
@@ -1007,7 +1007,7 @@ export function useBuyerStats() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetch = useCallback(async () => {
+  const loadBuyerStats = useCallback(async () => {
     setIsLoading(true);
     try {
       const supabase = createClient();
@@ -1051,7 +1051,7 @@ export function useBuyerStats() {
     }
   }, []);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { loadBuyerStats(); }, [loadBuyerStats]);
 
-  return { stats, isLoading, refresh: fetch };
+  return { stats, isLoading, refresh: loadBuyerStats };
 }

@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function useEmployee(employeeId?: string) {
   const [employee, setEmployee] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('employees').select('*, employee_profiles(*), employee_documents(*)').eq('id', employeeId).single(); setEmployee(data) } finally { setIsLoading(false) }
   }, [employeeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { employee, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { employee, isLoading, refresh: loadData }
 }
 
 export function useEmployees(options?: { department_id?: string; status?: string; manager_id?: string; search?: string; limit?: number }) {
   const [employees, setEmployees] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -52,28 +52,28 @@ export function useEmployees(options?: { department_id?: string; status?: string
       setEmployees(data || [])
     } finally { setIsLoading(false) }
   }, [options?.department_id, options?.status, options?.manager_id, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { employees, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { employees, isLoading, refresh: loadData }
 }
 
 export function useEmployeeProfile(employeeId?: string) {
   const [profile, setProfile] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('employee_profiles').select('*').eq('employee_id', employeeId).single(); setProfile(data) } finally { setIsLoading(false) }
   }, [employeeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { profile, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { profile, isLoading, refresh: loadData }
 }
 
 export function useEmployeeDocuments(employeeId?: string, options?: { type?: string }) {
   const [documents, setDocuments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
@@ -85,28 +85,28 @@ export function useEmployeeDocuments(employeeId?: string, options?: { type?: str
       setDocuments(data || [])
     } finally { setIsLoading(false) }
   }, [employeeId, options?.type])
-  useEffect(() => { fetch() }, [fetch])
-  return { documents, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { documents, isLoading, refresh: loadData }
 }
 
 export function useEmployeePerformance(employeeId?: string, options?: { limit?: number }) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('employee_performance').select('*').eq('employee_id', employeeId).order('review_date', { ascending: false }).limit(options?.limit || 10); setReviews(data || []) } finally { setIsLoading(false) }
   }, [employeeId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reviews, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reviews, isLoading, refresh: loadData }
 }
 
 export function useEmployeeLeave(employeeId?: string, options?: { status?: string; year?: number }) {
   const [leaves, setLeaves] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
@@ -119,14 +119,14 @@ export function useEmployeeLeave(employeeId?: string, options?: { status?: strin
       setLeaves(data || [])
     } finally { setIsLoading(false) }
   }, [employeeId, options?.status, options?.year])
-  useEffect(() => { fetch() }, [fetch])
-  return { leaves, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { leaves, isLoading, refresh: loadData }
 }
 
 export function usePendingLeaveRequests(managerId?: string) {
   const [requests, setRequests] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!managerId) { setIsLoading(false); return }
@@ -138,28 +138,28 @@ export function usePendingLeaveRequests(managerId?: string) {
       setRequests(data || [])
     } finally { setIsLoading(false) }
   }, [managerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { requests, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { requests, isLoading, refresh: loadData }
 }
 
 export function useDirectReports(managerId?: string) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!managerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('employees').select('*, employee_profiles(*)').eq('manager_id', managerId).eq('status', 'active').order('hire_date', { ascending: true }); setReports(data || []) } finally { setIsLoading(false) }
   }, [managerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reports, isLoading, refresh: loadData }
 }
 
 export function useEmployeeStats(options?: { department_id?: string }) {
   const [stats, setStats] = useState<{ total: number; active: number; onLeave: number; byDepartment: Record<string, number>; avgTenure: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -177,6 +177,6 @@ export function useEmployeeStats(options?: { department_id?: string }) {
       setStats({ total, active, onLeave, byDepartment, avgTenure })
     } finally { setIsLoading(false) }
   }, [options?.department_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

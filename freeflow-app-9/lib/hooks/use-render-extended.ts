@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useRenderJob(jobId?: string) {
   const [job, setJob] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('render_jobs').select('*').eq('id', jobId).single(); setJob(data) } finally { setIsLoading(false) }
   }, [jobId])
-  useEffect(() => { fetch() }, [fetch])
-  return { job, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { job, isLoading, refresh: loadData }
 }
 
 export function useRenderJobs(options?: { user_id?: string; status?: string; template_id?: string; limit?: number }) {
   const [jobs, setJobs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useRenderJobs(options?: { user_id?: string; status?: string; tem
       setJobs(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.status, options?.template_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { jobs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { jobs, isLoading, refresh: loadData }
 }
 
 export function useRenderTemplates(options?: { type?: string; is_active?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -54,45 +54,45 @@ export function useRenderTemplates(options?: { type?: string; is_active?: boolea
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function useRenderOutputs(jobId?: string) {
   const [outputs, setOutputs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('render_outputs').select('*').eq('job_id', jobId).order('created_at', { ascending: false }); setOutputs(data || []) } finally { setIsLoading(false) }
   }, [jobId])
-  useEffect(() => { fetch() }, [fetch])
-  return { outputs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { outputs, isLoading, refresh: loadData }
 }
 
 export function useRenderSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('render_settings').select('*').eq('user_id', userId).single(); setSettings(data) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function usePendingRenderJobs(userId?: string) {
   const [jobs, setJobs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('render_jobs').select('*').eq('user_id', userId).in('status', ['pending', 'processing']).order('created_at', { ascending: true }); setJobs(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { jobs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { jobs, isLoading, refresh: loadData }
 }

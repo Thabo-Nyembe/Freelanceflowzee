@@ -15,7 +15,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useVideoAnalytics(videoId?: string) {
   const [data, setData] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -32,15 +32,15 @@ export function useVideoAnalytics(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useVideoAnalyticsCountries(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -57,15 +57,15 @@ export function useVideoAnalyticsCountries(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useVideoAnalyticsDevices(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -81,15 +81,15 @@ export function useVideoAnalyticsDevices(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useVideoDailyAnalytics(videoId?: string, days = 30) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -107,9 +107,9 @@ export function useVideoDailyAnalytics(videoId?: string, days = 30) {
     }
   }, [videoId, days])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -120,7 +120,7 @@ export function useVideoAnnotations(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -140,7 +140,7 @@ export function useVideoAnnotations(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
   const create = useCallback(async (input: { timestamp: number; content: string; type?: string }) => {
     try {
@@ -158,7 +158,7 @@ export function useVideoAnnotations(videoId?: string) {
     }
   }, [videoId])
 
-  return { data, isLoading, error, create, refresh: fetch }
+  return { data, isLoading, error, create, refresh: loadData }
 }
 
 // ============================================
@@ -168,7 +168,7 @@ export function useVideoAnnotations(videoId?: string) {
 export function useVideoAssets(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
@@ -185,9 +185,9 @@ export function useVideoAssets(projectId?: string) {
     }
   }, [projectId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -197,7 +197,7 @@ export function useVideoAssets(projectId?: string) {
 export function useVideoCaptions(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -214,9 +214,9 @@ export function useVideoCaptions(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -226,7 +226,7 @@ export function useVideoCaptions(videoId?: string) {
 export function useVideoClips(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -243,9 +243,9 @@ export function useVideoClips(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -255,7 +255,7 @@ export function useVideoClips(videoId?: string) {
 export function useVideoCollaborators(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -271,9 +271,9 @@ export function useVideoCollaborators(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -283,7 +283,7 @@ export function useVideoCollaborators(videoId?: string) {
 export function useVideoComments(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -300,7 +300,7 @@ export function useVideoComments(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
   const create = useCallback(async (userId: string, content: string, timestamp?: number) => {
     try {
@@ -316,7 +316,7 @@ export function useVideoComments(videoId?: string) {
     }
   }, [videoId])
 
-  return { data, isLoading, create, refresh: fetch }
+  return { data, isLoading, create, refresh: loadData }
 }
 
 // ============================================
@@ -326,7 +326,7 @@ export function useVideoComments(videoId?: string) {
 export function useVideoEffects() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -342,9 +342,9 @@ export function useVideoEffects() {
     }
   }, [])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -354,7 +354,7 @@ export function useVideoEffects() {
 export function useVideoEncodingJobs(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -371,9 +371,9 @@ export function useVideoEncodingJobs(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -383,7 +383,7 @@ export function useVideoEncodingJobs(videoId?: string) {
 export function useVideoEngagementEvents(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -401,15 +401,15 @@ export function useVideoEngagementEvents(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useVideoEvents(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -426,9 +426,9 @@ export function useVideoEvents(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -438,7 +438,7 @@ export function useVideoEvents(videoId?: string) {
 export function useVideoExports(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -455,9 +455,9 @@ export function useVideoExports(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -467,7 +467,7 @@ export function useVideoExports(userId?: string) {
 export function useVideoFolders(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -484,7 +484,7 @@ export function useVideoFolders(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
   const create = useCallback(async (name: string, parentId?: string) => {
     try {
@@ -500,7 +500,7 @@ export function useVideoFolders(userId?: string) {
     }
   }, [userId])
 
-  return { data, isLoading, create, refresh: fetch }
+  return { data, isLoading, create, refresh: loadData }
 }
 
 // ============================================
@@ -511,7 +511,7 @@ export function useVideoLikes(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -528,7 +528,7 @@ export function useVideoLikes(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
   const toggle = useCallback(async (userId: string) => {
     const existing = data.find(l => l.user_id === userId)
@@ -551,7 +551,7 @@ export function useVideoLikes(videoId?: string) {
     }
   }, [videoId, data])
 
-  return { data, count, isLoading, toggle, refresh: fetch }
+  return { data, count, isLoading, toggle, refresh: loadData }
 }
 
 // ============================================
@@ -561,7 +561,7 @@ export function useVideoLikes(videoId?: string) {
 export function useVideoMetadata(videoId?: string) {
   const [data, setData] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -578,9 +578,9 @@ export function useVideoMetadata(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -590,7 +590,7 @@ export function useVideoMetadata(videoId?: string) {
 export function useVideoRenderJobs(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -607,9 +607,9 @@ export function useVideoRenderJobs(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -619,7 +619,7 @@ export function useVideoRenderJobs(userId?: string) {
 export function useVideoShares(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -635,9 +635,9 @@ export function useVideoShares(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -647,7 +647,7 @@ export function useVideoShares(videoId?: string) {
 export function useVideoTemplates(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -662,9 +662,9 @@ export function useVideoTemplates(userId?: string) {
     }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -674,7 +674,7 @@ export function useVideoTemplates(userId?: string) {
 export function useVideoTimelineItems(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
@@ -692,9 +692,9 @@ export function useVideoTimelineItems(projectId?: string) {
     }
   }, [projectId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -704,7 +704,7 @@ export function useVideoTimelineItems(projectId?: string) {
 export function useVideoTracks(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
@@ -721,9 +721,9 @@ export function useVideoTracks(projectId?: string) {
     }
   }, [projectId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -733,7 +733,7 @@ export function useVideoTracks(projectId?: string) {
 export function useVideoTranscripts(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -750,9 +750,9 @@ export function useVideoTranscripts(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -762,7 +762,7 @@ export function useVideoTranscripts(videoId?: string) {
 export function useVideoTransitions() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     setIsLoading(true)
@@ -778,9 +778,9 @@ export function useVideoTransitions() {
     }
   }, [])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -790,7 +790,7 @@ export function useVideoTransitions() {
 export function useVideoUsageLogs(userId?: string, limit = 100) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -808,9 +808,9 @@ export function useVideoUsageLogs(userId?: string, limit = 100) {
     }
   }, [userId, limit])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -820,7 +820,7 @@ export function useVideoUsageLogs(userId?: string, limit = 100) {
 export function useVideoVersions(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -837,9 +837,9 @@ export function useVideoVersions(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
-  return { data, isLoading, refresh: fetch }
+  return { data, isLoading, refresh: loadData }
 }
 
 // ============================================
@@ -850,7 +850,7 @@ export function useVideoViews(videoId?: string) {
   const [data, setData] = useState<any[]>([])
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId) { setIsLoading(false); return }
@@ -867,14 +867,14 @@ export function useVideoViews(videoId?: string) {
     }
   }, [videoId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
   const recordView = useCallback(async (userId?: string) => {
     await supabase.from('video_views').insert({ video_id: videoId, user_id: userId })
     setCount(prev => prev + 1)
   }, [videoId])
 
-  return { data, count, isLoading, recordView, refresh: fetch }
+  return { data, count, isLoading, recordView, refresh: loadData }
 }
 
 // ============================================
@@ -884,7 +884,7 @@ export function useVideoViews(videoId?: string) {
 export function useVideoWatchTime(videoId?: string, userId?: string) {
   const [data, setData] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
 
   const supabase = createClient()
     if (!videoId || !userId) { setIsLoading(false); return }
@@ -902,7 +902,7 @@ export function useVideoWatchTime(videoId?: string, userId?: string) {
     }
   }, [videoId, userId])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
 
   const updateWatchTime = useCallback(async (watchedSeconds: number, totalDuration: number) => {
     if (!videoId || !userId) return
@@ -915,5 +915,5 @@ export function useVideoWatchTime(videoId?: string, userId?: string) {
     }, { onConflict: 'video_id,user_id' })
   }, [videoId, userId])
 
-  return { data, isLoading, updateWatchTime, refresh: fetch }
+  return { data, isLoading, updateWatchTime, refresh: loadData }
 }

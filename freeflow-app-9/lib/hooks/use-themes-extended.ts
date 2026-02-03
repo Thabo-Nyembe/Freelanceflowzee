@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useTheme(themeId?: string) {
   const [theme, setTheme] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!themeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('themes').select('*, theme_settings(*), theme_assets(*), theme_versions(*)').eq('id', themeId).single(); setTheme(data) } finally { setIsLoading(false) }
   }, [themeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { theme, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { theme, isLoading, refresh: loadData }
 }
 
 export function useThemes(options?: { category?: string; author_id?: string; status?: string; is_public?: boolean; is_free?: boolean; search?: string; limit?: number }) {
   const [themes, setThemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useThemes(options?: { category?: string; author_id?: string; sta
       setThemes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.author_id, options?.status, options?.is_public, options?.is_free, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { themes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { themes, isLoading, refresh: loadData }
 }
 
 export function useMyThemes(userId?: string, options?: { status?: string }) {
   const [themes, setThemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -57,14 +57,14 @@ export function useMyThemes(userId?: string, options?: { status?: string }) {
       setThemes(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { themes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { themes, isLoading, refresh: loadData }
 }
 
 export function useThemeInstallations(options?: { theme_id?: string; user_id?: string; entity_type?: string; entity_id?: string }) {
   const [installations, setInstallations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -77,15 +77,15 @@ export function useThemeInstallations(options?: { theme_id?: string; user_id?: s
       setInstallations(data || [])
     } finally { setIsLoading(false) }
   }, [options?.theme_id, options?.user_id, options?.entity_type, options?.entity_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { installations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { installations, isLoading, refresh: loadData }
 }
 
 export function useActiveTheme(entityType?: string, entityId?: string) {
   const [installation, setInstallation] = useState<any>(null)
   const [theme, setTheme] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -95,15 +95,15 @@ export function useActiveTheme(entityType?: string, entityId?: string) {
       setTheme(data?.themes || null)
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { installation, theme, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { installation, theme, isLoading, refresh: loadData }
 }
 
 export function useThemeVersions(themeId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [latestVersion, setLatestVersion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!themeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -113,14 +113,14 @@ export function useThemeVersions(themeId?: string) {
       setLatestVersion(data?.[0] || null)
     } finally { setIsLoading(false) }
   }, [themeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { versions, latestVersion, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { versions, latestVersion, isLoading, refresh: loadData }
 }
 
 export function useThemeAssets(themeId?: string, options?: { asset_type?: string }) {
   const [assets, setAssets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!themeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -131,15 +131,15 @@ export function useThemeAssets(themeId?: string, options?: { asset_type?: string
       setAssets(data || [])
     } finally { setIsLoading(false) }
   }, [themeId, options?.asset_type])
-  useEffect(() => { fetch() }, [fetch])
-  return { assets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { assets, isLoading, refresh: loadData }
 }
 
 export function useThemeCustomizations(installationId?: string) {
   const [customizations, setCustomizations] = useState<any[]>([])
   const [latestCustomization, setLatestCustomization] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!installationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -149,14 +149,14 @@ export function useThemeCustomizations(installationId?: string) {
       setLatestCustomization(data?.[0] || null)
     } finally { setIsLoading(false) }
   }, [installationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { customizations, latestCustomization, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { customizations, latestCustomization, isLoading, refresh: loadData }
 }
 
 export function useThemeCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -165,14 +165,14 @@ export function useThemeCategories() {
       setCategories(unique)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function usePopularThemes(options?: { category?: string; limit?: number }) {
   const [themes, setThemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -182,6 +182,6 @@ export function usePopularThemes(options?: { category?: string; limit?: number }
       setThemes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { themes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { themes, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useBackup(backupId?: string) {
   const [backup, setBackup] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!backupId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('backups').select('*').eq('id', backupId).single(); setBackup(data) } finally { setIsLoading(false) }
   }, [backupId])
-  useEffect(() => { fetch() }, [fetch])
-  return { backup, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { backup, isLoading, refresh: loadData }
 }
 
 export function useBackups(options?: { user_id?: string; type?: string; status?: string; limit?: number }) {
   const [backups, setBackups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useBackups(options?: { user_id?: string; type?: string; status?:
       setBackups(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { backups, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { backups, isLoading, refresh: loadData }
 }
 
 export function useBackupSchedules(userId?: string) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('backup_schedules').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setSchedules(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedules, isLoading, refresh: loadData }
 }
 
 export function useLatestBackup(userId?: string, source?: string) {
   const [backup, setBackup] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -67,14 +67,14 @@ export function useLatestBackup(userId?: string, source?: string) {
       setBackup(data)
     } finally { setIsLoading(false) }
   }, [userId, source])
-  useEffect(() => { fetch() }, [fetch])
-  return { backup, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { backup, isLoading, refresh: loadData }
 }
 
 export function useBackupStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; totalSize: number; byStatus: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -87,6 +87,6 @@ export function useBackupStats(userId?: string) {
       setStats({ total, totalSize, byStatus })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

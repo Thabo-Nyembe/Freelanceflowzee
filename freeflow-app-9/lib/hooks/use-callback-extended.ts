@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useCallbackConfig(callbackId?: string) {
   const [callbackConfig, setCallbackConfig] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!callbackId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useCallbackConfig(callbackId?: string) {
       setCallbackConfig(data)
     } finally { setIsLoading(false) }
   }, [callbackId])
-  useEffect(() => { fetch() }, [fetch])
-  return { callbackConfig, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { callbackConfig, isLoading, refresh: loadData }
 }
 
 export function useUserCallbacks(userId?: string, options?: { isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useUserCallbacks(userId?: string, options?: { isActive?: boolean
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCallbackLogs(callbackId?: string, options?: { status?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!callbackId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,8 +55,8 @@ export function useCallbackLogs(callbackId?: string, options?: { status?: string
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [callbackId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCallbackStats(callbackId?: string) {
@@ -67,7 +67,7 @@ export function useCallbackStats(callbackId?: string) {
   const [lastStatus, setLastStatus] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!callbackId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -83,14 +83,14 @@ export function useCallbackStats(callbackId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [callbackId])
-  useEffect(() => { fetch() }, [fetch])
-  return { callCount, failureCount, successRate, lastCalledAt, lastStatus, isActive, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { callCount, failureCount, successRate, lastCalledAt, lastStatus, isActive, isLoading, refresh: loadData }
 }
 
 export function useCallbacksByType(callbackType?: string, userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!callbackType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -101,6 +101,6 @@ export function useCallbacksByType(callbackType?: string, userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [callbackType, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

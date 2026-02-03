@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useTerritory(territoryId?: string) {
   const [territory, setTerritory] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!territoryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('territories').select('*, territory_assignments(*, users(*)), territory_boundaries(*), territory_metrics(*), territory_rules(*)').eq('id', territoryId).single(); setTerritory(data) } finally { setIsLoading(false) }
   }, [territoryId])
-  useEffect(() => { fetch() }, [fetch])
-  return { territory, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { territory, isLoading, refresh: loadData }
 }
 
 export function useTerritories(options?: { territory_type?: string; parent_id?: string | null; region?: string; country?: string; status?: string; search?: string; limit?: number }) {
   const [territories, setTerritories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -42,14 +42,14 @@ export function useTerritories(options?: { territory_type?: string; parent_id?: 
       setTerritories(data || [])
     } finally { setIsLoading(false) }
   }, [options?.territory_type, options?.parent_id, options?.region, options?.country, options?.status, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { territories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { territories, isLoading, refresh: loadData }
 }
 
 export function useTerritoryHierarchy(rootId?: string | null) {
   const [hierarchy, setHierarchy] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -61,14 +61,14 @@ export function useTerritoryHierarchy(rootId?: string | null) {
       setHierarchy(data || [])
     } finally { setIsLoading(false) }
   }, [rootId])
-  useEffect(() => { fetch() }, [fetch])
-  return { hierarchy, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { hierarchy, isLoading, refresh: loadData }
 }
 
 export function useTerritoryAssignments(territoryId?: string, options?: { role?: string; status?: string }) {
   const [assignments, setAssignments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!territoryId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -80,15 +80,15 @@ export function useTerritoryAssignments(territoryId?: string, options?: { role?:
       setAssignments(data || [])
     } finally { setIsLoading(false) }
   }, [territoryId, options?.role, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { assignments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { assignments, isLoading, refresh: loadData }
 }
 
 export function useUserTerritories(userId?: string, options?: { role?: string; is_primary?: boolean }) {
   const [territories, setTerritories] = useState<any[]>([])
   const [primaryTerritory, setPrimaryTerritory] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -102,28 +102,28 @@ export function useUserTerritories(userId?: string, options?: { role?: string; i
       setPrimaryTerritory(result.find(t => t.assignment?.is_primary) || null)
     } finally { setIsLoading(false) }
   }, [userId, options?.role, options?.is_primary])
-  useEffect(() => { fetch() }, [fetch])
-  return { territories, primaryTerritory, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { territories, primaryTerritory, isLoading, refresh: loadData }
 }
 
 export function useTerritoryBoundaries(territoryId?: string) {
   const [boundaries, setBoundaries] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!territoryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('territory_boundaries').select('*').eq('territory_id', territoryId).single(); setBoundaries(data) } finally { setIsLoading(false) }
   }, [territoryId])
-  useEffect(() => { fetch() }, [fetch])
-  return { boundaries, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { boundaries, isLoading, refresh: loadData }
 }
 
 export function useTerritoryMetrics(territoryId?: string, options?: { from_period?: string; to_period?: string; limit?: number }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [latestMetrics, setLatestMetrics] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!territoryId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -136,14 +136,14 @@ export function useTerritoryMetrics(territoryId?: string, options?: { from_perio
       setLatestMetrics(data?.[0] || null)
     } finally { setIsLoading(false) }
   }, [territoryId, options?.from_period, options?.to_period, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { metrics, latestMetrics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { metrics, latestMetrics, isLoading, refresh: loadData }
 }
 
 export function useTerritoryHistory(territoryId?: string, options?: { action?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!territoryId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -154,14 +154,14 @@ export function useTerritoryHistory(territoryId?: string, options?: { action?: s
       setHistory(data || [])
     } finally { setIsLoading(false) }
   }, [territoryId, options?.action, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useTerritoryRules(territoryId?: string, options?: { rule_type?: string; is_active?: boolean }) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!territoryId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -173,27 +173,27 @@ export function useTerritoryRules(territoryId?: string, options?: { rule_type?: 
       setRules(data || [])
     } finally { setIsLoading(false) }
   }, [territoryId, options?.rule_type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { rules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rules, isLoading, refresh: loadData }
 }
 
 export function useChildTerritories(parentId?: string) {
   const [children, setChildren] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!parentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('territories').select('*, territory_assignments(count)').eq('parent_id', parentId).order('name', { ascending: true }); setChildren(data || []) } finally { setIsLoading(false) }
   }, [parentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { children, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { children, isLoading, refresh: loadData }
 }
 
 export function useRegions() {
   const [regions, setRegions] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -202,6 +202,6 @@ export function useRegions() {
       setRegions(unique)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { regions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { regions, isLoading, refresh: loadData }
 }

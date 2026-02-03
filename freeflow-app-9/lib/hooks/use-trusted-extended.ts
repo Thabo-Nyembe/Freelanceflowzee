@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useTrustedDevice(deviceId?: string) {
   const [device, setDevice] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!deviceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useTrustedDevice(deviceId?: string) {
       setDevice(data)
     } finally { setIsLoading(false) }
   }, [deviceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { device, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { device, isLoading, refresh: loadData }
 }
 
 export function useTrustedDevices(userId?: string, options?: { onlyActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -38,8 +38,8 @@ export function useTrustedDevices(userId?: string, options?: { onlyActive?: bool
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.onlyActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDeviceTrustCheck(userId?: string, deviceFingerprint?: string) {
@@ -63,7 +63,7 @@ export function useDeviceTrustCheck(userId?: string, deviceFingerprint?: string)
 export function useTwoFactorBackupCodesCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -72,14 +72,14 @@ export function useTwoFactorBackupCodesCount(userId?: string) {
       setCount(data?.length || 0)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useSecureFileDelivery(deliveryId?: string) {
   const [delivery, setDelivery] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!deliveryId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -88,14 +88,14 @@ export function useSecureFileDelivery(deliveryId?: string) {
       setDelivery(data)
     } finally { setIsLoading(false) }
   }, [deliveryId])
-  useEffect(() => { fetch() }, [fetch])
-  return { delivery, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { delivery, isLoading, refresh: loadData }
 }
 
 export function useSecureFileDeliveries(userId?: string, options?: { isActive?: boolean; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -106,8 +106,8 @@ export function useSecureFileDeliveries(userId?: string, options?: { isActive?: 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.isActive, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useSecureDeliveryValidation(deliveryId?: string, accessCode?: string) {

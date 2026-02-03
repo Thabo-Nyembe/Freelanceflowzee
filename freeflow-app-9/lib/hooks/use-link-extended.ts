@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useLink(linkId?: string) {
   const [link, setLink] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!linkId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useLink(linkId?: string) {
       setLink(data)
     } finally { setIsLoading(false) }
   }, [linkId])
-  useEffect(() => { fetch() }, [fetch])
-  return { link, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { link, isLoading, refresh: loadData }
 }
 
 export function useLinkBySlug(slug?: string) {
   const [link, setLink] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!slug) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function useLinkBySlug(slug?: string) {
       setLink(data)
     } finally { setIsLoading(false) }
   }, [slug])
-  useEffect(() => { fetch() }, [fetch])
-  return { link, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { link, isLoading, refresh: loadData }
 }
 
 export function useUserLinks(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -51,15 +51,15 @@ export function useUserLinks(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useLinkClicks(linkId?: string) {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!linkId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,6 +69,6 @@ export function useLinkClicks(linkId?: string) {
       setTotal(result?.length || 0)
     } finally { setIsLoading(false) }
   }, [linkId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, total, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, total, isLoading, refresh: loadData }
 }

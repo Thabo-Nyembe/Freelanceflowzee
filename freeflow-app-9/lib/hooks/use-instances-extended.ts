@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useInstance(instanceId?: string) {
   const [instance, setInstance] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('instances').select('*, instance_configs(*), instance_metrics(*)').eq('id', instanceId).single(); setInstance(data) } finally { setIsLoading(false) }
   }, [instanceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { instance, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { instance, isLoading, refresh: loadData }
 }
 
 export function useInstances(options?: { owner_id?: string; type?: string; status?: string; region?: string; limit?: number }) {
   const [instances, setInstances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useInstances(options?: { owner_id?: string; type?: string; statu
       setInstances(data || [])
     } finally { setIsLoading(false) }
   }, [options?.owner_id, options?.type, options?.status, options?.region, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { instances, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { instances, isLoading, refresh: loadData }
 }
 
 export function useUserInstances(userId?: string, options?: { status?: string }) {
   const [instances, setInstances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useUserInstances(userId?: string, options?: { status?: string })
       setInstances(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { instances, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { instances, isLoading, refresh: loadData }
 }
 
 export function useInstanceLogs(instanceId?: string, options?: { level?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -75,14 +75,14 @@ export function useInstanceLogs(instanceId?: string, options?: { level?: string;
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [instanceId, options?.level, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useInstanceMetrics(instanceId?: string, options?: { from_date?: string; to_date?: string; metric_type?: string }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -95,53 +95,53 @@ export function useInstanceMetrics(instanceId?: string, options?: { from_date?: 
       setMetrics(data || [])
     } finally { setIsLoading(false) }
   }, [instanceId, options?.from_date, options?.to_date, options?.metric_type])
-  useEffect(() => { fetch() }, [fetch])
-  return { metrics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { metrics, isLoading, refresh: loadData }
 }
 
 export function useInstanceSnapshots(instanceId?: string) {
   const [snapshots, setSnapshots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('instance_snapshots').select('*').eq('instance_id', instanceId).order('created_at', { ascending: false }); setSnapshots(data || []) } finally { setIsLoading(false) }
   }, [instanceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { snapshots, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { snapshots, isLoading, refresh: loadData }
 }
 
 export function useInstanceConfig(instanceId?: string) {
   const [config, setConfig] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('instance_configs').select('*').eq('instance_id', instanceId).single(); setConfig(data?.config || null) } finally { setIsLoading(false) }
   }, [instanceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { config, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { config, isLoading, refresh: loadData }
 }
 
 export function useRunningInstances(userId?: string) {
   const [instances, setInstances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('instances').select('*').eq('owner_id', userId).eq('status', 'running').order('created_at', { ascending: false }); setInstances(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { instances, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { instances, isLoading, refresh: loadData }
 }
 
 export function useInstancesByRegion() {
   const [byRegion, setByRegion] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -151,6 +151,6 @@ export function useInstancesByRegion() {
       setByRegion(grouped)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { byRegion, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { byRegion, isLoading, refresh: loadData }
 }

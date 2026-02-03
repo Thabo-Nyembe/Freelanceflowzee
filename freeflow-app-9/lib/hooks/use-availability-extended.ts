@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useAvailabilitySchedule(scheduleId?: string) {
   const [schedule, setSchedule] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useAvailabilitySchedule(scheduleId?: string) {
       setSchedule(data)
     } finally { setIsLoading(false) }
   }, [scheduleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedule, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedule, isLoading, refresh: loadData }
 }
 
 export function useAvailabilitySchedules(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -36,14 +36,14 @@ export function useAvailabilitySchedules(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDefaultAvailability(userId?: string) {
   const [schedule, setSchedule] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -52,8 +52,8 @@ export function useDefaultAvailability(userId?: string) {
       setSchedule(data)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedule, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedule, isLoading, refresh: loadData }
 }
 
 export function useAvailabilityCheck(userId?: string, dateTime?: Date) {
@@ -80,7 +80,7 @@ export function useAvailabilityCheck(userId?: string, dateTime?: Date) {
 export function useAvailableSlots(userId?: string, date?: string, duration?: number) {
   const [slots, setSlots] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !date) { setIsLoading(false); return }
     setIsLoading(true)
@@ -112,14 +112,14 @@ export function useAvailableSlots(userId?: string, date?: string, duration?: num
       setSlots(result)
     } finally { setIsLoading(false) }
   }, [userId, date, duration])
-  useEffect(() => { fetch() }, [fetch])
-  return { slots, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { slots, isLoading, refresh: loadData }
 }
 
 export function useAvailabilityExceptions(scheduleId?: string, options?: { startDate?: string; endDate?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -131,14 +131,14 @@ export function useAvailabilityExceptions(scheduleId?: string, options?: { start
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [scheduleId, options?.startDate, options?.endDate])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useWeeklyAvailability(userId?: string) {
   const [weeklySchedule, setWeeklySchedule] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -147,6 +147,6 @@ export function useWeeklyAvailability(userId?: string) {
       setWeeklySchedule(schedule?.schedule || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { weeklySchedule, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { weeklySchedule, isLoading, refresh: loadData }
 }

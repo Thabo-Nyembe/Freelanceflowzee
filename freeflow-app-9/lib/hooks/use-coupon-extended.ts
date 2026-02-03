@@ -23,7 +23,7 @@ function isDemoModeEnabled(): boolean {
 export function useCoupons(isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -34,22 +34,22 @@ export function useCoupons(isActive?: boolean) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCouponUsage(couponId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!couponId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('coupon_usage').select('*').eq('coupon_id', couponId).order('used_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [couponId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCreateCoupon() {

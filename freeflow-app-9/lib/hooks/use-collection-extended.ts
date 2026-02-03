@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useCollection(collectionId?: string) {
   const [collection, setCollection] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!collectionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('collections').select('*, collection_items(*), collection_tags(*)').eq('id', collectionId).single(); setCollection(data) } finally { setIsLoading(false) }
   }, [collectionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { collection, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { collection, isLoading, refresh: loadData }
 }
 
 export function useCollections(options?: { user_id?: string; type?: string; visibility?: string; limit?: number }) {
   const [collections, setCollections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useCollections(options?: { user_id?: string; type?: string; visi
       setCollections(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.visibility, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { collections, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { collections, isLoading, refresh: loadData }
 }
 
 export function useCollectionItems(collectionId?: string, options?: { item_type?: string; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!collectionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,40 +54,40 @@ export function useCollectionItems(collectionId?: string, options?: { item_type?
       setItems(data || [])
     } finally { setIsLoading(false) }
   }, [collectionId, options?.item_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useCollectionTags(collectionId?: string) {
   const [tags, setTags] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!collectionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('collection_tags').select('tag').eq('collection_id', collectionId); setTags(data?.map(t => t.tag) || []) } finally { setIsLoading(false) }
   }, [collectionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { tags, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tags, isLoading, refresh: loadData }
 }
 
 export function useSharedCollections(userId?: string) {
   const [collections, setCollections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('collection_shares').select('*, collections(*)').eq('shared_with_id', userId); setCollections(data?.map(s => ({ ...s.collections, permission: s.permission })) || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { collections, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { collections, isLoading, refresh: loadData }
 }
 
 export function usePublicCollections(options?: { type?: string; limit?: number }) {
   const [collections, setCollections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -97,14 +97,14 @@ export function usePublicCollections(options?: { type?: string; limit?: number }
       setCollections(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { collections, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { collections, isLoading, refresh: loadData }
 }
 
 export function useCollectionStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; totalItems: number; byType: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -117,6 +117,6 @@ export function useCollectionStats(userId?: string) {
       setStats({ total, totalItems, byType })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

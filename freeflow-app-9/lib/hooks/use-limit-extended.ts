@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useLimit(entityId?: string, entityType?: string, limitType?: string) {
   const [limit, setLimit] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !limitType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useLimit(entityId?: string, entityType?: string, limitType?: str
       setLimit(data)
     } finally { setIsLoading(false) }
   }, [entityId, entityType, limitType])
-  useEffect(() => { fetch() }, [fetch])
-  return { limit, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { limit, isLoading, refresh: loadData }
 }
 
 export function useLimits(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,8 +35,8 @@ export function useLimits(entityId?: string, entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useLimitCheck(entityId?: string, entityType?: string, limitType?: string, currentValue?: number) {

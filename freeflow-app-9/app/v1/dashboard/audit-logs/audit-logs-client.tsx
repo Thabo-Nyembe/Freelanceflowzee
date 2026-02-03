@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { useAuditLogs, useAuditAlertRules, useAuditLogMutations, useAuditAlertRuleMutations, type AuditLog as HookAuditLog, type AuditAlertRule } from '@/lib/hooks/use-audit-logs'
-import { useSession } from 'next-auth/react'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -303,10 +303,11 @@ export default function AuditLogsClient() {
   const insightsPanel = useInsightsPanel(false)
 
   // Demo mode detection
-  const { data: nextAuthSession, status: sessionStatus } = useSession()
-  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const { userId: currentUserId, userEmail, userName, isDemo, loading: sessionLoading } = useCurrentUser()
+  const sessionStatus = sessionLoading ? "loading" : "authenticated"
+  const isDemoAccount = userEmail === 'alex@freeflow.io' ||
+                        userEmail === 'sarah@freeflow.io' ||
+                        userEmail === 'mike@freeflow.io'
   const isSessionLoading = sessionStatus === 'loading'
 
   // Demo audit logs data

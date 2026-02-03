@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useStatistic(statisticId?: string) {
   const [statistic, setStatistic] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!statisticId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('statistics').select('*, statistic_snapshots(*), statistic_alerts(*)').eq('id', statisticId).single(); setStatistic(data) } finally { setIsLoading(false) }
   }, [statisticId])
-  useEffect(() => { fetch() }, [fetch])
-  return { statistic, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { statistic, isLoading, refresh: loadData }
 }
 
 export function useStatistics(options?: { category?: string; metric_type?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [statistics, setStatistics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useStatistics(options?: { category?: string; metric_type?: strin
       setStatistics(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.metric_type, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { statistics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { statistics, isLoading, refresh: loadData }
 }
 
 export function useStatisticSnapshots(statisticId?: string, options?: { from_date?: string; to_date?: string; period?: string; limit?: number }) {
   const [snapshots, setSnapshots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!statisticId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -57,15 +57,15 @@ export function useStatisticSnapshots(statisticId?: string, options?: { from_dat
       setSnapshots(data || [])
     } finally { setIsLoading(false) }
   }, [statisticId, options?.from_date, options?.to_date, options?.period, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { snapshots, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { snapshots, isLoading, refresh: loadData }
 }
 
 export function useLatestStatisticValue(statisticId?: string) {
   const [value, setValue] = useState<number | null>(null)
   const [snapshot, setSnapshot] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!statisticId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -75,14 +75,14 @@ export function useLatestStatisticValue(statisticId?: string) {
       setValue(data?.value || null)
     } finally { setIsLoading(false) }
   }, [statisticId])
-  useEffect(() => { fetch() }, [fetch])
-  return { value, snapshot, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { value, snapshot, isLoading, refresh: loadData }
 }
 
 export function useStatisticAggregations(statisticId?: string, options?: { aggregation_type?: string; period?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [aggregations, setAggregations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!statisticId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -96,14 +96,14 @@ export function useStatisticAggregations(statisticId?: string, options?: { aggre
       setAggregations(data || [])
     } finally { setIsLoading(false) }
   }, [statisticId, options?.aggregation_type, options?.period, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { aggregations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { aggregations, isLoading, refresh: loadData }
 }
 
 export function useStatisticReports(options?: { report_type?: string; is_active?: boolean; created_by?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -115,14 +115,14 @@ export function useStatisticReports(options?: { report_type?: string; is_active?
       setReports(data || [])
     } finally { setIsLoading(false) }
   }, [options?.report_type, options?.is_active, options?.created_by, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reports, isLoading, refresh: loadData }
 }
 
 export function useStatisticAlerts(statisticId?: string, options?: { is_active?: boolean }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -133,14 +133,14 @@ export function useStatisticAlerts(statisticId?: string, options?: { is_active?:
       setAlerts(data || [])
     } finally { setIsLoading(false) }
   }, [statisticId, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useStatisticTrend(statisticId?: string, days: number = 30) {
   const [trend, setTrend] = useState<{ current: number; previous: number; change: number; changePercent: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!statisticId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -159,14 +159,14 @@ export function useStatisticTrend(statisticId?: string, days: number = 30) {
       setTrend({ current: currentAvg, previous: previousAvg, change, changePercent })
     } finally { setIsLoading(false) }
   }, [statisticId, days])
-  useEffect(() => { fetch() }, [fetch])
-  return { trend, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { trend, isLoading, refresh: loadData }
 }
 
 export function useStatisticCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -175,7 +175,7 @@ export function useStatisticCategories() {
       setCategories(unique)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 

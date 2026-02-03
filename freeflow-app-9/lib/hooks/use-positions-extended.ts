@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function usePosition(positionId?: string) {
   const [position, setPosition] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!positionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('positions').select('*, position_requirements(*), position_applications(count)').eq('id', positionId).single(); setPosition(data) } finally { setIsLoading(false) }
   }, [positionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { position, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { position, isLoading, refresh: loadData }
 }
 
 export function usePositions(options?: { organization_id?: string; department_id?: string; status?: string; type?: string; search?: string; limit?: number }) {
   const [positions, setPositions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,27 +38,27 @@ export function usePositions(options?: { organization_id?: string; department_id
       setPositions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.organization_id, options?.department_id, options?.status, options?.type, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { positions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { positions, isLoading, refresh: loadData }
 }
 
 export function usePositionRequirements(positionId?: string) {
   const [requirements, setRequirements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!positionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('position_requirements').select('*').eq('position_id', positionId).order('order', { ascending: true }); setRequirements(data || []) } finally { setIsLoading(false) }
   }, [positionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { requirements, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { requirements, isLoading, refresh: loadData }
 }
 
 export function usePositionApplications(positionId?: string, options?: { status?: string; limit?: number }) {
   const [applications, setApplications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!positionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,27 +69,27 @@ export function usePositionApplications(positionId?: string, options?: { status?
       setApplications(data || [])
     } finally { setIsLoading(false) }
   }, [positionId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { applications, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { applications, isLoading, refresh: loadData }
 }
 
 export function useApplication(applicationId?: string) {
   const [application, setApplication] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!applicationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('position_applications').select('*, positions(*), users(*), position_interviews(*), position_offers(*)').eq('id', applicationId).single(); setApplication(data) } finally { setIsLoading(false) }
   }, [applicationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { application, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { application, isLoading, refresh: loadData }
 }
 
 export function useMyApplications(userId?: string, options?: { status?: string; limit?: number }) {
   const [applications, setApplications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -100,14 +100,14 @@ export function useMyApplications(userId?: string, options?: { status?: string; 
       setApplications(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { applications, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { applications, isLoading, refresh: loadData }
 }
 
 export function usePositionInterviews(positionId?: string, options?: { status?: string }) {
   const [interviews, setInterviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!positionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -118,14 +118,14 @@ export function usePositionInterviews(positionId?: string, options?: { status?: 
       setInterviews(data || [])
     } finally { setIsLoading(false) }
   }, [positionId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { interviews, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { interviews, isLoading, refresh: loadData }
 }
 
 export function usePositionOffers(positionId?: string, options?: { status?: string }) {
   const [offers, setOffers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!positionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -136,14 +136,14 @@ export function usePositionOffers(positionId?: string, options?: { status?: stri
       setOffers(data || [])
     } finally { setIsLoading(false) }
   }, [positionId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { offers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { offers, isLoading, refresh: loadData }
 }
 
 export function useOpenPositions(options?: { organization_id?: string; department_id?: string; type?: string; limit?: number }) {
   const [positions, setPositions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -155,27 +155,27 @@ export function useOpenPositions(options?: { organization_id?: string; departmen
       setPositions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.organization_id, options?.department_id, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { positions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { positions, isLoading, refresh: loadData }
 }
 
 export function usePositionAssignments(positionId?: string) {
   const [assignments, setAssignments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!positionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('position_assignments').select('*, users(*)').eq('position_id', positionId).order('assigned_at', { ascending: false }); setAssignments(data || []) } finally { setIsLoading(false) }
   }, [positionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { assignments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { assignments, isLoading, refresh: loadData }
 }
 
 export function usePositionStats(organizationId?: string) {
   const [stats, setStats] = useState<{ openPositions: number; totalApplications: number; pendingInterviews: number; pendingOffers: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -198,6 +198,6 @@ export function usePositionStats(organizationId?: string) {
       setStats({ openPositions, totalApplications, pendingInterviews, pendingOffers })
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

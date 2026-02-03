@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useMessage(messageId?: string) {
   const [message, setMessage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useMessage(messageId?: string) {
       setMessage(data)
     } finally { setIsLoading(false) }
   }, [messageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { message, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { message, isLoading, refresh: loadData }
 }
 
 export function useMessages(options?: { channelId?: string; threadId?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useMessages(options?: { channelId?: string; threadId?: string; l
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.channelId, options?.threadId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDirectMessages(userId1?: string, userId2?: string, options?: { limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId1 || !userId2) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useDirectMessages(userId1?: string, userId2?: string, options?: 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId1, userId2, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMessageAttachments(messageId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -70,14 +70,14 @@ export function useMessageAttachments(messageId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [messageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMessageMentions(userId?: string, options?: { isRead?: boolean; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -88,14 +88,14 @@ export function useMessageMentions(userId?: string, options?: { isRead?: boolean
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.isRead, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMessageReactions(messageId?: string) {
   const [reactions, setReactions] = useState<{ emoji: string; count: number; users: any[] }[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -110,14 +110,14 @@ export function useMessageReactions(messageId?: string) {
       setReactions(Object.values(grouped))
     } finally { setIsLoading(false) }
   }, [messageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reactions, isLoading, refresh: loadData }
 }
 
 export function useMessageReadReceipts(messageId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -126,15 +126,15 @@ export function useMessageReadReceipts(messageId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [messageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMessageThread(threadId?: string) {
   const [thread, setThread] = useState<any>(null)
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!threadId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -147,8 +147,8 @@ export function useMessageThread(threadId?: string) {
       setMessages(messagesRes.data || [])
     } finally { setIsLoading(false) }
   }, [threadId])
-  useEffect(() => { fetch() }, [fetch])
-  return { thread, messages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { thread, messages, isLoading, refresh: loadData }
 }
 
 export function useMessagesRealtime(channelId?: string) {

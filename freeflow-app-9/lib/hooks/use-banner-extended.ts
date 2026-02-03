@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useBanners(location?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function useBanners(location?: string, isActive?: boolean) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [location, isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useActiveBanners(location?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useActiveBanners(location?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [location])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBannerStats(bannerId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!bannerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,6 +56,6 @@ export function useBannerStats(bannerId?: string) {
       setStats({ ...result, ctr })
     } finally { setIsLoading(false) }
   }, [bannerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

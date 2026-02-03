@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useReferral(referralId?: string) {
   const [referral, setReferral] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!referralId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('referrals').select('*, referrer:referrer_id(id, full_name, email, avatar_url), referred:referred_id(id, full_name, email, avatar_url), referral_codes(*), referral_rewards(*)').eq('id', referralId).single(); setReferral(data) } finally { setIsLoading(false) }
   }, [referralId])
-  useEffect(() => { fetch() }, [fetch])
-  return { referral, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { referral, isLoading, refresh: loadData }
 }
 
 export function useReferrals(options?: { referrer_id?: string; referred_id?: string; campaign_id?: string; status?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [referrals, setReferrals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useReferrals(options?: { referrer_id?: string; referred_id?: str
       setReferrals(data || [])
     } finally { setIsLoading(false) }
   }, [options?.referrer_id, options?.referred_id, options?.campaign_id, options?.status, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { referrals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { referrals, isLoading, refresh: loadData }
 }
 
 export function useMyReferrals(userId?: string, options?: { status?: string; limit?: number }) {
   const [referrals, setReferrals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -57,27 +57,27 @@ export function useMyReferrals(userId?: string, options?: { status?: string; lim
       setReferrals(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { referrals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { referrals, isLoading, refresh: loadData }
 }
 
 export function useReferralCode(codeId?: string) {
   const [code, setCode] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!codeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('referral_codes').select('*, users(*), referral_campaigns(*)').eq('id', codeId).single(); setCode(data) } finally { setIsLoading(false) }
   }, [codeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { code, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { code, isLoading, refresh: loadData }
 }
 
 export function useUserReferralCode(userId?: string, campaignId?: string) {
   const [code, setCode] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -88,14 +88,14 @@ export function useUserReferralCode(userId?: string, campaignId?: string) {
       setCode(data)
     } finally { setIsLoading(false) }
   }, [userId, campaignId])
-  useEffect(() => { fetch() }, [fetch])
-  return { code, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { code, isLoading, refresh: loadData }
 }
 
 export function useReferralRewards(options?: { user_id?: string; referral_id?: string; status?: string; limit?: number }) {
   const [rewards, setRewards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -107,14 +107,14 @@ export function useReferralRewards(options?: { user_id?: string; referral_id?: s
       setRewards(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.referral_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { rewards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rewards, isLoading, refresh: loadData }
 }
 
 export function useMyRewards(userId?: string, options?: { status?: string; limit?: number }) {
   const [rewards, setRewards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -125,14 +125,14 @@ export function useMyRewards(userId?: string, options?: { status?: string; limit
       setRewards(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { rewards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rewards, isLoading, refresh: loadData }
 }
 
 export function useReferralCampaigns(options?: { is_active?: boolean; limit?: number }) {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -142,14 +142,14 @@ export function useReferralCampaigns(options?: { is_active?: boolean; limit?: nu
       setCampaigns(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { campaigns, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { campaigns, isLoading, refresh: loadData }
 }
 
 export function useReferralStats(userId?: string, options?: { campaign_id?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ totalReferrals: number; pendingReferrals: number; completedReferrals: number; totalEarned: number; pendingRewards: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -168,14 +168,14 @@ export function useReferralStats(userId?: string, options?: { campaign_id?: stri
       setStats({ totalReferrals, pendingReferrals, completedReferrals, totalEarned, pendingRewards })
     } finally { setIsLoading(false) }
   }, [userId, options?.campaign_id, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useTopReferrers(options?: { campaign_id?: string; limit?: number }) {
   const [referrers, setReferrers] = useState<{ user: any; count: number }[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -193,15 +193,15 @@ export function useTopReferrers(options?: { campaign_id?: string; limit?: number
       setReferrers(sorted)
     } finally { setIsLoading(false) }
   }, [options?.campaign_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { referrers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { referrers, isLoading, refresh: loadData }
 }
 
 export function usePendingRewards(userId?: string) {
   const [rewards, setRewards] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -211,6 +211,6 @@ export function usePendingRewards(userId?: string) {
       setTotal(data?.reduce((sum, r) => sum + (r.amount || 0), 0) || 0)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rewards, total, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rewards, total, isLoading, refresh: loadData }
 }

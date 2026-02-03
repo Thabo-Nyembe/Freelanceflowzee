@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useAlert(alertId?: string) {
   const [alert, setAlert] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!alertId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('alerts').select('*').eq('id', alertId).single(); setAlert(data) } finally { setIsLoading(false) }
   }, [alertId])
-  useEffect(() => { fetch() }, [fetch])
-  return { alert, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alert, isLoading, refresh: loadData }
 }
 
 export function useAlerts(options?: { user_id?: string; type?: string; severity?: string; status?: string; is_read?: boolean; limit?: number }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,47 +38,47 @@ export function useAlerts(options?: { user_id?: string; type?: string; severity?
       setAlerts(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.severity, options?.status, options?.is_read, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useUnreadAlerts(userId?: string, options?: { limit?: number }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('alerts').select('*').eq('user_id', userId).eq('is_read', false).eq('status', 'active').order('created_at', { ascending: false }).limit(options?.limit || 50); setAlerts(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useUnreadAlertCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { count: total } = await supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('is_read', false).eq('status', 'active'); setCount(total || 0) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useCriticalAlerts(userId?: string) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('alerts').select('*').eq('user_id', userId).in('severity', ['high', 'critical']).eq('status', 'active').order('created_at', { ascending: false }); setAlerts(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useAlertsRealtime(userId?: string) {
@@ -100,7 +100,7 @@ export function useAlertsRealtime(userId?: string) {
 export function useAlertsByType(userId?: string) {
   const [byType, setByType] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -110,6 +110,6 @@ export function useAlertsByType(userId?: string) {
       setByType(counts)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { byType, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { byType, isLoading, refresh: loadData }
 }

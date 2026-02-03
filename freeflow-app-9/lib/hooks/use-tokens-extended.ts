@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useToken(tokenId?: string) {
   const [token, setToken] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tokenId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tokens').select('*, token_scopes(*)').eq('id', tokenId).single(); setToken(data) } finally { setIsLoading(false) }
   }, [tokenId])
-  useEffect(() => { fetch() }, [fetch])
-  return { token, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { token, isLoading, refresh: loadData }
 }
 
 export function useTokens(options?: { token_type?: string; owner_id?: string; owner_type?: string; status?: string; search?: string; limit?: number }) {
   const [tokens, setTokens] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useTokens(options?: { token_type?: string; owner_id?: string; ow
       setTokens(data || [])
     } finally { setIsLoading(false) }
   }, [options?.token_type, options?.owner_id, options?.owner_type, options?.status, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tokens, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tokens, isLoading, refresh: loadData }
 }
 
 export function useMyTokens(userId?: string, options?: { token_type?: string; status?: string }) {
   const [tokens, setTokens] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -57,28 +57,28 @@ export function useMyTokens(userId?: string, options?: { token_type?: string; st
       setTokens(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.token_type, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { tokens, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tokens, isLoading, refresh: loadData }
 }
 
 export function useTokenScopes(tokenId?: string) {
   const [scopes, setScopes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tokenId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('token_scopes').select('scope').eq('token_id', tokenId); setScopes((data || []).map(s => s.scope)) } finally { setIsLoading(false) }
   }, [tokenId])
-  useEffect(() => { fetch() }, [fetch])
-  return { scopes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { scopes, isLoading, refresh: loadData }
 }
 
 export function useTokenUsage(tokenId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [usages, setUsages] = useState<any[]>([])
   const [totalUsage, setTotalUsage] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tokenId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -91,14 +91,14 @@ export function useTokenUsage(tokenId?: string, options?: { from_date?: string; 
       setTotalUsage(count || data?.length || 0)
     } finally { setIsLoading(false) }
   }, [tokenId, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { usages, totalUsage, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { usages, totalUsage, isLoading, refresh: loadData }
 }
 
 export function useTokenRateLimit(tokenId?: string) {
   const [rateLimit, setRateLimit] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tokenId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -118,14 +118,14 @@ export function useTokenRateLimit(tokenId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [tokenId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rateLimit, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rateLimit, isLoading, refresh: loadData }
 }
 
 export function useTokenAuditLogs(tokenId?: string, options?: { action?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tokenId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -136,27 +136,27 @@ export function useTokenAuditLogs(tokenId?: string, options?: { action?: string;
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [tokenId, options?.action, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useTokenRefreshHistory(tokenId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tokenId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('token_refresh_history').select('*').eq('token_id', tokenId).order('refreshed_at', { ascending: false }); setHistory(data || []) } finally { setIsLoading(false) }
   }, [tokenId])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useExpiringTokens(ownerId?: string, daysUntilExpiry: number = 7) {
   const [tokens, setTokens] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ownerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -166,14 +166,14 @@ export function useExpiringTokens(ownerId?: string, daysUntilExpiry: number = 7)
       setTokens(data || [])
     } finally { setIsLoading(false) }
   }, [ownerId, daysUntilExpiry])
-  useEffect(() => { fetch() }, [fetch])
-  return { tokens, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tokens, isLoading, refresh: loadData }
 }
 
 export function useTokenStats(ownerId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ownerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -189,14 +189,14 @@ export function useTokenStats(ownerId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [ownerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useAvailableScopes() {
   const [scopes, setScopes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -205,6 +205,6 @@ export function useAvailableScopes() {
       setScopes(unique.sort())
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { scopes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { scopes, isLoading, refresh: loadData }
 }

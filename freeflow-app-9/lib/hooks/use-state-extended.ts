@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useEntityState(entityId?: string, entityType?: string) {
   const [state, setState] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useEntityState(entityId?: string, entityType?: string) {
       setState(data?.state || {})
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { state, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { state, isLoading, refresh: loadData }
 }
 
 export function useStateValue(entityId?: string, entityType?: string, key?: string) {
   const [value, setValue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !key) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function useStateValue(entityId?: string, entityType?: string, key?: stri
       setValue(data?.state?.[key] || null)
     } finally { setIsLoading(false) }
   }, [entityId, entityType, key])
-  useEffect(() => { fetch() }, [fetch])
-  return { value, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { value, isLoading, refresh: loadData }
 }
 
 export function useStatesByType(entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -51,6 +51,6 @@ export function useStatesByType(entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

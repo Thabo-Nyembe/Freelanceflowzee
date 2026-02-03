@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useVehicle(vehicleId?: string) {
   const [vehicle, setVehicle] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!vehicleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('fleet_vehicles').select('*, fleet_drivers(*), fleet_maintenance(*)').eq('id', vehicleId).single(); setVehicle(data) } finally { setIsLoading(false) }
   }, [vehicleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { vehicle, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vehicle, isLoading, refresh: loadData }
 }
 
 export function useVehicles(options?: { status?: string; type?: string; driver_id?: string; limit?: number }) {
   const [vehicles, setVehicles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useVehicles(options?: { status?: string; type?: string; driver_i
       setVehicles(data || [])
     } finally { setIsLoading(false) }
   }, [options?.status, options?.type, options?.driver_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { vehicles, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vehicles, isLoading, refresh: loadData }
 }
 
 export function useDriver(driverId?: string) {
   const [driver, setDriver] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!driverId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('fleet_drivers').select('*, fleet_vehicles(*), fleet_trips(*)').eq('id', driverId).single(); setDriver(data) } finally { setIsLoading(false) }
   }, [driverId])
-  useEffect(() => { fetch() }, [fetch])
-  return { driver, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { driver, isLoading, refresh: loadData }
 }
 
 export function useDrivers(options?: { status?: string; license_type?: string; limit?: number }) {
   const [drivers, setDrivers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -67,14 +67,14 @@ export function useDrivers(options?: { status?: string; license_type?: string; l
       setDrivers(data || [])
     } finally { setIsLoading(false) }
   }, [options?.status, options?.license_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { drivers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { drivers, isLoading, refresh: loadData }
 }
 
 export function useTrips(options?: { vehicle_id?: string; driver_id?: string; status?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [trips, setTrips] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -88,14 +88,14 @@ export function useTrips(options?: { vehicle_id?: string; driver_id?: string; st
       setTrips(data || [])
     } finally { setIsLoading(false) }
   }, [options?.vehicle_id, options?.driver_id, options?.status, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { trips, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { trips, isLoading, refresh: loadData }
 }
 
 export function useVehicleTrips(vehicleId?: string, options?: { status?: string; limit?: number }) {
   const [trips, setTrips] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!vehicleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -106,14 +106,14 @@ export function useVehicleTrips(vehicleId?: string, options?: { status?: string;
       setTrips(data || [])
     } finally { setIsLoading(false) }
   }, [vehicleId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { trips, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { trips, isLoading, refresh: loadData }
 }
 
 export function useMaintenanceRecords(vehicleId?: string, options?: { status?: string; limit?: number }) {
   const [records, setRecords] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!vehicleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -124,14 +124,14 @@ export function useMaintenanceRecords(vehicleId?: string, options?: { status?: s
       setRecords(data || [])
     } finally { setIsLoading(false) }
   }, [vehicleId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { records, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { records, isLoading, refresh: loadData }
 }
 
 export function useFuelLogs(vehicleId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!vehicleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -143,30 +143,30 @@ export function useFuelLogs(vehicleId?: string, options?: { from_date?: string; 
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [vehicleId, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useAvailableVehicles() {
   const [vehicles, setVehicles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('fleet_vehicles').select('*').eq('status', 'available').order('registration_number', { ascending: true }); setVehicles(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { vehicles, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vehicles, isLoading, refresh: loadData }
 }
 
 export function useUpcomingMaintenance(limit?: number) {
   const [records, setRecords] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('fleet_maintenance').select('*, fleet_vehicles(*)').eq('status', 'scheduled').gte('scheduled_date', new Date().toISOString()).order('scheduled_date', { ascending: true }).limit(limit || 10); setRecords(data || []) } finally { setIsLoading(false) }
   }, [limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { records, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { records, isLoading, refresh: loadData }
 }

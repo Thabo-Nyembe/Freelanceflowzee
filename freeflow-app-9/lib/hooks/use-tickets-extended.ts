@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useTicket(ticketId?: string) {
   const [ticket, setTicket] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ticketId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tickets').select('*, ticket_comments(*, users(*)), ticket_assignments(*, users(*)), ticket_tags(*), ticket_attachments(*)').eq('id', ticketId).single(); setTicket(data) } finally { setIsLoading(false) }
   }, [ticketId])
-  useEffect(() => { fetch() }, [fetch])
-  return { ticket, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { ticket, isLoading, refresh: loadData }
 }
 
 export function useTickets(options?: { ticket_type?: string; status?: string; priority?: string; category?: string; department?: string; created_by?: string; overdue?: boolean; search?: string; limit?: number }) {
   const [tickets, setTickets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -41,14 +41,14 @@ export function useTickets(options?: { ticket_type?: string; status?: string; pr
       setTickets(data || [])
     } finally { setIsLoading(false) }
   }, [options?.ticket_type, options?.status, options?.priority, options?.category, options?.department, options?.created_by, options?.overdue, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tickets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tickets, isLoading, refresh: loadData }
 }
 
 export function useMyTickets(userId?: string, options?: { status?: string; priority?: string; limit?: number }) {
   const [tickets, setTickets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -60,14 +60,14 @@ export function useMyTickets(userId?: string, options?: { status?: string; prior
       setTickets(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.priority, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tickets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tickets, isLoading, refresh: loadData }
 }
 
 export function useAssignedTickets(userId?: string, options?: { status?: string; priority?: string; limit?: number }) {
   const [tickets, setTickets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -82,14 +82,14 @@ export function useAssignedTickets(userId?: string, options?: { status?: string;
       setTickets(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.priority, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tickets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tickets, isLoading, refresh: loadData }
 }
 
 export function useTicketComments(ticketId?: string, options?: { is_internal?: boolean; limit?: number }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ticketId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -100,40 +100,40 @@ export function useTicketComments(ticketId?: string, options?: { is_internal?: b
       setComments(data || [])
     } finally { setIsLoading(false) }
   }, [ticketId, options?.is_internal, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { comments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comments, isLoading, refresh: loadData }
 }
 
 export function useTicketAssignments(ticketId?: string) {
   const [assignments, setAssignments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ticketId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ticket_assignments').select('*, users(*)').eq('ticket_id', ticketId).order('assigned_at', { ascending: true }); setAssignments(data || []) } finally { setIsLoading(false) }
   }, [ticketId])
-  useEffect(() => { fetch() }, [fetch])
-  return { assignments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { assignments, isLoading, refresh: loadData }
 }
 
 export function useTicketTags(ticketId?: string) {
   const [tags, setTags] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ticketId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ticket_tags').select('tag').eq('ticket_id', ticketId); setTags((data || []).map(t => t.tag)) } finally { setIsLoading(false) }
   }, [ticketId])
-  useEffect(() => { fetch() }, [fetch])
-  return { tags, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tags, isLoading, refresh: loadData }
 }
 
 export function useTicketHistory(ticketId?: string, options?: { action?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ticketId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -144,27 +144,27 @@ export function useTicketHistory(ticketId?: string, options?: { action?: string;
       setHistory(data || [])
     } finally { setIsLoading(false) }
   }, [ticketId, options?.action, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useTicketAttachments(ticketId?: string) {
   const [attachments, setAttachments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ticketId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ticket_attachments').select('*, users(*)').eq('ticket_id', ticketId).order('created_at', { ascending: false }); setAttachments(data || []) } finally { setIsLoading(false) }
   }, [ticketId])
-  useEffect(() => { fetch() }, [fetch])
-  return { attachments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { attachments, isLoading, refresh: loadData }
 }
 
 export function useTicketStats(options?: { department?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -196,14 +196,14 @@ export function useTicketStats(options?: { department?: string; from_date?: stri
       setStats(result)
     } finally { setIsLoading(false) }
   }, [options?.department, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useOverdueTickets(options?: { department?: string; assigned_to?: string; limit?: number }) {
   const [tickets, setTickets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -217,6 +217,6 @@ export function useOverdueTickets(options?: { department?: string; assigned_to?:
       setTickets(result)
     } finally { setIsLoading(false) }
   }, [options?.department, options?.assigned_to, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tickets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tickets, isLoading, refresh: loadData }
 }

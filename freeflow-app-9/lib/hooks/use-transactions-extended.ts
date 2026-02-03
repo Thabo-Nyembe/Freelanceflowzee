@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useTransaction(transactionId?: string) {
   const [transaction, setTransaction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('transactions').select('*, transaction_items(*), transaction_fees(*), transaction_refunds(*)').eq('id', transactionId).single(); setTransaction(data) } finally { setIsLoading(false) }
   }, [transactionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { transaction, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transaction, isLoading, refresh: loadData }
 }
 
 export function useTransactions(options?: { transaction_type?: string; status?: string; sender_id?: string; recipient_id?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useTransactions(options?: { transaction_type?: string; status?: 
       setTransactions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.transaction_type, options?.status, options?.sender_id, options?.recipient_id, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { transactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transactions, isLoading, refresh: loadData }
 }
 
 export function useMyTransactions(userId?: string, options?: { role?: 'sender' | 'recipient' | 'both'; status?: string; limit?: number }) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -61,28 +61,28 @@ export function useMyTransactions(userId?: string, options?: { role?: 'sender' |
       setTransactions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.role, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { transactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transactions, isLoading, refresh: loadData }
 }
 
 export function useTransactionItems(transactionId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('transaction_items').select('*').eq('transaction_id', transactionId).order('created_at', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
   }, [transactionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useTransactionFees(transactionId?: string) {
   const [fees, setFees] = useState<any[]>([])
   const [totalFees, setTotalFees] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -92,15 +92,15 @@ export function useTransactionFees(transactionId?: string) {
       setTotalFees(data?.reduce((sum, f) => sum + (f.amount || 0), 0) || 0)
     } finally { setIsLoading(false) }
   }, [transactionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { fees, totalFees, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { fees, totalFees, isLoading, refresh: loadData }
 }
 
 export function useTransactionRefunds(transactionId?: string) {
   const [refunds, setRefunds] = useState<any[]>([])
   const [totalRefunded, setTotalRefunded] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -110,15 +110,15 @@ export function useTransactionRefunds(transactionId?: string) {
       setTotalRefunded(data?.reduce((sum, r) => sum + (r.amount || 0), 0) || 0)
     } finally { setIsLoading(false) }
   }, [transactionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { refunds, totalRefunded, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { refunds, totalRefunded, isLoading, refresh: loadData }
 }
 
 export function useTransactionDisputes(transactionId?: string) {
   const [disputes, setDisputes] = useState<any[]>([])
   const [activeDispute, setActiveDispute] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -128,14 +128,14 @@ export function useTransactionDisputes(transactionId?: string) {
       setActiveDispute(data?.find(d => d.status === 'open') || null)
     } finally { setIsLoading(false) }
   }, [transactionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { disputes, activeDispute, hasActiveDispute: !!activeDispute, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { disputes, activeDispute, hasActiveDispute: !!activeDispute, isLoading, refresh: loadData }
 }
 
 export function useTransactionLogs(transactionId?: string, options?: { action?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -146,14 +146,14 @@ export function useTransactionLogs(transactionId?: string, options?: { action?: 
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [transactionId, options?.action, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useTransactionStats(options?: { from_date?: string; to_date?: string; transaction_type?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -173,14 +173,14 @@ export function useTransactionStats(options?: { from_date?: string; to_date?: st
       })
     } finally { setIsLoading(false) }
   }, [options?.from_date, options?.to_date, options?.transaction_type])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function usePendingTransactions(options?: { sender_id?: string; recipient_id?: string; limit?: number }) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -191,6 +191,6 @@ export function usePendingTransactions(options?: { sender_id?: string; recipient
       setTransactions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.sender_id, options?.recipient_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { transactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transactions, isLoading, refresh: loadData }
 }

@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useLogs(logType?: string, level?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,19 +21,19 @@ export function useLogs(logType?: string, level?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [logType, level])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useLogEntries(logId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!logId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('log_entries').select('*').eq('log_id', logId).order('timestamp', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [logId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

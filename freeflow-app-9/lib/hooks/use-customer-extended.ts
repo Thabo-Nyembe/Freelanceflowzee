@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useCustomer(customerId?: string) {
   const [customer, setCustomer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useCustomer(customerId?: string) {
       setCustomer(data)
     } finally { setIsLoading(false) }
   }, [customerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { customer, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { customer, isLoading, refresh: loadData }
 }
 
 export function useCustomers(userId?: string, options?: { status?: string; segment_id?: string; tag?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -40,8 +40,8 @@ export function useCustomers(userId?: string, options?: { status?: string; segme
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.segment_id, options?.tag, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCustomerSearch(userId: string, searchTerm: string) {
@@ -66,7 +66,7 @@ export function useCustomerSearch(userId: string, searchTerm: string) {
 export function useCustomerNotes(customerId?: string, options?: { limit?: number }) {
   const [notes, setNotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -75,14 +75,14 @@ export function useCustomerNotes(customerId?: string, options?: { limit?: number
       setNotes(data || [])
     } finally { setIsLoading(false) }
   }, [customerId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { notes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { notes, isLoading, refresh: loadData }
 }
 
 export function useCustomerActivities(customerId?: string, options?: { activity_type?: string; limit?: number }) {
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -93,14 +93,14 @@ export function useCustomerActivities(customerId?: string, options?: { activity_
       setActivities(data || [])
     } finally { setIsLoading(false) }
   }, [customerId, options?.activity_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { activities, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { activities, isLoading, refresh: loadData }
 }
 
 export function useCustomerSegments(userId?: string) {
   const [segments, setSegments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -109,14 +109,14 @@ export function useCustomerSegments(userId?: string) {
       setSegments(data || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { segments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { segments, isLoading, refresh: loadData }
 }
 
 export function useCustomerSegment(segmentId?: string) {
   const [segment, setSegment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!segmentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -125,14 +125,14 @@ export function useCustomerSegment(segmentId?: string) {
       setSegment(data)
     } finally { setIsLoading(false) }
   }, [segmentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { segment, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { segment, isLoading, refresh: loadData }
 }
 
 export function useCustomerStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; active: number; inactive: number; totalLifetimeValue: number; totalOrders: number; avgLifetimeValue: number; newThisMonth: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -151,14 +151,14 @@ export function useCustomerStats(userId?: string) {
       setStats({ total, active, inactive, totalLifetimeValue, totalOrders, avgLifetimeValue, newThisMonth })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useTopCustomers(userId?: string, options?: { by?: 'lifetime_value' | 'total_orders'; limit?: number }) {
   const [customers, setCustomers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -168,14 +168,14 @@ export function useTopCustomers(userId?: string, options?: { by?: 'lifetime_valu
       setCustomers(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.by, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { customers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { customers, isLoading, refresh: loadData }
 }
 
 export function useRecentCustomers(userId?: string, options?: { limit?: number }) {
   const [customers, setCustomers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -184,14 +184,14 @@ export function useRecentCustomers(userId?: string, options?: { limit?: number }
       setCustomers(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { customers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { customers, isLoading, refresh: loadData }
 }
 
 export function useCustomersBySegment(userId?: string) {
   const [bySegment, setBySegment] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -211,6 +211,6 @@ export function useCustomersBySegment(userId?: string) {
       setBySegment(counts)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { bySegment, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { bySegment, isLoading, refresh: loadData }
 }

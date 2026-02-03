@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useBlockedUsers(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,8 +19,8 @@ export function useBlockedUsers(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useIsBlocked(userId?: string, otherUserId?: string) {
@@ -50,7 +50,7 @@ export function useBlockedIds(userId?: string) {
   const [blockedIds, setBlockedIds] = useState<string[]>([])
   const [blockedByIds, setBlockedByIds] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -63,14 +63,14 @@ export function useBlockedIds(userId?: string) {
       setBlockedByIds(blockedBy.data?.map(b => b.blocker_id) || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { blockedIds, blockedByIds, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { blockedIds, blockedByIds, isLoading, refresh: loadData }
 }
 
 export function useBlockCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -79,6 +79,6 @@ export function useBlockCount(userId?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }

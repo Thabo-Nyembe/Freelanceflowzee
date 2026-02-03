@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useIdentityVerification(verificationId?: string) {
   const [verification, setVerification] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!verificationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('identity_verifications').select('*, identity_documents(*)').eq('id', verificationId).single(); setVerification(data) } finally { setIsLoading(false) }
   }, [verificationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { verification, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { verification, isLoading, refresh: loadData }
 }
 
 export function useUserVerifications(userId?: string, options?: { type?: string; status?: string }) {
   const [verifications, setVerifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -36,27 +36,27 @@ export function useUserVerifications(userId?: string, options?: { type?: string;
       setVerifications(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { verifications, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { verifications, isLoading, refresh: loadData }
 }
 
 export function useVerificationDocuments(verificationId?: string) {
   const [documents, setDocuments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!verificationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('identity_documents').select('*').eq('verification_id', verificationId).order('uploaded_at', { ascending: false }); setDocuments(data || []) } finally { setIsLoading(false) }
   }, [verificationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { documents, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { documents, isLoading, refresh: loadData }
 }
 
 export function useIdentityProviders(options?: { is_active?: boolean }) {
   const [providers, setProviders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -66,47 +66,47 @@ export function useIdentityProviders(options?: { is_active?: boolean }) {
       setProviders(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { providers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { providers, isLoading, refresh: loadData }
 }
 
 export function useActiveSessions(userId?: string) {
   const [sessions, setSessions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('identity_sessions').select('*').eq('user_id', userId).eq('is_active', true).order('started_at', { ascending: false }); setSessions(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { sessions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sessions, isLoading, refresh: loadData }
 }
 
 export function useSessionHistory(userId?: string, options?: { limit?: number }) {
   const [sessions, setSessions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('identity_sessions').select('*').eq('user_id', userId).order('started_at', { ascending: false }).limit(options?.limit || 50); setSessions(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { sessions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sessions, isLoading, refresh: loadData }
 }
 
 export function useUserMFAMethods(userId?: string) {
   const [methods, setMethods] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('identity_mfa').select('*').eq('user_id', userId).eq('is_enabled', true); setMethods(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { methods, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { methods, isLoading, refresh: loadData }
 }
 
 export function useIsMFAEnabled(userId?: string) {

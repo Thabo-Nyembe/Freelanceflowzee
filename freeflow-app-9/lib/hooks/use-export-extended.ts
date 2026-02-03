@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useExport(exportId?: string) {
   const [exportData, setExportData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!exportId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,8 +19,8 @@ export function useExport(exportId?: string) {
       setExportData(data)
     } finally { setIsLoading(false) }
   }, [exportId])
-  useEffect(() => { fetch() }, [fetch])
-  return { exportData, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { exportData, isLoading, refresh: loadData }
 }
 
 export function useExportProgress(exportId?: string) {
@@ -61,7 +61,7 @@ export function useExportProgress(exportId?: string) {
 export function useUserExports(userId?: string, options?: { status?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -72,14 +72,14 @@ export function useUserExports(userId?: string, options?: { status?: string }) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useScheduledExports(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -88,6 +88,6 @@ export function useScheduledExports(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

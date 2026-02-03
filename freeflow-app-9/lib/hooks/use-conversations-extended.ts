@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useConversation(conversationId?: string) {
   const [conversation, setConversation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!conversationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('conversations').select('*, conversation_participants(*)').eq('id', conversationId).single(); setConversation(data) } finally { setIsLoading(false) }
   }, [conversationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { conversation, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { conversation, isLoading, refresh: loadData }
 }
 
 export function useConversations(userId?: string, options?: { type?: string; limit?: number }) {
   const [conversations, setConversations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,21 +37,21 @@ export function useConversations(userId?: string, options?: { type?: string; lim
       setConversations(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { conversations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { conversations, isLoading, refresh: loadData }
 }
 
 export function useConversationMessages(conversationId?: string, options?: { limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!conversationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('conversation_messages').select('*').eq('conversation_id', conversationId).order('created_at', { ascending: false }).limit(options?.limit || 50); setMessages((data || []).reverse()) } finally { setIsLoading(false) }
   }, [conversationId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { messages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { messages, isLoading, refresh: loadData }
 }
 
 export function useConversationMessagesRealtime(conversationId?: string) {
@@ -73,20 +73,20 @@ export function useConversationMessagesRealtime(conversationId?: string) {
 export function useConversationParticipants(conversationId?: string) {
   const [participants, setParticipants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!conversationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('conversation_participants').select('*').eq('conversation_id', conversationId).is('left_at', null).order('joined_at', { ascending: true }); setParticipants(data || []) } finally { setIsLoading(false) }
   }, [conversationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { participants, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { participants, isLoading, refresh: loadData }
 }
 
 export function useUnreadConversations(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -101,14 +101,14 @@ export function useUnreadConversations(userId?: string) {
       setCount(unread)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useArchivedConversations(userId?: string) {
   const [conversations, setConversations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -119,6 +119,6 @@ export function useArchivedConversations(userId?: string) {
       setConversations(data || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { conversations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { conversations, isLoading, refresh: loadData }
 }

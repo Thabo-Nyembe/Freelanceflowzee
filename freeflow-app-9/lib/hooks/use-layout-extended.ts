@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useLayouts(layoutType?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function useLayouts(layoutType?: string, isActive?: boolean) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [layoutType, isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useUserLayout(userId?: string, layoutType?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,14 +39,14 @@ export function useUserLayout(userId?: string, layoutType?: string) {
       setData(result)
     } finally { setIsLoading(false) }
   }, [userId, layoutType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useLayoutSections(layoutId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!layoutId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,6 +55,6 @@ export function useLayoutSections(layoutId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [layoutId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

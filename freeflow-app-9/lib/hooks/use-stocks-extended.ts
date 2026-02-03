@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useStock(stockId?: string) {
   const [stock, setStock] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!stockId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('stocks').select('*, stock_locations(*), stock_reservations(*), stock_alerts(*)').eq('id', stockId).single(); setStock(data) } finally { setIsLoading(false) }
   }, [stockId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stock, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stock, isLoading, refresh: loadData }
 }
 
 export function useStocks(options?: { product_id?: string; location_id?: string; low_stock?: boolean; search?: string; limit?: number }) {
   const [stocks, setStocks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -40,14 +40,14 @@ export function useStocks(options?: { product_id?: string; location_id?: string;
       setStocks(result)
     } finally { setIsLoading(false) }
   }, [options?.product_id, options?.location_id, options?.low_stock, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { stocks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stocks, isLoading, refresh: loadData }
 }
 
 export function useStockMovements(stockId?: string, options?: { movement_type?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [movements, setMovements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!stockId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -60,14 +60,14 @@ export function useStockMovements(stockId?: string, options?: { movement_type?: 
       setMovements(data || [])
     } finally { setIsLoading(false) }
   }, [stockId, options?.movement_type, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { movements, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { movements, isLoading, refresh: loadData }
 }
 
 export function useStockReservations(stockId?: string, options?: { status?: string }) {
   const [reservations, setReservations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!stockId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -78,14 +78,14 @@ export function useStockReservations(stockId?: string, options?: { status?: stri
       setReservations(data || [])
     } finally { setIsLoading(false) }
   }, [stockId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { reservations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reservations, isLoading, refresh: loadData }
 }
 
 export function useStockLocations(options?: { is_active?: boolean; search?: string }) {
   const [locations, setLocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -96,14 +96,14 @@ export function useStockLocations(options?: { is_active?: boolean; search?: stri
       setLocations(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active, options?.search])
-  useEffect(() => { fetch() }, [fetch])
-  return { locations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { locations, isLoading, refresh: loadData }
 }
 
 export function useStockAlerts(options?: { alert_type?: string; status?: string; limit?: number }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -114,14 +114,14 @@ export function useStockAlerts(options?: { alert_type?: string; status?: string;
       setAlerts(data || [])
     } finally { setIsLoading(false) }
   }, [options?.alert_type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useLowStockItems(options?: { location_id?: string; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -135,14 +135,14 @@ export function useLowStockItems(options?: { location_id?: string; limit?: numbe
       setItems(lowStock)
     } finally { setIsLoading(false) }
   }, [options?.location_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useStockAvailability(productId?: string, locationId?: string) {
   const [availability, setAvailability] = useState<{ total: number; reserved: number; available: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!productId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -155,14 +155,14 @@ export function useStockAvailability(productId?: string, locationId?: string) {
       setAvailability({ total, reserved, available: total - reserved })
     } finally { setIsLoading(false) }
   }, [productId, locationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { availability, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { availability, isLoading, refresh: loadData }
 }
 
 export function useStockStats(options?: { location_id?: string }) {
   const [stats, setStats] = useState<{ total_items: number; total_value: number; low_stock_count: number; out_of_stock_count: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -181,7 +181,7 @@ export function useStockStats(options?: { location_id?: string }) {
       })
     } finally { setIsLoading(false) }
   }, [options?.location_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 

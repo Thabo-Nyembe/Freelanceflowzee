@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useLicense(licenseId?: string) {
   const [license, setLicense] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!licenseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('licenses').select('*, license_types(*), license_activations(*)').eq('id', licenseId).single(); setLicense(data) } finally { setIsLoading(false) }
   }, [licenseId])
-  useEffect(() => { fetch() }, [fetch])
-  return { license, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { license, isLoading, refresh: loadData }
 }
 
 export function useUserLicenses(userId?: string, options?: { status?: string; product_id?: string }) {
   const [licenses, setLicenses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -36,33 +36,33 @@ export function useUserLicenses(userId?: string, options?: { status?: string; pr
       setLicenses(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.product_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { licenses, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { licenses, isLoading, refresh: loadData }
 }
 
 export function useLicenseActivations(licenseId?: string) {
   const [activations, setActivations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!licenseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('license_activations').select('*').eq('license_id', licenseId).order('activated_at', { ascending: false }); setActivations(data || []) } finally { setIsLoading(false) }
   }, [licenseId])
-  useEffect(() => { fetch() }, [fetch])
-  return { activations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { activations, isLoading, refresh: loadData }
 }
 
 export function useLicenseTypes() {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('license_types').select('*').order('name', { ascending: true }); setTypes(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useLicenseValidation(licenseKey?: string) {
@@ -89,20 +89,20 @@ export function useLicenseValidation(licenseKey?: string) {
 export function useActiveLicenses(userId?: string) {
   const [licenses, setLicenses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('licenses').select('*, license_types(*)').eq('user_id', userId).eq('status', 'active').order('expires_at', { ascending: true }); setLicenses(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { licenses, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { licenses, isLoading, refresh: loadData }
 }
 
 export function useExpiringLicenses(userId?: string, options?: { days?: number }) {
   const [licenses, setLicenses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -114,19 +114,19 @@ export function useExpiringLicenses(userId?: string, options?: { days?: number }
       setLicenses(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.days])
-  useEffect(() => { fetch() }, [fetch])
-  return { licenses, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { licenses, isLoading, refresh: loadData }
 }
 
 export function useLicenseRenewals(licenseId?: string) {
   const [renewals, setRenewals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!licenseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('license_renewals').select('*').eq('license_id', licenseId).order('renewed_at', { ascending: false }); setRenewals(data || []) } finally { setIsLoading(false) }
   }, [licenseId])
-  useEffect(() => { fetch() }, [fetch])
-  return { renewals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { renewals, isLoading, refresh: loadData }
 }

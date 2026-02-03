@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useColorPalette(paletteId?: string) {
   const [palette, setPalette] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!paletteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('color_palettes').select('*').eq('id', paletteId).single(); setPalette(data) } finally { setIsLoading(false) }
   }, [paletteId])
-  useEffect(() => { fetch() }, [fetch])
-  return { palette, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { palette, isLoading, refresh: loadData }
 }
 
 export function useColorPalettes(options?: { user_id?: string; is_public?: boolean; tag?: string; limit?: number }) {
   const [palettes, setPalettes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useColorPalettes(options?: { user_id?: string; is_public?: boole
       setPalettes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.is_public, options?.tag, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { palettes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { palettes, isLoading, refresh: loadData }
 }
 
 export function useColorSchemes(options?: { user_id?: string; type?: string; limit?: number }) {
   const [schemes, setSchemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -54,40 +54,40 @@ export function useColorSchemes(options?: { user_id?: string; type?: string; lim
       setSchemes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { schemes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schemes, isLoading, refresh: loadData }
 }
 
 export function useColorHistory(userId?: string, limit?: number) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('color_history').select('*').eq('user_id', userId).order('used_at', { ascending: false }).limit(limit || 20); setHistory(data || []) } finally { setIsLoading(false) }
   }, [userId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useFavoriteColors(userId?: string) {
   const [favorites, setFavorites] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('color_favorites').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setFavorites(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { favorites, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { favorites, isLoading, refresh: loadData }
 }
 
 export function usePublicPalettes(options?: { tag?: string; limit?: number }) {
   const [palettes, setPalettes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -97,14 +97,14 @@ export function usePublicPalettes(options?: { tag?: string; limit?: number }) {
       setPalettes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.tag, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { palettes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { palettes, isLoading, refresh: loadData }
 }
 
 export function useRecentColors(userId?: string) {
   const [colors, setColors] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -114,14 +114,14 @@ export function useRecentColors(userId?: string) {
       setColors(uniqueColors)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { colors, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { colors, isLoading, refresh: loadData }
 }
 
 export function useColorStats(userId?: string) {
   const [stats, setStats] = useState<{ palettes: number; favorites: number; history: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -134,6 +134,6 @@ export function useColorStats(userId?: string) {
       setStats({ palettes: palettes.count || 0, favorites: favorites.count || 0, history: history.count || 0 })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

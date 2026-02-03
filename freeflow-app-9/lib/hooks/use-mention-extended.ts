@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useMentions(userId?: string, unreadOnly = false) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -21,14 +21,14 @@ export function useMentions(userId?: string, unreadOnly = false) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, unreadOnly])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useUnreadMentionCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useUnreadMentionCount(userId?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useMentionsByItem(itemId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,6 +53,6 @@ export function useMentionsByItem(itemId?: string, itemType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [itemId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

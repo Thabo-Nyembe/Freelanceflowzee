@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useTenant(tenantId?: string) {
   const [tenant, setTenant] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tenantId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useTenant(tenantId?: string) {
       setTenant(data)
     } finally { setIsLoading(false) }
   }, [tenantId])
-  useEffect(() => { fetch() }, [fetch])
-  return { tenant, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tenant, isLoading, refresh: loadData }
 }
 
 export function useTenants(options?: { status?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useTenants(options?: { status?: string }) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTenantUsers(tenantId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tenantId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -52,14 +52,14 @@ export function useTenantUsers(tenantId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [tenantId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTenantSettings(tenantId?: string) {
   const [settings, setSettings] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tenantId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,14 +69,14 @@ export function useTenantSettings(tenantId?: string) {
       setSettings(settingsMap)
     } finally { setIsLoading(false) }
   }, [tenantId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function useTenantUsage(tenantId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tenantId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -85,6 +85,6 @@ export function useTenantUsage(tenantId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [tenantId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

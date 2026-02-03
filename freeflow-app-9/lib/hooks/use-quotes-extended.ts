@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useQuote(quoteId?: string) {
   const [quote, setQuote] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!quoteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('quotes').select('*, quote_items(*), quote_versions(*), quote_comments(*), clients(*), users(*)').eq('id', quoteId).single(); setQuote(data) } finally { setIsLoading(false) }
   }, [quoteId])
-  useEffect(() => { fetch() }, [fetch])
-  return { quote, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { quote, isLoading, refresh: loadData }
 }
 
 export function useQuotes(options?: { author_id?: string; client_id?: string; organization_id?: string; status?: string; search?: string; limit?: number }) {
   const [quotes, setQuotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,40 +38,40 @@ export function useQuotes(options?: { author_id?: string; client_id?: string; or
       setQuotes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.author_id, options?.client_id, options?.organization_id, options?.status, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { quotes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { quotes, isLoading, refresh: loadData }
 }
 
 export function useQuoteItems(quoteId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!quoteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('quote_items').select('*').eq('quote_id', quoteId).order('order', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
   }, [quoteId])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useQuoteVersions(quoteId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!quoteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('quote_versions').select('*, users(*)').eq('quote_id', quoteId).order('version', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
   }, [quoteId])
-  useEffect(() => { fetch() }, [fetch])
-  return { versions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { versions, isLoading, refresh: loadData }
 }
 
 export function useQuoteComments(quoteId?: string, options?: { is_internal?: boolean }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!quoteId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -82,14 +82,14 @@ export function useQuoteComments(quoteId?: string, options?: { is_internal?: boo
       setComments(data || [])
     } finally { setIsLoading(false) }
   }, [quoteId, options?.is_internal])
-  useEffect(() => { fetch() }, [fetch])
-  return { comments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comments, isLoading, refresh: loadData }
 }
 
 export function useMyQuotes(userId?: string, options?: { status?: string; limit?: number }) {
   const [quotes, setQuotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -100,14 +100,14 @@ export function useMyQuotes(userId?: string, options?: { status?: string; limit?
       setQuotes(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { quotes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { quotes, isLoading, refresh: loadData }
 }
 
 export function useClientQuotes(clientId?: string, options?: { status?: string; limit?: number }) {
   const [quotes, setQuotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!clientId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -118,14 +118,14 @@ export function useClientQuotes(clientId?: string, options?: { status?: string; 
       setQuotes(data || [])
     } finally { setIsLoading(false) }
   }, [clientId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { quotes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { quotes, isLoading, refresh: loadData }
 }
 
 export function usePendingQuotes(options?: { author_id?: string; organization_id?: string; limit?: number }) {
   const [quotes, setQuotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -136,14 +136,14 @@ export function usePendingQuotes(options?: { author_id?: string; organization_id
       setQuotes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.author_id, options?.organization_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { quotes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { quotes, isLoading, refresh: loadData }
 }
 
 export function useExpiringQuotes(options?: { days?: number; author_id?: string; limit?: number }) {
   const [quotes, setQuotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -155,14 +155,14 @@ export function useExpiringQuotes(options?: { days?: number; author_id?: string;
       setQuotes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.days, options?.author_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { quotes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { quotes, isLoading, refresh: loadData }
 }
 
 export function useQuoteStats(options?: { author_id?: string; organization_id?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; draft: number; sent: number; accepted: number; declined: number; expired: number; totalValue: number; acceptedValue: number; conversionRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -187,14 +187,14 @@ export function useQuoteStats(options?: { author_id?: string; organization_id?: 
       setStats({ total, draft, sent, accepted, declined, expired, totalValue, acceptedValue, conversionRate })
     } finally { setIsLoading(false) }
   }, [options?.author_id, options?.organization_id, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useQuoteTemplates(options?: { category?: string; search?: string; limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -205,6 +205,6 @@ export function useQuoteTemplates(options?: { category?: string; search?: string
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }

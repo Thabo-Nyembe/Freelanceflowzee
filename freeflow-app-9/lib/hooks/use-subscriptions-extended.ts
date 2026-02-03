@@ -84,7 +84,7 @@ export interface SubscriptionInput {
 export function useSubscription(subscriptionId?: string) {
   const [subscription, setSubscription] = useState<SubscriptionRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!subscriptionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -93,14 +93,14 @@ export function useSubscription(subscriptionId?: string) {
       setSubscription(data)
     } finally { setIsLoading(false) }
   }, [subscriptionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { subscription, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { subscription, isLoading, refresh: loadData }
 }
 
 export function useUserSubscription(userId?: string) {
   const [subscription, setSubscription] = useState<SubscriptionRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -109,14 +109,14 @@ export function useUserSubscription(userId?: string) {
       setSubscription(data)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { subscription, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { subscription, isLoading, refresh: loadData }
 }
 
 export function useUserSubscriptions(userId?: string, options?: { status?: string; includeAll?: boolean }) {
   const [data, setData] = useState<SubscriptionRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -128,14 +128,14 @@ export function useUserSubscriptions(userId?: string, options?: { status?: strin
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.includeAll])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useSubscriptionStatus(userId?: string) {
   const [status, setStatus] = useState<{ isActive: boolean; plan: string | null; expiresAt: string | null; isTrial: boolean; willCancel: boolean }>({ isActive: false, plan: null, expiresAt: null, isTrial: false, willCancel: false })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -154,14 +154,14 @@ export function useSubscriptionStatus(userId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { status, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { status, isLoading, refresh: loadData }
 }
 
 export function useSubscriptionUsage(subscriptionId?: string, options?: { feature?: string; startDate?: string; endDate?: string }) {
   const [data, setData] = useState<SubscriptionUsageRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!subscriptionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -174,14 +174,14 @@ export function useSubscriptionUsage(subscriptionId?: string, options?: { featur
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [subscriptionId, options?.feature, options?.startDate, options?.endDate])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useSubscriptionUsageSummary(subscriptionId?: string) {
   const [summary, setSummary] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!subscriptionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -192,14 +192,14 @@ export function useSubscriptionUsageSummary(subscriptionId?: string) {
       setSummary(result)
     } finally { setIsLoading(false) }
   }, [subscriptionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { summary, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { summary, isLoading, refresh: loadData }
 }
 
 export function useSubscriptionFeatureLimit(subscriptionId?: string, feature?: string, limit?: number) {
   const [usage, setUsage] = useState<{ used: number; limit: number; remaining: number; isWithinLimit: boolean } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!subscriptionId || !feature || limit === undefined) { setIsLoading(false); return }
     setIsLoading(true)
@@ -211,14 +211,14 @@ export function useSubscriptionFeatureLimit(subscriptionId?: string, feature?: s
       setUsage({ used: total, limit, remaining: Math.max(0, limit - total), isWithinLimit: total < limit })
     } finally { setIsLoading(false) }
   }, [subscriptionId, feature, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { usage, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { usage, isLoading, refresh: loadData }
 }
 
 export function useActiveSubscriptions(options?: { planId?: string; billingCycle?: string; limit?: number }) {
   const [data, setData] = useState<SubscriptionRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -229,8 +229,8 @@ export function useActiveSubscriptions(options?: { planId?: string; billingCycle
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.planId, options?.billingCycle, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useSubscriptionRealtime(subscriptionId?: string) {
@@ -250,7 +250,7 @@ export function useSubscriptionRealtime(subscriptionId?: string) {
 export function useSubscriptionStats() {
   const [stats, setStats] = useState<SubscriptionStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -264,8 +264,8 @@ export function useSubscriptionStats() {
       setStats(result)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useCreateSubscription() {

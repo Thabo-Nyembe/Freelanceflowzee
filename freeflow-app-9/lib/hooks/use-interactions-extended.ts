@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useInteraction(interactionId?: string) {
   const [interaction, setInteraction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!interactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('interactions').select('*, interaction_types(*)').eq('id', interactionId).single(); setInteraction(data) } finally { setIsLoading(false) }
   }, [interactionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { interaction, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { interaction, isLoading, refresh: loadData }
 }
 
 export function useInteractions(options?: { user_id?: string; target_id?: string; target_type?: string; interaction_type?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [interactions, setInteractions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useInteractions(options?: { user_id?: string; target_id?: string
       setInteractions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.target_id, options?.target_type, options?.interaction_type, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { interactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { interactions, isLoading, refresh: loadData }
 }
 
 export function useUserInteractions(userId?: string, options?: { target_type?: string; limit?: number }) {
   const [interactions, setInteractions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -57,14 +57,14 @@ export function useUserInteractions(userId?: string, options?: { target_type?: s
       setInteractions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.target_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { interactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { interactions, isLoading, refresh: loadData }
 }
 
 export function useTargetInteractions(targetId?: string, targetType?: string, options?: { interaction_type?: string; limit?: number }) {
   const [interactions, setInteractions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!targetId || !targetType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -75,14 +75,14 @@ export function useTargetInteractions(targetId?: string, targetType?: string, op
       setInteractions(data || [])
     } finally { setIsLoading(false) }
   }, [targetId, targetType, options?.interaction_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { interactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { interactions, isLoading, refresh: loadData }
 }
 
 export function useInteractionTypes(options?: { category?: string; is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -93,27 +93,27 @@ export function useInteractionTypes(options?: { category?: string; is_active?: b
       setTypes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useInteractionLogs(interactionId?: string, options?: { limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!interactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('interaction_logs').select('*').eq('interaction_id', interactionId).order('logged_at', { ascending: false }).limit(options?.limit || 50); setLogs(data || []) } finally { setIsLoading(false) }
   }, [interactionId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useInteractionAnalytics(options?: { target_type?: string; interaction_type?: string; from_date?: string; to_date?: string }) {
   const [analytics, setAnalytics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -126,14 +126,14 @@ export function useInteractionAnalytics(options?: { target_type?: string; intera
       setAnalytics(data || [])
     } finally { setIsLoading(false) }
   }, [options?.target_type, options?.interaction_type, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { analytics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { analytics, isLoading, refresh: loadData }
 }
 
 export function useInteractionRules(options?: { trigger_type?: string; is_active?: boolean }) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -144,14 +144,14 @@ export function useInteractionRules(options?: { trigger_type?: string; is_active
       setRules(data || [])
     } finally { setIsLoading(false) }
   }, [options?.trigger_type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { rules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rules, isLoading, refresh: loadData }
 }
 
 export function useInteractionCount(targetId?: string, targetType?: string, interactionType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!targetId || !targetType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -162,6 +162,6 @@ export function useInteractionCount(targetId?: string, targetType?: string, inte
       setCount(c || 0)
     } finally { setIsLoading(false) }
   }, [targetId, targetType, interactionType])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }

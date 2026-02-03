@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useBroadcast(broadcastId?: string) {
   const [broadcast, setBroadcast] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!broadcastId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('broadcasts').select('*, broadcast_recipients(*)').eq('id', broadcastId).single(); setBroadcast(data) } finally { setIsLoading(false) }
   }, [broadcastId])
-  useEffect(() => { fetch() }, [fetch])
-  return { broadcast, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { broadcast, isLoading, refresh: loadData }
 }
 
 export function useBroadcasts(options?: { user_id?: string; status?: string; channel?: string; limit?: number }) {
   const [broadcasts, setBroadcasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useBroadcasts(options?: { user_id?: string; status?: string; cha
       setBroadcasts(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.status, options?.channel, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { broadcasts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { broadcasts, isLoading, refresh: loadData }
 }
 
 export function useBroadcastRecipients(broadcastId?: string) {
   const [recipients, setRecipients] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!broadcastId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('broadcast_recipients').select('*').eq('broadcast_id', broadcastId).order('created_at', { ascending: true }); setRecipients(data || []) } finally { setIsLoading(false) }
   }, [broadcastId])
-  useEffect(() => { fetch() }, [fetch])
-  return { recipients, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { recipients, isLoading, refresh: loadData }
 }
 
 export function useBroadcastTemplates(options?: { user_id?: string; type?: string; limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -67,27 +67,27 @@ export function useBroadcastTemplates(options?: { user_id?: string; type?: strin
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function useScheduledBroadcasts(userId?: string) {
   const [broadcasts, setBroadcasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('broadcasts').select('*').eq('user_id', userId).eq('status', 'scheduled').gte('scheduled_at', new Date().toISOString()).order('scheduled_at', { ascending: true }); setBroadcasts(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { broadcasts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { broadcasts, isLoading, refresh: loadData }
 }
 
 export function useBroadcastStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -99,6 +99,6 @@ export function useBroadcastStats(userId?: string) {
       setStats({ total, byStatus })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

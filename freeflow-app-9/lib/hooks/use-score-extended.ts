@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useScore(entityId?: string, entityType?: string, scoreType?: string) {
   const [score, setScore] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !scoreType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useScore(entityId?: string, entityType?: string, scoreType?: str
       setScore(data?.score || 0)
     } finally { setIsLoading(false) }
   }, [entityId, entityType, scoreType])
-  useEffect(() => { fetch() }, [fetch])
-  return { score, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { score, isLoading, refresh: loadData }
 }
 
 export function useScores(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function useScores(entityId?: string, entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useLeaderboard(scoreType?: string, entityType?: string, limit = 10) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scoreType || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -51,15 +51,15 @@ export function useLeaderboard(scoreType?: string, entityType?: string, limit = 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [scoreType, entityType, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useRank(entityId?: string, entityType?: string, scoreType?: string) {
   const [rank, setRank] = useState<number | null>(null)
   const [score, setScore] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !scoreType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -71,6 +71,6 @@ export function useRank(entityId?: string, entityType?: string, scoreType?: stri
       setScore(entityScore.score)
     } finally { setIsLoading(false) }
   }, [entityId, entityType, scoreType])
-  useEffect(() => { fetch() }, [fetch])
-  return { rank, score, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rank, score, isLoading, refresh: loadData }
 }

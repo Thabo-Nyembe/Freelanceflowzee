@@ -1,11 +1,14 @@
 'use client'
 
 import React from 'react'
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { AlertCircle, RefreshCw, Home, ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 
 interface ErrorBoundaryProps {
   children: React.ReactNode
   fallback?: React.ReactNode
+  fallbackUrl?: string
+  fallbackLabel?: string
 }
 
 interface ErrorBoundaryState {
@@ -25,8 +28,27 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo)
-    this.setState({ errorInfo })
+    // Log error safely
+    try {
+      console.error('Error caught by boundary:', error, errorInfo)
+      this.setState({ errorInfo })
+      // Report to monitoring service
+      if (typeof window !== 'undefined') {
+        fetch('/api/error-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: error.message,
+            stack: error.stack,
+            componentStack: errorInfo.componentStack,
+            url: window.location.href,
+            timestamp: new Date().toISOString()
+          })
+        }).catch(() => {}) // Silently fail
+      }
+    } catch {
+      // Ignore logging errors
+    }
   }
 
   handleReset = () => {
@@ -35,6 +57,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   render() {
     if (this.state.hasError) {
+      const { fallbackUrl = '/dashboard', fallbackLabel = 'Back to Dashboard' } = this.props
+
       return this.props.fallback || (
         <div className="min-h-[400px] flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
           <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-lg w-full">
@@ -50,13 +74,29 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 </p>
               </div>
             )}
-            <button
-              onClick={this.handleReset}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={this.handleReset}
+                className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Try Again
+              </button>
+              <Link
+                href={fallbackUrl}
+                className="inline-flex items-center justify-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {fallbackLabel}
+              </Link>
+            </div>
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center px-4 py-2 mt-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Try again
-            </button>
+              <Home className="w-4 h-4 mr-2" />
+              Go to Homepage
+            </Link>
           </div>
         </div>
       )

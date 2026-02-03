@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function usePage(pageId?: string) {
   const [page, setPage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('pages').select('*, page_blocks(*), page_seo(*), page_versions(*)').eq('id', pageId).single(); setPage(data) } finally { setIsLoading(false) }
   }, [pageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { page, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { page, isLoading, refresh: loadData }
 }
 
 export function usePageBySlug(slug?: string, options?: { organization_id?: string }) {
   const [page, setPage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!slug) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function usePageBySlug(slug?: string, options?: { organization_id?: strin
       setPage(data)
     } finally { setIsLoading(false) }
   }, [slug, options?.organization_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { page, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { page, isLoading, refresh: loadData }
 }
 
 export function usePages(options?: { organization_id?: string; author_id?: string; type?: string; status?: string; parent_id?: string | null; search?: string; limit?: number }) {
   const [pages, setPages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -57,66 +57,66 @@ export function usePages(options?: { organization_id?: string; author_id?: strin
       setPages(data || [])
     } finally { setIsLoading(false) }
   }, [options?.organization_id, options?.author_id, options?.type, options?.status, options?.parent_id, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { pages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { pages, isLoading, refresh: loadData }
 }
 
 export function usePageBlocks(pageId?: string) {
   const [blocks, setBlocks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('page_blocks').select('*').eq('page_id', pageId).order('order', { ascending: true }); setBlocks(data || []) } finally { setIsLoading(false) }
   }, [pageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { blocks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { blocks, isLoading, refresh: loadData }
 }
 
 export function usePageVersions(pageId?: string, options?: { limit?: number }) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('page_versions').select('*').eq('page_id', pageId).order('created_at', { ascending: false }).limit(options?.limit || 20); setVersions(data || []) } finally { setIsLoading(false) }
   }, [pageId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { versions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { versions, isLoading, refresh: loadData }
 }
 
 export function usePageSeo(pageId?: string) {
   const [seo, setSeo] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('page_seo').select('*').eq('page_id', pageId).single(); setSeo(data) } finally { setIsLoading(false) }
   }, [pageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { seo, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { seo, isLoading, refresh: loadData }
 }
 
 export function usePagePermissions(pageId?: string) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('page_permissions').select('*').eq('page_id', pageId); setPermissions(data || []) } finally { setIsLoading(false) }
   }, [pageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { permissions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { permissions, isLoading, refresh: loadData }
 }
 
 export function usePageAnalytics(pageId?: string, options?: { from_date?: string; to_date?: string }) {
   const [analytics, setAnalytics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -128,27 +128,27 @@ export function usePageAnalytics(pageId?: string, options?: { from_date?: string
       setAnalytics(data || [])
     } finally { setIsLoading(false) }
   }, [pageId, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { analytics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { analytics, isLoading, refresh: loadData }
 }
 
 export function useChildPages(parentId?: string) {
   const [pages, setPages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!parentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('pages').select('*').eq('parent_id', parentId).order('title', { ascending: true }); setPages(data || []) } finally { setIsLoading(false) }
   }, [parentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { pages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { pages, isLoading, refresh: loadData }
 }
 
 export function usePublishedPages(organizationId?: string, options?: { type?: string; limit?: number }) {
   const [pages, setPages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -159,6 +159,6 @@ export function usePublishedPages(organizationId?: string, options?: { type?: st
       setPages(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { pages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { pages, isLoading, refresh: loadData }
 }

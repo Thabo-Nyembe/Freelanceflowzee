@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useSession } from 'next-auth/react'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { toast } from 'sonner'
 import { useCompliance, type Compliance as HookCompliance } from '@/lib/hooks/use-compliance'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
@@ -204,10 +204,11 @@ const copyToClipboard = async (text: string) => {
 
 export default function ComplianceClient() {
   // Demo mode detection for investor demos
-  const { data: nextAuthSession, status: sessionStatus } = useSession()
-  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const { userId: currentUserId, userEmail, userName, isDemo, loading: sessionLoading } = useCurrentUser()
+  const sessionStatus = sessionLoading ? "loading" : "authenticated"
+  const isDemoAccount = userEmail === 'alex@freeflow.io' ||
+                        userEmail === 'sarah@freeflow.io' ||
+                        userEmail === 'mike@freeflow.io'
   const isSessionLoading = sessionStatus === 'loading'
 
   // Use the compliance hook for Supabase data

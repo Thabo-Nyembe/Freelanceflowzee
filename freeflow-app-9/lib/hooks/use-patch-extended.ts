@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function usePatch(patchId?: string) {
   const [patch, setPatch] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!patchId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function usePatch(patchId?: string) {
       setPatch(data)
     } finally { setIsLoading(false) }
   }, [patchId])
-  useEffect(() => { fetch() }, [fetch])
-  return { patch, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { patch, isLoading, refresh: loadData }
 }
 
 export function usePatches(options?: { productId?: string; status?: string; isCritical?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,15 +38,15 @@ export function usePatches(options?: { productId?: string; status?: string; isCr
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.productId, options?.status, options?.isCritical])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCriticalPatches(productId?: string) {
   const [data, setData] = useState<any[]>([])
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -57,14 +57,14 @@ export function useCriticalPatches(productId?: string) {
       setCount(result?.length || 0)
     } finally { setIsLoading(false) }
   }, [productId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, count, isLoading, refresh: loadData }
 }
 
 export function usePatchesByVersion(version?: string, productId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!version) { setIsLoading(false); return }
     setIsLoading(true)
@@ -75,6 +75,6 @@ export function usePatchesByVersion(version?: string, productId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [version, productId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

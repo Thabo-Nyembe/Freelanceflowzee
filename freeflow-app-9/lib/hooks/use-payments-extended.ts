@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function usePayment(paymentId?: string) {
   const [payment, setPayment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!paymentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,15 +20,15 @@ export function usePayment(paymentId?: string) {
       setPayment(data)
     } finally { setIsLoading(false) }
   }, [paymentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { payment, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { payment, isLoading, refresh: loadData }
 }
 
 export function usePayments(userId?: string, options?: { status?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -40,14 +40,14 @@ export function usePayments(userId?: string, options?: { status?: string; limit?
       setTotal(count || 0)
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, total, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, total, isLoading, refresh: loadData }
 }
 
 export function usePaymentMethod(methodId?: string) {
   const [method, setMethod] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!methodId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,14 +56,14 @@ export function usePaymentMethod(methodId?: string) {
       setMethod(data)
     } finally { setIsLoading(false) }
   }, [methodId])
-  useEffect(() => { fetch() }, [fetch])
-  return { method, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { method, isLoading, refresh: loadData }
 }
 
 export function usePaymentMethods(userId?: string, options?: { type?: string; isVerified?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -75,14 +75,14 @@ export function usePaymentMethods(userId?: string, options?: { type?: string; is
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.isVerified])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDefaultPaymentMethod(userId?: string) {
   const [method, setMethod] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -91,14 +91,14 @@ export function useDefaultPaymentMethod(userId?: string) {
       setMethod(data)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { method, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { method, isLoading, refresh: loadData }
 }
 
 export function usePaymentLinks(userId?: string, options?: { isActive?: boolean; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -109,14 +109,14 @@ export function usePaymentLinks(userId?: string, options?: { isActive?: boolean;
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.isActive, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function usePaymentLink(linkId?: string) {
   const [link, setLink] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!linkId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -125,8 +125,8 @@ export function usePaymentLink(linkId?: string) {
       setLink(data)
     } finally { setIsLoading(false) }
   }, [linkId])
-  useEffect(() => { fetch() }, [fetch])
-  return { link, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { link, isLoading, refresh: loadData }
 }
 
 export function usePaymentLinkByCode(code?: string) {
@@ -134,7 +134,7 @@ export function usePaymentLinkByCode(code?: string) {
   const [isValid, setIsValid] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!code) { setIsLoading(false); return }
     setIsLoading(true)
@@ -148,14 +148,14 @@ export function usePaymentLinkByCode(code?: string) {
       setIsValid(true)
     } finally { setIsLoading(false) }
   }, [code])
-  useEffect(() => { fetch() }, [fetch])
-  return { link, isValid, error, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { link, isValid, error, isLoading, refresh: loadData }
 }
 
 export function usePaymentConfigs() {
   const [configs, setConfigs] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -165,14 +165,14 @@ export function usePaymentConfigs() {
       setConfigs(configMap)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { configs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { configs, isLoading, refresh: loadData }
 }
 
 export function usePaymentAnalytics(options?: { period?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -182,8 +182,8 @@ export function usePaymentAnalytics(options?: { period?: string; limit?: number 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.period, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function usePaymentsRealtime(userId?: string) {

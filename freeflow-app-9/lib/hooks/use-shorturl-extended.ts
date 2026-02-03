@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useShortUrl(shortUrlId?: string) {
   const [shortUrl, setShortUrl] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!shortUrlId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useShortUrl(shortUrlId?: string) {
       setShortUrl(data)
     } finally { setIsLoading(false) }
   }, [shortUrlId])
-  useEffect(() => { fetch() }, [fetch])
-  return { shortUrl, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { shortUrl, isLoading, refresh: loadData }
 }
 
 export function useShortUrlByCode(code?: string) {
   const [shortUrl, setShortUrl] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!code) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function useShortUrlByCode(code?: string) {
       setShortUrl(data)
     } finally { setIsLoading(false) }
   }, [code])
-  useEffect(() => { fetch() }, [fetch])
-  return { shortUrl, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { shortUrl, isLoading, refresh: loadData }
 }
 
 export function useUserShortUrls(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -51,15 +51,15 @@ export function useUserShortUrls(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useShortUrlClicks(shortUrlId?: string) {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!shortUrlId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,8 +69,8 @@ export function useShortUrlClicks(shortUrlId?: string) {
       setTotal(result?.length || 0)
     } finally { setIsLoading(false) }
   }, [shortUrlId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, total, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, total, isLoading, refresh: loadData }
 }
 
 export function useShortUrlStats(shortUrlId?: string) {
@@ -78,7 +78,7 @@ export function useShortUrlStats(shortUrlId?: string) {
   const [lastClickedAt, setLastClickedAt] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!shortUrlId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -91,6 +91,6 @@ export function useShortUrlStats(shortUrlId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [shortUrlId])
-  useEffect(() => { fetch() }, [fetch])
-  return { clickCount, lastClickedAt, isActive, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { clickCount, lastClickedAt, isActive, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useReward(rewardId?: string) {
   const [reward, setReward] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!rewardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('rewards').select('*, reward_types(*), reward_tiers(*), reward_programs(*)').eq('id', rewardId).single(); setReward(data) } finally { setIsLoading(false) }
   }, [rewardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reward, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reward, isLoading, refresh: loadData }
 }
 
 export function useRewards(options?: { program_id?: string; type_id?: string; tier_id?: string; is_active?: boolean; min_points?: number; max_points?: number; search?: string; limit?: number }) {
   const [rewards, setRewards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -40,14 +40,14 @@ export function useRewards(options?: { program_id?: string; type_id?: string; ti
       setRewards(data || [])
     } finally { setIsLoading(false) }
   }, [options?.program_id, options?.type_id, options?.tier_id, options?.is_active, options?.min_points, options?.max_points, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { rewards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rewards, isLoading, refresh: loadData }
 }
 
 export function useRewardTypes(options?: { is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -57,14 +57,14 @@ export function useRewardTypes(options?: { is_active?: boolean }) {
       setTypes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useRewardPrograms(options?: { is_active?: boolean }) {
   const [programs, setPrograms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -74,14 +74,14 @@ export function useRewardPrograms(options?: { is_active?: boolean }) {
       setPrograms(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { programs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { programs, isLoading, refresh: loadData }
 }
 
 export function useUserPoints(userId?: string, programId?: string) {
   const [points, setPoints] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -92,14 +92,14 @@ export function useUserPoints(userId?: string, programId?: string) {
       setPoints(data || [])
     } finally { setIsLoading(false) }
   }, [userId, programId])
-  useEffect(() => { fetch() }, [fetch])
-  return { points, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { points, isLoading, refresh: loadData }
 }
 
 export function useUserRedemptions(userId?: string, options?: { status?: string; limit?: number }) {
   const [redemptions, setRedemptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -110,14 +110,14 @@ export function useUserRedemptions(userId?: string, options?: { status?: string;
       setRedemptions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { redemptions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { redemptions, isLoading, refresh: loadData }
 }
 
 export function useUserTier(userId?: string, programId?: string) {
   const [tier, setTier] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !programId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -128,28 +128,28 @@ export function useUserTier(userId?: string, programId?: string) {
       setTier(data)
     } finally { setIsLoading(false) }
   }, [userId, programId])
-  useEffect(() => { fetch() }, [fetch])
-  return { tier, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tier, isLoading, refresh: loadData }
 }
 
 export function useRewardTiers(programId?: string) {
   const [tiers, setTiers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!programId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('reward_tiers').select('*').eq('program_id', programId).order('points_threshold', { ascending: true }); setTiers(data || []) } finally { setIsLoading(false) }
   }, [programId])
-  useEffect(() => { fetch() }, [fetch])
-  return { tiers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tiers, isLoading, refresh: loadData }
 }
 
 export function useAvailableRewards(userId?: string, programId?: string) {
   const [rewards, setRewards] = useState<any[]>([])
   const [userPoints, setUserPoints] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !programId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -161,14 +161,14 @@ export function useAvailableRewards(userId?: string, programId?: string) {
       setRewards(data || [])
     } finally { setIsLoading(false) }
   }, [userId, programId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rewards, userPoints, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rewards, userPoints, isLoading, refresh: loadData }
 }
 
 export function useRewardStats(programId?: string) {
   const [stats, setStats] = useState<{ totalMembers: number; totalPointsIssued: number; totalRedemptions: number; activeRewards: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!programId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -182,7 +182,7 @@ export function useRewardStats(programId?: string) {
       setStats({ totalMembers: members.count || 0, totalPointsIssued, totalRedemptions: redemptions.count || 0, activeRewards: rewards.count || 0 })
     } finally { setIsLoading(false) }
   }, [programId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 

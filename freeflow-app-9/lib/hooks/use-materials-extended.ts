@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useMaterial(materialId?: string) {
   const [material, setMaterial] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!materialId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('materials').select('*, material_categories(*), material_inventory(*), material_suppliers(*)').eq('id', materialId).single(); setMaterial(data) } finally { setIsLoading(false) }
   }, [materialId])
-  useEffect(() => { fetch() }, [fetch])
-  return { material, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { material, isLoading, refresh: loadData }
 }
 
 export function useMaterials(options?: { category_id?: string; status?: string; organization_id?: string; search?: string; limit?: number }) {
   const [materials, setMaterials] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,39 +37,39 @@ export function useMaterials(options?: { category_id?: string; status?: string; 
       setMaterials(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category_id, options?.status, options?.organization_id, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { materials, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { materials, isLoading, refresh: loadData }
 }
 
 export function useMaterialCategories() {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('material_categories').select('*').order('name', { ascending: true }); setCategories(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useMaterialInventory(materialId?: string) {
   const [inventory, setInventory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!materialId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('material_inventory').select('*').eq('material_id', materialId); setInventory(data || []) } finally { setIsLoading(false) }
   }, [materialId])
-  useEffect(() => { fetch() }, [fetch])
-  return { inventory, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { inventory, isLoading, refresh: loadData }
 }
 
 export function useMaterialSuppliers(options?: { status?: string }) {
   const [suppliers, setSuppliers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -79,14 +79,14 @@ export function useMaterialSuppliers(options?: { status?: string }) {
       setSuppliers(data || [])
     } finally { setIsLoading(false) }
   }, [options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { suppliers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { suppliers, isLoading, refresh: loadData }
 }
 
 export function useMaterialOrders(options?: { supplier_id?: string; status?: string; limit?: number }) {
   const [orders, setOrders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -97,14 +97,14 @@ export function useMaterialOrders(options?: { supplier_id?: string; status?: str
       setOrders(data || [])
     } finally { setIsLoading(false) }
   }, [options?.supplier_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { orders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { orders, isLoading, refresh: loadData }
 }
 
 export function useMaterialUsage(materialId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [usage, setUsage] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!materialId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -116,14 +116,14 @@ export function useMaterialUsage(materialId?: string, options?: { from_date?: st
       setUsage(data || [])
     } finally { setIsLoading(false) }
   }, [materialId, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { usage, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { usage, isLoading, refresh: loadData }
 }
 
 export function useLowStockMaterials(options?: { organization_id?: string }) {
   const [materials, setMaterials] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -137,14 +137,14 @@ export function useLowStockMaterials(options?: { organization_id?: string }) {
       setMaterials(lowStock)
     } finally { setIsLoading(false) }
   }, [options?.organization_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { materials, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { materials, isLoading, refresh: loadData }
 }
 
 export function useMaterialStats(organizationId?: string) {
   const [stats, setStats] = useState<{ totalMaterials: number; lowStock: number; totalValue: number; pendingOrders: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -164,6 +164,6 @@ export function useMaterialStats(organizationId?: string) {
       setStats({ totalMaterials, lowStock, totalValue, pendingOrders: orders?.length || 0 })
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

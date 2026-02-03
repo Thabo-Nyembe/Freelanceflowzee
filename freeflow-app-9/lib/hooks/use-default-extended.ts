@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useDefault(defaultId?: string) {
   const [defaultValue, setDefaultValue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!defaultId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useDefault(defaultId?: string) {
       setDefaultValue(data)
     } finally { setIsLoading(false) }
   }, [defaultId])
-  useEffect(() => { fetch() }, [fetch])
-  return { default: defaultValue, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { default: defaultValue, isLoading, refresh: loadData }
 }
 
 export function useDefaults(options?: { defaultType?: string; entityType?: string; isSystem?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useDefaults(options?: { defaultType?: string; entityType?: strin
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.defaultType, options?.entityType, options?.isSystem])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useDefaultByKey(key?: string, workspaceId?: string) {
   const [value, setValue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!key) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,14 +56,14 @@ export function useDefaultByKey(key?: string, workspaceId?: string) {
       setValue(data?.value)
     } finally { setIsLoading(false) }
   }, [key, workspaceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { value, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { value, isLoading, refresh: loadData }
 }
 
 export function useSystemDefaults(defaultType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -73,6 +73,6 @@ export function useSystemDefaults(defaultType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [defaultType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

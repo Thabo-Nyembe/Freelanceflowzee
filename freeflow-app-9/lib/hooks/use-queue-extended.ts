@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useQueueItems(queueName?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!queueName) { setIsLoading(false); return }
     setIsLoading(true)
@@ -21,14 +21,14 @@ export function useQueueItems(queueName?: string, status?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [queueName, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useQueueStats(queueName?: string) {
   const [stats, setStats] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!queueName) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,14 +39,14 @@ export function useQueueStats(queueName?: string) {
       setStats(counts)
     } finally { setIsLoading(false) }
   }, [queueName])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useQueueNames() {
   const [names, setNames] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -55,6 +55,6 @@ export function useQueueNames() {
       setNames(unique)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { names, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { names, isLoading, refresh: loadData }
 }

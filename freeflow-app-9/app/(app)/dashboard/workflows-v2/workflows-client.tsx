@@ -4,7 +4,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { toast } from 'sonner'
 import { useWorkflows } from '@/lib/hooks/use-workflows'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -246,10 +246,11 @@ const getStepIcon = (type: WorkflowStep['type']) => {
 
 export default function WorkflowsClient() {
   // Demo mode detection for investor demos
-  const { data: nextAuthSession, status: sessionStatus } = useSession()
-  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const { userId: currentUserId, userEmail, userName, isDemo, loading: sessionLoading } = useCurrentUser()
+  const sessionStatus = sessionLoading ? "loading" : "authenticated"
+  const isDemoAccount = userEmail === 'alex@freeflow.io' ||
+                        userEmail === 'sarah@freeflow.io' ||
+                        userEmail === 'mike@freeflow.io'
   const isSessionLoading = sessionStatus === 'loading'
 
   const router = useRouter()

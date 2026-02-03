@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useWorkspace(workspaceId?: string) {
   const [workspace, setWorkspace] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!workspaceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useWorkspace(workspaceId?: string) {
       setWorkspace(data)
     } finally { setIsLoading(false) }
   }, [workspaceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { workspace, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { workspace, isLoading, refresh: loadData }
 }
 
 export function useWorkspaces(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function useWorkspaces(userId?: string) {
       setData(result?.map(wm => ({ ...wm.workspaces, role: wm.role })) || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useWorkspaceMembers(workspaceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!workspaceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -51,14 +51,14 @@ export function useWorkspaceMembers(workspaceId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [workspaceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useWorkspaceInvitations(workspaceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!workspaceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -67,14 +67,14 @@ export function useWorkspaceInvitations(workspaceId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [workspaceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useWorkspaceSettings(workspaceId?: string) {
   const [settings, setSettings] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!workspaceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -84,6 +84,6 @@ export function useWorkspaceSettings(workspaceId?: string) {
       setSettings(settingsMap)
     } finally { setIsLoading(false) }
   }, [workspaceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }

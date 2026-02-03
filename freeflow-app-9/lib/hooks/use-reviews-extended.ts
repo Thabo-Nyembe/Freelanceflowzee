@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useReview(reviewId?: string) {
   const [review, setReview] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!reviewId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('reviews').select('*, review_responses(*), review_votes(*), review_media(*), users(*)').eq('id', reviewId).single(); setReview(data) } finally { setIsLoading(false) }
   }, [reviewId])
-  useEffect(() => { fetch() }, [fetch])
-  return { review, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { review, isLoading, refresh: loadData }
 }
 
 export function useReviews(options: { entity_type: string; entity_id: string; min_rating?: number; verified_only?: boolean; with_media?: boolean; sort_by?: 'recent' | 'helpful' | 'rating_high' | 'rating_low'; limit?: number }) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -40,14 +40,14 @@ export function useReviews(options: { entity_type: string; entity_id: string; mi
       setReviews(data || [])
     } finally { setIsLoading(false) }
   }, [options.entity_type, options.entity_id, options.min_rating, options.verified_only, options.with_media, options.sort_by, options.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reviews, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reviews, isLoading, refresh: loadData }
 }
 
 export function useReviewSummary(entityType?: string, entityId?: string) {
   const [summary, setSummary] = useState<{ total_reviews: number; average_rating: number; distribution: { [key: number]: number } } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,15 +56,15 @@ export function useReviewSummary(entityType?: string, entityId?: string) {
       setSummary(data || { total_reviews: 0, average_rating: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } })
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { summary, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { summary, isLoading, refresh: loadData }
 }
 
 export function useUserReview(entityType?: string, entityId?: string, userId?: string) {
   const [review, setReview] = useState<any>(null)
   const [hasReviewed, setHasReviewed] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -74,14 +74,14 @@ export function useUserReview(entityType?: string, entityId?: string, userId?: s
       setHasReviewed(!!data)
     } finally { setIsLoading(false) }
   }, [entityType, entityId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { review, hasReviewed, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { review, hasReviewed, isLoading, refresh: loadData }
 }
 
 export function useMyReviews(userId?: string, options?: { entity_type?: string; limit?: number }) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -92,40 +92,40 @@ export function useMyReviews(userId?: string, options?: { entity_type?: string; 
       setReviews(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.entity_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reviews, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reviews, isLoading, refresh: loadData }
 }
 
 export function useReviewResponses(reviewId?: string) {
   const [responses, setResponses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!reviewId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('review_responses').select('*, users(*)').eq('review_id', reviewId).order('created_at', { ascending: true }); setResponses(data || []) } finally { setIsLoading(false) }
   }, [reviewId])
-  useEffect(() => { fetch() }, [fetch])
-  return { responses, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { responses, isLoading, refresh: loadData }
 }
 
 export function useReviewVote(reviewId?: string, userId?: string) {
   const [vote, setVote] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!reviewId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('review_votes').select('*').eq('review_id', reviewId).eq('user_id', userId).single(); setVote(data) } finally { setIsLoading(false) }
   }, [reviewId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { vote, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vote, isLoading, refresh: loadData }
 }
 
 export function useTopReviewed(entityType?: string, options?: { min_reviews?: number; min_rating?: number; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -137,14 +137,14 @@ export function useTopReviewed(entityType?: string, options?: { min_reviews?: nu
       setItems(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, options?.min_reviews, options?.min_rating, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useRecentReviews(options?: { entity_type?: string; limit?: number }) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -154,19 +154,19 @@ export function useRecentReviews(options?: { entity_type?: string; limit?: numbe
       setReviews(data || [])
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reviews, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reviews, isLoading, refresh: loadData }
 }
 
 export function useReviewMedia(reviewId?: string) {
   const [media, setMedia] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!reviewId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('review_media').select('*').eq('review_id', reviewId).order('created_at', { ascending: true }); setMedia(data || []) } finally { setIsLoading(false) }
   }, [reviewId])
-  useEffect(() => { fetch() }, [fetch])
-  return { media, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { media, isLoading, refresh: loadData }
 }

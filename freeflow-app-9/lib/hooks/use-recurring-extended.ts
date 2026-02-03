@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useRecurringPayment(paymentId?: string) {
   const [payment, setPayment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!paymentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('recurring_payments').select('*').eq('id', paymentId).single(); setPayment(data) } finally { setIsLoading(false) }
   }, [paymentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { payment, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { payment, isLoading, refresh: loadData }
 }
 
 export function useRecurringPayments(options?: { user_id?: string; status?: string; frequency?: string; limit?: number }) {
   const [payments, setPayments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useRecurringPayments(options?: { user_id?: string; status?: stri
       setPayments(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.status, options?.frequency, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { payments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { payments, isLoading, refresh: loadData }
 }
 
 export function useRecurringInvoices(options?: { user_id?: string; client_id?: string; status?: string; limit?: number }) {
   const [invoices, setInvoices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -55,14 +55,14 @@ export function useRecurringInvoices(options?: { user_id?: string; client_id?: s
       setInvoices(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.client_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { invoices, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { invoices, isLoading, refresh: loadData }
 }
 
 export function useRecurringTasks(options?: { user_id?: string; project_id?: string; is_active?: boolean; limit?: number }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -74,14 +74,14 @@ export function useRecurringTasks(options?: { user_id?: string; project_id?: str
       setTasks(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.project_id, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tasks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tasks, isLoading, refresh: loadData }
 }
 
 export function useRecurringSchedules(options?: { type?: string; is_active?: boolean }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -92,6 +92,6 @@ export function useRecurringSchedules(options?: { type?: string; is_active?: boo
       setSchedules(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedules, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useSource(sourceId?: string) {
   const [source, setSource] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('sources').select('*, source_types(*), source_connections(*), source_mappings(*)').eq('id', sourceId).single(); setSource(data) } finally { setIsLoading(false) }
   }, [sourceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { source, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { source, isLoading, refresh: loadData }
 }
 
 export function useSources(options?: { type_id?: string; status?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [sources, setSources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useSources(options?: { type_id?: string; status?: string; is_act
       setSources(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type_id, options?.status, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { sources, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sources, isLoading, refresh: loadData }
 }
 
 export function useSourceTypes(options?: { is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -54,27 +54,27 @@ export function useSourceTypes(options?: { is_active?: boolean }) {
       setTypes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useSourceMappings(sourceId?: string) {
   const [mappings, setMappings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('source_mappings').select('*').eq('source_id', sourceId).order('target_field', { ascending: true }); setMappings(data || []) } finally { setIsLoading(false) }
   }, [sourceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { mappings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { mappings, isLoading, refresh: loadData }
 }
 
 export function useSyncHistory(sourceId?: string, options?: { status?: string; limit?: number }) {
   const [syncs, setSyncs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sourceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -85,14 +85,14 @@ export function useSyncHistory(sourceId?: string, options?: { status?: string; l
       setSyncs(data || [])
     } finally { setIsLoading(false) }
   }, [sourceId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { syncs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { syncs, isLoading, refresh: loadData }
 }
 
 export function useSourceLogs(sourceId?: string, options?: { level?: string; event_type?: string; from_date?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sourceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -105,27 +105,27 @@ export function useSourceLogs(sourceId?: string, options?: { level?: string; eve
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [sourceId, options?.level, options?.event_type, options?.from_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useLatestSync(sourceId?: string) {
   const [sync, setSync] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('source_sync').select('*').eq('source_id', sourceId).order('started_at', { ascending: false }).limit(1).single(); setSync(data) } finally { setIsLoading(false) }
   }, [sourceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { sync, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sync, isLoading, refresh: loadData }
 }
 
 export function useRunningSyncs() {
   const [syncs, setSyncs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -133,14 +133,14 @@ export function useRunningSyncs() {
       setSyncs(data || [])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { syncs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { syncs, isLoading, refresh: loadData }
 }
 
 export function useSourceStats() {
   const [stats, setStats] = useState<{ total: number; active: number; syncing: number; errors: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -154,14 +154,14 @@ export function useSourceStats() {
       })
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useSourceConnection(sourceId?: string) {
   const [connection, setConnection] = useState<{ status: string; lastTest: string | null; latency: number | null } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sourceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -176,7 +176,7 @@ export function useSourceConnection(sourceId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [sourceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { connection, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { connection, isLoading, refresh: loadData }
 }
 

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useCollabSpace(spaceId?: string) {
   const [space, setSpace] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!spaceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('collab_spaces').select('*, collab_documents(*)').eq('id', spaceId).single(); setSpace(data) } finally { setIsLoading(false) }
   }, [spaceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { space, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { space, isLoading, refresh: loadData }
 }
 
 export function useCollabSpaces(options?: { owner_id?: string; visibility?: string; type?: string; limit?: number }) {
   const [spaces, setSpaces] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useCollabSpaces(options?: { owner_id?: string; visibility?: stri
       setSpaces(data || [])
     } finally { setIsLoading(false) }
   }, [options?.owner_id, options?.visibility, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { spaces, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { spaces, isLoading, refresh: loadData }
 }
 
 export function useCollabDocument(docId?: string) {
   const [document, setDocument] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('collab_documents').select('*').eq('id', docId).single(); setDocument(data) } finally { setIsLoading(false) }
   }, [docId])
-  useEffect(() => { fetch() }, [fetch])
-  return { document, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { document, isLoading, refresh: loadData }
 }
 
 export function useCollabDocuments(spaceId?: string, options?: { type?: string; limit?: number }) {
   const [documents, setDocuments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!spaceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -67,8 +67,8 @@ export function useCollabDocuments(spaceId?: string, options?: { type?: string; 
       setDocuments(data || [])
     } finally { setIsLoading(false) }
   }, [spaceId, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { documents, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { documents, isLoading, refresh: loadData }
 }
 
 export function useCollabDocumentRealtime(docId?: string) {
@@ -95,14 +95,14 @@ export function useCollabDocumentRealtime(docId?: string) {
 export function useCollabComments(docId?: string) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('collab_comments').select('*').eq('document_id', docId).order('created_at', { ascending: true }); setComments(data || []) } finally { setIsLoading(false) }
   }, [docId])
-  useEffect(() => { fetch() }, [fetch])
-  return { comments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comments, isLoading, refresh: loadData }
 }
 
 export function useCollabCommentsRealtime(docId?: string) {

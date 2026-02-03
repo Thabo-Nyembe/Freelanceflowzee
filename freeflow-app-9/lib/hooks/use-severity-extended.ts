@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useSeverity(severityId?: string) {
   const [severity, setSeverity] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!severityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useSeverity(severityId?: string) {
       setSeverity(data)
     } finally { setIsLoading(false) }
   }, [severityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { severity, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { severity, isLoading, refresh: loadData }
 }
 
 export function useSeverities(options?: { entityType?: string; workspaceId?: string; isCritical?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useSeverities(options?: { entityType?: string; workspaceId?: str
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.entityType, options?.workspaceId, options?.isCritical])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEntitySeverity(entityType?: string, entityId?: string) {
   const [severity, setSeverity] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useEntitySeverity(entityType?: string, entityId?: string) {
       setSeverity(data?.severities || null)
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { severity, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { severity, isLoading, refresh: loadData }
 }
 
 export function useCriticalSeverities(entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -71,6 +71,6 @@ export function useCriticalSeverities(entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

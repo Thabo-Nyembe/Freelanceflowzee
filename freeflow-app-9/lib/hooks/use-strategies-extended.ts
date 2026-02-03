@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useStrategy(strategyId?: string) {
   const [strategy, setStrategy] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('strategies').select('*, strategy_goals(*), strategy_initiatives(*), strategy_metrics(*), strategy_milestones(*)').eq('id', strategyId).single(); setStrategy(data) } finally { setIsLoading(false) }
   }, [strategyId])
-  useEffect(() => { fetch() }, [fetch])
-  return { strategy, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { strategy, isLoading, refresh: loadData }
 }
 
 export function useStrategies(options?: { strategy_type?: string; owner_id?: string; status?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [strategies, setStrategies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useStrategies(options?: { strategy_type?: string; owner_id?: str
       setStrategies(data || [])
     } finally { setIsLoading(false) }
   }, [options?.strategy_type, options?.owner_id, options?.status, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { strategies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { strategies, isLoading, refresh: loadData }
 }
 
 export function useStrategyGoals(strategyId?: string, options?: { goal_type?: string; status?: string; owner_id?: string }) {
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -58,14 +58,14 @@ export function useStrategyGoals(strategyId?: string, options?: { goal_type?: st
       setGoals(data || [])
     } finally { setIsLoading(false) }
   }, [strategyId, options?.goal_type, options?.status, options?.owner_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { goals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { goals, isLoading, refresh: loadData }
 }
 
 export function useStrategyInitiatives(strategyId?: string, options?: { goal_id?: string; status?: string; owner_id?: string }) {
   const [initiatives, setInitiatives] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -78,14 +78,14 @@ export function useStrategyInitiatives(strategyId?: string, options?: { goal_id?
       setInitiatives(data || [])
     } finally { setIsLoading(false) }
   }, [strategyId, options?.goal_id, options?.status, options?.owner_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { initiatives, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { initiatives, isLoading, refresh: loadData }
 }
 
 export function useStrategyMetrics(strategyId?: string, options?: { metric_name?: string; goal_id?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -99,14 +99,14 @@ export function useStrategyMetrics(strategyId?: string, options?: { metric_name?
       setMetrics(data || [])
     } finally { setIsLoading(false) }
   }, [strategyId, options?.metric_name, options?.goal_id, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { metrics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { metrics, isLoading, refresh: loadData }
 }
 
 export function useStrategyMilestones(strategyId?: string, options?: { status?: string; initiative_id?: string }) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -118,14 +118,14 @@ export function useStrategyMilestones(strategyId?: string, options?: { status?: 
       setMilestones(data || [])
     } finally { setIsLoading(false) }
   }, [strategyId, options?.status, options?.initiative_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { milestones, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { milestones, isLoading, refresh: loadData }
 }
 
 export function useStrategyReviews(strategyId?: string, options?: { review_type?: string; limit?: number }) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -136,14 +136,14 @@ export function useStrategyReviews(strategyId?: string, options?: { review_type?
       setReviews(data || [])
     } finally { setIsLoading(false) }
   }, [strategyId, options?.review_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reviews, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reviews, isLoading, refresh: loadData }
 }
 
 export function useStrategyProgress(strategyId?: string) {
   const [progress, setProgress] = useState<{ goalsProgress: number; initiativesProgress: number; milestonesProgress: number; overallProgress: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -164,14 +164,14 @@ export function useStrategyProgress(strategyId?: string) {
       setProgress({ goalsProgress, initiativesProgress, milestonesProgress, overallProgress })
     } finally { setIsLoading(false) }
   }, [strategyId])
-  useEffect(() => { fetch() }, [fetch])
-  return { progress, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { progress, isLoading, refresh: loadData }
 }
 
 export function useUpcomingMilestones(options?: { strategy_id?: string; owner_id?: string; days?: number; limit?: number }) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -184,7 +184,7 @@ export function useUpcomingMilestones(options?: { strategy_id?: string; owner_id
       setMilestones(data || [])
     } finally { setIsLoading(false) }
   }, [options?.strategy_id, options?.owner_id, options?.days, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { milestones, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { milestones, isLoading, refresh: loadData }
 }
 

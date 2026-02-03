@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useSchedule(scheduleId?: string) {
   const [schedule, setSchedule] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('schedules').select('*, schedule_entries(*), schedule_exceptions(*), schedule_assignments(*), users(*)').eq('id', scheduleId).single(); setSchedule(data) } finally { setIsLoading(false) }
   }, [scheduleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedule, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedule, isLoading, refresh: loadData }
 }
 
 export function useSchedules(options?: { owner_id?: string; entity_type?: string; entity_id?: string; type?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useSchedules(options?: { owner_id?: string; entity_type?: string
       setSchedules(data || [])
     } finally { setIsLoading(false) }
   }, [options?.owner_id, options?.entity_type, options?.entity_id, options?.type, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedules, isLoading, refresh: loadData }
 }
 
 export function useScheduleEntries(scheduleId?: string, options?: { from_date?: string; to_date?: string; day_of_week?: number }) {
   const [entries, setEntries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -59,14 +59,14 @@ export function useScheduleEntries(scheduleId?: string, options?: { from_date?: 
       setEntries(data || [])
     } finally { setIsLoading(false) }
   }, [scheduleId, options?.from_date, options?.to_date, options?.day_of_week])
-  useEffect(() => { fetch() }, [fetch])
-  return { entries, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { entries, isLoading, refresh: loadData }
 }
 
 export function useScheduleExceptions(scheduleId?: string, options?: { from_date?: string; to_date?: string; type?: string }) {
   const [exceptions, setExceptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -79,40 +79,40 @@ export function useScheduleExceptions(scheduleId?: string, options?: { from_date
       setExceptions(data || [])
     } finally { setIsLoading(false) }
   }, [scheduleId, options?.type, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { exceptions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { exceptions, isLoading, refresh: loadData }
 }
 
 export function useScheduleConflicts(scheduleId?: string) {
   const [conflicts, setConflicts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('schedule_conflicts').select('*, entry1:entry1_id(*), entry2:entry2_id(*)').eq('schedule_id', scheduleId).is('resolved_at', null); setConflicts(data || []) } finally { setIsLoading(false) }
   }, [scheduleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { conflicts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { conflicts, isLoading, refresh: loadData }
 }
 
 export function useScheduleAssignments(scheduleId?: string) {
   const [assignments, setAssignments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('schedule_assignments').select('*, users(*)').eq('schedule_id', scheduleId); setAssignments(data || []) } finally { setIsLoading(false) }
   }, [scheduleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { assignments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { assignments, isLoading, refresh: loadData }
 }
 
 export function useUserSchedules(userId?: string, options?: { type?: string; is_active?: boolean }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -127,14 +127,14 @@ export function useUserSchedules(userId?: string, options?: { type?: string; is_
       setSchedules(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedules, isLoading, refresh: loadData }
 }
 
 export function useScheduleTemplates(options?: { type?: string; is_active?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -145,14 +145,14 @@ export function useScheduleTemplates(options?: { type?: string; is_active?: bool
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function useScheduleStats() {
   const [stats, setStats] = useState<{ total: number; active: number; totalEntries: number; conflicts: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -165,14 +165,14 @@ export function useScheduleStats() {
       setStats({ total: total.count || 0, active: active.count || 0, totalEntries: entries.count || 0, conflicts: conflicts.count || 0 })
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useTodayEntries(scheduleId?: string) {
   const [entries, setEntries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -182,7 +182,7 @@ export function useTodayEntries(scheduleId?: string) {
       setEntries(data || [])
     } finally { setIsLoading(false) }
   }, [scheduleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { entries, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { entries, isLoading, refresh: loadData }
 }
 

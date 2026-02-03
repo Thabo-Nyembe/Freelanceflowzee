@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function usePricingPlan(planId?: string) {
   const [plan, setPlan] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('pricing').select('*, pricing_features(*)').eq('id', planId).single(); setPlan(data) } finally { setIsLoading(false) }
   }, [planId])
-  useEffect(() => { fetch() }, [fetch])
-  return { plan, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plan, isLoading, refresh: loadData }
 }
 
 export function usePricingPlans(options?: { billing_period?: string; is_active?: boolean; limit?: number }) {
   const [plans, setPlans] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -35,51 +35,51 @@ export function usePricingPlans(options?: { billing_period?: string; is_active?:
       setPlans(data || [])
     } finally { setIsLoading(false) }
   }, [options?.billing_period, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { plans, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plans, isLoading, refresh: loadData }
 }
 
 export function usePricingTiers() {
   const [tiers, setTiers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('pricing_tiers').select('*, pricing(*)').order('order', { ascending: true }); setTiers(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { tiers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tiers, isLoading, refresh: loadData }
 }
 
 export function usePricingFeatures(planId?: string) {
   const [features, setFeatures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('pricing_features').select('*').eq('plan_id', planId).order('order', { ascending: true }); setFeatures(data || []) } finally { setIsLoading(false) }
   }, [planId])
-  useEffect(() => { fetch() }, [fetch])
-  return { features, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { features, isLoading, refresh: loadData }
 }
 
 export function useActivePricingPlans() {
   const [plans, setPlans] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('pricing').select('*, pricing_features(*)').eq('is_active', true).order('price', { ascending: true }); setPlans(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { plans, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plans, isLoading, refresh: loadData }
 }
 
 export function usePricingDiscounts(options?: { is_active?: boolean }) {
   const [discounts, setDiscounts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -89,6 +89,6 @@ export function usePricingDiscounts(options?: { is_active?: boolean }) {
       setDiscounts(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { discounts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { discounts, isLoading, refresh: loadData }
 }

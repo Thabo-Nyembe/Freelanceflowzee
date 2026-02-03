@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useQuota(entityId?: string, entityType?: string, quotaType?: string) {
   const [quota, setQuota] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !quotaType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useQuota(entityId?: string, entityType?: string, quotaType?: str
       setQuota(data)
     } finally { setIsLoading(false) }
   }, [entityId, entityType, quotaType])
-  useEffect(() => { fetch() }, [fetch])
-  return { quota, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { quota, isLoading, refresh: loadData }
 }
 
 export function useQuotas(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,8 +35,8 @@ export function useQuotas(entityId?: string, entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useQuotaStatus(entityId?: string, entityType?: string, quotaType?: string) {
@@ -44,7 +44,7 @@ export function useQuotaStatus(entityId?: string, entityType?: string, quotaType
   const [used, setUsed] = useState(0)
   const [limit, setLimit] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !quotaType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -57,6 +57,6 @@ export function useQuotaStatus(entityId?: string, entityType?: string, quotaType
       }
     } finally { setIsLoading(false) }
   }, [entityId, entityType, quotaType])
-  useEffect(() => { fetch() }, [fetch])
-  return { remaining, used, limit, percentage: limit > 0 ? (used / limit) * 100 : 0, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { remaining, used, limit, percentage: limit > 0 ? (used / limit) * 100 : 0, isLoading, refresh: loadData }
 }

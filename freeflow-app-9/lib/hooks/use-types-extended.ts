@@ -11,33 +11,33 @@ import { createClient } from '@/lib/supabase/client'
 export function useType(typeId?: string) {
   const [type, setType] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('types').select('*, type_fields(*), type_values(count)').eq('id', typeId).single(); setType(data) } finally { setIsLoading(false) }
   }, [typeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { type, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { type, isLoading, refresh: loadData }
 }
 
 export function useTypeByCode(code?: string) {
   const [type, setType] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!code) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('types').select('*, type_fields(*), type_values(*)').eq('code', code).single(); setType(data) } finally { setIsLoading(false) }
   }, [code])
-  useEffect(() => { fetch() }, [fetch])
-  return { type, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { type, isLoading, refresh: loadData }
 }
 
 export function useTypes(options?: { category?: string; parent_id?: string | null; is_system?: boolean; is_active?: boolean; search?: string; limit?: number }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -52,28 +52,28 @@ export function useTypes(options?: { category?: string; parent_id?: string | nul
       setTypes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.parent_id, options?.is_system, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useTypeFields(typeId?: string) {
   const [fields, setFields] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('type_fields').select('*').eq('type_id', typeId).order('order_index', { ascending: true }); setFields(data || []) } finally { setIsLoading(false) }
   }, [typeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { fields, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { fields, isLoading, refresh: loadData }
 }
 
 export function useTypeValues(typeId?: string, options?: { is_active?: boolean }) {
   const [values, setValues] = useState<any[]>([])
   const [defaultValue, setDefaultValue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -85,14 +85,14 @@ export function useTypeValues(typeId?: string, options?: { is_active?: boolean }
       setDefaultValue(data?.find(v => v.is_default) || null)
     } finally { setIsLoading(false) }
   }, [typeId, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { values, defaultValue, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { values, defaultValue, isLoading, refresh: loadData }
 }
 
 export function useTypeHierarchy(typeId?: string) {
   const [hierarchy, setHierarchy] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -111,53 +111,53 @@ export function useTypeHierarchy(typeId?: string) {
       setHierarchy(result)
     } finally { setIsLoading(false) }
   }, [typeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { hierarchy, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { hierarchy, isLoading, refresh: loadData }
 }
 
 export function useChildTypes(typeId?: string) {
   const [children, setChildren] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('types').select('*').eq('parent_id', typeId).order('name', { ascending: true }); setChildren(data || []) } finally { setIsLoading(false) }
   }, [typeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { children, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { children, isLoading, refresh: loadData }
 }
 
 export function useTypeMappings(typeId?: string) {
   const [mappings, setMappings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('type_mappings').select('*, source_type:types!source_type_id(*), target_type:types!target_type_id(*)').or(`source_type_id.eq.${typeId},target_type_id.eq.${typeId}`); setMappings(data || []) } finally { setIsLoading(false) }
   }, [typeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { mappings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { mappings, isLoading, refresh: loadData }
 }
 
 export function useTypeValidations(typeId?: string) {
   const [validations, setValidations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('type_validations').select('*, type_fields(*)').eq('type_id', typeId).order('created_at', { ascending: true }); setValidations(data || []) } finally { setIsLoading(false) }
   }, [typeId])
-  useEffect(() => { fetch() }, [fetch])
-  return { validations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { validations, isLoading, refresh: loadData }
 }
 
 export function useTypeCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -166,14 +166,14 @@ export function useTypeCategories() {
       setCategories(unique)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useRootTypes(options?: { category?: string; is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -184,14 +184,14 @@ export function useRootTypes(options?: { category?: string; is_active?: boolean 
       setTypes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useSystemTypes(options?: { category?: string }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -201,6 +201,6 @@ export function useSystemTypes(options?: { category?: string }) {
       setTypes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }

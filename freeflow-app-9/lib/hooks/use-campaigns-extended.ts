@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useCampaign(campaignId?: string) {
   const [campaign, setCampaign] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!campaignId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('campaigns').select('*, campaign_audiences(*), campaign_metrics(*)').eq('id', campaignId).single(); setCampaign(data) } finally { setIsLoading(false) }
   }, [campaignId])
-  useEffect(() => { fetch() }, [fetch])
-  return { campaign, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { campaign, isLoading, refresh: loadData }
 }
 
 export function useCampaigns(options?: { user_id?: string; status?: string; type?: string; limit?: number }) {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useCampaigns(options?: { user_id?: string; status?: string; type
       setCampaigns(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.status, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { campaigns, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { campaigns, isLoading, refresh: loadData }
 }
 
 export function useCampaignAudiences(campaignId?: string) {
   const [audiences, setAudiences] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!campaignId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('campaign_audiences').select('*').eq('campaign_id', campaignId).order('created_at', { ascending: false }); setAudiences(data || []) } finally { setIsLoading(false) }
   }, [campaignId])
-  useEffect(() => { fetch() }, [fetch])
-  return { audiences, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { audiences, isLoading, refresh: loadData }
 }
 
 export function useCampaignMetrics(campaignId?: string, options?: { metric_name?: string; date_from?: string; date_to?: string }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!campaignId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,27 +69,27 @@ export function useCampaignMetrics(campaignId?: string, options?: { metric_name?
       setMetrics(data || [])
     } finally { setIsLoading(false) }
   }, [campaignId, options?.metric_name, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { metrics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { metrics, isLoading, refresh: loadData }
 }
 
 export function useActiveCampaigns(userId?: string) {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('campaigns').select('*').eq('user_id', userId).eq('status', 'active').order('launched_at', { ascending: false }); setCampaigns(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { campaigns, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { campaigns, isLoading, refresh: loadData }
 }
 
 export function useCampaignStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; totalBudget: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -102,14 +102,14 @@ export function useCampaignStats(userId?: string) {
       setStats({ total, byStatus, totalBudget })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useCampaignPerformance(campaignId?: string) {
   const [performance, setPerformance] = useState<Record<string, number> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!campaignId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -120,6 +120,6 @@ export function useCampaignPerformance(campaignId?: string) {
       setPerformance(perf)
     } finally { setIsLoading(false) }
   }, [campaignId])
-  useEffect(() => { fetch() }, [fetch])
-  return { performance, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { performance, isLoading, refresh: loadData }
 }

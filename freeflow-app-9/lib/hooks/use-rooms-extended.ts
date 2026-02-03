@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useRoom(roomId?: string) {
   const [room, setRoom] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('rooms').select('*, room_types(*), room_amenities(*), room_rates(*), room_availability(*)').eq('id', roomId).single(); setRoom(data) } finally { setIsLoading(false) }
   }, [roomId])
-  useEffect(() => { fetch() }, [fetch])
-  return { room, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { room, isLoading, refresh: loadData }
 }
 
 export function useRooms(options?: { type_id?: string; location_id?: string; building?: string; floor?: number; min_capacity?: number; is_available?: boolean; search?: string; limit?: number }) {
   const [rooms, setRooms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -40,14 +40,14 @@ export function useRooms(options?: { type_id?: string; location_id?: string; bui
       setRooms(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type_id, options?.location_id, options?.building, options?.floor, options?.min_capacity, options?.is_available, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { rooms, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rooms, isLoading, refresh: loadData }
 }
 
 export function useRoomTypes(options?: { is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -57,14 +57,14 @@ export function useRoomTypes(options?: { is_active?: boolean }) {
       setTypes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useRoomBookings(roomId?: string, options?: { from_date?: string; to_date?: string; status?: string; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -77,14 +77,14 @@ export function useRoomBookings(roomId?: string, options?: { from_date?: string;
       setBookings(data || [])
     } finally { setIsLoading(false) }
   }, [roomId, options?.from_date, options?.to_date, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { bookings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { bookings, isLoading, refresh: loadData }
 }
 
 export function useMyRoomBookings(userId?: string, options?: { status?: string; upcoming_only?: boolean; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -96,14 +96,14 @@ export function useMyRoomBookings(userId?: string, options?: { status?: string; 
       setBookings(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.upcoming_only, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { bookings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { bookings, isLoading, refresh: loadData }
 }
 
 export function useRoomAvailability(roomId?: string, startTime?: string, endTime?: string) {
   const [availability, setAvailability] = useState<{ available: boolean; conflicts: any[] }>({ available: true, conflicts: [] })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!roomId || !startTime || !endTime) { setIsLoading(false); return }
     setIsLoading(true)
@@ -112,14 +112,14 @@ export function useRoomAvailability(roomId?: string, startTime?: string, endTime
       setAvailability({ available: !conflicts || conflicts.length === 0, conflicts: conflicts || [] })
     } finally { setIsLoading(false) }
   }, [roomId, startTime, endTime])
-  useEffect(() => { fetch() }, [fetch])
-  return { availability, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { availability, isLoading, refresh: loadData }
 }
 
 export function useAvailableRooms(startTime?: string, endTime?: string, options?: { type_id?: string; min_capacity?: number; location_id?: string }) {
   const [rooms, setRooms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!startTime || !endTime) { setIsLoading(false); return }
     setIsLoading(true)
@@ -135,27 +135,27 @@ export function useAvailableRooms(startTime?: string, endTime?: string, options?
       setRooms(allRooms.filter(r => !bookedRoomIds.has(r.id)))
     } finally { setIsLoading(false) }
   }, [startTime, endTime, options?.type_id, options?.min_capacity, options?.location_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { rooms, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rooms, isLoading, refresh: loadData }
 }
 
 export function useRoomAmenities(roomId?: string) {
   const [amenities, setAmenities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('room_amenities').select('*, amenities(*)').eq('room_id', roomId); setAmenities(data || []) } finally { setIsLoading(false) }
   }, [roomId])
-  useEffect(() => { fetch() }, [fetch])
-  return { amenities, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { amenities, isLoading, refresh: loadData }
 }
 
 export function useRoomRates(roomId?: string, effectiveDate?: string) {
   const [rates, setRates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -168,14 +168,14 @@ export function useRoomRates(roomId?: string, effectiveDate?: string) {
       setRates(data || [])
     } finally { setIsLoading(false) }
   }, [roomId, effectiveDate])
-  useEffect(() => { fetch() }, [fetch])
-  return { rates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rates, isLoading, refresh: loadData }
 }
 
 export function useRoomStats() {
   const [stats, setStats] = useState<{ total: number; available: number; types: number; todayBookings: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -189,7 +189,7 @@ export function useRoomStats() {
       setStats({ total: total.count || 0, available: available.count || 0, types: types.count || 0, todayBookings: todayBookings.count || 0 })
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 

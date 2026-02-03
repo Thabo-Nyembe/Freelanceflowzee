@@ -11,59 +11,59 @@ import { createClient } from '@/lib/supabase/client'
 export function usePhoneNumber(phoneId?: string) {
   const [phone, setPhone] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!phoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('phone_numbers').select('*').eq('id', phoneId).single(); setPhone(data) } finally { setIsLoading(false) }
   }, [phoneId])
-  useEffect(() => { fetch() }, [fetch])
-  return { phone, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { phone, isLoading, refresh: loadData }
 }
 
 export function usePhoneNumbers(userId?: string) {
   const [phones, setPhones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('phone_numbers').select('*').eq('user_id', userId).order('is_primary', { ascending: false }).order('created_at', { ascending: true }); setPhones(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { phones, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { phones, isLoading, refresh: loadData }
 }
 
 export function usePrimaryPhone(userId?: string) {
   const [phone, setPhone] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('phone_numbers').select('*').eq('user_id', userId).eq('is_primary', true).single(); setPhone(data) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { phone, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { phone, isLoading, refresh: loadData }
 }
 
 export function useVerifiedPhones(userId?: string) {
   const [phones, setPhones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('phone_numbers').select('*').eq('user_id', userId).eq('is_verified', true).order('is_primary', { ascending: false }); setPhones(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { phones, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { phones, isLoading, refresh: loadData }
 }
 
 export function usePhoneCalls(phoneId?: string, options?: { direction?: string; status?: string; from_date?: string; limit?: number }) {
   const [calls, setCalls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!phoneId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -76,14 +76,14 @@ export function usePhoneCalls(phoneId?: string, options?: { direction?: string; 
       setCalls(data || [])
     } finally { setIsLoading(false) }
   }, [phoneId, options?.direction, options?.status, options?.from_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { calls, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { calls, isLoading, refresh: loadData }
 }
 
 export function usePhoneSms(phoneId?: string, options?: { direction?: string; status?: string; limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!phoneId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -95,27 +95,27 @@ export function usePhoneSms(phoneId?: string, options?: { direction?: string; st
       setMessages(data || [])
     } finally { setIsLoading(false) }
   }, [phoneId, options?.direction, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { messages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { messages, isLoading, refresh: loadData }
 }
 
 export function usePhoneSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('phone_settings').select('*').eq('user_id', userId).single(); setSettings(data || { sms_notifications: true, call_forwarding: false, voicemail_enabled: true }) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function usePhoneLogs(phoneId?: string, options?: { action?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!phoneId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -126,14 +126,14 @@ export function usePhoneLogs(phoneId?: string, options?: { action?: string; limi
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [phoneId, options?.action, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useRecentCalls(userId?: string, options?: { limit?: number }) {
   const [calls, setCalls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -145,14 +145,14 @@ export function useRecentCalls(userId?: string, options?: { limit?: number }) {
       setCalls(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { calls, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { calls, isLoading, refresh: loadData }
 }
 
 export function useCallStats(phoneId?: string, options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ totalCalls: number; inbound: number; outbound: number; missed: number; totalDuration: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!phoneId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -169,6 +169,6 @@ export function useCallStats(phoneId?: string, options?: { from_date?: string; t
       setStats({ totalCalls, inbound, outbound, missed, totalDuration })
     } finally { setIsLoading(false) }
   }, [phoneId, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

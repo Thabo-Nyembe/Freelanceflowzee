@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function usePayrollRun(runId?: string) {
   const [run, setRun] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!runId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('payroll_runs').select('*, payroll_items(*)').eq('id', runId).single(); setRun(data) } finally { setIsLoading(false) }
   }, [runId])
-  useEffect(() => { fetch() }, [fetch])
-  return { run, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { run, isLoading, refresh: loadData }
 }
 
 export function usePayrollRuns(options?: { user_id?: string; status?: string; limit?: number }) {
   const [runs, setRuns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -50,76 +50,76 @@ export function usePayrollRuns(options?: { user_id?: string; status?: string; li
       setRuns(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { runs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { runs, isLoading, refresh: loadData }
 }
 
 export function usePayrollItems(runId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!runId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('payroll_items').select('*').eq('run_id', runId).order('employee_name', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
   }, [runId])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function usePayrollDeductions(itemId?: string) {
   const [deductions, setDeductions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('payroll_deductions').select('*').eq('item_id', itemId).order('type', { ascending: true }); setDeductions(data || []) } finally { setIsLoading(false) }
   }, [itemId])
-  useEffect(() => { fetch() }, [fetch])
-  return { deductions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deductions, isLoading, refresh: loadData }
 }
 
 export function useEmployeePayrollHistory(employeeId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('payroll_items').select('*, payroll_runs(*)').eq('employee_id', employeeId).order('created_at', { ascending: false }).limit(options?.limit || 24); setHistory(data || []) } finally { setIsLoading(false) }
   }, [employeeId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function usePendingPayrollRuns(userId?: string) {
   const [runs, setRuns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('payroll_runs').select('*').eq('user_id', userId).in('status', ['draft', 'processing']).order('pay_date', { ascending: true }); setRuns(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { runs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { runs, isLoading, refresh: loadData }
 }
 
 export function usePayrollStats(userId?: string, year?: number) {
   const [stats, setStats] = useState<{ total_paid: number; total_runs: number; avg_per_run: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('payroll_runs').select('*').eq('user_id', userId).eq('status', 'completed'); if (!data) { setStats(null); return }; const items = await supabase.from('payroll_items').select('net_pay').in('run_id', data.map(r => r.id)); const total_paid = (items.data || []).reduce((sum, i) => sum + (i.net_pay || 0), 0); setStats({ total_paid, total_runs: data.length, avg_per_run: data.length > 0 ? total_paid / data.length : 0 }); } finally { setIsLoading(false) }
   }, [userId, year])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

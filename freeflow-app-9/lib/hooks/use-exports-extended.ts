@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useExport(exportId?: string) {
   const [exportData, setExportData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!exportId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('exports').select('*').eq('id', exportId).single(); setExportData(data) } finally { setIsLoading(false) }
   }, [exportId])
-  useEffect(() => { fetch() }, [fetch])
-  return { export: exportData, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { export: exportData, isLoading, refresh: loadData }
 }
 
 export function useUserExports(userId?: string, options?: { type?: string; status?: string; limit?: number }) {
   const [exports, setExports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -36,40 +36,40 @@ export function useUserExports(userId?: string, options?: { type?: string; statu
       setExports(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { exports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { exports, isLoading, refresh: loadData }
 }
 
 export function useRecentExports(userId?: string, limit?: number) {
   const [exports, setExports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('exports').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(limit || 10); setExports(data || []) } finally { setIsLoading(false) }
   }, [userId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { exports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { exports, isLoading, refresh: loadData }
 }
 
 export function useExportJob(jobId?: string) {
   const [job, setJob] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('export_jobs').select('*').eq('id', jobId).single(); setJob(data) } finally { setIsLoading(false) }
   }, [jobId])
-  useEffect(() => { fetch() }, [fetch])
-  return { job, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { job, isLoading, refresh: loadData }
 }
 
 export function useExportTemplates(options?: { type?: string; is_public?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -80,14 +80,14 @@ export function useExportTemplates(options?: { type?: string; is_public?: boolea
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_public])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function useExportSchedules(userId?: string, options?: { is_active?: boolean }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -98,27 +98,27 @@ export function useExportSchedules(userId?: string, options?: { is_active?: bool
       setSchedules(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedules, isLoading, refresh: loadData }
 }
 
 export function usePendingExports(userId?: string) {
   const [exports, setExports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('exports').select('*').eq('user_id', userId).in('status', ['pending', 'processing']).order('created_at', { ascending: false }); setExports(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { exports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { exports, isLoading, refresh: loadData }
 }
 
 export function useExportStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; completed: number; failed: number; totalSize: number; byType: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -133,6 +133,6 @@ export function useExportStats(userId?: string) {
       setStats({ total, completed, failed, totalSize, byType })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useBatch(batchId?: string) {
   const [batch, setBatch] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!batchId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useBatch(batchId?: string) {
       setBatch(data)
     } finally { setIsLoading(false) }
   }, [batchId])
-  useEffect(() => { fetch() }, [fetch])
-  return { batch, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { batch, isLoading, refresh: loadData }
 }
 
 export function useBatches(options?: { batchType?: string; status?: string; userId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useBatches(options?: { batchType?: string; status?: string; user
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.batchType, options?.status, options?.userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBatchItems(batchId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!batchId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,14 +56,14 @@ export function useBatchItems(batchId?: string, status?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [batchId, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBatchProgress(batchId?: string) {
   const [progress, setProgress] = useState<{ total: number; processed: number; failed: number; percentage: number }>({ total: 0, processed: 0, failed: 0, percentage: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!batchId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -75,11 +75,11 @@ export function useBatchProgress(batchId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [batchId])
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
   useEffect(() => {
     if (!batchId) return
     const channel = supabase.channel(`batch-${batchId}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'batches', filter: `id=eq.${batchId}` }, () => fetch()).subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [batchId, fetch])
-  return { progress, isLoading, refresh: fetch }
+  return { progress, isLoading, refresh: loadData }
 }

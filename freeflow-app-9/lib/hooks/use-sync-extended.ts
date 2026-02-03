@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useSync(syncId?: string) {
   const [sync, setSync] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!syncId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,8 +19,8 @@ export function useSync(syncId?: string) {
       setSync(data)
     } finally { setIsLoading(false) }
   }, [syncId])
-  useEffect(() => { fetch() }, [fetch])
-  return { sync, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sync, isLoading, refresh: loadData }
 }
 
 export function useSyncStatus(syncId?: string) {
@@ -64,7 +64,7 @@ export function useSyncStatus(syncId?: string) {
 export function useUserSyncs(userId?: string, options?: { isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -75,14 +75,14 @@ export function useUserSyncs(userId?: string, options?: { isActive?: boolean }) 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useSyncLogs(syncId?: string, limit = 20) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!syncId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -91,6 +91,6 @@ export function useSyncLogs(syncId?: string, limit = 20) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [syncId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

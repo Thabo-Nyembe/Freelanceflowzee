@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useTrigger(triggerId?: string) {
   const [trigger, setTrigger] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!triggerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useTrigger(triggerId?: string) {
       setTrigger(data)
     } finally { setIsLoading(false) }
   }, [triggerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { trigger, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { trigger, isLoading, refresh: loadData }
 }
 
 export function useUserTriggers(userId?: string, options?: { isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useUserTriggers(userId?: string, options?: { isActive?: boolean 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTriggersForEvent(eventType?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!eventType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useTriggersForEvent(eventType?: string, entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [eventType, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTriggerExecutions(triggerId?: string, limit = 20) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!triggerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -71,8 +71,8 @@ export function useTriggerExecutions(triggerId?: string, limit = 20) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [triggerId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTriggerStats(triggerId?: string) {
@@ -80,7 +80,7 @@ export function useTriggerStats(triggerId?: string) {
   const [lastExecutedAt, setLastExecutedAt] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!triggerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -93,6 +93,6 @@ export function useTriggerStats(triggerId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [triggerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { executionCount, lastExecutedAt, isActive, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { executionCount, lastExecutedAt, isActive, isLoading, refresh: loadData }
 }

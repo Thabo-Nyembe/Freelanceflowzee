@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { useSession } from 'next-auth/react'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { toast } from 'sonner'
 import { useMessages } from '@/lib/hooks/use-messages'
 import { useConversations } from '@/lib/hooks/use-conversations'
@@ -197,10 +197,11 @@ export default function MessagesClient() {
   // ==========================================================================
   // DEMO MODE DETECTION - Check if user is demo account
   // ==========================================================================
-  const { data: nextAuthSession } = useSession()
-  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'test@kazi.dev' ||
-                        nextAuthSession?.user?.email === 'demo@kazi.io'
+  const { userId: currentUserId, userEmail, userName, isDemo } = useCurrentUser()
+  const isDemoAccount = isDemo ||
+                        userEmail === 'alex@freeflow.io' ||
+                        userEmail === 'test@kazi.dev' ||
+                        userEmail === 'demo@kazi.io'
 
   // ==========================================================================
   // AUTH & USER HOOKS - Get current authenticated user
@@ -209,20 +210,20 @@ export default function MessagesClient() {
   // For demo accounts, use undefined to skip API calls (hooks will return demo data)
   const userId = isDemoAccount ? undefined : (authUser?.id || null)
 
-  // Current user derived from auth (use NextAuth session for demo accounts)
+  // Current user derived from auth (use demo data for demo accounts)
   const currentUser: User = useMemo(() => {
-    if (isDemoAccount && nextAuthSession?.user) {
+    if (isDemoAccount) {
       return {
-        id: 'demo-user-id',
-        name: nextAuthSession.user.name || 'Alex',
-        displayName: nextAuthSession.user.name || 'Alex Johnson',
-        email: nextAuthSession.user.email || 'alex@freeflow.io',
+        id: currentUserId || 'demo-user-id',
+        name: userName || 'Alex',
+        displayName: userName || 'Alex Johnson',
+        email: userEmail || 'alex@freeflow.io',
         status: 'online' as UserStatus,
         title: 'Product Manager'
       }
     }
     return createDefaultUser(authUser?.id || null, authUser?.email || null)
-  }, [authUser, isDemoAccount, nextAuthSession])
+  }, [authUser, isDemoAccount, currentUserId, userName, userEmail])
 
   // ==========================================================================
   // TEAM MEMBERS HOOK - Replace mockUsers with real data
@@ -555,7 +556,7 @@ export default function MessagesClient() {
     messages: chatMessages,
     currentChat,
     typingUsers,
-    currentUserId,
+    currentUserId: _conversationUserId,
     totalUnread,
     directChats,
     groupChats,

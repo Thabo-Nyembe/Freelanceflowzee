@@ -37,25 +37,25 @@ export interface OrderItemRecord {
 export function useOrders(userId?: string) {
   const [data, setData] = useState<OrderRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('orders').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setData((result as OrderRecord[]) || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useOrderItems(orderId?: string) {
   const [data, setData] = useState<OrderItemRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!orderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('order_items').select('*').eq('order_id', orderId); setData((result as OrderItemRecord[]) || []) } finally { setIsLoading(false) }
   }, [orderId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

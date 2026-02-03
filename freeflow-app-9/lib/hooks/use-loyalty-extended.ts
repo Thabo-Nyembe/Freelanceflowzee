@@ -11,46 +11,46 @@ import { createClient } from '@/lib/supabase/client'
 export function useLoyaltyProgram(programId?: string) {
   const [program, setProgram] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!programId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('loyalty_programs').select('*, loyalty_tiers(*), loyalty_rewards(*)').eq('id', programId).single(); setProgram(data) } finally { setIsLoading(false) }
   }, [programId])
-  useEffect(() => { fetch() }, [fetch])
-  return { program, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { program, isLoading, refresh: loadData }
 }
 
 export function useLoyaltyMember(memberId?: string) {
   const [member, setMember] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!memberId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('loyalty_members').select('*, loyalty_programs(*), loyalty_tiers(*)').eq('id', memberId).single(); setMember(data) } finally { setIsLoading(false) }
   }, [memberId])
-  useEffect(() => { fetch() }, [fetch])
-  return { member, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { member, isLoading, refresh: loadData }
 }
 
 export function useUserMembership(userId?: string, programId?: string) {
   const [membership, setMembership] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !programId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('loyalty_members').select('*, loyalty_programs(*), loyalty_tiers(*)').eq('user_id', userId).eq('program_id', programId).single(); setMembership(data) } finally { setIsLoading(false) }
   }, [userId, programId])
-  useEffect(() => { fetch() }, [fetch])
-  return { membership, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { membership, isLoading, refresh: loadData }
 }
 
 export function useLoyaltyTransactions(memberId?: string, options?: { type?: string; limit?: number }) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!memberId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -61,14 +61,14 @@ export function useLoyaltyTransactions(memberId?: string, options?: { type?: str
       setTransactions(data || [])
     } finally { setIsLoading(false) }
   }, [memberId, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { transactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transactions, isLoading, refresh: loadData }
 }
 
 export function useLoyaltyRewards(programId?: string, options?: { is_active?: boolean }) {
   const [rewards, setRewards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!programId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -79,40 +79,40 @@ export function useLoyaltyRewards(programId?: string, options?: { is_active?: bo
       setRewards(data || [])
     } finally { setIsLoading(false) }
   }, [programId, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { rewards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rewards, isLoading, refresh: loadData }
 }
 
 export function useLoyaltyTiers(programId?: string) {
   const [tiers, setTiers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!programId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('loyalty_tiers').select('*').eq('program_id', programId).order('min_points', { ascending: true }); setTiers(data || []) } finally { setIsLoading(false) }
   }, [programId])
-  useEffect(() => { fetch() }, [fetch])
-  return { tiers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tiers, isLoading, refresh: loadData }
 }
 
 export function usePointsBalance(memberId?: string) {
   const [balance, setBalance] = useState<{ current: number; lifetime: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!memberId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('loyalty_members').select('points_balance, lifetime_points').eq('id', memberId).single(); setBalance(data ? { current: data.points_balance, lifetime: data.lifetime_points } : null) } finally { setIsLoading(false) }
   }, [memberId])
-  useEffect(() => { fetch() }, [fetch])
-  return { balance, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { balance, isLoading, refresh: loadData }
 }
 
 export function useAvailableRewards(memberId?: string) {
   const [rewards, setRewards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!memberId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -124,27 +124,27 @@ export function useAvailableRewards(memberId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [memberId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rewards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rewards, isLoading, refresh: loadData }
 }
 
 export function useUserMemberships(userId?: string) {
   const [memberships, setMemberships] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('loyalty_members').select('*, loyalty_programs(*), loyalty_tiers(*)').eq('user_id', userId).eq('status', 'active').order('enrolled_at', { ascending: false }); setMemberships(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { memberships, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { memberships, isLoading, refresh: loadData }
 }
 
 export function useTierProgress(memberId?: string) {
   const [progress, setProgress] = useState<{ currentTier: any; nextTier: any; pointsToNext: number; percentage: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!memberId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -163,6 +163,6 @@ export function useTierProgress(memberId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [memberId])
-  useEffect(() => { fetch() }, [fetch])
-  return { progress, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { progress, isLoading, refresh: loadData }
 }

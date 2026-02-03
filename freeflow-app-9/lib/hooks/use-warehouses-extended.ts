@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useWarehouse(warehouseId?: string) {
   const [warehouse, setWarehouse] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!warehouseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('warehouses').select('*, warehouse_locations(*)').eq('id', warehouseId).single(); setWarehouse(data) } finally { setIsLoading(false) }
   }, [warehouseId])
-  useEffect(() => { fetch() }, [fetch])
-  return { warehouse, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { warehouse, isLoading, refresh: loadData }
 }
 
 export function useWarehouses(options?: { status?: string; city?: string; country?: string; limit?: number }) {
   const [warehouses, setWarehouses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,40 +36,40 @@ export function useWarehouses(options?: { status?: string; city?: string; countr
       setWarehouses(data || [])
     } finally { setIsLoading(false) }
   }, [options?.status, options?.city, options?.country, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { warehouses, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { warehouses, isLoading, refresh: loadData }
 }
 
 export function useWarehouseLocations(warehouseId?: string) {
   const [locations, setLocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!warehouseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('warehouse_locations').select('*').eq('warehouse_id', warehouseId).order('code', { ascending: true }); setLocations(data || []) } finally { setIsLoading(false) }
   }, [warehouseId])
-  useEffect(() => { fetch() }, [fetch])
-  return { locations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { locations, isLoading, refresh: loadData }
 }
 
 export function useWarehouseInventory(warehouseId?: string, options?: { product_id?: string; low_stock?: boolean }) {
   const [inventory, setInventory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!warehouseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('warehouse_inventory').select('*').eq('warehouse_id', warehouseId); if (options?.product_id) query = query.eq('product_id', options.product_id); if (options?.low_stock) query = query.lt('quantity', 10); const { data } = await query.order('product_id', { ascending: true }); setInventory(data || []) } finally { setIsLoading(false) }
   }, [warehouseId, options?.product_id, options?.low_stock])
-  useEffect(() => { fetch() }, [fetch])
-  return { inventory, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { inventory, isLoading, refresh: loadData }
 }
 
 export function useWarehouseTransfers(options?: { from_warehouse_id?: string; to_warehouse_id?: string; status?: string; limit?: number }) {
   const [transfers, setTransfers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -81,8 +81,8 @@ export function useWarehouseTransfers(options?: { from_warehouse_id?: string; to
       setTransfers(data || [])
     } finally { setIsLoading(false) }
   }, [options?.from_warehouse_id, options?.to_warehouse_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { transfers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transfers, isLoading, refresh: loadData }
 }
 
 // ==========================================

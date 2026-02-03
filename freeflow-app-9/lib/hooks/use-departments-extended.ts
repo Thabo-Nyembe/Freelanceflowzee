@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useDepartment(departmentId?: string) {
   const [department, setDepartment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!departmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('departments').select('*, department_members(*), department_goals(*)').eq('id', departmentId).single(); setDepartment(data) } finally { setIsLoading(false) }
   }, [departmentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { department, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { department, isLoading, refresh: loadData }
 }
 
 export function useDepartments(options?: { parent_id?: string; is_active?: boolean; search?: string }) {
   const [departments, setDepartments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,53 +36,53 @@ export function useDepartments(options?: { parent_id?: string; is_active?: boole
       setDepartments(data || [])
     } finally { setIsLoading(false) }
   }, [options?.parent_id, options?.is_active, options?.search])
-  useEffect(() => { fetch() }, [fetch])
-  return { departments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { departments, isLoading, refresh: loadData }
 }
 
 export function useDepartmentMembers(departmentId?: string) {
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!departmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('department_members').select('*, users:user_id(*)').eq('department_id', departmentId); setMembers(data || []) } finally { setIsLoading(false) }
   }, [departmentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { members, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { members, isLoading, refresh: loadData }
 }
 
 export function useUserDepartments(userId?: string) {
   const [departments, setDepartments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('department_members').select('*, departments:department_id(*)').eq('user_id', userId); setDepartments(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { departments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { departments, isLoading, refresh: loadData }
 }
 
 export function useDepartmentBudget(departmentId?: string, fiscalYear?: string) {
   const [budget, setBudget] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!departmentId || !fiscalYear) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('department_budgets').select('*').eq('department_id', departmentId).eq('fiscal_year', fiscalYear).single(); setBudget(data) } finally { setIsLoading(false) }
   }, [departmentId, fiscalYear])
-  useEffect(() => { fetch() }, [fetch])
-  return { budget, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { budget, isLoading, refresh: loadData }
 }
 
 export function useDepartmentGoals(departmentId?: string, options?: { status?: string }) {
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!departmentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -93,14 +93,14 @@ export function useDepartmentGoals(departmentId?: string, options?: { status?: s
       setGoals(data || [])
     } finally { setIsLoading(false) }
   }, [departmentId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { goals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { goals, isLoading, refresh: loadData }
 }
 
 export function useDepartmentHierarchy() {
   const [hierarchy, setHierarchy] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -111,14 +111,14 @@ export function useDepartmentHierarchy() {
       setHierarchy(buildTree(data || []))
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { hierarchy, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { hierarchy, isLoading, refresh: loadData }
 }
 
 export function useDepartmentStats(departmentId?: string) {
   const [stats, setStats] = useState<{ memberCount: number; activeGoals: number; budgetUtilization: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!departmentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -130,6 +130,6 @@ export function useDepartmentStats(departmentId?: string) {
       setStats({ memberCount: memberCount || 0, activeGoals: activeGoals || 0, budgetUtilization })
     } finally { setIsLoading(false) }
   }, [departmentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

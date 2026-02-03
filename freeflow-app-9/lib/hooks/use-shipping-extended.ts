@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useShippingRate(rateId?: string) {
   const [rate, setRate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!rateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('shipping_rates').select('*').eq('id', rateId).single(); setRate(data) } finally { setIsLoading(false) }
   }, [rateId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rate, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rate, isLoading, refresh: loadData }
 }
 
 export function useShippingRates(options?: { zone_id?: string; method_id?: string; is_active?: boolean; limit?: number }) {
   const [rates, setRates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useShippingRates(options?: { zone_id?: string; method_id?: strin
       setRates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.zone_id, options?.method_id, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { rates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rates, isLoading, refresh: loadData }
 }
 
 export function useShippingZones(options?: { is_active?: boolean }) {
   const [zones, setZones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -53,14 +53,14 @@ export function useShippingZones(options?: { is_active?: boolean }) {
       setZones(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { zones, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { zones, isLoading, refresh: loadData }
 }
 
 export function useShippingMethods(options?: { is_active?: boolean; carrier_id?: string }) {
   const [methods, setMethods] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -71,14 +71,14 @@ export function useShippingMethods(options?: { is_active?: boolean; carrier_id?:
       setMethods(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active, options?.carrier_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { methods, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { methods, isLoading, refresh: loadData }
 }
 
 export function useShippingCarriers(options?: { is_active?: boolean }) {
   const [carriers, setCarriers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -88,6 +88,6 @@ export function useShippingCarriers(options?: { is_active?: boolean }) {
       setCarriers(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { carriers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { carriers, isLoading, refresh: loadData }
 }

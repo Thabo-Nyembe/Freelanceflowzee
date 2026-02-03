@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function usePlaylist(playlistId?: string) {
   const [playlist, setPlaylist] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!playlistId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('playlists').select('*, playlist_items(*, media(*)), playlist_collaborators(*, users(*))').eq('id', playlistId).single(); setPlaylist(data) } finally { setIsLoading(false) }
   }, [playlistId])
-  useEffect(() => { fetch() }, [fetch])
-  return { playlist, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { playlist, isLoading, refresh: loadData }
 }
 
 export function usePlaylists(options?: { owner_id?: string; visibility?: string; type?: string; search?: string; limit?: number }) {
   const [playlists, setPlaylists] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,92 +37,92 @@ export function usePlaylists(options?: { owner_id?: string; visibility?: string;
       setPlaylists(data || [])
     } finally { setIsLoading(false) }
   }, [options?.owner_id, options?.visibility, options?.type, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { playlists, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { playlists, isLoading, refresh: loadData }
 }
 
 export function useUserPlaylists(userId?: string) {
   const [playlists, setPlaylists] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('playlists').select('*, playlist_items(count)').eq('owner_id', userId).order('updated_at', { ascending: false }); setPlaylists(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { playlists, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { playlists, isLoading, refresh: loadData }
 }
 
 export function usePlaylistItems(playlistId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!playlistId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('playlist_items').select('*, media(*)').eq('playlist_id', playlistId).order('position', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
   }, [playlistId])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function usePlaylistShares(playlistId?: string) {
   const [shares, setShares] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!playlistId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('playlist_shares').select('*, users(*)').eq('playlist_id', playlistId).order('created_at', { ascending: false }); setShares(data || []) } finally { setIsLoading(false) }
   }, [playlistId])
-  useEffect(() => { fetch() }, [fetch])
-  return { shares, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { shares, isLoading, refresh: loadData }
 }
 
 export function usePlaylistCollaborators(playlistId?: string) {
   const [collaborators, setCollaborators] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!playlistId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('playlist_collaborators').select('*, users(*)').eq('playlist_id', playlistId).order('added_at', { ascending: false }); setCollaborators(data || []) } finally { setIsLoading(false) }
   }, [playlistId])
-  useEffect(() => { fetch() }, [fetch])
-  return { collaborators, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { collaborators, isLoading, refresh: loadData }
 }
 
 export function usePlaylistFollowers(playlistId?: string, options?: { limit?: number }) {
   const [followers, setFollowers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!playlistId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('playlist_followers').select('*, users(*)').eq('playlist_id', playlistId).order('followed_at', { ascending: false }).limit(options?.limit || 50); setFollowers(data || []) } finally { setIsLoading(false) }
   }, [playlistId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { followers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { followers, isLoading, refresh: loadData }
 }
 
 export function useIsFollowing(playlistId?: string, userId?: string) {
   const [isFollowing, setIsFollowing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!playlistId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('playlist_followers').select('id').eq('playlist_id', playlistId).eq('user_id', userId).single(); setIsFollowing(!!data) } finally { setIsLoading(false) }
   }, [playlistId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { isFollowing, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { isFollowing, isLoading, refresh: loadData }
 }
 
 export function useFollowedPlaylists(userId?: string, options?: { limit?: number }) {
   const [playlists, setPlaylists] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -134,14 +134,14 @@ export function useFollowedPlaylists(userId?: string, options?: { limit?: number
       setPlaylists(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { playlists, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { playlists, isLoading, refresh: loadData }
 }
 
 export function usePublicPlaylists(options?: { type?: string; search?: string; limit?: number }) {
   const [playlists, setPlaylists] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -152,14 +152,14 @@ export function usePublicPlaylists(options?: { type?: string; search?: string; l
       setPlaylists(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { playlists, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { playlists, isLoading, refresh: loadData }
 }
 
 export function usePlaylistAnalytics(playlistId?: string, options?: { from_date?: string; to_date?: string }) {
   const [analytics, setAnalytics] = useState<{ plays: number; uniqueListeners: number; shares: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!playlistId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -174,6 +174,6 @@ export function usePlaylistAnalytics(playlistId?: string, options?: { from_date?
       setAnalytics({ plays, uniqueListeners, shares })
     } finally { setIsLoading(false) }
   }, [playlistId, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { analytics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { analytics, isLoading, refresh: loadData }
 }

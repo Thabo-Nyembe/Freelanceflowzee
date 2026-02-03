@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useMonitor(monitorId?: string) {
   const [monitor, setMonitor] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!monitorId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useMonitor(monitorId?: string) {
       setMonitor(data)
     } finally { setIsLoading(false) }
   }, [monitorId])
-  useEffect(() => { fetch() }, [fetch])
-  return { monitor, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { monitor, isLoading, refresh: loadData }
 }
 
 export function useMonitors(options?: { monitorType?: string; status?: string; isEnabled?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useMonitors(options?: { monitorType?: string; status?: string; i
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.monitorType, options?.status, options?.isEnabled])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMonitorChecks(monitorId?: string, limit = 100) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!monitorId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useMonitorChecks(monitorId?: string, limit = 100) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [monitorId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMonitorAlerts(monitorId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -72,14 +72,14 @@ export function useMonitorAlerts(monitorId?: string, status?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [monitorId, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMonitorUptime(monitorId?: string, days = 30) {
   const [uptime, setUptime] = useState<{ percentage: number; totalChecks: number }>({ percentage: 100, totalChecks: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!monitorId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -92,6 +92,6 @@ export function useMonitorUptime(monitorId?: string, days = 30) {
       setUptime({ percentage, totalChecks: total })
     } finally { setIsLoading(false) }
   }, [monitorId, days])
-  useEffect(() => { fetch() }, [fetch])
-  return { uptime, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { uptime, isLoading, refresh: loadData }
 }

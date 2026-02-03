@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useAnomaly(anomalyId?: string) {
   const [anomaly, setAnomaly] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!anomalyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('anomaly_detections').select('*').eq('id', anomalyId).single(); setAnomaly(data) } finally { setIsLoading(false) }
   }, [anomalyId])
-  useEffect(() => { fetch() }, [fetch])
-  return { anomaly, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { anomaly, isLoading, refresh: loadData }
 }
 
 export function useAnomalies(options?: { user_id?: string; source?: string; type?: string; severity?: string; status?: string; limit?: number }) {
   const [anomalies, setAnomalies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,40 +38,40 @@ export function useAnomalies(options?: { user_id?: string; source?: string; type
       setAnomalies(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.source, options?.type, options?.severity, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { anomalies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { anomalies, isLoading, refresh: loadData }
 }
 
 export function useActiveAnomalies(userId?: string) {
   const [anomalies, setAnomalies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('anomaly_detections').select('*').eq('user_id', userId).in('status', ['detected', 'acknowledged']).order('severity', { ascending: false }).order('detected_at', { ascending: false }); setAnomalies(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { anomalies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { anomalies, isLoading, refresh: loadData }
 }
 
 export function useCriticalAnomalies(userId?: string) {
   const [anomalies, setAnomalies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('anomaly_detections').select('*').eq('user_id', userId).in('severity', ['high', 'critical']).in('status', ['detected', 'acknowledged']).order('detected_at', { ascending: false }); setAnomalies(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { anomalies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { anomalies, isLoading, refresh: loadData }
 }
 
 export function useAnomalyStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; bySeverity: Record<string, number>; byStatus: Record<string, number>; byType: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -84,8 +84,8 @@ export function useAnomalyStats(userId?: string) {
       setStats({ total: data.length, bySeverity, byStatus, byType })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useAnomaliesRealtime(userId?: string) {

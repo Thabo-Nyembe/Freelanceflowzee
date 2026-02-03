@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useQueueJob(jobId?: string) {
   const [job, setJob] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useQueueJob(jobId?: string) {
       setJob(data)
     } finally { setIsLoading(false) }
   }, [jobId])
-  useEffect(() => { fetch() }, [fetch])
-  return { job, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { job, isLoading, refresh: loadData }
 }
 
 export function useQueueJobs(options?: { queueName?: string; jobType?: string; status?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useQueueJobs(options?: { queueName?: string; jobType?: string; s
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.queueName, options?.jobType, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useQueueStats(queueName?: string) {
   const [stats, setStats] = useState<{ pending: number; processing: number; completed: number; failed: number; total: number }>({ pending: 0, processing: 0, completed: 0, failed: 0, total: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -57,13 +57,13 @@ export function useQueueStats(queueName?: string) {
       setStats(newStats)
     } finally { setIsLoading(false) }
   }, [queueName])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useRealtimeQueueStats(queueName?: string) {
   const [stats, setStats] = useState<{ pending: number; processing: number; completed: number; failed: number; total: number }>({ pending: 0, processing: 0, completed: 0, failed: 0, total: 0 })
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     let query = supabase.from('queue_jobs').select('status')
     if (queueName) query = query.eq('queue_name', queueName)
@@ -72,18 +72,18 @@ export function useRealtimeQueueStats(queueName?: string) {
     data?.forEach(job => { if (job.status in newStats) newStats[job.status as keyof typeof newStats]++ })
     setStats(newStats)
   }, [queueName])
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
   useEffect(() => {
     const channel = supabase.channel('queue-stats').on('postgres_changes', { event: '*', schema: 'public', table: 'queue_jobs' }, () => fetch()).subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [fetch])
-  return { stats, refresh: fetch }
+  return { stats, refresh: loadData }
 }
 
 export function usePendingJobs(queueName?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -93,6 +93,6 @@ export function usePendingJobs(queueName?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [queueName])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useAllowance(entityId?: string, entityType?: string, allowanceType?: string) {
   const [allowance, setAllowance] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !allowanceType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useAllowance(entityId?: string, entityType?: string, allowanceTy
       setAllowance(data)
     } finally { setIsLoading(false) }
   }, [entityId, entityType, allowanceType])
-  useEffect(() => { fetch() }, [fetch])
-  return { allowance, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { allowance, isLoading, refresh: loadData }
 }
 
 export function useAllowances(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,8 +35,8 @@ export function useAllowances(entityId?: string, entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAllowanceStatus(entityId?: string, entityType?: string, allowanceType?: string) {
@@ -44,7 +44,7 @@ export function useAllowanceStatus(entityId?: string, entityType?: string, allow
   const [total, setTotal] = useState(0)
   const [isExpired, setIsExpired] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || !allowanceType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -57,6 +57,6 @@ export function useAllowanceStatus(entityId?: string, entityType?: string, allow
       }
     } finally { setIsLoading(false) }
   }, [entityId, entityType, allowanceType])
-  useEffect(() => { fetch() }, [fetch])
-  return { remaining, total, percentage: total > 0 ? ((total - remaining) / total) * 100 : 0, isExpired, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { remaining, total, percentage: total > 0 ? ((total - remaining) / total) * 100 : 0, isExpired, isLoading, refresh: loadData }
 }

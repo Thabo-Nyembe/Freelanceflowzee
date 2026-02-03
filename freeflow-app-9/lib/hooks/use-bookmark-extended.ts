@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useBookmarks(userId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function useBookmarks(userId?: string, itemType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBookmarkFolders(userId?: string, parentId?: string | null) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -40,8 +40,8 @@ export function useBookmarkFolders(userId?: string, parentId?: string | null) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, parentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useIsBookmarked(userId?: string, itemId?: string, itemType?: string) {

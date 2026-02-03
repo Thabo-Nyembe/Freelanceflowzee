@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useHandler(handlerId?: string) {
   const [handler, setHandler] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!handlerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useHandler(handlerId?: string) {
       setHandler(data)
     } finally { setIsLoading(false) }
   }, [handlerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { handler, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { handler, isLoading, refresh: loadData }
 }
 
 export function useUserHandlers(userId?: string, options?: { isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useUserHandlers(userId?: string, options?: { isActive?: boolean 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useHandlersForEvent(eventType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!eventType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,14 +53,14 @@ export function useHandlersForEvent(eventType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [eventType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useHandlerExecutions(handlerId?: string, limit = 20) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!handlerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,8 +69,8 @@ export function useHandlerExecutions(handlerId?: string, limit = 20) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [handlerId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useHandlerStats(handlerId?: string) {
@@ -80,7 +80,7 @@ export function useHandlerStats(handlerId?: string) {
   const [lastExecutedAt, setLastExecutedAt] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!handlerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -95,6 +95,6 @@ export function useHandlerStats(handlerId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [handlerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { executionCount, failureCount, successRate, lastExecutedAt, isActive, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { executionCount, failureCount, successRate, lastExecutedAt, isActive, isLoading, refresh: loadData }
 }

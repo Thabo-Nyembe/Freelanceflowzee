@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function usePlatform(platformId?: string) {
   const [platform, setPlatform] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!platformId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platforms').select('*').eq('id', platformId).single(); setPlatform(data) } finally { setIsLoading(false) }
   }, [platformId])
-  useEffect(() => { fetch() }, [fetch])
-  return { platform, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { platform, isLoading, refresh: loadData }
 }
 
 export function usePlatforms(options?: { type?: string; is_active?: boolean }) {
   const [platforms, setPlatforms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -35,27 +35,27 @@ export function usePlatforms(options?: { type?: string; is_active?: boolean }) {
       setPlatforms(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { platforms, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { platforms, isLoading, refresh: loadData }
 }
 
 export function usePlatformConnection(connectionId?: string) {
   const [connection, setConnection] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!connectionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platform_connections').select('*, platforms(*), platform_settings(*)').eq('id', connectionId).single(); setConnection(data) } finally { setIsLoading(false) }
   }, [connectionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { connection, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { connection, isLoading, refresh: loadData }
 }
 
 export function usePlatformConnections(options?: { platform_id?: string; user_id?: string; organization_id?: string; status?: string }) {
   const [connections, setConnections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -68,27 +68,27 @@ export function usePlatformConnections(options?: { platform_id?: string; user_id
       setConnections(data || [])
     } finally { setIsLoading(false) }
   }, [options?.platform_id, options?.user_id, options?.organization_id, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { connections, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { connections, isLoading, refresh: loadData }
 }
 
 export function useUserConnections(userId?: string) {
   const [connections, setConnections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platform_connections').select('*, platforms(*)').eq('user_id', userId).order('created_at', { ascending: false }); setConnections(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { connections, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { connections, isLoading, refresh: loadData }
 }
 
 export function usePlatformSyncLogs(connectionId?: string, options?: { status?: string; sync_type?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!connectionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -100,40 +100,40 @@ export function usePlatformSyncLogs(connectionId?: string, options?: { status?: 
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [connectionId, options?.status, options?.sync_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function usePlatformMappings(connectionId?: string) {
   const [mappings, setMappings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!connectionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platform_mappings').select('*').eq('connection_id', connectionId).eq('is_active', true).order('local_entity', { ascending: true }); setMappings(data || []) } finally { setIsLoading(false) }
   }, [connectionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { mappings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { mappings, isLoading, refresh: loadData }
 }
 
 export function usePlatformSettings(connectionId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!connectionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platform_settings').select('*').eq('connection_id', connectionId).single(); setSettings(data?.settings || {}) } finally { setIsLoading(false) }
   }, [connectionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function useActiveConnections(organizationId?: string) {
   const [connections, setConnections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -143,14 +143,14 @@ export function useActiveConnections(organizationId?: string) {
       setConnections(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { connections, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { connections, isLoading, refresh: loadData }
 }
 
 export function useSyncStatus(connectionId?: string) {
   const [status, setStatus] = useState<{ lastSync: string | null; lastStatus: string | null; recentLogs: any[] } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!connectionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -166,6 +166,6 @@ export function useSyncStatus(connectionId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [connectionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { status, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { status, isLoading, refresh: loadData }
 }

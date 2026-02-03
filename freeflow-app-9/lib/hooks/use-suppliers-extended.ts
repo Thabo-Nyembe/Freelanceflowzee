@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useSupplier(supplierId?: string) {
   const [supplier, setSupplier] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!supplierId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('suppliers').select('*, supplier_contacts(*), supplier_products(count), supplier_ratings(*)').eq('id', supplierId).single(); setSupplier(data) } finally { setIsLoading(false) }
   }, [supplierId])
-  useEffect(() => { fetch() }, [fetch])
-  return { supplier, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { supplier, isLoading, refresh: loadData }
 }
 
 export function useSuppliers(options?: { category?: string; is_active?: boolean; min_rating?: number; search?: string; limit?: number }) {
   const [suppliers, setSuppliers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -40,27 +40,27 @@ export function useSuppliers(options?: { category?: string; is_active?: boolean;
       setSuppliers(result)
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_active, options?.min_rating, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { suppliers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { suppliers, isLoading, refresh: loadData }
 }
 
 export function useSupplierContacts(supplierId?: string) {
   const [contacts, setContacts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!supplierId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('supplier_contacts').select('*').eq('supplier_id', supplierId).order('is_primary', { ascending: false }); setContacts(data || []) } finally { setIsLoading(false) }
   }, [supplierId])
-  useEffect(() => { fetch() }, [fetch])
-  return { contacts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { contacts, isLoading, refresh: loadData }
 }
 
 export function useSupplierProducts(supplierId?: string, options?: { is_preferred?: boolean }) {
   const [products, setProducts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!supplierId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -71,14 +71,14 @@ export function useSupplierProducts(supplierId?: string, options?: { is_preferre
       setProducts(data || [])
     } finally { setIsLoading(false) }
   }, [supplierId, options?.is_preferred])
-  useEffect(() => { fetch() }, [fetch])
-  return { products, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { products, isLoading, refresh: loadData }
 }
 
 export function useSupplierOrders(supplierId?: string, options?: { status?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [orders, setOrders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!supplierId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -91,15 +91,15 @@ export function useSupplierOrders(supplierId?: string, options?: { status?: stri
       setOrders(data || [])
     } finally { setIsLoading(false) }
   }, [supplierId, options?.status, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { orders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { orders, isLoading, refresh: loadData }
 }
 
 export function useSupplierRatings(supplierId?: string, options?: { category?: string; limit?: number }) {
   const [ratings, setRatings] = useState<any[]>([])
   const [average, setAverage] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!supplierId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -114,14 +114,14 @@ export function useSupplierRatings(supplierId?: string, options?: { category?: s
       }
     } finally { setIsLoading(false) }
   }, [supplierId, options?.category, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { ratings, average, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { ratings, average, isLoading, refresh: loadData }
 }
 
 export function useSupplierDocuments(supplierId?: string, options?: { document_type?: string }) {
   const [documents, setDocuments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!supplierId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -132,14 +132,14 @@ export function useSupplierDocuments(supplierId?: string, options?: { document_t
       setDocuments(data || [])
     } finally { setIsLoading(false) }
   }, [supplierId, options?.document_type])
-  useEffect(() => { fetch() }, [fetch])
-  return { documents, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { documents, isLoading, refresh: loadData }
 }
 
 export function useProductSuppliers(productId?: string) {
   const [suppliers, setSuppliers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!productId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -148,14 +148,14 @@ export function useProductSuppliers(productId?: string) {
       setSuppliers((data || []).map(sp => ({ ...sp.suppliers, supplierProduct: sp })))
     } finally { setIsLoading(false) }
   }, [productId])
-  useEffect(() => { fetch() }, [fetch])
-  return { suppliers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { suppliers, isLoading, refresh: loadData }
 }
 
 export function useSupplierCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -164,14 +164,14 @@ export function useSupplierCategories() {
       setCategories(unique)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function usePendingOrders() {
   const [orders, setOrders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -179,7 +179,7 @@ export function usePendingOrders() {
       setOrders(data || [])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { orders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { orders, isLoading, refresh: loadData }
 }
 

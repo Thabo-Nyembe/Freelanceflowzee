@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function useReport(reportId?: string) {
   const [report, setReport] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!reportId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('reports').select('*, report_templates(*), report_widgets(*), users(*), report_exports(*)').eq('id', reportId).single(); setReport(data) } finally { setIsLoading(false) }
   }, [reportId])
-  useEffect(() => { fetch() }, [fetch])
-  return { report, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { report, isLoading, refresh: loadData }
 }
 
 export function useReports(options?: { user_id?: string; organization_id?: string; type?: string; template_id?: string; status?: string; is_public?: boolean; search?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useReports(options?: { user_id?: string; organization_id?: strin
       setReports(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.organization_id, options?.type, options?.template_id, options?.status, options?.is_public, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reports, isLoading, refresh: loadData }
 }
 
 export function useMyReports(userId?: string, options?: { type?: string; status?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -75,14 +75,14 @@ export function useMyReports(userId?: string, options?: { type?: string; status?
       setReports(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reports, isLoading, refresh: loadData }
 }
 
 export function useReportTemplates(options?: { type?: string; category?: string; is_active?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -95,56 +95,56 @@ export function useReportTemplates(options?: { type?: string; category?: string;
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.category, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function useReportWidgets(reportId?: string) {
   const [widgets, setWidgets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!reportId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('report_widgets').select('*').eq('report_id', reportId).order('order', { ascending: true }); setWidgets(data || []) } finally { setIsLoading(false) }
   }, [reportId])
-  useEffect(() => { fetch() }, [fetch])
-  return { widgets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { widgets, isLoading, refresh: loadData }
 }
 
 export function useReportSchedules(reportId?: string) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!reportId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('report_schedules').select('*').eq('report_id', reportId).order('created_at', { ascending: false }); setSchedules(data || []) } finally { setIsLoading(false) }
   }, [reportId])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedules, isLoading, refresh: loadData }
 }
 
 export function useReportExports(reportId?: string, options?: { limit?: number }) {
   const [exports, setExports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!reportId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('report_exports').select('*, users(*)').eq('report_id', reportId).order('created_at', { ascending: false }).limit(options?.limit || 20); setExports(data || []) } finally { setIsLoading(false) }
   }, [reportId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { exports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { exports, isLoading, refresh: loadData }
 }
 
 export function usePublicReports(options?: { type?: string; search?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -156,14 +156,14 @@ export function usePublicReports(options?: { type?: string; search?: string; lim
       setReports(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reports, isLoading, refresh: loadData }
 }
 
 export function useRecentReports(userId?: string, options?: { limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -173,14 +173,14 @@ export function useRecentReports(userId?: string, options?: { limit?: number }) 
       setReports(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reports, isLoading, refresh: loadData }
 }
 
 export function useScheduledReports(options?: { is_active?: boolean; limit?: number }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -191,6 +191,6 @@ export function useScheduledReports(options?: { is_active?: boolean; limit?: num
       setSchedules(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedules, isLoading, refresh: loadData }
 }

@@ -24,22 +24,22 @@ function isDemoModeEnabled(): boolean {
 export function usePresence(userId?: string) {
   const [presence, setPresence] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('presence').select('*, presence_sessions(*), presence_settings(*)').eq('user_id', userId).single(); setPresence(data) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { presence, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { presence, isLoading, refresh: loadData }
 }
 
 export function useUserStatus(userId?: string) {
   const [status, setStatus] = useState<string>('offline')
   const [lastSeen, setLastSeen] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -57,14 +57,14 @@ export function useUserStatus(userId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { status, lastSeen, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { status, lastSeen, isLoading, refresh: loadData }
 }
 
 export function useOnlineUsers(options?: { channel_id?: string; limit?: number }) {
   const [users, setUsers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -75,14 +75,14 @@ export function useOnlineUsers(options?: { channel_id?: string; limit?: number }
       setUsers(data || [])
     } finally { setIsLoading(false) }
   }, [options?.channel_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { users, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { users, isLoading, refresh: loadData }
 }
 
 export function useBulkPresence(userIds?: string[]) {
   const [presenceMap, setPresenceMap] = useState<{ [userId: string]: any }>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userIds || userIds.length === 0) { setIsLoading(false); return }
@@ -94,42 +94,42 @@ export function useBulkPresence(userIds?: string[]) {
       setPresenceMap(map)
     } finally { setIsLoading(false) }
   }, [userIds?.join(',')])
-  useEffect(() => { fetch() }, [fetch])
-  return { presenceMap, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { presenceMap, isLoading, refresh: loadData }
 }
 
 export function usePresenceSessions(userId?: string) {
   const [sessions, setSessions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('presence_sessions').select('*').eq('user_id', userId).order('started_at', { ascending: false }); setSessions(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { sessions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sessions, isLoading, refresh: loadData }
 }
 
 export function useActiveSessions(userId?: string) {
   const [sessions, setSessions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('presence_sessions').select('*').eq('user_id', userId).eq('status', 'active').order('started_at', { ascending: false }); setSessions(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { sessions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sessions, isLoading, refresh: loadData }
 }
 
 export function usePresenceChannels(options?: { type?: string }) {
   const [channels, setChannels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -140,15 +140,15 @@ export function usePresenceChannels(options?: { type?: string }) {
       setChannels(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type])
-  useEffect(() => { fetch() }, [fetch])
-  return { channels, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { channels, isLoading, refresh: loadData }
 }
 
 export function useChannelMembers(channelId?: string) {
   const [members, setMembers] = useState<any[]>([])
   const [onlineCount, setOnlineCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!channelId) { setIsLoading(false); return }
@@ -161,28 +161,28 @@ export function useChannelMembers(channelId?: string) {
       setOnlineCount(online)
     } finally { setIsLoading(false) }
   }, [channelId])
-  useEffect(() => { fetch() }, [fetch])
-  return { members, onlineCount, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { members, onlineCount, isLoading, refresh: loadData }
 }
 
 export function useMyChannels(userId?: string) {
   const [channels, setChannels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('presence_subscriptions').select('*, presence_channels(*)').eq('user_id', userId).order('joined_at', { ascending: false }); setChannels(data?.map(d => d.presence_channels) || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { channels, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { channels, isLoading, refresh: loadData }
 }
 
 export function usePresenceHistory(userId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -195,20 +195,20 @@ export function usePresenceHistory(userId?: string, options?: { from_date?: stri
       setHistory(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function usePresenceSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('presence_settings').select('*').eq('user_id', userId).single(); setSettings(data || { show_online_status: true, allow_tracking: true, auto_away_timeout: 5, invisible_mode: false }) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }

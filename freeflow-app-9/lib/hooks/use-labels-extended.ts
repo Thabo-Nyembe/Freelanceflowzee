@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useLabel(labelId?: string) {
   const [label, setLabel] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!labelId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('labels').select('*, label_groups(*)').eq('id', labelId).single(); setLabel(data) } finally { setIsLoading(false) }
   }, [labelId])
-  useEffect(() => { fetch() }, [fetch])
-  return { label, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { label, isLoading, refresh: loadData }
 }
 
 export function useLabels(options?: { organization_id?: string; group_id?: string; search?: string }) {
   const [labels, setLabels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useLabels(options?: { organization_id?: string; group_id?: strin
       setLabels(data || [])
     } finally { setIsLoading(false) }
   }, [options?.organization_id, options?.group_id, options?.search])
-  useEffect(() => { fetch() }, [fetch])
-  return { labels, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { labels, isLoading, refresh: loadData }
 }
 
 export function useEntityLabels(entityType?: string, entityId?: string) {
   const [labels, setLabels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('label_assignments').select('*, labels(*)').eq('entity_type', entityType).eq('entity_id', entityId); setLabels(data || []) } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { labels, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { labels, isLoading, refresh: loadData }
 }
 
 export function useLabelGroups(organizationId?: string) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -66,26 +66,26 @@ export function useLabelGroups(organizationId?: string) {
       setGroups(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { groups, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { groups, isLoading, refresh: loadData }
 }
 
 export function useLabelColors() {
   const [colors, setColors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('label_colors').select('*').order('name', { ascending: true }); setColors(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { colors, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { colors, isLoading, refresh: loadData }
 }
 
 export function usePopularLabels(organizationId?: string, options?: { limit?: number }) {
   const [labels, setLabels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -95,21 +95,21 @@ export function usePopularLabels(organizationId?: string, options?: { limit?: nu
       setLabels(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { labels, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { labels, isLoading, refresh: loadData }
 }
 
 export function useLabelRules(labelId?: string) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!labelId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('label_rules').select('*').eq('label_id', labelId).order('created_at', { ascending: false }); setRules(data || []) } finally { setIsLoading(false) }
   }, [labelId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rules, isLoading, refresh: loadData }
 }
 
 export function useLabelSearch(organizationId?: string, query?: string) {
@@ -133,7 +133,7 @@ export function useLabelSearch(organizationId?: string, query?: string) {
 export function useLabelsByEntity(entityType?: string, entityIds?: string[]) {
   const [labelMap, setLabelMap] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityIds?.length) { setIsLoading(false); return }
     setIsLoading(true)
@@ -147,6 +147,6 @@ export function useLabelsByEntity(entityType?: string, entityIds?: string[]) {
       setLabelMap(map)
     } finally { setIsLoading(false) }
   }, [entityType, entityIds])
-  useEffect(() => { fetch() }, [fetch])
-  return { labelMap, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { labelMap, isLoading, refresh: loadData }
 }

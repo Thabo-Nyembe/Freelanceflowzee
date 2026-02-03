@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 
 // MIGRATED: Batch #12 - Removed mock data, using database hooks
 

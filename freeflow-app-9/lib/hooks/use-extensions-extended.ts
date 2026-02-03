@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useExtension(extensionId?: string) {
   const [extension, setExtension] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!extensionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('extensions').select('*, extension_versions(*)').eq('id', extensionId).single(); setExtension(data) } finally { setIsLoading(false) }
   }, [extensionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { extension, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extension, isLoading, refresh: loadData }
 }
 
 export function useExtensions(options?: { category?: string; status?: string; developer_id?: string; search?: string; limit?: number }) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useExtensions(options?: { category?: string; status?: string; de
       setExtensions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.status, options?.developer_id, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { extensions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extensions, isLoading, refresh: loadData }
 }
 
 export function useUserExtensions(userId?: string, options?: { is_active?: boolean }) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,8 +55,8 @@ export function useUserExtensions(userId?: string, options?: { is_active?: boole
       setExtensions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { extensions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extensions, isLoading, refresh: loadData }
 }
 
 export function useIsExtensionInstalled(extensionId?: string, userId?: string) {
@@ -76,45 +76,45 @@ export function useIsExtensionInstalled(extensionId?: string, userId?: string) {
 export function useExtensionSettings(extensionId?: string, userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!extensionId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('extension_settings').select('*').eq('extension_id', extensionId).eq('user_id', userId).single(); setSettings(data?.settings || null) } finally { setIsLoading(false) }
   }, [extensionId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function useExtensionVersions(extensionId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!extensionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('extension_versions').select('*').eq('extension_id', extensionId).order('published_at', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
   }, [extensionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { versions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { versions, isLoading, refresh: loadData }
 }
 
 export function usePopularExtensions(limit?: number) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('extensions').select('*').eq('status', 'published').order('install_count', { ascending: false }).limit(limit || 10); setExtensions(data || []) } finally { setIsLoading(false) }
   }, [limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { extensions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extensions, isLoading, refresh: loadData }
 }
 
 export function useExtensionCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -123,19 +123,19 @@ export function useExtensionCategories() {
       setCategories(uniqueCategories as string[])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useDeveloperExtensions(developerId?: string) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!developerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('extensions').select('*').eq('developer_id', developerId).order('created_at', { ascending: false }); setExtensions(data || []) } finally { setIsLoading(false) }
   }, [developerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { extensions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extensions, isLoading, refresh: loadData }
 }

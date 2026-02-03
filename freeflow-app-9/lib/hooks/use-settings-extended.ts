@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useSetting(key?: string, scope?: { type: string; id: string }) {
   const [setting, setSetting] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!key) { setIsLoading(false); return }
     setIsLoading(true)
@@ -24,14 +24,14 @@ export function useSetting(key?: string, scope?: { type: string; id: string }) {
       setSetting(data)
     } finally { setIsLoading(false) }
   }, [key, scope?.type, scope?.id])
-  useEffect(() => { fetch() }, [fetch])
-  return { setting, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { setting, isLoading, refresh: loadData }
 }
 
 export function useSettings(options?: { category_id?: string; is_public?: boolean; search?: string; keys?: string[] }) {
   const [settings, setSettings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -44,14 +44,14 @@ export function useSettings(options?: { category_id?: string; is_public?: boolea
       setSettings(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category_id, options?.is_public, options?.search, JSON.stringify(options?.keys)])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function useSettingsMap(keys: string[], scope?: { type: string; id: string }) {
   const [settingsMap, setSettingsMap] = useState<{ [key: string]: any }>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (keys.length === 0) { setIsLoading(false); return }
     setIsLoading(true)
@@ -66,14 +66,14 @@ export function useSettingsMap(keys: string[], scope?: { type: string; id: strin
       setSettingsMap(map)
     } finally { setIsLoading(false) }
   }, [JSON.stringify(keys), scope?.type, scope?.id])
-  useEffect(() => { fetch() }, [fetch])
-  return { settingsMap, isLoading, refresh: fetch, getValue: (key: string) => settingsMap[key] }
+  useEffect(() => { loadData() }, [loadData])
+  return { settingsMap, isLoading, refresh: loadData, getValue: (key: string) => settingsMap[key] }
 }
 
 export function useSettingCategories(options?: { parent_id?: string | null; is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -87,14 +87,14 @@ export function useSettingCategories(options?: { parent_id?: string | null; is_a
       setCategories(data || [])
     } finally { setIsLoading(false) }
   }, [options?.parent_id, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useSettingHistory(settingKey?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!settingKey) { setIsLoading(false); return }
     setIsLoading(true)
@@ -108,14 +108,14 @@ export function useSettingHistory(settingKey?: string, options?: { from_date?: s
       setHistory(data || [])
     } finally { setIsLoading(false) }
   }, [settingKey, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useSettingPresets(options?: { category?: string; is_active?: boolean }) {
   const [presets, setPresets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -126,14 +126,14 @@ export function useSettingPresets(options?: { category?: string; is_active?: boo
       setPresets(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { presets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { presets, isLoading, refresh: loadData }
 }
 
 export function useSettingOverrides(scope?: { type: string; id: string }) {
   const [overrides, setOverrides] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scope) { setIsLoading(false); return }
     setIsLoading(true)
@@ -142,14 +142,14 @@ export function useSettingOverrides(scope?: { type: string; id: string }) {
       setOverrides(data || [])
     } finally { setIsLoading(false) }
   }, [scope?.type, scope?.id])
-  useEffect(() => { fetch() }, [fetch])
-  return { overrides, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { overrides, isLoading, refresh: loadData }
 }
 
 export function usePublicSettings() {
   const [settings, setSettings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -157,14 +157,14 @@ export function usePublicSettings() {
       setSettings(data || [])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function useSettingStats() {
   const [stats, setStats] = useState<{ total: number; categories: number; presets: number; overrides: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -177,7 +177,7 @@ export function useSettingStats() {
       setStats({ total: total.count || 0, categories: categories.count || 0, presets: presets.count || 0, overrides: overrides.count || 0 })
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 

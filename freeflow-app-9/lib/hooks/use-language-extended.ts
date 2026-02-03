@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useLanguage(languageId?: string) {
   const [language, setLanguage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!languageId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useLanguage(languageId?: string) {
       setLanguage(data)
     } finally { setIsLoading(false) }
   }, [languageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { language, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { language, isLoading, refresh: loadData }
 }
 
 export function useLanguages(options?: { isSupported?: boolean; isEnabled?: boolean; direction?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useLanguages(options?: { isSupported?: boolean; isEnabled?: bool
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.isSupported, options?.isEnabled, options?.direction])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useSupportedLanguages() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -53,14 +53,14 @@ export function useSupportedLanguages() {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useUserLanguage(userId?: string) {
   const [language, setLanguage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,14 +69,14 @@ export function useUserLanguage(userId?: string) {
       setLanguage(data)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { language, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { language, isLoading, refresh: loadData }
 }
 
 export function useRTLLanguages() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -84,6 +84,6 @@ export function useRTLLanguages() {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

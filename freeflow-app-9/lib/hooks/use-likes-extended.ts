@@ -24,33 +24,33 @@ export function useLikeStatus(userId?: string, entityType?: string, entityId?: s
 export function useLikeCount(entityType?: string, entityId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('like_counts').select('count').eq('entity_type', entityType).eq('entity_id', entityId).single(); setCount(data?.count || 0) } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useLikesForEntity(entityType?: string, entityId?: string, options?: { limit?: number }) {
   const [likes, setLikes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('likes').select('*').eq('entity_type', entityType).eq('entity_id', entityId).order('created_at', { ascending: false }).limit(options?.limit || 50); setLikes(data || []) } finally { setIsLoading(false) }
   }, [entityType, entityId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { likes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { likes, isLoading, refresh: loadData }
 }
 
 export function useUserLikes(userId?: string, options?: { entity_type?: string; limit?: number }) {
   const [likes, setLikes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -61,15 +61,15 @@ export function useUserLikes(userId?: string, options?: { entity_type?: string; 
       setLikes(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.entity_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { likes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { likes, isLoading, refresh: loadData }
 }
 
 export function useReactions(entityType?: string, entityId?: string) {
   const [reactions, setReactions] = useState<any[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -81,27 +81,27 @@ export function useReactions(entityType?: string, entityId?: string) {
       setCounts(reactionCounts)
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reactions, counts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reactions, counts, isLoading, refresh: loadData }
 }
 
 export function useUserReaction(userId?: string, entityType?: string, entityId?: string) {
   const [reaction, setReaction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('like_reactions').select('*').eq('user_id', userId).eq('entity_type', entityType).eq('entity_id', entityId).single(); setReaction(data) } finally { setIsLoading(false) }
   }, [userId, entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reaction, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reaction, isLoading, refresh: loadData }
 }
 
 export function useMostLiked(entityType?: string, options?: { limit?: number; period?: string }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -118,14 +118,14 @@ export function useMostLiked(entityType?: string, options?: { limit?: number; pe
       setItems(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, options?.limit, options?.period])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useLikeAndReaction(userId?: string, entityType?: string, entityId?: string) {
   const [state, setState] = useState<{ isLiked: boolean; reaction: any; likeCount: number }>({ isLiked: false, reaction: null, likeCount: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -142,6 +142,6 @@ export function useLikeAndReaction(userId?: string, entityType?: string, entityI
       })
     } finally { setIsLoading(false) }
   }, [userId, entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { ...state, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { ...state, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useStandard(standardId?: string) {
   const [standard, setStandard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!standardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('standards').select('*, standard_requirements(*), standard_documents(*)').eq('id', standardId).single(); setStandard(data) } finally { setIsLoading(false) }
   }, [standardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { standard, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { standard, isLoading, refresh: loadData }
 }
 
 export function useStandards(options?: { category?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [standards, setStandards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useStandards(options?: { category?: string; is_active?: boolean;
       setStandards(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { standards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { standards, isLoading, refresh: loadData }
 }
 
 export function useStandardRequirements(standardId?: string) {
   const [requirements, setRequirements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!standardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('standard_requirements').select('*').eq('standard_id', standardId).order('order_index', { ascending: true }); setRequirements(data || []) } finally { setIsLoading(false) }
   }, [standardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { requirements, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { requirements, isLoading, refresh: loadData }
 }
 
 export function useComplianceStatus(entityType?: string, entityId?: string, standardId?: string) {
   const [compliance, setCompliance] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId || !standardId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -65,14 +65,14 @@ export function useComplianceStatus(entityType?: string, entityId?: string, stan
       setCompliance(data)
     } finally { setIsLoading(false) }
   }, [entityType, entityId, standardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { compliance, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { compliance, isLoading, refresh: loadData }
 }
 
 export function useComplianceHistory(entityType?: string, entityId?: string, options?: { standard_id?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -83,14 +83,14 @@ export function useComplianceHistory(entityType?: string, entityId?: string, opt
       setHistory(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId, options?.standard_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useCertifications(options?: { entity_type?: string; entity_id?: string; standard_id?: string; status?: string; limit?: number }) {
   const [certifications, setCertifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -103,14 +103,14 @@ export function useCertifications(options?: { entity_type?: string; entity_id?: 
       setCertifications(data || [])
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.entity_id, options?.standard_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { certifications, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { certifications, isLoading, refresh: loadData }
 }
 
 export function useActiveCertification(entityType?: string, entityId?: string, standardId?: string) {
   const [certification, setCertification] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId || !standardId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -120,14 +120,14 @@ export function useActiveCertification(entityType?: string, entityId?: string, s
       setCertification(data)
     } finally { setIsLoading(false) }
   }, [entityType, entityId, standardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { certification, isValid: !!certification, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { certification, isValid: !!certification, isLoading, refresh: loadData }
 }
 
 export function useUpcomingAudits(options?: { entity_type?: string; entity_id?: string; auditor_id?: string; limit?: number }) {
   const [audits, setAudits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -139,14 +139,14 @@ export function useUpcomingAudits(options?: { entity_type?: string; entity_id?: 
       setAudits(data || [])
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.entity_id, options?.auditor_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { audits, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { audits, isLoading, refresh: loadData }
 }
 
 export function useStandardCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -155,7 +155,7 @@ export function useStandardCategories() {
       setCategories(unique)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 

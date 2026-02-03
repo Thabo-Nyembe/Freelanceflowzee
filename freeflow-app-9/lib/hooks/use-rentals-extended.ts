@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useRental(rentalId?: string) {
   const [rental, setRental] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!rentalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('rentals').select('*, rental_items(*), rental_agreements(*), rental_payments(*), users(*), customers(*)').eq('id', rentalId).single(); setRental(data) } finally { setIsLoading(false) }
   }, [rentalId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rental, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rental, isLoading, refresh: loadData }
 }
 
 export function useRentals(options?: { customer_id?: string; user_id?: string; status?: string; from_date?: string; to_date?: string; search?: string; limit?: number }) {
   const [rentals, setRentals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useRentals(options?: { customer_id?: string; user_id?: string; s
       setRentals(data || [])
     } finally { setIsLoading(false) }
   }, [options?.customer_id, options?.user_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { rentals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rentals, isLoading, refresh: loadData }
 }
 
 export function useActiveRentals(options?: { limit?: number }) {
   const [rentals, setRentals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -54,14 +54,14 @@ export function useActiveRentals(options?: { limit?: number }) {
       setRentals(data || [])
     } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { rentals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rentals, isLoading, refresh: loadData }
 }
 
 export function useOverdueRentals(options?: { limit?: number }) {
   const [rentals, setRentals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -70,40 +70,40 @@ export function useOverdueRentals(options?: { limit?: number }) {
       setRentals(data || [])
     } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { rentals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rentals, isLoading, refresh: loadData }
 }
 
 export function useRentalItems(rentalId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!rentalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('rental_items').select('*, rental_inventory(*)').eq('rental_id', rentalId); setItems(data || []) } finally { setIsLoading(false) }
   }, [rentalId])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useRentalPayments(rentalId?: string) {
   const [payments, setPayments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!rentalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('rental_payments').select('*').eq('rental_id', rentalId).order('created_at', { ascending: false }); setPayments(data || []) } finally { setIsLoading(false) }
   }, [rentalId])
-  useEffect(() => { fetch() }, [fetch])
-  return { payments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { payments, isLoading, refresh: loadData }
 }
 
 export function useRentalInventory(options?: { category?: string; is_available?: boolean; search?: string; limit?: number }) {
   const [inventory, setInventory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -115,14 +115,14 @@ export function useRentalInventory(options?: { category?: string; is_available?:
       setInventory(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_available, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { inventory, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { inventory, isLoading, refresh: loadData }
 }
 
 export function useRentalStats(options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; active: number; completed: number; cancelled: number; totalRevenue: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -139,14 +139,14 @@ export function useRentalStats(options?: { from_date?: string; to_date?: string 
       setStats({ total, active, completed, cancelled, totalRevenue })
     } finally { setIsLoading(false) }
   }, [options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useCustomerRentals(customerId?: string, options?: { status?: string; limit?: number }) {
   const [rentals, setRentals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -157,14 +157,14 @@ export function useCustomerRentals(customerId?: string, options?: { status?: str
       setRentals(data || [])
     } finally { setIsLoading(false) }
   }, [customerId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { rentals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rentals, isLoading, refresh: loadData }
 }
 
 export function useUpcomingReturns(options?: { days?: number; limit?: number }) {
   const [rentals, setRentals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -174,6 +174,6 @@ export function useUpcomingReturns(options?: { days?: number; limit?: number }) 
       setRentals(data || [])
     } finally { setIsLoading(false) }
   }, [options?.days, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { rentals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rentals, isLoading, refresh: loadData }
 }

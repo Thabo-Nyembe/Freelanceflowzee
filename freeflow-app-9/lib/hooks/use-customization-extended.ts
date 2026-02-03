@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useCustomization(customizationId?: string) {
   const [customization, setCustomization] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!customizationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('customizations').select('*, customization_options(*)').eq('id', customizationId).single(); setCustomization(data) } finally { setIsLoading(false) }
   }, [customizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { customization, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { customization, isLoading, refresh: loadData }
 }
 
 export function useCustomizations(options?: { type?: string; is_global?: boolean; is_active?: boolean }) {
   const [customizations, setCustomizations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useCustomizations(options?: { type?: string; is_global?: boolean
       setCustomizations(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_global, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { customizations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { customizations, isLoading, refresh: loadData }
 }
 
 export function useCustomizationPresets(options?: { type?: string; is_default?: boolean }) {
   const [presets, setPresets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -54,15 +54,15 @@ export function useCustomizationPresets(options?: { type?: string; is_default?: 
       setPresets(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_default])
-  useEffect(() => { fetch() }, [fetch])
-  return { presets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { presets, isLoading, refresh: loadData }
 }
 
 export function useUserCustomizations(userId?: string) {
   const [customizations, setCustomizations] = useState<any[]>([])
   const [valuesMap, setValuesMap] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -74,14 +74,14 @@ export function useUserCustomizations(userId?: string) {
       setValuesMap(map)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { customizations, valuesMap, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { customizations, valuesMap, isLoading, refresh: loadData }
 }
 
 export function useCustomizationValue(userId?: string, customizationId?: string) {
   const [value, setValue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !customizationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -92,27 +92,27 @@ export function useCustomizationValue(userId?: string, customizationId?: string)
       setValue(defaultValue?.default_value || null)
     } finally { setIsLoading(false) }
   }, [userId, customizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { value, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { value, isLoading, refresh: loadData }
 }
 
 export function useCustomizationOptions(customizationId?: string) {
   const [options, setOptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!customizationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('customization_options').select('*').eq('customization_id', customizationId).order('order', { ascending: true }); setOptions(data || []) } finally { setIsLoading(false) }
   }, [customizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { options, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { options, isLoading, refresh: loadData }
 }
 
 export function useCustomizationTypes() {
   const [types, setTypes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -121,19 +121,19 @@ export function useCustomizationTypes() {
       setTypes(uniqueTypes as string[])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useDefaultPreset(type?: string) {
   const [preset, setPreset] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!type) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('customization_presets').select('*').eq('type', type).eq('is_default', true).single(); setPreset(data) } finally { setIsLoading(false) }
   }, [type])
-  useEffect(() => { fetch() }, [fetch])
-  return { preset, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { preset, isLoading, refresh: loadData }
 }

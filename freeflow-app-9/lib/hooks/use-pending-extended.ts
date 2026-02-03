@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function usePendingItems(userId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -21,14 +21,14 @@ export function usePendingItems(userId?: string, itemType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function usePendingCount(userId?: string, itemType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,14 +39,14 @@ export function usePendingCount(userId?: string, itemType?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [userId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function usePendingStats(userId?: string) {
   const [stats, setStats] = useState<Record<string, Record<string, number>>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -60,6 +60,6 @@ export function usePendingStats(userId?: string) {
       setStats(result)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

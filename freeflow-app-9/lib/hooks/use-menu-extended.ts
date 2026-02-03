@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useMenus(menuType?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function useMenus(menuType?: string, isActive?: boolean) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [menuType, isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMenuItems(menuId?: string, parentId?: string | null) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -40,14 +40,14 @@ export function useMenuItems(menuId?: string, parentId?: string | null) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [menuId, parentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMenuTree(menuId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!menuId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -59,6 +59,6 @@ export function useMenuTree(menuId?: string) {
       setData(buildTree(items || []))
     } finally { setIsLoading(false) }
   }, [menuId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

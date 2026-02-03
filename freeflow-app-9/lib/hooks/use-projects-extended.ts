@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useProject(projectId?: string) {
   const [project, setProject] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('projects').select('*, project_members(*, users(*)), project_tasks(count), project_milestones(*), project_files(count), project_budgets(*)').eq('id', projectId).single(); setProject(data) } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { project, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { project, isLoading, refresh: loadData }
 }
 
 export function useProjects(options?: { owner_id?: string; organization_id?: string; client_id?: string; status?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [projects, setProjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,27 +39,27 @@ export function useProjects(options?: { owner_id?: string; organization_id?: str
       setProjects(data || [])
     } finally { setIsLoading(false) }
   }, [options?.owner_id, options?.organization_id, options?.client_id, options?.status, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { projects, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { projects, isLoading, refresh: loadData }
 }
 
 export function useProjectMembers(projectId?: string) {
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('project_members').select('*, users(*)').eq('project_id', projectId).order('joined_at', { ascending: true }); setMembers(data || []) } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { members, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { members, isLoading, refresh: loadData }
 }
 
 export function useProjectTasks(projectId?: string, options?: { status?: string; assignee_id?: string; milestone_id?: string; priority?: string }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -73,27 +73,27 @@ export function useProjectTasks(projectId?: string, options?: { status?: string;
       setTasks(data || [])
     } finally { setIsLoading(false) }
   }, [projectId, options?.status, options?.assignee_id, options?.milestone_id, options?.priority])
-  useEffect(() => { fetch() }, [fetch])
-  return { tasks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tasks, isLoading, refresh: loadData }
 }
 
 export function useProjectMilestones(projectId?: string) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('project_milestones').select('*, project_tasks(count)').eq('project_id', projectId).order('due_date', { ascending: true }); setMilestones(data || []) } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { milestones, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { milestones, isLoading, refresh: loadData }
 }
 
 export function useProjectFiles(projectId?: string, options?: { folder_id?: string; type?: string }) {
   const [files, setFiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -105,14 +105,14 @@ export function useProjectFiles(projectId?: string, options?: { folder_id?: stri
       setFiles(data || [])
     } finally { setIsLoading(false) }
   }, [projectId, options?.folder_id, options?.type])
-  useEffect(() => { fetch() }, [fetch])
-  return { files, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { files, isLoading, refresh: loadData }
 }
 
 export function useProjectComments(projectId?: string, options?: { task_id?: string; limit?: number }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -123,14 +123,14 @@ export function useProjectComments(projectId?: string, options?: { task_id?: str
       setComments(data || [])
     } finally { setIsLoading(false) }
   }, [projectId, options?.task_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { comments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comments, isLoading, refresh: loadData }
 }
 
 export function useMyProjects(userId?: string, options?: { status?: string; role?: string; limit?: number }) {
   const [projects, setProjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -143,40 +143,40 @@ export function useMyProjects(userId?: string, options?: { status?: string; role
       setProjects(projects)
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.role, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { projects, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { projects, isLoading, refresh: loadData }
 }
 
 export function useProjectBudget(projectId?: string) {
   const [budget, setBudget] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('project_budgets').select('*').eq('project_id', projectId).single(); setBudget(data) } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { budget, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { budget, isLoading, refresh: loadData }
 }
 
 export function useProjectTimeline(projectId?: string) {
   const [timeline, setTimeline] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('project_timelines').select('*, users(*)').eq('project_id', projectId).order('created_at', { ascending: false }); setTimeline(data || []) } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { timeline, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timeline, isLoading, refresh: loadData }
 }
 
 export function useProjectStats(projectId?: string) {
   const [stats, setStats] = useState<{ totalTasks: number; completedTasks: number; progress: number; overdueTasks: number; memberCount: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -193,14 +193,14 @@ export function useProjectStats(projectId?: string) {
       setStats({ totalTasks, completedTasks, progress, overdueTasks, memberCount: membersRes.count || 0 })
     } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useActiveProjects(options?: { organization_id?: string; limit?: number }) {
   const [projects, setProjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -210,6 +210,6 @@ export function useActiveProjects(options?: { organization_id?: string; limit?: 
       setProjects(data || [])
     } finally { setIsLoading(false) }
   }, [options?.organization_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { projects, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { projects, isLoading, refresh: loadData }
 }

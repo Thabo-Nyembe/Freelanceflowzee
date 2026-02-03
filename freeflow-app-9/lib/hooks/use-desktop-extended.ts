@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useDesktopApp(appId?: string) {
   const [app, setApp] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!appId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useDesktopApp(appId?: string) {
       setApp(data)
     } finally { setIsLoading(false) }
   }, [appId])
-  useEffect(() => { fetch() }, [fetch])
-  return { app, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { app, isLoading, refresh: loadData }
 }
 
 export function useDesktopApps(userId?: string, options?: { app_type?: string; is_installed?: boolean; limit?: number }) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,14 +39,14 @@ export function useDesktopApps(userId?: string, options?: { app_type?: string; i
       setApps(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.app_type, options?.is_installed, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { apps, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { apps, isLoading, refresh: loadData }
 }
 
 export function useInstalledApps(userId?: string) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useInstalledApps(userId?: string) {
       setApps(data || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { apps, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { apps, isLoading, refresh: loadData }
 }
 
 export function useRunningApps(userId?: string) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -71,14 +71,14 @@ export function useRunningApps(userId?: string) {
       setApps(data || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { apps, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { apps, isLoading, refresh: loadData }
 }
 
 export function useDesktopNotifications(userId?: string, options?: { is_read?: boolean; priority?: string; limit?: number }) {
   const [notifications, setNotifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -90,14 +90,14 @@ export function useDesktopNotifications(userId?: string, options?: { is_read?: b
       setNotifications(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_read, options?.priority, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { notifications, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { notifications, isLoading, refresh: loadData }
 }
 
 export function useUnreadNotificationCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -106,8 +106,8 @@ export function useUnreadNotificationCount(userId?: string) {
       setCount(total || 0)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useDesktopNotificationsRealtime(userId?: string) {
@@ -129,7 +129,7 @@ export function useDesktopNotificationsRealtime(userId?: string) {
 export function useDesktopShortcuts(userId?: string, options?: { folder_id?: string | null }) {
   const [shortcuts, setShortcuts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -144,14 +144,14 @@ export function useDesktopShortcuts(userId?: string, options?: { folder_id?: str
       setShortcuts(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.folder_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { shortcuts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { shortcuts, isLoading, refresh: loadData }
 }
 
 export function useDesktopPreferences(userId?: string) {
   const [preferences, setPreferences] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -160,14 +160,14 @@ export function useDesktopPreferences(userId?: string) {
       setPreferences(data)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { preferences, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { preferences, isLoading, refresh: loadData }
 }
 
 export function useRecentApps(userId?: string, options?: { limit?: number }) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -176,14 +176,14 @@ export function useRecentApps(userId?: string, options?: { limit?: number }) {
       setApps(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { apps, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { apps, isLoading, refresh: loadData }
 }
 
 export function useFrequentApps(userId?: string, options?: { limit?: number }) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -192,8 +192,8 @@ export function useFrequentApps(userId?: string, options?: { limit?: number }) {
       setApps(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { apps, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { apps, isLoading, refresh: loadData }
 }
 
 export function useAppSearch(userId: string, searchTerm: string) {

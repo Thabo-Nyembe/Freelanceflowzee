@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useFlag(flagId?: string) {
   const [flag, setFlag] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!flagId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,15 +19,15 @@ export function useFlag(flagId?: string) {
       setFlag(data)
     } finally { setIsLoading(false) }
   }, [flagId])
-  useEffect(() => { fetch() }, [fetch])
-  return { flag, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { flag, isLoading, refresh: loadData }
 }
 
 export function useFlagByKey(flagKey?: string) {
   const [flag, setFlag] = useState<any>(null)
   const [isEnabled, setIsEnabled] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!flagKey) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useFlagByKey(flagKey?: string) {
       setIsEnabled(data?.is_enabled ?? false)
     } finally { setIsLoading(false) }
   }, [flagKey])
-  useEffect(() => { fetch() }, [fetch])
-  return { flag, isEnabled, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { flag, isEnabled, isLoading, refresh: loadData }
 }
 
 export function useFlags(options?: { environment?: string; isEnabled?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -55,8 +55,8 @@ export function useFlags(options?: { environment?: string; isEnabled?: boolean }
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.environment, options?.isEnabled])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useFlagEvaluation(flagKey?: string, context?: Record<string, any>) {

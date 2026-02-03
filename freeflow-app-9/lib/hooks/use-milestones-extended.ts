@@ -24,7 +24,7 @@ function isDemoModeEnabled(): boolean {
 export function useMilestone(milestoneId?: string) {
   const [milestone, setMilestone] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -33,14 +33,14 @@ export function useMilestone(milestoneId?: string) {
     setIsLoading(true)
     try { const { data } = await supabase.from('milestones').select('*, milestone_tasks(*), milestone_dependencies(*), milestone_updates(*)').eq('id', milestoneId).single(); setMilestone(data) } finally { setIsLoading(false) }
   }, [milestoneId])
-  useEffect(() => { fetch() }, [fetch])
-  return { milestone, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { milestone, isLoading, refresh: loadData }
 }
 
 export function useMilestones(projectId?: string, options?: { status?: string; owner_id?: string; priority?: string; limit?: number }) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -56,14 +56,14 @@ export function useMilestones(projectId?: string, options?: { status?: string; o
       setMilestones(data || [])
     } finally { setIsLoading(false) }
   }, [projectId, options?.status, options?.owner_id, options?.priority, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { milestones, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { milestones, isLoading, refresh: loadData }
 }
 
 export function useMilestoneTasks(milestoneId?: string, options?: { status?: string; assignee_id?: string }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -78,14 +78,14 @@ export function useMilestoneTasks(milestoneId?: string, options?: { status?: str
       setTasks(data || [])
     } finally { setIsLoading(false) }
   }, [milestoneId, options?.status, options?.assignee_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { tasks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tasks, isLoading, refresh: loadData }
 }
 
 export function useMilestoneDependencies(milestoneId?: string) {
   const [dependencies, setDependencies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -94,14 +94,14 @@ export function useMilestoneDependencies(milestoneId?: string) {
     setIsLoading(true)
     try { const { data } = await supabase.from('milestone_dependencies').select('*, milestones!depends_on_id(*)').eq('milestone_id', milestoneId); setDependencies(data || []) } finally { setIsLoading(false) }
   }, [milestoneId])
-  useEffect(() => { fetch() }, [fetch])
-  return { dependencies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { dependencies, isLoading, refresh: loadData }
 }
 
 export function useMilestoneProgress(milestoneId?: string, options?: { limit?: number }) {
   const [progress, setProgress] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -110,14 +110,14 @@ export function useMilestoneProgress(milestoneId?: string, options?: { limit?: n
     setIsLoading(true)
     try { const { data } = await supabase.from('milestone_progress').select('*').eq('milestone_id', milestoneId).order('recorded_at', { ascending: false }).limit(options?.limit || 50); setProgress(data || []) } finally { setIsLoading(false) }
   }, [milestoneId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { progress, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { progress, isLoading, refresh: loadData }
 }
 
 export function useMilestoneUpdates(milestoneId?: string, options?: { limit?: number }) {
   const [updates, setUpdates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -126,14 +126,14 @@ export function useMilestoneUpdates(milestoneId?: string, options?: { limit?: nu
     setIsLoading(true)
     try { const { data } = await supabase.from('milestone_updates').select('*').eq('milestone_id', milestoneId).order('created_at', { ascending: false }).limit(options?.limit || 20); setUpdates(data || []) } finally { setIsLoading(false) }
   }, [milestoneId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { updates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { updates, isLoading, refresh: loadData }
 }
 
 export function useUpcomingMilestones(projectId?: string, options?: { days?: number; limit?: number }) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -148,14 +148,14 @@ export function useUpcomingMilestones(projectId?: string, options?: { days?: num
       setMilestones(data || [])
     } finally { setIsLoading(false) }
   }, [projectId, options?.days, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { milestones, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { milestones, isLoading, refresh: loadData }
 }
 
 export function useOverdueMilestones(projectId?: string) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -164,14 +164,14 @@ export function useOverdueMilestones(projectId?: string) {
     setIsLoading(true)
     try { const { data } = await supabase.from('milestones').select('*, milestone_tasks(*)').eq('project_id', projectId).in('status', ['pending', 'in_progress']).lt('due_date', new Date().toISOString()).order('due_date', { ascending: true }); setMilestones(data || []) } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { milestones, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { milestones, isLoading, refresh: loadData }
 }
 
 export function useProjectMilestoneStats(projectId?: string) {
   const [stats, setStats] = useState<{ total: number; completed: number; inProgress: number; pending: number; overdue: number; avgProgress: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -190,6 +190,6 @@ export function useProjectMilestoneStats(projectId?: string) {
       setStats({ total, completed, inProgress, pending, overdue, avgProgress })
     } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

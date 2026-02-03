@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useBulkOperation(operationId?: string) {
   const [operation, setOperation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!operationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useBulkOperation(operationId?: string) {
       setOperation(data)
     } finally { setIsLoading(false) }
   }, [operationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { operation, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { operation, isLoading, refresh: loadData }
 }
 
 export function useBulkOperations(options?: { operationType?: string; entityType?: string; status?: string; userId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useBulkOperations(options?: { operationType?: string; entityType
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.operationType, options?.entityType, options?.status, options?.userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBulkOperationLogs(operationId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!operationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useBulkOperationLogs(operationId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [operationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBulkOperationProgress(operationId?: string) {
   const [progress, setProgress] = useState<{ total: number; success: number; failure: number; percentage: number }>({ total: 0, success: 0, failure: 0, percentage: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!operationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -75,6 +75,6 @@ export function useBulkOperationProgress(operationId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [operationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { progress, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { progress, isLoading, refresh: loadData }
 }

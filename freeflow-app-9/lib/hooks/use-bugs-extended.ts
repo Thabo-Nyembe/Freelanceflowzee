@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useBug(bugId?: string) {
   const [bug, setBug] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!bugId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('bugs').select('*, bug_comments(*), bug_attachments(*)').eq('id', bugId).single(); setBug(data) } finally { setIsLoading(false) }
   }, [bugId])
-  useEffect(() => { fetch() }, [fetch])
-  return { bug, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { bug, isLoading, refresh: loadData }
 }
 
 export function useBugs(options?: { project_id?: string; reporter_id?: string; assignee_id?: string; status?: string; severity?: string; limit?: number }) {
   const [bugs, setBugs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,27 +38,27 @@ export function useBugs(options?: { project_id?: string; reporter_id?: string; a
       setBugs(data || [])
     } finally { setIsLoading(false) }
   }, [options?.project_id, options?.reporter_id, options?.assignee_id, options?.status, options?.severity, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { bugs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { bugs, isLoading, refresh: loadData }
 }
 
 export function useBugComments(bugId?: string) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!bugId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('bug_comments').select('*').eq('bug_id', bugId).order('created_at', { ascending: true }); setComments(data || []) } finally { setIsLoading(false) }
   }, [bugId])
-  useEffect(() => { fetch() }, [fetch])
-  return { comments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comments, isLoading, refresh: loadData }
 }
 
 export function useOpenBugs(projectId?: string) {
   const [bugs, setBugs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -68,27 +68,27 @@ export function useOpenBugs(projectId?: string) {
       setBugs(data || [])
     } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { bugs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { bugs, isLoading, refresh: loadData }
 }
 
 export function useMyAssignedBugs(userId?: string) {
   const [bugs, setBugs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('bugs').select('*').eq('assignee_id', userId).neq('status', 'closed').order('priority', { ascending: true }); setBugs(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { bugs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { bugs, isLoading, refresh: loadData }
 }
 
 export function useBugStats(projectId?: string) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; bySeverity: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -102,8 +102,8 @@ export function useBugStats(projectId?: string) {
       setStats({ total, byStatus, bySeverity })
     } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useBugCommentsRealtime(bugId?: string) {

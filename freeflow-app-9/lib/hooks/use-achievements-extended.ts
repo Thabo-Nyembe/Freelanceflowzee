@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useAchievement(achievementId?: string) {
   const [achievement, setAchievement] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!achievementId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useAchievement(achievementId?: string) {
       setAchievement(data)
     } finally { setIsLoading(false) }
   }, [achievementId])
-  useEffect(() => { fetch() }, [fetch])
-  return { achievement, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { achievement, isLoading, refresh: loadData }
 }
 
 export function useAchievements(options?: { category?: string; isActive?: boolean; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,15 +38,15 @@ export function useAchievements(options?: { category?: string; isActive?: boolea
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.isActive, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useUserAchievements(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [totalPoints, setTotalPoints] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -57,14 +57,14 @@ export function useUserAchievements(userId?: string) {
       setTotalPoints(points)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, totalPoints, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, totalPoints, isLoading, refresh: loadData }
 }
 
 export function useAchievementProgress(userId?: string, achievementId?: string) {
   const [progress, setProgress] = useState<{ isEarned: boolean; requirements: any } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !achievementId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -76,14 +76,14 @@ export function useAchievementProgress(userId?: string, achievementId?: string) 
       setProgress({ isEarned: !!earnedRes.data, requirements: achievementRes.data?.requirements })
     } finally { setIsLoading(false) }
   }, [userId, achievementId])
-  useEffect(() => { fetch() }, [fetch])
-  return { progress, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { progress, isLoading, refresh: loadData }
 }
 
 export function useAchievementsByCategory() {
   const [categories, setCategories] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -97,14 +97,14 @@ export function useAchievementsByCategory() {
       setCategories(grouped)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useRecentAchievements(userId?: string, limit?: number) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -113,8 +113,8 @@ export function useRecentAchievements(userId?: string, limit?: number) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAchievementsRealtime(userId?: string) {

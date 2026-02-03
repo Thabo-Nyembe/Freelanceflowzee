@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useAutomationWorkflow(workflowId?: string) {
   const [workflow, setWorkflow] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!workflowId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('automation_workflows').select('*, automation_triggers(*), automation_actions(*)').eq('id', workflowId).single(); setWorkflow(data) } finally { setIsLoading(false) }
   }, [workflowId])
-  useEffect(() => { fetch() }, [fetch])
-  return { workflow, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { workflow, isLoading, refresh: loadData }
 }
 
 export function useAutomationWorkflows(options?: { user_id?: string; is_active?: boolean; limit?: number }) {
   const [workflows, setWorkflows] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -35,27 +35,27 @@ export function useAutomationWorkflows(options?: { user_id?: string; is_active?:
       setWorkflows(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { workflows, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { workflows, isLoading, refresh: loadData }
 }
 
 export function useActiveAutomations(userId?: string) {
   const [workflows, setWorkflows] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('automation_workflows').select('*').eq('user_id', userId).eq('is_active', true).order('last_run_at', { ascending: false }); setWorkflows(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { workflows, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { workflows, isLoading, refresh: loadData }
 }
 
 export function useAutomationLogs(workflowId?: string, options?: { status?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!workflowId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -66,14 +66,14 @@ export function useAutomationLogs(workflowId?: string, options?: { status?: stri
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [workflowId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useAutomationStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; active: number; inactive: number; totalRuns: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -87,14 +87,14 @@ export function useAutomationStats(userId?: string) {
       setStats({ total, active, inactive, totalRuns })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useRecentAutomationRuns(userId?: string, options?: { limit?: number }) {
   const [runs, setRuns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -106,8 +106,8 @@ export function useRecentAutomationRuns(userId?: string, options?: { limit?: num
       setRuns(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { runs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { runs, isLoading, refresh: loadData }
 }
 
 export function useAutomationLogsRealtime(workflowId?: string) {

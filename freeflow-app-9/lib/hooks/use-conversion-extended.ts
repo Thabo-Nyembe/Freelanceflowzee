@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function useConversion(conversionId?: string) {
   const [conversion, setConversion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!conversionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('conversions').select('*, conversion_events(*)').eq('id', conversionId).single(); setConversion(data) } finally { setIsLoading(false) }
   }, [conversionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { conversion, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { conversion, isLoading, refresh: loadData }
 }
 
 export function useConversions(options?: { goal_id?: string; funnel_id?: string; date_from?: string; date_to?: string; limit?: number }) {
   const [conversions, setConversions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -52,14 +52,14 @@ export function useConversions(options?: { goal_id?: string; funnel_id?: string;
       setConversions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.goal_id, options?.funnel_id, options?.date_from, options?.date_to, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { conversions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { conversions, isLoading, refresh: loadData }
 }
 
 export function useConversionGoals(options?: { type?: string; is_active?: boolean }) {
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -71,14 +71,14 @@ export function useConversionGoals(options?: { type?: string; is_active?: boolea
       setGoals(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { goals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { goals, isLoading, refresh: loadData }
 }
 
 export function useConversionFunnels(options?: { is_active?: boolean }) {
   const [funnels, setFunnels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -89,14 +89,14 @@ export function useConversionFunnels(options?: { is_active?: boolean }) {
       setFunnels(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { funnels, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { funnels, isLoading, refresh: loadData }
 }
 
 export function useConversionRate(goalId?: string, options?: { date_from?: string; date_to?: string }) {
   const [rate, setRate] = useState<{ conversions: number; target: number; rate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!goalId) { setIsLoading(false); return }
@@ -111,14 +111,14 @@ export function useConversionRate(goalId?: string, options?: { date_from?: strin
       setRate({ conversions: conversions || 0, target: goal?.target_value || 0, rate: rateValue })
     } finally { setIsLoading(false) }
   }, [goalId, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { rate, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rate, isLoading, refresh: loadData }
 }
 
 export function useFunnelAnalysis(funnelId?: string, options?: { date_from?: string; date_to?: string }) {
   const [analysis, setAnalysis] = useState<{ steps: { name: string; count: number; dropoff: number }[] } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!funnelId) { setIsLoading(false); return }
@@ -140,14 +140,14 @@ export function useFunnelAnalysis(funnelId?: string, options?: { date_from?: str
       setAnalysis({ steps })
     } finally { setIsLoading(false) }
   }, [funnelId, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { analysis, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { analysis, isLoading, refresh: loadData }
 }
 
 export function useConversionStats(options?: { date_from?: string; date_to?: string }) {
   const [stats, setStats] = useState<{ total: number; totalValue: number; byGoal: Record<string, number>; bySource: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -164,6 +164,6 @@ export function useConversionStats(options?: { date_from?: string; date_to?: str
       setStats({ total, totalValue, byGoal, bySource })
     } finally { setIsLoading(false) }
   }, [options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

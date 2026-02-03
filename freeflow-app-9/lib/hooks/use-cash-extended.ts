@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useCashAccount(accountId?: string) {
   const [account, setAccount] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!accountId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cash_accounts').select('*').eq('id', accountId).single(); setAccount(data) } finally { setIsLoading(false) }
   }, [accountId])
-  useEffect(() => { fetch() }, [fetch])
-  return { account, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { account, isLoading, refresh: loadData }
 }
 
 export function useCashAccounts(options?: { user_id?: string; type?: string; is_active?: boolean }) {
   const [accounts, setAccounts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useCashAccounts(options?: { user_id?: string; type?: string; is_
       setAccounts(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { accounts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { accounts, isLoading, refresh: loadData }
 }
 
 export function useCashTransactions(accountId?: string, options?: { type?: string; date_from?: string; date_to?: string; limit?: number }) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!accountId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,14 +56,14 @@ export function useCashTransactions(accountId?: string, options?: { type?: strin
       setTransactions(data || [])
     } finally { setIsLoading(false) }
   }, [accountId, options?.type, options?.date_from, options?.date_to, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { transactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transactions, isLoading, refresh: loadData }
 }
 
 export function useCashFlow(userId?: string, options?: { date_from?: string; date_to?: string }) {
   const [cashFlow, setCashFlow] = useState<{ inflow: number; outflow: number; net: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -79,14 +79,14 @@ export function useCashFlow(userId?: string, options?: { date_from?: string; dat
       setCashFlow({ inflow, outflow, net: inflow - outflow })
     } finally { setIsLoading(false) }
   }, [userId, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { cashFlow, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { cashFlow, isLoading, refresh: loadData }
 }
 
 export function useTotalCashBalance(userId?: string) {
   const [balance, setBalance] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -96,14 +96,14 @@ export function useTotalCashBalance(userId?: string) {
       setBalance(total)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { balance, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { balance, isLoading, refresh: loadData }
 }
 
 export function useCashForecasts(userId?: string, options?: { date_from?: string; date_to?: string }) {
   const [forecasts, setForecasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -115,6 +115,6 @@ export function useCashForecasts(userId?: string, options?: { date_from?: string
       setForecasts(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { forecasts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { forecasts, isLoading, refresh: loadData }
 }

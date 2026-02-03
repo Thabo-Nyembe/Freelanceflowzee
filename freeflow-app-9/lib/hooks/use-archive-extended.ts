@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useArchives(userId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function useArchives(userId?: string, entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useArchiveById(archiveId?: string) {
   const [archive, setArchive] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!archiveId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useArchiveById(archiveId?: string) {
       setArchive(data)
     } finally { setIsLoading(false) }
   }, [archiveId])
-  useEffect(() => { fetch() }, [fetch])
-  return { archive, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { archive, isLoading, refresh: loadData }
 }
 
 export function useArchiveStats(entityType?: string) {
   const [stats, setStats] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -61,6 +61,6 @@ export function useArchiveStats(entityType?: string) {
       setStats(result)
     } finally { setIsLoading(false) }
   }, [entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

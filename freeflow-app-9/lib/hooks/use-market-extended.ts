@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useMarket(marketId?: string) {
   const [market, setMarket] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadMarket = useCallback(async () => {
   const supabase = createClient()
     if (!marketId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('markets').select('*').eq('id', marketId).single(); setMarket(data) } finally { setIsLoading(false) }
   }, [marketId])
-  useEffect(() => { fetch() }, [fetch])
-  return { market, isLoading, refresh: fetch }
+  useEffect(() => { loadMarket() }, [loadMarket])
+  return { market, isLoading, refresh: loadMarket }
 }
 
 export function useMarkets(options?: { type?: string; region?: string; is_active?: boolean; limit?: number }) {
   const [markets, setMarkets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadMarkets = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useMarkets(options?: { type?: string; region?: string; is_active
       setMarkets(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.region, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { markets, isLoading, refresh: fetch }
+  useEffect(() => { loadMarkets() }, [loadMarkets])
+  return { markets, isLoading, refresh: loadMarkets }
 }
 
 export function useMarketData(marketId?: string, options?: { date_from?: string; date_to?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!marketId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useMarketData(marketId?: string, options?: { date_from?: string;
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [marketId, options?.date_from, options?.date_to, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMarketTrends(options?: { market_id?: string; type?: string; limit?: number }) {
   const [trends, setTrends] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadTrends = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -73,18 +73,18 @@ export function useMarketTrends(options?: { market_id?: string; type?: string; l
       setTrends(data || [])
     } finally { setIsLoading(false) }
   }, [options?.market_id, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { trends, isLoading, refresh: fetch }
+  useEffect(() => { loadTrends() }, [loadTrends])
+  return { trends, isLoading, refresh: loadTrends }
 }
 
 export function useActiveMarkets() {
   const [markets, setMarkets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadActiveMarkets = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('markets').select('*').eq('is_active', true).order('name', { ascending: true }); setMarkets(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { markets, isLoading, refresh: fetch }
+  useEffect(() => { loadActiveMarkets() }, [loadActiveMarkets])
+  return { markets, isLoading, refresh: loadActiveMarkets }
 }

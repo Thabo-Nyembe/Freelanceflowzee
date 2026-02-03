@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useInstalledApp(installId?: string) {
   const [app, setApp] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!installId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('installed_apps').select('*').eq('id', installId).single(); setApp(data) } finally { setIsLoading(false) }
   }, [installId])
-  useEffect(() => { fetch() }, [fetch])
-  return { app, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { app, isLoading, refresh: loadData }
 }
 
 export function useInstalledApps(userId?: string, options?: { is_active?: boolean; limit?: number }) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function useInstalledApps(userId?: string, options?: { is_active?: boolea
       setApps(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { apps, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { apps, isLoading, refresh: loadData }
 }
 
 export function useInstalledPlugins(userId?: string, options?: { is_active?: boolean; limit?: number }) {
   const [plugins, setPlugins] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,14 +53,14 @@ export function useInstalledPlugins(userId?: string, options?: { is_active?: boo
       setPlugins(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { plugins, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plugins, isLoading, refresh: loadData }
 }
 
 export function useInstalledExtensions(userId?: string, options?: { is_active?: boolean; limit?: number }) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -71,32 +71,32 @@ export function useInstalledExtensions(userId?: string, options?: { is_active?: 
       setExtensions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { extensions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extensions, isLoading, refresh: loadData }
 }
 
 export function useInstalledThemes(userId?: string) {
   const [themes, setThemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('installed_themes').select('*').eq('user_id', userId).order('installed_at', { ascending: false }); setThemes(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { themes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { themes, isLoading, refresh: loadData }
 }
 
 export function useActiveApps(userId?: string) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('installed_apps').select('*').eq('user_id', userId).eq('is_active', true).order('installed_at', { ascending: false }); setApps(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { apps, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { apps, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function usePolicy(policyId?: string) {
   const [policy, setPolicy] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!policyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('policies').select('*, policy_versions(*), policy_categories(*), policy_attachments(*)').eq('id', policyId).single(); setPolicy(data) } finally { setIsLoading(false) }
   }, [policyId])
-  useEffect(() => { fetch() }, [fetch])
-  return { policy, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { policy, isLoading, refresh: loadData }
 }
 
 export function usePolicies(options?: { organization_id?: string; category_id?: string; status?: string; requires_acknowledgment?: boolean; search?: string; limit?: number }) {
   const [policies, setPolicies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,54 +38,54 @@ export function usePolicies(options?: { organization_id?: string; category_id?: 
       setPolicies(data || [])
     } finally { setIsLoading(false) }
   }, [options?.organization_id, options?.category_id, options?.status, options?.requires_acknowledgment, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { policies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { policies, isLoading, refresh: loadData }
 }
 
 export function usePolicyVersions(policyId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!policyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('policy_versions').select('*').eq('policy_id', policyId).order('version', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
   }, [policyId])
-  useEffect(() => { fetch() }, [fetch])
-  return { versions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { versions, isLoading, refresh: loadData }
 }
 
 export function usePolicyAcknowledgments(policyId?: string, options?: { limit?: number }) {
   const [acknowledgments, setAcknowledgments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!policyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('policy_acknowledgments').select('*, users(*)').eq('policy_id', policyId).order('acknowledged_at', { ascending: false }).limit(options?.limit || 100); setAcknowledgments(data || []) } finally { setIsLoading(false) }
   }, [policyId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { acknowledgments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { acknowledgments, isLoading, refresh: loadData }
 }
 
 export function useUserAcknowledgments(userId?: string) {
   const [acknowledgments, setAcknowledgments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('policy_acknowledgments').select('*, policies(*)').eq('user_id', userId).order('acknowledged_at', { ascending: false }); setAcknowledgments(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { acknowledgments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { acknowledgments, isLoading, refresh: loadData }
 }
 
 export function useHasAcknowledged(policyId?: string, userId?: string) {
   const [hasAcknowledged, setHasAcknowledged] = useState(false)
   const [acknowledgment, setAcknowledgment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!policyId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -96,14 +96,14 @@ export function useHasAcknowledged(policyId?: string, userId?: string) {
       setAcknowledgment(data)
     } finally { setIsLoading(false) }
   }, [policyId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { hasAcknowledged, acknowledgment, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { hasAcknowledged, acknowledgment, isLoading, refresh: loadData }
 }
 
 export function usePolicyCategories(organizationId?: string) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -113,40 +113,40 @@ export function usePolicyCategories(organizationId?: string) {
       setCategories(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function usePolicyAttachments(policyId?: string) {
   const [attachments, setAttachments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!policyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('policy_attachments').select('*').eq('policy_id', policyId).order('uploaded_at', { ascending: false }); setAttachments(data || []) } finally { setIsLoading(false) }
   }, [policyId])
-  useEffect(() => { fetch() }, [fetch])
-  return { attachments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { attachments, isLoading, refresh: loadData }
 }
 
 export function usePolicyExceptions(policyId?: string) {
   const [exceptions, setExceptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!policyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('policy_exceptions').select('*, users(*)').eq('policy_id', policyId).eq('status', 'active').order('created_at', { ascending: false }); setExceptions(data || []) } finally { setIsLoading(false) }
   }, [policyId])
-  useEffect(() => { fetch() }, [fetch])
-  return { exceptions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { exceptions, isLoading, refresh: loadData }
 }
 
 export function usePendingAcknowledgments(userId?: string, organizationId?: string) {
   const [policies, setPolicies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -160,14 +160,14 @@ export function usePendingAcknowledgments(userId?: string, organizationId?: stri
       setPolicies(pending)
     } finally { setIsLoading(false) }
   }, [userId, organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { policies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { policies, isLoading, refresh: loadData }
 }
 
 export function usePoliciesNeedingReview(organizationId?: string) {
   const [policies, setPolicies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -177,6 +177,6 @@ export function usePoliciesNeedingReview(organizationId?: string) {
       setPolicies(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { policies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { policies, isLoading, refresh: loadData }
 }

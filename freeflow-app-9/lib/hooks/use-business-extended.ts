@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useBusinessProfile(profileId?: string) {
   const [profile, setProfile] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!profileId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useBusinessProfile(profileId?: string) {
       setProfile(data)
     } finally { setIsLoading(false) }
   }, [profileId])
-  useEffect(() => { fetch() }, [fetch])
-  return { profile, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { profile, isLoading, refresh: loadData }
 }
 
 export function useUserBusinessProfiles(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -36,14 +36,14 @@ export function useUserBusinessProfiles(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useVerifiedBusinessProfiles(options?: { industry?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -53,14 +53,14 @@ export function useVerifiedBusinessProfiles(options?: { industry?: string; limit
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.industry, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBusinessSettings(businessId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!businessId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,14 +69,14 @@ export function useBusinessSettings(businessId?: string) {
       setSettings(data)
     } finally { setIsLoading(false) }
   }, [businessId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function useBusinessHours(businessId?: string) {
   const [hours, setHours] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!businessId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -85,8 +85,8 @@ export function useBusinessHours(businessId?: string) {
       setHours(data || [])
     } finally { setIsLoading(false) }
   }, [businessId])
-  useEffect(() => { fetch() }, [fetch])
-  return { hours, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { hours, isLoading, refresh: loadData }
 }
 
 export function useIsBusinessOpen(businessId?: string) {
@@ -121,7 +121,7 @@ export function useIsBusinessOpen(businessId?: string) {
 export function useBusinessReports(businessId?: string, options?: { report_type?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!businessId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -132,14 +132,14 @@ export function useBusinessReports(businessId?: string, options?: { report_type?
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [businessId, options?.report_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBusinessReport(reportId?: string) {
   const [report, setReport] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!reportId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -148,8 +148,8 @@ export function useBusinessReport(reportId?: string) {
       setReport(data)
     } finally { setIsLoading(false) }
   }, [reportId])
-  useEffect(() => { fetch() }, [fetch])
-  return { report, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { report, isLoading, refresh: loadData }
 }
 
 export function useBusinessSearch(searchTerm: string, options?: { industry?: string; business_type?: string; verified_only?: boolean; limit?: number }) {
@@ -178,7 +178,7 @@ export function useBusinessSearch(searchTerm: string, options?: { industry?: str
 export function useBusinessStats(businessId?: string) {
   const [stats, setStats] = useState<{ profile: any; reportsCount: number; isVerified: boolean; status: string; createdAt: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!businessId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -198,14 +198,14 @@ export function useBusinessStats(businessId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [businessId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useBusinessIndustries() {
   const [industries, setIndustries] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -214,6 +214,6 @@ export function useBusinessIndustries() {
       setIndustries(uniqueIndustries)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { industries, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { industries, isLoading, refresh: loadData }
 }

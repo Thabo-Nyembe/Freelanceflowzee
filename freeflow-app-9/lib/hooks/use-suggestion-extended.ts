@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useSuggestion(suggestionId?: string) {
   const [suggestion, setSuggestion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!suggestionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useSuggestion(suggestionId?: string) {
       setSuggestion(data)
     } finally { setIsLoading(false) }
   }, [suggestionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { suggestion, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { suggestion, isLoading, refresh: loadData }
 }
 
 export function useSuggestions(options?: { user_id?: string; type?: string; status?: string; target_id?: string; target_type?: string; limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -41,14 +41,14 @@ export function useSuggestions(options?: { user_id?: string; type?: string; stat
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.status, options?.target_id, options?.target_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { suggestions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { suggestions, isLoading, refresh: loadData }
 }
 
 export function usePendingSuggestions(userId?: string, options?: { type?: string; limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -59,14 +59,14 @@ export function usePendingSuggestions(userId?: string, options?: { type?: string
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { suggestions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { suggestions, isLoading, refresh: loadData }
 }
 
 export function useTopSuggestions(userId?: string, options?: { type?: string; limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -77,14 +77,14 @@ export function useTopSuggestions(userId?: string, options?: { type?: string; li
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { suggestions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { suggestions, isLoading, refresh: loadData }
 }
 
 export function useSuggestionsByType(userId?: string, type?: string, options?: { status?: string; limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !type) { setIsLoading(false); return }
     setIsLoading(true)
@@ -95,14 +95,14 @@ export function useSuggestionsByType(userId?: string, type?: string, options?: {
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { suggestions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { suggestions, isLoading, refresh: loadData }
 }
 
 export function useSuggestionStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; byType: Record<string, number>; byStatus: Record<string, number>; acceptanceRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -117,14 +117,14 @@ export function useSuggestionStats(userId?: string) {
       setStats({ total, byType, byStatus, acceptanceRate })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useSuggestionTypes(userId?: string) {
   const [types, setTypes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -134,14 +134,14 @@ export function useSuggestionTypes(userId?: string) {
       setTypes(uniqueTypes)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useAcceptedSuggestions(userId?: string, options?: { type?: string; limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -152,8 +152,8 @@ export function useAcceptedSuggestions(userId?: string, options?: { type?: strin
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { suggestions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { suggestions, isLoading, refresh: loadData }
 }
 
 export function useSuggestionsRealtime(userId?: string) {
@@ -186,7 +186,7 @@ export function useSuggestionsRealtime(userId?: string) {
 export function useSuggestionCount(userId?: string, options?: { type?: string; status?: string }) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -198,14 +198,14 @@ export function useSuggestionCount(userId?: string, options?: { type?: string; s
       setCount(total || 0)
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useRelatedSuggestions(suggestionId?: string, options?: { limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!suggestionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -216,6 +216,6 @@ export function useRelatedSuggestions(suggestionId?: string, options?: { limit?:
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
   }, [suggestionId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { suggestions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { suggestions, isLoading, refresh: loadData }
 }

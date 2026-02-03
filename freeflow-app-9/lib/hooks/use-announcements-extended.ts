@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function useAnnouncement(announcementId?: string) {
   const [announcement, setAnnouncement] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!announcementId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('announcements').select('*').eq('id', announcementId).single(); setAnnouncement(data) } finally { setIsLoading(false) }
   }, [announcementId])
-  useEffect(() => { fetch() }, [fetch])
-  return { announcement, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { announcement, isLoading, refresh: loadData }
 }
 
 export function useAnnouncements(options?: { user_id?: string; type?: string; status?: string; priority?: string; is_pinned?: boolean; limit?: number }) {
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -53,14 +53,14 @@ export function useAnnouncements(options?: { user_id?: string; type?: string; st
       setAnnouncements(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.status, options?.priority, options?.is_pinned, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { announcements, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { announcements, isLoading, refresh: loadData }
 }
 
 export function useActiveAnnouncements(options?: { target_audience?: string; limit?: number }) {
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -77,27 +77,27 @@ export function useActiveAnnouncements(options?: { target_audience?: string; lim
       setAnnouncements(filtered)
     } finally { setIsLoading(false) }
   }, [options?.target_audience, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { announcements, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { announcements, isLoading, refresh: loadData }
 }
 
 export function usePinnedAnnouncements(options?: { limit?: number }) {
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('announcements').select('*').eq('status', 'published').eq('is_pinned', true).order('created_at', { ascending: false }).limit(options?.limit || 10); setAnnouncements(data || []) } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { announcements, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { announcements, isLoading, refresh: loadData }
 }
 
 export function useUnreadAnnouncementCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -109,8 +109,8 @@ export function useUnreadAnnouncementCount(userId?: string) {
       setCount(Math.max(0, (total || 0) - readList.length))
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useAnnouncementsRealtime() {

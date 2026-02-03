@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useProvider(providerId?: string) {
   const [provider, setProvider] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('providers').select('*, provider_services(*)').eq('id', providerId).single(); setProvider(data) } finally { setIsLoading(false) }
   }, [providerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { provider, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { provider, isLoading, refresh: loadData }
 }
 
 export function useProviders(options?: { type?: string; status?: string; min_rating?: number; limit?: number }) {
   const [providers, setProviders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useProviders(options?: { type?: string; status?: string; min_rat
       setProviders(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.status, options?.min_rating, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { providers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { providers, isLoading, refresh: loadData }
 }
 
 export function useProviderServices(providerId?: string) {
   const [services, setServices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('provider_services').select('*').eq('provider_id', providerId).eq('is_active', true).order('name', { ascending: true }); setServices(data || []) } finally { setIsLoading(false) }
   }, [providerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { services, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { services, isLoading, refresh: loadData }
 }
 
 export function useProviderAvailability(providerId?: string, options?: { date_from?: string; date_to?: string }) {
   const [availability, setAvailability] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -68,27 +68,27 @@ export function useProviderAvailability(providerId?: string, options?: { date_fr
       setAvailability(data || [])
     } finally { setIsLoading(false) }
   }, [providerId, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { availability, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { availability, isLoading, refresh: loadData }
 }
 
 export function useProviderReviews(providerId?: string, options?: { limit?: number }) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('provider_reviews').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(options?.limit || 20); setReviews(data || []) } finally { setIsLoading(false) }
   }, [providerId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reviews, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reviews, isLoading, refresh: loadData }
 }
 
 export function useTopProviders(options?: { type?: string; limit?: number }) {
   const [providers, setProviders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -98,6 +98,6 @@ export function useTopProviders(options?: { type?: string; limit?: number }) {
       setProviders(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { providers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { providers, isLoading, refresh: loadData }
 }

@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useMemo, useRef, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { Loader2 } from 'lucide-react'
 import { useDocuments, useDocumentMutations, type Document, type DocumentType, type DocumentFolder as DBFolder, type DocumentShare, type DocumentVersion, type PermissionLevel } from '@/lib/hooks/use-documents'
 import { useTeam } from '@/lib/hooks/use-team'
@@ -279,10 +279,11 @@ const documentsActivities: { id: string; user: string; action: string; target: s
 
 export default function DocumentsClient({ initialDocuments }: { initialDocuments: Document[] }) {
   // Demo mode detection for investor demos
-  const { data: nextAuthSession, status: sessionStatus } = useSession()
-  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const { userId: currentUserId, userEmail, userName, isDemo, loading: sessionLoading } = useCurrentUser()
+  const sessionStatus = sessionLoading ? "loading" : "authenticated"
+  const isDemoAccount = userEmail === 'alex@freeflow.io' ||
+                        userEmail === 'sarah@freeflow.io' ||
+                        userEmail === 'mike@freeflow.io'
   const isSessionLoading = sessionStatus === 'loading'
 
   // Team and activity data hooks

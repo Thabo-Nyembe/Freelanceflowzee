@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function usePolicy(policyId?: string) {
   const [policy, setPolicy] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!policyId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function usePolicy(policyId?: string) {
       setPolicy(data)
     } finally { setIsLoading(false) }
   }, [policyId])
-  useEffect(() => { fetch() }, [fetch])
-  return { policy, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { policy, isLoading, refresh: loadData }
 }
 
 export function usePolicies(options?: { policyType?: string; resourceType?: string; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function usePolicies(options?: { policyType?: string; resourceType?: stri
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.policyType, options?.resourceType, options?.isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useRolePolicies(roleId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!roleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useRolePolicies(roleId?: string) {
       setData(result?.map(rp => rp.policies) || [])
     } finally { setIsLoading(false) }
   }, [roleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useActivePolicies(resourceType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -71,6 +71,6 @@ export function useActivePolicies(resourceType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [resourceType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

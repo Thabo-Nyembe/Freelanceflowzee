@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useCodeBlock(codeBlockId?: string) {
   const [codeBlock, setCodeBlock] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!codeBlockId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useCodeBlock(codeBlockId?: string) {
       setCodeBlock(data)
     } finally { setIsLoading(false) }
   }, [codeBlockId])
-  useEffect(() => { fetch() }, [fetch])
-  return { codeBlock, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { codeBlock, isLoading, refresh: loadData }
 }
 
 export function useCodeBlocks(options?: { language?: string; entityType?: string; entityId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useCodeBlocks(options?: { language?: string; entityType?: string
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.language, options?.entityType, options?.entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEntityCodeBlocks(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useEntityCodeBlocks(entityType?: string, entityId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCodeBlockComments(codeBlockId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!codeBlockId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -70,14 +70,14 @@ export function useCodeBlockComments(codeBlockId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [codeBlockId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCodeBlocksByLanguage(language?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!language) { setIsLoading(false); return }
     setIsLoading(true)
@@ -86,6 +86,6 @@ export function useCodeBlocksByLanguage(language?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [language])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

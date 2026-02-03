@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useStatus(statusId?: string) {
   const [status, setStatus] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!statusId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('statuses').select('*, status_groups(*), status_transitions(*), status_rules(*)').eq('id', statusId).single(); setStatus(data) } finally { setIsLoading(false) }
   }, [statusId])
-  useEffect(() => { fetch() }, [fetch])
-  return { status, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { status, isLoading, refresh: loadData }
 }
 
 export function useStatuses(options?: { entity_type?: string; group_id?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [statuses, setStatuses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useStatuses(options?: { entity_type?: string; group_id?: string;
       setStatuses(data || [])
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.group_id, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { statuses, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { statuses, isLoading, refresh: loadData }
 }
 
 export function useStatusGroups(options?: { entity_type?: string; is_active?: boolean }) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -55,14 +55,14 @@ export function useStatusGroups(options?: { entity_type?: string; is_active?: bo
       setGroups(data || [])
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { groups, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { groups, isLoading, refresh: loadData }
 }
 
 export function useCurrentStatus(entityType?: string, entityId?: string) {
   const [currentStatus, setCurrentStatus] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -71,14 +71,14 @@ export function useCurrentStatus(entityType?: string, entityId?: string) {
       setCurrentStatus(data?.statuses || null)
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { currentStatus, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { currentStatus, isLoading, refresh: loadData }
 }
 
 export function useStatusHistory(entityType?: string, entityId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -87,14 +87,14 @@ export function useStatusHistory(entityType?: string, entityId?: string, options
       setHistory(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useAvailableTransitions(fromStatusId?: string) {
   const [transitions, setTransitions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!fromStatusId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -103,14 +103,14 @@ export function useAvailableTransitions(fromStatusId?: string) {
       setTransitions(data || [])
     } finally { setIsLoading(false) }
   }, [fromStatusId])
-  useEffect(() => { fetch() }, [fetch])
-  return { transitions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transitions, isLoading, refresh: loadData }
 }
 
 export function useDefaultStatus(entityType?: string) {
   const [defaultStatus, setDefaultStatus] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -119,27 +119,27 @@ export function useDefaultStatus(entityType?: string) {
       setDefaultStatus(data)
     } finally { setIsLoading(false) }
   }, [entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { defaultStatus, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { defaultStatus, isLoading, refresh: loadData }
 }
 
 export function useStatusRules(statusId?: string) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!statusId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('status_rules').select('*').eq('status_id', statusId).order('name', { ascending: true }); setRules(data || []) } finally { setIsLoading(false) }
   }, [statusId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rules, isLoading, refresh: loadData }
 }
 
 export function useStatusesByGroup(entityType?: string) {
   const [groupedStatuses, setGroupedStatuses] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -154,7 +154,7 @@ export function useStatusesByGroup(entityType?: string) {
       setGroupedStatuses(grouped)
     } finally { setIsLoading(false) }
   }, [entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { groupedStatuses, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { groupedStatuses, isLoading, refresh: loadData }
 }
 

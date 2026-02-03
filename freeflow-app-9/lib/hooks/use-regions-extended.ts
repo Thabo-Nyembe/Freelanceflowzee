@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useRegion(regionId?: string) {
   const [region, setRegion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!regionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('regions').select('*, region_settings(*), region_languages(*), region_currencies(*), region_taxes(*), region_shipping(*)').eq('id', regionId).single(); setRegion(data) } finally { setIsLoading(false) }
   }, [regionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { region, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { region, isLoading, refresh: loadData }
 }
 
 export function useRegions(options?: { country_code?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [regions, setRegions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,92 +36,92 @@ export function useRegions(options?: { country_code?: string; is_active?: boolea
       setRegions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.country_code, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { regions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { regions, isLoading, refresh: loadData }
 }
 
 export function useRegionByCode(code?: string) {
   const [region, setRegion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!code) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('regions').select('*, region_settings(*), region_languages(*), region_currencies(*)').eq('code', code.toUpperCase()).single(); setRegion(data) } finally { setIsLoading(false) }
   }, [code])
-  useEffect(() => { fetch() }, [fetch])
-  return { region, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { region, isLoading, refresh: loadData }
 }
 
 export function useRegionLanguages(regionId?: string) {
   const [languages, setLanguages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!regionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('region_languages').select('*').eq('region_id', regionId).order('is_default', { ascending: false }); setLanguages(data || []) } finally { setIsLoading(false) }
   }, [regionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { languages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { languages, isLoading, refresh: loadData }
 }
 
 export function useRegionCurrencies(regionId?: string) {
   const [currencies, setCurrencies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!regionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('region_currencies').select('*').eq('region_id', regionId).order('is_default', { ascending: false }); setCurrencies(data || []) } finally { setIsLoading(false) }
   }, [regionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { currencies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { currencies, isLoading, refresh: loadData }
 }
 
 export function useRegionTaxes(regionId?: string) {
   const [taxes, setTaxes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!regionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('region_taxes').select('*').eq('region_id', regionId).order('name', { ascending: true }); setTaxes(data || []) } finally { setIsLoading(false) }
   }, [regionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { taxes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { taxes, isLoading, refresh: loadData }
 }
 
 export function useRegionShipping(regionId?: string) {
   const [shipping, setShipping] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!regionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('region_shipping').select('*').eq('region_id', regionId).order('name', { ascending: true }); setShipping(data || []) } finally { setIsLoading(false) }
   }, [regionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { shipping, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { shipping, isLoading, refresh: loadData }
 }
 
 export function useRegionSettings(regionId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!regionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('region_settings').select('*').eq('region_id', regionId).single(); setSettings(data) } finally { setIsLoading(false) }
   }, [regionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function useActiveRegions() {
   const [regions, setRegions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -129,14 +129,14 @@ export function useActiveRegions() {
       setRegions(data || [])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { regions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { regions, isLoading, refresh: loadData }
 }
 
 export function useRegionsByCountry(countryCode?: string) {
   const [regions, setRegions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!countryCode) { setIsLoading(false); return }
     setIsLoading(true)
@@ -145,14 +145,14 @@ export function useRegionsByCountry(countryCode?: string) {
       setRegions(data || [])
     } finally { setIsLoading(false) }
   }, [countryCode])
-  useEffect(() => { fetch() }, [fetch])
-  return { regions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { regions, isLoading, refresh: loadData }
 }
 
 export function useAllCurrencies() {
   const [currencies, setCurrencies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -161,6 +161,6 @@ export function useAllCurrencies() {
       setCurrencies(unique || [])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { currencies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { currencies, isLoading, refresh: loadData }
 }

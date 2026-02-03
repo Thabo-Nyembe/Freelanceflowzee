@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useActionHistory(actionId?: string) {
   const [action, setAction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!actionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,15 +20,15 @@ export function useActionHistory(actionId?: string) {
       setAction(data)
     } finally { setIsLoading(false) }
   }, [actionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { action, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { action, isLoading, refresh: loadData }
 }
 
 export function useUserActionHistory(userId?: string, options?: { actionType?: string; entityType?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -41,14 +41,14 @@ export function useUserActionHistory(userId?: string, options?: { actionType?: s
       setTotal(count || 0)
     } finally { setIsLoading(false) }
   }, [userId, options?.actionType, options?.entityType, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, total, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, total, isLoading, refresh: loadData }
 }
 
 export function useEntityActionHistory(entityType?: string, entityId?: string, options?: { limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -57,14 +57,14 @@ export function useEntityActionHistory(entityType?: string, entityId?: string, o
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useRecentActions(options?: { limit?: number; actionTypes?: string[] }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -74,14 +74,14 @@ export function useRecentActions(options?: { limit?: number; actionTypes?: strin
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.limit, options?.actionTypes])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useActionStats(userId?: string, options?: { startDate?: string; endDate?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -98,8 +98,8 @@ export function useActionStats(userId?: string, options?: { startDate?: string; 
       setStats(result)
     } finally { setIsLoading(false) }
   }, [userId, options?.startDate, options?.endDate])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useActionHistoryRealtime(userId?: string) {

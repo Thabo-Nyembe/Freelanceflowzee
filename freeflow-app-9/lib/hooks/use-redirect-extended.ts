@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useRedirect(redirectId?: string) {
   const [redirect, setRedirect] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!redirectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useRedirect(redirectId?: string) {
       setRedirect(data)
     } finally { setIsLoading(false) }
   }, [redirectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { redirect, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { redirect, isLoading, refresh: loadData }
 }
 
 export function useRedirectByPath(path?: string) {
   const [redirect, setRedirect] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!path) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function useRedirectByPath(path?: string) {
       setRedirect(data)
     } finally { setIsLoading(false) }
   }, [path])
-  useEffect(() => { fetch() }, [fetch])
-  return { redirect, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { redirect, isLoading, refresh: loadData }
 }
 
 export function useRedirects(filters?: { userId?: string; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -53,15 +53,15 @@ export function useRedirects(filters?: { userId?: string; isActive?: boolean }) 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [filters?.userId, filters?.isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useRedirectStats(redirectId?: string) {
   const [hitCount, setHitCount] = useState(0)
   const [lastHitAt, setLastHitAt] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!redirectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -73,6 +73,6 @@ export function useRedirectStats(redirectId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [redirectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { hitCount, lastHitAt, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { hitCount, lastHitAt, isLoading, refresh: loadData }
 }

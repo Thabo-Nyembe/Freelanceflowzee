@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function usePublications(userId?: string, entityType?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -22,15 +22,15 @@ export function usePublications(userId?: string, entityType?: string, status?: s
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, entityType, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function usePublicationStatus(entityId?: string, entityType?: string) {
   const [status, setStatus] = useState<string | null>(null)
   const [isPublished, setIsPublished] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -40,14 +40,14 @@ export function usePublicationStatus(entityId?: string, entityType?: string) {
       setIsPublished(data?.status === 'published')
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { status, isPublished, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { status, isPublished, isLoading, refresh: loadData }
 }
 
 export function useScheduledPublications() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -55,6 +55,6 @@ export function useScheduledPublications() {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

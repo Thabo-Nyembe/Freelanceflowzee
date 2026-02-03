@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function useTeam(teamId?: string) {
   const [team, setTeam] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('teams').select('*, team_members(*, users(*)), team_roles(*), team_settings(*)').eq('id', teamId).single(); setTeam(data) } finally { setIsLoading(false) }
   }, [teamId])
-  useEffect(() => { fetch() }, [fetch])
-  return { team, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { team, isLoading, refresh: loadData }
 }
 
 export function useTeams(options?: { team_type?: string; owner_id?: string; is_private?: boolean; search?: string; limit?: number }) {
   const [teams, setTeams] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     setIsLoading(true)
@@ -52,14 +52,14 @@ export function useTeams(options?: { team_type?: string; owner_id?: string; is_p
       setTeams(data || [])
     } finally { setIsLoading(false) }
   }, [options?.team_type, options?.owner_id, options?.is_private, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { teams, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { teams, isLoading, refresh: loadData }
 }
 
 export function useTeamMembers(teamId?: string, options?: { role?: string; is_active?: boolean }) {
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
@@ -72,14 +72,14 @@ export function useTeamMembers(teamId?: string, options?: { role?: string; is_ac
       setMembers(data || [])
     } finally { setIsLoading(false) }
   }, [teamId, options?.role, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { members, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { members, isLoading, refresh: loadData }
 }
 
 export function useUserTeams(userId?: string, options?: { role?: string; is_active?: boolean }) {
   const [teams, setTeams] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -92,14 +92,14 @@ export function useUserTeams(userId?: string, options?: { role?: string; is_acti
       setTeams((data || []).map(m => ({ ...m.teams, membership: m })))
     } finally { setIsLoading(false) }
   }, [userId, options?.role, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { teams, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { teams, isLoading, refresh: loadData }
 }
 
 export function useTeamMembership(teamId?: string, userId?: string) {
   const [membership, setMembership] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId || !userId) { setIsLoading(false); return }
@@ -109,14 +109,14 @@ export function useTeamMembership(teamId?: string, userId?: string) {
       setMembership(data)
     } finally { setIsLoading(false) }
   }, [teamId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { membership, isMember: !!membership, role: membership?.role, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { membership, isMember: !!membership, role: membership?.role, isLoading, refresh: loadData }
 }
 
 export function useTeamInvitations(teamId?: string, options?: { status?: string }) {
   const [invitations, setInvitations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
@@ -134,14 +134,14 @@ export function useTeamInvitations(teamId?: string, options?: { status?: string 
       setInvitations([])
     } finally { setIsLoading(false) }
   }, [teamId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { invitations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { invitations, isLoading, refresh: loadData }
 }
 
 export function useTeamSettings(teamId?: string) {
   const [settings, setSettings] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
@@ -153,14 +153,14 @@ export function useTeamSettings(teamId?: string) {
       setSettings(settingsMap)
     } finally { setIsLoading(false) }
   }, [teamId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function useTeamActivities(teamId?: string, options?: { activity_type?: string; user_id?: string; limit?: number }) {
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
@@ -173,28 +173,28 @@ export function useTeamActivities(teamId?: string, options?: { activity_type?: s
       setActivities(data || [])
     } finally { setIsLoading(false) }
   }, [teamId, options?.activity_type, options?.user_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { activities, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { activities, isLoading, refresh: loadData }
 }
 
 export function useTeamRoles(teamId?: string) {
   const [roles, setRoles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('team_roles').select('*').eq('team_id', teamId).order('name', { ascending: true }); setRoles(data || []) } finally { setIsLoading(false) }
   }, [teamId])
-  useEffect(() => { fetch() }, [fetch])
-  return { roles, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { roles, isLoading, refresh: loadData }
 }
 
 export function useMyPendingInvitations(email?: string) {
   const [invitations, setInvitations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!email) { setIsLoading(false); return }
@@ -204,7 +204,7 @@ export function useMyPendingInvitations(email?: string) {
       setInvitations(data || [])
     } finally { setIsLoading(false) }
   }, [email])
-  useEffect(() => { fetch() }, [fetch])
-  return { invitations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { invitations, isLoading, refresh: loadData }
 }
 

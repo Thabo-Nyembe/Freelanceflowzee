@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useTransfer(transferId?: string) {
   const [transfer, setTransfer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!transferId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,8 +19,8 @@ export function useTransfer(transferId?: string) {
       setTransfer(data)
     } finally { setIsLoading(false) }
   }, [transferId])
-  useEffect(() => { fetch() }, [fetch])
-  return { transfer, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transfer, isLoading, refresh: loadData }
 }
 
 export function useTransferStatus(transferId?: string) {
@@ -61,7 +61,7 @@ export function useTransferStatus(transferId?: string) {
 export function useUserTransfers(userId?: string, options?: { status?: string; direction?: 'sent' | 'received' }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -79,15 +79,15 @@ export function useUserTransfers(userId?: string, options?: { status?: string; d
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.direction])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function usePendingTransfers(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -97,14 +97,14 @@ export function usePendingTransfers(userId?: string) {
       setCount(result?.length || 0)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, count, isLoading, refresh: loadData }
 }
 
 export function useTransferHistory(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -113,6 +113,6 @@ export function useTransferHistory(entityType?: string, entityId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useAddOn(addOnId?: string) {
   const [addOn, setAddOn] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!addOnId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('add_ons').select('*').eq('id', addOnId).single(); setAddOn(data) } finally { setIsLoading(false) }
   }, [addOnId])
-  useEffect(() => { fetch() }, [fetch])
-  return { addOn, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { addOn, isLoading, refresh: loadData }
 }
 
 export function useAddOns(options?: { category?: string; status?: string; pricing_type?: string; search?: string; limit?: number }) {
   const [addOns, setAddOns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,21 +37,21 @@ export function useAddOns(options?: { category?: string; status?: string; pricin
       setAddOns(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.status, options?.pricing_type, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { addOns, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { addOns, isLoading, refresh: loadData }
 }
 
 export function useUserAddOns(userId?: string) {
   const [installations, setInstallations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('add_on_installations').select('*, add_ons(*)').eq('user_id', userId).eq('is_active', true); setInstallations(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { installations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { installations, isLoading, refresh: loadData }
 }
 
 export function useIsAddOnInstalled(userId?: string, addOnId?: string) {
@@ -70,23 +70,23 @@ export function useIsAddOnInstalled(userId?: string, addOnId?: string) {
 export function usePopularAddOns(options?: { limit?: number }) {
   const [addOns, setAddOns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('add_ons').select('*').eq('status', 'published').order('install_count', { ascending: false }).limit(options?.limit || 10); setAddOns(data || []) } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { addOns, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { addOns, isLoading, refresh: loadData }
 }
 
 export function useAddOnCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('add_ons').select('category').eq('status', 'published'); const unique = [...new Set((data || []).map(a => a.category).filter(Boolean))]; setCategories(unique) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }

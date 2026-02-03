@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useAccount(accountId?: string) {
   const [account, setAccount] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!accountId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useAccount(accountId?: string) {
       setAccount(data)
     } finally { setIsLoading(false) }
   }, [accountId])
-  useEffect(() => { fetch() }, [fetch])
-  return { account, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { account, isLoading, refresh: loadData }
 }
 
 export function useAccounts(options?: { accountType?: string; status?: string; ownerId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useAccounts(options?: { accountType?: string; status?: string; o
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.accountType, options?.status, options?.ownerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAccountContacts(accountId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!accountId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useAccountContacts(accountId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [accountId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAccountNotes(accountId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!accountId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -70,14 +70,14 @@ export function useAccountNotes(accountId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [accountId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAccountActivities(accountId?: string, limit = 50) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!accountId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -86,6 +86,6 @@ export function useAccountActivities(accountId?: string, limit = 50) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [accountId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

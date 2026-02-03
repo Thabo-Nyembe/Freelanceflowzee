@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useMetric(metricId?: string) {
   const [metric, setMetric] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!metricId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('metrics').select('*, metric_thresholds(*), metric_alerts(*)').eq('id', metricId).single(); setMetric(data) } finally { setIsLoading(false) }
   }, [metricId])
-  useEffect(() => { fetch() }, [fetch])
-  return { metric, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { metric, isLoading, refresh: loadData }
 }
 
 export function useMetrics(options?: { category?: string; organization_id?: string; is_active?: boolean; limit?: number }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useMetrics(options?: { category?: string; organization_id?: stri
       setMetrics(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.organization_id, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { metrics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { metrics, isLoading, refresh: loadData }
 }
 
 export function useMetricValues(metricId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [values, setValues] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!metricId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,27 +55,27 @@ export function useMetricValues(metricId?: string, options?: { from_date?: strin
       setValues(data || [])
     } finally { setIsLoading(false) }
   }, [metricId, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { values, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { values, isLoading, refresh: loadData }
 }
 
 export function useMetricThresholds(metricId?: string) {
   const [thresholds, setThresholds] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!metricId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('metric_thresholds').select('*').eq('metric_id', metricId).eq('is_active', true); setThresholds(data || []) } finally { setIsLoading(false) }
   }, [metricId])
-  useEffect(() => { fetch() }, [fetch])
-  return { thresholds, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { thresholds, isLoading, refresh: loadData }
 }
 
 export function useMetricAlerts(options?: { metric_id?: string; status?: string; severity?: string; limit?: number }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -87,14 +87,14 @@ export function useMetricAlerts(options?: { metric_id?: string; status?: string;
       setAlerts(data || [])
     } finally { setIsLoading(false) }
   }, [options?.metric_id, options?.status, options?.severity, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useActiveAlerts(organizationId?: string) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -104,14 +104,14 @@ export function useActiveAlerts(organizationId?: string) {
       setAlerts(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useMetricDashboards(userId?: string, options?: { organization_id?: string }) {
   const [dashboards, setDashboards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -122,15 +122,15 @@ export function useMetricDashboards(userId?: string, options?: { organization_id
       setDashboards(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.organization_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { dashboards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { dashboards, isLoading, refresh: loadData }
 }
 
 export function useDashboard(dashboardId?: string) {
   const [dashboard, setDashboard] = useState<any>(null)
   const [widgets, setWidgets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!dashboardId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -143,14 +143,14 @@ export function useDashboard(dashboardId?: string) {
       setWidgets(widgetsRes.data || [])
     } finally { setIsLoading(false) }
   }, [dashboardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { dashboard, widgets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { dashboard, widgets, isLoading, refresh: loadData }
 }
 
 export function useMetricSummary(metricId?: string, options?: { period?: 'day' | 'week' | 'month' }) {
   const [summary, setSummary] = useState<{ current: number; previous: number; change: number; min: number; max: number; avg: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!metricId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -174,6 +174,6 @@ export function useMetricSummary(metricId?: string, options?: { period?: 'day' |
       setSummary({ current: currentSum, previous: previousSum, change, min, max, avg })
     } finally { setIsLoading(false) }
   }, [metricId, options?.period])
-  useEffect(() => { fetch() }, [fetch])
-  return { summary, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { summary, isLoading, refresh: loadData }
 }

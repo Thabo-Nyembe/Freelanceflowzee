@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useDeadline(deadlineId?: string) {
   const [deadline, setDeadline] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!deadlineId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useDeadline(deadlineId?: string) {
       setDeadline(data)
     } finally { setIsLoading(false) }
   }, [deadlineId])
-  useEffect(() => { fetch() }, [fetch])
-  return { deadline, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deadline, isLoading, refresh: loadData }
 }
 
 export function useUserDeadlines(userId?: string, options?: { includeCompleted?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useUserDeadlines(userId?: string, options?: { includeCompleted?:
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.includeCompleted])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useUpcomingDeadlines(userId?: string, days = 7) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -56,15 +56,15 @@ export function useUpcomingDeadlines(userId?: string, days = 7) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, days])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useOverdueDeadlines(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -75,14 +75,14 @@ export function useOverdueDeadlines(userId?: string) {
       setCount(result?.length || 0)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, count, isLoading, refresh: loadData }
 }
 
 export function useEntityDeadlines(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -91,6 +91,6 @@ export function useEntityDeadlines(entityType?: string, entityId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

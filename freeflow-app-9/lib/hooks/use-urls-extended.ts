@@ -11,33 +11,33 @@ import { createClient } from '@/lib/supabase/client'
 export function useUrl(urlId?: string) {
   const [url, setUrl] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!urlId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('urls').select('*, url_groups(*), users(*)').eq('id', urlId).single(); setUrl(data) } finally { setIsLoading(false) }
   }, [urlId])
-  useEffect(() => { fetch() }, [fetch])
-  return { url, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { url, isLoading, refresh: loadData }
 }
 
 export function useUrlByShortCode(shortCode?: string) {
   const [url, setUrl] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!shortCode) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('urls').select('*, url_groups(*)').eq('short_code', shortCode).single(); setUrl(data) } finally { setIsLoading(false) }
   }, [shortCode])
-  useEffect(() => { fetch() }, [fetch])
-  return { url, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { url, isLoading, refresh: loadData }
 }
 
 export function useUrls(options?: { created_by?: string; group_id?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [urls, setUrls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -50,14 +50,14 @@ export function useUrls(options?: { created_by?: string; group_id?: string; is_a
       setUrls(data || [])
     } finally { setIsLoading(false) }
   }, [options?.created_by, options?.group_id, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { urls, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { urls, isLoading, refresh: loadData }
 }
 
 export function useMyUrls(userId?: string, options?: { group_id?: string; is_active?: boolean; limit?: number }) {
   const [urls, setUrls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,14 +69,14 @@ export function useMyUrls(userId?: string, options?: { group_id?: string; is_act
       setUrls(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.group_id, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { urls, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { urls, isLoading, refresh: loadData }
 }
 
 export function useUrlClicks(urlId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [clicks, setClicks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!urlId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -88,14 +88,14 @@ export function useUrlClicks(urlId?: string, options?: { from_date?: string; to_
       setClicks(data || [])
     } finally { setIsLoading(false) }
   }, [urlId, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { clicks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { clicks, isLoading, refresh: loadData }
 }
 
 export function useUrlAnalytics(urlId?: string, options?: { from_date?: string; to_date?: string }) {
   const [analytics, setAnalytics] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!urlId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -124,14 +124,14 @@ export function useUrlAnalytics(urlId?: string, options?: { from_date?: string; 
       })
     } finally { setIsLoading(false) }
   }, [urlId, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { analytics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { analytics, isLoading, refresh: loadData }
 }
 
 export function useUrlGroups(options?: { created_by?: string; is_public?: boolean }) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -142,53 +142,53 @@ export function useUrlGroups(options?: { created_by?: string; is_public?: boolea
       setGroups(data || [])
     } finally { setIsLoading(false) }
   }, [options?.created_by, options?.is_public])
-  useEffect(() => { fetch() }, [fetch])
-  return { groups, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { groups, isLoading, refresh: loadData }
 }
 
 export function useUrlRedirects(urlId?: string) {
   const [redirects, setRedirects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!urlId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('url_redirects').select('*').eq('url_id', urlId).order('priority', { ascending: false }); setRedirects(data || []) } finally { setIsLoading(false) }
   }, [urlId])
-  useEffect(() => { fetch() }, [fetch])
-  return { redirects, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { redirects, isLoading, refresh: loadData }
 }
 
 export function useUrlQrCodes(urlId?: string) {
   const [qrCodes, setQrCodes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!urlId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('url_qr_codes').select('*').eq('url_id', urlId).order('created_at', { ascending: false }); setQrCodes(data || []) } finally { setIsLoading(false) }
   }, [urlId])
-  useEffect(() => { fetch() }, [fetch])
-  return { qrCodes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { qrCodes, isLoading, refresh: loadData }
 }
 
 export function useTopUrls(userId?: string, options?: { limit?: number }) {
   const [urls, setUrls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('urls').select('*').eq('created_by', userId).eq('is_active', true).order('click_count', { ascending: false }).limit(options?.limit || 10); setUrls(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { urls, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { urls, isLoading, refresh: loadData }
 }
 
 export function useRecentUrls(userId?: string, options?: { days?: number; limit?: number }) {
   const [urls, setUrls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -200,27 +200,27 @@ export function useRecentUrls(userId?: string, options?: { days?: number; limit?
       setUrls(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.days, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { urls, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { urls, isLoading, refresh: loadData }
 }
 
 export function useExpiredUrls(userId?: string, options?: { limit?: number }) {
   const [urls, setUrls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('urls').select('*').eq('created_by', userId).lt('expires_at', new Date().toISOString()).order('expires_at', { ascending: false }).limit(options?.limit || 20); setUrls(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { urls, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { urls, isLoading, refresh: loadData }
 }
 
 export function useUrlStats(userId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -236,6 +236,6 @@ export function useUrlStats(userId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

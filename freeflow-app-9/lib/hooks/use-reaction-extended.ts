@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useReactions(itemId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function useReactions(itemId?: string, itemType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [itemId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useReactionCounts(itemId?: string, itemType?: string) {
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,14 +39,14 @@ export function useReactionCounts(itemId?: string, itemType?: string) {
       setCounts(counts)
     } finally { setIsLoading(false) }
   }, [itemId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { counts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { counts, isLoading, refresh: loadData }
 }
 
 export function useUserReaction(userId?: string, itemId?: string, itemType?: string) {
   const [reaction, setReaction] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,6 +55,6 @@ export function useUserReaction(userId?: string, itemId?: string, itemType?: str
       setReaction(data?.reaction_type || null)
     } finally { setIsLoading(false) }
   }, [userId, itemId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { reaction, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reaction, isLoading, refresh: loadData }
 }

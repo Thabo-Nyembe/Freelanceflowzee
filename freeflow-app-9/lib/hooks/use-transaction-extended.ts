@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useTransaction(transactionId?: string) {
   const [transaction, setTransaction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,15 +20,15 @@ export function useTransaction(transactionId?: string) {
       setTransaction(data)
     } finally { setIsLoading(false) }
   }, [transactionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { transaction, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transaction, isLoading, refresh: loadData }
 }
 
 export function useTransactions(userId?: string, options?: { type?: string; status?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -41,14 +41,14 @@ export function useTransactions(userId?: string, options?: { type?: string; stat
       setTotal(count || 0)
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, total, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, total, isLoading, refresh: loadData }
 }
 
 export function useTransactionsByReference(referenceType?: string, referenceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!referenceType || !referenceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -57,14 +57,14 @@ export function useTransactionsByReference(referenceType?: string, referenceId?:
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [referenceType, referenceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTransactionStats(userId?: string, options?: { startDate?: string; endDate?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -83,14 +83,14 @@ export function useTransactionStats(userId?: string, options?: { startDate?: str
       setStats(result)
     } finally { setIsLoading(false) }
   }, [userId, options?.startDate, options?.endDate])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useTransactionFees(transactionId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -99,14 +99,14 @@ export function useTransactionFees(transactionId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [transactionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTransactionWebhooks(transactionId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -115,8 +115,8 @@ export function useTransactionWebhooks(transactionId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [transactionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTransactionsRealtime(userId?: string) {
@@ -139,7 +139,7 @@ export function useTransactionWithDetails(transactionId?: string) {
   const [fees, setFees] = useState<any[]>([])
   const [webhooks, setWebhooks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -154,6 +154,6 @@ export function useTransactionWithDetails(transactionId?: string) {
       setWebhooks(webhooksRes.data || [])
     } finally { setIsLoading(false) }
   }, [transactionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { transaction, fees, webhooks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transaction, fees, webhooks, isLoading, refresh: loadData }
 }

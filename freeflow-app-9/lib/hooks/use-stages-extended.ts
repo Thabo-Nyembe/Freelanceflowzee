@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useStage(stageId?: string) {
   const [stage, setStage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!stageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('stages').select('*, stage_transitions(*), stage_rules(*), stage_automations(*)').eq('id', stageId).single(); setStage(data) } finally { setIsLoading(false) }
   }, [stageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stage, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stage, isLoading, refresh: loadData }
 }
 
 export function useStages(options?: { pipeline_id?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [stages, setStages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useStages(options?: { pipeline_id?: string; is_active?: boolean;
       setStages(data || [])
     } finally { setIsLoading(false) }
   }, [options?.pipeline_id, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { stages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stages, isLoading, refresh: loadData }
 }
 
 export function useStageTransitions(pipelineId?: string) {
   const [transitions, setTransitions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useStageTransitions(pipelineId?: string) {
       setTransitions(data || [])
     } finally { setIsLoading(false) }
   }, [pipelineId])
-  useEffect(() => { fetch() }, [fetch])
-  return { transitions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transitions, isLoading, refresh: loadData }
 }
 
 export function useStageHistory(entityType?: string, entityId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -71,14 +71,14 @@ export function useStageHistory(entityType?: string, entityId?: string, options?
       setHistory(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useCurrentStage(entityType?: string, entityId?: string) {
   const [assignment, setAssignment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -87,14 +87,14 @@ export function useCurrentStage(entityType?: string, entityId?: string) {
       setAssignment(data)
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { assignment, stage: assignment?.stages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { assignment, stage: assignment?.stages, isLoading, refresh: loadData }
 }
 
 export function useAvailableTransitions(stageId?: string) {
   const [transitions, setTransitions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!stageId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -103,14 +103,14 @@ export function useAvailableTransitions(stageId?: string) {
       setTransitions(data || [])
     } finally { setIsLoading(false) }
   }, [stageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { transitions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transitions, isLoading, refresh: loadData }
 }
 
 export function useStageRules(stageId?: string) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!stageId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -119,14 +119,14 @@ export function useStageRules(stageId?: string) {
       setRules(data || [])
     } finally { setIsLoading(false) }
   }, [stageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rules, isLoading, refresh: loadData }
 }
 
 export function usePipelineStats(pipelineId?: string) {
   const [stats, setStats] = useState<{ stages: number; itemsByStage: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -137,7 +137,7 @@ export function usePipelineStats(pipelineId?: string) {
       setStats({ stages: stages?.length || 0, itemsByStage })
     } finally { setIsLoading(false) }
   }, [pipelineId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 

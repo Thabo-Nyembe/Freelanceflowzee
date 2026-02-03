@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useMicroservice(serviceId?: string) {
   const [service, setService] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!serviceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('microservices').select('*').eq('id', serviceId).single(); setService(data) } finally { setIsLoading(false) }
   }, [serviceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { service, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { service, isLoading, refresh: loadData }
 }
 
 export function useMicroservices(options?: { type?: string; status?: string; limit?: number }) {
   const [services, setServices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -35,14 +35,14 @@ export function useMicroservices(options?: { type?: string; status?: string; lim
       setServices(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { services, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { services, isLoading, refresh: loadData }
 }
 
 export function useMicroDeployments(serviceId?: string, options?: { status?: string; limit?: number }) {
   const [deployments, setDeployments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!serviceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,27 +53,27 @@ export function useMicroDeployments(serviceId?: string, options?: { status?: str
       setDeployments(data || [])
     } finally { setIsLoading(false) }
   }, [serviceId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { deployments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deployments, isLoading, refresh: loadData }
 }
 
 export function useMicroEndpoints(serviceId?: string) {
   const [endpoints, setEndpoints] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!serviceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('micro_endpoints').select('*').eq('service_id', serviceId).order('path', { ascending: true }); setEndpoints(data || []) } finally { setIsLoading(false) }
   }, [serviceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { endpoints, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { endpoints, isLoading, refresh: loadData }
 }
 
 export function useMicroLogs(serviceId?: string, options?: { level?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!serviceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -84,18 +84,18 @@ export function useMicroLogs(serviceId?: string, options?: { level?: string; lim
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [serviceId, options?.level, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useRunningMicroservices() {
   const [services, setServices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('microservices').select('*').eq('status', 'running').order('name', { ascending: true }); setServices(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { services, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { services, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useTrend(trendId?: string) {
   const [trend, setTrend] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!trendId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('trends').select('*').eq('id', trendId).single(); setTrend(data) } finally { setIsLoading(false) }
   }, [trendId])
-  useEffect(() => { fetch() }, [fetch])
-  return { trend, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { trend, isLoading, refresh: loadData }
 }
 
 export function useTrends(options?: { metric_type?: string; is_active?: boolean; limit?: number }) {
   const [trends, setTrends] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -35,27 +35,27 @@ export function useTrends(options?: { metric_type?: string; is_active?: boolean;
       setTrends(data || [])
     } finally { setIsLoading(false) }
   }, [options?.metric_type, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { trends, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { trends, isLoading, refresh: loadData }
 }
 
 export function useTrendData(trendId?: string, options?: { days?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!trendId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const since = new Date(); since.setDate(since.getDate() - (options?.days || 30)); const { data: trendData } = await supabase.from('trend_data').select('*').eq('trend_id', trendId).gte('recorded_at', since.toISOString()).order('recorded_at', { ascending: true }); setData(trendData || []) } finally { setIsLoading(false) }
   }, [trendId, options?.days])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTrendAlerts(options?: { trend_id?: string; is_acknowledged?: boolean; limit?: number }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -66,31 +66,31 @@ export function useTrendAlerts(options?: { trend_id?: string; is_acknowledged?: 
       setAlerts(data || [])
     } finally { setIsLoading(false) }
   }, [options?.trend_id, options?.is_acknowledged, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useTrendForecasts(trendId?: string) {
   const [forecasts, setForecasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!trendId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('trend_forecasts').select('*').eq('trend_id', trendId).order('forecast_date', { ascending: true }); setForecasts(data || []) } finally { setIsLoading(false) }
   }, [trendId])
-  useEffect(() => { fetch() }, [fetch])
-  return { forecasts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { forecasts, isLoading, refresh: loadData }
 }
 
 export function useActiveTrends() {
   const [trends, setTrends] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('trends').select('*').eq('is_active', true).order('name', { ascending: true }); setTrends(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { trends, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { trends, isLoading, refresh: loadData }
 }

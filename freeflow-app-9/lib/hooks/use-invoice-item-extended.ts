@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useInvoiceItems(invoiceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!invoiceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useInvoiceItems(invoiceId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [invoiceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useInvoiceItemTotal(invoiceId?: string) {
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!invoiceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,14 +39,14 @@ export function useInvoiceItemTotal(invoiceId?: string) {
       setTotal(sum)
     } finally { setIsLoading(false) }
   }, [invoiceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { total, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { total, isLoading, refresh: loadData }
 }
 
 export function useLineItems(parentId?: string, parentType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -57,6 +57,6 @@ export function useLineItems(parentId?: string, parentType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [parentId, parentType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

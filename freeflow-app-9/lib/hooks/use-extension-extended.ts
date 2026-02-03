@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useExtension(extensionId?: string) {
   const [extension, setExtension] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!extensionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useExtension(extensionId?: string) {
       setExtension(data)
     } finally { setIsLoading(false) }
   }, [extensionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { extension, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extension, isLoading, refresh: loadData }
 }
 
 export function useExtensions(options?: { category?: string; pricing_type?: string; search?: string; limit?: number }) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useExtensions(options?: { category?: string; pricing_type?: stri
       setExtensions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.pricing_type, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { extensions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extensions, isLoading, refresh: loadData }
 }
 
 export function usePopularExtensions(options?: { limit?: number }) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -54,14 +54,14 @@ export function usePopularExtensions(options?: { limit?: number }) {
       setExtensions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { extensions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extensions, isLoading, refresh: loadData }
 }
 
 export function useTopRatedExtensions(options?: { limit?: number }) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -69,14 +69,14 @@ export function useTopRatedExtensions(options?: { limit?: number }) {
       setExtensions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { extensions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extensions, isLoading, refresh: loadData }
 }
 
 export function useDeveloperExtensions(developerId?: string) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!developerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -85,14 +85,14 @@ export function useDeveloperExtensions(developerId?: string) {
       setExtensions(data || [])
     } finally { setIsLoading(false) }
   }, [developerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { extensions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extensions, isLoading, refresh: loadData }
 }
 
 export function useUserInstalledExtensions(userId?: string, options?: { is_enabled?: boolean }) {
   const [installations, setInstallations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -103,8 +103,8 @@ export function useUserInstalledExtensions(userId?: string, options?: { is_enabl
       setInstallations(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_enabled])
-  useEffect(() => { fetch() }, [fetch])
-  return { installations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { installations, isLoading, refresh: loadData }
 }
 
 export function useIsExtensionInstalled(extensionId?: string, userId?: string) {
@@ -128,7 +128,7 @@ export function useIsExtensionInstalled(extensionId?: string, userId?: string) {
 export function useExtensionSettings(extensionId?: string, userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!extensionId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -137,14 +137,14 @@ export function useExtensionSettings(extensionId?: string, userId?: string) {
       setSettings(data?.settings || {})
     } finally { setIsLoading(false) }
   }, [extensionId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function useExtensionPermissions(extensionId?: string) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!extensionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -153,14 +153,14 @@ export function useExtensionPermissions(extensionId?: string) {
       setPermissions(data || [])
     } finally { setIsLoading(false) }
   }, [extensionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { permissions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { permissions, isLoading, refresh: loadData }
 }
 
 export function useExtensionReviews(extensionId?: string, options?: { limit?: number }) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!extensionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -169,14 +169,14 @@ export function useExtensionReviews(extensionId?: string, options?: { limit?: nu
       setReviews(data || [])
     } finally { setIsLoading(false) }
   }, [extensionId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reviews, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reviews, isLoading, refresh: loadData }
 }
 
 export function useExtensionCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -185,8 +185,8 @@ export function useExtensionCategories() {
       setCategories(uniqueCategories)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useExtensionSearch(searchTerm: string, options?: { category?: string; pricing_type?: string; limit?: number }) {
@@ -214,7 +214,7 @@ export function useExtensionSearch(searchTerm: string, options?: { category?: st
 export function useNewExtensions(options?: { limit?: number; days?: number }) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -224,6 +224,6 @@ export function useNewExtensions(options?: { limit?: number; days?: number }) {
       setExtensions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.limit, options?.days])
-  useEffect(() => { fetch() }, [fetch])
-  return { extensions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { extensions, isLoading, refresh: loadData }
 }

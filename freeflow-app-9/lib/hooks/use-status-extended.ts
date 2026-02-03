@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useStatus(entityId?: string, entityType?: string) {
   const [status, setStatus] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useStatus(entityId?: string, entityType?: string) {
       setStatus(data)
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { status, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { status, isLoading, refresh: loadData }
 }
 
 export function useStatusHistory(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function useStatusHistory(entityId?: string, entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useStatusCounts(entityType?: string) {
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,6 +53,6 @@ export function useStatusCounts(entityType?: string) {
       setCounts(result)
     } finally { setIsLoading(false) }
   }, [entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { counts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { counts, isLoading, refresh: loadData }
 }

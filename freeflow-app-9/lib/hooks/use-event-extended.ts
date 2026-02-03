@@ -40,7 +40,7 @@ export interface EventRegistrationRecord {
 export function useEvents(status?: string, eventType?: string) {
   const [data, setData] = useState<EventRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -51,19 +51,19 @@ export function useEvents(status?: string, eventType?: string) {
       setData((result as EventRecord[]) || [])
     } finally { setIsLoading(false) }
   }, [status, eventType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEventRegistrations(eventId?: string) {
   const [data, setData] = useState<EventRegistrationRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!eventId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('event_registrations').select('*').eq('event_id', eventId).order('registered_at', { ascending: false }); setData((result as EventRegistrationRecord[]) || []) } finally { setIsLoading(false) }
   }, [eventId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

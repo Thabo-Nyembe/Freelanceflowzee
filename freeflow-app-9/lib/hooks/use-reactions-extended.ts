@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useReaction(reactionId?: string) {
   const [reaction, setReaction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!reactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('reactions').select('*, reaction_types(*), users(*)').eq('id', reactionId).single(); setReaction(data) } finally { setIsLoading(false) }
   }, [reactionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reaction, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reaction, isLoading, refresh: loadData }
 }
 
 export function useReactions(options: { entity_type: string; entity_id: string; reaction_type?: string; limit?: number }) {
   const [reactions, setReactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -34,14 +34,14 @@ export function useReactions(options: { entity_type: string; entity_id: string; 
       setReactions(data || [])
     } finally { setIsLoading(false) }
   }, [options.entity_type, options.entity_id, options.reaction_type, options.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reactions, isLoading, refresh: loadData }
 }
 
 export function useReactionSummary(entityType?: string, entityId?: string) {
   const [summary, setSummary] = useState<{ total_reactions: number; reaction_counts: { [key: string]: number } } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -50,14 +50,14 @@ export function useReactionSummary(entityType?: string, entityId?: string) {
       setSummary(data || { total_reactions: 0, reaction_counts: {} })
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { summary, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { summary, isLoading, refresh: loadData }
 }
 
 export function useUserReaction(entityType?: string, entityId?: string, userId?: string) {
   const [reaction, setReaction] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -66,14 +66,14 @@ export function useUserReaction(entityType?: string, entityId?: string, userId?:
       setReaction(data?.reaction_type || null)
     } finally { setIsLoading(false) }
   }, [entityType, entityId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reaction, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reaction, isLoading, refresh: loadData }
 }
 
 export function useReactionTypes(options?: { category?: string; is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -84,14 +84,14 @@ export function useReactionTypes(options?: { category?: string; is_active?: bool
       setTypes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useBulkReactions(entityType?: string, entityIds?: string[]) {
   const [summaryMap, setSummaryMap] = useState<{ [key: string]: any }>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityIds || entityIds.length === 0) { setIsLoading(false); return }
     setIsLoading(true)
@@ -102,14 +102,14 @@ export function useBulkReactions(entityType?: string, entityIds?: string[]) {
       setSummaryMap(map)
     } finally { setIsLoading(false) }
   }, [entityType, entityIds?.join(',')])
-  useEffect(() => { fetch() }, [fetch])
-  return { summaryMap, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { summaryMap, isLoading, refresh: loadData }
 }
 
 export function useBulkUserReactions(entityType?: string, entityIds?: string[], userId?: string) {
   const [reactionMap, setReactionMap] = useState<{ [key: string]: string }>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityIds || entityIds.length === 0 || !userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -120,14 +120,14 @@ export function useBulkUserReactions(entityType?: string, entityIds?: string[], 
       setReactionMap(map)
     } finally { setIsLoading(false) }
   }, [entityType, entityIds?.join(','), userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reactionMap, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reactionMap, isLoading, refresh: loadData }
 }
 
 export function useReactors(entityType?: string, entityId?: string, reactionType?: string, options?: { limit?: number }) {
   const [reactors, setReactors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId || !reactionType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -136,14 +136,14 @@ export function useReactors(entityType?: string, entityId?: string, reactionType
       setReactors(data?.map(r => r.users) || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId, reactionType, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reactors, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reactors, isLoading, refresh: loadData }
 }
 
 export function useMyReactions(userId?: string, options?: { entity_type?: string; limit?: number }) {
   const [reactions, setReactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -154,14 +154,14 @@ export function useMyReactions(userId?: string, options?: { entity_type?: string
       setReactions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.entity_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reactions, isLoading, refresh: loadData }
 }
 
 export function useMostReacted(entityType?: string, options?: { limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -170,15 +170,15 @@ export function useMostReacted(entityType?: string, options?: { limit?: number }
       setItems(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useReactionCounts(entityType?: string, entityId?: string) {
   const [counts, setCounts] = useState<{ [key: string]: number }>({})
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -188,14 +188,14 @@ export function useReactionCounts(entityType?: string, entityId?: string) {
       setTotal(data?.total_reactions || 0)
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { counts, total, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { counts, total, isLoading, refresh: loadData }
 }
 
 export function useTopReactionTypes(entityType?: string, options?: { limit?: number }) {
   const [types, setTypes] = useState<{ type: string; count: number }[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -207,6 +207,6 @@ export function useTopReactionTypes(entityType?: string, options?: { limit?: num
       setTypes(sorted)
     } finally { setIsLoading(false) }
   }, [entityType, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }

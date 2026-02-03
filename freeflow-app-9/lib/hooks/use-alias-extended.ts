@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useAlias(aliasId?: string) {
   const [alias, setAlias] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!aliasId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useAlias(aliasId?: string) {
       setAlias(data)
     } finally { setIsLoading(false) }
   }, [aliasId])
-  useEffect(() => { fetch() }, [fetch])
-  return { alias, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alias, isLoading, refresh: loadData }
 }
 
 export function useAliasByName(name?: string, type?: string) {
   const [alias, setAlias] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!name) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,15 +37,15 @@ export function useAliasByName(name?: string, type?: string) {
       setAlias(data)
     } finally { setIsLoading(false) }
   }, [name, type])
-  useEffect(() => { fetch() }, [fetch])
-  return { alias, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alias, isLoading, refresh: loadData }
 }
 
 export function useTargetAliases(targetId?: string, targetType?: string) {
   const [data, setData] = useState<any[]>([])
   const [primaryAlias, setPrimaryAlias] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!targetId || !targetType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useTargetAliases(targetId?: string, targetType?: string) {
       setPrimaryAlias(result?.find(a => a.is_primary) || null)
     } finally { setIsLoading(false) }
   }, [targetId, targetType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, primaryAlias, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, primaryAlias, isLoading, refresh: loadData }
 }
 
 export function useUserAliases(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -71,8 +71,8 @@ export function useUserAliases(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useAliasAvailability(aliasName?: string, aliasType?: string) {

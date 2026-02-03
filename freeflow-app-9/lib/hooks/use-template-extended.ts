@@ -10,103 +10,103 @@ import { createClient } from '@/lib/supabase/client'
 export function useTemplateDeliverables(templateId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!templateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('template_deliverables').select('*').eq('template_id', templateId).order('order_index', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [templateId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTemplateFavorites(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('template_favorites').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTemplateItems(templateId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!templateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('template_items').select('*').eq('template_id', templateId).order('order_index', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [templateId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTemplateMilestones(templateId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!templateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('template_milestones').select('*').eq('template_id', templateId).order('order_index', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [templateId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTemplatePricing(templateId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!templateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('template_pricing').select('*').eq('template_id', templateId); setData(result || []) } finally { setIsLoading(false) }
   }, [templateId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTemplateRatings(templateId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!templateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('template_ratings').select('*').eq('template_id', templateId); setData(result || []) } finally { setIsLoading(false) }
   }, [templateId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTemplateReviews(templateId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!templateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('template_reviews').select('*').eq('template_id', templateId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [templateId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTemplateTasks(templateId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!templateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('template_tasks').select('*').eq('template_id', templateId).order('order_index', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [templateId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

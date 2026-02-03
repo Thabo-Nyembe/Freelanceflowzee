@@ -11,7 +11,7 @@ export function useFollowers(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -21,15 +21,15 @@ export function useFollowers(userId?: string) {
       setTotal(count || 0)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, total, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, total, isLoading, refresh: loadData }
 }
 
 export function useFollowing(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,8 +39,8 @@ export function useFollowing(userId?: string) {
       setTotal(count || 0)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, total, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, total, isLoading, refresh: loadData }
 }
 
 export function useIsFollowing(followerId?: string, followingId?: string) {
@@ -63,7 +63,7 @@ export function useFollowCounts(userId?: string) {
   const [followers, setFollowers] = useState(0)
   const [following, setFollowing] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -76,6 +76,6 @@ export function useFollowCounts(userId?: string) {
       setFollowing(followingRes.count || 0)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { followers, following, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { followers, following, isLoading, refresh: loadData }
 }

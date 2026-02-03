@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -219,10 +219,11 @@ export default function AnnouncementsClient() {
   const insightsPanel = useInsightsPanel(false)
 
   // Demo mode detection for investor demos
-  const { data: nextAuthSession, status: sessionStatus } = useSession()
-  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const { userId: currentUserId, userEmail, userName, isDemo, loading: sessionLoading } = useCurrentUser()
+  const sessionStatus = sessionLoading ? "loading" : "authenticated"
+  const isDemoAccount = userEmail === 'alex@freeflow.io' ||
+                        userEmail === 'sarah@freeflow.io' ||
+                        userEmail === 'mike@freeflow.io'
   const isSessionLoading = sessionStatus === 'loading'
 
   // Define adapter variables locally (removed mock data imports)

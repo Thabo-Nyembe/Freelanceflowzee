@@ -110,7 +110,7 @@ export interface ExtendedTask {
 export function useTask(taskId?: string) {
   const [task, setTask] = useState<ExtendedTask | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -119,14 +119,14 @@ export function useTask(taskId?: string) {
     setIsLoading(true)
     try { const { data } = await supabase.from('tasks').select('*, task_assignments(*), task_dependencies(*), task_checklists(*), users(*), projects(*)').eq('id', taskId).single(); setTask(data as ExtendedTask | null) } finally { setIsLoading(false) }
   }, [taskId])
-  useEffect(() => { fetch() }, [fetch])
-  return { task, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { task, isLoading, refresh: loadData }
 }
 
 export function useTasks(options?: { project_id?: string; status?: string; priority?: string; assignee_id?: string; parent_id?: string | null; overdue?: boolean; search?: string; limit?: number }) {
   const [tasks, setTasks] = useState<ExtendedTask[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -153,14 +153,14 @@ export function useTasks(options?: { project_id?: string; status?: string; prior
       setTasks(result)
     } finally { setIsLoading(false) }
   }, [options?.project_id, options?.status, options?.priority, options?.assignee_id, options?.parent_id, options?.overdue, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tasks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tasks, isLoading, refresh: loadData }
 }
 
 export function useMyTasks(userId?: string, options?: { status?: string; priority?: string; limit?: number }) {
   const [tasks, setTasks] = useState<ExtendedTask[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -178,14 +178,14 @@ export function useMyTasks(userId?: string, options?: { status?: string; priorit
       setTasks((data || []) as ExtendedTask[])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.priority, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tasks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tasks, isLoading, refresh: loadData }
 }
 
 export function useSubtasks(taskId?: string) {
   const [subtasks, setSubtasks] = useState<ExtendedTask[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -194,15 +194,15 @@ export function useSubtasks(taskId?: string) {
     setIsLoading(true)
     try { const { data } = await supabase.from('tasks').select('*, task_assignments(*)').eq('parent_id', taskId).order('created_at', { ascending: true }); setSubtasks((data || []) as ExtendedTask[]) } finally { setIsLoading(false) }
   }, [taskId])
-  useEffect(() => { fetch() }, [fetch])
-  return { subtasks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { subtasks, isLoading, refresh: loadData }
 }
 
 export function useTaskDependencies(taskId?: string) {
   const [dependencies, setDependencies] = useState<TaskDependency[]>([])
   const [dependents, setDependents] = useState<TaskDependency[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -218,14 +218,14 @@ export function useTaskDependencies(taskId?: string) {
       setDependents((dependentsRes.data || []) as TaskDependency[])
     } finally { setIsLoading(false) }
   }, [taskId])
-  useEffect(() => { fetch() }, [fetch])
-  return { dependencies, dependents, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { dependencies, dependents, isLoading, refresh: loadData }
 }
 
 export function useTaskComments(taskId?: string, options?: { limit?: number }) {
   const [comments, setComments] = useState<TaskComment[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -234,15 +234,15 @@ export function useTaskComments(taskId?: string, options?: { limit?: number }) {
     setIsLoading(true)
     try { const { data } = await supabase.from('task_comments').select('*, users(*)').eq('task_id', taskId).is('parent_id', null).order('created_at', { ascending: true }).limit(options?.limit || 100); setComments((data || []) as TaskComment[]) } finally { setIsLoading(false) }
   }, [taskId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { comments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comments, isLoading, refresh: loadData }
 }
 
 export function useTaskTimeLogs(taskId?: string, options?: { user_id?: string; from_date?: string; to_date?: string }) {
   const [timeLogs, setTimeLogs] = useState<TaskTimeLog[]>([])
   const [totalHours, setTotalHours] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -260,15 +260,15 @@ export function useTaskTimeLogs(taskId?: string, options?: { user_id?: string; f
       setTotalHours(logs.reduce((sum, l) => sum + (l.hours || 0), 0))
     } finally { setIsLoading(false) }
   }, [taskId, options?.user_id, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { timeLogs, totalHours, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timeLogs, totalHours, isLoading, refresh: loadData }
 }
 
 export function useTaskChecklist(taskId?: string) {
   const [items, setItems] = useState<TaskChecklistItem[]>([])
   const [progress, setProgress] = useState<{ completed: number; total: number; percentage: number }>({ completed: 0, total: 0, percentage: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -284,14 +284,14 @@ export function useTaskChecklist(taskId?: string) {
       setProgress({ completed, total, percentage: total > 0 ? (completed / total) * 100 : 0 })
     } finally { setIsLoading(false) }
   }, [taskId])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, progress, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, progress, isLoading, refresh: loadData }
 }
 
 export function useOverdueTasks(options?: { project_id?: string; assignee_id?: string; limit?: number }) {
   const [tasks, setTasks] = useState<ExtendedTask[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -310,14 +310,14 @@ export function useOverdueTasks(options?: { project_id?: string; assignee_id?: s
       setTasks(result)
     } finally { setIsLoading(false) }
   }, [options?.project_id, options?.assignee_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tasks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tasks, isLoading, refresh: loadData }
 }
 
 export function useTaskStats(projectId?: string) {
   const [stats, setStats] = useState<{ total: number; todo: number; inProgress: number; done: number; overdue: number }>({ total: 0, todo: 0, inProgress: 0, done: 0, overdue: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     // In demo mode, return empty data to avoid unauthenticated Supabase queries
     // Demo data is fetched via API routes instead
@@ -338,7 +338,7 @@ export function useTaskStats(projectId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 

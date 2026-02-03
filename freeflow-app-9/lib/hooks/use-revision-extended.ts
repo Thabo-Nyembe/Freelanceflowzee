@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useRevisions(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useRevisions(entityId?: string, entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useLatestRevision(entityId?: string, entityType?: string) {
   const [revision, setRevision] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -35,14 +35,14 @@ export function useLatestRevision(entityId?: string, entityType?: string) {
       setRevision(data)
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { revision, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { revision, isLoading, refresh: loadData }
 }
 
 export function useRevisionCount(entityId?: string, entityType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -51,14 +51,14 @@ export function useRevisionCount(entityId?: string, entityType?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [entityId, entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useRevisionByNumber(entityId?: string, entityType?: string, revisionNumber?: number) {
   const [revision, setRevision] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityId || !entityType || revisionNumber === undefined) { setIsLoading(false); return }
     setIsLoading(true)
@@ -67,6 +67,6 @@ export function useRevisionByNumber(entityId?: string, entityType?: string, revi
       setRevision(data)
     } finally { setIsLoading(false) }
   }, [entityId, entityType, revisionNumber])
-  useEffect(() => { fetch() }, [fetch])
-  return { revision, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { revision, isLoading, refresh: loadData }
 }

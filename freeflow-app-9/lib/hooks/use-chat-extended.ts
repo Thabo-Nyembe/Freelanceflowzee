@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useChatRoom(roomId?: string) {
   const [room, setRoom] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useChatRoom(roomId?: string) {
       setRoom(data)
     } finally { setIsLoading(false) }
   }, [roomId])
-  useEffect(() => { fetch() }, [fetch])
-  return { room, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { room, isLoading, refresh: loadData }
 }
 
 export function useUserChatRooms(userId?: string, options?: { type?: string; includeArchived?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -42,15 +42,15 @@ export function useUserChatRooms(userId?: string, options?: { type?: string; inc
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.includeArchived])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useChatMessages(roomId?: string, options?: { limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,8 +69,8 @@ export function useChatMessages(roomId?: string, options?: { limit?: number }) {
       setHasMore(data.length >= (options?.limit || 50))
     }
   }, [roomId, messages, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { messages, isLoading, hasMore, loadMore, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { messages, isLoading, hasMore, loadMore, refresh: loadData }
 }
 
 export function useChatMessagesRealtime(roomId?: string) {
@@ -92,7 +92,7 @@ export function useChatMessagesRealtime(roomId?: string) {
 export function useChatParticipants(roomId?: string) {
   const [participants, setParticipants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -101,14 +101,14 @@ export function useChatParticipants(roomId?: string) {
       setParticipants(data || [])
     } finally { setIsLoading(false) }
   }, [roomId])
-  useEffect(() => { fetch() }, [fetch])
-  return { participants, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { participants, isLoading, refresh: loadData }
 }
 
 export function useUnreadMessages(userId?: string) {
   const [unread, setUnread] = useState<{ total: number; byRoom: Record<string, number> }>({ total: 0, byRoom: {} })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -126,8 +126,8 @@ export function useUnreadMessages(userId?: string) {
       setUnread({ total, byRoom })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { unread, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { unread, isLoading, refresh: loadData }
 }
 
 export function useChatSearch(roomId: string, searchTerm: string) {
@@ -194,7 +194,7 @@ export function useChatRoomRealtime(roomId?: string) {
 export function useDirectChat(userId1?: string, userId2?: string) {
   const [room, setRoom] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId1 || !userId2) { setIsLoading(false); return }
     setIsLoading(true)
@@ -207,6 +207,6 @@ export function useDirectChat(userId1?: string, userId2?: string) {
       setRoom(directRoom || null)
     } finally { setIsLoading(false) }
   }, [userId1, userId2])
-  useEffect(() => { fetch() }, [fetch])
-  return { room, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { room, isLoading, refresh: loadData }
 }

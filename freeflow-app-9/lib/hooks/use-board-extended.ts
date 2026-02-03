@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useBoard(boardId?: string) {
   const [board, setBoard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('boards').select('*, board_columns(*, board_cards(*))').eq('id', boardId).single(); setBoard(data) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { board, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { board, isLoading, refresh: loadData }
 }
 
 export function useBoards(options?: { user_id?: string; type?: string; is_archived?: boolean; limit?: number }) {
   const [boards, setBoards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,47 +36,47 @@ export function useBoards(options?: { user_id?: string; type?: string; is_archiv
       setBoards(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.is_archived, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { boards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { boards, isLoading, refresh: loadData }
 }
 
 export function useBoardColumns(boardId?: string) {
   const [columns, setColumns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('board_columns').select('*, board_cards(*)').eq('board_id', boardId).order('position', { ascending: true }); setColumns(data || []) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { columns, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { columns, isLoading, refresh: loadData }
 }
 
 export function useBoardCards(columnId?: string) {
   const [cards, setCards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!columnId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('board_cards').select('*').eq('column_id', columnId).order('position', { ascending: true }); setCards(data || []) } finally { setIsLoading(false) }
   }, [columnId])
-  useEffect(() => { fetch() }, [fetch])
-  return { cards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { cards, isLoading, refresh: loadData }
 }
 
 export function useBoardMembers(boardId?: string) {
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('board_members').select('*').eq('board_id', boardId).order('joined_at', { ascending: true }); setMembers(data || []) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { members, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { members, isLoading, refresh: loadData }
 }
 
 export function useBoardRealtime(boardId?: string) {
@@ -101,12 +101,12 @@ export function useBoardRealtime(boardId?: string) {
 export function useMyAssignedCards(userId?: string, options?: { limit?: number }) {
   const [cards, setCards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('board_cards').select('*, boards(name)').eq('assignee_id', userId).eq('is_completed', false).order('due_date', { ascending: true }).limit(options?.limit || 50); setCards(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { cards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { cards, isLoading, refresh: loadData }
 }

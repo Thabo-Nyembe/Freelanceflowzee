@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useSavedItem(itemId?: string) {
   const [item, setItem] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('saved_items').select('*').eq('id', itemId).single(); setItem(data) } finally { setIsLoading(false) }
   }, [itemId])
-  useEffect(() => { fetch() }, [fetch])
-  return { item, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { item, isLoading, refresh: loadData }
 }
 
 export function useSavedItems(options?: { user_id?: string; item_type?: string; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -35,14 +35,14 @@ export function useSavedItems(options?: { user_id?: string; item_type?: string; 
       setItems(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.item_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useSavedSearches(options?: { user_id?: string; search_type?: string }) {
   const [searches, setSearches] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -53,14 +53,14 @@ export function useSavedSearches(options?: { user_id?: string; search_type?: str
       setSearches(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.search_type])
-  useEffect(() => { fetch() }, [fetch])
-  return { searches, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { searches, isLoading, refresh: loadData }
 }
 
 export function useSavedFilters(options?: { user_id?: string; filter_type?: string }) {
   const [filters, setFilters] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -71,14 +71,14 @@ export function useSavedFilters(options?: { user_id?: string; filter_type?: stri
       setFilters(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.filter_type])
-  useEffect(() => { fetch() }, [fetch])
-  return { filters, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { filters, isLoading, refresh: loadData }
 }
 
 export function useSavedViews(options?: { user_id?: string; view_type?: string; is_default?: boolean }) {
   const [views, setViews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -90,6 +90,6 @@ export function useSavedViews(options?: { user_id?: string; view_type?: string; 
       setViews(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.view_type, options?.is_default])
-  useEffect(() => { fetch() }, [fetch])
-  return { views, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { views, isLoading, refresh: loadData }
 }

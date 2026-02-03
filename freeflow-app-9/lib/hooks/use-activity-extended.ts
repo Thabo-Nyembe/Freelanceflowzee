@@ -23,7 +23,7 @@ export interface Activity {
 export function useActivities(userId?: string, itemType?: string) {
   const [data, setData] = useState<Activity[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -34,14 +34,14 @@ export function useActivities(userId?: string, itemType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, itemType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useActivityFeed(userId?: string, followingIds: string[] = []) {
   const [data, setData] = useState<Activity[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -51,14 +51,14 @@ export function useActivityFeed(userId?: string, followingIds: string[] = []) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, followingIds])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useActivityStats(userId?: string) {
   const [stats, setStats] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,6 +69,6 @@ export function useActivityStats(userId?: string) {
       setStats(counts)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

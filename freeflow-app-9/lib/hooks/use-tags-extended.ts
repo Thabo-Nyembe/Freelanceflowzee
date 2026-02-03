@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useTag(tagId?: string) {
   const [tag, setTag] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tagId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tags').select('*, tag_groups(*), tag_assignments(count)').eq('id', tagId).single(); setTag(data) } finally { setIsLoading(false) }
   }, [tagId])
-  useEffect(() => { fetch() }, [fetch])
-  return { tag, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tag, isLoading, refresh: loadData }
 }
 
 export function useTags(options?: { group_id?: string; is_system?: boolean; search?: string; limit?: number }) {
   const [tags, setTags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useTags(options?: { group_id?: string; is_system?: boolean; sear
       setTags(data || [])
     } finally { setIsLoading(false) }
   }, [options?.group_id, options?.is_system, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tags, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tags, isLoading, refresh: loadData }
 }
 
 export function useTagGroups(options?: { is_exclusive?: boolean }) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -53,14 +53,14 @@ export function useTagGroups(options?: { is_exclusive?: boolean }) {
       setGroups(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_exclusive])
-  useEffect(() => { fetch() }, [fetch])
-  return { groups, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { groups, isLoading, refresh: loadData }
 }
 
 export function useEntityTags(entityType?: string, entityId?: string) {
   const [tags, setTags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,14 +69,14 @@ export function useEntityTags(entityType?: string, entityId?: string) {
       setTags((data || []).map(a => a.tags))
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { tags, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tags, isLoading, refresh: loadData }
 }
 
 export function usePopularTags(options?: { entity_type?: string; limit?: number }) {
   const [tags, setTags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -84,14 +84,14 @@ export function usePopularTags(options?: { entity_type?: string; limit?: number 
       setTags(data || [])
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tags, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tags, isLoading, refresh: loadData }
 }
 
 export function useTagsByGroup() {
   const [groupedTags, setGroupedTags] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -105,14 +105,14 @@ export function useTagsByGroup() {
       setGroupedTags(grouped)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { groupedTags, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { groupedTags, isLoading, refresh: loadData }
 }
 
 export function useEntitiesByTag(tagId?: string, entityType?: string, options?: { limit?: number }) {
   const [entities, setEntities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tagId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -123,8 +123,8 @@ export function useEntitiesByTag(tagId?: string, entityType?: string, options?: 
       setEntities(data || [])
     } finally { setIsLoading(false) }
   }, [tagId, entityType, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { entities, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { entities, isLoading, refresh: loadData }
 }
 
 export function useTagSearch(searchTerm: string, options?: { group_id?: string; limit?: number }) {
@@ -148,7 +148,7 @@ export function useTagSearch(searchTerm: string, options?: { group_id?: string; 
 export function useRecentlyUsedTags(userId?: string, options?: { limit?: number }) {
   const [tags, setTags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -159,7 +159,7 @@ export function useRecentlyUsedTags(userId?: string, options?: { limit?: number 
       setTags(Array.from(uniqueTags.values()))
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tags, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tags, isLoading, refresh: loadData }
 }
 

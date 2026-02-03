@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useCreator(creatorId?: string) {
   const [creator, setCreator] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!creatorId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('creators').select('*, creator_profiles(*)').eq('id', creatorId).single(); setCreator(data) } finally { setIsLoading(false) }
   }, [creatorId])
-  useEffect(() => { fetch() }, [fetch])
-  return { creator, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { creator, isLoading, refresh: loadData }
 }
 
 export function useCreators(options?: { category?: string; is_verified?: boolean; search?: string; limit?: number }) {
   const [creators, setCreators] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useCreators(options?: { category?: string; is_verified?: boolean
       setCreators(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_verified, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { creators, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { creators, isLoading, refresh: loadData }
 }
 
 export function useCreatorContent(creatorId?: string, options?: { type?: string; status?: string; limit?: number }) {
   const [content, setContent] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!creatorId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,21 +55,21 @@ export function useCreatorContent(creatorId?: string, options?: { type?: string;
       setContent(data || [])
     } finally { setIsLoading(false) }
   }, [creatorId, options?.type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { content, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { content, isLoading, refresh: loadData }
 }
 
 export function useCreatorFollowers(creatorId?: string) {
   const [followers, setFollowers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!creatorId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('creator_followers').select('*, users:user_id(*)').eq('creator_id', creatorId).order('followed_at', { ascending: false }); setFollowers(data || []) } finally { setIsLoading(false) }
   }, [creatorId])
-  useEffect(() => { fetch() }, [fetch])
-  return { followers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { followers, isLoading, refresh: loadData }
 }
 
 export function useIsFollowing(creatorId?: string, userId?: string) {
@@ -89,7 +89,7 @@ export function useCreatorEarnings(creatorId?: string, options?: { date_from?: s
   const [earnings, setEarnings] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!creatorId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -102,26 +102,26 @@ export function useCreatorEarnings(creatorId?: string, options?: { date_from?: s
       setTotal(data?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0)
     } finally { setIsLoading(false) }
   }, [creatorId, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { earnings, total, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { earnings, total, isLoading, refresh: loadData }
 }
 
 export function useTopCreators(limit?: number) {
   const [creators, setCreators] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('creators').select('*').eq('is_verified', true).order('follower_count', { ascending: false }).limit(limit || 10); setCreators(data || []) } finally { setIsLoading(false) }
   }, [limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { creators, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { creators, isLoading, refresh: loadData }
 }
 
 export function useCreatorStats(creatorId?: string) {
   const [stats, setStats] = useState<{ totalContent: number; totalViews: number; totalLikes: number; totalEarnings: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!creatorId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -135,6 +135,6 @@ export function useCreatorStats(creatorId?: string) {
       setStats({ totalContent, totalViews, totalLikes, totalEarnings })
     } finally { setIsLoading(false) }
   }, [creatorId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

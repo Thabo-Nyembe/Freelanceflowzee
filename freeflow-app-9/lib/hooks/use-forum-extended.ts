@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useForums(parentId?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -22,14 +22,14 @@ export function useForums(parentId?: string, isActive?: boolean) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [parentId, isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useForumTopics(forumId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!forumId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -40,14 +40,14 @@ export function useForumTopics(forumId?: string, status?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [forumId, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useForumStats(forumId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!forumId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -56,6 +56,6 @@ export function useForumStats(forumId?: string) {
       setStats(result)
     } finally { setIsLoading(false) }
   }, [forumId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

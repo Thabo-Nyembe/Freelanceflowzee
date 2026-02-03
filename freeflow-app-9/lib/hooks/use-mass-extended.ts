@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useMassAction(actionId?: string) {
   const [action, setAction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!actionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useMassAction(actionId?: string) {
       setAction(data)
     } finally { setIsLoading(false) }
   }, [actionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { action, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { action, isLoading, refresh: loadData }
 }
 
 export function useMassActions(options?: { actionType?: string; targetType?: string; status?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useMassActions(options?: { actionType?: string; targetType?: str
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.actionType, options?.targetType, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMassNotifications(options?: { notificationType?: string; status?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -56,14 +56,14 @@ export function useMassNotifications(options?: { notificationType?: string; stat
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.notificationType, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useScheduledMassActions() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -71,6 +71,6 @@ export function useScheduledMassActions() {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

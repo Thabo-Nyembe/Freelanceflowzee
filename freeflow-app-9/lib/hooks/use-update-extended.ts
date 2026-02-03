@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useUpdate(updateId?: string) {
   const [update, setUpdate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!updateId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useUpdate(updateId?: string) {
       setUpdate(data)
     } finally { setIsLoading(false) }
   }, [updateId])
-  useEffect(() => { fetch() }, [fetch])
-  return { update, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { update, isLoading, refresh: loadData }
 }
 
 export function useUpdates(options?: { productId?: string; status?: string; updateType?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useUpdates(options?: { productId?: string; status?: string; upda
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.productId, options?.status, options?.updateType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useLatestUpdate(productId?: string) {
   const [update, setUpdate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -55,8 +55,8 @@ export function useLatestUpdate(productId?: string) {
       setUpdate(data)
     } finally { setIsLoading(false) }
   }, [productId])
-  useEffect(() => { fetch() }, [fetch])
-  return { update, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { update, isLoading, refresh: loadData }
 }
 
 export function useUpdateCheck(currentVersion?: string, productId?: string) {

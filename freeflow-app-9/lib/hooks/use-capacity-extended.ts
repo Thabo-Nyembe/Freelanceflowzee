@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useCapacityPlan(planId?: string) {
   const [plan, setPlan] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('capacity_plans').select('*, capacity_resources(*), capacity_allocations(*)').eq('id', planId).single(); setPlan(data) } finally { setIsLoading(false) }
   }, [planId])
-  useEffect(() => { fetch() }, [fetch])
-  return { plan, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plan, isLoading, refresh: loadData }
 }
 
 export function useCapacityPlans(options?: { user_id?: string; status?: string; limit?: number }) {
   const [plans, setPlans] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -35,27 +35,27 @@ export function useCapacityPlans(options?: { user_id?: string; status?: string; 
       setPlans(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { plans, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plans, isLoading, refresh: loadData }
 }
 
 export function useCapacityResources(planId?: string) {
   const [resources, setResources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('capacity_resources').select('*').eq('plan_id', planId).order('name', { ascending: true }); setResources(data || []) } finally { setIsLoading(false) }
   }, [planId])
-  useEffect(() => { fetch() }, [fetch])
-  return { resources, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { resources, isLoading, refresh: loadData }
 }
 
 export function useCapacityAllocations(planId?: string, options?: { resource_id?: string; project_id?: string; status?: string }) {
   const [allocations, setAllocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -68,14 +68,14 @@ export function useCapacityAllocations(planId?: string, options?: { resource_id?
       setAllocations(data || [])
     } finally { setIsLoading(false) }
   }, [planId, options?.resource_id, options?.project_id, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { allocations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { allocations, isLoading, refresh: loadData }
 }
 
 export function useCapacityForecasts(planId?: string, options?: { date_from?: string; date_to?: string }) {
   const [forecasts, setForecasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -87,14 +87,14 @@ export function useCapacityForecasts(planId?: string, options?: { date_from?: st
       setForecasts(data || [])
     } finally { setIsLoading(false) }
   }, [planId, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { forecasts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { forecasts, isLoading, refresh: loadData }
 }
 
 export function useCapacityUtilization(planId?: string) {
   const [utilization, setUtilization] = useState<{ total: number; used: number; available: number; percentage: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -108,14 +108,14 @@ export function useCapacityUtilization(planId?: string) {
       setUtilization({ total, used, available, percentage })
     } finally { setIsLoading(false) }
   }, [planId])
-  useEffect(() => { fetch() }, [fetch])
-  return { utilization, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { utilization, isLoading, refresh: loadData }
 }
 
 export function useResourceAvailability(resourceId?: string, options?: { date_from?: string; date_to?: string }) {
   const [availability, setAvailability] = useState<{ capacity: number; allocated: number; available: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!resourceId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -129,6 +129,6 @@ export function useResourceAvailability(resourceId?: string, options?: { date_fr
       })
     } finally { setIsLoading(false) }
   }, [resourceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { availability, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { availability, isLoading, refresh: loadData }
 }

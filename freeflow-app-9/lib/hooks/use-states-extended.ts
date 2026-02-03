@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useState_(stateId?: string) {
   const [state, setState] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!stateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('states').select('*, state_machines(*), state_transitions(*), state_rules(*)').eq('id', stateId).single(); setState(data) } finally { setIsLoading(false) }
   }, [stateId])
-  useEffect(() => { fetch() }, [fetch])
-  return { state, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { state, isLoading, refresh: loadData }
 }
 
 export function useStates(options?: { machine_id?: string; state_type?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [states, setStates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useStates(options?: { machine_id?: string; state_type?: string; 
       setStates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.machine_id, options?.state_type, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { states, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { states, isLoading, refresh: loadData }
 }
 
 export function useStateMachines(options?: { entity_type?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [machines, setMachines] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -56,8 +56,8 @@ export function useStateMachines(options?: { entity_type?: string; is_active?: b
       setMachines(data || [])
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { machines, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { machines, isLoading, refresh: loadData }
 }
 
 export function useStateMachine(machineId?: string) {
@@ -65,7 +65,7 @@ export function useStateMachine(machineId?: string) {
   const [states, setStates] = useState<any[]>([])
   const [transitions, setTransitions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!machineId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -83,14 +83,14 @@ export function useStateMachine(machineId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [machineId])
-  useEffect(() => { fetch() }, [fetch])
-  return { machine, states, transitions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { machine, states, transitions, isLoading, refresh: loadData }
 }
 
 export function useCurrentState(entityType?: string, entityId?: string, machineId?: string) {
   const [currentState, setCurrentState] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId || !machineId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -99,14 +99,14 @@ export function useCurrentState(entityType?: string, entityId?: string, machineI
       setCurrentState(data?.states || null)
     } finally { setIsLoading(false) }
   }, [entityType, entityId, machineId])
-  useEffect(() => { fetch() }, [fetch])
-  return { currentState, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { currentState, isLoading, refresh: loadData }
 }
 
 export function useStateHistory(entityType?: string, entityId?: string, machineId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -117,14 +117,14 @@ export function useStateHistory(entityType?: string, entityId?: string, machineI
       setHistory(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId, machineId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useAvailableTransitions(entityType?: string, entityId?: string, machineId?: string) {
   const [transitions, setTransitions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId || !machineId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -135,20 +135,20 @@ export function useAvailableTransitions(entityType?: string, entityId?: string, 
       setTransitions(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId, machineId])
-  useEffect(() => { fetch() }, [fetch])
-  return { transitions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transitions, isLoading, refresh: loadData }
 }
 
 export function useStateRules(stateId?: string) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!stateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('state_rules').select('*').eq('state_id', stateId).order('name', { ascending: true }); setRules(data || []) } finally { setIsLoading(false) }
   }, [stateId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rules, isLoading, refresh: loadData }
 }
 

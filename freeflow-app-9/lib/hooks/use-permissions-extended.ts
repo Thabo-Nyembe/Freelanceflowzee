@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function usePermission(permissionId?: string) {
   const [permission, setPermission] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!permissionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('permissions').select('*').eq('id', permissionId).single(); setPermission(data) } finally { setIsLoading(false) }
   }, [permissionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { permission, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { permission, isLoading, refresh: loadData }
 }
 
 export function usePermissions(options?: { resource?: string; organization_id?: string; is_active?: boolean; limit?: number }) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function usePermissions(options?: { resource?: string; organization_id?: 
       setPermissions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.resource, options?.organization_id, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { permissions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { permissions, isLoading, refresh: loadData }
 }
 
 export function usePermissionGroups(options?: { organization_id?: string; is_active?: boolean }) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -54,14 +54,14 @@ export function usePermissionGroups(options?: { organization_id?: string; is_act
       setGroups(data || [])
     } finally { setIsLoading(false) }
   }, [options?.organization_id, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { groups, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { groups, isLoading, refresh: loadData }
 }
 
 export function useUserPermissions(userId?: string, options?: { organization_id?: string }) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -72,40 +72,40 @@ export function useUserPermissions(userId?: string, options?: { organization_id?
       setPermissions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.organization_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { permissions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { permissions, isLoading, refresh: loadData }
 }
 
 export function useRolePermissions(roleId?: string) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!roleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('permission_assignments').select('*, permissions(*), permission_groups(*)').eq('role_id', roleId); setPermissions(data || []) } finally { setIsLoading(false) }
   }, [roleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { permissions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { permissions, isLoading, refresh: loadData }
 }
 
 export function usePermissionOverrides(userId?: string) {
   const [overrides, setOverrides] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('permission_overrides').select('*, permissions(*)').eq('user_id', userId).or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`); setOverrides(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { overrides, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { overrides, isLoading, refresh: loadData }
 }
 
 export function usePermissionTemplates(options?: { organization_id?: string }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -115,14 +115,14 @@ export function usePermissionTemplates(options?: { organization_id?: string }) {
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.organization_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function usePermissionCheck(userId?: string, permissionSlug?: string, resourceId?: string) {
   const [isAllowed, setIsAllowed] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !permissionSlug) { setIsLoading(false); return }
     setIsLoading(true)
@@ -133,14 +133,14 @@ export function usePermissionCheck(userId?: string, permissionSlug?: string, res
       setIsAllowed(!!assignment)
     } finally { setIsLoading(false) }
   }, [userId, permissionSlug, resourceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { isAllowed, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { isAllowed, isLoading, refresh: loadData }
 }
 
 export function usePermissionLogs(options?: { user_id?: string; action?: string; from_date?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -151,19 +151,19 @@ export function usePermissionLogs(options?: { user_id?: string; action?: string;
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [options?.action, options?.from_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useResourcePermissions(resource?: string) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!resource) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('permissions').select('*').eq('resource', resource).eq('is_active', true).order('action', { ascending: true }); setPermissions(data || []) } finally { setIsLoading(false) }
   }, [resource])
-  useEffect(() => { fetch() }, [fetch])
-  return { permissions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { permissions, isLoading, refresh: loadData }
 }

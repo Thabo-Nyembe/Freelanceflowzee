@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useEmbed(embedId?: string) {
   const [embed, setEmbed] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!embedId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useEmbed(embedId?: string) {
       setEmbed(data)
     } finally { setIsLoading(false) }
   }, [embedId])
-  useEffect(() => { fetch() }, [fetch])
-  return { embed, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { embed, isLoading, refresh: loadData }
 }
 
 export function useEmbeds(options?: { embedType?: string; workspaceId?: string; userId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useEmbeds(options?: { embedType?: string; workspaceId?: string; 
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.embedType, options?.workspaceId, options?.userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEntityEmbeds(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useEntityEmbeds(entityType?: string, entityId?: string) {
       setData(result?.map(ee => ee.embeds) || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEmbedsByType(embedType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!embedType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -70,6 +70,6 @@ export function useEmbedsByType(embedType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [embedType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

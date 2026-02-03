@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useKpi(kpiId?: string) {
   const [kpi, setKpi] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!kpiId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('kpis').select('*, kpi_targets(*), kpi_values(*)').eq('id', kpiId).single(); setKpi(data) } finally { setIsLoading(false) }
   }, [kpiId])
-  useEffect(() => { fetch() }, [fetch])
-  return { kpi, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { kpi, isLoading, refresh: loadData }
 }
 
 export function useKpis(options?: { organization_id?: string; category_id?: string; status?: string }) {
   const [kpis, setKpis] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useKpis(options?: { organization_id?: string; category_id?: stri
       setKpis(data || [])
     } finally { setIsLoading(false) }
   }, [options?.organization_id, options?.category_id, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { kpis, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { kpis, isLoading, refresh: loadData }
 }
 
 export function useKpiValues(kpiId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [values, setValues] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!kpiId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,27 +55,27 @@ export function useKpiValues(kpiId?: string, options?: { from_date?: string; to_
       setValues(data || [])
     } finally { setIsLoading(false) }
   }, [kpiId, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { values, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { values, isLoading, refresh: loadData }
 }
 
 export function useKpiTargets(kpiId?: string) {
   const [targets, setTargets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!kpiId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('kpi_targets').select('*').eq('kpi_id', kpiId).order('start_date', { ascending: false }); setTargets(data || []) } finally { setIsLoading(false) }
   }, [kpiId])
-  useEffect(() => { fetch() }, [fetch])
-  return { targets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { targets, isLoading, refresh: loadData }
 }
 
 export function useKpiCategories(organizationId?: string) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -85,27 +85,27 @@ export function useKpiCategories(organizationId?: string) {
       setCategories(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useKpiDashboard(dashboardId?: string) {
   const [dashboard, setDashboard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!dashboardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('kpi_dashboards').select('*, kpis(*)').eq('id', dashboardId).single(); setDashboard(data) } finally { setIsLoading(false) }
   }, [dashboardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { dashboard, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { dashboard, isLoading, refresh: loadData }
 }
 
 export function useKpiDashboards(organizationId?: string) {
   const [dashboards, setDashboards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -115,27 +115,27 @@ export function useKpiDashboards(organizationId?: string) {
       setDashboards(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { dashboards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { dashboards, isLoading, refresh: loadData }
 }
 
 export function useKpiAlerts(kpiId?: string) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!kpiId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('kpi_alerts').select('*').eq('kpi_id', kpiId).order('created_at', { ascending: false }); setAlerts(data || []) } finally { setIsLoading(false) }
   }, [kpiId])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useKpiProgress(kpiId?: string) {
   const [progress, setProgress] = useState<{ current: number; target: number; percentage: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!kpiId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -149,19 +149,19 @@ export function useKpiProgress(kpiId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [kpiId])
-  useEffect(() => { fetch() }, [fetch])
-  return { progress, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { progress, isLoading, refresh: loadData }
 }
 
 export function useKpiTrend(kpiId?: string, options?: { periods?: number }) {
   const [trend, setTrend] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!kpiId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('kpi_values').select('value, recorded_at').eq('kpi_id', kpiId).order('recorded_at', { ascending: true }).limit(options?.periods || 12); setTrend(data || []) } finally { setIsLoading(false) }
   }, [kpiId, options?.periods])
-  useEffect(() => { fetch() }, [fetch])
-  return { trend, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { trend, isLoading, refresh: loadData }
 }

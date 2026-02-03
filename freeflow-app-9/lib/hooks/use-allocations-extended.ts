@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useAllocation(allocationId?: string) {
   const [allocation, setAllocation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!allocationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('allocations').select('*').eq('id', allocationId).single(); setAllocation(data) } finally { setIsLoading(false) }
   }, [allocationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { allocation, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { allocation, isLoading, refresh: loadData }
 }
 
 export function useAllocations(options?: { user_id?: string; resource_type?: string; resource_id?: string; allocated_to?: string; status?: string; limit?: number }) {
   const [allocations, setAllocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,27 +38,27 @@ export function useAllocations(options?: { user_id?: string; resource_type?: str
       setAllocations(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.resource_type, options?.resource_id, options?.allocated_to, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { allocations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { allocations, isLoading, refresh: loadData }
 }
 
 export function useResourceAllocations(resourceType?: string, resourceId?: string) {
   const [allocations, setAllocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!resourceType || !resourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('allocations').select('*').eq('resource_type', resourceType).eq('resource_id', resourceId).eq('status', 'active'); setAllocations(data || []) } finally { setIsLoading(false) }
   }, [resourceType, resourceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { allocations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { allocations, isLoading, refresh: loadData }
 }
 
 export function useUserAllocations(allocatedTo?: string, options?: { resource_type?: string; status?: string; limit?: number }) {
   const [allocations, setAllocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!allocatedTo) { setIsLoading(false); return }
     setIsLoading(true)
@@ -70,14 +70,14 @@ export function useUserAllocations(allocatedTo?: string, options?: { resource_ty
       setAllocations(data || [])
     } finally { setIsLoading(false) }
   }, [allocatedTo, options?.resource_type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { allocations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { allocations, isLoading, refresh: loadData }
 }
 
 export function useActiveAllocations(userId?: string, options?: { resource_type?: string; limit?: number }) {
   const [allocations, setAllocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -88,14 +88,14 @@ export function useActiveAllocations(userId?: string, options?: { resource_type?
       setAllocations(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.resource_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { allocations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { allocations, isLoading, refresh: loadData }
 }
 
 export function useAllocationStats(userId?: string, options?: { resource_type?: string }) {
   const [stats, setStats] = useState<{ total: number; active: number; completed: number; totalQuantity: number; totalAmount: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -112,14 +112,14 @@ export function useAllocationStats(userId?: string, options?: { resource_type?: 
       setStats({ total, active, completed, totalQuantity, totalAmount })
     } finally { setIsLoading(false) }
   }, [userId, options?.resource_type])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useAllocationsByResourceType(userId?: string) {
   const [byType, setByType] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -129,6 +129,6 @@ export function useAllocationsByResourceType(userId?: string) {
       setByType(counts)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { byType, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { byType, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function usePlugin(pluginId?: string) {
   const [plugin, setPlugin] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pluginId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plugins').select('*').eq('id', pluginId).single(); setPlugin(data) } finally { setIsLoading(false) }
   }, [pluginId])
-  useEffect(() => { fetch() }, [fetch])
-  return { plugin, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plugin, isLoading, refresh: loadData }
 }
 
 export function usePlugins(options?: { category?: string; status?: string; limit?: number }) {
   const [plugins, setPlugins] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -35,14 +35,14 @@ export function usePlugins(options?: { category?: string; status?: string; limit
       setPlugins(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { plugins, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plugins, isLoading, refresh: loadData }
 }
 
 export function useUserPlugins(userId?: string, options?: { is_active?: boolean }) {
   const [plugins, setPlugins] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,32 +53,32 @@ export function useUserPlugins(userId?: string, options?: { is_active?: boolean 
       setPlugins(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { plugins, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plugins, isLoading, refresh: loadData }
 }
 
 export function useActivePlugins(userId?: string) {
   const [plugins, setPlugins] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plugin_installs').select('*, plugins(*)').eq('user_id', userId).eq('is_active', true).order('installed_at', { ascending: false }); setPlugins(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { plugins, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plugins, isLoading, refresh: loadData }
 }
 
 export function usePluginsByCategory(category?: string) {
   const [plugins, setPlugins] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!category) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plugins').select('*').eq('category', category).eq('status', 'active').order('name', { ascending: true }); setPlugins(data || []) } finally { setIsLoading(false) }
   }, [category])
-  useEffect(() => { fetch() }, [fetch])
-  return { plugins, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { plugins, isLoading, refresh: loadData }
 }

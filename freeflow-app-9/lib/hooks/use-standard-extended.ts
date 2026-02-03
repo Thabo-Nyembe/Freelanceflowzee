@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useStandard(standardId?: string) {
   const [standard, setStandard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!standardId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useStandard(standardId?: string) {
       setStandard(data)
     } finally { setIsLoading(false) }
   }, [standardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { standard, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { standard, isLoading, refresh: loadData }
 }
 
 export function useStandards(options?: { standardType?: string; category?: string; isMandatory?: boolean; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useStandards(options?: { standardType?: string; category?: strin
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.standardType, options?.category, options?.isMandatory, options?.isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useMandatoryStandards(category?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -56,14 +56,14 @@ export function useMandatoryStandards(category?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [category])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEntityCompliance(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -72,6 +72,6 @@ export function useEntityCompliance(entityType?: string, entityId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

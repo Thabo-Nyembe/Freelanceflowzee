@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useCapture(captureId?: string) {
   const [capture, setCapture] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!captureId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('captures').select('*, capture_frames(*)').eq('id', captureId).single(); setCapture(data) } finally { setIsLoading(false) }
   }, [captureId])
-  useEffect(() => { fetch() }, [fetch])
-  return { capture, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { capture, isLoading, refresh: loadData }
 }
 
 export function useCaptures(options?: { user_id?: string; type?: string; status?: string; limit?: number }) {
   const [captures, setCaptures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,47 +36,47 @@ export function useCaptures(options?: { user_id?: string; type?: string; status?
       setCaptures(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { captures, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { captures, isLoading, refresh: loadData }
 }
 
 export function useCaptureFrames(captureId?: string, options?: { limit?: number }) {
   const [frames, setFrames] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!captureId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('capture_frames').select('*').eq('capture_id', captureId).order('frame_number', { ascending: true }).limit(options?.limit || 100); setFrames(data || []) } finally { setIsLoading(false) }
   }, [captureId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { frames, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { frames, isLoading, refresh: loadData }
 }
 
 export function useCaptureSessions(captureId?: string) {
   const [sessions, setSessions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!captureId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('capture_sessions').select('*').eq('capture_id', captureId).order('started_at', { ascending: false }); setSessions(data || []) } finally { setIsLoading(false) }
   }, [captureId])
-  useEffect(() => { fetch() }, [fetch])
-  return { sessions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sessions, isLoading, refresh: loadData }
 }
 
 export function useActiveCaptures(userId?: string) {
   const [captures, setCaptures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('captures').select('*').eq('user_id', userId).eq('status', 'capturing').order('created_at', { ascending: false }); setCaptures(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { captures, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { captures, isLoading, refresh: loadData }
 }
 
 export function useCaptureRealtime(captureId?: string) {

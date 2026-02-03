@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useHabit(habitId?: string) {
   const [habit, setHabit] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!habitId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('habits').select('*, habit_logs(*), habit_streaks(*), habit_reminders(*)').eq('id', habitId).single(); setHabit(data) } finally { setIsLoading(false) }
   }, [habitId])
-  useEffect(() => { fetch() }, [fetch])
-  return { habit, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { habit, isLoading, refresh: loadData }
 }
 
 export function useHabits(options?: { user_id?: string; category_id?: string; frequency?: string; is_active?: boolean; limit?: number }) {
   const [habits, setHabits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useHabits(options?: { user_id?: string; category_id?: string; fr
       setHabits(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.category_id, options?.frequency, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { habits, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { habits, isLoading, refresh: loadData }
 }
 
 export function useUserHabits(userId?: string, options?: { is_active?: boolean }) {
   const [habits, setHabits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useUserHabits(userId?: string, options?: { is_active?: boolean }
       setHabits(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { habits, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { habits, isLoading, refresh: loadData }
 }
 
 export function useHabitLogs(habitId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!habitId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -74,52 +74,52 @@ export function useHabitLogs(habitId?: string, options?: { from_date?: string; t
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [habitId, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useHabitStreak(habitId?: string) {
   const [streak, setStreak] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!habitId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('habit_streaks').select('*').eq('habit_id', habitId).single(); setStreak(data) } finally { setIsLoading(false) }
   }, [habitId])
-  useEffect(() => { fetch() }, [fetch])
-  return { streak, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { streak, isLoading, refresh: loadData }
 }
 
 export function useHabitReminders(habitId?: string) {
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!habitId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('habit_reminders').select('*').eq('habit_id', habitId).eq('is_active', true); setReminders(data || []) } finally { setIsLoading(false) }
   }, [habitId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reminders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reminders, isLoading, refresh: loadData }
 }
 
 export function useHabitCategories() {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('habit_categories').select('*').order('name', { ascending: true }); setCategories(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useHabitTemplates(options?: { category_id?: string }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -129,14 +129,14 @@ export function useHabitTemplates(options?: { category_id?: string }) {
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function useTodaysHabits(userId?: string) {
   const [habits, setHabits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -149,14 +149,14 @@ export function useTodaysHabits(userId?: string) {
       setHabits(habitsWithStatus || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { habits, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { habits, isLoading, refresh: loadData }
 }
 
 export function useWeeklyHabitStats(userId?: string) {
   const [stats, setStats] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -167,6 +167,6 @@ export function useWeeklyHabitStats(userId?: string) {
       setStats(data || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

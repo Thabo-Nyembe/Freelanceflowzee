@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useInvite(inviteId?: string) {
   const [invite, setInvite] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!inviteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('invites').select('*').eq('id', inviteId).single(); setInvite(data) } finally { setIsLoading(false) }
   }, [inviteId])
-  useEffect(() => { fetch() }, [fetch])
-  return { invite, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { invite, isLoading, refresh: loadData }
 }
 
 export function useInvites(options?: { inviter_id?: string; status?: string; type?: string; limit?: number }) {
   const [invites, setInvites] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useInvites(options?: { inviter_id?: string; status?: string; typ
       setInvites(data || [])
     } finally { setIsLoading(false) }
   }, [options?.inviter_id, options?.status, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { invites, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { invites, isLoading, refresh: loadData }
 }
 
 export function useUserInvites(userId?: string, options?: { status?: string }) {
   const [invites, setInvites] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,15 +54,15 @@ export function useUserInvites(userId?: string, options?: { status?: string }) {
       setInvites(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { invites, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { invites, isLoading, refresh: loadData }
 }
 
 export function useInviteByCode(code?: string) {
   const [invite, setInvite] = useState<any>(null)
   const [isValid, setIsValid] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!code) { setIsLoading(false); return }
     setIsLoading(true)
@@ -73,15 +73,15 @@ export function useInviteByCode(code?: string) {
       setIsValid(valid)
     } finally { setIsLoading(false) }
   }, [code])
-  useEffect(() => { fetch() }, [fetch])
-  return { invite, isValid, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { invite, isValid, isLoading, refresh: loadData }
 }
 
 export function useInviteCode(code?: string) {
   const [inviteCode, setInviteCode] = useState<any>(null)
   const [isValid, setIsValid] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!code) { setIsLoading(false); return }
     setIsLoading(true)
@@ -92,15 +92,15 @@ export function useInviteCode(code?: string) {
       setIsValid(valid)
     } finally { setIsLoading(false) }
   }, [code])
-  useEffect(() => { fetch() }, [fetch])
-  return { inviteCode, isValid, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { inviteCode, isValid, isLoading, refresh: loadData }
 }
 
 export function useInviteLink(token?: string) {
   const [link, setLink] = useState<any>(null)
   const [isValid, setIsValid] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!token) { setIsLoading(false); return }
     setIsLoading(true)
@@ -111,14 +111,14 @@ export function useInviteLink(token?: string) {
       setIsValid(valid)
     } finally { setIsLoading(false) }
   }, [token])
-  useEffect(() => { fetch() }, [fetch])
-  return { link, isValid, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { link, isValid, isLoading, refresh: loadData }
 }
 
 export function useInviteCampaigns(options?: { is_active?: boolean }) {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -128,14 +128,14 @@ export function useInviteCampaigns(options?: { is_active?: boolean }) {
       setCampaigns(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { campaigns, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { campaigns, isLoading, refresh: loadData }
 }
 
 export function useInviteRewards(options?: { is_active?: boolean }) {
   const [rewards, setRewards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -145,14 +145,14 @@ export function useInviteRewards(options?: { is_active?: boolean }) {
       setRewards(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { rewards, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rewards, isLoading, refresh: loadData }
 }
 
 export function useUserInviteStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; accepted: number; pending: number; conversion_rate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -164,19 +164,19 @@ export function useUserInviteStats(userId?: string) {
       setStats({ total, accepted, pending, conversion_rate: total > 0 ? (accepted / total) * 100 : 0 })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function usePendingInvites(userId?: string) {
   const [invites, setInvites] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('invites').select('*').eq('inviter_id', userId).eq('status', 'pending').order('created_at', { ascending: false }); setInvites(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { invites, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { invites, isLoading, refresh: loadData }
 }

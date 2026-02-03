@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useContract(contractId?: string) {
   const [contract, setContract] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!contractId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('contracts').select('*, contract_versions(*), contract_signatures(*)').eq('id', contractId).single(); setContract(data) } finally { setIsLoading(false) }
   }, [contractId])
-  useEffect(() => { fetch() }, [fetch])
-  return { contract, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { contract, isLoading, refresh: loadData }
 }
 
 export function useContracts(options?: { user_id?: string; status?: string; type?: string; limit?: number }) {
   const [contracts, setContracts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,40 +36,40 @@ export function useContracts(options?: { user_id?: string; status?: string; type
       setContracts(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.status, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { contracts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { contracts, isLoading, refresh: loadData }
 }
 
 export function useContractVersions(contractId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!contractId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('contract_versions').select('*').eq('contract_id', contractId).order('version', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
   }, [contractId])
-  useEffect(() => { fetch() }, [fetch])
-  return { versions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { versions, isLoading, refresh: loadData }
 }
 
 export function useContractSignatures(contractId?: string) {
   const [signatures, setSignatures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!contractId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('contract_signatures').select('*').eq('contract_id', contractId).order('signed_at', { ascending: true }); setSignatures(data || []) } finally { setIsLoading(false) }
   }, [contractId])
-  useEffect(() => { fetch() }, [fetch])
-  return { signatures, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { signatures, isLoading, refresh: loadData }
 }
 
 export function useContractTemplates(options?: { type?: string; is_active?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -80,14 +80,14 @@ export function useContractTemplates(options?: { type?: string; is_active?: bool
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function usePendingSignatures(userId?: string) {
   const [contracts, setContracts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -98,14 +98,14 @@ export function usePendingSignatures(userId?: string) {
       setContracts(data?.filter(c => !signedIds.has(c.id)) || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { contracts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { contracts, isLoading, refresh: loadData }
 }
 
 export function useContractStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; totalValue: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -118,14 +118,14 @@ export function useContractStats(userId?: string) {
       setStats({ total, byStatus, totalValue })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useExpiringContracts(userId?: string, daysAhead?: number) {
   const [contracts, setContracts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -136,6 +136,6 @@ export function useExpiringContracts(userId?: string, daysAhead?: number) {
       setContracts(data || [])
     } finally { setIsLoading(false) }
   }, [userId, daysAhead])
-  useEffect(() => { fetch() }, [fetch])
-  return { contracts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { contracts, isLoading, refresh: loadData }
 }

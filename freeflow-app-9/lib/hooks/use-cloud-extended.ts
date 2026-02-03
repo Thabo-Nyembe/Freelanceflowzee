@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useCloudProvider(providerId?: string) {
   const [provider, setProvider] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cloud_providers').select('*, cloud_resources(*)').eq('id', providerId).single(); setProvider(data) } finally { setIsLoading(false) }
   }, [providerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { provider, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { provider, isLoading, refresh: loadData }
 }
 
 export function useCloudProviders(options?: { user_id?: string; type?: string; status?: string }) {
   const [providers, setProviders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useCloudProviders(options?: { user_id?: string; type?: string; s
       setProviders(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { providers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { providers, isLoading, refresh: loadData }
 }
 
 export function useCloudResources(providerId?: string, options?: { type?: string; status?: string }) {
   const [resources, setResources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useCloudResources(providerId?: string, options?: { type?: string
       setResources(data || [])
     } finally { setIsLoading(false) }
   }, [providerId, options?.type, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { resources, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { resources, isLoading, refresh: loadData }
 }
 
 export function useCloudCosts(providerId?: string, options?: { date_from?: string; date_to?: string }) {
   const [costs, setCosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -74,27 +74,27 @@ export function useCloudCosts(providerId?: string, options?: { date_from?: strin
       setCosts(data || [])
     } finally { setIsLoading(false) }
   }, [providerId, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { costs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { costs, isLoading, refresh: loadData }
 }
 
 export function useCloudMonitoring(resourceId?: string) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!resourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cloud_monitoring').select('*').eq('resource_id', resourceId).eq('is_active', true).order('created_at', { ascending: false }); setAlerts(data || []) } finally { setIsLoading(false) }
   }, [resourceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useCloudCostSummary(userId?: string, period?: string) {
   const [summary, setSummary] = useState<{ total: number; byProvider: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -114,8 +114,8 @@ export function useCloudCostSummary(userId?: string, period?: string) {
       setSummary({ total, byProvider })
     } finally { setIsLoading(false) }
   }, [userId, period])
-  useEffect(() => { fetch() }, [fetch])
-  return { summary, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { summary, isLoading, refresh: loadData }
 }
 
 export function useResourceStatus(resourceId?: string) {
@@ -137,7 +137,7 @@ export function useResourceStatus(resourceId?: string) {
 export function useActiveResources(userId?: string) {
   const [resources, setResources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -148,6 +148,6 @@ export function useActiveResources(userId?: string) {
       setResources(data || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { resources, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { resources, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useUpload(uploadId?: string) {
   const [upload, setUpload] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!uploadId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('uploads').select('*, upload_metadata(*), upload_processing(*), users(*)').eq('id', uploadId).single(); setUpload(data) } finally { setIsLoading(false) }
   }, [uploadId])
-  useEffect(() => { fetch() }, [fetch])
-  return { upload, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { upload, isLoading, refresh: loadData }
 }
 
 export function useUploads(options?: { uploaded_by?: string; mime_type?: string; status?: string; folder_id?: string; is_public?: boolean; search?: string; limit?: number }) {
   const [uploads, setUploads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useUploads(options?: { uploaded_by?: string; mime_type?: string;
       setUploads(data || [])
     } finally { setIsLoading(false) }
   }, [options?.uploaded_by, options?.mime_type, options?.status, options?.folder_id, options?.is_public, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { uploads, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { uploads, isLoading, refresh: loadData }
 }
 
 export function useMyUploads(userId?: string, options?: { status?: string; folder_id?: string; limit?: number }) {
   const [uploads, setUploads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -58,27 +58,27 @@ export function useMyUploads(userId?: string, options?: { status?: string; folde
       setUploads(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.folder_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { uploads, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { uploads, isLoading, refresh: loadData }
 }
 
 export function useUploadChunks(uploadId?: string) {
   const [chunks, setChunks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!uploadId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('upload_chunks').select('*').eq('upload_id', uploadId).order('chunk_index', { ascending: true }); setChunks(data || []) } finally { setIsLoading(false) }
   }, [uploadId])
-  useEffect(() => { fetch() }, [fetch])
-  return { chunks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { chunks, isLoading, refresh: loadData }
 }
 
 export function useUploadMetadata(uploadId?: string) {
   const [metadata, setMetadata] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!uploadId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -89,27 +89,27 @@ export function useUploadMetadata(uploadId?: string) {
       setMetadata(result)
     } finally { setIsLoading(false) }
   }, [uploadId])
-  useEffect(() => { fetch() }, [fetch])
-  return { metadata, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { metadata, isLoading, refresh: loadData }
 }
 
 export function useUploadProcessing(uploadId?: string) {
   const [processing, setProcessing] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!uploadId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('upload_processing').select('*').eq('upload_id', uploadId).order('created_at', { ascending: false }); setProcessing(data || []) } finally { setIsLoading(false) }
   }, [uploadId])
-  useEffect(() => { fetch() }, [fetch])
-  return { processing, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { processing, isLoading, refresh: loadData }
 }
 
 export function useUploadQuota(userId?: string) {
   const [quota, setQuota] = useState<{ quota: number; used: number; remaining: number; file_limit: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -126,40 +126,40 @@ export function useUploadQuota(userId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { quota, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { quota, isLoading, refresh: loadData }
 }
 
 export function useUploadShares(uploadId?: string) {
   const [shares, setShares] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!uploadId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('upload_shares').select('*, users(*)').eq('upload_id', uploadId).eq('is_active', true); setShares(data || []) } finally { setIsLoading(false) }
   }, [uploadId])
-  useEffect(() => { fetch() }, [fetch])
-  return { shares, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { shares, isLoading, refresh: loadData }
 }
 
 export function useSharedWithMe(userId?: string, options?: { limit?: number }) {
   const [uploads, setUploads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('upload_shares').select('*, uploads(*)').eq('shared_with', userId).eq('is_active', true).order('created_at', { ascending: false }).limit(options?.limit || 50); setUploads(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { uploads, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { uploads, isLoading, refresh: loadData }
 }
 
 export function useRecentUploads(userId?: string, options?: { days?: number; limit?: number }) {
   const [uploads, setUploads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -171,27 +171,27 @@ export function useRecentUploads(userId?: string, options?: { days?: number; lim
       setUploads(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.days, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { uploads, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { uploads, isLoading, refresh: loadData }
 }
 
 export function useUploadsByType(userId?: string, mimeTypePrefix?: string, options?: { limit?: number }) {
   const [uploads, setUploads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !mimeTypePrefix) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('uploads').select('*').eq('uploaded_by', userId).eq('status', 'completed').ilike('mime_type', `${mimeTypePrefix}%`).order('created_at', { ascending: false }).limit(options?.limit || 50); setUploads(data || []) } finally { setIsLoading(false) }
   }, [userId, mimeTypePrefix, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { uploads, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { uploads, isLoading, refresh: loadData }
 }
 
 export function useUploadStats(userId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -213,19 +213,19 @@ export function useUploadStats(userId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function usePendingUploads(userId?: string) {
   const [uploads, setUploads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('uploads').select('*').eq('uploaded_by', userId).in('status', ['pending', 'uploading', 'processing']).order('created_at', { ascending: false }); setUploads(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { uploads, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { uploads, isLoading, refresh: loadData }
 }

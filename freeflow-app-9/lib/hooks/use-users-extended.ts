@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useUser(userId?: string) {
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('users').select('*, user_profiles(*), user_preferences(*)').eq('id', userId).single(); setUser(data) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { user, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { user, isLoading, refresh: loadData }
 }
 
 export function useUsers(options?: { role?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [users, setUsers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,54 +36,54 @@ export function useUsers(options?: { role?: string; is_active?: boolean; search?
       setUsers(data || [])
     } finally { setIsLoading(false) }
   }, [options?.role, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { users, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { users, isLoading, refresh: loadData }
 }
 
 export function useUserByEmail(email?: string) {
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!email) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('users').select('*, user_profiles(*)').eq('email', email).single(); setUser(data) } finally { setIsLoading(false) }
   }, [email])
-  useEffect(() => { fetch() }, [fetch])
-  return { user, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { user, isLoading, refresh: loadData }
 }
 
 export function useUserProfile(userId?: string) {
   const [profile, setProfile] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('user_profiles').select('*').eq('user_id', userId).single(); setProfile(data) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { profile, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { profile, isLoading, refresh: loadData }
 }
 
 export function useUserPreferences(userId?: string) {
   const [preferences, setPreferences] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('user_preferences').select('*').eq('user_id', userId).single(); setPreferences(data) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { preferences, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { preferences, isLoading, refresh: loadData }
 }
 
 export function useUserSessions(userId?: string, options?: { is_active?: boolean; limit?: number }) {
   const [sessions, setSessions] = useState<any[]>([])
   const [activeSessions, setActiveSessions] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -95,14 +95,14 @@ export function useUserSessions(userId?: string, options?: { is_active?: boolean
       setActiveSessions(data?.filter(s => s.is_active).length || 0)
     } finally { setIsLoading(false) }
   }, [userId, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { sessions, activeSessions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sessions, activeSessions, isLoading, refresh: loadData }
 }
 
 export function useUserDevices(userId?: string, options?: { is_active?: boolean }) {
   const [devices, setDevices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -113,8 +113,8 @@ export function useUserDevices(userId?: string, options?: { is_active?: boolean 
       setDevices(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { devices, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { devices, isLoading, refresh: loadData }
 }
 
 export function useUserSearch(query?: string, options?: { exclude_ids?: string[]; limit?: number }) {
@@ -140,7 +140,7 @@ export function useUserSearch(query?: string, options?: { exclude_ids?: string[]
 export function useOnlineUsers(options?: { limit?: number }) {
   const [users, setUsers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -153,14 +153,14 @@ export function useOnlineUsers(options?: { limit?: number }) {
       setUsers(data || [])
     } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { users, count: users.length, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { users, count: users.length, isLoading, refresh: loadData }
 }
 
 export function useRecentUsers(options?: { days?: number; limit?: number }) {
   const [users, setUsers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -171,14 +171,14 @@ export function useRecentUsers(options?: { days?: number; limit?: number }) {
       setUsers(data || [])
     } finally { setIsLoading(false) }
   }, [options?.days, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { users, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { users, isLoading, refresh: loadData }
 }
 
 export function useUserStats() {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -196,14 +196,14 @@ export function useUserStats() {
       })
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useUserVerifications(userId?: string, options?: { verification_type?: string; is_used?: boolean; limit?: number }) {
   const [verifications, setVerifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -215,6 +215,6 @@ export function useUserVerifications(userId?: string, options?: { verification_t
       setVerifications(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.verification_type, options?.is_used, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { verifications, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { verifications, isLoading, refresh: loadData }
 }

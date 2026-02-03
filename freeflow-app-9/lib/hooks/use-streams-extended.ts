@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useStream(streamId?: string) {
   const [stream, setStream] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!streamId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('streams').select('*, stream_sessions(*), stream_recordings(*)').eq('id', streamId).single(); setStream(data) } finally { setIsLoading(false) }
   }, [streamId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stream, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stream, isLoading, refresh: loadData }
 }
 
 export function useStreams(options?: { streamer_id?: string; category?: string; is_live?: boolean; stream_type?: string; search?: string; limit?: number }) {
   const [streams, setStreams] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useStreams(options?: { streamer_id?: string; category?: string; 
       setStreams(data || [])
     } finally { setIsLoading(false) }
   }, [options?.streamer_id, options?.category, options?.is_live, options?.stream_type, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { streams, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { streams, isLoading, refresh: loadData }
 }
 
 export function useLiveStreams(options?: { category?: string; limit?: number }) {
   const [streams, setStreams] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -55,15 +55,15 @@ export function useLiveStreams(options?: { category?: string; limit?: number }) 
       setStreams(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { streams, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { streams, isLoading, refresh: loadData }
 }
 
 export function useStreamViewers(streamId?: string) {
   const [viewers, setViewers] = useState<any[]>([])
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!streamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -73,14 +73,14 @@ export function useStreamViewers(streamId?: string) {
       setCount(viewerCount || 0)
     } finally { setIsLoading(false) }
   }, [streamId])
-  useEffect(() => { fetch() }, [fetch])
-  return { viewers, count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { viewers, count, isLoading, refresh: loadData }
 }
 
 export function useStreamChat(streamId?: string, options?: { limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!streamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -89,33 +89,33 @@ export function useStreamChat(streamId?: string, options?: { limit?: number }) {
       setMessages(data || [])
     } finally { setIsLoading(false) }
   }, [streamId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
   // Subscribe to new messages
   useEffect(() => {
     if (!streamId) return
     const channel = supabase.channel(`stream-chat-${streamId}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'stream_chats', filter: `stream_id=eq.${streamId}` }, (payload) => { setMessages(prev => [...prev, payload.new]) }).subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [streamId])
-  return { messages, isLoading, refresh: fetch }
+  return { messages, isLoading, refresh: loadData }
 }
 
 export function useStreamRecordings(streamId?: string) {
   const [recordings, setRecordings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!streamId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('stream_recordings').select('*').eq('stream_id', streamId).order('created_at', { ascending: false }); setRecordings(data || []) } finally { setIsLoading(false) }
   }, [streamId])
-  useEffect(() => { fetch() }, [fetch])
-  return { recordings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { recordings, isLoading, refresh: loadData }
 }
 
 export function useStreamAnalytics(streamId?: string, options?: { metric_type?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [analytics, setAnalytics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!streamId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -128,14 +128,14 @@ export function useStreamAnalytics(streamId?: string, options?: { metric_type?: 
       setAnalytics(data || [])
     } finally { setIsLoading(false) }
   }, [streamId, options?.metric_type, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { analytics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { analytics, isLoading, refresh: loadData }
 }
 
 export function useStreamCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -144,14 +144,14 @@ export function useStreamCategories() {
       setCategories(unique)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useStreamerStats(streamerId?: string) {
   const [stats, setStats] = useState<{ totalStreams: number; totalViewers: number; totalHours: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!streamerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -170,7 +170,7 @@ export function useStreamerStats(streamerId?: string) {
       setStats({ totalStreams: streams.length, totalViewers, totalHours })
     } finally { setIsLoading(false) }
   }, [streamerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 

@@ -68,20 +68,20 @@ export interface CommentWithReactions {
 export function useComment(commentId?: string) {
   const [comment, setComment] = useState<ExtendedCommentRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('comments').select('*, comment_replies(*), comment_reactions(*)').eq('id', commentId).single(); setComment(data as ExtendedCommentRecord | null) } finally { setIsLoading(false) }
   }, [commentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { comment, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comment, isLoading, refresh: loadData }
 }
 
 export function useComments(targetType?: string, targetId?: string, options?: { parent_id?: string; limit?: number }) {
   const [comments, setComments] = useState<CommentWithReactions[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!targetType || !targetId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -93,8 +93,8 @@ export function useComments(targetType?: string, targetId?: string, options?: { 
       setComments((data as CommentWithReactions[]) || [])
     } finally { setIsLoading(false) }
   }, [targetType, targetId, options?.parent_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { comments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comments, isLoading, refresh: loadData }
 }
 
 export function useCommentsRealtime(targetType?: string, targetId?: string) {
@@ -116,40 +116,40 @@ export function useCommentsRealtime(targetType?: string, targetId?: string) {
 export function useCommentReplies(parentId?: string) {
   const [replies, setReplies] = useState<CommentWithReactions[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!parentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('comments').select('*, comment_reactions(*)').eq('parent_id', parentId).order('created_at', { ascending: true }); setReplies((data as CommentWithReactions[]) || []) } finally { setIsLoading(false) }
   }, [parentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { replies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { replies, isLoading, refresh: loadData }
 }
 
 export function useCommentReactions(commentId?: string) {
   const [reactions, setReactions] = useState<CommentReactionRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('comment_reactions').select('*').eq('comment_id', commentId); setReactions((data as CommentReactionRecord[]) || []) } finally { setIsLoading(false) }
   }, [commentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reactions, isLoading, refresh: loadData }
 }
 
 export function useCommentCount(targetType?: string, targetId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!targetType || !targetId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { count: total } = await supabase.from('comments').select('*', { count: 'exact', head: true }).eq('target_type', targetType).eq('target_id', targetId); setCount(total || 0) } finally { setIsLoading(false) }
   }, [targetType, targetId])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 /**
@@ -172,14 +172,14 @@ export interface UserCommentRecord {
 export function useUserComments(userId?: string, options?: { limit?: number }) {
   const [comments, setComments] = useState<UserCommentRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('comments').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setComments((data as UserCommentRecord[]) || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { comments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { comments, isLoading, refresh: loadData }
 }
 
 /**
@@ -192,7 +192,7 @@ interface ReactionTypeResult {
 export function useReactionSummary(commentId?: string) {
   const [summary, setSummary] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -202,6 +202,6 @@ export function useReactionSummary(commentId?: string) {
       setSummary(counts)
     } finally { setIsLoading(false) }
   }, [commentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { summary, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { summary, isLoading, refresh: loadData }
 }

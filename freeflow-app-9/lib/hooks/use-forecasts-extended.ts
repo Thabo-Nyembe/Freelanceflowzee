@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useForecast(forecastId?: string) {
   const [forecast, setForecast] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!forecastId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forecasts').select('*, forecast_predictions(*), forecast_accuracy(*)').eq('id', forecastId).single(); setForecast(data) } finally { setIsLoading(false) }
   }, [forecastId])
-  useEffect(() => { fetch() }, [fetch])
-  return { forecast, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { forecast, isLoading, refresh: loadData }
 }
 
 export function useForecasts(options?: { type?: string; status?: string; created_by?: string; target_metric?: string; limit?: number }) {
   const [forecasts, setForecasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function useForecasts(options?: { type?: string; status?: string; created
       setForecasts(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.status, options?.created_by, options?.target_metric, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { forecasts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { forecasts, isLoading, refresh: loadData }
 }
 
 export function useForecastModels(options?: { type?: string; is_active?: boolean }) {
   const [models, setModels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -55,14 +55,14 @@ export function useForecastModels(options?: { type?: string; is_active?: boolean
       setModels(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { models, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { models, isLoading, refresh: loadData }
 }
 
 export function useForecastPredictions(forecastId?: string, options?: { from_date?: string; to_date?: string }) {
   const [predictions, setPredictions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!forecastId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -74,14 +74,14 @@ export function useForecastPredictions(forecastId?: string, options?: { from_dat
       setPredictions(data || [])
     } finally { setIsLoading(false) }
   }, [forecastId, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { predictions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { predictions, isLoading, refresh: loadData }
 }
 
 export function useForecastAccuracy(forecastId?: string) {
   const [accuracy, setAccuracy] = useState<{ records: any[]; avgError: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!forecastId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -91,39 +91,39 @@ export function useForecastAccuracy(forecastId?: string) {
       setAccuracy({ records: data || [], avgError })
     } finally { setIsLoading(false) }
   }, [forecastId])
-  useEffect(() => { fetch() }, [fetch])
-  return { accuracy, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { accuracy, isLoading, refresh: loadData }
 }
 
 export function useForecastScenarios(forecastId?: string) {
   const [scenarios, setScenarios] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!forecastId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forecast_scenarios').select('*').eq('forecast_id', forecastId).order('created_at', { ascending: false }); setScenarios(data || []) } finally { setIsLoading(false) }
   }, [forecastId])
-  useEffect(() => { fetch() }, [fetch])
-  return { scenarios, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { scenarios, isLoading, refresh: loadData }
 }
 
 export function useRecentForecasts(limit?: number) {
   const [forecasts, setForecasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('forecasts').select('*').order('created_at', { ascending: false }).limit(limit || 10); setForecasts(data || []) } finally { setIsLoading(false) }
   }, [limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { forecasts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { forecasts, isLoading, refresh: loadData }
 }
 
 export function useForecastsByType() {
   const [byType, setByType] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -133,6 +133,6 @@ export function useForecastsByType() {
       setByType(grouped)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { byType, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { byType, isLoading, refresh: loadData }
 }

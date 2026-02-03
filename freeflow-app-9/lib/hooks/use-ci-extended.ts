@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function usePipeline(pipelineId?: string) {
   const [pipeline, setPipeline] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ci_pipelines').select('*, ci_stages(*, ci_jobs(*))').eq('id', pipelineId).single(); setPipeline(data) } finally { setIsLoading(false) }
   }, [pipelineId])
-  useEffect(() => { fetch() }, [fetch])
-  return { pipeline, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { pipeline, isLoading, refresh: loadData }
 }
 
 export function usePipelines(options?: { project_id?: string; status?: string; branch?: string; limit?: number }) {
   const [pipelines, setPipelines] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function usePipelines(options?: { project_id?: string; status?: string; b
       setPipelines(data || [])
     } finally { setIsLoading(false) }
   }, [options?.project_id, options?.status, options?.branch, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { pipelines, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { pipelines, isLoading, refresh: loadData }
 }
 
 export function usePipelineStages(pipelineId?: string) {
   const [stages, setStages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ci_stages').select('*, ci_jobs(*)').eq('pipeline_id', pipelineId).order('position', { ascending: true }); setStages(data || []) } finally { setIsLoading(false) }
   }, [pipelineId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stages, isLoading, refresh: loadData }
 }
 
 export function usePipelineJobs(pipelineId?: string, stageId?: string) {
   const [jobs, setJobs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -67,21 +67,21 @@ export function usePipelineJobs(pipelineId?: string, stageId?: string) {
       setJobs(data || [])
     } finally { setIsLoading(false) }
   }, [pipelineId, stageId])
-  useEffect(() => { fetch() }, [fetch])
-  return { jobs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { jobs, isLoading, refresh: loadData }
 }
 
 export function useJobArtifacts(jobId?: string) {
   const [artifacts, setArtifacts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ci_artifacts').select('*').eq('job_id', jobId).order('created_at', { ascending: false }); setArtifacts(data || []) } finally { setIsLoading(false) }
   }, [jobId])
-  useEffect(() => { fetch() }, [fetch])
-  return { artifacts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { artifacts, isLoading, refresh: loadData }
 }
 
 export function usePipelineRealtime(pipelineId?: string) {
@@ -107,7 +107,7 @@ export function usePipelineRealtime(pipelineId?: string) {
 export function usePipelineStats(projectId?: string) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; successRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -122,19 +122,19 @@ export function usePipelineStats(projectId?: string) {
       setStats({ total, byStatus, successRate })
     } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useRecentPipelines(projectId?: string, limit?: number) {
   const [pipelines, setPipelines] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ci_pipelines').select('*').eq('project_id', projectId).order('created_at', { ascending: false }).limit(limit || 10); setPipelines(data || []) } finally { setIsLoading(false) }
   }, [projectId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { pipelines, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { pipelines, isLoading, refresh: loadData }
 }

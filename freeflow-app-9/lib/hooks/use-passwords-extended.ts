@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function usePasswordPolicy(organizationId?: string) {
   const [policy, setPolicy] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -30,28 +30,28 @@ export function usePasswordPolicy(organizationId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { policy, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { policy, isLoading, refresh: loadData }
 }
 
 export function usePasswordHistory(userId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('password_history').select('id, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 10); setHistory(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function usePasswordReset(token?: string) {
   const [resetData, setResetData] = useState<any>(null)
   const [isValid, setIsValid] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!token) { setIsLoading(false); return }
     setIsLoading(true)
@@ -65,26 +65,26 @@ export function usePasswordReset(token?: string) {
       }
     } finally { setIsLoading(false) }
   }, [token])
-  useEffect(() => { fetch() }, [fetch])
-  return { resetData, isValid, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { resetData, isValid, isLoading, refresh: loadData }
 }
 
 export function usePendingResets(options?: { limit?: number }) {
   const [resets, setResets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('password_resets').select('*').eq('status', 'pending').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }).limit(options?.limit || 50); setResets(data || []) } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { resets, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { resets, isLoading, refresh: loadData }
 }
 
 export function usePasswordRequirements(organizationId?: string) {
   const [requirements, setRequirements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -94,8 +94,8 @@ export function usePasswordRequirements(organizationId?: string) {
       setRequirements(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { requirements, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { requirements, isLoading, refresh: loadData }
 }
 
 export function usePasswordValidation(password: string, policy?: any) {
@@ -122,20 +122,20 @@ export function usePasswordValidation(password: string, policy?: any) {
 export function useUserResetRequests(email?: string) {
   const [requests, setRequests] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!email) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('password_resets').select('*').eq('email', email).order('created_at', { ascending: false }).limit(10); setRequests(data || []) } finally { setIsLoading(false) }
   }, [email])
-  useEffect(() => { fetch() }, [fetch])
-  return { requests, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { requests, isLoading, refresh: loadData }
 }
 
 export function usePasswordExpiry(userId?: string, policy?: any) {
   const [expiryInfo, setExpiryInfo] = useState<{ isExpired: boolean; daysUntilExpiry: number; lastChanged: string | null } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -157,6 +157,6 @@ export function usePasswordExpiry(userId?: string, policy?: any) {
       }
     } finally { setIsLoading(false) }
   }, [userId, policy])
-  useEffect(() => { fetch() }, [fetch])
-  return { expiryInfo, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { expiryInfo, isLoading, refresh: loadData }
 }

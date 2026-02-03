@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useExchangeRate(fromCurrency?: string, toCurrency?: string) {
   const [rate, setRate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!fromCurrency || !toCurrency) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('exchange_rates').select('*').eq('from_currency', fromCurrency).eq('to_currency', toCurrency).single(); setRate(data) } finally { setIsLoading(false) }
   }, [fromCurrency, toCurrency])
-  useEffect(() => { fetch() }, [fetch])
-  return { rate, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rate, isLoading, refresh: loadData }
 }
 
 export function useExchangeRates(options?: { base_currency?: string; provider?: string }) {
   const [rates, setRates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -35,14 +35,14 @@ export function useExchangeRates(options?: { base_currency?: string; provider?: 
       setRates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.base_currency, options?.provider])
-  useEffect(() => { fetch() }, [fetch])
-  return { rates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rates, isLoading, refresh: loadData }
 }
 
 export function useUserExchangeTransactions(userId?: string, options?: { status?: string; from_currency?: string; limit?: number }) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useUserExchangeTransactions(userId?: string, options?: { status?
       setTransactions(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.from_currency, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { transactions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { transactions, isLoading, refresh: loadData }
 }
 
 export function useExchangeHistory(fromCurrency?: string, toCurrency?: string, options?: { days?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!fromCurrency || !toCurrency) { setIsLoading(false); return }
     setIsLoading(true)
@@ -72,14 +72,14 @@ export function useExchangeHistory(fromCurrency?: string, toCurrency?: string, o
       setHistory(data || [])
     } finally { setIsLoading(false) }
   }, [fromCurrency, toCurrency, options?.days])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useExchangeProviders(options?: { is_active?: boolean }) {
   const [providers, setProviders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -89,8 +89,8 @@ export function useExchangeProviders(options?: { is_active?: boolean }) {
       setProviders(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { providers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { providers, isLoading, refresh: loadData }
 }
 
 export function useCurrencyConverter(amount?: number, fromCurrency?: string, toCurrency?: string) {
@@ -112,7 +112,7 @@ export function useCurrencyConverter(amount?: number, fromCurrency?: string, toC
 export function useAvailableCurrencies() {
   const [currencies, setCurrencies] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -122,14 +122,14 @@ export function useAvailableCurrencies() {
       setCurrencies([...allCurrencies].sort())
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { currencies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { currencies, isLoading, refresh: loadData }
 }
 
 export function useExchangeStats(userId?: string) {
   const [stats, setStats] = useState<{ totalTransactions: number; totalVolume: number; byCurrency: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -142,6 +142,6 @@ export function useExchangeStats(userId?: string) {
       setStats({ totalTransactions, totalVolume, byCurrency })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

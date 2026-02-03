@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useMilestones, useMilestoneMutations, type Milestone as HookMilestone, type MilestoneFilters } from '@/lib/hooks/use-milestones'
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
-import { useSession } from 'next-auth/react'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const supabase = createClient()
 
@@ -340,10 +340,11 @@ const initialFormState: MilestoneFormState = {
 
 export default function MilestonesClient() {
   // Demo mode detection
-  const { data: nextAuthSession, status: sessionStatus } = useSession()
-  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const { userId: currentUserId, userEmail, userName, isDemo, loading: sessionLoading } = useCurrentUser()
+  const sessionStatus = sessionLoading ? "loading" : "authenticated"
+  const isDemoAccount = userEmail === 'alex@freeflow.io' ||
+                        userEmail === 'sarah@freeflow.io' ||
+                        userEmail === 'mike@freeflow.io'
 
   // Demo team members for milestones (memoized to prevent infinite re-renders)
   const demoTeamMembers: TeamMember[] = useMemo(() => [

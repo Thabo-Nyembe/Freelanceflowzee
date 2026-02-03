@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useAudienceSegment(segmentId?: string) {
   const [segment, setSegment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!segmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('audience_segments').select('*, audience_rules(*)').eq('id', segmentId).single(); setSegment(data) } finally { setIsLoading(false) }
   }, [segmentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { segment, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { segment, isLoading, refresh: loadData }
 }
 
 export function useAudienceSegments(options?: { user_id?: string; type?: string; status?: string; limit?: number }) {
   const [segments, setSegments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useAudienceSegments(options?: { user_id?: string; type?: string;
       setSegments(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { segments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { segments, isLoading, refresh: loadData }
 }
 
 export function useAudienceMembers(segmentId?: string, options?: { limit?: number }) {
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!segmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('audience_members').select('*').eq('segment_id', segmentId).order('joined_at', { ascending: false }).limit(options?.limit || 50); setMembers(data || []) } finally { setIsLoading(false) }
   }, [segmentId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { members, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { members, isLoading, refresh: loadData }
 }
 
 export function useAudienceStats(userId?: string) {
   const [stats, setStats] = useState<{ totalSegments: number; totalMembers: number; byType: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,21 +69,21 @@ export function useAudienceStats(userId?: string) {
       setStats({ totalSegments, totalMembers, byType })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useLargestAudienceSegments(userId?: string, options?: { limit?: number }) {
   const [segments, setSegments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('audience_segments').select('*').eq('user_id', userId).eq('status', 'active').order('member_count', { ascending: false }).limit(options?.limit || 10); setSegments(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { segments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { segments, isLoading, refresh: loadData }
 }
 
 export function useIsMemberOfSegment(segmentId?: string, memberId?: string) {

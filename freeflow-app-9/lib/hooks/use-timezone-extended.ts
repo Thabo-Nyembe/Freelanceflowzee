@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useTimezone(timezoneId?: string) {
   const [timezone, setTimezone] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!timezoneId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useTimezone(timezoneId?: string) {
       setTimezone(data)
     } finally { setIsLoading(false) }
   }, [timezoneId])
-  useEffect(() => { fetch() }, [fetch])
-  return { timezone, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timezone, isLoading, refresh: loadData }
 }
 
 export function useTimezones(options?: { region?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useTimezones(options?: { region?: string }) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.region])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useTimezoneRegions() {
   const [regions, setRegions] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -52,14 +52,14 @@ export function useTimezoneRegions() {
       setRegions(uniqueRegions)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { regions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { regions, isLoading, refresh: loadData }
 }
 
 export function useUserTimezone(userId?: string) {
   const [timezone, setTimezone] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -68,8 +68,8 @@ export function useUserTimezone(userId?: string) {
       setTimezone(data?.timezones || null)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { timezone, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { timezone, isLoading, refresh: loadData }
 }
 
 export function useTimezoneSearch(query?: string) {

@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useConfigs(category?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -20,19 +20,19 @@ export function useConfigs(category?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [category])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useConfigVersions(configId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!configId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('config_versions').select('*').eq('config_id', configId).order('version', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [configId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

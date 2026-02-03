@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 
 import React, { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/lib/hooks/use-expenses'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
 import { toast } from 'sonner'
@@ -253,10 +253,11 @@ const getExpensesQuickActions = (
 
 export default function ExpensesClient({ initialExpenses }: ExpensesClientProps) {
   // Demo mode detection for investor demos
-  const { data: nextAuthSession, status: sessionStatus } = useSession()
-  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const { userId: currentUserId, userEmail, userName, isDemo, loading: sessionLoading } = useCurrentUser()
+  const sessionStatus = sessionLoading ? "loading" : "authenticated"
+  const isDemoAccount = userEmail === 'alex@freeflow.io' ||
+                        userEmail === 'sarah@freeflow.io' ||
+                        userEmail === 'mike@freeflow.io'
   const isSessionLoading = sessionStatus === 'loading'
 
   const supabase = createClient()

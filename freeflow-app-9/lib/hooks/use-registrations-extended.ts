@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useRegistration(registrationId?: string) {
   const [registration, setRegistration] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!registrationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('registrations').select('*, registration_responses(*), users(*), events(*)').eq('id', registrationId).single(); setRegistration(data) } finally { setIsLoading(false) }
   }, [registrationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { registration, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { registration, isLoading, refresh: loadData }
 }
 
 export function useRegistrations(options?: { event_id?: string; entity_type?: string; entity_id?: string; user_id?: string; status?: string; search?: string; limit?: number }) {
   const [registrations, setRegistrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,27 +39,27 @@ export function useRegistrations(options?: { event_id?: string; entity_type?: st
       setRegistrations(data || [])
     } finally { setIsLoading(false) }
   }, [options?.event_id, options?.entity_type, options?.entity_id, options?.user_id, options?.status, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { registrations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { registrations, isLoading, refresh: loadData }
 }
 
 export function useRegistrationByCode(confirmationCode?: string) {
   const [registration, setRegistration] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!confirmationCode) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('registrations').select('*, registration_responses(*), users(*), events(*)').eq('confirmation_code', confirmationCode.toUpperCase()).single(); setRegistration(data) } finally { setIsLoading(false) }
   }, [confirmationCode])
-  useEffect(() => { fetch() }, [fetch])
-  return { registration, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { registration, isLoading, refresh: loadData }
 }
 
 export function useRegistrationFields(entityType?: string, entityId?: string) {
   const [fields, setFields] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -70,27 +70,27 @@ export function useRegistrationFields(entityType?: string, entityId?: string) {
       setFields(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { fields, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { fields, isLoading, refresh: loadData }
 }
 
 export function useRegistrationResponses(registrationId?: string) {
   const [responses, setResponses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!registrationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('registration_responses').select('*, registration_fields(*)').eq('registration_id', registrationId); setResponses(data || []) } finally { setIsLoading(false) }
   }, [registrationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { responses, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { responses, isLoading, refresh: loadData }
 }
 
 export function useMyRegistrations(userId?: string, options?: { status?: string; limit?: number }) {
   const [registrations, setRegistrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -101,14 +101,14 @@ export function useMyRegistrations(userId?: string, options?: { status?: string;
       setRegistrations(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { registrations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { registrations, isLoading, refresh: loadData }
 }
 
 export function useWaitlist(options?: { event_id?: string; entity_type?: string; entity_id?: string; status?: string; limit?: number }) {
   const [waitlist, setWaitlist] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -121,14 +121,14 @@ export function useWaitlist(options?: { event_id?: string; entity_type?: string;
       setWaitlist(data || [])
     } finally { setIsLoading(false) }
   }, [options?.event_id, options?.entity_type, options?.entity_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { waitlist, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { waitlist, isLoading, refresh: loadData }
 }
 
 export function useRegistrationStats(options?: { event_id?: string; entity_type?: string; entity_id?: string }) {
   const [stats, setStats] = useState<{ total: number; pending: number; confirmed: number; checkedIn: number; cancelled: number; checkInRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -147,14 +147,14 @@ export function useRegistrationStats(options?: { event_id?: string; entity_type?
       setStats({ total, pending, confirmed, checkedIn, cancelled, checkInRate })
     } finally { setIsLoading(false) }
   }, [options?.event_id, options?.entity_type, options?.entity_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useConfirmedRegistrations(options?: { event_id?: string; entity_id?: string; limit?: number }) {
   const [registrations, setRegistrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -165,14 +165,14 @@ export function useConfirmedRegistrations(options?: { event_id?: string; entity_
       setRegistrations(data || [])
     } finally { setIsLoading(false) }
   }, [options?.event_id, options?.entity_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { registrations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { registrations, isLoading, refresh: loadData }
 }
 
 export function usePendingRegistrations(options?: { event_id?: string; entity_id?: string; limit?: number }) {
   const [registrations, setRegistrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -183,6 +183,6 @@ export function usePendingRegistrations(options?: { event_id?: string; entity_id
       setRegistrations(data || [])
     } finally { setIsLoading(false) }
   }, [options?.event_id, options?.entity_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { registrations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { registrations, isLoading, refresh: loadData }
 }

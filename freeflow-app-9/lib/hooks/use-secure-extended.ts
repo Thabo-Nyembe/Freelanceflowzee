@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useSecureFileDelivery(deliveryId?: string) {
   const [delivery, setDelivery] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!deliveryId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useSecureFileDelivery(deliveryId?: string) {
       setDelivery(data)
     } finally { setIsLoading(false) }
   }, [deliveryId])
-  useEffect(() => { fetch() }, [fetch])
-  return { delivery, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { delivery, isLoading, refresh: loadData }
 }
 
 export function useSecureFileDeliveries(options?: { owner_id?: string; recipient_id?: string; status?: string; limit?: number }) {
   const [deliveries, setDeliveries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,15 +39,15 @@ export function useSecureFileDeliveries(options?: { owner_id?: string; recipient
       setDeliveries(data || [])
     } finally { setIsLoading(false) }
   }, [options?.owner_id, options?.recipient_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { deliveries, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deliveries, isLoading, refresh: loadData }
 }
 
 export function useSecureFileDeliveryByToken(accessToken?: string) {
   const [delivery, setDelivery] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!accessToken) { setIsLoading(false); return }
     setIsLoading(true)
@@ -60,14 +60,14 @@ export function useSecureFileDeliveryByToken(accessToken?: string) {
       setDelivery(data)
     } catch { setError('Failed to load delivery') } finally { setIsLoading(false) }
   }, [accessToken])
-  useEffect(() => { fetch() }, [fetch])
-  return { delivery, error, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { delivery, error, isLoading, refresh: loadData }
 }
 
 export function useSentSecureDeliveries(ownerId?: string, options?: { status?: string; limit?: number }) {
   const [deliveries, setDeliveries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ownerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -78,14 +78,14 @@ export function useSentSecureDeliveries(ownerId?: string, options?: { status?: s
       setDeliveries(data || [])
     } finally { setIsLoading(false) }
   }, [ownerId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { deliveries, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deliveries, isLoading, refresh: loadData }
 }
 
 export function useReceivedSecureDeliveries(recipientId?: string, options?: { status?: string; limit?: number }) {
   const [deliveries, setDeliveries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!recipientId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -96,14 +96,14 @@ export function useReceivedSecureDeliveries(recipientId?: string, options?: { st
       setDeliveries(data || [])
     } finally { setIsLoading(false) }
   }, [recipientId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { deliveries, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deliveries, isLoading, refresh: loadData }
 }
 
 export function useSecureDeliveryStats(ownerId?: string) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; totalDownloads: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ownerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -115,14 +115,14 @@ export function useSecureDeliveryStats(ownerId?: string) {
       setStats({ total: data.length, byStatus, totalDownloads })
     } finally { setIsLoading(false) }
   }, [ownerId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useSecureShareToken(tokenId?: string) {
   const [token, setToken] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tokenId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -131,15 +131,15 @@ export function useSecureShareToken(tokenId?: string) {
       setToken(data)
     } finally { setIsLoading(false) }
   }, [tokenId])
-  useEffect(() => { fetch() }, [fetch])
-  return { token, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { token, isLoading, refresh: loadData }
 }
 
 export function useSecureShareTokenByToken(tokenValue?: string) {
   const [token, setToken] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tokenValue) { setIsLoading(false); return }
     setIsLoading(true)
@@ -152,14 +152,14 @@ export function useSecureShareTokenByToken(tokenValue?: string) {
       setToken(data)
     } catch { setError('Failed to load share token') } finally { setIsLoading(false) }
   }, [tokenValue])
-  useEffect(() => { fetch() }, [fetch])
-  return { token, error, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { token, error, isLoading, refresh: loadData }
 }
 
 export function useUserSecureShareTokens(userId?: string, options?: { video_id?: string; is_active?: boolean; limit?: number }) {
   const [tokens, setTokens] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -171,14 +171,14 @@ export function useUserSecureShareTokens(userId?: string, options?: { video_id?:
       setTokens(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.video_id, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tokens, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tokens, isLoading, refresh: loadData }
 }
 
 export function useActiveSecureShareTokens(userId?: string, options?: { limit?: number }) {
   const [tokens, setTokens] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -187,8 +187,8 @@ export function useActiveSecureShareTokens(userId?: string, options?: { limit?: 
       setTokens(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tokens, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tokens, isLoading, refresh: loadData }
 }
 
 export function useSecureDeliveryRealtime(ownerId?: string) {
@@ -210,7 +210,7 @@ export function useSecureDeliveryRealtime(ownerId?: string) {
 export function usePendingSecureDeliveries(recipientId?: string) {
   const [deliveries, setDeliveries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!recipientId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -219,6 +219,6 @@ export function usePendingSecureDeliveries(recipientId?: string) {
       setDeliveries(data || [])
     } finally { setIsLoading(false) }
   }, [recipientId])
-  useEffect(() => { fetch() }, [fetch])
-  return { deliveries, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deliveries, isLoading, refresh: loadData }
 }

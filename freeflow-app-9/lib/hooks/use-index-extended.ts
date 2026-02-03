@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useIndexes(indexType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -20,14 +20,14 @@ export function useIndexes(indexType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [indexType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useIndexById(indexId?: string) {
   const [index, setIndex] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!indexId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -36,14 +36,14 @@ export function useIndexById(indexId?: string) {
       setIndex(data)
     } finally { setIsLoading(false) }
   }, [indexId])
-  useEffect(() => { fetch() }, [fetch])
-  return { index, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { index, isLoading, refresh: loadData }
 }
 
 export function useIndexStats(indexId?: string) {
   const [entryCount, setEntryCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!indexId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -52,6 +52,6 @@ export function useIndexStats(indexId?: string) {
       setEntryCount(count || 0)
     } finally { setIsLoading(false) }
   }, [indexId])
-  useEffect(() => { fetch() }, [fetch])
-  return { entryCount, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { entryCount, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useChurnPrediction(predictionId?: string) {
   const [prediction, setPrediction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!predictionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('churn_predictions').select('*, churn_indicators(*)').eq('id', predictionId).single(); setPrediction(data) } finally { setIsLoading(false) }
   }, [predictionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { prediction, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { prediction, isLoading, refresh: loadData }
 }
 
 export function useChurnPredictions(options?: { risk_level?: string; status?: string; min_score?: number; limit?: number }) {
   const [predictions, setPredictions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,39 +36,39 @@ export function useChurnPredictions(options?: { risk_level?: string; status?: st
       setPredictions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.risk_level, options?.status, options?.min_score, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { predictions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { predictions, isLoading, refresh: loadData }
 }
 
 export function useHighRiskCustomers(threshold?: number, limit?: number) {
   const [customers, setCustomers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('churn_predictions').select('*').eq('status', 'active').gte('risk_score', threshold || 70).order('risk_score', { ascending: false }).limit(limit || 50); setCustomers(data || []) } finally { setIsLoading(false) }
   }, [threshold, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { customers, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { customers, isLoading, refresh: loadData }
 }
 
 export function useChurnIndicators(predictionId?: string) {
   const [indicators, setIndicators] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!predictionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('churn_indicators').select('*').eq('prediction_id', predictionId).order('weight', { ascending: false }); setIndicators(data || []) } finally { setIsLoading(false) }
   }, [predictionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { indicators, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { indicators, isLoading, refresh: loadData }
 }
 
 export function useChurnInterventions(options?: { customer_id?: string; status?: string; limit?: number }) {
   const [interventions, setInterventions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -79,14 +79,14 @@ export function useChurnInterventions(options?: { customer_id?: string; status?:
       setInterventions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.customer_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { interventions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { interventions, isLoading, refresh: loadData }
 }
 
 export function useChurnStats() {
   const [stats, setStats] = useState<{ total: number; highRisk: number; mediumRisk: number; lowRisk: number; avgScore: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -100,14 +100,14 @@ export function useChurnStats() {
       setStats({ total, highRisk, mediumRisk, lowRisk, avgScore })
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useChurnAnalysis(options?: { date_from?: string; date_to?: string }) {
   const [analysis, setAnalysis] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -118,6 +118,6 @@ export function useChurnAnalysis(options?: { date_from?: string; date_to?: strin
       setAnalysis(data || [])
     } finally { setIsLoading(false) }
   }, [options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { analysis, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { analysis, isLoading, refresh: loadData }
 }

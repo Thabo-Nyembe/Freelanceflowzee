@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function useReminder(reminderId?: string) {
   const [reminder, setReminder] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!reminderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('reminders').select('*, reminder_recipients(*), reminder_schedules(*), users(*)').eq('id', reminderId).single(); setReminder(data) } finally { setIsLoading(false) }
   }, [reminderId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reminder, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reminder, isLoading, refresh: loadData }
 }
 
 export function useReminders(options?: { user_id?: string; entity_type?: string; entity_id?: string; status?: string; priority?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useReminders(options?: { user_id?: string; entity_type?: string;
       setReminders(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.entity_type, options?.entity_id, options?.status, options?.priority, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reminders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reminders, isLoading, refresh: loadData }
 }
 
 export function useUpcomingReminders(userId?: string, options?: { hours?: number; limit?: number }) {
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -74,14 +74,14 @@ export function useUpcomingReminders(userId?: string, options?: { hours?: number
       setReminders(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.hours, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reminders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reminders, isLoading, refresh: loadData }
 }
 
 export function useOverdueReminders(userId?: string, options?: { limit?: number }) {
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -92,14 +92,14 @@ export function useOverdueReminders(userId?: string, options?: { limit?: number 
       setReminders(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reminders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reminders, isLoading, refresh: loadData }
 }
 
 export function useTodayReminders(userId?: string) {
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -112,28 +112,28 @@ export function useTodayReminders(userId?: string) {
       setReminders(data || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { reminders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reminders, isLoading, refresh: loadData }
 }
 
 export function useReminderRecipients(reminderId?: string) {
   const [recipients, setRecipients] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!reminderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('reminder_recipients').select('*, users(*)').eq('reminder_id', reminderId); setRecipients(data || []) } finally { setIsLoading(false) }
   }, [reminderId])
-  useEffect(() => { fetch() }, [fetch])
-  return { recipients, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { recipients, isLoading, refresh: loadData }
 }
 
 export function useReminderTemplates(options?: { category?: string; is_active?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -145,28 +145,28 @@ export function useReminderTemplates(options?: { category?: string; is_active?: 
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function useReminderHistory(reminderId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!reminderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('reminder_history').select('*, users(*)').eq('reminder_id', reminderId).order('created_at', { ascending: false }); setHistory(data || []) } finally { setIsLoading(false) }
   }, [reminderId])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useMyPendingReminders(userId?: string, options?: { limit?: number }) {
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -176,14 +176,14 @@ export function useMyPendingReminders(userId?: string, options?: { limit?: numbe
       setReminders(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reminders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reminders, isLoading, refresh: loadData }
 }
 
 export function useSnoozedReminders(userId?: string, options?: { limit?: number }) {
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -193,14 +193,14 @@ export function useSnoozedReminders(userId?: string, options?: { limit?: number 
       setReminders(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reminders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reminders, isLoading, refresh: loadData }
 }
 
 export function useHighPriorityReminders(userId?: string, options?: { limit?: number }) {
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -210,6 +210,6 @@ export function useHighPriorityReminders(userId?: string, options?: { limit?: nu
       setReminders(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reminders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reminders, isLoading, refresh: loadData }
 }

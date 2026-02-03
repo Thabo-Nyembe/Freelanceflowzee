@@ -11,33 +11,33 @@ import { createClient } from '@/lib/supabase/client'
 export function useMerchant(merchantId?: string) {
   const [merchant, setMerchant] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!merchantId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('merchants').select('*, merchant_accounts(*), merchant_settings(*)').eq('id', merchantId).single(); setMerchant(data) } finally { setIsLoading(false) }
   }, [merchantId])
-  useEffect(() => { fetch() }, [fetch])
-  return { merchant, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { merchant, isLoading, refresh: loadData }
 }
 
 export function useUserMerchant(userId?: string) {
   const [merchant, setMerchant] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('merchants').select('*, merchant_accounts(*), merchant_settings(*)').eq('user_id', userId).single(); setMerchant(data) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { merchant, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { merchant, isLoading, refresh: loadData }
 }
 
 export function useMerchants(options?: { status?: string; verification_status?: string; business_type?: string; limit?: number }) {
   const [merchants, setMerchants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -49,27 +49,27 @@ export function useMerchants(options?: { status?: string; verification_status?: 
       setMerchants(data || [])
     } finally { setIsLoading(false) }
   }, [options?.status, options?.verification_status, options?.business_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { merchants, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { merchants, isLoading, refresh: loadData }
 }
 
 export function useMerchantAccounts(merchantId?: string) {
   const [accounts, setAccounts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!merchantId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('merchant_accounts').select('*').eq('merchant_id', merchantId); setAccounts(data || []) } finally { setIsLoading(false) }
   }, [merchantId])
-  useEffect(() => { fetch() }, [fetch])
-  return { accounts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { accounts, isLoading, refresh: loadData }
 }
 
 export function useMerchantProducts(merchantId?: string, options?: { status?: string; category?: string; limit?: number }) {
   const [products, setProducts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!merchantId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -81,14 +81,14 @@ export function useMerchantProducts(merchantId?: string, options?: { status?: st
       setProducts(data || [])
     } finally { setIsLoading(false) }
   }, [merchantId, options?.status, options?.category, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { products, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { products, isLoading, refresh: loadData }
 }
 
 export function useMerchantOrders(merchantId?: string, options?: { status?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [orders, setOrders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!merchantId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -101,14 +101,14 @@ export function useMerchantOrders(merchantId?: string, options?: { status?: stri
       setOrders(data || [])
     } finally { setIsLoading(false) }
   }, [merchantId, options?.status, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { orders, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { orders, isLoading, refresh: loadData }
 }
 
 export function useMerchantPayouts(merchantId?: string, options?: { status?: string; limit?: number }) {
   const [payouts, setPayouts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!merchantId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -119,27 +119,27 @@ export function useMerchantPayouts(merchantId?: string, options?: { status?: str
       setPayouts(data || [])
     } finally { setIsLoading(false) }
   }, [merchantId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { payouts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { payouts, isLoading, refresh: loadData }
 }
 
 export function useMerchantSettings(merchantId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!merchantId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('merchant_settings').select('*').eq('merchant_id', merchantId).single(); setSettings(data) } finally { setIsLoading(false) }
   }, [merchantId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function useMerchantStats(merchantId?: string) {
   const [stats, setStats] = useState<{ totalProducts: number; totalOrders: number; totalRevenue: number; pendingPayouts: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!merchantId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -156,18 +156,18 @@ export function useMerchantStats(merchantId?: string) {
       setStats({ totalProducts, totalOrders, totalRevenue, pendingPayouts })
     } finally { setIsLoading(false) }
   }, [merchantId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function usePendingMerchants(options?: { limit?: number }) {
   const [merchants, setMerchants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('merchants').select('*').eq('verification_status', 'pending').order('created_at', { ascending: true }).limit(options?.limit || 50); setMerchants(data || []) } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { merchants, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { merchants, isLoading, refresh: loadData }
 }

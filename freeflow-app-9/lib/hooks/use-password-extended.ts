@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function usePasswordHistory(userId?: string, limit?: number) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function usePasswordHistory(userId?: string, limit?: number) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function usePasswordResetTokens(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -36,8 +36,8 @@ export function usePasswordResetTokens(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function usePasswordResetToken(token?: string) {
@@ -86,7 +86,7 @@ export function usePasswordStrength() {
 export function usePasswordLastChanged(userId?: string) {
   const [lastChanged, setLastChanged] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -95,6 +95,6 @@ export function usePasswordLastChanged(userId?: string) {
       setLastChanged(data?.created_at || null)
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { lastChanged, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { lastChanged, isLoading, refresh: loadData }
 }

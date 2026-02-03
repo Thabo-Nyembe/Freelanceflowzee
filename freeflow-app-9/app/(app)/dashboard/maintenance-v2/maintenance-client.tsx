@@ -4,7 +4,7 @@ import { useMaintenance, type MaintenanceWindow } from '@/lib/hooks/use-maintena
 import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { toast } from 'sonner'
 import {
   Wrench, CheckCircle, AlertCircle, Server,
@@ -357,10 +357,11 @@ const initialFormState: MaintenanceFormState = {
 
 export default function MaintenanceClient() {
   // Demo mode detection for investor demos
-  const { data: nextAuthSession, status: sessionStatus } = useSession()
-  const isDemoAccount = nextAuthSession?.user?.email === 'alex@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'sarah@freeflow.io' ||
-                        nextAuthSession?.user?.email === 'mike@freeflow.io'
+  const { userId: currentUserId, userEmail, userName, isDemo, loading: sessionLoading } = useCurrentUser()
+  const sessionStatus = sessionLoading ? "loading" : "authenticated"
+  const isDemoAccount = userEmail === 'alex@freeflow.io' ||
+                        userEmail === 'sarah@freeflow.io' ||
+                        userEmail === 'mike@freeflow.io'
   const isSessionLoading = sessionStatus === 'loading'
 
   const [activeTab, setActiveTab] = useState('dashboard')

@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useSnippet(snippetId?: string) {
   const [snippet, setSnippet] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!snippetId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useSnippet(snippetId?: string) {
       setSnippet(data)
     } finally { setIsLoading(false) }
   }, [snippetId])
-  useEffect(() => { fetch() }, [fetch])
-  return { snippet, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { snippet, isLoading, refresh: loadData }
 }
 
 export function useSnippets(options?: { language?: string; category?: string; isPublic?: boolean; tags?: string[] }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useSnippets(options?: { language?: string; category?: string; is
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.language, options?.category, options?.isPublic, options?.tags])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function usePopularSnippets(limit = 20, language?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -56,8 +56,8 @@ export function usePopularSnippets(limit = 20, language?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [limit, language])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useSnippetSearch(searchTerm: string, language?: string) {
@@ -81,7 +81,7 @@ export function useSnippetSearch(searchTerm: string, language?: string) {
 export function useMySnippets(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -90,6 +90,6 @@ export function useMySnippets(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useCustomField(fieldId?: string) {
   const [field, setField] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!fieldId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useCustomField(fieldId?: string) {
       setField(data)
     } finally { setIsLoading(false) }
   }, [fieldId])
-  useEffect(() => { fetch() }, [fetch])
-  return { field, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { field, isLoading, refresh: loadData }
 }
 
 export function useCustomFields(entityType?: string, workspaceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function useCustomFields(entityType?: string, workspaceId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityType, workspaceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCustomFieldValues(entityType?: string, entityId?: string) {
   const [values, setValues] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useCustomFieldValues(entityType?: string, entityId?: string) {
       setValues(valuesMap)
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { values, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { values, isLoading, refresh: loadData }
 }
 
 export function useEntityWithCustomFields(entityType?: string, entityId?: string) {
   const [data, setData] = useState<{ fields: any[]; values: Record<string, any> }>({ fields: [], values: {} })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -74,6 +74,6 @@ export function useEntityWithCustomFields(entityType?: string, entityId?: string
       setData({ fields: fieldsResult.data || [], values: valuesMap })
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { ...data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { ...data, isLoading, refresh: loadData }
 }

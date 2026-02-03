@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useMember(memberId?: string) {
   const [member, setMember] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!memberId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('members').select('*, member_roles(*), member_permissions(*), member_preferences(*)').eq('id', memberId).single(); setMember(data) } finally { setIsLoading(false) }
   }, [memberId])
-  useEffect(() => { fetch() }, [fetch])
-  return { member, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { member, isLoading, refresh: loadData }
 }
 
 export function useMembers(organizationId?: string, options?: { status?: string; role_id?: string; department?: string; limit?: number }) {
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,27 +37,27 @@ export function useMembers(organizationId?: string, options?: { status?: string;
       setMembers(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId, options?.status, options?.role_id, options?.department, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { members, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { members, isLoading, refresh: loadData }
 }
 
 export function useMemberRoles(organizationId?: string) {
   const [roles, setRoles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('member_roles').select('*').eq('organization_id', organizationId).order('name', { ascending: true }); setRoles(data || []) } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { roles, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { roles, isLoading, refresh: loadData }
 }
 
 export function useMemberInvitations(organizationId?: string, options?: { status?: string }) {
   const [invitations, setInvitations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -68,53 +68,53 @@ export function useMemberInvitations(organizationId?: string, options?: { status
       setInvitations(data || [])
     } finally { setIsLoading(false) }
   }, [organizationId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { invitations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { invitations, isLoading, refresh: loadData }
 }
 
 export function useMemberActivities(memberId?: string, options?: { limit?: number }) {
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!memberId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('member_activities').select('*').eq('member_id', memberId).order('created_at', { ascending: false }).limit(options?.limit || 50); setActivities(data || []) } finally { setIsLoading(false) }
   }, [memberId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { activities, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { activities, isLoading, refresh: loadData }
 }
 
 export function useMemberPreferences(memberId?: string) {
   const [preferences, setPreferences] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!memberId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('member_preferences').select('*').eq('member_id', memberId).single(); setPreferences(data) } finally { setIsLoading(false) }
   }, [memberId])
-  useEffect(() => { fetch() }, [fetch])
-  return { preferences, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { preferences, isLoading, refresh: loadData }
 }
 
 export function useUserMemberships(userId?: string) {
   const [memberships, setMemberships] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('members').select('*, member_roles(*)').eq('user_id', userId).eq('status', 'active'); setMemberships(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { memberships, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { memberships, isLoading, refresh: loadData }
 }
 
 export function useOrganizationStats(organizationId?: string) {
   const [stats, setStats] = useState<{ total: number; active: number; byDepartment: Record<string, number>; byRole: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -128,19 +128,19 @@ export function useOrganizationStats(organizationId?: string) {
       setStats({ total, active, byDepartment, byRole })
     } finally { setIsLoading(false) }
   }, [organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function usePendingInvitations(email?: string) {
   const [invitations, setInvitations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!email) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('member_invitations').select('*').eq('email', email).eq('status', 'pending').gte('expires_at', new Date().toISOString()); setInvitations(data || []) } finally { setIsLoading(false) }
   }, [email])
-  useEffect(() => { fetch() }, [fetch])
-  return { invitations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { invitations, isLoading, refresh: loadData }
 }

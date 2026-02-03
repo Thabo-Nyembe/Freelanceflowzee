@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useContent(contentId?: string) {
   const [content, setContent] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!contentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useContent(contentId?: string) {
       setContent(data)
     } finally { setIsLoading(false) }
   }, [contentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { content, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { content, isLoading, refresh: loadData }
 }
 
 export function useContentBySlug(slug?: string) {
   const [content, setContent] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!slug) { setIsLoading(false); return }
     setIsLoading(true)
@@ -36,14 +36,14 @@ export function useContentBySlug(slug?: string) {
       setContent(data)
     } finally { setIsLoading(false) }
   }, [slug])
-  useEffect(() => { fetch() }, [fetch])
-  return { content, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { content, isLoading, refresh: loadData }
 }
 
 export function useContents(filters?: { user_id?: string; content_type?: string; status?: string; category_id?: string; tag?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -57,14 +57,14 @@ export function useContents(filters?: { user_id?: string; content_type?: string;
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [filters?.user_id, filters?.content_type, filters?.status, filters?.category_id, filters?.tag, filters?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function usePublishedContent(options?: { content_type?: string; category_id?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -75,14 +75,14 @@ export function usePublishedContent(options?: { content_type?: string; category_
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.content_type, options?.category_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useContentBlocks(contentId?: string) {
   const [blocks, setBlocks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!contentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -91,14 +91,14 @@ export function useContentBlocks(contentId?: string) {
       setBlocks(data || [])
     } finally { setIsLoading(false) }
   }, [contentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { blocks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { blocks, isLoading, refresh: loadData }
 }
 
 export function useContentVersions(contentId?: string, options?: { limit?: number }) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!contentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -107,14 +107,14 @@ export function useContentVersions(contentId?: string, options?: { limit?: numbe
       setVersions(data || [])
     } finally { setIsLoading(false) }
   }, [contentId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { versions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { versions, isLoading, refresh: loadData }
 }
 
 export function useContentCategories(options?: { parent_id?: string | null }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -128,14 +128,14 @@ export function useContentCategories(options?: { parent_id?: string | null }) {
       setCategories(data || [])
     } finally { setIsLoading(false) }
   }, [options?.parent_id])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useContentCategory(categoryId?: string) {
   const [category, setCategory] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!categoryId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -144,8 +144,8 @@ export function useContentCategory(categoryId?: string) {
       setCategory(data)
     } finally { setIsLoading(false) }
   }, [categoryId])
-  useEffect(() => { fetch() }, [fetch])
-  return { category, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { category, isLoading, refresh: loadData }
 }
 
 export function useContentSearch(searchTerm: string, options?: { content_type?: string; status?: string; limit?: number }) {
@@ -173,7 +173,7 @@ export function useContentSearch(searchTerm: string, options?: { content_type?: 
 export function useContentStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; published: number; draft: number; totalViews: number; totalLikes: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -188,14 +188,14 @@ export function useContentStats(userId?: string) {
       setStats({ total, published, draft, totalViews, totalLikes })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function usePopularContent(options?: { content_type?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -205,14 +205,14 @@ export function usePopularContent(options?: { content_type?: string; limit?: num
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.content_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useRelatedContent(contentId?: string, options?: { limit?: number }) {
   const [related, setRelated] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!contentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -226,6 +226,6 @@ export function useRelatedContent(contentId?: string, options?: { limit?: number
       setRelated(data || [])
     } finally { setIsLoading(false) }
   }, [contentId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { related, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { related, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useValidation(validationId?: string) {
   const [validation, setValidation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!validationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('validations').select('*, validation_rules(*), validation_results(count)').eq('id', validationId).single(); setValidation(data) } finally { setIsLoading(false) }
   }, [validationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { validation, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { validation, isLoading, refresh: loadData }
 }
 
 export function useValidations(options?: { entity_type?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [validations, setValidations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useValidations(options?: { entity_type?: string; is_active?: boo
       setValidations(data || [])
     } finally { setIsLoading(false) }
   }, [options?.entity_type, options?.is_active, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { validations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { validations, isLoading, refresh: loadData }
 }
 
 export function useValidationRules(validationId?: string) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!validationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('validation_rules').select('*').eq('validation_id', validationId).eq('is_active', true).order('order_index', { ascending: true }); setRules(data || []) } finally { setIsLoading(false) }
   }, [validationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rules, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rules, isLoading, refresh: loadData }
 }
 
 export function useValidationResults(validationId?: string, options?: { is_valid?: boolean; entity_id?: string; limit?: number }) {
   const [results, setResults] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!validationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -68,14 +68,14 @@ export function useValidationResults(validationId?: string, options?: { is_valid
       setResults(data || [])
     } finally { setIsLoading(false) }
   }, [validationId, options?.is_valid, options?.entity_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { results, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { results, isLoading, refresh: loadData }
 }
 
 export function useValidationSchemas(options?: { is_active?: boolean; search?: string }) {
   const [schemas, setSchemas] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -86,14 +86,14 @@ export function useValidationSchemas(options?: { is_active?: boolean; search?: s
       setSchemas(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active, options?.search])
-  useEffect(() => { fetch() }, [fetch])
-  return { schemas, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schemas, isLoading, refresh: loadData }
 }
 
 export function useValidationLogs(validationId?: string, options?: { status?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!validationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -104,27 +104,27 @@ export function useValidationLogs(validationId?: string, options?: { status?: st
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [validationId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useValidationConfig(entityType?: string) {
   const [config, setConfig] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('validation_configs').select('*').eq('entity_type', entityType).single(); setConfig(data) } finally { setIsLoading(false) }
   }, [entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { config, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { config, isLoading, refresh: loadData }
 }
 
 export function useValidationStats(validationId?: string, options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!validationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -142,14 +142,14 @@ export function useValidationStats(validationId?: string, options?: { from_date?
       })
     } finally { setIsLoading(false) }
   }, [validationId, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useEntityValidations(entityType?: string, options?: { is_active?: boolean }) {
   const [validations, setValidations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -160,14 +160,14 @@ export function useEntityValidations(entityType?: string, options?: { is_active?
       setValidations(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { validations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { validations, isLoading, refresh: loadData }
 }
 
 export function useEntityTypes() {
   const [types, setTypes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -176,8 +176,8 @@ export function useEntityTypes() {
       setTypes(unique)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useRuleTypes() {
@@ -199,7 +199,7 @@ export function useRuleTypes() {
 export function useLatestValidationResult(validationId?: string, entityId?: string) {
   const [result, setResult] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!validationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -210,6 +210,6 @@ export function useLatestValidationResult(validationId?: string, entityId?: stri
       setResult(data)
     } finally { setIsLoading(false) }
   }, [validationId, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { result, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { result, isLoading, refresh: loadData }
 }

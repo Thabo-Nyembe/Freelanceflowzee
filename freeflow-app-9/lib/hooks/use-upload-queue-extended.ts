@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useUploadQueue(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,15 +21,15 @@ export function useUploadQueue(userId?: string, status?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useUploadProgress(uploadId?: string) {
   const [progress, setProgress] = useState<number>(0)
   const [status, setStatus] = useState<string>('pending')
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!uploadId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,19 +39,19 @@ export function useUploadProgress(uploadId?: string) {
       setStatus(data?.status || 'pending')
     } finally { setIsLoading(false) }
   }, [uploadId])
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadData() }, [loadData])
   useEffect(() => {
     if (!uploadId) return
     const channel = supabase.channel(`upload-${uploadId}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'upload_queue', filter: `id=eq.${uploadId}` }, (payload) => { setProgress(payload.new.progress || 0); setStatus(payload.new.status || 'pending') }).subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [uploadId])
-  return { progress, status, isLoading, refresh: fetch }
+  return { progress, status, isLoading, refresh: loadData }
 }
 
 export function useChunkedUploads(uploadId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!uploadId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -60,6 +60,6 @@ export function useChunkedUploads(uploadId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [uploadId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

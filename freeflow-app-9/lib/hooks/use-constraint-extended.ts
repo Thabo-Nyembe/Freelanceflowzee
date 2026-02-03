@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useConstraint(constraintId?: string) {
   const [constraint, setConstraint] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!constraintId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useConstraint(constraintId?: string) {
       setConstraint(data)
     } finally { setIsLoading(false) }
   }, [constraintId])
-  useEffect(() => { fetch() }, [fetch])
-  return { constraint, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { constraint, isLoading, refresh: loadData }
 }
 
 export function useConstraints(options?: { constraintType?: string; entityType?: string; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useConstraints(options?: { constraintType?: string; entityType?:
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.constraintType, options?.entityType, options?.isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEntityConstraints(entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useEntityConstraints(entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBlockingConstraints(entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -70,6 +70,6 @@ export function useBlockingConstraints(entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

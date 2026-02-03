@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useSchedule(scheduleId?: string) {
   const [schedule, setSchedule] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useSchedule(scheduleId?: string) {
       setSchedule(data)
     } finally { setIsLoading(false) }
   }, [scheduleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { schedule, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { schedule, isLoading, refresh: loadData }
 }
 
 export function useSchedules(options?: { userId?: string; isActive?: boolean; entityType?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useSchedules(options?: { userId?: string; isActive?: boolean; en
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.userId, options?.isActive, options?.entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useScheduleRuns(scheduleId?: string, limit = 20) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useScheduleRuns(scheduleId?: string, limit = 20) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [scheduleId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useUpcomingSchedules(userId?: string, limit = 10) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -71,6 +71,6 @@ export function useUpcomingSchedules(userId?: string, limit = 10) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

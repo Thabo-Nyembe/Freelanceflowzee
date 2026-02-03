@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useObject(objectId?: string) {
   const [object, setObject] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!objectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('objects').select('*, object_types(*), object_properties(*), object_relationships(*)').eq('id', objectId).single(); setObject(data) } finally { setIsLoading(false) }
   }, [objectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { object, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { object, isLoading, refresh: loadData }
 }
 
 export function useObjects(options?: { type_id?: string; owner_id?: string; organization_id?: string; status?: string; search?: string; limit?: number }) {
   const [objects, setObjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useObjects(options?: { type_id?: string; owner_id?: string; orga
       setObjects(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type_id, options?.owner_id, options?.organization_id, options?.status, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { objects, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { objects, isLoading, refresh: loadData }
 }
 
 export function useObjectTypes(options?: { is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -55,27 +55,27 @@ export function useObjectTypes(options?: { is_active?: boolean }) {
       setTypes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useObjectProperties(objectId?: string) {
   const [properties, setProperties] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!objectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('object_properties').select('*').eq('object_id', objectId); setProperties(data || []) } finally { setIsLoading(false) }
   }, [objectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { properties, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { properties, isLoading, refresh: loadData }
 }
 
 export function useObjectRelationships(objectId?: string, options?: { direction?: 'source' | 'target' | 'both'; type?: string }) {
   const [relationships, setRelationships] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!objectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -90,40 +90,40 @@ export function useObjectRelationships(objectId?: string, options?: { direction?
       setRelationships(data || [])
     } finally { setIsLoading(false) }
   }, [objectId, options?.direction, options?.type])
-  useEffect(() => { fetch() }, [fetch])
-  return { relationships, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { relationships, isLoading, refresh: loadData }
 }
 
 export function useObjectVersions(objectId?: string, options?: { limit?: number }) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!objectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('object_versions').select('*').eq('object_id', objectId).order('version', { ascending: false }).limit(options?.limit || 20); setVersions(data || []) } finally { setIsLoading(false) }
   }, [objectId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { versions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { versions, isLoading, refresh: loadData }
 }
 
 export function useObjectPermissions(objectId?: string) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!objectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('object_permissions').select('*').eq('object_id', objectId); setPermissions(data || []) } finally { setIsLoading(false) }
   }, [objectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { permissions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { permissions, isLoading, refresh: loadData }
 }
 
 export function useObjectsByType(typeSlug?: string, options?: { organization_id?: string; limit?: number }) {
   const [objects, setObjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!typeSlug) { setIsLoading(false); return }
     setIsLoading(true)
@@ -136,14 +136,14 @@ export function useObjectsByType(typeSlug?: string, options?: { organization_id?
       setObjects(data || [])
     } finally { setIsLoading(false) }
   }, [typeSlug, options?.organization_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { objects, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { objects, isLoading, refresh: loadData }
 }
 
 export function useRelatedObjects(objectId?: string, relationshipType?: string) {
   const [related, setRelated] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!objectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -154,6 +154,6 @@ export function useRelatedObjects(objectId?: string, relationshipType?: string) 
       setRelated(data?.map(r => ({ ...r.target, relationship: r })) || [])
     } finally { setIsLoading(false) }
   }, [objectId, relationshipType])
-  useEffect(() => { fetch() }, [fetch])
-  return { related, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { related, isLoading, refresh: loadData }
 }

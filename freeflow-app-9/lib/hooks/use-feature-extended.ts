@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useFeature(featureId?: string) {
   const [feature, setFeature] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!featureId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('features').select('*, feature_votes(*)').eq('id', featureId).single(); setFeature(data) } finally { setIsLoading(false) }
   }, [featureId])
-  useEffect(() => { fetch() }, [fetch])
-  return { feature, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { feature, isLoading, refresh: loadData }
 }
 
 export function useFeatures(options?: { category?: string; status?: string; priority?: string; owner_id?: string; limit?: number }) {
   const [features, setFeatures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,28 +37,28 @@ export function useFeatures(options?: { category?: string; status?: string; prio
       setFeatures(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.status, options?.priority, options?.owner_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { features, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { features, isLoading, refresh: loadData }
 }
 
 export function useFeatureFlag(flagKey?: string) {
   const [flag, setFlag] = useState<any>(null)
   const [isEnabled, setIsEnabled] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!flagKey) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('feature_flags').select('*').eq('key', flagKey).single(); setFlag(data); setIsEnabled(data?.is_enabled ?? false) } finally { setIsLoading(false) }
   }, [flagKey])
-  useEffect(() => { fetch() }, [fetch])
-  return { flag, isEnabled, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { flag, isEnabled, isLoading, refresh: loadData }
 }
 
 export function useFeatureFlags(options?: { is_enabled?: boolean }) {
   const [flags, setFlags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -68,14 +68,14 @@ export function useFeatureFlags(options?: { is_enabled?: boolean }) {
       setFlags(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_enabled])
-  useEffect(() => { fetch() }, [fetch])
-  return { flags, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { flags, isLoading, refresh: loadData }
 }
 
 export function useFeatureRequests(options?: { status?: string; category?: string; user_id?: string; limit?: number }) {
   const [requests, setRequests] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -87,8 +87,8 @@ export function useFeatureRequests(options?: { status?: string; category?: strin
       setRequests(data || [])
     } finally { setIsLoading(false) }
   }, [options?.status, options?.category, options?.user_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { requests, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { requests, isLoading, refresh: loadData }
 }
 
 export function useHasVoted(featureId?: string, userId?: string) {
@@ -108,7 +108,7 @@ export function useHasVoted(featureId?: string, userId?: string) {
 export function useFeatureReleases(options?: { status?: string; limit?: number }) {
   const [releases, setReleases] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -118,26 +118,26 @@ export function useFeatureReleases(options?: { status?: string; limit?: number }
       setReleases(data || [])
     } finally { setIsLoading(false) }
   }, [options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { releases, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { releases, isLoading, refresh: loadData }
 }
 
 export function useTopVotedFeatures(limit?: number) {
   const [features, setFeatures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('features').select('*').order('vote_count', { ascending: false }).limit(limit || 10); setFeatures(data || []) } finally { setIsLoading(false) }
   }, [limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { features, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { features, isLoading, refresh: loadData }
 }
 
 export function useFeaturesByStatus() {
   const [byStatus, setByStatus] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -147,14 +147,14 @@ export function useFeaturesByStatus() {
       setByStatus(grouped)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { byStatus, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { byStatus, isLoading, refresh: loadData }
 }
 
 export function useFeatureCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -163,6 +163,6 @@ export function useFeatureCategories() {
       setCategories(uniqueCategories as string[])
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }

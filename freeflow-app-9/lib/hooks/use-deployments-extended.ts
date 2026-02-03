@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useDeployment(deploymentId?: string) {
   const [deployment, setDeployment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!deploymentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('deployments').select('*, deployment_logs(*), deployment_environments(*)').eq('id', deploymentId).single(); setDeployment(data) } finally { setIsLoading(false) }
   }, [deploymentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { deployment, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deployment, isLoading, refresh: loadData }
 }
 
 export function useProjectDeployments(projectId?: string, options?: { environment_id?: string; status?: string; limit?: number }) {
   const [deployments, setDeployments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -36,14 +36,14 @@ export function useProjectDeployments(projectId?: string, options?: { environmen
       setDeployments(data || [])
     } finally { setIsLoading(false) }
   }, [projectId, options?.environment_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { deployments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deployments, isLoading, refresh: loadData }
 }
 
 export function useDeploymentLogs(deploymentId?: string, options?: { level?: string }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!deploymentId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useDeploymentLogs(deploymentId?: string, options?: { level?: str
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [deploymentId, options?.level])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useEnvironments(projectId?: string) {
   const [environments, setEnvironments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -71,40 +71,40 @@ export function useEnvironments(projectId?: string) {
       setEnvironments(data || [])
     } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { environments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { environments, isLoading, refresh: loadData }
 }
 
 export function useLatestDeployment(projectId?: string, environmentId?: string) {
   const [deployment, setDeployment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId || !environmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('deployments').select('*').eq('project_id', projectId).eq('environment_id', environmentId).eq('status', 'completed').order('completed_at', { ascending: false }).limit(1).single(); setDeployment(data) } finally { setIsLoading(false) }
   }, [projectId, environmentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { deployment, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deployment, isLoading, refresh: loadData }
 }
 
 export function useDeploymentRollbacks(deploymentId?: string) {
   const [rollbacks, setRollbacks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!deploymentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('deployment_rollbacks').select('*').eq('deployment_id', deploymentId).order('rolled_back_at', { ascending: false }); setRollbacks(data || []) } finally { setIsLoading(false) }
   }, [deploymentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rollbacks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rollbacks, isLoading, refresh: loadData }
 }
 
 export function useDeploymentStats(projectId?: string, options?: { days?: number }) {
   const [stats, setStats] = useState<{ total: number; successful: number; failed: number; avgDuration: number; byEnvironment: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -122,19 +122,19 @@ export function useDeploymentStats(projectId?: string, options?: { days?: number
       setStats({ total, successful, failed, avgDuration, byEnvironment })
     } finally { setIsLoading(false) }
   }, [projectId, options?.days])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useActiveDeployments(projectId?: string) {
   const [deployments, setDeployments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('deployments').select('*').eq('project_id', projectId).in('status', ['pending', 'in_progress']).order('started_at', { ascending: false }); setDeployments(data || []) } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { deployments, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { deployments, isLoading, refresh: loadData }
 }

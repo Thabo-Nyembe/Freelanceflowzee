@@ -10,206 +10,206 @@ import { createClient } from '@/lib/supabase/client'
 export function useCanvasActivityLog(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_activity_log').select('*').eq('board_id', boardId).order('created_at', { ascending: false }).limit(100); setData(result || []) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasArtboards(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_artboards').select('*').eq('project_id', projectId).order('order', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasBoards(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_boards').select('*').eq('user_id', userId).order('updated_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasCollaborators(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_collaborators').select('*').eq('board_id', boardId); setData(result || []) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasCommentReplies(commentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_comment_replies').select('*').eq('comment_id', commentId).order('created_at', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [commentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasComments(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_comments').select('*').eq('board_id', boardId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasConnectors(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_connectors').select('*').eq('board_id', boardId); setData(result || []) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasElements(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_elements').select('*').eq('board_id', boardId).order('z_index', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasExports(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_exports').select('*').eq('board_id', boardId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasLayers(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_layers').select('*').eq('board_id', boardId).order('order', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasPages(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_pages').select('*').eq('project_id', projectId).order('order', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [projectId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasProjects(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_projects').select('*').eq('user_id', userId).order('updated_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasSessions(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_sessions').select('*').eq('board_id', boardId).eq('is_active', true); setData(result || []) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasStats(boardId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_stats').select('*').eq('board_id', boardId).single(); setData(result) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasTemplates() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_templates').select('*').eq('is_public', true).order('name', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCanvasVersions(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('canvas_versions').select('*').eq('board_id', boardId).order('version_number', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
   }, [boardId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

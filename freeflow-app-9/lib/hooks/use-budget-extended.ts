@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useBudget(budgetId?: string) {
   const [budget, setBudget] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!budgetId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useBudget(budgetId?: string) {
       setBudget(data)
     } finally { setIsLoading(false) }
   }, [budgetId])
-  useEffect(() => { fetch() }, [fetch])
-  return { budget, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { budget, isLoading, refresh: loadData }
 }
 
 export function useBudgets(options?: { userId?: string; organizationId?: string; projectId?: string; isActive?: boolean; category?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -41,14 +41,14 @@ export function useBudgets(options?: { userId?: string; organizationId?: string;
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.userId, options?.organizationId, options?.projectId, options?.isActive, options?.category])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBudgetStatus(budgetId?: string) {
   const [status, setStatus] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!budgetId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -66,14 +66,14 @@ export function useBudgetStatus(budgetId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [budgetId])
-  useEffect(() => { fetch() }, [fetch])
-  return { status, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { status, isLoading, refresh: loadData }
 }
 
 export function useBudgetsByCategory(options?: { userId?: string; organizationId?: string }) {
   const [data, setData] = useState<Record<string, { total: number; spent: number; count: number }>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -92,14 +92,14 @@ export function useBudgetsByCategory(options?: { userId?: string; organizationId
       setData(byCategory)
     } finally { setIsLoading(false) }
   }, [options?.userId, options?.organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBudgetSummary(options?: { userId?: string; organizationId?: string }) {
   const [summary, setSummary] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -122,14 +122,14 @@ export function useBudgetSummary(options?: { userId?: string; organizationId?: s
       })
     } finally { setIsLoading(false) }
   }, [options?.userId, options?.organizationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { summary, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { summary, isLoading, refresh: loadData }
 }
 
 export function useActiveBudgets(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -138,14 +138,14 @@ export function useActiveBudgets(userId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useBudgetAlerts(userId?: string, threshold: number = 80) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -162,8 +162,8 @@ export function useBudgetAlerts(userId?: string, threshold: number = 80) {
       setAlerts(alertList)
     } finally { setIsLoading(false) }
   }, [userId, threshold])
-  useEffect(() => { fetch() }, [fetch])
-  return { alerts, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { alerts, isLoading, refresh: loadData }
 }
 
 export function useBudgetRealtime(budgetId?: string) {

@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useCountry(countryId?: string) {
   const [country, setCountry] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!countryId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useCountry(countryId?: string) {
       setCountry(data)
     } finally { setIsLoading(false) }
   }, [countryId])
-  useEffect(() => { fetch() }, [fetch])
-  return { country, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { country, isLoading, refresh: loadData }
 }
 
 export function useCountries(options?: { continent?: string; region?: string; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useCountries(options?: { continent?: string; region?: string; is
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.continent, options?.region, options?.isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCountryStates(countryCode?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!countryCode) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useCountryStates(countryCode?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [countryCode])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCountryCities(countryCode?: string, stateCode?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!countryCode) { setIsLoading(false); return }
     setIsLoading(true)
@@ -72,8 +72,8 @@ export function useCountryCities(countryCode?: string, stateCode?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [countryCode, stateCode])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCountrySearch(searchTerm: string) {

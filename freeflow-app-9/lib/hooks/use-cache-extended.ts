@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useCacheEntry(key?: string, namespace?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!key) { setIsLoading(false); return }
     setIsLoading(true)
@@ -25,14 +25,14 @@ export function useCacheEntry(key?: string, namespace?: string) {
       }
     } finally { setIsLoading(false) }
   }, [key, namespace])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCacheStats(namespace?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -42,14 +42,14 @@ export function useCacheStats(namespace?: string) {
       setCount(result || 0)
     } finally { setIsLoading(false) }
   }, [namespace])
-  useEffect(() => { fetch() }, [fetch])
-  return { count, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { count, isLoading, refresh: loadData }
 }
 
 export function useCacheKeys(namespace?: string) {
   const [keys, setKeys] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -59,6 +59,6 @@ export function useCacheKeys(namespace?: string) {
       setKeys(data || [])
     } finally { setIsLoading(false) }
   }, [namespace])
-  useEffect(() => { fetch() }, [fetch])
-  return { keys, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { keys, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useFaq(faqId?: string) {
   const [faq, setFaq] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!faqId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('faqs').select('*, faq_categories(*), faq_translations(*)').eq('id', faqId).single(); setFaq(data) } finally { setIsLoading(false) }
   }, [faqId])
-  useEffect(() => { fetch() }, [fetch])
-  return { faq, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { faq, isLoading, refresh: loadData }
 }
 
 export function useFaqs(options?: { category_id?: string; is_published?: boolean; search?: string; limit?: number }) {
   const [faqs, setFaqs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,14 +36,14 @@ export function useFaqs(options?: { category_id?: string; is_published?: boolean
       setFaqs(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category_id, options?.is_published, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { faqs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { faqs, isLoading, refresh: loadData }
 }
 
 export function useFaqCategories(options?: { is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -53,14 +53,14 @@ export function useFaqCategories(options?: { is_active?: boolean }) {
       setCategories(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }
 
 export function useFaqsByCategory() {
   const [faqsByCategory, setFaqsByCategory] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -74,8 +74,8 @@ export function useFaqsByCategory() {
       setFaqsByCategory(grouped)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { faqsByCategory, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { faqsByCategory, isLoading, refresh: loadData }
 }
 
 export function useFaqSearch(query?: string, options?: { category_id?: string; limit?: number }) {
@@ -100,7 +100,7 @@ export function useFaqFeedback(faqId?: string) {
   const [feedback, setFeedback] = useState<any[]>([])
   const [stats, setStats] = useState<{ total: number; helpful: number; unhelpful: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!faqId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -112,31 +112,31 @@ export function useFaqFeedback(faqId?: string) {
       setStats({ total, helpful, unhelpful: total - helpful })
     } finally { setIsLoading(false) }
   }, [faqId])
-  useEffect(() => { fetch() }, [fetch])
-  return { feedback, stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { feedback, stats, isLoading, refresh: loadData }
 }
 
 export function useFaqTranslation(faqId?: string, language?: string) {
   const [translation, setTranslation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!faqId || !language) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('faq_translations').select('*').eq('faq_id', faqId).eq('language', language).single(); setTranslation(data) } finally { setIsLoading(false) }
   }, [faqId, language])
-  useEffect(() => { fetch() }, [fetch])
-  return { translation, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { translation, isLoading, refresh: loadData }
 }
 
 export function usePopularFaqs(limit?: number) {
   const [faqs, setFaqs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('faqs').select('*, faq_categories(*)').eq('is_published', true).order('view_count', { ascending: false }).limit(limit || 10); setFaqs(data || []) } finally { setIsLoading(false) }
   }, [limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { faqs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { faqs, isLoading, refresh: loadData }
 }

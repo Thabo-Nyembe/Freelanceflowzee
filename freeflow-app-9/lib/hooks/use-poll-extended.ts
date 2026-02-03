@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function usePolls(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function usePolls(userId?: string, status?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function usePollOptions(pollId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pollId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -37,14 +37,14 @@ export function usePollOptions(pollId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [pollId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function usePollVotes(pollId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!pollId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,14 +53,14 @@ export function usePollVotes(pollId?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [pollId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useUserPollVote(userId?: string, pollId?: string) {
   const [vote, setVote] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !pollId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,6 +69,6 @@ export function useUserPollVote(userId?: string, pollId?: string) {
       setVote(data)
     } finally { setIsLoading(false) }
   }, [userId, pollId])
-  useEffect(() => { fetch() }, [fetch])
-  return { vote, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vote, isLoading, refresh: loadData }
 }

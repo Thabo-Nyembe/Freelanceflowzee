@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function usePriority(priorityId?: string) {
   const [priority, setPriority] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!priorityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function usePriority(priorityId?: string) {
       setPriority(data)
     } finally { setIsLoading(false) }
   }, [priorityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { priority, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { priority, isLoading, refresh: loadData }
 }
 
 export function usePriorities(options?: { entityType?: string; workspaceId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,14 +37,14 @@ export function usePriorities(options?: { entityType?: string; workspaceId?: str
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.entityType, options?.workspaceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useEntityPriority(entityType?: string, entityId?: string) {
   const [priority, setPriority] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -53,14 +53,14 @@ export function useEntityPriority(entityType?: string, entityId?: string) {
       setPriority(data?.priorities || null)
     } finally { setIsLoading(false) }
   }, [entityType, entityId])
-  useEffect(() => { fetch() }, [fetch])
-  return { priority, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { priority, isLoading, refresh: loadData }
 }
 
 export function useDefaultPriority(entityType?: string) {
   const [priority, setPriority] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -70,6 +70,6 @@ export function useDefaultPriority(entityType?: string) {
       setPriority(data)
     } finally { setIsLoading(false) }
   }, [entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { priority, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { priority, isLoading, refresh: loadData }
 }

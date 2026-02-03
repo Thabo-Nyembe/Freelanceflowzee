@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useExecution(executionId?: string) {
   const [execution, setExecution] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!executionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('executions').select('*, execution_steps(*), execution_logs(*)').eq('id', executionId).single(); setExecution(data) } finally { setIsLoading(false) }
   }, [executionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { execution, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { execution, isLoading, refresh: loadData }
 }
 
 export function useExecutions(options?: { type?: string; status?: string; workflow_id?: string; triggered_by?: string; limit?: number }) {
   const [executions, setExecutions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,27 +37,27 @@ export function useExecutions(options?: { type?: string; status?: string; workfl
       setExecutions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.status, options?.workflow_id, options?.triggered_by, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { executions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { executions, isLoading, refresh: loadData }
 }
 
 export function useExecutionSteps(executionId?: string) {
   const [steps, setSteps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!executionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('execution_steps').select('*').eq('execution_id', executionId).order('order', { ascending: true }); setSteps(data || []) } finally { setIsLoading(false) }
   }, [executionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { steps, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { steps, isLoading, refresh: loadData }
 }
 
 export function useExecutionLogs(executionId?: string, options?: { step_id?: string; level?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!executionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -69,27 +69,27 @@ export function useExecutionLogs(executionId?: string, options?: { step_id?: str
       setLogs(data || [])
     } finally { setIsLoading(false) }
   }, [executionId, options?.step_id, options?.level, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { logs, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { logs, isLoading, refresh: loadData }
 }
 
 export function useExecutionResult(executionId?: string) {
   const [result, setResult] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!executionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('execution_results').select('*').eq('execution_id', executionId).single(); setResult(data) } finally { setIsLoading(false) }
   }, [executionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { result, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { result, isLoading, refresh: loadData }
 }
 
 export function useActiveExecutions(options?: { type?: string }) {
   const [executions, setExecutions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -99,14 +99,14 @@ export function useActiveExecutions(options?: { type?: string }) {
       setExecutions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type])
-  useEffect(() => { fetch() }, [fetch])
-  return { executions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { executions, isLoading, refresh: loadData }
 }
 
 export function useExecutionStats(options?: { type?: string; days?: number }) {
   const [stats, setStats] = useState<{ total: number; successful: number; failed: number; avgDuration: number; byType: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -125,18 +125,18 @@ export function useExecutionStats(options?: { type?: string; days?: number }) {
       setStats({ total, successful, failed, avgDuration, byType })
     } finally { setIsLoading(false) }
   }, [options?.type, options?.days])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useRecentExecutions(limit?: number) {
   const [executions, setExecutions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('executions').select('*').order('started_at', { ascending: false }).limit(limit || 10); setExecutions(data || []) } finally { setIsLoading(false) }
   }, [limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { executions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { executions, isLoading, refresh: loadData }
 }

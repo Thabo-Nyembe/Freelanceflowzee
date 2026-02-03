@@ -24,21 +24,21 @@ function isDemoModeEnabled(): boolean {
 export function useCertification(certificationId?: string) {
   const [certification, setCertification] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!certificationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('certifications').select('*').eq('id', certificationId).single(); setCertification(data) } finally { setIsLoading(false) }
   }, [certificationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { certification, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { certification, isLoading, refresh: loadData }
 }
 
 export function useCertifications(options?: { user_id?: string; issuer?: string; status?: string; limit?: number }) {
   const [certifications, setCertifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -51,14 +51,14 @@ export function useCertifications(options?: { user_id?: string; issuer?: string;
       setCertifications(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.issuer, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { certifications, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { certifications, isLoading, refresh: loadData }
 }
 
 export function useExpiringCertifications(userId?: string, daysAhead?: number) {
   const [certifications, setCertifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -70,28 +70,28 @@ export function useExpiringCertifications(userId?: string, daysAhead?: number) {
       setCertifications(data || [])
     } finally { setIsLoading(false) }
   }, [userId, daysAhead])
-  useEffect(() => { fetch() }, [fetch])
-  return { certifications, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { certifications, isLoading, refresh: loadData }
 }
 
 export function useActiveCertifications(userId?: string) {
   const [certifications, setCertifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('certifications').select('*').eq('user_id', userId).eq('status', 'active').order('issued_date', { ascending: false }); setCertifications(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { certifications, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { certifications, isLoading, refresh: loadData }
 }
 
 export function useCertificationCourses(options?: { issuer?: string; is_active?: boolean; limit?: number }) {
   const [courses, setCourses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     setIsLoading(true)
@@ -103,28 +103,28 @@ export function useCertificationCourses(options?: { issuer?: string; is_active?:
       setCourses(data || [])
     } finally { setIsLoading(false) }
   }, [options?.issuer, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { courses, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { courses, isLoading, refresh: loadData }
 }
 
 export function useCertificationBadges(userId?: string) {
   const [badges, setBadges] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('certification_badges').select('*').eq('user_id', userId).order('awarded_at', { ascending: false }); setBadges(data || []) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { badges, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { badges, isLoading, refresh: loadData }
 }
 
 export function useCertificationStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; active: number; expired: number; expiringSoon: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -143,6 +143,6 @@ export function useCertificationStats(userId?: string) {
       })
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }

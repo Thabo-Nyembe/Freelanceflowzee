@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useRecommendation(recommendationId?: string) {
   const [recommendation, setRecommendation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!recommendationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('recommendations').select('*, recommendation_models(*), users(*), recommendation_feedback(*)').eq('id', recommendationId).single(); setRecommendation(data) } finally { setIsLoading(false) }
   }, [recommendationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { recommendation, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { recommendation, isLoading, refresh: loadData }
 }
 
 export function useRecommendations(options: { user_id: string; entity_type?: string; model_id?: string; status?: string; min_score?: number; limit?: number }) {
   const [recommendations, setRecommendations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!options.user_id) { setIsLoading(false); return }
     setIsLoading(true)
@@ -39,14 +39,14 @@ export function useRecommendations(options: { user_id: string; entity_type?: str
       setRecommendations(data || [])
     } finally { setIsLoading(false) }
   }, [options.user_id, options.entity_type, options.model_id, options.status, options.min_score, options.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { recommendations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { recommendations, isLoading, refresh: loadData }
 }
 
 export function useTopRecommendations(userId?: string, entityType?: string, limit?: number) {
   const [recommendations, setRecommendations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useTopRecommendations(userId?: string, entityType?: string, limi
       setRecommendations(data || [])
     } finally { setIsLoading(false) }
   }, [userId, entityType, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { recommendations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { recommendations, isLoading, refresh: loadData }
 }
 
 export function useRecommendationModels(options?: { type?: string; is_active?: boolean }) {
   const [models, setModels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -73,27 +73,27 @@ export function useRecommendationModels(options?: { type?: string; is_active?: b
       setModels(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { models, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { models, isLoading, refresh: loadData }
 }
 
 export function useRecommendationFeedback(recommendationId?: string) {
   const [feedback, setFeedback] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!recommendationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('recommendation_feedback').select('*, users(*)').eq('recommendation_id', recommendationId).order('created_at', { ascending: false }); setFeedback(data || []) } finally { setIsLoading(false) }
   }, [recommendationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { feedback, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { feedback, isLoading, refresh: loadData }
 }
 
 export function useRecommendationStats(options?: { model_id?: string; entity_type?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; active: number; accepted: number; dismissed: number; converted: number; acceptanceRate: number; conversionRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -114,14 +114,14 @@ export function useRecommendationStats(options?: { model_id?: string; entity_typ
       setStats({ total, active, accepted, dismissed, converted, acceptanceRate, conversionRate })
     } finally { setIsLoading(false) }
   }, [options?.model_id, options?.entity_type, options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useSimilarItems(entityType?: string, entityId?: string, limit?: number) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -130,14 +130,14 @@ export function useSimilarItems(entityType?: string, entityId?: string, limit?: 
       setItems(data || [])
     } finally { setIsLoading(false) }
   }, [entityType, entityId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useMyRecommendationHistory(userId?: string, options?: { entity_type?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -148,14 +148,14 @@ export function useMyRecommendationHistory(userId?: string, options?: { entity_t
       setHistory(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.entity_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function usePersonalizedRecommendations(userId?: string, options?: { categories?: string[]; limit?: number }) {
   const [recommendations, setRecommendations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -166,6 +166,6 @@ export function usePersonalizedRecommendations(userId?: string, options?: { cate
       setRecommendations(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.categories?.join(','), options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { recommendations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { recommendations, isLoading, refresh: loadData }
 }

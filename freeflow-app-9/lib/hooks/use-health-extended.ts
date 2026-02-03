@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useHealthCheck(checkId?: string) {
   const [check, setCheck] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!checkId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useHealthCheck(checkId?: string) {
       setCheck(data)
     } finally { setIsLoading(false) }
   }, [checkId])
-  useEffect(() => { fetch() }, [fetch])
-  return { check, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { check, isLoading, refresh: loadData }
 }
 
 export function useHealthChecks(options?: { serviceName?: string; checkType?: string; status?: string; isCritical?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useHealthChecks(options?: { serviceName?: string; checkType?: st
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.serviceName, options?.checkType, options?.status, options?.isCritical])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useHealthCheckResults(checkId?: string, limit = 100) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!checkId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -55,14 +55,14 @@ export function useHealthCheckResults(checkId?: string, limit = 100) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [checkId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useSystemHealth(workspaceId?: string) {
   const [health, setHealth] = useState<{ status: string; summary: { healthy: number; unhealthy: number; degraded: number; unknown: number; total: number }; checks: any[] }>({ status: 'unknown', summary: { healthy: 0, unhealthy: 0, degraded: 0, unknown: 0, total: 0 }, checks: [] })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -78,14 +78,14 @@ export function useSystemHealth(workspaceId?: string) {
       setHealth({ status: overallStatus, summary: { healthy, unhealthy, degraded, unknown, total: checks?.length || 0 }, checks: checks || [] })
     } finally { setIsLoading(false) }
   }, [workspaceId])
-  useEffect(() => { fetch() }, [fetch])
-  return { health, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { health, isLoading, refresh: loadData }
 }
 
 export function useServiceHealth(serviceName?: string) {
   const [health, setHealth] = useState<{ status: string; checks: any[] }>({ status: 'unknown', checks: [] })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!serviceName) { setIsLoading(false); return }
     setIsLoading(true)
@@ -97,6 +97,6 @@ export function useServiceHealth(serviceName?: string) {
       setHealth({ status, checks: checks || [] })
     } finally { setIsLoading(false) }
   }, [serviceName])
-  useEffect(() => { fetch() }, [fetch])
-  return { health, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { health, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useTutorial(tutorialId?: string) {
   const [tutorial, setTutorial] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tutorialId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorials').select('*, tutorial_steps(*), users(*)').eq('id', tutorialId).single(); setTutorial(data) } finally { setIsLoading(false) }
   }, [tutorialId])
-  useEffect(() => { fetch() }, [fetch])
-  return { tutorial, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tutorial, isLoading, refresh: loadData }
 }
 
 export function useTutorials(options?: { category?: string; difficulty?: string; is_published?: boolean; is_featured?: boolean; author_id?: string; search?: string; limit?: number }) {
   const [tutorials, setTutorials] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,40 +39,40 @@ export function useTutorials(options?: { category?: string; difficulty?: string;
       setTutorials(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.difficulty, options?.is_published, options?.is_featured, options?.author_id, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tutorials, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tutorials, isLoading, refresh: loadData }
 }
 
 export function useTutorialSteps(tutorialId?: string) {
   const [steps, setSteps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tutorialId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_steps').select('*').eq('tutorial_id', tutorialId).order('order_index', { ascending: true }); setSteps(data || []) } finally { setIsLoading(false) }
   }, [tutorialId])
-  useEffect(() => { fetch() }, [fetch])
-  return { steps, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { steps, isLoading, refresh: loadData }
 }
 
 export function useTutorialProgress(tutorialId?: string, userId?: string) {
   const [progress, setProgress] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tutorialId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_progress').select('*').eq('tutorial_id', tutorialId).eq('user_id', userId).single(); setProgress(data) } finally { setIsLoading(false) }
   }, [tutorialId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { progress, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { progress, isLoading, refresh: loadData }
 }
 
 export function useMyTutorialProgress(userId?: string, options?: { is_completed?: boolean; limit?: number }) {
   const [progress, setProgress] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -84,54 +84,54 @@ export function useMyTutorialProgress(userId?: string, options?: { is_completed?
       setProgress(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_completed, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { progress, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { progress, isLoading, refresh: loadData }
 }
 
 export function useTutorialCompletions(tutorialId?: string, options?: { limit?: number }) {
   const [completions, setCompletions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tutorialId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_completions').select('*, users(*)').eq('tutorial_id', tutorialId).order('completed_at', { ascending: false }).limit(options?.limit || 50); setCompletions(data || []) } finally { setIsLoading(false) }
   }, [tutorialId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { completions, count: completions.length, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { completions, count: completions.length, isLoading, refresh: loadData }
 }
 
 export function useMyBookmarks(userId?: string, options?: { limit?: number }) {
   const [bookmarks, setBookmarks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_bookmarks').select('*, tutorials(*)').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setBookmarks(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { bookmarks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { bookmarks, isLoading, refresh: loadData }
 }
 
 export function useIsBookmarked(tutorialId?: string, userId?: string) {
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tutorialId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_bookmarks').select('id').eq('tutorial_id', tutorialId).eq('user_id', userId).single(); setIsBookmarked(!!data) } finally { setIsLoading(false) }
   }, [tutorialId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { isBookmarked, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { isBookmarked, isLoading, refresh: loadData }
 }
 
 export function useTutorialRatings(tutorialId?: string, options?: { limit?: number }) {
   const [ratings, setRatings] = useState<any[]>([])
   const [average, setAverage] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tutorialId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -142,27 +142,27 @@ export function useTutorialRatings(tutorialId?: string, options?: { limit?: numb
       setAverage(allRatings.length > 0 ? allRatings.reduce((sum, r) => sum + r.rating, 0) / allRatings.length : 0)
     } finally { setIsLoading(false) }
   }, [tutorialId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { ratings, average: Math.round(average * 10) / 10, count: ratings.length, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { ratings, average: Math.round(average * 10) / 10, count: ratings.length, isLoading, refresh: loadData }
 }
 
 export function useMyRating(tutorialId?: string, userId?: string) {
   const [rating, setRating] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!tutorialId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_ratings').select('*').eq('tutorial_id', tutorialId).eq('user_id', userId).single(); setRating(data) } finally { setIsLoading(false) }
   }, [tutorialId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rating, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rating, isLoading, refresh: loadData }
 }
 
 export function useFeaturedTutorials(options?: { category?: string; limit?: number }) {
   const [tutorials, setTutorials] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -172,14 +172,14 @@ export function useFeaturedTutorials(options?: { category?: string; limit?: numb
       setTutorials(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tutorials, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tutorials, isLoading, refresh: loadData }
 }
 
 export function usePopularTutorials(options?: { category?: string; limit?: number }) {
   const [tutorials, setTutorials] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -189,14 +189,14 @@ export function usePopularTutorials(options?: { category?: string; limit?: numbe
       setTutorials(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { tutorials, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { tutorials, isLoading, refresh: loadData }
 }
 
 export function useTutorialCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -205,6 +205,6 @@ export function useTutorialCategories() {
       setCategories(unique)
     } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { categories, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { categories, isLoading, refresh: loadData }
 }

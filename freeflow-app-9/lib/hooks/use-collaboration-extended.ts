@@ -23,7 +23,7 @@ function isDemoModeEnabled(): boolean {
 export function useCollaborationAnalytics(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
@@ -34,14 +34,14 @@ export function useCollaborationAnalytics(teamId?: string) {
     } finally { setIsLoading(false) }
   }, [teamId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationCanvasBoards(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -52,14 +52,14 @@ export function useCollaborationCanvasBoards(userId?: string) {
     } finally { setIsLoading(false) }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationCanvasCollaborators(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
@@ -70,14 +70,14 @@ export function useCollaborationCanvasCollaborators(boardId?: string) {
     } finally { setIsLoading(false) }
   }, [boardId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationCanvasExports(boardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
@@ -88,14 +88,14 @@ export function useCollaborationCanvasExports(boardId?: string) {
     } finally { setIsLoading(false) }
   }, [boardId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationChannelMembers(channelId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!channelId) { setIsLoading(false); return }
@@ -106,14 +106,14 @@ export function useCollaborationChannelMembers(channelId?: string) {
     } finally { setIsLoading(false) }
   }, [channelId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationChannels(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
@@ -124,14 +124,14 @@ export function useCollaborationChannels(teamId?: string) {
     } finally { setIsLoading(false) }
   }, [teamId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationEvents(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
@@ -142,14 +142,14 @@ export function useCollaborationEvents(teamId?: string) {
     } finally { setIsLoading(false) }
   }, [teamId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationFeedback(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
@@ -160,14 +160,14 @@ export function useCollaborationFeedback(projectId?: string) {
     } finally { setIsLoading(false) }
   }, [projectId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationFeedbackReplies(feedbackId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
@@ -178,14 +178,14 @@ export function useCollaborationFeedbackReplies(feedbackId?: string) {
     } finally { setIsLoading(false) }
   }, [feedbackId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationFeedbackVotes(feedbackId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
@@ -196,14 +196,14 @@ export function useCollaborationFeedbackVotes(feedbackId?: string) {
     } finally { setIsLoading(false) }
   }, [feedbackId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationFileShares(fileId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!fileId) { setIsLoading(false); return }
@@ -214,14 +214,14 @@ export function useCollaborationFileShares(fileId?: string) {
     } finally { setIsLoading(false) }
   }, [fileId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationInvites(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
@@ -232,14 +232,14 @@ export function useCollaborationInvites(teamId?: string) {
     } finally { setIsLoading(false) }
   }, [teamId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationMedia(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
@@ -250,14 +250,14 @@ export function useCollaborationMedia(projectId?: string) {
     } finally { setIsLoading(false) }
   }, [projectId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationMediaShares(mediaId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!mediaId) { setIsLoading(false); return }
@@ -268,14 +268,14 @@ export function useCollaborationMediaShares(mediaId?: string) {
     } finally { setIsLoading(false) }
   }, [mediaId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationMeetingParticipants(meetingId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
@@ -286,14 +286,14 @@ export function useCollaborationMeetingParticipants(meetingId?: string) {
     } finally { setIsLoading(false) }
   }, [meetingId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationMeetingRecordings(meetingId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
@@ -304,14 +304,14 @@ export function useCollaborationMeetingRecordings(meetingId?: string) {
     } finally { setIsLoading(false) }
   }, [meetingId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationMeetings(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
@@ -322,14 +322,14 @@ export function useCollaborationMeetings(teamId?: string) {
     } finally { setIsLoading(false) }
   }, [teamId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationMessages(channelId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!channelId) { setIsLoading(false); return }
@@ -340,14 +340,14 @@ export function useCollaborationMessages(channelId?: string) {
     } finally { setIsLoading(false) }
   }, [channelId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationSessions(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
@@ -358,14 +358,14 @@ export function useCollaborationSessions(projectId?: string) {
     } finally { setIsLoading(false) }
   }, [projectId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationTeamMembers(teamId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
@@ -376,14 +376,14 @@ export function useCollaborationTeamMembers(teamId?: string) {
     } finally { setIsLoading(false) }
   }, [teamId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationTeamMetrics(teamId?: string) {
   const [data, setData] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!teamId) { setIsLoading(false); return }
@@ -394,14 +394,14 @@ export function useCollaborationTeamMetrics(teamId?: string) {
     } finally { setIsLoading(false) }
   }, [teamId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationTeams(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
@@ -412,14 +412,14 @@ export function useCollaborationTeams(userId?: string) {
     } finally { setIsLoading(false) }
   }, [userId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationWorkspaceFiles(workspaceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!workspaceId) { setIsLoading(false); return }
@@ -430,14 +430,14 @@ export function useCollaborationWorkspaceFiles(workspaceId?: string) {
     } finally { setIsLoading(false) }
   }, [workspaceId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useCollaborationWorkspaceFolders(workspaceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
     // Demo mode: fetch data with demo=true parameter
     const supabase = createClient()
     if (!workspaceId) { setIsLoading(false); return }
@@ -448,6 +448,6 @@ export function useCollaborationWorkspaceFolders(workspaceId?: string) {
     } finally { setIsLoading(false) }
   }, [workspaceId])
 
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

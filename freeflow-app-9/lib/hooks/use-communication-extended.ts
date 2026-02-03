@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useCommunicationChannel(channelId?: string) {
   const [channel, setChannel] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!channelId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('communication_channels').select('*').eq('id', channelId).single(); setChannel(data) } finally { setIsLoading(false) }
   }, [channelId])
-  useEffect(() => { fetch() }, [fetch])
-  return { channel, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { channel, isLoading, refresh: loadData }
 }
 
 export function useCommunicationChannels(options?: { type?: string; is_active?: boolean }) {
   const [channels, setChannels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -35,14 +35,14 @@ export function useCommunicationChannels(options?: { type?: string; is_active?: 
       setChannels(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { channels, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { channels, isLoading, refresh: loadData }
 }
 
 export function useCommunicationMessages(options?: { channel_id?: string; recipient_id?: string; status?: string; limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -54,14 +54,14 @@ export function useCommunicationMessages(options?: { channel_id?: string; recipi
       setMessages(data || [])
     } finally { setIsLoading(false) }
   }, [options?.channel_id, options?.recipient_id, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { messages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { messages, isLoading, refresh: loadData }
 }
 
 export function useCommunicationTemplates(options?: { channel_type?: string; is_active?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -72,27 +72,27 @@ export function useCommunicationTemplates(options?: { channel_type?: string; is_
       setTemplates(data || [])
     } finally { setIsLoading(false) }
   }, [options?.channel_type, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { templates, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { templates, isLoading, refresh: loadData }
 }
 
 export function useCommunicationPreferences(userId?: string) {
   const [preferences, setPreferences] = useState<Record<string, any> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('communication_preferences').select('preferences').eq('user_id', userId).single(); setPreferences(data?.preferences || {}) } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { preferences, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { preferences, isLoading, refresh: loadData }
 }
 
 export function useMessageStats(options?: { channel_id?: string; date_from?: string; date_to?: string }) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -107,18 +107,18 @@ export function useMessageStats(options?: { channel_id?: string; date_from?: str
       setStats({ total, byStatus })
     } finally { setIsLoading(false) }
   }, [options?.channel_id, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function usePendingMessages(limit?: number) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('communication_messages').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(limit || 50); setMessages(data || []) } finally { setIsLoading(false) }
   }, [limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { messages, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { messages, isLoading, refresh: loadData }
 }

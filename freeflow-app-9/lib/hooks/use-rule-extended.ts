@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useRule(ruleId?: string) {
   const [rule, setRule] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ruleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,14 +19,14 @@ export function useRule(ruleId?: string) {
       setRule(data)
     } finally { setIsLoading(false) }
   }, [ruleId])
-  useEffect(() => { fetch() }, [fetch])
-  return { rule, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { rule, isLoading, refresh: loadData }
 }
 
 export function useRules(options?: { ruleType?: string; entityType?: string; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useRules(options?: { ruleType?: string; entityType?: string; isA
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [options?.ruleType, options?.entityType, options?.isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useRuleExecutions(ruleId?: string, limit = 20) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!ruleId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useRuleExecutions(ruleId?: string, limit = 20) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [ruleId, limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useActiveRules(entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -71,6 +71,6 @@ export function useActiveRules(entityType?: string) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [entityType])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }

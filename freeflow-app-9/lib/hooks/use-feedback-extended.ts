@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useFeedback(feedbackId?: string) {
   const [feedback, setFeedback] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -20,14 +20,14 @@ export function useFeedback(feedbackId?: string) {
       setFeedback(data)
     } finally { setIsLoading(false) }
   }, [feedbackId])
-  useEffect(() => { fetch() }, [fetch])
-  return { feedback, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { feedback, isLoading, refresh: loadData }
 }
 
 export function useFeedbacks(options?: { user_id?: string; target_type?: string; target_id?: string; category?: string; status?: string; priority?: string; limit?: number }) {
   const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -42,14 +42,14 @@ export function useFeedbacks(options?: { user_id?: string; target_type?: string;
       setFeedbacks(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.target_type, options?.target_id, options?.category, options?.status, options?.priority, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { feedbacks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { feedbacks, isLoading, refresh: loadData }
 }
 
 export function useFeedbackReplies(feedbackId?: string, options?: { limit?: number }) {
   const [replies, setReplies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -58,8 +58,8 @@ export function useFeedbackReplies(feedbackId?: string, options?: { limit?: numb
       setReplies(data || [])
     } finally { setIsLoading(false) }
   }, [feedbackId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { replies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { replies, isLoading, refresh: loadData }
 }
 
 export function useFeedbackRepliesRealtime(feedbackId?: string) {
@@ -80,7 +80,7 @@ export function useFeedbackRepliesRealtime(feedbackId?: string) {
 export function useFeedbackVotes(feedbackId?: string) {
   const [votes, setVotes] = useState<{ upvotes: number; downvotes: number; total: number }>({ upvotes: 0, downvotes: 0, total: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -91,14 +91,14 @@ export function useFeedbackVotes(feedbackId?: string) {
       setVotes({ upvotes, downvotes, total: upvotes - downvotes })
     } finally { setIsLoading(false) }
   }, [feedbackId])
-  useEffect(() => { fetch() }, [fetch])
-  return { votes, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { votes, isLoading, refresh: loadData }
 }
 
 export function useUserFeedbackVote(feedbackId?: string, userId?: string) {
   const [vote, setVote] = useState<'up' | 'down' | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!feedbackId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -107,14 +107,14 @@ export function useUserFeedbackVote(feedbackId?: string, userId?: string) {
       setVote(data?.vote_type || null)
     } finally { setIsLoading(false) }
   }, [feedbackId, userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { vote, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vote, isLoading, refresh: loadData }
 }
 
 export function useFeedbackStats(options?: { user_id?: string; target_type?: string }) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; byPriority: Record<string, number>; byCategory: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -129,14 +129,14 @@ export function useFeedbackStats(options?: { user_id?: string; target_type?: str
       setStats({ total: data.length, byStatus, byPriority, byCategory })
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.target_type])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function usePopularFeedback(options?: { target_type?: string; limit?: number }) {
   const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -146,8 +146,8 @@ export function usePopularFeedback(options?: { target_type?: string; limit?: num
       setFeedbacks(data || [])
     } finally { setIsLoading(false) }
   }, [options?.target_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { feedbacks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { feedbacks, isLoading, refresh: loadData }
 }
 
 export function useFeedbackSearch(searchTerm: string, options?: { target_type?: string; limit?: number }) {
@@ -174,7 +174,7 @@ export function useFeedbackSearch(searchTerm: string, options?: { target_type?: 
 export function useStarredFeedback(options?: { user_id?: string; target_type?: string; limit?: number }) {
   const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -185,14 +185,14 @@ export function useStarredFeedback(options?: { user_id?: string; target_type?: s
       setFeedbacks(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.target_type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { feedbacks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { feedbacks, isLoading, refresh: loadData }
 }
 
 export function useAssignedFeedback(assigneeId?: string, options?: { status?: string; limit?: number }) {
   const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!assigneeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -203,8 +203,8 @@ export function useAssignedFeedback(assigneeId?: string, options?: { status?: st
       setFeedbacks(data || [])
     } finally { setIsLoading(false) }
   }, [assigneeId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { feedbacks, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { feedbacks, isLoading, refresh: loadData }
 }
 
 export function useFeedbackRealtime(feedbackId?: string) {

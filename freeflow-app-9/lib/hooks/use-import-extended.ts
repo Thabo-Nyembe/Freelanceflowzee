@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useImport(importId?: string) {
   const [importData, setImportData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!importId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -19,8 +19,8 @@ export function useImport(importId?: string) {
       setImportData(data)
     } finally { setIsLoading(false) }
   }, [importId])
-  useEffect(() => { fetch() }, [fetch])
-  return { importData, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { importData, isLoading, refresh: loadData }
 }
 
 export function useImportProgress(importId?: string) {
@@ -67,7 +67,7 @@ export function useImportProgress(importId?: string) {
 export function useUserImports(userId?: string, options?: { status?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -78,15 +78,15 @@ export function useUserImports(userId?: string, options?: { status?: string }) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useImportErrors(importId?: string) {
   const [errors, setErrors] = useState<any[]>([])
   const [failedRows, setFailedRows] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!importId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -96,6 +96,6 @@ export function useImportErrors(importId?: string) {
       setFailedRows(data?.failed_rows || 0)
     } finally { setIsLoading(false) }
   }, [importId])
-  useEffect(() => { fetch() }, [fetch])
-  return { errors, failedRows, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { errors, failedRows, isLoading, refresh: loadData }
 }

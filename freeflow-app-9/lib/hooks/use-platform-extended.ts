@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function usePlatform(platformId?: string) {
   const [platform, setPlatform] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!platformId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platforms').select('*').eq('id', platformId).single(); setPlatform(data) } finally { setIsLoading(false) }
   }, [platformId])
-  useEffect(() => { fetch() }, [fetch])
-  return { platform, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { platform, isLoading, refresh: loadData }
 }
 
 export function usePlatforms(options?: { type?: string; status?: string; limit?: number }) {
   const [platforms, setPlatforms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -35,40 +35,40 @@ export function usePlatforms(options?: { type?: string; status?: string; limit?:
       setPlatforms(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { platforms, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { platforms, isLoading, refresh: loadData }
 }
 
 export function usePlatformSettings(platformId?: string) {
   const [settings, setSettings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!platformId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platform_settings').select('*').eq('platform_id', platformId); setSettings(data || []) } finally { setIsLoading(false) }
   }, [platformId])
-  useEffect(() => { fetch() }, [fetch])
-  return { settings, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { settings, isLoading, refresh: loadData }
 }
 
 export function usePlatformFeatures(platformId?: string) {
   const [features, setFeatures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!platformId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platform_features').select('*').eq('platform_id', platformId).order('name', { ascending: true }); setFeatures(data || []) } finally { setIsLoading(false) }
   }, [platformId])
-  useEffect(() => { fetch() }, [fetch])
-  return { features, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { features, isLoading, refresh: loadData }
 }
 
 export function usePlatformAnalytics(platformId?: string, options?: { date_from?: string; date_to?: string }) {
   const [analytics, setAnalytics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!platformId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -80,6 +80,6 @@ export function usePlatformAnalytics(platformId?: string, options?: { date_from?
       setAnalytics(data || [])
     } finally { setIsLoading(false) }
   }, [platformId, options?.date_from, options?.date_to])
-  useEffect(() => { fetch() }, [fetch])
-  return { analytics, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { analytics, isLoading, refresh: loadData }
 }

@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useRefund(refundId?: string) {
   const [refund, setRefund] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!refundId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('refunds').select('*, refund_items(*), transactions(*), orders(*), users(*), refund_history(*)').eq('id', refundId).single(); setRefund(data) } finally { setIsLoading(false) }
   }, [refundId])
-  useEffect(() => { fetch() }, [fetch])
-  return { refund, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { refund, isLoading, refresh: loadData }
 }
 
 export function useRefunds(options?: { customer_id?: string; order_id?: string; status?: string; from_date?: string; to_date?: string; search?: string; limit?: number }) {
   const [refunds, setRefunds] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -39,14 +39,14 @@ export function useRefunds(options?: { customer_id?: string; order_id?: string; 
       setRefunds(data || [])
     } finally { setIsLoading(false) }
   }, [options?.customer_id, options?.order_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { refunds, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { refunds, isLoading, refresh: loadData }
 }
 
 export function usePendingRefunds(options?: { limit?: number }) {
   const [refunds, setRefunds] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -54,27 +54,27 @@ export function usePendingRefunds(options?: { limit?: number }) {
       setRefunds(data || [])
     } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { refunds, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { refunds, isLoading, refresh: loadData }
 }
 
 export function useRefundHistory(refundId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!refundId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('refund_history').select('*, users(*)').eq('refund_id', refundId).order('created_at', { ascending: false }); setHistory(data || []) } finally { setIsLoading(false) }
   }, [refundId])
-  useEffect(() => { fetch() }, [fetch])
-  return { history, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { history, isLoading, refresh: loadData }
 }
 
 export function useRefundPolicies(options?: { category?: string; is_active?: boolean }) {
   const [policies, setPolicies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -85,14 +85,14 @@ export function useRefundPolicies(options?: { category?: string; is_active?: boo
       setPolicies(data || [])
     } finally { setIsLoading(false) }
   }, [options?.category, options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { policies, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { policies, isLoading, refresh: loadData }
 }
 
 export function useRefundStats(options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; pending: number; approved: number; processed: number; rejected: number; totalAmount: number; pendingAmount: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -111,14 +111,14 @@ export function useRefundStats(options?: { from_date?: string; to_date?: string 
       setStats({ total, pending, approved, processed, rejected, totalAmount, pendingAmount })
     } finally { setIsLoading(false) }
   }, [options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useCustomerRefunds(customerId?: string, options?: { status?: string; limit?: number }) {
   const [refunds, setRefunds] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -129,27 +129,27 @@ export function useCustomerRefunds(customerId?: string, options?: { status?: str
       setRefunds(data || [])
     } finally { setIsLoading(false) }
   }, [customerId, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { refunds, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { refunds, isLoading, refresh: loadData }
 }
 
 export function useRefundItems(refundId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!refundId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('refund_items').select('*').eq('refund_id', refundId); setItems(data || []) } finally { setIsLoading(false) }
   }, [refundId])
-  useEffect(() => { fetch() }, [fetch])
-  return { items, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { items, isLoading, refresh: loadData }
 }
 
 export function useRecentRefunds(options?: { limit?: number }) {
   const [refunds, setRefunds] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -157,6 +157,6 @@ export function useRecentRefunds(options?: { limit?: number }) {
       setRefunds(data || [])
     } finally { setIsLoading(false) }
   }, [options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { refunds, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { refunds, isLoading, refresh: loadData }
 }

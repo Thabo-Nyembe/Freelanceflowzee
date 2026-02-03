@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useVacation(vacationId?: string) {
   const [vacation, setVacation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!vacationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('vacations').select('*, vacation_types(*), users(*), vacation_approvals(*, approver:users(*))').eq('id', vacationId).single(); setVacation(data) } finally { setIsLoading(false) }
   }, [vacationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { vacation, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vacation, isLoading, refresh: loadData }
 }
 
 export function useVacations(options?: { user_id?: string; vacation_type_id?: string; status?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [vacations, setVacations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useVacations(options?: { user_id?: string; vacation_type_id?: st
       setVacations(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.vacation_type_id, options?.status, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { vacations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vacations, isLoading, refresh: loadData }
 }
 
 export function useMyVacations(userId?: string, options?: { status?: string; year?: number; limit?: number }) {
   const [vacations, setVacations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -59,14 +59,14 @@ export function useMyVacations(userId?: string, options?: { status?: string; yea
       setVacations(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.year, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { vacations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vacations, isLoading, refresh: loadData }
 }
 
 export function useVacationTypes(options?: { is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -76,14 +76,14 @@ export function useVacationTypes(options?: { is_active?: boolean }) {
       setTypes(data || [])
     } finally { setIsLoading(false) }
   }, [options?.is_active])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useVacationBalance(userId?: string, year?: number) {
   const [balances, setBalances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -93,14 +93,14 @@ export function useVacationBalance(userId?: string, year?: number) {
       setBalances(data || [])
     } finally { setIsLoading(false) }
   }, [userId, year])
-  useEffect(() => { fetch() }, [fetch])
-  return { balances, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { balances, isLoading, refresh: loadData }
 }
 
 export function useVacationBalanceByType(userId?: string, vacationTypeId?: string, year?: number) {
   const [balance, setBalance] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId || !vacationTypeId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -110,53 +110,53 @@ export function useVacationBalanceByType(userId?: string, vacationTypeId?: strin
       setBalance(data)
     } finally { setIsLoading(false) }
   }, [userId, vacationTypeId, year])
-  useEffect(() => { fetch() }, [fetch])
-  return { balance, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { balance, isLoading, refresh: loadData }
 }
 
 export function usePendingApprovals(approverId?: string, options?: { limit?: number }) {
   const [vacations, setVacations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!approverId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('vacations').select('*, vacation_types(*), users(*)').eq('status', 'pending').order('created_at', { ascending: true }).limit(options?.limit || 50); setVacations(data || []) } finally { setIsLoading(false) }
   }, [approverId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { vacations, count: vacations.length, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vacations, count: vacations.length, isLoading, refresh: loadData }
 }
 
 export function useTeamCalendar(teamMemberIds?: string[], fromDate?: string, toDate?: string) {
   const [vacations, setVacations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!teamMemberIds || teamMemberIds.length === 0 || !fromDate || !toDate) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('vacations').select('*, users(*), vacation_types(*)').in('user_id', teamMemberIds).in('status', ['approved', 'pending']).gte('start_date', fromDate).lte('end_date', toDate).order('start_date', { ascending: true }); setVacations(data || []) } finally { setIsLoading(false) }
   }, [teamMemberIds, fromDate, toDate])
-  useEffect(() => { fetch() }, [fetch])
-  return { vacations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vacations, isLoading, refresh: loadData }
 }
 
 export function useVacationApprovals(vacationId?: string) {
   const [approvals, setApprovals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!vacationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('vacation_approvals').select('*, approver:users(*)').eq('vacation_id', vacationId).order('created_at', { ascending: false }); setApprovals(data || []) } finally { setIsLoading(false) }
   }, [vacationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { approvals, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { approvals, isLoading, refresh: loadData }
 }
 
 export function useUpcomingVacations(userId?: string, options?: { days?: number; limit?: number }) {
   const [vacations, setVacations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -168,14 +168,14 @@ export function useUpcomingVacations(userId?: string, options?: { days?: number;
       setVacations(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.days, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { vacations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { vacations, isLoading, refresh: loadData }
 }
 
 export function useVacationStats(userId?: string, year?: number) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -196,14 +196,14 @@ export function useVacationStats(userId?: string, year?: number) {
       })
     } finally { setIsLoading(false) }
   }, [userId, year])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useVacationPolicy(policyId?: string) {
   const [policy, setPolicy] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -216,6 +216,6 @@ export function useVacationPolicy(policyId?: string) {
       }
     } finally { setIsLoading(false) }
   }, [policyId])
-  useEffect(() => { fetch() }, [fetch])
-  return { policy, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { policy, isLoading, refresh: loadData }
 }

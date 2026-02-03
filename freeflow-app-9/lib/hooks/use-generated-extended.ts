@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useGeneratedContent(contentId?: string) {
   const [content, setContent] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!contentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('generated_content').select('*').eq('id', contentId).single(); setContent(data) } finally { setIsLoading(false) }
   }, [contentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { content, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { content, isLoading, refresh: loadData }
 }
 
 export function useGeneratedContentList(options?: { user_id?: string; type?: string; status?: string; limit?: number }) {
   const [contents, setContents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -36,27 +36,27 @@ export function useGeneratedContentList(options?: { user_id?: string; type?: str
       setContents(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.type, options?.status, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { contents, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { contents, isLoading, refresh: loadData }
 }
 
 export function useGeneratedImages(userId?: string, options?: { limit?: number }) {
   const [images, setImages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('generated_images').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setImages(data || []) } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { images, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { images, isLoading, refresh: loadData }
 }
 
 export function useGeneratedCode(userId?: string, options?: { language?: string; limit?: number }) {
   const [code, setCode] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -67,14 +67,14 @@ export function useGeneratedCode(userId?: string, options?: { language?: string;
       setCode(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.language, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { code, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { code, isLoading, refresh: loadData }
 }
 
 export function useGeneratedReports(userId?: string, options?: { type?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -85,6 +85,6 @@ export function useGeneratedReports(userId?: string, options?: { type?: string; 
       setReports(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.type, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reports, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reports, isLoading, refresh: loadData }
 }

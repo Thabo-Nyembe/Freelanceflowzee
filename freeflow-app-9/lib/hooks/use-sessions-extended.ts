@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useSession(sessionId?: string) {
   const [session, setSession] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sessionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('sessions').select('*, session_tokens(*), session_devices(*), session_activities(*), users(*)').eq('id', sessionId).single(); setSession(data) } finally { setIsLoading(false) }
   }, [sessionId])
-  useEffect(() => { fetch() }, [fetch])
-  return { session, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { session, isLoading, refresh: loadData }
 }
 
 export function useSessions(options?: { user_id?: string; status?: string; device_id?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [sessions, setSessions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -38,14 +38,14 @@ export function useSessions(options?: { user_id?: string; status?: string; devic
       setSessions(data || [])
     } finally { setIsLoading(false) }
   }, [options?.user_id, options?.status, options?.device_id, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { sessions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sessions, isLoading, refresh: loadData }
 }
 
 export function useUserActiveSessions(userId?: string) {
   const [sessions, setSessions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -54,14 +54,14 @@ export function useUserActiveSessions(userId?: string) {
       setSessions(data || [])
     } finally { setIsLoading(false) }
   }, [userId])
-  useEffect(() => { fetch() }, [fetch])
-  return { sessions, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { sessions, isLoading, refresh: loadData }
 }
 
 export function useSessionActivities(sessionId?: string, options?: { action?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!sessionId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -74,14 +74,14 @@ export function useSessionActivities(sessionId?: string, options?: { action?: st
       setActivities(data || [])
     } finally { setIsLoading(false) }
   }, [sessionId, options?.action, options?.from_date, options?.to_date, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { activities, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { activities, isLoading, refresh: loadData }
 }
 
 export function useUserDevices(userId?: string, options?: { is_trusted?: boolean }) {
   const [devices, setDevices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -92,8 +92,8 @@ export function useUserDevices(userId?: string, options?: { is_trusted?: boolean
       setDevices(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.is_trusted])
-  useEffect(() => { fetch() }, [fetch])
-  return { devices, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { devices, isLoading, refresh: loadData }
 }
 
 export function useCurrentSession() {
@@ -119,7 +119,7 @@ export function useCurrentSession() {
 export function useSessionStats(options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; active: number; ended: number; expired: number; uniqueUsers: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -136,14 +136,14 @@ export function useSessionStats(options?: { from_date?: string; to_date?: string
       setStats({ total, active, ended, expired, uniqueUsers })
     } finally { setIsLoading(false) }
   }, [options?.from_date, options?.to_date])
-  useEffect(() => { fetch() }, [fetch])
-  return { stats, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { stats, isLoading, refresh: loadData }
 }
 
 export function useRecentActivities(userId?: string, options?: { limit?: number }) {
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -155,7 +155,7 @@ export function useRecentActivities(userId?: string, options?: { limit?: number 
       setActivities(data || [])
     } finally { setIsLoading(false) }
   }, [userId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { activities, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { activities, isLoading, refresh: loadData }
 }
 

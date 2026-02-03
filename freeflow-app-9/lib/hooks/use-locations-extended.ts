@@ -11,20 +11,20 @@ import { createClient } from '@/lib/supabase/client'
 export function useLocation(locationId?: string) {
   const [location, setLocation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!locationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('locations').select('*, location_types(*), location_hours(*), location_amenities(*), location_photos(*)').eq('id', locationId).single(); setLocation(data) } finally { setIsLoading(false) }
   }, [locationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { location, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { location, isLoading, refresh: loadData }
 }
 
 export function useLocations(options?: { type_id?: string; city?: string; country?: string; is_active?: boolean; limit?: number }) {
   const [locations, setLocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -37,72 +37,72 @@ export function useLocations(options?: { type_id?: string; city?: string; countr
       setLocations(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type_id, options?.city, options?.country, options?.is_active, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { locations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { locations, isLoading, refresh: loadData }
 }
 
 export function useLocationTypes() {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('location_types').select('*').order('name', { ascending: true }); setTypes(data || []) } finally { setIsLoading(false) }
   }, [])
-  useEffect(() => { fetch() }, [fetch])
-  return { types, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { types, isLoading, refresh: loadData }
 }
 
 export function useLocationHours(locationId?: string) {
   const [hours, setHours] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!locationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('location_hours').select('*').eq('location_id', locationId).order('day_of_week', { ascending: true }); setHours(data || []) } finally { setIsLoading(false) }
   }, [locationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { hours, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { hours, isLoading, refresh: loadData }
 }
 
 export function useLocationAmenities(locationId?: string) {
   const [amenities, setAmenities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!locationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('location_amenities').select('*').eq('location_id', locationId); setAmenities(data || []) } finally { setIsLoading(false) }
   }, [locationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { amenities, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { amenities, isLoading, refresh: loadData }
 }
 
 export function useLocationReviews(locationId?: string, options?: { limit?: number }) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!locationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('location_reviews').select('*').eq('location_id', locationId).order('created_at', { ascending: false }).limit(options?.limit || 20); setReviews(data || []) } finally { setIsLoading(false) }
   }, [locationId, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { reviews, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { reviews, isLoading, refresh: loadData }
 }
 
 export function useLocationPhotos(locationId?: string) {
   const [photos, setPhotos] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!locationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('location_photos').select('*').eq('location_id', locationId).order('is_primary', { ascending: false }); setPhotos(data || []) } finally { setIsLoading(false) }
   }, [locationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { photos, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { photos, isLoading, refresh: loadData }
 }
 
 export function useLocationSearch(query?: string, options?: { type_id?: string; limit?: number }) {
@@ -126,7 +126,7 @@ export function useLocationSearch(query?: string, options?: { type_id?: string; 
 export function useNearbyLocations(latitude?: number, longitude?: number, options?: { radius_km?: number; type_id?: string; limit?: number }) {
   const [locations, setLocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!latitude || !longitude) { setIsLoading(false); return }
     setIsLoading(true)
@@ -141,14 +141,14 @@ export function useNearbyLocations(latitude?: number, longitude?: number, option
       setLocations(data || [])
     } finally { setIsLoading(false) }
   }, [latitude, longitude, options?.radius_km, options?.type_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { locations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { locations, isLoading, refresh: loadData }
 }
 
 export function useTopRatedLocations(options?: { type_id?: string; limit?: number }) {
   const [locations, setLocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -158,6 +158,6 @@ export function useTopRatedLocations(options?: { type_id?: string; limit?: numbe
       setLocations(data || [])
     } finally { setIsLoading(false) }
   }, [options?.type_id, options?.limit])
-  useEffect(() => { fetch() }, [fetch])
-  return { locations, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { locations, isLoading, refresh: loadData }
 }

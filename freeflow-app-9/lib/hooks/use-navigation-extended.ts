@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 export function useNavigations(navigationType?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -21,14 +21,14 @@ export function useNavigations(navigationType?: string, isActive?: boolean) {
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [navigationType, isActive])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useNavigationItems(navigationId?: string, parentId?: string | null) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     setIsLoading(true)
     try {
@@ -40,14 +40,14 @@ export function useNavigationItems(navigationId?: string, parentId?: string | nu
       setData(result || [])
     } finally { setIsLoading(false) }
   }, [navigationId, parentId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
 
 export function useNavigationTree(navigationId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const fetch = useCallback(async () => {
+  const loadData = useCallback(async () => {
   const supabase = createClient()
     if (!navigationId) { setIsLoading(false); return }
     setIsLoading(true)
@@ -59,6 +59,6 @@ export function useNavigationTree(navigationId?: string) {
       setData(buildTree(items || []))
     } finally { setIsLoading(false) }
   }, [navigationId])
-  useEffect(() => { fetch() }, [fetch])
-  return { data, isLoading, refresh: fetch }
+  useEffect(() => { loadData() }, [loadData])
+  return { data, isLoading, refresh: loadData }
 }
