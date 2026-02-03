@@ -33,7 +33,11 @@ import {
   Settings,
   Gauge,
   Repeat,
-  Focus
+  Focus,
+  Inbox,
+  Handshake,
+  Kanban,
+  Quote
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -163,6 +167,31 @@ const sidebarItems: SidebarItem[] = [
     name: 'Settings',
     href: '/dashboard/notification-settings-v2',
     icon: Settings
+  },
+  {
+    name: 'Inbox',
+    href: '/dashboard/inbox-v2',
+    icon: Inbox
+  },
+  {
+    name: 'Deals',
+    href: '/dashboard/deals-v2',
+    icon: Handshake
+  },
+  {
+    name: 'Contacts',
+    href: '/dashboard/contacts-v2',
+    icon: Users
+  },
+  {
+    name: 'Pipeline',
+    href: '/dashboard/pipeline-v2',
+    icon: Kanban
+  },
+  {
+    name: 'Quotes',
+    href: '/dashboard/quotes-v2',
+    icon: FileText
   }
 ]
 
