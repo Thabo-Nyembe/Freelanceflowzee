@@ -4,6 +4,6 @@ export const dynamic = 'force-dynamic';
 
 import BugsTrackingClient from './bugs-tracking-client'
 
-export default function Page() {
+export default function BugsTrackingPage() {
   return <BugsTrackingClient />
 }
