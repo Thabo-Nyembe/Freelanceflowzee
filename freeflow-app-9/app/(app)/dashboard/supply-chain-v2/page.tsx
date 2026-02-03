@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import InventoryClient from './inventory-client'
+import SupplyChainClient from './supply-chain-client'
 
 export default function Page() {
-  return <InventoryClient />
+  return <SupplyChainClient />
 }

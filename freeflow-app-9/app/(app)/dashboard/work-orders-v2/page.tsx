@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import InventoryClient from './inventory-client'
+import WorkOrdersClient from './work-orders-client'
 
 export default function Page() {
-  return <InventoryClient />
+  return <WorkOrdersClient />
 }
