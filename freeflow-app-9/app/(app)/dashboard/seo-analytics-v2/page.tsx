@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import CampaignsClient from './campaigns-client'
+import SeoAnalyticsClient from './seo-analytics-client'
 
 export default function Page() {
-  return <CampaignsClient />
+  return <SeoAnalyticsClient />
 }
