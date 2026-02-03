@@ -83,7 +83,18 @@ import {
   Target as SkillsIcon,
   Star,
   UserMinus,
-  UserPlus
+  UserPlus,
+  CheckSquare,
+  Briefcase,
+  CreditCard,
+  Mail,
+  Send,
+  Clock,
+  Workflow,
+  Plug,
+  Code,
+  Webhook,
+  BarChart
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -360,6 +371,150 @@ const sidebarItems: SidebarItem[] = [
     name: 'Content Hub',
     href: '/dashboard/content-v2',
     icon: FileText
+  },
+  // Projects & Tasks
+  {
+    name: 'Projects',
+    href: '/dashboard/projects-v2',
+    icon: Briefcase
+  },
+  {
+    name: 'Tasks',
+    href: '/dashboard/tasks-v2',
+    icon: CheckSquare
+  },
+  {
+    name: 'Calendar',
+    href: '/dashboard/calendar-v2',
+    icon: Calendar
+  },
+  {
+    name: 'Time Tracking',
+    href: '/dashboard/time-tracking-v2',
+    icon: Clock
+  },
+  // Team & Employees
+  {
+    name: 'Team',
+    href: '/dashboard/team-v2',
+    icon: Users
+  },
+  {
+    name: 'Employees',
+    href: '/dashboard/employees-v2',
+    icon: Users
+  },
+  {
+    name: 'Time Off',
+    href: '/dashboard/time-off-v2',
+    icon: Calendar
+  },
+  // Finance & Accounting
+  {
+    name: 'Accounting',
+    href: '/dashboard/accounting-v2',
+    icon: Calculator
+  },
+  {
+    name: 'Invoices',
+    href: '/dashboard/invoices-v2',
+    icon: Receipt
+  },
+  {
+    name: 'Billing',
+    href: '/dashboard/billing-v2',
+    icon: CreditCard
+  },
+  {
+    name: 'Payments',
+    href: '/dashboard/payments-v2',
+    icon: DollarSign
+  },
+  {
+    name: 'Expenses',
+    href: '/dashboard/expenses-v2',
+    icon: Receipt
+  },
+  // Communication
+  {
+    name: 'Messages',
+    href: '/dashboard/messages-v2',
+    icon: MessageSquare
+  },
+  {
+    name: 'Chat',
+    href: '/dashboard/chat-v2',
+    icon: MessageSquare
+  },
+  {
+    name: 'Email Agent',
+    href: '/dashboard/email-agent-v2',
+    icon: Mail
+  },
+  // Files & Documents
+  {
+    name: 'Files',
+    href: '/dashboard/files-v2',
+    icon: FileText
+  },
+  {
+    name: 'Documents',
+    href: '/dashboard/documents-v2',
+    icon: FileText
+  },
+  // Clients
+  {
+    name: 'Clients',
+    href: '/dashboard/clients-v2',
+    icon: Users
+  },
+  {
+    name: 'Client Portal',
+    href: '/dashboard/client-portal-v2',
+    icon: UserCircle
+  },
+  // Workflows & Automation
+  {
+    name: 'Workflows',
+    href: '/dashboard/workflows-v2',
+    icon: Workflow
+  },
+  {
+    name: 'Workflow Builder',
+    href: '/dashboard/workflow-builder-v2',
+    icon: Workflow
+  },
+  {
+    name: 'Automations',
+    href: '/dashboard/automations-v2',
+    icon: Zap
+  },
+  // Integrations & API
+  {
+    name: 'Integrations',
+    href: '/dashboard/integrations-v2',
+    icon: Plug
+  },
+  {
+    name: 'API',
+    href: '/dashboard/api-v2',
+    icon: Code
+  },
+  {
+    name: 'Webhooks',
+    href: '/dashboard/webhooks-v2',
+    icon: Webhook
+  },
+  // Reports
+  {
+    name: 'Reports',
+    href: '/dashboard/reports-v2',
+    icon: BarChart
+  },
+  {
+    name: 'Reporting',
+    href: '/dashboard/reporting-v2',
+    icon: BarChart3
   },
   // Facilities & Operations
   {
