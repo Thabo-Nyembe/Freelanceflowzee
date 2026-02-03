@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import ContractsClient from './contracts-client'
+import PoliciesClient from './policies-client'
 
 export default function Page() {
-  return <ContractsClient />
+  return <PoliciesClient />
 }
