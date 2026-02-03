@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import LeadsClient from './leads-client'
+import CommissionsClient from './commissions-client'
 
 export default function Page() {
-  return <LeadsClient />
+  return <CommissionsClient />
 }
