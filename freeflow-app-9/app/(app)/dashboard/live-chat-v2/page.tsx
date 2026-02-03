@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import KnowledgeBaseClient from './knowledge-base-client'
+import LiveChatClient from './live-chat-client'
 
 export default function Page() {
-  return <KnowledgeBaseClient />
+  return <LiveChatClient />
 }
