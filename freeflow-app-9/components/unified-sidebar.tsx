@@ -130,6 +130,76 @@ const sidebarItems: SidebarItem[] = [
     icon: Sparkles
   },
   {
+    name: 'AI Agents',
+    href: '/dashboard/ai-agents-v2',
+    icon: Zap
+  },
+  {
+    name: 'AI Code Builder',
+    href: '/dashboard/ai-code-builder-v2',
+    icon: Zap
+  },
+  {
+    name: 'AI Design',
+    href: '/dashboard/ai-design-v2',
+    icon: Sparkles
+  },
+  {
+    name: 'AI Video',
+    href: '/dashboard/ai-video-v2',
+    icon: Video
+  },
+  {
+    name: 'AI Voice',
+    href: '/dashboard/ai-voice-v2',
+    icon: Music
+  },
+  {
+    name: 'AI Settings',
+    href: '/dashboard/ai-settings-v2',
+    icon: Settings
+  },
+  {
+    name: 'Audio Studio',
+    href: '/dashboard/audio-studio-v2',
+    icon: Music
+  },
+  {
+    name: 'Content Studio',
+    href: '/dashboard/content-studio-v2',
+    icon: Video
+  },
+  {
+    name: 'Media Library',
+    href: '/dashboard/media-library-v2',
+    icon: FolderOpen
+  },
+  {
+    name: '3D Modeling',
+    href: '/dashboard/3d-modeling-v2',
+    icon: Monitor
+  },
+  {
+    name: 'AI Image Generator',
+    href: '/dashboard/ai-image-generator',
+    icon: Sparkles
+  },
+  {
+    name: 'AI Music Studio',
+    href: '/dashboard/ai-music-studio',
+    icon: Music
+  },
+  {
+    name: 'Motion Graphics',
+    href: '/dashboard/motion-graphics-v2',
+    icon: Video
+  },
+  {
+    name: 'Video Review',
+    href: '/dashboard/video-review-v2',
+    icon: Video
+  },
+  {
     name: 'My Day',
     href: '/dashboard/my-day-v2',
     icon: Calendar
@@ -237,6 +307,48 @@ const sidebarItems: SidebarItem[] = [
   {
     name: 'Quotes',
     href: '/dashboard/quotes-v2',
+    icon: FileText
+  },
+  // CRM & Sales
+  {
+    name: 'CRM',
+    href: '/dashboard/crm-v2',
+    icon: Users
+  },
+  {
+    name: 'Sales',
+    href: '/dashboard/sales-v2',
+    icon: TrendingUp
+  },
+  {
+    name: 'Leads',
+    href: '/dashboard/leads-v2',
+    icon: Target
+  },
+  {
+    name: 'Opportunities',
+    href: '/dashboard/opportunities-v2',
+    icon: Target
+  },
+  // Marketing
+  {
+    name: 'Marketing',
+    href: '/dashboard/marketing-v2',
+    icon: TrendingUp
+  },
+  {
+    name: 'Campaigns',
+    href: '/dashboard/campaigns-v2',
+    icon: Zap
+  },
+  {
+    name: 'Content Calendar',
+    href: '/dashboard/content-calendar-v2',
+    icon: Calendar
+  },
+  {
+    name: 'Content Hub',
+    href: '/dashboard/content-v2',
     icon: FileText
   },
   // Facilities & Operations
