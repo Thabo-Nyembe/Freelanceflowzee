@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import BudgetsClient from './budgets-client'
+import TaxesClient from './taxes-client'
 
 export default function Page() {
-  return <BudgetsClient />
+  return <TaxesClient />
 }
