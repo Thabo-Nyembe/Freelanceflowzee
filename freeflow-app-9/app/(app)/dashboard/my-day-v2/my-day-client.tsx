@@ -814,10 +814,10 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     { label: 'Today', value: todayTasks.length, icon: Sun, color: 'from-amber-500 to-orange-600', change: '+2' },
     { label: 'Overdue', value: overdueTasks.length, icon: Clock, color: 'from-red-500 to-rose-600', change: '-1' },
     { label: 'Completed', value: completedToday.length, icon: CheckCircle2, color: 'from-green-500 to-emerald-600', change: '+6' },
-    { label: 'Focus Time', value: `${Math.floor(stats.focusMinutesToday / 60)}h ${stats.focusMinutesToday % 60}m`, icon: Timer, color: 'from-purple-500 to-violet-600', change: '+45m' },
-    { label: 'This Week', value: stats.tasksCompletedThisWeek, icon: BarChart3, color: 'from-blue-500 to-indigo-600', change: '+8' },
-    { label: 'Streak', value: `${stats.streakDays} days`, icon: Flame, color: 'from-orange-500 to-red-600', change: '+1' },
-    { label: 'On-time Rate', value: `${stats.onTimeCompletionRate}%`, icon: TrendingUp, color: 'from-teal-500 to-cyan-600', change: '+3%' },
+    { label: 'Focus Time', value: `${Math.floor((stats.focusMinutesToday ?? 0) / 60)}h ${(stats.focusMinutesToday ?? 0) % 60}m`, icon: Timer, color: 'from-purple-500 to-violet-600', change: '+45m' },
+    { label: 'This Week', value: stats.tasksCompletedThisWeek ?? 0, icon: BarChart3, color: 'from-blue-500 to-indigo-600', change: '+8' },
+    { label: 'Streak', value: `${stats.streakDays ?? 0} days`, icon: Flame, color: 'from-orange-500 to-red-600', change: '+1' },
+    { label: 'On-time Rate', value: `${stats.onTimeCompletionRate ?? 0}%`, icon: TrendingUp, color: 'from-teal-500 to-cyan-600', change: '+3%' },
     { label: 'Karma', value: (stats.karmaPoints ?? 0).toLocaleString(), icon: Award, color: 'from-pink-500 to-rose-600', change: '+127' }
   ]
 
@@ -1256,11 +1256,11 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                         <div className="text-xs opacity-80">Pomodoros</div>
                       </div>
                       <div className="text-center p-2 bg-white/10 rounded-lg">
-                        <div className="text-xl font-bold">{Math.floor(stats.focusMinutesToday / 60)}h</div>
+                        <div className="text-xl font-bold">{Math.floor((stats.focusMinutesToday ?? 0) / 60)}h</div>
                         <div className="text-xs opacity-80">Focus Time</div>
                       </div>
                       <div className="text-center p-2 bg-white/10 rounded-lg">
-                        <div className="text-xl font-bold">{stats.streakDays}</div>
+                        <div className="text-xl font-bold">{stats.streakDays ?? 0}</div>
                         <div className="text-xs opacity-80">Day Streak</div>
                       </div>
                     </div>
@@ -1340,7 +1340,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                     <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                       <p className="text-sm font-medium text-purple-700 dark:text-purple-400">On-Time Rate</p>
                       <p className="text-xs text-purple-600 dark:text-purple-500 mt-1">
-                        {stats.onTimeCompletionRate}% of tasks completed on time
+                        {stats.onTimeCompletionRate ?? 0}% of tasks completed on time
                       </p>
                     </div>
                   </CardContent>
@@ -1737,7 +1737,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                      <div className="text-3xl font-bold text-purple-600">{stats.focusMinutesToday}</div>
+                      <div className="text-3xl font-bold text-purple-600">{stats.focusMinutesToday ?? 0}</div>
                       <div className="text-sm text-purple-600/80">Focus Minutes Today</div>
                     </div>
                     <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
@@ -1745,11 +1745,11 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                       <div className="text-sm text-blue-600/80">Pomodoros Today</div>
                     </div>
                     <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                      <div className="text-3xl font-bold text-green-600">{stats.topProductiveHour}</div>
+                      <div className="text-3xl font-bold text-green-600">{stats.topProductiveHour ?? 'N/A'}</div>
                       <div className="text-sm text-green-600/80">Peak Hour</div>
                     </div>
                     <div className="text-center p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                      <div className="text-3xl font-bold text-amber-600">{stats.streakDays}</div>
+                      <div className="text-3xl font-bold text-amber-600">{stats.streakDays ?? 0}</div>
                       <div className="text-sm text-amber-600/80">Day Streak</div>
                     </div>
                   </div>
