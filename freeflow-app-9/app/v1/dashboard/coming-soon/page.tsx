@@ -47,20 +47,65 @@ export default function ComingSoonPage() {
   // Available HANDLERS
   // ============================================
 
-  const handleNotifyMe = useCallback((params?: any) => {
-    // Handler ready
-    // Production implementation - handler is functional
-  }, [])
+  const handleNotifyMe = useCallback(async (email?: string) => {
+    try {
+      if (!email && !userId) {
+        announce('Please provide an email address', 'assertive')
+        return
+      }
 
-  const handleViewRoadmap = useCallback((params?: any) => {
-    // Handler ready
-    // Production implementation - handler is functional
-  }, [])
+      const response = await fetch('/api/features/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email || undefined,
+          user_id: userId,
+          feature: 'coming_soon_features',
+          source: 'coming_soon_page'
+        })
+      })
 
-  const handleRequestFeature = useCallback((params?: any) => {
-    // Handler ready
-    // Production implementation - handler is functional
-  }, [])
+      if (!response.ok) throw new Error('Failed to subscribe')
+
+      announce('You\'ll be notified when new features launch!', 'polite')
+    } catch (err) {
+      announce('Failed to subscribe. Please try again.', 'assertive')
+      console.error('Notify me error:', err)
+    }
+  }, [userId, announce])
+
+  const handleViewRoadmap = useCallback(() => {
+    // Navigate to roadmap page
+    window.location.href = '/dashboard/roadmap'
+    announce('Navigating to roadmap', 'polite')
+  }, [announce])
+
+  const handleRequestFeature = useCallback(async (request: string) => {
+    try {
+      if (!request || !request.trim()) {
+        announce('Please describe the feature you\'d like to request', 'assertive')
+        return
+      }
+
+      const response = await fetch('/api/features/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          feature_request: request.trim(),
+          user_id: userId,
+          source: 'coming_soon_page',
+          priority: 'normal'
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to submit feature request')
+
+      announce('Feature request submitted! Thank you for your feedback.', 'polite')
+    } catch (err) {
+      announce('Failed to submit request. Please try again.', 'assertive')
+      console.error('Feature request error:', err)
+    }
+  }, [userId, announce])
 
   // A+++ LOADING STATE
   if (isLoading) {
