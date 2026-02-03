@@ -4,6 +4,6 @@ export const dynamic = 'force-dynamic';
 
 import RecruitmentClient from './recruitment-client'
 
-export default function Page() {
+export default function RecruitmentPage() {
   return <RecruitmentClient />
 }
