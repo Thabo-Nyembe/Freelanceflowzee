@@ -24,7 +24,16 @@ import {
   Bell,
   Zap,
   Monitor,
-  DollarSign
+  DollarSign,
+  Target,
+  Timer,
+  BookOpen,
+  Heart,
+  Database,
+  Settings,
+  Gauge,
+  Repeat,
+  Focus
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -109,6 +118,51 @@ const sidebarItems: SidebarItem[] = [
     name: 'Notifications',
     href: '/dashboard/notifications-v2',
     icon: Bell
+  },
+  {
+    name: 'Goals',
+    href: '/dashboard/goals-v2',
+    icon: Target
+  },
+  {
+    name: 'KPIs',
+    href: '/dashboard/kpis-v2',
+    icon: Gauge
+  },
+  {
+    name: 'Focus Mode',
+    href: '/dashboard/focus-v2',
+    icon: Focus
+  },
+  {
+    name: 'Pomodoro',
+    href: '/dashboard/pomodoro-v2',
+    icon: Timer
+  },
+  {
+    name: 'Journal',
+    href: '/dashboard/journals-v2',
+    icon: BookOpen
+  },
+  {
+    name: 'Habits',
+    href: '/dashboard/habits-v2',
+    icon: Repeat
+  },
+  {
+    name: 'Mood',
+    href: '/dashboard/mood-v2',
+    icon: Heart
+  },
+  {
+    name: 'Data Studio',
+    href: '/dashboard/data-studio-v2',
+    icon: Database
+  },
+  {
+    name: 'Settings',
+    href: '/dashboard/notification-settings-v2',
+    icon: Settings
   }
 ]
 
