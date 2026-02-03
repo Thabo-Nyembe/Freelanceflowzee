@@ -409,6 +409,14 @@ export async function POST(request: NextRequest) {
 }
 
 // ============================================================================
+// PATCH - Partial Update Client (alias for PUT)
+// ============================================================================
+export async function PATCH(request: NextRequest) {
+  // PATCH is an alias for PUT - both support partial updates
+  return PUT(request)
+}
+
+// ============================================================================
 // PUT - Update Client
 // ============================================================================
 

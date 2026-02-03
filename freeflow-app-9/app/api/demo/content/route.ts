@@ -267,3 +267,33 @@ export async function POST(request: NextRequest) {
     },
   })
 }
+
+export async function PATCH(request: NextRequest) {
+  // Demo mode - simulate update
+  const body = await request.json()
+  const { type, id, data } = body
+
+  return NextResponse.json({
+    success: true,
+    demo: true,
+    message: `Demo ${type || 'item'} #${id} updated successfully`,
+    data: {
+      id,
+      ...data,
+      updatedAt: new Date().toISOString(),
+    },
+  })
+}
+
+export async function DELETE(request: NextRequest) {
+  // Demo mode - simulate deletion
+  const { searchParams } = new URL(request.url)
+  const type = searchParams.get('type')
+  const id = searchParams.get('id')
+
+  return NextResponse.json({
+    success: true,
+    demo: true,
+    message: `Demo ${type || 'item'} #${id} deleted successfully`,
+  })
+}

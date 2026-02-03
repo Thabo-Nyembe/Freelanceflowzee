@@ -802,6 +802,14 @@ export async function GET(request: NextRequest) {
 }
 
 // ============================================================================
+// PATCH - Partial Update (alias for PUT)
+// ============================================================================
+export async function PATCH(request: NextRequest) {
+  // PATCH is an alias for PUT - both support partial updates
+  return PUT(request)
+}
+
+// ============================================================================
 // PUT - Update resources
 // ============================================================================
 

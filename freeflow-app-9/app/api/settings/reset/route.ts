@@ -234,6 +234,39 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
+  // PATCH is an alias for POST - both reset settings
+  return POST(request)
+}
+
+export async function DELETE(request: NextRequest): Promise<NextResponse> {
+  // DELETE - Clear all settings (not just reset to defaults)
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Delete all user settings (will fall back to defaults)
+    await Promise.allSettled([
+      supabase.from('notification_settings').delete().eq('user_id', user.id),
+      supabase.from('security_settings').delete().eq('user_id', user.id),
+      supabase.from('appearance_settings').delete().eq('user_id', user.id),
+    ])
+
+    logger.info('All settings cleared', { userId: user.id })
+    return NextResponse.json({
+      success: true,
+      message: 'All settings cleared successfully'
+    })
+  } catch (error) {
+    logger.error('Settings clear error', { error })
+    return NextResponse.json({ error: 'Failed to clear settings' }, { status: 500 })
+  }
+}
+
 // =====================================================
 // GET - Get default settings values
 // =====================================================

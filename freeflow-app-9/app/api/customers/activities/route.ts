@@ -113,6 +113,41 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { id, ...updates } = body
+
+    if (!id) {
+      return NextResponse.json({ error: 'Activity ID is required' }, { status: 400 })
+    }
+
+    const { data, error } = await supabase
+      .from('customer_activities')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    logger.info('Customer activity updated', { activityId: id })
+    return NextResponse.json({ data })
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    logger.error('Error updating customer activity', { error: errorMessage })
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   try {
     const supabase = await createClient()

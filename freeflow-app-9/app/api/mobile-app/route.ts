@@ -258,3 +258,96 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { type, id, ...updates } = body
+
+    if (!type || !id) {
+      return NextResponse.json({ error: 'Type and ID required' }, { status: 400 })
+    }
+
+    const tableMap: Record<string, string> = {
+      'device': 'mobile_devices',
+      'screen': 'mobile_screens',
+      'build': 'mobile_builds',
+      'test': 'mobile_tests'
+    }
+
+    const table = tableMap[type]
+    if (!table) {
+      return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
+    }
+
+    const { data, error } = await supabase
+      .from(table)
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    logger.info('Mobile app item updated', { type, id })
+    return NextResponse.json({ data })
+
+  } catch (error) {
+    logger.error('Mobile App PATCH error', { error })
+    return NextResponse.json({ error: 'Failed to update item' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const type = searchParams.get('type')
+    const id = searchParams.get('id')
+
+    if (!type || !id) {
+      return NextResponse.json({ error: 'Type and ID required' }, { status: 400 })
+    }
+
+    const tableMap: Record<string, string> = {
+      'device': 'mobile_devices',
+      'screen': 'mobile_screens',
+      'build': 'mobile_builds',
+      'test': 'mobile_tests'
+    }
+
+    const table = tableMap[type]
+    if (!table) {
+      return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
+    }
+
+    const { error } = await supabase
+      .from(table)
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id)
+
+    if (error) throw error
+
+    logger.info('Mobile app item deleted', { type, id })
+    return NextResponse.json({ success: true, message: `${type} deleted successfully` })
+
+  } catch (error) {
+    logger.error('Mobile App DELETE error', { error })
+    return NextResponse.json({ error: 'Failed to delete item' }, { status: 500 })
+  }
+}

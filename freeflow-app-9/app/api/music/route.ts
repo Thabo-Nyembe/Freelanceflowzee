@@ -168,3 +168,57 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const body = await request.json()
+    const { trackId, ...updates } = body
+
+    if (!trackId) {
+      return NextResponse.json({ error: 'Track ID required' }, { status: 400 })
+    }
+
+    const { data, error } = await supabase
+      .from('music_tracks')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', trackId)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    logger.info('Music track updated', { trackId })
+    return NextResponse.json({ data })
+
+  } catch (error) {
+    logger.error('Music PATCH error', { error })
+    return NextResponse.json({ error: 'Failed to update track' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { searchParams } = new URL(request.url)
+    const trackId = searchParams.get('trackId')
+
+    if (!trackId) {
+      return NextResponse.json({ error: 'Track ID required' }, { status: 400 })
+    }
+
+    const { error } = await supabase
+      .from('music_tracks')
+      .delete()
+      .eq('id', trackId)
+
+    if (error) throw error
+
+    logger.info('Music track deleted', { trackId })
+    return NextResponse.json({ success: true, message: 'Track deleted successfully' })
+
+  } catch (error) {
+    logger.error('Music DELETE error', { error })
+    return NextResponse.json({ error: 'Failed to delete track' }, { status: 500 })
+  }
+}

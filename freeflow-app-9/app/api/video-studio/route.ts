@@ -387,6 +387,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
+  // PATCH is an alias for PUT - both support partial updates
+  return PUT(request)
+}
+
 // =====================================================
 // PUT - Update video or project
 // =====================================================

@@ -315,3 +315,74 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { callId, ...updates } = body;
+
+    if (!callId) {
+      return NextResponse.json({ error: 'Call ID required' }, { status: 400 });
+    }
+
+    //Update call in database
+    const { data, error } = await supabase
+      .from('calls')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', callId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, call: data });
+
+  } catch (error) {
+    logger.error('Failed to update call', { error });
+    return NextResponse.json(
+      { error: 'Failed to update call' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const callId = searchParams.get('callId');
+
+    if (!callId) {
+      return NextResponse.json({ error: 'Call ID required' }, { status: 400 });
+    }
+
+    const { error } = await supabase
+      .from('calls')
+      .delete()
+      .eq('id', callId);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, message: 'Call deleted successfully' });
+
+  } catch (error) {
+    logger.error('Failed to delete call', { error });
+    return NextResponse.json(
+      { error: 'Failed to delete call' },
+      { status: 500 }
+    );
+  }
+}

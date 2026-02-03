@@ -202,6 +202,81 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 }
 
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
+  // PATCH - Update token permissions or extend expiration
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { sessionId, permissions, role } = body
+
+    if (!sessionId) {
+      return NextResponse.json({ error: 'Session ID required' }, { status: 400 })
+    }
+
+    // Update session participant
+    const { data, error } = await supabase
+      .from('session_participants')
+      .update({
+        role: role || undefined,
+        last_active_at: new Date().toISOString(),
+      })
+      .eq('session_id', sessionId)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    logger.info('Collaboration token updated', { sessionId })
+    return NextResponse.json({ success: true, data })
+
+  } catch (error) {
+    logger.error('Token update error', { error })
+    return NextResponse.json({ error: 'Failed to update token' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest): Promise<NextResponse> {
+  // DELETE - Revoke token / Leave collaboration session
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const sessionId = searchParams.get('sessionId')
+
+    if (!sessionId) {
+      return NextResponse.json({ error: 'Session ID required' }, { status: 400 })
+    }
+
+    // Remove user from session
+    const { error } = await supabase
+      .from('session_participants')
+      .delete()
+      .eq('session_id', sessionId)
+      .eq('user_id', user.id)
+
+    if (error) throw error
+
+    logger.info('User left collaboration session', { sessionId, userId: user.id })
+    return NextResponse.json({ success: true, message: 'Left session successfully' })
+
+  } catch (error) {
+    logger.error('Leave session error', { error })
+    return NextResponse.json({ error: 'Failed to leave session' }, { status: 500 })
+  }
+}
+
 // =====================================================
 // Helper Functions
 // =====================================================

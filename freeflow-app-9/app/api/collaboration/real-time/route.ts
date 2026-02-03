@@ -247,6 +247,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PATCH(request: NextRequest) {
+  // PATCH is an alias for PUT - both support partial updates
+  return PUT(request)
+}
+
 export async function PUT(request: NextRequest) {
   try {
     const supabase = await createClient();

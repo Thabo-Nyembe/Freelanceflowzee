@@ -567,3 +567,73 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { commentId, ...updates } = body
+
+    if (!commentId) {
+      return NextResponse.json({ error: 'Comment ID required' }, { status: 400 })
+    }
+
+    const { data, error } = await supabase
+      .from('collaboration_comments')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', commentId)
+      .eq('author_id', user.id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    logger.info('Comment updated', { commentId, userId: user.id })
+
+    return NextResponse.json({ success: true, data })
+
+  } catch (error) {
+    logger.error('Comment PATCH error', { error })
+    return NextResponse.json({ error: 'Failed to update comment' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const commentId = searchParams.get('commentId')
+
+    if (!commentId) {
+      return NextResponse.json({ error: 'Comment ID required' }, { status: 400 })
+    }
+
+    const { error } = await supabase
+      .from('collaboration_comments')
+      .delete()
+      .eq('id', commentId)
+      .eq('author_id', user.id)
+
+    if (error) throw error
+
+    logger.info('Comment deleted', { commentId, userId: user.id })
+
+    return NextResponse.json({ success: true, message: 'Comment deleted successfully' })
+
+  } catch (error) {
+    logger.error('Comment DELETE error', { error })
+    return NextResponse.json({ error: 'Failed to delete comment' }, { status: 500 })
+  }
+}

@@ -150,3 +150,116 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
+
+/**
+ * PATCH /api/v1/invoices - Update an existing invoice
+ */
+export async function PATCH(request: NextRequest) {
+  const startTime = Date.now()
+
+  const { context, error } = await validateApiKey(request)
+  if (error) return error
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  if (!hasPermission(context, 'write')) {
+    return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+  }
+
+  const supabase = await createClient()
+
+  try {
+    const body = await request.json()
+    const { id, ...updates } = body
+
+    if (!id) {
+      return NextResponse.json({ error: 'Invoice ID is required' }, { status: 400 })
+    }
+
+    // If items are updated, recalculate totals
+    if (updates.items) {
+      const subtotal = updates.items.reduce((sum: number, item: any) => {
+        return sum + (item.quantity || 1) * (item.rate || 0)
+      }, 0)
+
+      const taxRate = updates.tax_rate || 0
+      const taxAmount = subtotal * (taxRate / 100)
+      const total = subtotal + taxAmount - (updates.discount || 0)
+
+      updates.subtotal = subtotal
+      updates.tax_amount = taxAmount
+      updates.total = total
+    }
+
+    updates.updated_at = new Date().toISOString()
+
+    const { data, error: updateError } = await supabase
+      .from('invoices')
+      .update(updates)
+      .eq('id', id)
+      .eq('user_id', context.userId)
+      .select()
+      .single()
+
+    if (updateError) throw updateError
+
+    const latency = Date.now() - startTime
+    await logApiRequest(context, request, 200, latency)
+
+    const response = NextResponse.json({ data })
+    return withRateLimitHeaders(response, context)
+
+  } catch (err) {
+    const latency = Date.now() - startTime
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+    await logApiRequest(context, request, 500, latency, errorMessage)
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}
+
+/**
+ * DELETE /api/v1/invoices - Delete an invoice
+ */
+export async function DELETE(request: NextRequest) {
+  const startTime = Date.now()
+
+  const { context, error } = await validateApiKey(request)
+  if (error) return error
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  if (!hasPermission(context, 'write')) {
+    return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+  }
+
+  const supabase = await createClient()
+
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'Invoice ID is required' }, { status: 400 })
+    }
+
+    const { error: deleteError } = await supabase
+      .from('invoices')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', context.userId)
+
+    if (deleteError) throw deleteError
+
+    const latency = Date.now() - startTime
+    await logApiRequest(context, request, 200, latency)
+
+    const response = NextResponse.json({ success: true, message: 'Invoice deleted successfully' })
+    return withRateLimitHeaders(response, context)
+
+  } catch (err) {
+    const latency = Date.now() - startTime
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+    await logApiRequest(context, request, 500, latency, errorMessage)
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}
