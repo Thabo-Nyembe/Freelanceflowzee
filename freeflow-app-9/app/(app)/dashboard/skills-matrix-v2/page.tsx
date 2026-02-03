@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import RecruitmentClient from './recruitment-client'
+import SkillsMatrixClient from './skills-matrix-client'
 
 export default function Page() {
-  return <RecruitmentClient />
+  return <SkillsMatrixClient />
 }

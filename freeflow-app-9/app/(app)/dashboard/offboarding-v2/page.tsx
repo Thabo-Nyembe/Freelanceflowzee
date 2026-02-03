@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import RecruitmentClient from './recruitment-client'
+import OffboardingClient from './offboarding-client'
 
 export default function Page() {
-  return <RecruitmentClient />
+  return <OffboardingClient />
 }
