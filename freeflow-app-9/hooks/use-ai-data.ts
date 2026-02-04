@@ -548,6 +548,9 @@ export function useCurrentUser() {
           })
           setStatus('authenticated')
         } else {
+          // Check if the logged-in user IS the demo user
+          const isAlexDemoUser = data.user.email === DEMO_USER_EMAIL || data.user.id === DEMO_USER_ID
+          setIsDemo(isAlexDemoUser)
           setSession(data)
           setStatus('authenticated')
         }
