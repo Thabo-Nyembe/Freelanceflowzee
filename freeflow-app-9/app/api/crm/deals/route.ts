@@ -3,6 +3,40 @@ import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { createFeatureLogger } from '@/lib/logger'
 
+// ============================================================================
+// DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
+// ============================================================================
+
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+const DEMO_USER_EMAIL = 'alex@freeflow.io'
+
+function isDemoMode(request: NextRequest): boolean {
+  if (typeof request === 'undefined') return false
+  const url = new URL(request.url)
+  return (
+    url.searchParams.get('demo') === 'true' ||
+    request.cookies.get('demo_mode')?.value === 'true' ||
+    request.headers.get('X-Demo-Mode') === 'true'
+  )
+}
+
+function getDemoUserId(session: any, demoMode: boolean): string | null {
+  if (!session?.user) {
+    return demoMode ? DEMO_USER_ID : null
+  }
+
+  const userEmail = session.user.email
+  const isDemoAccount = userEmail === DEMO_USER_EMAIL ||
+                       userEmail === 'demo@kazi.io' ||
+                       userEmail === 'test@kazi.dev'
+
+  if (isDemoAccount || demoMode) {
+    return DEMO_USER_ID
+  }
+
+  return session.user.id || session.user.authId || null
+}
+
 const logger = createFeatureLogger('crm-api')
 
 // ============================================================================
@@ -356,11 +390,22 @@ async function updateContactDealStats(
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
+    const demoMode = isDemoMode(request)
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    let effectiveUserId: string
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      if (demoMode) {
+        effectiveUserId = DEMO_USER_ID
+      } else {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+    } else {
+      const userEmail = user.email
+      const isDemoAccount = userEmail === DEMO_USER_EMAIL || userEmail === 'demo@kazi.io' || userEmail === 'test@kazi.dev'
+      effectiveUserId = (isDemoAccount || demoMode) ? DEMO_USER_ID : user.id
     }
 
     const { searchParams } = new URL(request.url)
@@ -368,13 +413,13 @@ export async function GET(request: NextRequest) {
     // Check for special endpoints
     const action = searchParams.get('action')
     if (action === 'forecast') {
-      return getForecast(supabase, user.id, searchParams)
+      return getForecast(supabase, effectiveUserId, searchParams)
     }
     if (action === 'stage_history') {
-      return getStageHistory(supabase, user.id, searchParams)
+      return getStageHistory(supabase, effectiveUserId, searchParams)
     }
     if (action === 'pipeline_stats') {
-      return getPipelineStats(supabase, user.id, searchParams)
+      return getPipelineStats(supabase, effectiveUserId, searchParams)
     }
 
     const page = parseInt(searchParams.get('page') || '1')
@@ -419,7 +464,7 @@ export async function GET(request: NextRequest) {
         contact:crm_contacts!contact_id(id, full_name, email, avatar_url),
         owner:users!owner_id(id, name, avatar_url)
       `, { count: 'exact' })
-      .eq('user_id', user.id)
+      .eq('user_id', effectiveUserId)
 
     // Apply filters
     if (filters.search) {
@@ -538,7 +583,7 @@ export async function GET(request: NextRequest) {
           stage_id,
           stage:crm_pipeline_stages!stage_id(name)
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .eq('pipeline_id', filters.pipeline_id)
         .eq('status', 'open')
 
@@ -763,7 +808,7 @@ export async function PUT(request: NextRequest) {
       .from('crm_deals')
       .select('*')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', effectiveUserId)
       .single()
 
     if (fetchError || !existing) {
@@ -831,7 +876,7 @@ export async function PUT(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', effectiveUserId)
       .select(`
         *,
         pipeline:crm_pipelines!pipeline_id(id, name),
@@ -928,7 +973,7 @@ export async function DELETE(request: NextRequest) {
       .from('crm_deals')
       .select('id, name, company_id, contact_id')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', effectiveUserId)
       .single()
 
     if (fetchError || !existing) {
@@ -940,7 +985,7 @@ export async function DELETE(request: NextRequest) {
       .from('crm_deals')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('user_id', effectiveUserId)
 
     if (error) {
       logger.error('Error deleting deal', { error })

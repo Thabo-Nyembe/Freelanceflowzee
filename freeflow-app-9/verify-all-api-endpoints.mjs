@@ -37,8 +37,8 @@ const API_ENDPOINTS = [
   },
   {
     name: 'Time Tracking',
-    url: `/api/time-entries?demo=true`,
-    expectedKeys: ['entries', 'data']
+    url: `/api/time-tracking?demo=true&type=entries`,
+    expectedKeys: ['data']
   },
   {
     name: 'Expenses',
@@ -47,7 +47,7 @@ const API_ENDPOINTS = [
   },
   {
     name: 'Deals/Pipeline',
-    url: `/api/deals?demo=true`,
+    url: `/api/crm/deals?demo=true`,
     expectedKeys: ['deals', 'data']
   },
   {

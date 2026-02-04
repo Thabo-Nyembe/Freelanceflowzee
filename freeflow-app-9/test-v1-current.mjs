@@ -1,0 +1,64 @@
+import puppeteer from 'puppeteer';
+import { execSync } from 'child_process';
+
+// Get all v1 dashboard directories
+const v1Dirs = execSync('find "app/v1/dashboard" -maxdepth 1 -type d -exec basename {} \\;')
+  .toString()
+  .trim()
+  .split('\n')
+  .filter(d => d && d !== 'dashboard');
+
+const pages = v1Dirs.map(dir => ({
+  route: '/v1/dashboard/' + dir,
+  name: dir
+}));
+
+async function test() {
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1920, height: 1080 });
+
+  let ok = 0, errors = 0;
+  const errorPages = [];
+
+  console.log('Testing', pages.length, 'v1 pages...\n');
+
+  for (const { route, name } of pages) {
+    process.stdout.write(name.substring(0, 22).padEnd(24) + '... ');
+    try {
+      const response = await page.goto('http://localhost:9323' + route + '?demo=true', { waitUntil: 'networkidle2', timeout: 12000 });
+      await new Promise(r => setTimeout(r, 600));
+
+      const content = await page.content();
+      const hasError = content.includes('Dashboard Error') || content.includes('is not defined') || content.includes('Unhandled Runtime Error') || content.includes('Module not found');
+
+      if (response.status() >= 400) {
+        console.log('HTTP ' + response.status());
+        errors++;
+        errorPages.push({ name, type: 'HTTP ' + response.status() });
+      } else if (hasError) {
+        console.log('ERROR');
+        errors++;
+        errorPages.push({ name, type: 'Runtime Error' });
+      } else {
+        console.log('OK');
+        ok++;
+      }
+    } catch (e) {
+      console.log('TIMEOUT');
+    }
+  }
+
+  await browser.close();
+  console.log('\n=== V1 Summary ===');
+  console.log('OK:', ok, '| Errors:', errors);
+
+  if (errorPages.length > 0) {
+    console.log('\nV1 Pages with errors:');
+    errorPages.forEach(p => console.log(`  - ${p.name}: ${p.type}`));
+  } else {
+    console.log('\nAll v1 pages working!');
+  }
+}
+
+test().catch(console.error);

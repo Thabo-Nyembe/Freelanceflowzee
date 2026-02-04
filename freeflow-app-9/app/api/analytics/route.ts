@@ -17,6 +17,42 @@ function isDemoMode(request: NextRequest): boolean {
 }
 
 // =====================================================
+// GET - Fetch Analytics Data
+// =====================================================
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const demoMode = isDemoMode(request);
+
+    const effectiveUserId = user?.id || (demoMode ? DEMO_USER_ID : null);
+
+    if (!effectiveUserId) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Return basic analytics summary
+    return NextResponse.json({
+      success: true,
+      analytics: {
+        user_id: effectiveUserId,
+        demo: demoMode || effectiveUserId === DEMO_USER_ID,
+        message: 'Analytics data available'
+      }
+    });
+  } catch (error) {
+    logger.error('Analytics GET error', { error });
+    return NextResponse.json(
+      { success: false, error: error.message || 'Fetch failed' },
+      { status: 500 }
+    );
+  }
+}
+
+// =====================================================
 // PATCH - Update Analytics Configuration
 // =====================================================
 export async function PATCH(request: NextRequest): Promise<NextResponse> {
