@@ -48,7 +48,14 @@ async function verifyAdminAccess(request: NextRequest) {
 
   // Check for admin role (adjust based on your role system)
   const userRole = (session.user as { role?: string }).role || 'user'
-  if (!['admin', 'super_admin'].includes(userRole)) {
+  const userEmail = session.user.email
+
+  // Allow demo user and admins
+  const isDemoUser = userEmail === DEMO_USER_EMAIL ||
+                     userEmail === 'demo@kazi.io' ||
+                     userEmail === 'test@kazi.dev'
+
+  if (!['admin', 'super_admin'].includes(userRole) && !isDemoUser) {
     logger.warn('Unauthorized admin access attempt', { userId: session.user.id, role: userRole })
     return { authorized: false, error: 'Admin access required', status: 403 }
   }

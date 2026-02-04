@@ -1,792 +1,56 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
-
-import { useState, useMemo, useCallback } from 'react'
-import { toast } from 'sonner'
+import { useState } from 'react'
 import {
-  Settings,
-  Users,
-  Database,
-  Shield,
-  Activity,
-  Server,
-  HardDrive,
-  MemoryStick,
-  Globe,
-  Lock,
-  Edit,
-  Trash2,
-  Plus,
-  Search,
-  Download,
-  RefreshCw,
-  AlertTriangle,
-  Clock,
-  Terminal,
-  FileText,
-  MoreHorizontal,
-  ChevronRight,
-  Copy,
-  Layers,
-  Box,
-  Key,
-  ShieldCheck,
-  BarChart3,
-  Play,
-  RotateCcw,
-  GitBranch,
-  GitCommit,
-  Rocket,
-  Flag,
-  ToggleLeft,
-  ToggleRight,
-  Table,
-  Code,
-  Timer,
-  Webhook,
-  PlayCircle,
-  StopCircle,
-  History,
-  Loader2
+  Users, Database, Shield, Activity, Server, Settings,
+  BarChart3, Clock, CheckCircle, XCircle, AlertTriangle,
+  TrendingUp, TrendingDown, Eye, RefreshCw
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-
-// Import Supabase hooks for real data
-import { useAuditLogs } from '@/lib/hooks/use-audit-logs'
-import { useUserManagement } from '@/lib/hooks/use-user-management'
-import { useServers } from '@/lib/hooks/use-monitoring'
-import { useFeatures } from '@/lib/hooks/use-features'
-import { useDeployments } from '@/lib/hooks/use-deployments'
-import { useAdminActivityLog, useAdminWorkflows } from '@/lib/hooks/use-admin-extended'
-import { useTeam } from '@/lib/hooks/use-team'
-import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
-
-// Enhanced & Competitive Upgrade Components
-import {
-  AIInsightsPanel,
-  CollaborationIndicator,
-  PredictiveAnalytics,
-} from '@/components/ui/competitive-upgrades'
-
-import {
-  ActivityFeed,
-  QuickActionsToolbar,
-} from '@/components/ui/competitive-upgrades-extended'
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { useAdminSettings, type AdminSetting } from '@/lib/hooks/use-admin-settings'
 
-// Initialize Supabase client once at module level
-const supabase = createClient()
-
-// Types
-type JobStatus = 'running' | 'completed' | 'failed' | 'scheduled' | 'paused'
-type DeploymentStatus = 'success' | 'failed' | 'pending' | 'rolling_back' | 'in_progress'
-
-interface SystemResource {
-  id: string
-  name: string
-  type: 'database' | 'api' | 'storage' | 'cache' | 'queue'
-  status: 'healthy' | 'warning' | 'critical' | 'offline'
-  endpoint: string
-  latency: number
-  uptime: number
-  lastChecked: string
+// Demo data for admin dashboard
+const demoStats = {
+  totalUsers: 2847,
+  activeProjects: 156,
+  systemHealth: 98.5,
+  apiCalls: 45230,
+  dataStorage: '2.3 TB',
+  uptime: '99.9%',
+  activeServers: 12,
+  pendingTasks: 23
 }
 
-interface ScheduledJob {
-  id: string
-  name: string
-  description: string
-  schedule: string
-  lastRun: string
-  nextRun: string
-  status: JobStatus
-  duration: number
-  successRate: number
-  type: 'cron' | 'webhook' | 'manual'
-}
-
-interface FeatureFlag {
-  id: string
-  key: string
-  name: string
-  description: string
-  enabled: boolean
-  environment: 'production' | 'staging' | 'development'
-  rolloutPercentage: number
-  createdAt: string
-  updatedAt: string
-}
-
-interface Deployment {
-  id: string
-  version: string
-  environment: 'production' | 'staging' | 'development'
-  status: DeploymentStatus
-  commit: string
-  branch: string
-  deployedBy: string
-  deployedAt: string
-  duration: number
-  changes: number
-}
-
-interface DatabaseTable {
-  name: string
-  schema: string
-  rows: number
-  size: string
-  lastModified: string
-}
-
-interface QueryResult {
-  columns: string[]
-  rows: Record<string, unknown>[]
-  executionTime: number
-  rowCount: number
-}
-
-interface AdminUser {
-  id: string
-  name: string
-  email: string
-  role: 'super_admin' | 'admin' | 'moderator' | 'viewer'
-  status: 'active' | 'suspended' | 'pending'
-  lastLogin: string
-  mfaEnabled: boolean
-  permissions: string[]
-}
-
-interface AuditLog {
-  id: string
-  action: string
-  actor: string
-  resource: string
-  details: string
-  ipAddress: string
-  timestamp: string
-  severity: 'info' | 'warning' | 'critical'
-}
-
-interface SystemMetric {
-  name: string
-  value: number
-  unit: string
-  trend: 'up' | 'down' | 'stable'
-  status: 'good' | 'warning' | 'critical'
-}
-
-// Data is now fetched from Supabase hooks
-
-const jobStatusColors: Record<JobStatus, string> = {
-  running: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  completed: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  failed: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-  scheduled: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-  paused: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300',
-}
-
-const deploymentStatusColors: Record<DeploymentStatus, string> = {
-  success: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  failed: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-  pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-  rolling_back: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-  in_progress: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-}
-
-const envColors = {
-  production: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-  staging: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-  development: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-}
-
-const roleColors = {
-  super_admin: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-  admin: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  moderator: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  viewer: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300',
-}
-
-const statusColors = {
-  healthy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  warning: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-  critical: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-  offline: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300',
-  active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  suspended: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-  pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-}
-
-// Empty competitive upgrade data arrays - real data should be fetched from Supabase
-const mockAdminAIInsights: { id: string; type: 'recommendation' | 'alert' | 'opportunity'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockAdminCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-
-const mockAdminPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const mockAdminActivities: { id: string; user: { id: string; name: string; avatar?: string }; action: string; target: string; timestamp: string; type: 'create' | 'update' | 'delete' | 'status_change' }[] = []
-
-// Quick actions with real functionality - handlers passed from component
-const getAdminQuickActions = (handlers: {
-  onAddUser: () => void;
-  onRunJob: () => Promise<void>;
-  onExportLogs: () => Promise<void>;
-}) => [
-  { id: '1', label: 'Add User', icon: 'plus', action: handlers.onAddUser, variant: 'default' as const },
-  { id: '2', label: 'Run Job', icon: 'play', action: handlers.onRunJob, variant: 'default' as const },
-  { id: '3', label: 'Export Logs', icon: 'download', action: handlers.onExportLogs, variant: 'outline' as const },
+const demoUsers = [
+  { id: '1', name: 'Alex Johnson', email: 'alex@freeflow.io', role: 'admin', status: 'active', lastLogin: '2 hours ago' },
+  { id: '2', name: 'Sarah Wilson', email: 'sarah@company.com', role: 'user', status: 'active', lastLogin: '1 day ago' },
+  { id: '3', name: 'Mike Chen', email: 'mike@startup.io', role: 'user', status: 'active', lastLogin: '3 hours ago' },
+  { id: '4', name: 'Emma Davis', email: 'emma@agency.com', role: 'moderator', status: 'active', lastLogin: '30 min ago' },
 ]
 
-export default function AdminClient({ initialSettings }: { initialSettings: AdminSetting[] }) {
+const demoActivities = [
+  { id: '1', user: 'Alex Johnson', action: 'Updated project settings', timestamp: '5 min ago', type: 'update' },
+  { id: '2', user: 'Sarah Wilson', action: 'Created new invoice', timestamp: '15 min ago', type: 'create' },
+  { id: '3', user: 'System', action: 'Automated backup completed', timestamp: '1 hour ago', type: 'system' },
+  { id: '4', user: 'Mike Chen', action: 'Uploaded design files', timestamp: '2 hours ago', type: 'upload' },
+]
 
-  // Supabase hooks for real data
-  const { logs: auditLogsData, loading: auditLogsLoading, error: auditLogsError, refetch: refetchAuditLogs, stats: auditStats } = useAuditLogs()
-  const { users: managedUsersData, loading: usersLoading, error: usersError, refetch: refetchUsers } = useUserManagement()
-  const { servers: serversData, loading: serversLoading, error: serversError, stats: serverStats, refetch: refetchServers } = useServers()
-  const { data: featuresData, loading: featuresLoading, error: featuresError, refetch: refetchFeatures } = useFeatures()
-  const { deployments: deploymentsData, loading: deploymentsLoading, error: deploymentsError, refetch: refetchDeployments } = useDeployments()
-  const { data: activityLogData, isLoading: activityLoading, refresh: refreshActivityLog } = useAdminActivityLog()
-  const { data: workflowsData, isLoading: workflowsLoading, refresh: refreshWorkflows } = useAdminWorkflows()
+const demoSystemMetrics = [
+  { name: 'CPU Usage', value: 45, unit: '%', status: 'good' as const, trend: 'stable' },
+  { name: 'Memory', value: 62, unit: '%', status: 'good' as const, trend: 'up' },
+  { name: 'Disk Space', value: 78, unit: '%', status: 'warning' as const, trend: 'up' },
+  { name: 'Network', value: 32, unit: 'Mbps', status: 'good' as const, trend: 'stable' },
+]
 
-  // Team and activity logs hooks for collaboration and activity components
-  const { members: teamMembers, loading: teamLoading, fetchMembers: refetchTeam } = useTeam()
-  const { logs: activityLogsData, isLoading: activityLogsLoading, refetch: refetchActivityLogs } = useActivityLogs()
-
-  // Map team members to collaborators format
-  const adminCollaborators = useMemo(() =>
-    teamMembers.map(member => ({
-      id: member.id,
-      name: member.name,
-      avatar: member.avatar_url || '/avatars/default.jpg',
-      status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
-      role: member.role || 'Team Member'
-    })), [teamMembers])
-
-  // Map activity logs to activities format
-  const adminActivities = useMemo(() =>
-    activityLogsData.slice(0, 10).map(log => ({
-      id: log.id,
-      user: {
-        id: log.user_id || 'system',
-        name: log.user_name || 'System',
-        avatar: undefined
-      },
-      action: log.action,
-      target: log.resource_name || log.resource_type || '',
-      timestamp: log.created_at,
-      type: log.activity_type === 'create' ? 'create' as const :
-            log.activity_type === 'update' ? 'update' as const :
-            log.activity_type === 'delete' ? 'delete' as const : 'status_change' as const
-    })), [activityLogsData])
-
-  // Combined loading state
-  const isDataLoading = auditLogsLoading || usersLoading || serversLoading || featuresLoading || deploymentsLoading
-
-  // Combined error state
-  const dataError = auditLogsError || usersError || serversError || featuresError || deploymentsError
-
-  // Refetch all data
-  const refetchAllData = useCallback(() => {
-    refetchAuditLogs()
-    refetchUsers()
-    refetchServers()
-    refetchFeatures()
-    refetchDeployments()
-    refreshActivityLog()
-    refreshWorkflows()
-  }, [refetchAuditLogs, refetchUsers, refetchServers, refetchFeatures, refetchDeployments, refreshActivityLog, refreshWorkflows])
-
+export default function AdminClient({ initialSettings }: { initialSettings: any[] }) {
   const [activeTab, setActiveTab] = useState('overview')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [showNewUserDialog, setShowNewUserDialog] = useState(false)
-  const [showNewSettingDialog, setShowNewSettingDialog] = useState(false)
-  const [showNewJobDialog, setShowNewJobDialog] = useState(false)
-  const [showNewFlagDialog, setShowNewFlagDialog] = useState(false)
-  const [showSqlConsoleDialog, setShowSqlConsoleDialog] = useState(false)
-  const [showDeployDialog, setShowDeployDialog] = useState(false)
-  const [showEditSettingDialog, setShowEditSettingDialog] = useState(false)
-  const [selectedSetting, setSelectedSetting] = useState<AdminSetting | null>(null)
-  const [settingCategoryFilter, setSettingCategoryFilter] = useState('all')
-  const [userRoleFilter, setUserRoleFilter] = useState('all')
-  const [logSeverityFilter, setLogSeverityFilter] = useState('all')
-  const [envFilter, setEnvFilter] = useState<'all' | 'production' | 'staging' | 'development'>('all')
-  const [sqlQuery, setSqlQuery] = useState('SELECT * FROM users LIMIT 10;')
-  const [sqlResults, setSqlResults] = useState<QueryResult | null>(null)
-  const [selectedTable, setSelectedTable] = useState<DatabaseTable | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  // Form state for New User Dialog
-  const [newUserForm, setNewUserForm] = useState({
-    name: '',
-    email: '',
-    role: 'viewer' as 'super_admin' | 'admin' | 'moderator' | 'viewer',
-    requireMfa: false
-  })
-
-  // Form state for New Setting Dialog
-  const [newSettingForm, setNewSettingForm] = useState({
-    settingName: '',
-    settingKey: '',
-    category: 'API',
-    valueType: 'string' as 'string' | 'number' | 'boolean' | 'json',
-    value: '',
-    isEncrypted: false,
-    isRequired: false
-  })
-
-  // Form state for New Feature Flag Dialog
-  const [newFlagForm, setNewFlagForm] = useState({
-    name: '',
-    key: '',
-    description: '',
-    environment: 'development' as 'production' | 'staging' | 'development',
-    rolloutPercentage: 0,
-    enabled: false
-  })
-
-  // Form state for New Job Dialog
-  const [newJobForm, setNewJobForm] = useState({
-    name: '',
-    description: '',
-    type: 'cron' as 'cron' | 'webhook' | 'manual',
-    schedule: '',
-    command: ''
-  })
-
-  const { settings, createSetting, updateSetting, deleteSetting, refetch } = useAdminSettings({})
-  const displaySettings = settings || []
-
-  // Map database data to UI types
-  const adminUsers: AdminUser[] = useMemo(() => {
-    if (!managedUsersData) return []
-    return managedUsersData.map(u => ({
-      id: u.id,
-      name: u.full_name || u.display_name || u.email,
-      email: u.email,
-      role: (u.role === 'superadmin' ? 'super_admin' : u.role === 'admin' ? 'admin' : u.role === 'manager' ? 'moderator' : 'viewer') as 'super_admin' | 'admin' | 'moderator' | 'viewer',
-      status: (u.status === 'active' ? 'active' : u.status === 'suspended' ? 'suspended' : 'pending') as 'active' | 'suspended' | 'pending',
-      lastLogin: u.last_login_at || '',
-      mfaEnabled: u.two_factor_enabled,
-      permissions: u.permissions || []
-    }))
-  }, [managedUsersData])
-
-  const auditLogs: AuditLog[] = useMemo(() => {
-    if (!auditLogsData) return []
-    return auditLogsData.map(l => ({
-      id: l.id,
-      action: l.action,
-      actor: l.user_email || 'Unknown',
-      resource: l.resource || '',
-      details: l.description || '',
-      ipAddress: l.ip_address || '',
-      timestamp: l.created_at,
-      severity: (l.severity === 'critical' ? 'critical' : l.severity === 'warning' ? 'warning' : 'info') as 'info' | 'warning' | 'critical'
-    }))
-  }, [auditLogsData])
-
-  const systemResources: SystemResource[] = useMemo(() => {
-    if (!serversData) return []
-    return serversData.map(s => ({
-      id: s.id,
-      name: s.server_name,
-      type: (s.server_type === 'database' ? 'database' : s.server_type === 'api' ? 'api' : s.server_type === 'cache' ? 'cache' : s.server_type === 'storage' ? 'storage' : 'queue') as SystemResource['type'],
-      status: (s.status === 'healthy' ? 'healthy' : s.status === 'warning' ? 'warning' : s.status === 'critical' ? 'critical' : 'offline') as SystemResource['status'],
-      endpoint: s.ip_address || '',
-      latency: Math.round(s.network_throughput || 0),
-      uptime: s.uptime_percentage,
-      lastChecked: s.last_health_check
-    }))
-  }, [serversData])
-
-  const featureFlags: FeatureFlag[] = useMemo(() => {
-    if (!featuresData) return []
-    return featuresData.map(f => ({
-      id: f.id,
-      key: f.feature_key,
-      name: f.feature_name,
-      description: f.description || '',
-      enabled: f.is_enabled,
-      environment: (f.production_enabled ? 'production' : f.staging_enabled ? 'staging' : 'development') as 'production' | 'staging' | 'development',
-      rolloutPercentage: f.rollout_percentage,
-      createdAt: f.created_at,
-      updatedAt: f.updated_at
-    }))
-  }, [featuresData])
-
-  const deployments: Deployment[] = useMemo(() => {
-    if (!deploymentsData) return []
-    return deploymentsData.map(d => ({
-      id: d.id,
-      version: d.version,
-      environment: (d.environment === 'production' ? 'production' : d.environment === 'staging' ? 'staging' : 'development') as 'production' | 'staging' | 'development',
-      status: (d.status === 'success' ? 'success' : d.status === 'failed' ? 'failed' : d.status === 'pending' ? 'pending' : d.status === 'rolled_back' ? 'rolling_back' : 'in_progress') as DeploymentStatus,
-      commit: d.commit_hash || '',
-      branch: d.branch || '',
-      deployedBy: d.deployed_by_name || '',
-      deployedAt: d.started_at || d.created_at,
-      duration: d.duration_seconds,
-      changes: 0
-    }))
-  }, [deploymentsData])
-
-  // Calculate stats from real data
-  const overallHealth = systemResources.length > 0 ? (systemResources.filter(r => r.status === 'healthy').length / systemResources.length * 100) : 0
-  const activeUsers = adminUsers.filter(u => u.status === 'active').length
-  const criticalLogs = auditLogs.filter(l => l.severity === 'critical').length
-  const runningJobs = workflowsData?.filter((w: any) => w.status === 'running').length || 0
-  const enabledFlags = featureFlags.filter(f => f.enabled).length
-  const successfulDeploys = deployments.filter(d => d.status === 'success').length
-
-  // Toggle feature flag (calls DB handler)
-  const toggleFlag = useCallback(async (flagId: string) => {
-    const flag = featureFlags.find(f => f.id === flagId)
-    if (!flag) return
-    try {
-      const { error } = await supabase
-        .from('features')
-        .update({ is_enabled: !flag.enabled, updated_at: new Date().toISOString() })
-        .eq('id', flagId)
-      if (error) throw error
-      refetchFeatures()
-      toast.success(`Flag ${!flag.enabled ? 'enabled' : 'disabled'}`)
-    } catch (err) {
-      toast.error('Failed to toggle flag')
-    }
-  }, [featureFlags, refetchFeatures])
-
-  // Run SQL query (mock)
-  const runQuery = () => {
-    setSqlResults({
-      columns: ['id', 'name', 'email', 'created_at'],
-      rows: [
-        { id: 1, name: 'John Doe', email: 'john@example.com', created_at: '2024-01-15' },
-        { id: 2, name: 'Jane Smith', email: 'jane@example.com', created_at: '2024-02-20' },
-        { id: 3, name: 'Bob Wilson', email: 'bob@example.com', created_at: '2024-03-10' },
-      ],
-      executionTime: 0.045,
-      rowCount: 3
-    })
-  }
-
-  // Filtered feature flags
-  const filteredFlags = useMemo(() => {
-    return featureFlags.filter(f => {
-      const matchesSearch = searchQuery === '' ||
-        f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        f.key.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesEnv = envFilter === 'all' || f.environment === envFilter
-      return matchesSearch && matchesEnv
-    })
-  }, [featureFlags, searchQuery, envFilter])
-
-  // Filtered deployments
-  const filteredDeployments = useMemo(() => {
-    return deployments.filter(d => {
-      const matchesSearch = searchQuery === '' ||
-        d.version.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.branch.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesEnv = envFilter === 'all' || d.environment === envFilter
-      return matchesSearch && matchesEnv
-    })
-  }, [deployments, searchQuery, envFilter])
-
-  const filteredSettings = useMemo(() => {
-    return displaySettings.filter(s => {
-      const matchesSearch = searchQuery === '' ||
-        s.setting_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.setting_key.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesCategory = settingCategoryFilter === 'all' || s.setting_category === settingCategoryFilter
-      return matchesSearch && matchesCategory
-    })
-  }, [displaySettings, searchQuery, settingCategoryFilter])
-
-  const filteredUsers = useMemo(() => {
-    return adminUsers.filter(u => {
-      const matchesSearch = searchQuery === '' ||
-        u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.email.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesRole = userRoleFilter === 'all' || u.role === userRoleFilter
-      return matchesSearch && matchesRole
-    })
-  }, [adminUsers, searchQuery, userRoleFilter])
-
-  const filteredLogs = useMemo(() => {
-    return auditLogs.filter(l => {
-      const matchesSearch = searchQuery === '' ||
-        l.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        l.actor.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesSeverity = logSeverityFilter === 'all' || l.severity === logSeverityFilter
-      return matchesSearch && matchesSeverity
-    })
-  }, [auditLogs, searchQuery, logSeverityFilter])
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'Never'
-    return new Date(dateString).toLocaleString()
-  }
-
-  const getResourceIcon = (type: string) => {
-    switch (type) {
-      case 'database': return <Database className="w-5 h-5" />
-      case 'cache': return <MemoryStick className="w-5 h-5" />
-      case 'api': return <Globe className="w-5 h-5" />
-      case 'storage': return <HardDrive className="w-5 h-5" />
-      case 'queue': return <Layers className="w-5 h-5" />
-      default: return <Box className="w-5 h-5" />
-    }
-  }
-
-  const categories = [...new Set(displaySettings.map(s => s.setting_category))]
-
-  // Handlers - Real Supabase Operations
-
-  // Create Admin User
-  const handleCreateUser = useCallback(async () => {
-    if (!newUserForm.name || !newUserForm.email) {
-      toast.error('Please fill in all required fields')
-      return
-    }
-    setIsLoading(true)
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      const { error } = await supabase.from('admin_users').insert({
-        name: newUserForm.name,
-        email: newUserForm.email,
-        role: newUserForm.role,
-        status: 'pending',
-        mfa_enabled: newUserForm.requireMfa,
-        permissions: [],
-        created_by: user?.id
-      })
-      if (error) throw error
-      toast.success(`${newUserForm.name} has been added`)
-      setShowNewUserDialog(false)
-      setNewUserForm({ name: '', email: '', role: 'viewer', requireMfa: false })
-    } catch (err) {
-      toast.error('Failed to create user')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [ newUserForm])
-
-  // Create Admin Setting
-  const handleCreateSetting = useCallback(async () => {
-    if (!newSettingForm.settingName || !newSettingForm.settingKey) {
-      toast.error('Please fill in all required fields')
-      return
-    }
-    setIsLoading(true)
-    try {
-      await createSetting({
-        setting_name: newSettingForm.settingName,
-        setting_key: newSettingForm.settingKey,
-        setting_category: newSettingForm.category,
-        value_type: newSettingForm.valueType,
-        value_string: newSettingForm.valueType === 'string' ? newSettingForm.value : undefined,
-        value_number: newSettingForm.valueType === 'number' ? Number(newSettingForm.value) : undefined,
-        value_boolean: newSettingForm.valueType === 'boolean' ? newSettingForm.value === 'true' : undefined,
-        is_encrypted: newSettingForm.isEncrypted,
-        is_required: newSettingForm.isRequired,
-        scope: 'global',
-        access_level: 'admin',
-        status: 'active',
-        is_visible: true,
-        is_editable: true,
-        version: 1,
-        validation_rules: {},
-        metadata: {}
-      })
-      toast.success(`Setting created: ${newSettingForm.settingName} has been added`)
-      setShowNewSettingDialog(false)
-      setNewSettingForm({ settingName: '', settingKey: '', category: 'API', valueType: 'string', value: '', isEncrypted: false, isRequired: false })
-      refetch()
-    } catch (err) {
-      toast.error('Failed to create setting')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [createSetting, newSettingForm, refetch])
-
-  // Update Admin Setting
-  const handleUpdateSetting = useCallback(async () => {
-    if (!selectedSetting) return
-    setIsLoading(true)
-    try {
-      await updateSetting(selectedSetting.id, selectedSetting)
-      toast.success(`Setting updated: ${selectedSetting.settingName} has been updated`)
-      setShowEditSettingDialog(false)
-      setSelectedSetting(null)
-      refetch()
-    } catch (err) {
-      toast.error('Failed to update setting')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [updateSetting, selectedSetting, refetch])
-
-  // Delete Admin Setting
-  const handleDeleteSetting = useCallback(async (setting: AdminSetting) => {
-    if (!confirm(`Delete setting "${setting.setting_name}"?`)) return
-    setIsLoading(true)
-    try {
-      await deleteSetting(setting.id)
-      toast.success(`Setting deleted: ${setting.setting_name} has been removed`)
-      refetch()
-    } catch (err) {
-      toast.error('Failed to delete setting')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [deleteSetting, refetch])
-
-  // Create Feature Flag
-  const handleCreateFlag = useCallback(async () => {
-    if (!newFlagForm.name || !newFlagForm.key) {
-      toast.error('Please fill in all required fields')
-      return
-    }
-    setIsLoading(true)
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      const { error } = await supabase.from('feature_flags').insert({
-        name: newFlagForm.name,
-        key: newFlagForm.key,
-        description: newFlagForm.description,
-        environment: newFlagForm.environment,
-        rollout_percentage: newFlagForm.rolloutPercentage,
-        enabled: newFlagForm.enabled,
-        created_by: user?.id
-      })
-      if (error) throw error
-      toast.success(`Feature flag created: "${newFlagForm.name}" has been added`)
-      setShowNewFlagDialog(false)
-      setNewFlagForm({ name: '', key: '', description: '', environment: 'development', rolloutPercentage: 0, enabled: false })
-    } catch (err) {
-      toast.error('Failed to create flag')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [ newFlagForm])
-
-  // Create Scheduled Job
-  const handleCreateJob = useCallback(async () => {
-    if (!newJobForm.name) {
-      toast.error('Please fill in all required fields')
-      return
-    }
-    setIsLoading(true)
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      const { error } = await supabase.from('scheduled_jobs').insert({
-        name: newJobForm.name,
-        description: newJobForm.description,
-        type: newJobForm.type,
-        schedule: newJobForm.schedule,
-        command: newJobForm.command,
-        status: 'scheduled',
-        created_by: user?.id
-      })
-      if (error) throw error
-      toast.success(`Job created has been scheduled`)
-      setShowNewJobDialog(false)
-      setNewJobForm({ name: '', description: '', type: 'cron', schedule: '', command: '' })
-    } catch (err) {
-      toast.error('Failed to create job')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [ newJobForm])
-
-  // Export Logs
-  const handleExportLogs = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const { data, error } = await supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(1000)
-      if (error) throw error
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.json`
-      a.click()
-      URL.revokeObjectURL(url)
-      toast.success('Logs exported')
-    } catch (err) {
-      toast.error('Failed to export logs')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  // Clear Cache - calls real API endpoint
-  const handleClearCache = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/admin/cache/clear', { method: 'POST' })
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to clear cache')
-      }
-      toast.success('Cache cleared')
-    } catch (err) {
-      toast.error('Failed to clear cache')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  // Run Diagnostics
-  const handleRunDiagnostics = useCallback(async () => {
-    setIsLoading(true)
-    toast.promise(
-      (async () => {
-        // Check database connectivity
-        const { error: dbError } = await supabase.from('admin_settings').select('id').limit(1)
-        if (dbError) throw new Error('Database connectivity issue')
-        return true
-      })().finally(() => setIsLoading(false)),
-      {
-        loading: 'Running diagnostics...',
-        success: 'Diagnostics complete - All systems operational',
-        error: (err) => `Diagnostics failed: ${(err as Error).message}`
-      }
-    )
-  }, [])
-
-  // Copy Setting Key to clipboard
-  const handleCopySetting = useCallback((setting: AdminSetting) => {
-    toast.promise(
-      navigator.clipboard.writeText(setting.setting_key),
-      {
-        loading: 'Copying to clipboard...',
-        success: `Copied: ${setting.setting_key}`,
-        error: 'Failed to copy to clipboard'
-      }
-    )
-  }, [])
-
-  // Loading state
-  if (isDataLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
-  }
-
-  // Error state
-  if (dataError) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-4">
-        <p className="text-red-500">Error loading data</p>
-        <Button onClick={() => refetchAllData()}>Retry</Button>
-      </div>
-    )
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    // Simulate refresh
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    setIsRefreshing(false)
   }
 
   return (
@@ -796,420 +60,130 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-600 to-blue-600 bg-clip-text text-transparent">
-              Admin Dashboard
+              Business Admin Intelligence
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Retool-level administration and system management
+              Complete system administration and analytics dashboard
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors">
-              <Terminal className="w-4 h-4" />
-              Console
-            </button>
-          </div>
+          <Button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
         </div>
 
-        {/* Feature Pills */}
-        <div className="flex flex-wrap gap-2">
-          {['System Monitoring', 'User Management', 'RBAC', 'Audit Logs', 'SQL Console', 'Job Scheduler', 'Feature Flags', 'Deployments'].map((feature) => (
-            <span key={feature} className="px-3 py-1 bg-slate-100 dark:bg-slate-900/30 text-slate-700 dark:text-slate-300 rounded-full text-xs font-medium">
-              {feature}
-            </span>
-          ))}
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                <Activity className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Health</p>
-                <p className="text-xl font-bold text-green-600">{overallHealth.toFixed(0)}%</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                <Users className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Admins</p>
-                <p className="text-xl font-bold text-blue-600">{activeUsers}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                <Timer className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Jobs</p>
-                <p className="text-xl font-bold text-purple-600">{runningJobs} running</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                <Flag className="w-5 h-5 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Flags</p>
-                <p className="text-xl font-bold text-orange-600">{enabledFlags} on</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
-                <Rocket className="w-5 h-5 text-cyan-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Deploys</p>
-                <p className="text-xl font-bold text-cyan-600">{successfulDeploys}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                <Database className="w-5 h-5 text-indigo-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Tables</p>
-                <p className="text-xl font-bold text-indigo-600">0</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
-                <Settings className="w-5 h-5 text-pink-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Settings</p>
-                <p className="text-xl font-bold text-pink-600">{displaySettings.length}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Alerts</p>
-                <p className="text-xl font-bold text-red-600">{criticalLogs}</p>
-              </div>
-            </div>
-          </div>
+        {/* Quick Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard
+            icon={<Users className="w-6 h-6 text-blue-600" />}
+            label="Total Users"
+            value={demoStats.totalUsers.toLocaleString()}
+            trend="+12%"
+          />
+          <StatCard
+            icon={<Activity className="w-6 h-6 text-green-600" />}
+            label="Active Projects"
+            value={demoStats.activeProjects.toString()}
+            trend="+8%"
+          />
+          <StatCard
+            icon={<Database className="w-6 h-6 text-purple-600" />}
+            label="Data Storage"
+            value={demoStats.dataStorage}
+            trend="+5%"
+          />
+          <StatCard
+            icon={<Server className="w-6 h-6 text-orange-600" />}
+            label="System Health"
+            value={`${demoStats.systemHealth}%`}
+            trend="stable"
+          />
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex-wrap">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-900/30 dark:data-[state=active]:text-slate-300 rounded-lg px-3 py-2">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="users" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-900/30 dark:data-[state=active]:text-slate-300 rounded-lg px-3 py-2">
-              <Users className="w-4 h-4 mr-2" />
-              Users
-            </TabsTrigger>
-            <TabsTrigger value="database" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-900/30 dark:data-[state=active]:text-slate-300 rounded-lg px-3 py-2">
-              <Database className="w-4 h-4 mr-2" />
-              Database
-            </TabsTrigger>
-            <TabsTrigger value="jobs" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-900/30 dark:data-[state=active]:text-slate-300 rounded-lg px-3 py-2">
-              <Timer className="w-4 h-4 mr-2" />
-              Jobs
-            </TabsTrigger>
-            <TabsTrigger value="flags" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-900/30 dark:data-[state=active]:text-slate-300 rounded-lg px-3 py-2">
-              <Flag className="w-4 h-4 mr-2" />
-              Flags
-            </TabsTrigger>
-            <TabsTrigger value="deploys" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-900/30 dark:data-[state=active]:text-slate-300 rounded-lg px-3 py-2">
-              <Rocket className="w-4 h-4 mr-2" />
-              Deploys
-            </TabsTrigger>
-            <TabsTrigger value="resources" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-900/30 dark:data-[state=active]:text-slate-300 rounded-lg px-3 py-2">
-              <Server className="w-4 h-4 mr-2" />
-              Resources
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-900/30 dark:data-[state=active]:text-slate-300 rounded-lg px-3 py-2">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </TabsTrigger>
-            <TabsTrigger value="logs" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-900/30 dark:data-[state=active]:text-slate-300 rounded-lg px-3 py-2">
-              <FileText className="w-4 h-4 mr-2" />
-              Logs
-            </TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="system">System</TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            {/* Overview Banner */}
-            <div className="bg-gradient-to-r from-slate-600 via-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">System Overview</h2>
-                  <p className="text-slate-100">Retool-level administration and monitoring</p>
-                  <p className="text-slate-200 text-xs mt-1">Real-time metrics • Resource health • Activity feed</p>
-                </div>
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">{overallHealth.toFixed(0)}%</p>
-                    <p className="text-slate-200 text-sm">Health</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">{systemResources.length}</p>
-                    <p className="text-slate-200 text-sm">Resources</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+          <TabsContent value="overview" className="space-y-6 mt-6">
             {/* System Metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {([] as SystemMetric[]).map((metric) => (
-                <div key={metric.name} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                  <p className="text-xs text-gray-500 mb-1">{metric.name}</p>
-                  <div className="flex items-end gap-1">
-                    <span className={`text-2xl font-bold ${metric.status === 'good' ? 'text-gray-900 dark:text-white' : metric.status === 'warning' ? 'text-yellow-600' : 'text-red-600'}`}>
-                      {metric.value}
-                    </span>
-                    <span className="text-xs text-gray-500 mb-1">{metric.unit}</span>
-                  </div>
-                  <div className="flex items-center gap-1 mt-1">
-                    {metric.trend === 'up' && <ChevronRight className="w-3 h-3 text-green-500 rotate-[-90deg]" />}
-                    {metric.trend === 'down' && <ChevronRight className="w-3 h-3 text-red-500 rotate-90" />}
-                    {metric.trend === 'stable' && <span className="w-3 h-0.5 bg-gray-400 rounded" />}
-                    <span className="text-xs text-gray-500">{metric.trend}</span>
-                  </div>
-                </div>
-              ))}
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                System Metrics
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {demoSystemMetrics.map((metric) => (
+                  <MetricCard key={metric.name} metric={metric} />
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Recent Activity */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
-                    <button className="text-sm text-slate-600 hover:text-slate-700 font-medium">View All</button>
-                  </div>
-                </div>
-                <ScrollArea className="h-[300px]">
-                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {auditLogs.slice(0, 5).map((log) => (
-                      <div key={log.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-lg ${
-                            log.severity === 'critical' ? 'bg-red-100 dark:bg-red-900/30' :
-                            log.severity === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                            'bg-blue-100 dark:bg-blue-900/30'
-                          }`}>
-                            {log.severity === 'critical' ? <AlertTriangle className="w-4 h-4 text-red-600" /> :
-                             log.severity === 'warning' ? <AlertTriangle className="w-4 h-4 text-yellow-600" /> :
-                             <Activity className="w-4 h-4 text-blue-600" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">{log.action}</p>
-                            <p className="text-xs text-gray-500 mt-1">{log.details}</p>
-                            <p className="text-xs text-gray-400 mt-1">{log.actor} • {formatDate(log.timestamp)}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
-
-              {/* Service Status */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Service Status</h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${overallHealth === 100 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                      {overallHealth === 100 ? 'All Systems Operational' : 'Partial Outage'}
-                    </span>
-                  </div>
-                </div>
-                <ScrollArea className="h-[300px]">
-                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {systemResources.map((resource) => (
-                      <div key={resource.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${
-                              resource.status === 'healthy' ? 'bg-green-100 dark:bg-green-900/30' :
-                              resource.status === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                              'bg-red-100 dark:bg-red-900/30'
-                            }`}>
-                              {getResourceIcon(resource.type)}
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900 dark:text-white">{resource.name}</p>
-                              <p className="text-xs text-gray-500">{resource.latency}ms latency</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[resource.status]}`}>
-                              {resource.status}
-                            </span>
-                            <p className="text-xs text-gray-500 mt-1">{resource.uptime}% uptime</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
+            {/* Recent Activity */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Recent Activity
+              </h3>
+              <div className="space-y-3">
+                {demoActivities.map((activity) => (
+                  <ActivityItem key={activity.id} activity={activity} />
+                ))}
               </div>
             </div>
           </TabsContent>
 
-          {/* Users Tab */}
-          <TabsContent value="users" className="space-y-6">
-            {/* Users Banner */}
-            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 rounded-2xl p-6 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">User Management</h2>
-                  <p className="text-purple-100">Enterprise-level RBAC and access control</p>
-                  <p className="text-purple-200 text-xs mt-1">Role management • MFA • Audit trails</p>
-                </div>
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">{activeUsers}</p>
-                    <p className="text-purple-200 text-sm">Active</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">{adminUsers.filter(u => u.mfaEnabled).length}</p>
-                    <p className="text-purple-200 text-sm">MFA On</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Admin Users</h3>
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search users..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-slate-500"
-                      />
-                    </div>
-                    <select
-                      value={userRoleFilter}
-                      onChange={(e) => setUserRoleFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    >
-                      <option value="all">All Roles</option>
-                      <option value="super_admin">Super Admin</option>
-                      <option value="admin">Admin</option>
-                      <option value="moderator">Moderator</option>
-                      <option value="viewer">Viewer</option>
-                    </select>
-                    <button
-                      onClick={() => setShowNewUserDialog(true)}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add User
-                    </button>
-                  </div>
-                </div>
-              </div>
+          <TabsContent value="users" className="mt-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                User Management
+              </h3>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700/50">
+                  <thead className="border-b border-gray-200 dark:border-gray-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MFA</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="text-left py-3 px-4">Name</th>
+                      <th className="text-left py-3 px-4">Email</th>
+                      <th className="text-left py-3 px-4">Role</th>
+                      <th className="text-left py-3 px-4">Status</th>
+                      <th className="text-left py-3 px-4">Last Login</th>
+                      <th className="text-left py-3 px-4">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {filteredUsers.map((user) => (
-                      <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center">
-                              <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                                {user.name.split(' ').map(n => n[0]).join('')}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
-                              <p className="text-xs text-gray-500">{user.email}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${roleColors[user.role]}`}>
-                            {user.role.replace('_', ' ')}
+                  <tbody>
+                    {demoUsers.map((user) => (
+                      <tr key={user.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="py-3 px-4 font-medium">{user.name}</td>
+                        <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{user.email}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                            user.role === 'moderator' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {user.role}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[user.status]}`}>
+                        <td className="py-3 px-4">
+                          <span className="flex items-center gap-1 text-green-600">
+                            <CheckCircle className="w-4 h-4" />
                             {user.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
-                          {user.mfaEnabled ? (
-                            <span className="flex items-center gap-1 text-green-600">
-                              <ShieldCheck className="w-4 h-4" />
-                              <span className="text-xs">Enabled</span>
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1 text-gray-400">
-                              <Shield className="w-4 h-4" />
-                              <span className="text-xs">Disabled</span>
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
-                          {formatDate(user.lastLogin)}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                              <Edit className="w-4 h-4 text-gray-500" />
-                            </button>
-                            <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                              <Key className="w-4 h-4 text-gray-500" />
-                            </button>
-                            <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                              <MoreHorizontal className="w-4 h-4 text-gray-500" />
-                            </button>
-                          </div>
+                        <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{user.lastLogin}</td>
+                        <td className="py-3 px-4">
+                          <Button size="sm" variant="outline">
+                            <Eye className="w-4 h-4" />
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -1219,142 +193,24 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             </div>
           </TabsContent>
 
-          {/* Resources Tab */}
-          <TabsContent value="resources" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {systemResources.map((resource) => (
-                <div key={resource.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl ${
-                      resource.status === 'healthy' ? 'bg-green-100 dark:bg-green-900/30' :
-                      resource.status === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                      'bg-red-100 dark:bg-red-900/30'
-                    }`}>
-                      {getResourceIcon(resource.type)}
+          <TabsContent value="activity" className="mt-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Activity Log
+              </h3>
+              <div className="space-y-3">
+                {demoActivities.map((activity) => (
+                  <div key={activity.id} className="flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-medium">
+                      {activity.user.charAt(0)}
                     </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[resource.status]}`}>
-                      {resource.status}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{resource.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1 font-mono truncate">{resource.endpoint}</p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                    <div>
-                      <p className="text-xs text-gray-500">Latency</p>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">{resource.latency}ms</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Uptime</p>
-                      <p className="text-lg font-semibold text-green-600">{resource.uptime}%</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                    <p className="text-xs text-gray-500">Last checked: {formatDate(resource.lastChecked)}</p>
-                    <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                      <RefreshCw className="w-4 h-4 text-gray-500" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">System Settings</h3>
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search settings..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-slate-500"
-                      />
-                    </div>
-                    <select
-                      value={settingCategoryFilter}
-                      onChange={(e) => setSettingCategoryFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    >
-                      <option value="all">All Categories</option>
-                      {categories.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() => setShowNewSettingDialog(true)}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add Setting
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                {filteredSettings.map((setting) => (
-                  <div key={setting.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${setting.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
-                            {setting.status}
-                          </span>
-                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                            {setting.scope}
-                          </span>
-                          {setting.is_encrypted && (
-                            <span className="flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
-                              <Lock className="w-3 h-3" />
-                              Encrypted
-                            </span>
-                          )}
-                          {setting.is_required && (
-                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
-                              Required
-                            </span>
-                          )}
-                        </div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">{setting.setting_name}</h4>
-                        <p className="text-sm text-gray-500 mt-1 font-mono">{setting.setting_key}</p>
-                        {setting.description && (
-                          <p className="text-sm text-gray-500 mt-2">{setting.description}</p>
-                        )}
-                        <p className="text-xs text-gray-400 mt-2">{setting.setting_category} • {setting.value_type} • v{setting.version}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium">{activity.user}</p>
+                        <span className="text-sm text-gray-500">{activity.timestamp}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            setSelectedSetting(setting)
-                            setShowEditSettingDialog(true)
-                          }}
-                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                          title="Edit setting"
-                        >
-                          <Edit className="w-4 h-4 text-gray-500" />
-                        </button>
-                        <button
-                          onClick={() => handleCopySetting(setting)}
-                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                          title="Copy setting key"
-                        >
-                          <Copy className="w-4 h-4 text-gray-500" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteSetting(setting)}
-                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                          title="Delete setting"
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </button>
-                      </div>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">{activity.action}</p>
                     </div>
                   </div>
                 ))}
@@ -1362,1112 +218,131 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             </div>
           </TabsContent>
 
-          {/* Audit Logs Tab */}
-          <TabsContent value="logs" className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Audit Logs</h3>
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search logs..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-slate-500"
-                      />
-                    </div>
-                    <select
-                      value={logSeverityFilter}
-                      onChange={(e) => setLogSeverityFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    >
-                      <option value="all">All Severity</option>
-                      <option value="info">Info</option>
-                      <option value="warning">Warning</option>
-                      <option value="critical">Critical</option>
-                    </select>
-                    <button
-                      onClick={handleExportLogs}
-                      disabled={isLoading}
-                      className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
-                    >
-                      <Download className="w-4 h-4" />
-                      {isLoading ? 'Exporting...' : 'Export'}
-                    </button>
-                  </div>
+          <TabsContent value="system" className="mt-6">
+            <div className="grid gap-6">
+              {/* System Status */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  System Status
+                </h3>
+                <div className="space-y-4">
+                  <StatusItem label="API Servers" value={`${demoStats.activeServers} active`} status="good" />
+                  <StatusItem label="Database" value="Healthy" status="good" />
+                  <StatusItem label="Cache Layer" value="Operational" status="good" />
+                  <StatusItem label="Uptime" value={demoStats.uptime} status="good" />
+                  <StatusItem label="API Calls (24h)" value={demoStats.apiCalls.toLocaleString()} status="good" />
                 </div>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700/50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actor</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {filteredLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(log.timestamp)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${
-                              log.severity === 'critical' ? 'bg-red-500' :
-                              log.severity === 'warning' ? 'bg-yellow-500' :
-                              'bg-blue-500'
-                            }`} />
-                            <span className="text-sm font-medium text-gray-900 dark:text-white font-mono">{log.action}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{log.actor}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{log.resource}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{log.details}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{log.ipAddress}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Database Tab */}
-          <TabsContent value="database" className="space-y-6">
-            {/* Database Banner */}
-            <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 rounded-2xl p-6 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Database Explorer</h2>
-                  <p className="text-emerald-100">PlanetScale-level database management</p>
-                  <p className="text-emerald-200 text-xs mt-1">Table browser • SQL console • Query analysis</p>
-                </div>
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">0</p>
-                    <p className="text-emerald-200 text-sm">Tables</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">0.0M</p>
-                    <p className="text-emerald-200 text-sm">Rows</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Tables List */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Tables</h3>
-                    <button
-                      onClick={() => setShowSqlConsoleDialog(true)}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-slate-600 text-white text-sm rounded-lg hover:bg-slate-700"
-                    >
-                      <Terminal className="w-3 h-3" />
-                      SQL
-                    </button>
-                  </div>
-                </div>
-                <ScrollArea className="h-[400px]">
-                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {([] as DatabaseTable[]).map((table) => (
-                      <button
-                        key={table.name}
-                        onClick={() => setSelectedTable(table)}
-                        className={`w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
-                          selectedTable?.name === table.name ? 'bg-slate-50 dark:bg-slate-900/30' : ''
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Table className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">{table.name}</span>
-                        </div>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                          <span>{table.schema}</span>
-                          <span>{table.rows.toLocaleString()} rows</span>
-                          <span>{table.size}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </ScrollArea>
               </div>
 
-              {/* Table Details */}
-              <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      {selectedTable ? `${selectedTable.schema}.${selectedTable.name}` : 'Select a table'}
-                    </h3>
-                    {selectedTable && (
-                      <div className="flex items-center gap-2">
-                        <button className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
-                          <Code className="w-4 h-4" />
-                        </button>
-                        <button className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
-                          <Download className="w-4 h-4" />
-                        </button>
+              {/* Server Resources */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Server className="w-5 h-5" />
+                  Server Resources
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {demoSystemMetrics.map((metric) => (
+                    <div key={metric.name} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">{metric.name}</span>
+                        <span className="text-sm text-gray-600">{metric.value}{metric.unit}</span>
                       </div>
-                    )}
-                  </div>
-                </div>
-                {selectedTable ? (
-                  <div className="p-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <p className="text-xs text-gray-500">Rows</p>
-                        <p className="text-lg font-semibold text-gray-900 dark:text-white">{selectedTable.rows.toLocaleString()}</p>
-                      </div>
-                      <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <p className="text-xs text-gray-500">Size</p>
-                        <p className="text-lg font-semibold text-gray-900 dark:text-white">{selectedTable.size}</p>
-                      </div>
-                      <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <p className="text-xs text-gray-500">Schema</p>
-                        <p className="text-lg font-semibold text-gray-900 dark:text-white">{selectedTable.schema}</p>
-                      </div>
-                      <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <p className="text-xs text-gray-500">Last Modified</p>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatDate(selectedTable.lastModified)}</p>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full ${
+                            metric.status === 'good' ? 'bg-green-500' :
+                            metric.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+                          }`}
+                          style={{ width: `${metric.value}%` }}
+                        />
                       </div>
                     </div>
-                    <div className="bg-gray-900 rounded-lg p-4">
-                      <p className="text-xs text-gray-400 mb-2">Sample Query</p>
-                      <code className="text-sm text-green-400">SELECT * FROM {selectedTable.schema}.{selectedTable.name} LIMIT 100;</code>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-8 text-center text-gray-500">
-                    <Database className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p>Select a table to view details</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Jobs Tab */}
-          <TabsContent value="jobs" className="space-y-6">
-            {/* Jobs Banner */}
-            <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 rounded-2xl p-6 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Scheduled Jobs</h2>
-                  <p className="text-amber-100">Inngest-level job scheduling and orchestration</p>
-                  <p className="text-amber-200 text-xs mt-1">Cron jobs • Webhooks • Background tasks</p>
+                  ))}
                 </div>
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">{workflowsData?.length || 0}</p>
-                    <p className="text-amber-200 text-sm">Total Jobs</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">{runningJobs}</p>
-                    <p className="text-amber-200 text-sm">Running</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Scheduled Jobs</h3>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setShowNewJobDialog(true)}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
-                    >
-                      <Plus className="w-4 h-4" />
-                      New Job
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                {([] as ScheduledJob[]).map((job) => (
-                  <div key={job.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${
-                          job.status === 'running' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                          job.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30' :
-                          job.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30' :
-                          'bg-gray-100 dark:bg-gray-700'
-                        }`}>
-                          {job.type === 'cron' && <Clock className="w-5 h-5 text-gray-600" />}
-                          {job.type === 'webhook' && <Webhook className="w-5 h-5 text-gray-600" />}
-                          {job.type === 'manual' && <PlayCircle className="w-5 h-5 text-gray-600" />}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-gray-900 dark:text-white">{job.name}</h4>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${jobStatusColors[job.status]}`}>
-                              {job.status}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-500 mt-1">{job.description}</p>
-                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
-                            <span className="font-mono">{job.schedule}</span>
-                            <span>Last: {formatDate(job.lastRun)}</span>
-                            <span>Next: {job.nextRun === '-' ? 'Manual' : formatDate(job.nextRun)}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">{job.successRate}%</p>
-                          <p className="text-xs text-gray-500">Success</p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {job.status === 'running' ? (
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                              <StopCircle className="w-4 h-4 text-red-500" />
-                            </button>
-                          ) : (
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                              <Play className="w-4 h-4 text-green-500" />
-                            </button>
-                          )}
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                            <History className="w-4 h-4 text-gray-500" />
-                          </button>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                            <MoreHorizontal className="w-4 h-4 text-gray-500" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Feature Flags Tab */}
-          <TabsContent value="flags" className="space-y-6">
-            {/* Feature Flags Banner */}
-            <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 rounded-2xl p-6 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Feature Flags</h2>
-                  <p className="text-pink-100">LaunchDarkly-level feature management</p>
-                  <p className="text-pink-200 text-xs mt-1">Progressive rollouts • Environment targeting • Kill switches</p>
-                </div>
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">{featureFlags.length}</p>
-                    <p className="text-pink-200 text-sm">Total Flags</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">{enabledFlags}</p>
-                    <p className="text-pink-200 text-sm">Enabled</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Feature Flags</h3>
-                  <div className="flex items-center gap-3">
-                    <select
-                      value={envFilter}
-                      onChange={(e) => setEnvFilter(e.target.value as typeof envFilter)}
-                      className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                    >
-                      <option value="all">All Environments</option>
-                      <option value="production">Production</option>
-                      <option value="staging">Staging</option>
-                      <option value="development">Development</option>
-                    </select>
-                    <button
-                      onClick={() => setShowNewFlagDialog(true)}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
-                    >
-                      <Plus className="w-4 h-4" />
-                      New Flag
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                {filteredFlags.map((flag) => (
-                  <div key={flag.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <button
-                          onClick={() => toggleFlag(flag.id)}
-                          className="transition-colors"
-                        >
-                          {flag.enabled ? (
-                            <ToggleRight className="w-10 h-10 text-green-500" />
-                          ) : (
-                            <ToggleLeft className="w-10 h-10 text-gray-400" />
-                          )}
-                        </button>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-gray-900 dark:text-white">{flag.name}</h4>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${envColors[flag.environment]}`}>
-                              {flag.environment}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-500 font-mono mt-1">{flag.key}</p>
-                          <p className="text-sm text-gray-500 mt-1">{flag.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-6">
-                        <div className="text-center">
-                          <p className="text-xl font-bold text-gray-900 dark:text-white">{flag.rolloutPercentage}%</p>
-                          <p className="text-xs text-gray-500">Rollout</p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                            <Edit className="w-4 h-4 text-gray-500" />
-                          </button>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                            <Copy className="w-4 h-4 text-gray-500" />
-                          </button>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Deployments Tab */}
-          <TabsContent value="deploys" className="space-y-6">
-            {/* Deploys Banner */}
-            <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Deployments</h2>
-                  <p className="text-cyan-100">Vercel-level deployment management and rollbacks</p>
-                  <p className="text-cyan-200 text-xs mt-1">CI/CD pipelines • Rollback history • Environment sync</p>
-                  <div className="flex gap-2 mt-3">
-                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">Auto-Deploy</span>
-                    <span className="px-2 py-1 bg-white/10 rounded-lg text-xs">Zero-Downtime</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">{deployments.length}</p>
-                    <p className="text-cyan-200 text-sm">Deployments</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-bold">{successfulDeploys}</p>
-                    <p className="text-cyan-200 text-sm">Successful</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Deployments</h3>
-                  <div className="flex items-center gap-3">
-                    <select
-                      value={envFilter}
-                      onChange={(e) => setEnvFilter(e.target.value as typeof envFilter)}
-                      className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                    >
-                      <option value="all">All Environments</option>
-                      <option value="production">Production</option>
-                      <option value="staging">Staging</option>
-                      <option value="development">Development</option>
-                    </select>
-                    <button
-                      onClick={() => setShowDeployDialog(true)}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
-                    >
-                      <Rocket className="w-4 h-4" />
-                      Deploy
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                {filteredDeployments.map((deploy) => (
-                  <div key={deploy.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${
-                          deploy.status === 'success' ? 'bg-green-100 dark:bg-green-900/30' :
-                          deploy.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30' :
-                          deploy.status === 'in_progress' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                          'bg-gray-100 dark:bg-gray-700'
-                        }`}>
-                          <Rocket className={`w-5 h-5 ${
-                            deploy.status === 'success' ? 'text-green-600' :
-                            deploy.status === 'failed' ? 'text-red-600' :
-                            deploy.status === 'in_progress' ? 'text-blue-600' :
-                            'text-gray-600'
-                          }`} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-gray-900 dark:text-white">{deploy.version}</h4>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${envColors[deploy.environment]}`}>
-                              {deploy.environment}
-                            </span>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${deploymentStatusColors[deploy.status]}`}>
-                              {deploy.status.replace('_', ' ')}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <GitBranch className="w-3 h-3" />
-                              {deploy.branch}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <GitCommit className="w-3 h-3" />
-                              {deploy.commit}
-                            </span>
-                            <span>{deploy.changes} changes</span>
-                            <span>{deploy.deployedBy}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {deploy.duration > 0 ? `${Math.floor(deploy.duration / 60)}m ${deploy.duration % 60}s` : 'In progress...'}
-                          </p>
-                          <p className="text-xs text-gray-500">{formatDate(deploy.deployedAt)}</p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {deploy.status === 'success' && (
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Rollback">
-                              <RotateCcw className="w-4 h-4 text-orange-500" />
-                            </button>
-                          )}
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                            <FileText className="w-4 h-4 text-gray-500" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           </TabsContent>
         </Tabs>
+      </div>
+    </div>
+  )
+}
 
-        {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockAdminAIInsights}
-              title="Admin Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={adminCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockAdminPredictions}
-              title="System Forecasts"
-            />
-          </div>
-        </div>
+function StatCard({ icon, label, value, trend }: { icon: React.ReactNode; label: string; value: string; trend: string }) {
+  const isPositive = trend.startsWith('+')
+  const isNeutral = trend === 'stable'
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={adminActivities}
-            title="Admin Activity"
-            maxItems={5}
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="flex items-start justify-between mb-4">
+        {icon}
+        <span className={`text-sm font-medium flex items-center gap-1 ${
+          isNeutral ? 'text-gray-600' : isPositive ? 'text-green-600' : 'text-red-600'
+        }`}>
+          {!isNeutral && (isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />)}
+          {trend}
+        </span>
+      </div>
+      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">{label}</div>
+    </div>
+  )
+}
+
+function MetricCard({ metric }: { metric: typeof demoSystemMetrics[0] }) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">{metric.name}</span>
+        <span className={`px-2 py-1 rounded text-xs font-medium ${
+          metric.status === 'good' ? 'bg-green-100 text-green-700' :
+          metric.status === 'warning' ? 'bg-yellow-100 text-yellow-700' :
+          'bg-red-100 text-red-700'
+        }`}>
+          {metric.value}{metric.unit}
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div
+            className={`h-full ${
+              metric.status === 'good' ? 'bg-green-500' :
+              metric.status === 'warning' ? 'bg-yellow-500' :
+              'bg-red-500'
+            }`}
+            style={{ width: `${metric.value}%` }}
           />
-          <QuickActionsToolbar
-            actions={getAdminQuickActions({
-              onAddUser: () => setShowNewUserDialog(true),
-              onRunJob: async () => {
-                const response = await fetch('/api/admin/jobs/run', {
-                  method: 'POST',
-                  body: JSON.stringify({ jobId: 'default' }),
-                  headers: { 'Content-Type': 'application/json' }
-                })
-                if (!response.ok) throw new Error('Job execution failed')
-                toast.success('Job executed successfully')
-              },
-              onExportLogs: handleExportLogs,
-            })}
-            variant="grid"
-          />
         </div>
+      </div>
+    </div>
+  )
+}
 
-        {/* New User Dialog */}
-        <Dialog open={showNewUserDialog} onOpenChange={setShowNewUserDialog}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add Admin User</DialogTitle>
-              <DialogDescription>Create a new admin user with specific permissions.</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
-                <input
-                  type="text"
-                  placeholder="John Doe"
-                  value={newUserForm.name}
-                  onChange={(e) => setNewUserForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                <input
-                  type="email"
-                  placeholder="john@company.com"
-                  value={newUserForm.email}
-                  onChange={(e) => setNewUserForm(prev => ({ ...prev, email: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
-                <select
-                  value={newUserForm.role}
-                  onChange={(e) => setNewUserForm(prev => ({ ...prev, role: e.target.value as typeof newUserForm.role }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                >
-                  <option value="viewer">Viewer</option>
-                  <option value="moderator">Moderator</option>
-                  <option value="admin">Admin</option>
-                  <option value="super_admin">Super Admin</option>
-                </select>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="require-mfa"
-                  checked={newUserForm.requireMfa}
-                  onChange={(e) => setNewUserForm(prev => ({ ...prev, requireMfa: e.target.checked }))}
-                  className="rounded"
-                />
-                <label htmlFor="require-mfa" className="text-sm text-gray-700 dark:text-gray-300">Require MFA</label>
-              </div>
-            </div>
-            <DialogFooter>
-              <button onClick={() => setShowNewUserDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateUser}
-                disabled={isLoading}
-                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
-              >
-                {isLoading ? 'Creating...' : 'Create User'}
-              </button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+function ActivityItem({ activity }: { activity: typeof demoActivities[0] }) {
+  return (
+    <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+      <div className="w-2 h-2 rounded-full bg-blue-500" />
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{activity.user}</span>
+          <span className="text-gray-600 dark:text-gray-400">{activity.action}</span>
+        </div>
+      </div>
+      <span className="text-sm text-gray-500">{activity.timestamp}</span>
+    </div>
+  )
+}
 
-        {/* New Setting Dialog */}
-        <Dialog open={showNewSettingDialog} onOpenChange={setShowNewSettingDialog}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add Setting</DialogTitle>
-              <DialogDescription>Create a new system configuration setting.</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Setting Name</label>
-                <input
-                  type="text"
-                  placeholder="API Rate Limit"
-                  value={newSettingForm.settingName}
-                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, settingName: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Setting Key</label>
-                <input
-                  type="text"
-                  placeholder="api.rate_limit"
-                  value={newSettingForm.settingKey}
-                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, settingKey: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                <select
-                  value={newSettingForm.category}
-                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, category: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                >
-                  <option>API</option>
-                  <option>Security</option>
-                  <option>Billing</option>
-                  <option>Notifications</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Value Type</label>
-                <select
-                  value={newSettingForm.valueType}
-                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, valueType: e.target.value as typeof newSettingForm.valueType }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                >
-                  <option value="string">string</option>
-                  <option value="number">number</option>
-                  <option value="boolean">boolean</option>
-                  <option value="json">json</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Value</label>
-                <input
-                  type="text"
-                  placeholder="Enter value"
-                  value={newSettingForm.value}
-                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, value: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                />
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="encrypted"
-                    checked={newSettingForm.isEncrypted}
-                    onChange={(e) => setNewSettingForm(prev => ({ ...prev, isEncrypted: e.target.checked }))}
-                    className="rounded"
-                  />
-                  <label htmlFor="encrypted" className="text-sm text-gray-700 dark:text-gray-300">Encrypted</label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="required"
-                    checked={newSettingForm.isRequired}
-                    onChange={(e) => setNewSettingForm(prev => ({ ...prev, isRequired: e.target.checked }))}
-                    className="rounded"
-                  />
-                  <label htmlFor="required" className="text-sm text-gray-700 dark:text-gray-300">Required</label>
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <button onClick={() => setShowNewSettingDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateSetting}
-                disabled={isLoading}
-                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
-              >
-                {isLoading ? 'Creating...' : 'Create Setting'}
-              </button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* SQL Console Dialog */}
-        <Dialog open={showSqlConsoleDialog} onOpenChange={setShowSqlConsoleDialog}>
-          <DialogContent className="max-w-4xl">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Terminal className="w-5 h-5" />
-                SQL Console
-              </DialogTitle>
-              <DialogDescription>Execute SQL queries against your database</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="bg-gray-900 rounded-lg p-4">
-                <textarea
-                  value={sqlQuery}
-                  onChange={(e) => setSqlQuery(e.target.value)}
-                  className="w-full h-32 bg-transparent text-green-400 font-mono text-sm focus:outline-none resize-none"
-                  placeholder="SELECT * FROM users LIMIT 10;"
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <select className="px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                    <option>Primary Database</option>
-                    <option>Analytics DB</option>
-                    <option>Read Replica</option>
-                  </select>
-                </div>
-                <button
-                  onClick={runQuery}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  <Play className="w-4 h-4" />
-                  Run Query
-                </button>
-              </div>
-              {sqlResults && (
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                  <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-2 flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {sqlResults.rowCount} rows in {sqlResults.executionTime}s
-                    </span>
-                    <button className="text-sm text-slate-600 hover:text-slate-700">
-                      <Download className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-100 dark:bg-gray-700">
-                        <tr>
-                          {sqlResults.columns.map((col) => (
-                            <th key={col} className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-300">{col}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {sqlResults.rows.map((row, i) => (
-                          <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            {sqlResults.columns.map((col) => (
-                              <td key={col} className="px-4 py-2 text-gray-900 dark:text-white">{String(row[col])}</td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* New Job Dialog */}
-        <Dialog open={showNewJobDialog} onOpenChange={setShowNewJobDialog}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Create Scheduled Job</DialogTitle>
-              <DialogDescription>Configure a new automated job or task</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Job Name</label>
-                <input
-                  type="text"
-                  placeholder="Database Backup"
-                  value={newJobForm.name}
-                  onChange={(e) => setNewJobForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                <textarea
-                  placeholder="What does this job do?"
-                  value={newJobForm.description}
-                  onChange={(e) => setNewJobForm(prev => ({ ...prev, description: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 h-20 resize-none"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Job Type</label>
-                <select
-                  value={newJobForm.type}
-                  onChange={(e) => setNewJobForm(prev => ({ ...prev, type: e.target.value as typeof newJobForm.type }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                >
-                  <option value="cron">Cron Schedule</option>
-                  <option value="webhook">Webhook Trigger</option>
-                  <option value="manual">Manual Only</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Cron Expression</label>
-                <input
-                  type="text"
-                  placeholder="0 2 * * *"
-                  value={newJobForm.schedule}
-                  onChange={(e) => setNewJobForm(prev => ({ ...prev, schedule: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
-                />
-                <p className="text-xs text-gray-500 mt-1">e.g., 0 2 * * * = Every day at 2:00 AM</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Command</label>
-                <input
-                  type="text"
-                  placeholder="npm run backup"
-                  value={newJobForm.command}
-                  onChange={(e) => setNewJobForm(prev => ({ ...prev, command: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <button onClick={() => setShowNewJobDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateJob}
-                disabled={isLoading}
-                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
-              >
-                {isLoading ? 'Creating...' : 'Create Job'}
-              </button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* New Feature Flag Dialog */}
-        <Dialog open={showNewFlagDialog} onOpenChange={setShowNewFlagDialog}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Create Feature Flag</DialogTitle>
-              <DialogDescription>Add a new feature flag for controlled rollouts</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Flag Name</label>
-                <input
-                  type="text"
-                  placeholder="New Dashboard UI"
-                  value={newFlagForm.name}
-                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Flag Key</label>
-                <input
-                  type="text"
-                  placeholder="new_dashboard_ui"
-                  value={newFlagForm.key}
-                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, key: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                <textarea
-                  placeholder="What does this flag control?"
-                  value={newFlagForm.description}
-                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, description: e.target.value }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 h-20 resize-none"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Environment</label>
-                <select
-                  value={newFlagForm.environment}
-                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, environment: e.target.value as typeof newFlagForm.environment }))}
-                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                >
-                  <option value="development">Development</option>
-                  <option value="staging">Staging</option>
-                  <option value="production">Production</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Rollout Percentage: {newFlagForm.rolloutPercentage}%</label>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={newFlagForm.rolloutPercentage}
-                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, rolloutPercentage: Number(e.target.value) }))}
-                  className="mt-1 w-full"
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>0%</span>
-                  <span>50%</span>
-                  <span>100%</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="flag-enabled"
-                  checked={newFlagForm.enabled}
-                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, enabled: e.target.checked }))}
-                  className="rounded"
-                />
-                <label htmlFor="flag-enabled" className="text-sm text-gray-700 dark:text-gray-300">Enable immediately</label>
-              </div>
-            </div>
-            <DialogFooter>
-              <button onClick={() => setShowNewFlagDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateFlag}
-                disabled={isLoading}
-                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
-              >
-                {isLoading ? 'Creating...' : 'Create Flag'}
-              </button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Deploy Dialog */}
-        <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Rocket className="w-5 h-5" />
-                New Deployment
-              </DialogTitle>
-              <DialogDescription>Deploy a new version to an environment</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Environment</label>
-                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                  <option value="development">Development</option>
-                  <option value="staging">Staging</option>
-                  <option value="production">Production</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Branch</label>
-                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                  <option value="main">main</option>
-                  <option value="develop">develop</option>
-                  <option value="release/2.5.0">release/2.5.0</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Commit</label>
-                <div className="mt-1 flex items-center gap-2">
-                  <input type="text" value="abc123f" readOnly className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700 font-mono text-sm" />
-                  <button className="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
-                    <RefreshCw className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Production Deployment</p>
-                    <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">This will deploy to the production environment. Make sure all tests have passed.</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="run-migrations" className="rounded" defaultChecked />
-                <label htmlFor="run-migrations" className="text-sm text-gray-700 dark:text-gray-300">Run database migrations</label>
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="notify-team" className="rounded" defaultChecked />
-                <label htmlFor="notify-team" className="text-sm text-gray-700 dark:text-gray-300">Notify team on Slack</label>
-              </div>
-            </div>
-            <DialogFooter>
-              <button onClick={() => setShowDeployDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                Cancel
-              </button>
-              <button onClick={() => setShowDeployDialog(false)} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                <Rocket className="w-4 h-4" />
-                Deploy Now
-              </button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit Setting Dialog */}
-        <Dialog open={showEditSettingDialog} onOpenChange={setShowEditSettingDialog}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Edit Setting</DialogTitle>
-              <DialogDescription>Update the system configuration setting.</DialogDescription>
-            </DialogHeader>
-            {selectedSetting && (
-              <div className="space-y-4 py-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Setting Name</label>
-                  <input
-                    type="text"
-                    value={selectedSetting.setting_name}
-                    onChange={(e) => setSelectedSetting(prev => prev ? { ...prev, setting_name: e.target.value } : null)}
-                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Setting Key</label>
-                  <input
-                    type="text"
-                    value={selectedSetting.setting_key}
-                    onChange={(e) => setSelectedSetting(prev => prev ? { ...prev, setting_key: e.target.value } : null)}
-                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                  <textarea
-                    value={selectedSetting.description || ''}
-                    onChange={(e) => setSelectedSetting(prev => prev ? { ...prev, description: e.target.value } : null)}
-                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 h-20 resize-none"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Value ({selectedSetting.value_type})</label>
-                  <input
-                    type="text"
-                    value={selectedSetting.value_string || selectedSetting.value_number?.toString() || ''}
-                    onChange={(e) => setSelectedSetting(prev => prev ? {
-                      ...prev,
-                      value_string: prev.value_type === 'string' ? e.target.value : prev.value_string,
-                      value_number: prev.value_type === 'number' ? Number(e.target.value) : prev.value_number
-                    } : null)}
-                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                  <select
-                    value={selectedSetting.status}
-                    onChange={(e) => setSelectedSetting(prev => prev ? { ...prev, status: e.target.value as typeof selectedSetting.status } : null)}
-                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="deprecated">Deprecated</option>
-                    <option value="testing">Testing</option>
-                  </select>
-                </div>
-              </div>
-            )}
-            <DialogFooter>
-              <button onClick={() => { setShowEditSettingDialog(false); setSelectedSetting(null); }} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdateSetting}
-                disabled={isLoading}
-                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
-              >
-                {isLoading ? 'Saving...' : 'Save Changes'}
-              </button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+function StatusItem({ label, value, status }: { label: string; value: string; status: 'good' | 'warning' | 'critical' }) {
+  return (
+    <div className="flex items-center justify-between py-2">
+      <span className="text-gray-700 dark:text-gray-300">{label}</span>
+      <div className="flex items-center gap-2">
+        <span className="font-medium">{value}</span>
+        {status === 'good' && <CheckCircle className="w-4 h-4 text-green-600" />}
+        {status === 'warning' && <AlertTriangle className="w-4 h-4 text-yellow-600" />}
+        {status === 'critical' && <XCircle className="w-4 h-4 text-red-600" />}
       </div>
     </div>
   )
