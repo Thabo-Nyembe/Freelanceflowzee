@@ -316,6 +316,11 @@ function downloadBlob(blob: Blob, filename: string): void {
 export default function FormsClient({ initialForms }: { initialForms: Form[] }) {
   const supabase = createClient()
 
+  // Helper to safely get window origin (SSR-safe)
+  const getOrigin = () => {
+    return typeof window !== 'undefined' ? window.location.origin : ''
+  }
+
   // UI State
   const [activeTab, setActiveTab] = useState('dashboard')
   const [settingsTab, setSettingsTab] = useState('general')
@@ -896,7 +901,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   // ============================================================================
 
   const handleShareForm = async (form: Form) => {
-    const shareUrl = `${window.location.origin}/forms/${form.id}`
+    const shareUrl = `${getOrigin()}/forms/${form.id}`
     try {
       await navigator.clipboard.writeText(shareUrl)
       toast.success('Share link copied to clipboard')
@@ -908,7 +913,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
   const handleCopyShareLink = async () => {
     if (!selectedForm) return
-    const shareUrl = `${window.location.origin}/forms/${selectedForm.id}`
+    const shareUrl = `${getOrigin()}/forms/${selectedForm.id}`
     try {
       await navigator.clipboard.writeText(shareUrl)
       toast.success('Link copied to clipboard')
@@ -1298,7 +1303,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   }
 
   const handleCopyQRCode = async () => {
-    const formUrl = `${window.location.origin}/forms/${selectedForm?.id || ''}`
+    const formUrl = `${getOrigin()}/forms/${selectedForm?.id || ''}`
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(formUrl)}`
 
     try {
@@ -1316,7 +1321,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   }
 
   const handleDownloadQRCode = async () => {
-    const formUrl = `${window.location.origin}/forms/${selectedForm?.id || ''}`
+    const formUrl = `${getOrigin()}/forms/${selectedForm?.id || ''}`
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(formUrl)}`
 
     try {
@@ -2294,7 +2299,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             </DialogHeader>
             <div className="py-4 text-center">
               <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${window.location.origin}/forms/${selectedForm?.id || ''}`)}`}
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${getOrigin()}/forms/${selectedForm?.id || ''}`)}`}
                 alt="Form QR Code"
                 className="mx-auto mb-4"
               />
@@ -2361,7 +2366,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   <Label>Direct Link</Label>
                   <div className="flex gap-2 mt-1">
                     <Input
-                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/forms/${selectedForm.id}`}
+                      value={`${getOrigin()}/forms/${selectedForm.id}`}
                       readOnly
                       className="font-mono text-sm"
                     />
@@ -2376,13 +2381,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                     <Textarea
                       readOnly
                       className="font-mono text-xs"
-                      value={`<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/forms/${selectedForm.id}/embed" width="100%" height="600" frameborder="0"></iframe>`}
+                      value={`<iframe src="${getOrigin()}/forms/${selectedForm.id}/embed" width="100%" height="600" frameborder="0"></iframe>`}
                     />
                     <Button
                       variant="outline"
                       className="mt-2"
                       onClick={async () => {
-                        const embedCode = `<iframe src="${window.location.origin}/forms/${selectedForm.id}/embed" width="100%" height="600" frameborder="0"></iframe>`
+                        const embedCode = `<iframe src="${getOrigin()}/forms/${selectedForm.id}/embed" width="100%" height="600" frameborder="0"></iframe>`
                         await navigator.clipboard.writeText(embedCode)
                         toast.success('Embed code copied')
                       }}
