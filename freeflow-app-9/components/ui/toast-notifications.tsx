@@ -9,8 +9,10 @@ import {
   AlertCircle,
   Info,
   X,
-  Loader2
+  Loader2,
+  XCircleIcon
 } from "lucide-react"
+import { notificationDeduplicator } from "@/lib/notification-deduplicator"
 
 /**
  * Toast Notifications System - A+++ UI/UX
@@ -40,6 +42,9 @@ interface ToastContextValue {
   toasts: Toast[]
   addToast: (toast: Omit<Toast, "id">) => void
   removeToast: (id: string) => void
+  clearAll: () => void
+  isMuted: boolean
+  toggleMute: () => void
   success: (title: string, description?: string) => void
   error: (title: string, description?: string) => void
   warning: (title: string, description?: string) => void
@@ -74,8 +79,51 @@ export function ToastProvider({
   maxToasts = 5
 }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([])
+  const [isMuted, setIsMuted] = useState(false)
+
+  // Load mute state from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('kazi-notifications-muted')
+    if (saved === 'true') {
+      setIsMuted(true)
+    }
+  }, [])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clear all timers and cleanup
+      notificationDeduplicator.clearAll()
+    }
+  }, [])
+
+  const toggleMute = () => {
+    setIsMuted(prev => {
+      const newValue = !prev
+      localStorage.setItem('kazi-notifications-muted', String(newValue))
+      return newValue
+    })
+  }
 
   const addToast = (toast: Omit<Toast, "id">) => {
+    // Don't show toasts if muted
+    if (isMuted) {
+      return ""
+    }
+
+    // Check if notification should be shown (deduplication)
+    const shouldShow = notificationDeduplicator.shouldShow({
+      title: toast.title,
+      description: toast.description,
+      variant: toast.variant,
+      timestamp: Date.now()
+    })
+
+    if (!shouldShow) {
+      // Suppressed duplicate notification
+      return ""
+    }
+
     const id = Math.random().toString(36).substring(7)
     const newToast = { ...toast, id }
 
@@ -101,6 +149,11 @@ export function ToastProvider({
 
   const removeToast = (id: string) => {
     setToasts(prev => prev.filter(toast => toast.id !== id))
+  }
+
+  const clearAll = () => {
+    setToasts([])
+    notificationDeduplicator.clearAll()
   }
 
   const success = (title: string, description?: string) => {
@@ -141,6 +194,9 @@ export function ToastProvider({
     toasts,
     addToast,
     removeToast,
+    clearAll,
+    isMuted,
+    toggleMute,
     success,
     error,
     warning,
@@ -152,7 +208,14 @@ export function ToastProvider({
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <ToastContainer toasts={toasts} position={position} onRemove={removeToast} />
+      <ToastContainer
+        toasts={toasts}
+        position={position}
+        onRemove={removeToast}
+        onClearAll={clearAll}
+        isMuted={isMuted}
+        onToggleMute={toggleMute}
+      />
     </ToastContext.Provider>
   )
 }
@@ -165,9 +228,12 @@ interface ToastContainerProps {
   toasts: Toast[]
   position: ToastPosition
   onRemove: (id: string) => void
+  onClearAll: () => void
+  isMuted: boolean
+  onToggleMute: () => void
 }
 
-function ToastContainer({ toasts, position, onRemove }: ToastContainerProps) {
+function ToastContainer({ toasts, position, onRemove, onClearAll, isMuted, onToggleMute }: ToastContainerProps) {
   const positionClasses = {
     "top-right": "top-4 right-4",
     "top-left": "top-4 left-4",
@@ -179,6 +245,37 @@ function ToastContainer({ toasts, position, onRemove }: ToastContainerProps) {
 
   return (
     <div className={cn("fixed z-50 flex flex-col gap-3 max-w-md w-full", positionClasses[position])}>
+      {/* Control Buttons - Show when notifications exist or when muted */}
+      {(toasts.length >= 2 || isMuted) && (
+        <div className="flex items-center gap-2 justify-end mb-1">
+          {/* Mute/Unmute Toggle */}
+          <button
+            onClick={onToggleMute}
+            className={cn(
+              "px-3 py-1.5 text-xs font-medium rounded-md transition-colors shadow-lg flex items-center gap-1.5",
+              isMuted
+                ? "bg-orange-600 hover:bg-orange-700 text-white"
+                : "bg-gray-700 hover:bg-gray-800 text-white"
+            )}
+            title={
+              isMuted ? "Unmute notifications" : "Mute notifications"}
+          >
+            {isMuted ? "🔕 Unmute" : "🔔 Mute"}
+          </button>
+
+          {/* Clear All Button - Only when toasts exist */}
+          {toasts.length >= 2 && (
+            <button
+              onClick={onClearAll}
+              className="px-3 py-1.5 text-xs font-medium rounded-md bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-lg flex items-center gap-1.5"
+            >
+              <XCircleIcon className="h-3 w-3" />
+              Clear All ({toasts.length})
+            </button>
+          )}
+        </div>
+      )}
+
       <AnimatePresence mode="popLayout">
         {toasts.map((toast, index) => (
           <ToastItem

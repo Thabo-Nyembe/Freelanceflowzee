@@ -35,7 +35,7 @@ const SocialProofSection = dynamic(
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white dark:bg-none dark:bg-gray-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white dark:bg-none dark:bg-gray-900 relative overflow-x-hidden">
       {/* Navigation - Client Component for interactivity */}
       <ClientNav />
 
@@ -120,8 +120,8 @@ export default function HomePage() {
       <StatsSection />
 
       {/* Comparison Section - Server rendered */}
-      <section className="py-24 bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-950 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
               Stop Paying the "subscription tax"
@@ -140,11 +140,11 @@ export default function HomePage() {
 
       {/* Features Grid - Client Component */}
       <section
-        className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950"
+        className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950 overflow-hidden"
         aria-labelledby="features-heading"
         role="region"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
             <Badge
               variant="secondary"

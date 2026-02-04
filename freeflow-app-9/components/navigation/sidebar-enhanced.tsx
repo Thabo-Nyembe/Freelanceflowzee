@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { GlobalPresenceWidget } from '@/components/realtime/presence-indicator'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useSidebar } from '@/lib/sidebar-context'
+import { SidebarCollapseToggle } from '@/components/navigation/sidebar-collapse-toggle'
 import {
   BarChart3,
   FolderOpen,
@@ -44,6 +46,11 @@ import {
   Music,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
+  ChevronsLeft,
+  ChevronsRight,
+  PanelLeftClose,
+  PanelLeftOpen,
   Briefcase,
   Film,
   Box,
@@ -934,8 +941,8 @@ function SortableSubcategory({
                         itemIsActive
                           ? 'bg-white/20 text-white'
                           : item.badge === 'Pro'
-                          ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
-                          : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                       )}
                     >
                       {item.badge}
@@ -954,6 +961,7 @@ function SortableSubcategory({
 export function SidebarEnhanced() {
   const pathname = usePathname()
   const { userId } = useCurrentUser()
+  const { isCollapsed, toggleSidebar } = useSidebar()
   const [categories, setCategories] = useState<SidebarCategory[]>(DEFAULT_CATEGORIES)
   const [expandedCategories, setExpandedCategories] = useState<string[]>([
     'ai-creative-suite',
@@ -968,7 +976,7 @@ export function SidebarEnhanced() {
   const [isCustomizing, setIsCustomizing] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [presetName, setPresetName] = useState('')
-  const [savedPresets, setSavedPresets] = useState<Array<{id: string, name: string, config: SidebarCategory[]}>>([])
+  const [savedPresets, setSavedPresets] = useState<Array<{ id: string, name: string, config: SidebarCategory[] }>>([])
   const [activePreset, setActivePreset] = useState<string>('default')
   const [showPresetSaved, setShowPresetSaved] = useState(false)
 
@@ -1227,7 +1235,13 @@ export function SidebarEnhanced() {
   }
 
   return (
-    <aside data-tour="sidebar-nav" className="fixed top-16 left-0 z-40 w-64 h-[calc(100vh-4rem)] bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col">
+    <aside
+      data-tour="sidebar-nav"
+      className={cn(
+        "fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col transition-all duration-300 ease-in-out",
+        isCollapsed ? "w-16" : "w-64"
+      )}
+    >
       <div className="flex-1 overflow-y-auto overscroll-contain scroll-smooth p-4 space-y-1">
         {/* Navigation Categories */}
         {categories.map((category) => {
@@ -1472,61 +1486,61 @@ export function SidebarEnhanced() {
               {/* Customization Tab */}
               <TabsContent value="customize" className="space-y-4 p-4 bg-white dark:bg-gray-950" style={{ backgroundColor: 'white', color: 'black' }}>
                 <div className="max-h-[50vh] overflow-y-auto space-y-4 pr-2">
-              {/* Customization Mode Toggle */}
-              <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div>
-                  <Label htmlFor="customize-mode" className="text-sm font-medium text-gray-900 dark:text-white">
-                    Reorder Mode
-                  </Label>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    Enable to drag and reorder subcategories
-                  </p>
-                </div>
-                <Switch
-                  id="customize-mode"
-                  checked={isCustomizing}
-                  onCheckedChange={(checked) => {
-                    setIsCustomizing(checked)
-                    toast.info(checked ? 'Reorder mode enabled - drag to reorder' : 'Reorder mode disabled', { duration: 2000 })
-                  }}
-                />
-              </div>
-
-              {/* Categories Visibility */}
-              {categories.map((category) => (
-                <div key={category.id} className="space-y-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <category.icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                      <span className="font-semibold text-gray-900 dark:text-white">{category.name}</span>
+                  {/* Customization Mode Toggle */}
+                  <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div>
+                      <Label htmlFor="customize-mode" className="text-sm font-medium text-gray-900 dark:text-white">
+                        Reorder Mode
+                      </Label>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        Enable to drag and reorder subcategories
+                      </p>
                     </div>
                     <Switch
-                      checked={category.visible}
-                      onCheckedChange={() => toggleCategoryVisibility(category.id)}
+                      id="customize-mode"
+                      checked={isCustomizing}
+                      onCheckedChange={(checked) => {
+                        setIsCustomizing(checked)
+                        toast.info(checked ? 'Reorder mode enabled - drag to reorder' : 'Reorder mode disabled', { duration: 2000 })
+                      }}
                     />
                   </div>
 
-                  {/* Subcategories */}
-                  <div className="ml-7 space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                    {category.subcategories.map((subcategory) => (
-                      <div key={subcategory.id} className="flex items-center justify-between text-sm py-1">
-                        <span className={cn(
-                          "text-gray-700 dark:text-gray-300",
-                          !subcategory.visible && 'text-gray-400 dark:text-gray-600 line-through'
-                        )}>
-                          {subcategory.name}
-                        </span>
+                  {/* Categories Visibility */}
+                  {categories.map((category) => (
+                    <div key={category.id} className="space-y-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <category.icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          <span className="font-semibold text-gray-900 dark:text-white">{category.name}</span>
+                        </div>
                         <Switch
-                          checked={subcategory.visible}
-                          onCheckedChange={() =>
-                            toggleSubcategoryVisibility(category.id, subcategory.id)
-                          }
+                          checked={category.visible}
+                          onCheckedChange={() => toggleCategoryVisibility(category.id)}
                         />
                       </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+
+                      {/* Subcategories */}
+                      <div className="ml-7 space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        {category.subcategories.map((subcategory) => (
+                          <div key={subcategory.id} className="flex items-center justify-between text-sm py-1">
+                            <span className={cn(
+                              "text-gray-700 dark:text-gray-300",
+                              !subcategory.visible && 'text-gray-400 dark:text-gray-600 line-through'
+                            )}>
+                              {subcategory.name}
+                            </span>
+                            <Switch
+                              checked={subcategory.visible}
+                              onCheckedChange={() =>
+                                toggleSubcategoryVisibility(category.id, subcategory.id)
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
 
                   {/* Save as Preset Section */}
                   <div className="mt-6 p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
