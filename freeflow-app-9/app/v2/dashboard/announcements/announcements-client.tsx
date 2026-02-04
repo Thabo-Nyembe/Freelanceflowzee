@@ -3515,31 +3515,30 @@ export default function AnnouncementsClient() {
         </DialogContent>
       </Dialog>
 
-        {/* Insights Panel */}
-        {insightsPanel.isOpen && (
-          <CollapsibleInsightsPanel title="Announcement Insights" defaultOpen={true}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <AIInsightsPanel
-                  insights={[
-                    { id: '1', type: 'success', title: 'Engagement Up', description: 'Announcement views increased by 25% this month.', priority: 'high', timestamp: new Date().toISOString(), category: 'Engagement' },
-                    { id: '2', type: 'info', title: 'Best Timing', description: 'Posts published on Tuesday mornings get 40% more engagement.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Analytics' },
-                    { id: '3', type: 'warning', title: 'Scheduled Posts', description: 'You have 3 announcements scheduled for next week.', priority: 'low', timestamp: new Date().toISOString(), category: 'Planning' },
-                  ]}
-                />
-              </div>
-              <ActivityFeed
-                activities={[
-                  { id: '1', user: 'You', action: 'published', target: 'feature update', timestamp: '2h ago', type: 'success' },
-                  { id: '2', user: 'Team', action: 'scheduled', target: 'maintenance notice', timestamp: '5h ago', type: 'info' },
-                  { id: '3', user: 'System', action: 'auto-archived', target: 'expired post', timestamp: '1d ago', type: 'info' },
+      {/* Insights Panel */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="Announcement Insights" defaultOpen={true}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={[
+                  { id: '1', type: 'success', title: 'Engagement Up', description: 'Announcement views increased by 25% this month.', priority: 'high', timestamp: new Date().toISOString(), category: 'Engagement' },
+                  { id: '2', type: 'info', title: 'Best Timing', description: 'Posts published on Tuesday mornings get 40% more engagement.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Analytics' },
+                  { id: '3', type: 'warning', title: 'Scheduled Posts', description: 'You have 3 announcements scheduled for next week.', priority: 'low', timestamp: new Date().toISOString(), category: 'Planning' },
                 ]}
-                variant="grid"
               />
             </div>
-          </CollapsibleInsightsPanel>
-        )}
-      </div>
+            <ActivityFeed
+              activities={[
+                { id: '1', user: 'You', action: 'published', target: 'feature update', timestamp: '2h ago', type: 'success' },
+                { id: '2', user: 'Team', action: 'scheduled', target: 'maintenance notice', timestamp: '5h ago', type: 'info' },
+                { id: '3', user: 'System', action: 'auto-archived', target: 'expired post', timestamp: '1d ago', type: 'info' },
+              ]}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
     </div>
   )
 }

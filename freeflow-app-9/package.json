@@ -8,7 +8,7 @@
   "description": "KAZI - Enterprise Freelance Management Platform with AI-powered tools, real-time collaboration, and secure payment systems",
   "scripts": {
     "preinstall": "npx npm-force-resolutions",
-    "dev": "NODE_OPTIONS='--max-old-space-size=16384' next dev --turbo -p 9323",
+    "dev": "NODE_OPTIONS='--max-old-space-size=16384' next dev --webpack -p 9323",
     "dev:webpack": "NODE_OPTIONS='--max-old-space-size=16384' next dev -p 9323",
     "dev:debug": "NODE_OPTIONS='--inspect --max-old-space-size=8192' next dev --turbo -p 9323",
     "dev:debug-full": "NODE_OPTIONS='--inspect=0.0.0.0 --max-old-space-size=8192' next dev --turbo -p 9323",

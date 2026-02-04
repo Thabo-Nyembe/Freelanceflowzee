@@ -3183,31 +3183,30 @@ export default function ThreeDModelingClient() {
         </DialogContent>
       </Dialog>
 
-        {/* Insights Panel */}
-        {insightsPanel.isOpen && (
-          <CollapsibleInsightsPanel title="3D Modeling Insights" defaultOpen={true}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <AIInsightsPanel
-                  insights={[
-                    { id: '1', type: 'info', title: 'Render Optimization', description: 'Consider using lower polygon counts for faster render times.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Performance' },
-                    { id: '2', type: 'success', title: 'Model Quality', description: 'Your models maintain high quality standards with optimized topology.', priority: 'high', timestamp: new Date().toISOString(), category: 'Quality' },
-                    { id: '3', type: 'warning', title: 'Storage Usage', description: 'Texture files are using significant storage. Consider compression.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Storage' },
-                  ]}
-                />
-              </div>
-              <ActivityFeed
-                activities={[
-                  { id: '1', user: 'System', action: 'completed', target: 'render job', timestamp: '5m ago', type: 'success' },
-                  { id: '2', user: 'You', action: 'uploaded', target: 'new texture', timestamp: '15m ago', type: 'info' },
-                  { id: '3', user: 'System', action: 'optimized', target: 'model mesh', timestamp: '1h ago', type: 'info' },
+      {/* Insights Panel */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="3D Modeling Insights" defaultOpen={true}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={[
+                  { id: '1', type: 'info', title: 'Render Optimization', description: 'Consider using lower polygon counts for faster render times.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Performance' },
+                  { id: '2', type: 'success', title: 'Model Quality', description: 'Your models maintain high quality standards with optimized topology.', priority: 'high', timestamp: new Date().toISOString(), category: 'Quality' },
+                  { id: '3', type: 'warning', title: 'Storage Usage', description: 'Texture files are using significant storage. Consider compression.', priority: 'medium', timestamp: new Date().toISOString(), category: 'Storage' },
                 ]}
-                variant="grid"
               />
             </div>
-          </CollapsibleInsightsPanel>
-        )}
-      </div>
+            <ActivityFeed
+              activities={[
+                { id: '1', user: 'System', action: 'completed', target: 'render job', timestamp: '5m ago', type: 'success' },
+                { id: '2', user: 'You', action: 'uploaded', target: 'new texture', timestamp: '15m ago', type: 'info' },
+                { id: '3', user: 'System', action: 'optimized', target: 'model mesh', timestamp: '1h ago', type: 'info' },
+              ]}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
     </div>
   )
 }

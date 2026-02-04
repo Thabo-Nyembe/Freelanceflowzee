@@ -310,7 +310,7 @@ export default function AnalyticsAdvancedClient() {
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-4">Recent Insights</h3>
           <div className="space-y-3">
-            {insights.slice(0, 3).map((insight: AIInsight) => (
+            {insights.slice(0, 3).map((insight: Insight) => (
               <div key={insight.id} className="flex items-start gap-3 p-4 rounded-lg bg-muted/30">
                 <div className="text-2xl">{getInsightIcon(insight.type)}</div>
                 <div className="flex-1">
@@ -383,8 +383,8 @@ export default function AnalyticsAdvancedClient() {
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-6">Revenue Trend</h3>
           <div className="h-80 flex items-end justify-between gap-3">
-            {{ data: revenueChart }.data.map((point, index) => {
-              const maxValue = Math.max(...{ data: revenueChart }.data.map(d => d.value))
+            {revenueChart.map((point, index) => {
+              const maxValue = Math.max(...revenueChart.map(d => d.value))
               const height = (point.value / maxValue) * 100
               return (
                 <div key={index} className="flex-1 flex flex-col items-center gap-2">
@@ -449,8 +449,8 @@ export default function AnalyticsAdvancedClient() {
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-6">User Growth</h3>
           <div className="h-80 flex items-end justify-between gap-3">
-            {{ data: usersChart }.data.map((point, index) => {
-              const maxValue = Math.max(...{ data: usersChart }.data.map(d => d.value))
+            {usersChart.map((point, index) => {
+              const maxValue = Math.max(...usersChart.map(d => d.value))
               const height = (point.value / maxValue) * 100
               return (
                 <div key={index} className="flex-1 flex flex-col items-center gap-2">
@@ -575,7 +575,7 @@ export default function AnalyticsAdvancedClient() {
       </div>
 
       <div className="space-y-4">
-        {insights.map((insight: AIInsight) => (
+        {insights.map((insight: Insight) => (
           <LiquidGlassCard key={insight.id}>
             <div className="p-6">
               <div className="flex items-start gap-4">
@@ -1130,23 +1130,22 @@ export default function AnalyticsAdvancedClient() {
         </DialogContent>
       </Dialog>
 
-        {/* Insights Panel */}
-        {insightsPanel.isOpen && (
-          <CollapsibleInsightsPanel title="Analytics Insights" defaultOpen={true}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <AIInsightsPanel
-                  insights={analyticsAdvancedAIInsights}
-                />
-              </div>
-              <ActivityFeed
-                activities={analyticsAdvancedActivities}
-                variant="grid"
+      {/* Insights Panel */}
+      {insightsPanel.isOpen && (
+        <CollapsibleInsightsPanel title="Analytics Insights" defaultOpen={true}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <AIInsightsPanel
+                insights={analyticsAdvancedAIInsights}
               />
             </div>
-          </CollapsibleInsightsPanel>
-        )}
-      </div>
+            <ActivityFeed
+              activities={analyticsAdvancedActivities}
+              variant="grid"
+            />
+          </div>
+        </CollapsibleInsightsPanel>
+      )}
     </div>
   )
 }

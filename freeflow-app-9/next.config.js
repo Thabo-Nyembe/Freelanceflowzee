@@ -129,10 +129,10 @@ const nextConfig = {
     'esbuild',
   ],
 
-  // Turbopack configuration
-  turbopack: {
-    root: '/Users/thabonyembe/Documents/freeflow-app-9',
-  },
+  // Turbopack configuration - DISABLED due to cache corruption issues
+  // turbopack: {
+  //   root: '/Users/thabonyembe/Documents/freeflow-app-9',
+  // },
 
   // A+++ Build optimization
   staticPageGenerationTimeout: 90,
