@@ -480,12 +480,13 @@ export async function GET(request: NextRequest) {
       query = query.eq('contact_id', filters.contact_id)
     }
 
-    if (filters.status?.length) {
-      query = query.in('status', filters.status)
-    } else {
-      // Default to open deals only
-      query = query.eq('status', 'open')
-    }
+    // DISABLED: status column doesn't exist in crm_deals table
+    // if (filters.status?.length) {
+    //   query = query.in('status', filters.status)
+    // } else {
+    //   // Default to open deals only
+    //   query = query.eq('status', 'open')
+    // }
 
     if (filters.priority?.length) {
       query = query.in('priority', filters.priority)
