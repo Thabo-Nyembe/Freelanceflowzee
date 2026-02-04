@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, createContext, useContext } from 'react'
+import { useState, useEffect } from 'react'
 import { SidebarEnhanced } from '@/components/navigation/sidebar-enhanced'
 import { MobileAdminNav } from '@/components/admin/mobile-admin-nav'
 import { ErrorBoundary } from '@/components/error-boundary'
@@ -10,23 +10,7 @@ import { AnnouncementsBanner } from '@/components/dashboard/announcements-banner
 import { Button } from '@/components/ui/button'
 import { PanelLeftClose, PanelLeft, Maximize2, Minimize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-// Sidebar context for child components to access collapse state
-interface SidebarContextType {
-  isCollapsed: boolean
-  setIsCollapsed: (collapsed: boolean) => void
-  toggleSidebar: () => void
-}
-
-const SidebarContext = createContext<SidebarContextType | null>(null)
-
-export function useSidebarContext() {
-  const context = useContext(SidebarContext)
-  if (!context) {
-    return { isCollapsed: false, setIsCollapsed: () => {}, toggleSidebar: () => {} }
-  }
-  return context
-}
+import { SidebarProvider, useSidebar } from '@/lib/sidebar-context'
 
 interface UserData {
   id: string
@@ -39,45 +23,28 @@ interface DashboardLayoutClientProps {
   user: UserData
 }
 
-export default function DashboardLayoutClient({
-  children, user
-}: DashboardLayoutClientProps) {
-  // Persist sidebar state in localStorage
-  const [isCollapsed, setIsCollapsed] = useState(false)
+function DashboardLayoutInner({ children, user }: DashboardLayoutClientProps) {
+  const { isCollapsed, toggleSidebar } = useSidebar()
   const [isFullscreen, setIsFullscreen] = useState(false)
 
-  // Load saved state on mount
+  // Load saved fullscreen state on mount
   useEffect(() => {
-    const savedCollapsed = localStorage.getItem('sidebar-collapsed')
     const savedFullscreen = localStorage.getItem('dashboard-fullscreen')
-    if (savedCollapsed === 'true') setIsCollapsed(true)
     if (savedFullscreen === 'true') setIsFullscreen(true)
   }, [])
 
-  // Save state changes
-  useEffect(() => {
-    localStorage.setItem('sidebar-collapsed', String(isCollapsed))
-  }, [isCollapsed])
-
+  // Save fullscreen state changes
   useEffect(() => {
     localStorage.setItem('dashboard-fullscreen', String(isFullscreen))
   }, [isFullscreen])
 
-  const toggleSidebar = () => setIsCollapsed(prev => !prev)
   const toggleFullscreen = () => {
     setIsFullscreen(prev => !prev)
-    if (!isFullscreen) {
-      setIsCollapsed(true) // Collapse sidebar when entering fullscreen
-    }
   }
 
-  // Keyboard shortcut: Cmd/Ctrl + B to toggle sidebar
+  // Keyboard shortcut: Cmd/Ctrl + Shift + F to toggle fullscreen
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
-        e.preventDefault()
-        toggleSidebar()
-      }
       if ((e.metaKey || e.ctrlKey) && e.key === 'f' && e.shiftKey) {
         e.preventDefault()
         toggleFullscreen()
@@ -88,9 +55,8 @@ export default function DashboardLayoutClient({
   }, [])
 
   return (
-    <SidebarContext.Provider value={{ isCollapsed, setIsCollapsed, toggleSidebar }}>
-      <OnboardingProvider>
-        <EngagementProvider userId={user.id}>
+    <OnboardingProvider>
+      <EngagementProvider userId={user.id}>
           <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-950">
             <MobileAdminNav />
 
@@ -170,6 +136,13 @@ export default function DashboardLayoutClient({
           </div>
         </EngagementProvider>
       </OnboardingProvider>
-    </SidebarContext.Provider>
+  )
+}
+
+export default function DashboardLayoutClient(props: DashboardLayoutClientProps) {
+  return (
+    <SidebarProvider>
+      <DashboardLayoutInner {...props} />
+    </SidebarProvider>
   )
 }
