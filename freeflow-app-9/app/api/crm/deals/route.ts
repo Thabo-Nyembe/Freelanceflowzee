@@ -453,17 +453,10 @@ export async function GET(request: NextRequest) {
       is_rotting: searchParams.get('is_rotting') === 'true' ? true : undefined,
     }
 
-    // Build query
+    // Build query (simplified without joins due to missing FK constraints)
     let query = supabase
       .from('crm_deals')
-      .select(`
-        *,
-        pipeline:crm_pipelines!pipeline_id(id, name),
-        stage:crm_pipeline_stages!stage_id(id, name, order, probability, color, is_won, is_lost, rotting_days),
-        company:crm_companies!company_id(id, name, domain, logo_url),
-        contact:crm_contacts!contact_id(id, full_name, email, avatar_url),
-        owner:users!owner_id(id, name, avatar_url)
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('user_id', effectiveUserId)
 
     // Apply filters

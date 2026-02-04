@@ -343,14 +343,11 @@ export async function DELETE(request: NextRequest) {
     } else {
       const { error } = await supabase
         .from('expenses')
-        .update({
-          deleted_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
+        .delete()
         .eq('id', expenseId)
 
       if (error) {
-        logger.error('Expense soft delete error', { error })
+        logger.error('Expense delete error', { error })
         return NextResponse.json(
           { error: 'Failed to delete expense' },
           { status: 500 }
@@ -396,7 +393,6 @@ async function handleListExpenses(
     .from('expenses')
     .select('*', { count: 'exact' })
     .eq('user_id', userId)
-    .is('deleted_at', null)
 
   if (status && status !== 'all') {
     query = query.eq('status', status)
@@ -481,7 +477,6 @@ async function handleGetAnalytics(
       .from('expenses')
       .select('*')
       .eq('user_id', userId)
-      .is('deleted_at', null)
 
     if (error) {
       logger.error('Expenses analytics error', { error })
