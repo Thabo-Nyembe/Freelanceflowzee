@@ -5,7 +5,7 @@ import { createBrowserClient } from '@supabase/ssr'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ThemeProvider } from '../theme-provider'
-import { Toaster } from '../ui/toaster'
+// Removed duplicate Toaster - using Sonner in layout.tsx instead
 import { ThemeProvider as NextThemeProvider } from 'next-themes'
 import { createQueryClient } from '@/lib/query-client'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -52,7 +52,6 @@ export function Providers({ children }: ProvidersProps) {
         <NextThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ThemeProvider>
             {children}
-            <Toaster />
           </ThemeProvider>
         </NextThemeProvider>
         {process.env.NODE_ENV === 'development' && (

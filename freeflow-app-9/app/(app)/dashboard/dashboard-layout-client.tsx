@@ -7,6 +7,7 @@ import { ErrorBoundary } from '@/components/error-boundary'
 import { OnboardingProvider } from '@/components/onboarding/onboarding-provider'
 import { EngagementProvider } from '@/components/engagement/engagement-provider'
 import { AnnouncementsBanner } from '@/components/dashboard/announcements-banner'
+import { OnlinePeopleToggle } from '@/components/realtime/online-people-toggle'
 
 interface UserData {
   id: string
@@ -36,6 +37,7 @@ export default function DashboardLayoutClient({
             <div className="lg:hidden sticky top-0 z-40 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
               <div className="flex items-center justify-between">
                 <h1 className="text-xl font-semibold text-black dark:text-white kazi-headline">KAZI</h1>
+                <OnlinePeopleToggle position="header" />
               </div>
             </div>
 

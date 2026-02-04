@@ -187,41 +187,7 @@ export function NotificationBell({
     onNewNotification: handleNewNotification
   })
 
-  // Additional direct Supabase Realtime subscription for toast notifications
-  // This ensures toasts appear even when the hook's internal state management delays
-  useEffect(() => {
-    if (!showToastOnNew) return
-
-    const channel = supabase
-      .channel('notifications-toast')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications' },
-        (payload) => {
-          const notification = payload.new as Notification
-          if (notification.is_silent) return
-
-          const toastFn = notification.notification_type === 'error' ? toast.error
-            : notification.notification_type === 'warning' ? toast.warning
-            : notification.notification_type === 'success' ? toast.success
-            : toast.info
-
-          toastFn(notification.title, {
-            description: notification.message,
-            action: notification.action_url ? {
-              label: notification.action_label || 'View',
-              onClick: () => window.open(notification.action_url!, '_blank')
-            } : undefined,
-            duration: notification.priority === 'critical' || notification.priority === 'urgent' ? 10000 : 5000
-          })
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [showToastOnNew, supabase])
+  // Removed duplicate Supabase subscription - notifications handled by useNotifications hook with onNewNotification callback
 
   const handleMarkAllAsRead = useCallback(async () => {
     const success = await markAllAsRead()

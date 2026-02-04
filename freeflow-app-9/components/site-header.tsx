@@ -11,6 +11,7 @@ import GlobalSearch from '@/components/global-search'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { GlowEffect } from '@/components/ui/glow-effect'
 import { BorderTrail } from '@/components/ui/border-trail'
+import { OnlinePeopleToggle } from '@/components/realtime/online-people-toggle'
 import { cn } from '@/lib/utils'
 
 const mainNav = [
@@ -133,6 +134,7 @@ export function SiteHeader({ user }: SiteHeaderProps) {
           </div>
           <nav className="flex items-center space-x-2">
             <PremiumThemeToggle />
+            {user && <OnlinePeopleToggle position="header" />}
             {user ? (
               <UserButton user={user} />
             ) : (
