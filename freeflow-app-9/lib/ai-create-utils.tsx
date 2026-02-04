@@ -4,9 +4,9 @@
  * Integrates with Universal Pinpoint System for world-class A+++ capabilities
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AICreateUtils')
+const logger = createSimpleLogger('AICreateUtils')
 
 // ============================================================================
 // TYPE DEFINITIONS

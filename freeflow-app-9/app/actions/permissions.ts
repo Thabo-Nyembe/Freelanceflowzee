@@ -3,10 +3,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { hasPermission } from '@/lib/auth/permissions'
 
-const logger = createFeatureLogger('permissions-actions')
+const logger = createSimpleLogger('permissions-actions')
 
 export async function createRole(data: any): Promise<ActionResult<any>> {
   try {

@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   Dialog,
@@ -55,7 +55,7 @@ import type {
   PaymentMethodType
 } from '@/lib/financial-queries'
 
-const logger = createFeatureLogger('TransactionsPage')
+const logger = createSimpleLogger('TransactionsPage')
 
 // Map database transaction to UI transaction type
 function mapDbTransactionToUi(dbTxn: FinancialTransaction): Transaction {

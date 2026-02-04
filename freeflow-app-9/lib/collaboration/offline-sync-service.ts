@@ -9,7 +9,7 @@
  * - Bandwidth-optimized delta compression
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
   CRDTOperation,
   VectorClock,
@@ -17,7 +17,7 @@ import {
   isConcurrent
 } from './crdt-service'
 
-const logger = createFeatureLogger('OfflineSyncService')
+const logger = createSimpleLogger('OfflineSyncService')
 
 // ============================================================================
 // Types

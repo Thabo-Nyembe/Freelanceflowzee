@@ -12,9 +12,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import crypto from 'crypto'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('customer-support-api')
+const logger = createSimpleLogger('customer-support-api')
 
 // ============================================================================
 // GET - List Tickets / Get Single Ticket

@@ -3,9 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('knowledge-base-actions')
+const logger = createSimpleLogger('knowledge-base-actions')
 
 export async function createArticle(data: any): Promise<ActionResult<any>> {
   try {

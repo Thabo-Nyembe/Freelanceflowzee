@@ -22,11 +22,11 @@ import { Shield, AlertCircle, Download, Key, Eye, EyeOff, AlertTriangle } from '
 import { SecuritySettings, defaultSecurity } from '@/lib/settings-utils'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 
-const logger = createFeatureLogger('Settings:Security')
+const logger = createSimpleLogger('Settings:Security')
 
 export default function SecurityPage() {
   const { userId, loading: userLoading } = useCurrentUser()

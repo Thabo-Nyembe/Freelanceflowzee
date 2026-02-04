@@ -11,7 +11,7 @@ import {
   JournalEntry,
 } from '@/lib/accounting/double-entry';
 import { z } from 'zod';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -47,7 +47,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('accounting-api');
+const logger = createSimpleLogger('accounting-api');
 
 // ============================================================================
 // SCHEMAS

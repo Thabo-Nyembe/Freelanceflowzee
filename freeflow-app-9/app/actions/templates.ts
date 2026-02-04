@@ -3,10 +3,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, type ActionResult, ErrorCode } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { uuidSchema } from '@/lib/validations'
 
-const logger = createFeatureLogger('templates-actions')
+const logger = createSimpleLogger('templates-actions')
 
 export interface CreateTemplateInput {
   name: string

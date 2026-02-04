@@ -13,9 +13,9 @@
  * - Real-time analytics tracking
  */
 
-import { createFeatureLogger } from './logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AIAssistantUtils')
+const logger = createSimpleLogger('AIAssistantUtils')
 
 // ============================================
 // TYPES & INTERFACES

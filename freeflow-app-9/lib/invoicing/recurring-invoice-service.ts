@@ -5,7 +5,7 @@
  * Handles subscription billing, schedule management, and invoice creation
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import { getEmailService } from '@/lib/email/email-service'
 import { sendRecurringInvoiceCreated } from '@/lib/email/email-templates'
@@ -18,7 +18,7 @@ import type {
 
 const emailService = getEmailService()
 
-const logger = createFeatureLogger('RecurringInvoiceService')
+const logger = createSimpleLogger('RecurringInvoiceService')
 
 // ============================================================================
 // Types

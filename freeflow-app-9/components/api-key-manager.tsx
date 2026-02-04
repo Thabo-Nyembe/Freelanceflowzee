@@ -21,9 +21,9 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('APIKeyManager')
+const logger = createSimpleLogger('APIKeyManager')
 
 // ============================================================================
 // API KEY CONFIGURATIONS

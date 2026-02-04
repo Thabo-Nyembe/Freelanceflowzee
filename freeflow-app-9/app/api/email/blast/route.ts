@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getEmailService, EmailMessage } from '@/lib/email/email-service'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 
 // ============================================================================
@@ -44,7 +44,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-EmailBlast')
+const logger = createSimpleLogger('API-EmailBlast')
 
 export interface EmailBlastRequest {
   subject: string

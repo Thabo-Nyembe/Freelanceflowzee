@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { collaborationService } from '@/lib/collaboration/collaboration-service';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -42,7 +42,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('collaboration-sessions');
+const logger = createSimpleLogger('collaboration-sessions');
 
 // =====================================================
 // GET - List sessions, get session details, participants

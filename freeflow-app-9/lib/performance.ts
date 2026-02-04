@@ -1,7 +1,7 @@
 import type { Metric } from 'web-vitals'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Performance')
+const logger = createSimpleLogger('Performance')
 
 // Web Vitals metric type (using the library's type)
 export type WebVitalMetric = Metric

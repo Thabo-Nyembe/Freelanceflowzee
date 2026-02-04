@@ -47,7 +47,7 @@ import {
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // Supabase Hooks
@@ -64,7 +64,7 @@ import {
   formatCurrency
 } from '@/lib/client-zone-utils'
 
-const logger = createFeatureLogger('ProjectsV2')
+const logger = createSimpleLogger('ProjectsV2')
 
 
 

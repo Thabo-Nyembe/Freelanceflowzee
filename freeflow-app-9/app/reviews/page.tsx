@@ -5,9 +5,9 @@ import ReviewManagementDashboard from '@/components/video/review-management-dash
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { InfoIcon } from 'lucide-react';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('Reviews');
+const logger = createSimpleLogger('Reviews');
 
 export const metadata: Metadata = {
   title: 'Client Review Management | KAZI',

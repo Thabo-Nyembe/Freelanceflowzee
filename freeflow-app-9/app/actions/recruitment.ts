@@ -3,11 +3,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { uuidSchema } from '@/lib/validations'
 import type { Database } from '@/types/supabase'
 
-const logger = createFeatureLogger('recruitment')
+const logger = createSimpleLogger('recruitment')
 
 // Type definitions
 type JobPosting = Database['public']['Tables']['job_postings']['Row']

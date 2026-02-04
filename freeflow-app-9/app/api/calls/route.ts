@@ -17,7 +17,7 @@ import {
   CreateCallOptions,
   JoinCallOptions,
 } from '@/lib/livekit/voice-video-service';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -53,7 +53,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('calls-api');
+const logger = createSimpleLogger('calls-api');
 
 // ============================================================================
 // POST - Call Actions

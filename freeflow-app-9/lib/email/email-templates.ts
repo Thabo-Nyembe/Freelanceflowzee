@@ -6,9 +6,9 @@
  */
 
 import { getEmailService } from './email-service'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('EmailTemplates')
+const logger = createSimpleLogger('EmailTemplates')
 const emailService = getEmailService()
 
 // ============================================================================

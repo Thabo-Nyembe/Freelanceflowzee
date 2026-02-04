@@ -1,6 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { createProject as createProjectAction } from '@/app/actions/projects';
 import { createFile as createFileAction } from '@/app/actions/files';
 import { createEscrowDeposit } from '@/lib/escrow-queries';
@@ -8,7 +8,7 @@ import { getAnalyticsOverview, getAnalyticsMetrics } from '@/lib/analytics-queri
 import { createAsset as createAIAsset, createGeneration } from '@/lib/ai-create-queries';
 import { createClient } from '@/lib/supabase/client';
 
-const logger = createFeatureLogger('AI-Tools');
+const logger = createSimpleLogger('AI-Tools');
 
 // 1. Project Creation Tool
 export const createProjectTool = tool({

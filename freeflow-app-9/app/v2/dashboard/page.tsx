@@ -62,7 +62,7 @@ import { BorderTrail } from '@/components/ui/border-trail'
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
 // AI FEATURES
@@ -75,7 +75,7 @@ import { NewUserChecklist } from '@/components/onboarding/new-user-checklist'
 import { useNewUserDetection } from '@/lib/hooks/use-new-user-detection'
 
 // Initialize logger
-const logger = createFeatureLogger('Dashboard')
+const logger = createSimpleLogger('Dashboard')
 
 /*
  * A+++ SEO Note: This is a client component, so metadata must be set in parent layout.

@@ -5,9 +5,9 @@
  * traffic analysis, ROI calculations, and business intelligence insights.
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AdminAnalyticsUtils')
+const logger = createSimpleLogger('AdminAnalyticsUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

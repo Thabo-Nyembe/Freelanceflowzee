@@ -3,7 +3,7 @@ import { writeFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
 import { createClient } from '@/lib/supabase/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { nanoid } from 'nanoid'
 
 // ============================================================================
@@ -40,7 +40,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-ScreenRecordings')
+const logger = createSimpleLogger('API-ScreenRecordings')
 
 /**
  * Screen Recordings API

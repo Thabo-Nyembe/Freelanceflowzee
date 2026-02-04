@@ -6,13 +6,13 @@
  */
 
 import OpenAI from 'openai'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { extractAudio } from './ffmpeg-processor'
 import fs from 'fs/promises'
 import { createReadStream, existsSync } from 'fs'
 import { runtimeFilePath, basename, extname } from '@/lib/utils/runtime-path'
 
-const logger = createFeatureLogger('CaptionService')
+const logger = createSimpleLogger('CaptionService')
 
 // Initialize OpenAI client
 const openai = new OpenAI({

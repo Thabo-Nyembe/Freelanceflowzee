@@ -108,7 +108,7 @@ import { EnhancedBreadcrumb } from '@/components/ui/enhanced-breadcrumb'
 import { EnhancedSearch } from '@/components/ui/enhanced-search'
 import { ContextualTooltip, HelpTooltip } from '@/components/ui/enhanced-contextual-tooltips'
 import { AnimatedElement, AnimatedCounter } from '@/components/ui/enhanced-micro-animations'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import {
   Sparkles,
@@ -132,7 +132,7 @@ import {
   Loader2
 } from 'lucide-react'
 
-const logger = createFeatureLogger('Advanced-Micro-Features')
+const logger = createSimpleLogger('Advanced-Micro-Features')
 
 
 // ============================================================================

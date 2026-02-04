@@ -106,12 +106,12 @@ import {
   FileText
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 
-const logger = createFeatureLogger('CollaborationDemo')
+const logger = createSimpleLogger('CollaborationDemo')
 
 // Mock current user
 const CURRENT_USER = {

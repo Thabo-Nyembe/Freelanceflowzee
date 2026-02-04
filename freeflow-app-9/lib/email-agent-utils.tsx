@@ -5,9 +5,9 @@
  * automatic responses, quotation generation, booking management, and approval workflows.
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('EmailAgentUtils')
+const logger = createSimpleLogger('EmailAgentUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

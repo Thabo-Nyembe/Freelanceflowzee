@@ -6,9 +6,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('events-actions')
+const logger = createSimpleLogger('events-actions')
 
 export type EventType = 'conference' | 'workshop' | 'meetup' | 'training' | 'seminar' | 'networking' | 'launch' | 'other'
 export type EventStatus = 'upcoming' | 'ongoing' | 'completed' | 'cancelled' | 'postponed'

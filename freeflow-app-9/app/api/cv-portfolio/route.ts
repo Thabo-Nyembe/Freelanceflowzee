@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 // ============================================================================
@@ -36,7 +36,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-CVPortfolio');
+const logger = createSimpleLogger('API-CVPortfolio');
 
 /**
  * CV Portfolio API Route

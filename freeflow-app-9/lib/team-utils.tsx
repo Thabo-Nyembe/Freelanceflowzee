@@ -13,9 +13,9 @@
  * - Team analytics and insights
  */
 
-import { createFeatureLogger } from './logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('TeamUtils')
+const logger = createSimpleLogger('TeamUtils')
 
 // ============================================
 // TYPES & INTERFACES

@@ -15,7 +15,7 @@ import { toast } from 'sonner'
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // AI FEATURES
 import { AIInsightsPanel } from '@/components/ai/ai-insights-panel'
@@ -59,7 +59,7 @@ import { TextShimmer as TextShimmerComponent } from '@/components/ui/text-shimme
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 
 // Initialize logger
-const logger = createFeatureLogger('MyDay-Today')
+const logger = createSimpleLogger('MyDay-Today')
 
 export default function MyDayTodayPage() {
   // REAL USER AUTH & AI DATA

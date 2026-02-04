@@ -2,10 +2,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import type { Certification } from '@/lib/hooks/use-certifications'
 
-const logger = createFeatureLogger('certifications-actions')
+const logger = createSimpleLogger('certifications-actions')
 
 export async function createCertification(data: Partial<Certification>): Promise<ActionResult<Certification>> {
   try {

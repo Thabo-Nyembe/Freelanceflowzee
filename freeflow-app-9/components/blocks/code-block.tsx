@@ -14,10 +14,10 @@ import { Copy, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from '@/components/ui/enhanced-toast'
 
-const logger = createFeatureLogger('CodeBlock')
+const logger = createSimpleLogger('CodeBlock')
 
 interface CodeBlockProps {
   id: string

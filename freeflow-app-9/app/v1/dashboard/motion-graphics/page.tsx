@@ -35,11 +35,11 @@ import {
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('MotionGraphicsPage')
+const logger = createSimpleLogger('MotionGraphicsPage')
 
 type ViewMode = 'projects' | 'editor' | 'templates' | 'assets'
 type EditorPanel = 'layers' | 'timeline' | 'properties' | 'effects'

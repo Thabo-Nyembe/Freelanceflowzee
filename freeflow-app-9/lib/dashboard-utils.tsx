@@ -3,9 +3,9 @@
  * Comprehensive utilities for central dashboard overview and analytics
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Dashboard-Utils')
+const logger = createSimpleLogger('Dashboard-Utils')
 
 // ============================================================================
 // TYPESCRIPT INTERFACES

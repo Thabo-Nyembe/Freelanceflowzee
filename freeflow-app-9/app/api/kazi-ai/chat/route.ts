@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { kaziAI, AITaskType } from '@/lib/ai/kazi-ai-router'
 import { investorAnalytics } from '@/lib/ai/investor-analytics'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -42,7 +42,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('KaziAI-API')
+const logger = createSimpleLogger('KaziAI-API')
 
 export async function POST(request: NextRequest) {
   try {

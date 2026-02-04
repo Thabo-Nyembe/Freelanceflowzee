@@ -2,11 +2,11 @@
 // Handles transactions, insights, goals, and financial analytics
 
 import { createClient } from '@/lib/supabase/client'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import type { DatabaseError } from '@/lib/types/database'
 import { toDbError } from '@/lib/types/database'
 
-const logger = createFeatureLogger('financial')
+const logger = createSimpleLogger('financial')
 
 // ============================================================================
 // Types

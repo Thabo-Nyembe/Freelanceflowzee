@@ -21,7 +21,7 @@ export const dynamic = 'force-dynamic';
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -75,7 +75,7 @@ import {
   useCalendarStats
 } from '@/lib/api-clients'
 
-const logger = createFeatureLogger('Bookings')
+const logger = createSimpleLogger('Bookings')
 
 interface Booking {
   id: string

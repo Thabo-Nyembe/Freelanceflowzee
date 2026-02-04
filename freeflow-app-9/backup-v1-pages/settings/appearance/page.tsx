@@ -11,11 +11,11 @@ import { Sun, Moon, Monitor } from 'lucide-react'
 import { AppearanceSettings, defaultAppearance } from '@/lib/settings-utils'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 
-const logger = createFeatureLogger('Settings:Appearance')
+const logger = createSimpleLogger('Settings:Appearance')
 
 export default function AppearancePage() {
   const { userId, loading: userLoading } = useCurrentUser()

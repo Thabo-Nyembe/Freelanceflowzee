@@ -3,9 +3,9 @@
  * Comprehensive utilities for design and prototyping workspace
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Canvas-Utils')
+const logger = createSimpleLogger('Canvas-Utils')
 
 // ============================================================================
 // TYPESCRIPT INTERFACES

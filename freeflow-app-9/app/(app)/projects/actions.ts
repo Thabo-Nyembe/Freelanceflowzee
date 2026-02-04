@@ -1,8 +1,8 @@
 'use server'
 
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('Projects-Actions');
+const logger = createSimpleLogger('Projects-Actions');
 
 export async function searchProjects(query: string) {
   // Mock implementation for now

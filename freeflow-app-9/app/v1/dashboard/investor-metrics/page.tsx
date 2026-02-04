@@ -24,13 +24,13 @@ import {
 } from 'lucide-react'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // AI FEATURES & DATABASE
 import { getPlatformMetrics } from '@/lib/supabase/ai-features'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('InvestorMetrics')
+const logger = createSimpleLogger('InvestorMetrics')
 
 // Helper function to calculate overall health score
 function calculateHealthScore(metrics: any): number {

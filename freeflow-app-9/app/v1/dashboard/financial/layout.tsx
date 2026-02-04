@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { NumberFlow } from '@/components/ui/number-flow'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
   Wallet,
   DollarSign,
@@ -29,7 +29,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 
-const logger = createFeatureLogger('FinancialLayout')
+const logger = createSimpleLogger('FinancialLayout')
 
 interface Tab {
   name: string

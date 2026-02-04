@@ -13,10 +13,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { emailService } from '@/lib/email/email-service'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import crypto from 'crypto'
 
-const logger = createFeatureLogger('EmailVerification')
+const logger = createSimpleLogger('EmailVerification')
 
 // Types
 export interface VerificationToken {

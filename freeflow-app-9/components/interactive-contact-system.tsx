@@ -42,10 +42,10 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from '@/components/ui/enhanced-toast'
 
-const logger = createFeatureLogger('ContactSystem')
+const logger = createSimpleLogger('ContactSystem')
 
 // types
 type ContactMethod = 'email' | 'phone' | 'scheduler' | 'form';

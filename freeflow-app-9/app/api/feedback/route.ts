@@ -3,9 +3,9 @@ import { createClient } from "@/lib/supabase/server"
 import { z } from "zod"
 import { PDFDocument, StandardFonts } from "pdf-lib"
 import { Parser } from "json2csv"
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('API-Feedback')
+const logger = createSimpleLogger('API-Feedback')
 
 // Rate limiting setup
 import { Ratelimit } from "@upstash/ratelimit"

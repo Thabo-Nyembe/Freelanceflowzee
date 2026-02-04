@@ -155,10 +155,10 @@ function showMigrationGuide(filePath, featureName) {
   if (!analysis.hasLogger) {
     log('\n1️⃣  Add logger import at the top:', 'cyan');
     log(`
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // Initialize logger
-const logger = createFeatureLogger('${featureName}')
+const logger = createSimpleLogger('${featureName}')
 `, 'blue');
   }
 

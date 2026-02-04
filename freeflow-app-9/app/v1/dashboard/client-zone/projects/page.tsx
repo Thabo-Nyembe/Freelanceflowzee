@@ -37,7 +37,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // CLIENT ZONE UTILITIES
@@ -48,7 +48,7 @@ import {
   formatCurrency
 } from '@/lib/client-zone-utils'
 
-const logger = createFeatureLogger('ClientZoneProjects')
+const logger = createSimpleLogger('ClientZoneProjects')
 
 // ============================================================================
 // MAIN COMPONENT

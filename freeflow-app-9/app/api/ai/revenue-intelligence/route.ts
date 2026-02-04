@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { revenueIntelligenceEngine, type RevenueData } from '@/lib/ai/revenue-intelligence-engine';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -42,7 +42,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('ai-revenue-intelligence');
+const logger = createSimpleLogger('ai-revenue-intelligence');
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;

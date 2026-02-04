@@ -7,9 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth.config';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('dashboard');
+const logger = createSimpleLogger('dashboard');
 
 // Demo user for unauthenticated access
 // Demo mode can be enabled via ?demo=true query parameter

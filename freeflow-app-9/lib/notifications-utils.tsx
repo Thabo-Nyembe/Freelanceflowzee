@@ -5,9 +5,9 @@
  * priority system, and multi-channel delivery (email, push, SMS, in-app).
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('NotificationsUtils')
+const logger = createSimpleLogger('NotificationsUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

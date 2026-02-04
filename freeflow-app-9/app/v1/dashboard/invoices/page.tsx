@@ -43,7 +43,7 @@ import {
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { formatCurrency, getStatusColor } from '@/lib/client-zone-utils'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
@@ -63,7 +63,7 @@ import {
   useInvoiceStats
 } from '@/lib/api-clients'
 
-const logger = createFeatureLogger('ClientZoneInvoices')
+const logger = createSimpleLogger('ClientZoneInvoices')
 
 // Type Definitions
 interface InvoiceItem {

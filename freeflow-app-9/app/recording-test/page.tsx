@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import VideoMessageRecorder from '@/components/video/VideoMessageRecorder'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
-const logger = createFeatureLogger('Recording-Test')
+const logger = createSimpleLogger('Recording-Test')
 
 export default function RecordingTestPage() {
   // A+++ STATE MANAGEMENT

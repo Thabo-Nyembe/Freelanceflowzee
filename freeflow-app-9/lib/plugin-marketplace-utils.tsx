@@ -14,9 +14,9 @@
  * - Installation analytics
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('PluginMarketplaceUtils')
+const logger = createSimpleLogger('PluginMarketplaceUtils')
 
 // ========================================
 // TYPE DEFINITIONS

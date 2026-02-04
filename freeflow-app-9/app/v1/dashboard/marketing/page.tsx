@@ -7,7 +7,7 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -53,7 +53,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
-const logger = createFeatureLogger('admin-marketing')
+const logger = createSimpleLogger('admin-marketing')
 
 export default function MarketingPage() {
   const router = useRouter()

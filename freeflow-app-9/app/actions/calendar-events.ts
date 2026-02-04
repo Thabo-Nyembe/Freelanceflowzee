@@ -3,11 +3,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, type ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { uuidSchema } from '@/lib/validations'
 import type { CalendarEvent } from '@/lib/hooks/use-calendar-events'
 
-const logger = createFeatureLogger('calendar-events')
+const logger = createSimpleLogger('calendar-events')
 
 type EventStatus = 'tentative' | 'confirmed' | 'cancelled' | 'rescheduled' | 'completed'
 type RSVPResponse = 'accepted' | 'declined' | 'tentative'

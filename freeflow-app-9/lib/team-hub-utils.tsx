@@ -14,9 +14,9 @@
  * - Communication tools integration
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('TeamHubUtils')
+const logger = createSimpleLogger('TeamHubUtils')
 
 // ========================================
 // TYPE DEFINITIONS

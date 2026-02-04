@@ -3,11 +3,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, type ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { uuidSchema } from '@/lib/validations'
 import type { TimeEntry } from '@/lib/hooks/use-time-tracking'
 
-const logger = createFeatureLogger('time-tracking')
+const logger = createSimpleLogger('time-tracking')
 
 interface StartTimerInput {
   title: string

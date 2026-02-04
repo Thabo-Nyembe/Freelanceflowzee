@@ -3,10 +3,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import type { AutomationWorkflow } from '@/lib/hooks/use-automations'
 
-const logger = createFeatureLogger('automations-actions')
+const logger = createSimpleLogger('automations-actions')
 
 export async function createWorkflow(data: Partial<AutomationWorkflow>): Promise<ActionResult<any>> {
   try {

@@ -21,7 +21,7 @@ import {
   verifyAccessToken,
   generateAccessToken
 } from '@/lib/security/file-password'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -57,7 +57,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('files-download')
+const logger = createSimpleLogger('files-download')
 
 export interface DownloadRequest {
   password?: string

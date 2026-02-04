@@ -43,9 +43,9 @@ import {
   Users
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('VideoCall')
+const logger = createSimpleLogger('VideoCall')
 
 export interface VideoCallProps {
   roomId: string

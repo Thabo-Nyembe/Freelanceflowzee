@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Stripe')
+const logger = createSimpleLogger('Stripe')
 
 // Validate Stripe key is configured
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY

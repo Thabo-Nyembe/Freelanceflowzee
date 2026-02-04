@@ -4,9 +4,9 @@
  */
 
 import { kaziAI } from './kazi-ai-router'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('BusinessIntelligence')
+const logger = createSimpleLogger('BusinessIntelligence')
 
 export interface ProjectInsight {
   category: 'profitability' | 'risk' | 'opportunity' | 'warning'

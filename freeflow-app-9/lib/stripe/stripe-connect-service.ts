@@ -13,9 +13,9 @@
  */
 
 import Stripe from 'stripe'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('StripeConnect')
+const logger = createSimpleLogger('StripeConnect')
 
 // Types
 export interface CreateMarketplacePaymentParams {

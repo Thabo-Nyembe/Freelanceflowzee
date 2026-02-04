@@ -91,7 +91,7 @@ import {
 import { format, formatDistanceToNow, isAfter, isBefore, isToday, addDays } from 'date-fns'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // TanStack Query hooks for real database operations
@@ -108,7 +108,7 @@ import {
   type TaskFilters,
 } from '@/lib/api-clients'
 
-const logger = createFeatureLogger('TasksClient')
+const logger = createSimpleLogger('TasksClient')
 
 // Types
 type TaskStatus = 'todo' | 'in_progress' | 'in_review' | 'completed' | 'cancelled'

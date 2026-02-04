@@ -6,12 +6,12 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import type { Metric, Insight, Goal, FunnelStage, TimeRange } from '@/lib/analytics-types'
 import type { DatabaseError } from '@/lib/types/database'
 import { toDbError } from '@/lib/types/database'
 
-const logger = createFeatureLogger('AnalyticsQueries')
+const logger = createSimpleLogger('AnalyticsQueries')
 
 // ============================================================================
 // TYPES

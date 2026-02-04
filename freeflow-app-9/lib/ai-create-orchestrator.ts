@@ -11,9 +11,9 @@
  * - Advanced file analysis and processing
  */
 
-import { createFeatureLogger } from './logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AIOrchestrator')
+const logger = createSimpleLogger('AIOrchestrator')
 
 // ============================================================================
 // TYPES & INTERFACES

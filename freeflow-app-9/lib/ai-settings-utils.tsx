@@ -5,9 +5,9 @@
 // usage tracking, rate limiting, and cost monitoring
 // ============================================================================
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AISettingsUtils')
+const logger = createSimpleLogger('AISettingsUtils')
 
 // ============================================================================
 // TYPESCRIPT TYPES & INTERFACES

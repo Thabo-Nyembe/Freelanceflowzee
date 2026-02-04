@@ -50,9 +50,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AIEnhancedInput')
+const logger = createSimpleLogger('AIEnhancedInput')
 
 // ==================== TYPES ====================
 

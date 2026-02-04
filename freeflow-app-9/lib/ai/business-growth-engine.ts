@@ -5,9 +5,9 @@
  */
 
 import { kaziAI } from './kazi-ai-router'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('BusinessGrowthEngine')
+const logger = createSimpleLogger('BusinessGrowthEngine')
 
 // Specialized prompt templates for business growth
 export const GROWTH_PROMPTS = {

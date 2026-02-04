@@ -37,10 +37,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import EnhancedCalendarBooking from '@/components/booking/enhanced-calendar-booking'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
-const logger = createFeatureLogger('Booking')
+const logger = createSimpleLogger('Booking')
 
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'

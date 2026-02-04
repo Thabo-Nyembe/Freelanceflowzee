@@ -4,9 +4,9 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('ThumbnailGenerator');
+const logger = createSimpleLogger('ThumbnailGenerator');
 
 export interface ThumbnailOptions {
   width?: number;

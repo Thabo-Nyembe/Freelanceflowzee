@@ -42,10 +42,10 @@ import {
 } from '@/components/ui/popover'
 import { Circle, Users, ChevronDown } from 'lucide-react'
 import { useOnlinePresence } from '@/lib/messages-realtime'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
-const logger = createFeatureLogger('PresenceIndicator')
+const logger = createSimpleLogger('PresenceIndicator')
 
 // ==================== TYPES ====================
 

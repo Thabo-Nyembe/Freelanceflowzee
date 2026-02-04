@@ -10,12 +10,12 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { User, Mail, Phone, MapPin, Briefcase, Calendar, Settings, Edit, Camera } from 'lucide-react'
 
-const logger = createFeatureLogger('ProfilePage')
+const logger = createSimpleLogger('ProfilePage')
 
 export default function ProfilePage() {
   const router = useRouter()

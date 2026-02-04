@@ -3,10 +3,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { hasPermission } from '@/lib/auth/permissions'
 
-const logger = createFeatureLogger('security-actions')
+const logger = createSimpleLogger('security-actions')
 
 // Safe JSON parse helper
 function safeJsonParse<T>(value: string | null, fallback: T): T {

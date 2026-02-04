@@ -14,9 +14,9 @@ import { ProjectIntelligence } from '@/components/ai/project-intelligence'
 import { PricingIntelligence } from '@/components/ai/pricing-intelligence'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AIBusinessAdvisor')
+const logger = createSimpleLogger('AIBusinessAdvisor')
 
 export default function AIBusinessAdvisorPage() {
   const { userId, loading: userLoading } = useCurrentUser()

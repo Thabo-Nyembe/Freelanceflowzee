@@ -33,10 +33,10 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // Initialize feature logger
-const logger = createFeatureLogger('Reports')
+const logger = createSimpleLogger('Reports')
 
 // UI Components
 import { Button } from '@/components/ui/button'

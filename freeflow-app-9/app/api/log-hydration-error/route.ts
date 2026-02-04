@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -46,7 +46,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
  * - Severity classification
  */
 
-const logger = createFeatureLogger('HydrationErrorLog')
+const logger = createSimpleLogger('HydrationErrorLog')
 
 interface HydrationError {
   message: string

@@ -57,10 +57,10 @@ import { usePresence, useBroadcast } from '@/hooks/use-realtime'
 
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { OnboardingTourLauncher } from '@/components/onboarding-tour-launcher'
 
-const logger = createFeatureLogger('AdvancedFeaturesDemo')
+const logger = createSimpleLogger('AdvancedFeaturesDemo')
 
 
 // ============================================================================

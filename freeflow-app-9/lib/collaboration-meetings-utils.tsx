@@ -5,9 +5,9 @@
 // recording, participant controls, and collaboration features
 // ============================================================================
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('CollaborationMeetingsUtils')
+const logger = createSimpleLogger('CollaborationMeetingsUtils')
 
 // ============================================================================
 // TYPESCRIPT TYPES & INTERFACES

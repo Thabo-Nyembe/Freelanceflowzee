@@ -8,7 +8,7 @@
 // BullMQ types only - not using the actual queue in serverless
 // import { Queue, Worker, Job, QueueEvents } from 'bullmq'
 import { Redis } from '@upstash/redis'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
   exportVideo,
   generateThumbnails,
@@ -21,7 +21,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import path from 'path'
 
-const logger = createFeatureLogger('VideoQueue')
+const logger = createSimpleLogger('VideoQueue')
 
 // ============================================================================
 // Types

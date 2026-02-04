@@ -22,7 +22,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
   Palette,
   Share2,
@@ -54,7 +54,7 @@ import {
   Sparkles
 } from 'lucide-react'
 
-const logger = createFeatureLogger('CanvasCollaboration')
+const logger = createSimpleLogger('CanvasCollaboration')
 
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'

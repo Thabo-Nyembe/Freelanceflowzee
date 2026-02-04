@@ -10,9 +10,9 @@ import { geolocation } from '@vercel/edge';
  */
 // import { withAxiom } from 'next-axiom';
 import { nanoid } from 'nanoid';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('Middleware');
+const logger = createSimpleLogger('Middleware');
 
 // ==========================================================
 // TYPES AND INTERFACES

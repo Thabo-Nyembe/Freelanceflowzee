@@ -38,10 +38,10 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
-const logger = createFeatureLogger('ReferralLoyalty')
+const logger = createSimpleLogger('ReferralLoyalty')
 
 // ============================================================================
 // TYPES

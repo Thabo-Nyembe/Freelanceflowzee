@@ -6,7 +6,7 @@
  */
 
 import { NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { checkFFmpegAvailability } from '@/lib/video/ffmpeg-processor'
 import { checkWhisperAvailability } from '@/lib/video/caption-service'
 
@@ -44,7 +44,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-Video')
+const logger = createSimpleLogger('API-Video')
 
 /**
  * GET /api/video

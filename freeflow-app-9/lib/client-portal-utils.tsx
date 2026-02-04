@@ -3,9 +3,9 @@
  * Comprehensive utilities for client relationship management and portal access
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Client-Portal-Utils')
+const logger = createSimpleLogger('Client-Portal-Utils')
 
 // ============================================================================
 // TYPESCRIPT INTERFACES

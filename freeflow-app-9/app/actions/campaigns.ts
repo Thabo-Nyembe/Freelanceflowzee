@@ -3,10 +3,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import type { Campaign } from '@/lib/hooks/use-campaigns'
 
-const logger = createFeatureLogger('campaigns-actions')
+const logger = createSimpleLogger('campaigns-actions')
 
 export async function createCampaign(data: Partial<Campaign>): Promise<ActionResult<any>> {
   try {

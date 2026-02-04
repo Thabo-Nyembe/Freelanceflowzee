@@ -3,9 +3,9 @@
  * Comprehensive utilities for community platform and social networking
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Community-Hub-Utils')
+const logger = createSimpleLogger('Community-Hub-Utils')
 
 // ============================================================================
 // TYPESCRIPT INTERFACES

@@ -85,13 +85,13 @@ import {
 // A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
 
 // Supabase hooks for real data
 import { useProjects, Project as SupabaseProject } from '@/lib/hooks/use-projects'
 
-const logger = createFeatureLogger('ProjectsClientV1')
+const logger = createSimpleLogger('ProjectsClientV1')
 
 // Types
 type ProjectStatus = 'pending' | 'in-progress' | 'review' | 'completed' | 'planning' | 'active' | 'on_hold' | 'cancelled'

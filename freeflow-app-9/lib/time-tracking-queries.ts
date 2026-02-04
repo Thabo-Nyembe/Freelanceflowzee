@@ -6,10 +6,10 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
-const logger = createFeatureLogger('TimeTrackingQueries')
+const logger = createSimpleLogger('TimeTrackingQueries')
 
 // Types matching the database schema
 export type EntryStatus = 'running' | 'paused' | 'stopped' | 'completed'

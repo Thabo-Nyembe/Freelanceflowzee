@@ -17,9 +17,9 @@ import {
   Play, Video, FileVideo, Music, Image as ImageIcon,
   Type, Sparkles, Award, TrendingUp, Clock
 } from 'lucide-react'
-import { createFeatureLogger } from './logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('VideoStudioUtils')
+const logger = createSimpleLogger('VideoStudioUtils')
 
 // ========================================
 // TYPE DEFINITIONS

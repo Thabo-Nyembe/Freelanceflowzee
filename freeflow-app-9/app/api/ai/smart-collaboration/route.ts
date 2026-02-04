@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { SmartCollaborationAI } from '@/lib/ai/smart-collaboration-ai';
 import { WebSocketServer } from '@/lib/websocket-server';
 import { rateLimit } from '@/lib/rate-limit';
@@ -46,7 +46,7 @@ type SmartCollaborationFeatureType = 'suggestions' | 'workload' | 'scheduling' |
 type CollaborationContextType = 'project' | 'team' | 'task' | 'document';
 type DocumentType = 'contract' | 'proposal' | 'report' | 'policy' | 'invoice' | 'presentation';
 
-const logger = createFeatureLogger('API-SmartCollaboration')
+const logger = createSimpleLogger('API-SmartCollaboration')
 
 // Environment configuration
 const API_SECRET_KEY = process.env.API_SECRET_KEY || '';

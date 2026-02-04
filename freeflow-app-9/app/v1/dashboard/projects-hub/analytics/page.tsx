@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 // PRODUCTION LOGGER
-import { createFeatureLogger } from '@/lib/logger'
-const logger = createFeatureLogger('ProjectsHub:Analytics')
+import { createSimpleLogger } from '@/lib/simple-logger'
+const logger = createSimpleLogger('ProjectsHub:Analytics')
 
 // A+++ Utilities
 import { CardSkeleton } from '@/components/ui/loading-skeleton'

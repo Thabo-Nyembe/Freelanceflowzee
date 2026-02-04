@@ -6,11 +6,11 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import { createFeatureLogger } from './logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const supabase = createClient()
-const logger = createFeatureLogger('ProjectsHubQueries')
+const logger = createSimpleLogger('ProjectsHubQueries')
 
 // ============================================================================
 // TYPE DEFINITIONS

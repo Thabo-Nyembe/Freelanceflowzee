@@ -11,7 +11,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import type {
   User,
   RoomUser,
@@ -20,7 +20,7 @@ import type {
   ChatMessage
 } from '@/lib/websocket/socket-server'
 
-const logger = createFeatureLogger('WebSocketClient')
+const logger = createSimpleLogger('WebSocketClient')
 
 export interface UseWebSocketOptions {
   user?: User

@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('API-Messages');
+const logger = createSimpleLogger('API-Messages');
 
 // Demo mode constants
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';

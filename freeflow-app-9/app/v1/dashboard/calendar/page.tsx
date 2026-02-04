@@ -62,7 +62,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // 🚀 NEW: TanStack Query hooks replace ALL manual fetch() calls!
 import {
@@ -73,7 +73,7 @@ import {
   useCalendarStats
 } from '@/lib/api-clients'
 
-const logger = createFeatureLogger('ClientZoneCalendar')
+const logger = createSimpleLogger('ClientZoneCalendar')
 
 // Types
 interface EventFormData {

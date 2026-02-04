@@ -7,14 +7,14 @@ import EnhancedAIChat from '@/components/ai/enhanced-ai-chat'
 import SimpleAIChat from '@/components/ai/simple-ai-chat'
 import { AICreateStudio } from '@/components/ai/ai-create-studio'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
-const logger = createFeatureLogger('AI-Assistant')
+const logger = createSimpleLogger('AI-Assistant')
 
 export default function AIAssistantPage() {
   // A+++ STATE MANAGEMENT

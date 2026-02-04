@@ -14,9 +14,9 @@
  * - Dependency tracking
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('APlusShowcaseUtils')
+const logger = createSimpleLogger('APlusShowcaseUtils')
 
 // ========================================
 // TYPE DEFINITIONS

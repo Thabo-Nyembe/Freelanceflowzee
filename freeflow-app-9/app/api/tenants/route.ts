@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { sendTeamInvite } from '@/lib/email/email-templates';
 import { processDataExportAsync } from '@/lib/jobs/data-export-processor';
 
@@ -44,7 +44,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('tenants-api');
+const logger = createSimpleLogger('tenants-api');
 
 // =====================================================
 // VALIDATION SCHEMAS

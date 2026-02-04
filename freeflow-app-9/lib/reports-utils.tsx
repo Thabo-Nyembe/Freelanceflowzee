@@ -15,9 +15,9 @@
  * - Business insights and trends
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('ReportsUtils')
+const logger = createSimpleLogger('ReportsUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

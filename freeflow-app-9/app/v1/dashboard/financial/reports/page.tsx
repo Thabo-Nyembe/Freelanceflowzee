@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   PieChart,
@@ -28,7 +28,7 @@ import {
   Activity
 } from 'lucide-react'
 
-const logger = createFeatureLogger('ReportsPage')
+const logger = createSimpleLogger('ReportsPage')
 
 interface ReportTemplate {
   id: string

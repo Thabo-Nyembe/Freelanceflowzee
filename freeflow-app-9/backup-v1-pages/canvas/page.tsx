@@ -56,7 +56,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   Monitor,
@@ -82,7 +82,7 @@ import {
   TrendingUp
 } from 'lucide-react'
 
-const logger = createFeatureLogger('Canvas')
+const logger = createSimpleLogger('Canvas')
 
 // Simple decorative wrapper components
 const FloatingParticle = ({ children, color: _color, size: _size }: { children: React.ReactNode; color?: string; size?: string }) => (

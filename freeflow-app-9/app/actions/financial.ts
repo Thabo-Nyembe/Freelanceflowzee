@@ -3,9 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('financial-actions')
+const logger = createSimpleLogger('financial-actions')
 
 export async function createFinancialRecord(data: any): Promise<ActionResult<any>> {
   try {

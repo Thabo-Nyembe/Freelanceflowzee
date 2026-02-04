@@ -53,9 +53,9 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 // ============================================================================
 // PRODUCTION LOGGER
 // ============================================================================
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Calendar')
+const logger = createSimpleLogger('Calendar')
 
 // ============================================================================
 // FRAMER MOTION COMPONENTS

@@ -4,11 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { Content } from '@/lib/hooks/use-content'
 import { actionSuccess, actionError, type ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { uuidSchema } from '@/lib/validations'
 import { ErrorCode } from '@/lib/api/response'
 
-const logger = createFeatureLogger('content-actions')
+const logger = createSimpleLogger('content-actions')
 
 /**
  * Creates new content

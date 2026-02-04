@@ -40,7 +40,7 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useTrainingMutations } from '@/lib/hooks/use-training'
 import {
@@ -109,7 +109,7 @@ interface TeamOverview {
   averageRating: number
 }
 
-const logger = createFeatureLogger('TeamHub')
+const logger = createSimpleLogger('TeamHub')
 
 export default function TeamHubPage() {
   const [isLoading, setIsLoading] = useState(true)

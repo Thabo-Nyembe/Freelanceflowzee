@@ -1,9 +1,9 @@
 // SESSION_14: INVOICES UTILITIES - World-Class Invoice & Billing System
 // Production-ready invoicing with templates, payments, and automation
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Invoices')
+const logger = createSimpleLogger('Invoices')
 
 // ================================
 // TYPESCRIPT INTERFACES

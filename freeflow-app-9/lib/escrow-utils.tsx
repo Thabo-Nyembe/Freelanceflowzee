@@ -16,9 +16,9 @@
  * - Contract management
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('EscrowUtils')
+const logger = createSimpleLogger('EscrowUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

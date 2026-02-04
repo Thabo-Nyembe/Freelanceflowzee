@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -35,7 +35,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('crm-deal-pipeline');
+const logger = createSimpleLogger('crm-deal-pipeline');
 
 // Phase 7 Gap #5: Deal Pipeline Visualization
 // Priority: MEDIUM | Competitor: HubSpot

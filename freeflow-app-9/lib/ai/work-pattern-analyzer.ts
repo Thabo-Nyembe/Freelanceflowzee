@@ -7,9 +7,9 @@
  * Based on FreeFlow User Manual specifications for "My Day Today" AI features.
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('WorkPatternAnalyzer')
+const logger = createSimpleLogger('WorkPatternAnalyzer')
 
 // ==================== TYPE DEFINITIONS ====================
 

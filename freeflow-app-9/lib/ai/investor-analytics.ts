@@ -4,11 +4,11 @@
  * Provides real-time metrics for funding decisions
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/client'
 import { toDbError } from '@/lib/types/database'
 
-const logger = createFeatureLogger('InvestorAnalytics')
+const logger = createSimpleLogger('InvestorAnalytics')
 
 // Core Metrics Interfaces
 export interface UserMetrics {

@@ -45,9 +45,9 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Shadcn-Showcase')
+const logger = createSimpleLogger('Shadcn-Showcase')
 
 // Enhanced Components
 import { EnhancedShadcnForm } from '@/components/ui/enhanced-shadcn-form'

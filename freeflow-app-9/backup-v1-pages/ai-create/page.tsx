@@ -21,9 +21,9 @@ import {
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AI-Create')
+const logger = createSimpleLogger('AI-Create')
 
 const subPages = [
   {

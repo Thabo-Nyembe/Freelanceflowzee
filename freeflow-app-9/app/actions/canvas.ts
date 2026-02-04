@@ -22,9 +22,9 @@ import {
   actionValidationError,
   ActionResult
 } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('canvas-actions')
+const logger = createSimpleLogger('canvas-actions')
 
 // ============================================
 // VALIDATION SCHEMAS

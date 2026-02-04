@@ -1,7 +1,7 @@
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 
-const logger = createFeatureLogger('API-VideoRender')
+const logger = createSimpleLogger('API-VideoRender')
 import { NextRequest, NextResponse } from 'next/server'
 
 // ============================================================================

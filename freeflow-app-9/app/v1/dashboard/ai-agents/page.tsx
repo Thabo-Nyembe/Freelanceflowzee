@@ -64,11 +64,11 @@ import { Slider } from '@/components/ui/slider';
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card';
 import { TextShimmer } from '@/components/ui/text-shimmer';
 import { toast } from 'sonner';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 import type { AgentRole } from '@/lib/ai/agent-orchestrator';
 import { useAIAgents, useAgentChat, type AIAgent, type CreateAgentInput } from '@/lib/hooks/use-ai-agents';
 
-const logger = createFeatureLogger('AIAgents-Page');
+const logger = createSimpleLogger('AIAgents-Page');
 
 // Types
 interface CustomAgent {

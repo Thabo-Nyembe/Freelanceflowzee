@@ -21,7 +21,7 @@ import {
   createProfileEmbedding,
 } from '@/lib/ai/job-matching';
 import { z } from 'zod';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -57,7 +57,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('ai-job-matching');
+const logger = createSimpleLogger('ai-job-matching');
 
 // ============================================================================
 // VALIDATION SCHEMAS

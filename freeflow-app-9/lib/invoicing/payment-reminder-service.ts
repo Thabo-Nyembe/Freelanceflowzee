@@ -5,7 +5,7 @@
  * Handles before-due, on-due, and overdue notifications
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import { generateReminderEmailHTML } from '@/lib/invoice-email-template'
 import { getEmailService } from '@/lib/email/email-service'
@@ -13,7 +13,7 @@ import type { InvoiceStatus, Currency } from '@/lib/invoice-types'
 
 const emailService = getEmailService()
 
-const logger = createFeatureLogger('PaymentReminderService')
+const logger = createSimpleLogger('PaymentReminderService')
 
 // ============================================================================
 // Types

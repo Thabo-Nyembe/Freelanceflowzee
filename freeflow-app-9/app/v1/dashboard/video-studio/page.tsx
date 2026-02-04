@@ -49,9 +49,9 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 // ============================================================================
 // PRODUCTION LOGGER
 // ============================================================================
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('VideoStudio')
+const logger = createSimpleLogger('VideoStudio')
 
 // ============================================================================
 // ============================================================================

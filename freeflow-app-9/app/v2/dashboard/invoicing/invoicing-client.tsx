@@ -16,9 +16,9 @@ import { useClients } from '@/lib/hooks/use-clients'
 import { useTransactions } from '@/lib/hooks/use-transactions'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { Label } from '@/components/ui/label'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('InvoicingV2')
+const logger = createSimpleLogger('InvoicingV2')
 import {
   FileText,
   Plus,

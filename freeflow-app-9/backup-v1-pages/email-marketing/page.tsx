@@ -21,11 +21,11 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
-const logger = createFeatureLogger('EmailMarketingPage')
+const logger = createSimpleLogger('EmailMarketingPage')
 
 type ViewMode = 'overview' | 'campaigns' | 'subscribers' | 'automation' | 'templates'
 
@@ -153,8 +153,8 @@ export default function EmailMarketingPage() {
     }
 
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('email-marketing')
+      const { createSimpleLogger } = await import('@/lib/simple-logger')
+      const logger = createSimpleLogger('email-marketing')
       const { toast } = await import('sonner')
 
       logger.info('Sending campaign', {
@@ -192,8 +192,8 @@ export default function EmailMarketingPage() {
 
       announce(`Campaign ${campaign.name} sent successfully`, 'polite')
     } catch (err: unknown) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('email-marketing')
+      const { createSimpleLogger } = await import('@/lib/simple-logger')
+      const logger = createSimpleLogger('email-marketing')
       logger.error('Send campaign error', { error: err.message })
 
       const { toast } = await import('sonner')
@@ -216,8 +216,8 @@ export default function EmailMarketingPage() {
     }
 
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('email-marketing')
+      const { createSimpleLogger } = await import('@/lib/simple-logger')
+      const logger = createSimpleLogger('email-marketing')
       const { toast } = await import('sonner')
 
       logger.info('Duplicating campaign', {
@@ -273,8 +273,8 @@ export default function EmailMarketingPage() {
 
       announce(`Campaign duplicated as ${newCampaignName}`, 'polite')
     } catch (err: unknown) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('email-marketing')
+      const { createSimpleLogger } = await import('@/lib/simple-logger')
+      const logger = createSimpleLogger('email-marketing')
       logger.error('Duplicate campaign error', { error: err.message })
 
       const { toast } = await import('sonner')

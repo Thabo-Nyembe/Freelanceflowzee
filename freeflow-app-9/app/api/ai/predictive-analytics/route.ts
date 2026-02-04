@@ -6,7 +6,7 @@ import { verifyAuthToken } from '@/lib/auth';
 import { sanitizeInput } from '@/lib/security';
 import { logApiUsage, trackMetric } from '@/lib/analytics';
 import { v4 as uuidv4 } from 'uuid';
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import * as ExcelJS from 'exceljs'
 
 // ============================================================================
@@ -50,7 +50,7 @@ type PerformanceMetricType = 'latency' | 'throughput' | 'error_rate' | 'availabi
 type OptimizationStrategyType = 'cost' | 'performance' | 'balanced';
 type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 
-const logger = createFeatureLogger('API-PredictiveAnalytics')
+const logger = createSimpleLogger('API-PredictiveAnalytics')
 
 // Environment configuration
 const API_SECRET_KEY = process.env.API_SECRET_KEY || '';

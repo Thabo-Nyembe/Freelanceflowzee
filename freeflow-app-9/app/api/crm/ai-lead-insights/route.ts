@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -35,7 +35,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('crm-ai-lead-insights');
+const logger = createSimpleLogger('crm-ai-lead-insights');
 
 // Phase 7 Gap #10: AI-Powered Lead Insights
 // Priority: MEDIUM | Competitor: Salesforce Einstein

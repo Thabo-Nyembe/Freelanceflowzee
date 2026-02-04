@@ -49,8 +49,8 @@ import { Textarea } from '@/components/ui/textarea'
 // Select components removed due to Radix UI infinite loop bug
 
 // PRODUCTION LOGGER
-import { createFeatureLogger } from '@/lib/logger'
-const logger = createFeatureLogger('Gallery')
+import { createSimpleLogger } from '@/lib/simple-logger'
+const logger = createSimpleLogger('Gallery')
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'

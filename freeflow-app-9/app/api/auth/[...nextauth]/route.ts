@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth'
 import { authOptions } from '@/lib/auth.config'
+import type { NextRequest } from 'next/server'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support

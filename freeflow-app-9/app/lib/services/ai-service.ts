@@ -3,9 +3,9 @@ import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
 import Replicate from 'replicate'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AI-Service')
+const logger = createSimpleLogger('AI-Service')
 
 export interface AIGenerationSettings {
   creativity: number

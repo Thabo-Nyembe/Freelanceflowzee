@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import {
@@ -54,7 +54,7 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 
-const logger = createFeatureLogger('BookingsCalendar')
+const logger = createSimpleLogger('BookingsCalendar')
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date())

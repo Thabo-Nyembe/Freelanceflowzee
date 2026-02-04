@@ -5,9 +5,9 @@ import VideoEditor, { VideoEdit, ExportFormat, ShareSettings } from '@/component
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Share, Eye } from 'lucide-react';
 import Link from 'next/link';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('VideoEditor');
+const logger = createSimpleLogger('VideoEditor');
 
 export const metadata: Metadata = {
   title: 'Video Editor | FreeFlow',

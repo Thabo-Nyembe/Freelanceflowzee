@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
   Brain,
   Sparkles,
@@ -213,7 +213,7 @@ interface AICreateProps {
   onSaveKeys?: (keys: Record<string, string>) => void
 }
 
-const logger = createFeatureLogger('AICreate')
+const logger = createSimpleLogger('AICreate')
 
 export function AICreate({ onSaveKeys }: AICreateProps) {
   // Core State (existing)

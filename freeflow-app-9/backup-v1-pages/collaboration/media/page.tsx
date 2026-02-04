@@ -29,7 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { createFeatureLogger } from "@/lib/logger";
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { NumberFlow } from "@/components/ui/number-flow";
 import {
   Select,
@@ -64,7 +64,7 @@ import {
   type MediaType,
 } from "@/lib/collaboration-media-queries";
 
-const logger = createFeatureLogger("CollaborationMedia");
+const logger = createSimpleLogger("CollaborationMedia");
 
 interface MediaItem {
   id: string;

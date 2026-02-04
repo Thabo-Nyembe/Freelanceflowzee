@@ -35,10 +35,10 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { motion } from 'framer-motion'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
-const logger = createFeatureLogger('ClientValueDashboard')
+const logger = createSimpleLogger('ClientValueDashboard')
 
 interface ValueMetrics {
   totalInvestment: number

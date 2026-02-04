@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import CommunityHub from "@/components/hubs/community-hub"
 
 // A+++ UTILITIES
@@ -13,7 +13,7 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('CommunityPage')
+const logger = createSimpleLogger('CommunityPage')
 
 export default function CommunityPage() {
   // REAL USER AUTH

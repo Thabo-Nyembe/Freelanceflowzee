@@ -8,9 +8,9 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('NewUserDetection')
+const logger = createSimpleLogger('NewUserDetection')
 
 interface NewUserStatus {
   isNewUser: boolean

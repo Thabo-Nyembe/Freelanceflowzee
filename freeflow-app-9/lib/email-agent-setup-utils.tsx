@@ -5,9 +5,9 @@
  * email providers, AI, calendar, payments, SMS, and CRM systems.
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('EmailAgentSetupUtils')
+const logger = createSimpleLogger('EmailAgentSetupUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

@@ -20,7 +20,7 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { formatCurrency, getStatusColor } from '@/lib/client-zone-utils'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
@@ -30,7 +30,7 @@ import { Textarea } from '@/components/ui/textarea'
 // DATABASE QUERIES
 import { disputeInvoice } from '@/lib/client-zone-queries'
 
-const logger = createFeatureLogger('ClientZoneInvoices')
+const logger = createSimpleLogger('ClientZoneInvoices')
 
 // Type Definitions
 interface InvoiceItem {

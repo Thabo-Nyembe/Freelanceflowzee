@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import crypto from 'crypto'
 
 // ============================================================================
@@ -37,7 +37,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('Analytics:Track')
+const logger = createSimpleLogger('Analytics:Track')
 
 /**
  * POST /api/analytics/track

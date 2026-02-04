@@ -5,7 +5,7 @@
  * payment tracking, and revenue analytics.
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
   Invoice,
   InvoiceStatus,
@@ -20,7 +20,7 @@ import {
   ClientRevenue
 } from '@/lib/invoice-types'
 
-const logger = createFeatureLogger('InvoiceUtils')
+const logger = createSimpleLogger('InvoiceUtils')
 
 // ============================================================================
 // MOCK DATA - REMOVED (Migration Batch #11)

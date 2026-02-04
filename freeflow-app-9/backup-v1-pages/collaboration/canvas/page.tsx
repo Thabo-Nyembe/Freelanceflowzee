@@ -35,7 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { createFeatureLogger } from "@/lib/logger";
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { NumberFlow } from "@/components/ui/number-flow";
 import { useCurrentUser } from "@/hooks/use-ai-data";
 import { useAnnouncer } from "@/lib/accessibility";
@@ -67,7 +67,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 
-const logger = createFeatureLogger("CollaborationCanvas");
+const logger = createSimpleLogger("CollaborationCanvas");
 
 interface CanvasProject {
   id: string;

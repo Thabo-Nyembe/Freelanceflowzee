@@ -27,10 +27,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { markOnboardingComplete } from '@/components/onboarding-check'
 
-const logger = createFeatureLogger('EasyOnboarding')
+const logger = createSimpleLogger('EasyOnboarding')
 
 // ============================================================================
 // COMPETITOR APPS (For Data Import)

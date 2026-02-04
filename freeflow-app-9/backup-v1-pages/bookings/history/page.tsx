@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { Clock, Download, Filter } from 'lucide-react'
@@ -21,7 +21,7 @@ import {
 import { ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 
-const logger = createFeatureLogger('BookingsHistory')
+const logger = createSimpleLogger('BookingsHistory')
 
 export default function HistoryPage() {
   // A+++ STATE MANAGEMENT

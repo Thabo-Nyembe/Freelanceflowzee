@@ -45,7 +45,7 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // AI Features
 import { RevenueInsightsWidget } from '@/components/ai/revenue-insights-widget'
@@ -54,7 +54,7 @@ import { useCurrentUser, useRevenueData } from '@/hooks/use-ai-data'
 // Real button handlers
 import { downloadAsCsv, downloadAsJson } from '@/lib/button-handlers'
 
-const logger = createFeatureLogger('FinancialHub')
+const logger = createSimpleLogger('FinancialHub')
 
 export default function FinancialHubPage() {
   // Real user auth & AI data

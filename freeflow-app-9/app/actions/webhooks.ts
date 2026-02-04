@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { uuidSchema } from '@/lib/validations'
 
 // ============================================
@@ -81,7 +81,7 @@ type WebhookStatus = 'active' | 'paused' | 'disabled'
 // LOGGER
 // ============================================
 
-const logger = createFeatureLogger('webhooks')
+const logger = createSimpleLogger('webhooks')
 
 // Safe JSON parse helper
 function safeJsonParse<T>(value: string | null, fallback: T): T {

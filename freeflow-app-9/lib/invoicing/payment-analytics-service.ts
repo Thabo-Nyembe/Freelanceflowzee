@@ -5,11 +5,11 @@
  * Business intelligence for invoicing and payments
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import type { Payment, Currency, PaymentMethod } from '@/lib/invoice-types'
 
-const logger = createFeatureLogger('PaymentAnalyticsService')
+const logger = createSimpleLogger('PaymentAnalyticsService')
 
 // ============================================================================
 // Types

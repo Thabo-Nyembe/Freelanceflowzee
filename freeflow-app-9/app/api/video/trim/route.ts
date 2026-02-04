@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import {
   trimVideo,
@@ -51,7 +51,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-VideoTrim')
+const logger = createSimpleLogger('API-VideoTrim')
 
 // Trim output directory
 const TRIM_DIR = process.env.VIDEO_TRIM_DIR || '/tmp/video-trimmed'

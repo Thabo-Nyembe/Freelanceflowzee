@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -35,7 +35,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-GenerateSchedule')
+const logger = createSimpleLogger('API-GenerateSchedule')
 
 export async function POST(request: Request) {
   try {

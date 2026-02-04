@@ -5,9 +5,9 @@
  * availability tracking, reminders, and revenue calculations.
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('BookingsUtils')
+const logger = createSimpleLogger('BookingsUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

@@ -28,9 +28,9 @@ import { DatabaseSource } from '@/lib/types/editor'
 import { defaultDatabases } from '@/lib/utils/editor'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('DatabaseBlock')
+const logger = createSimpleLogger('DatabaseBlock')
 
 interface DatabaseBlockProps {
   id: string

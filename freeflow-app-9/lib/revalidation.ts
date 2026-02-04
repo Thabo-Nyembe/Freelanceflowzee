@@ -10,9 +10,9 @@
 'use server'
 
 import { revalidateTag, revalidatePath } from 'next/cache'
-import { createFeatureLogger } from './logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Revalidation')
+const logger = createSimpleLogger('Revalidation')
 
 /**
  * Revalidate user data after profile updates

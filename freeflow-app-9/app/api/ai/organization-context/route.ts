@@ -12,7 +12,7 @@ import {
   TeamContext,
   AIConfiguration,
 } from '@/lib/ai/organization-context';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -48,7 +48,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('ai-organization-context');
+const logger = createSimpleLogger('ai-organization-context');
 
 // Initialize service
 const contextService = new OrganizationContextService();

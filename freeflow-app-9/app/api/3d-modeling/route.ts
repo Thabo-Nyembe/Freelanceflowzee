@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('3d-modeling');
+const logger = createSimpleLogger('3d-modeling');
 
 // ============================================================================
 // WORLD-CLASS 3D MODELING API

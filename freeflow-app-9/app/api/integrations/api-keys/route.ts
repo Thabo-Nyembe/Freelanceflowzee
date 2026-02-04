@@ -6,9 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { integrationService } from '@/lib/integrations/integration-service';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('api-keys');
+const logger = createSimpleLogger('api-keys');
 
 // Demo mode constants
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';

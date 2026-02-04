@@ -7,9 +7,9 @@
 
 import React, { Component, ReactNode } from 'react'
 import { LiquidGlassCard } from './liquid-glass-card'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('ErrorBoundary')
+const logger = createSimpleLogger('ErrorBoundary')
 
 interface Props {
   children: ReactNode

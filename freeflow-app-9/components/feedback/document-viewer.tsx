@@ -27,9 +27,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('DocumentViewer')
+const logger = createSimpleLogger('DocumentViewer')
 
 // Check if a file is a PDF based on filename or URL
 function isPdfFile(filename?: string, url?: string): boolean {

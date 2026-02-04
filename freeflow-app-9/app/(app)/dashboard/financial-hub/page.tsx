@@ -43,13 +43,13 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // AI FEATURES
 import { RevenueInsightsWidget } from '@/components/ai/revenue-insights-widget'
 import { useCurrentUser, useRevenueData } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('FinancialHub')
+const logger = createSimpleLogger('FinancialHub')
 
 export default function FinancialHubPage() {
   // REAL USER AUTH & AI DATA

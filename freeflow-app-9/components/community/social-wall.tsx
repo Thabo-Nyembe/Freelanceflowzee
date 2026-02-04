@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -59,7 +59,7 @@ import {
   Hash
 } from 'lucide-react'
 
-const logger = createFeatureLogger('SocialWall')
+const logger = createSimpleLogger('SocialWall')
 
 interface Author {
   id: string

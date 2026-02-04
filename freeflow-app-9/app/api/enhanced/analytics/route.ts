@@ -12,9 +12,9 @@ import {
   predictProjectHealth,
   type Client
 } from '@/lib/analytics/predictive-engine';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('enhanced-analytics');
+const logger = createSimpleLogger('enhanced-analytics');
 
 // Demo user for unauthenticated access
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';

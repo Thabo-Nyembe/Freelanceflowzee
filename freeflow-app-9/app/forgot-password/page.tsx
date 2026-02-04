@@ -12,10 +12,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/client'
 
-const logger = createFeatureLogger('ForgotPassword')
+const logger = createSimpleLogger('ForgotPassword')
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')

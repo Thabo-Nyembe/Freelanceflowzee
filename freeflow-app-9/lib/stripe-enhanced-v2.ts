@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('StripeEnhanced')
+const logger = createSimpleLogger('StripeEnhanced')
 
 // Enhanced Stripe service with Apple Pay, Google Pay, and advanced features
 class StripeEnhancedService {

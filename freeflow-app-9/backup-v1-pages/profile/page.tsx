@@ -58,11 +58,11 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createActivityLog, getProfileAnalytics } from '@/lib/profile-settings-queries'
 
-const logger = createFeatureLogger('Profile')
+const logger = createSimpleLogger('Profile')
 
 export default function ProfilePage() {
   // A+++ STATE MANAGEMENT

@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { getEmailService } from '@/lib/email/email-service';
 
 // ============================================================================
@@ -42,7 +42,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('video-reviews');
+const logger = createSimpleLogger('video-reviews');
 
 // GET - Get review sessions
 export async function GET(request: NextRequest) {

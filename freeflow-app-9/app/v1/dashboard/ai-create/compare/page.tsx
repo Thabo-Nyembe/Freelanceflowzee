@@ -16,10 +16,10 @@ import {
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { saveModelComparison, type ComparisonResult as DBComparisonResult } from '@/lib/ai-create-queries'
 
-const logger = createFeatureLogger('AI-Create-Compare')
+const logger = createSimpleLogger('AI-Create-Compare')
 
 // Comparison result type
 interface ComparisonResult {

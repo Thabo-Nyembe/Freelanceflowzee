@@ -67,9 +67,9 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('CryptoPayments')
+const logger = createSimpleLogger('CryptoPayments')
 
 // ========================================
 // TYPE DEFINITIONS

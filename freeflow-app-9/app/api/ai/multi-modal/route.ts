@@ -14,7 +14,7 @@ import { IntegratedAISystem } from '@/lib/ai/integrated-ai-system';
 import { createHash, randomBytes } from 'crypto';
 import { WebSocketServer } from 'ws';
 import { Server } from 'http';
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -50,7 +50,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-MultiModal')
+const logger = createSimpleLogger('API-MultiModal')
 
 // Lazy-initialized Multi-modal AI System (to avoid build-time initialization)
 let multiModalSystem: MultiModalAISystem | null = null;

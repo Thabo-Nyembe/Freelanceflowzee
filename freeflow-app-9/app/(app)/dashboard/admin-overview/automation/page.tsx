@@ -7,7 +7,7 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -52,7 +52,7 @@ import {
   Eye
 } from 'lucide-react'
 
-const logger = createFeatureLogger('admin-automation')
+const logger = createSimpleLogger('admin-automation')
 
 export default function AutomationPage() {
   const router = useRouter()

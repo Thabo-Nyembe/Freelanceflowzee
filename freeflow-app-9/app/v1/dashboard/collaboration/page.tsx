@@ -95,12 +95,12 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // MIGRATED: Batch #23 - Removed mock data, using database hooks
 
-const logger = createFeatureLogger('Collaboration')
+const logger = createSimpleLogger('Collaboration')
 
 export default function CollaborationPage() {
   const [isLoading, setIsLoading] = useState(true)

@@ -36,7 +36,7 @@ import {
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // MY DAY UTILITIES
 import {
@@ -54,7 +54,7 @@ import {
   deleteGoal as deleteGoalDB
 } from '@/lib/my-day-queries'
 
-const logger = createFeatureLogger('MyDay-Goals')
+const logger = createSimpleLogger('MyDay-Goals')
 
 interface Goal {
   id: string

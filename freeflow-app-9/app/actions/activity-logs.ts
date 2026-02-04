@@ -2,9 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('activity-logs-actions')
+const logger = createSimpleLogger('activity-logs-actions')
 
 export interface LogActivityInput {
   user_name?: string

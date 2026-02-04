@@ -10,7 +10,7 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
   Settings,
   User,
@@ -23,7 +23,7 @@ import {
   Info
 } from 'lucide-react'
 
-const logger = createFeatureLogger('Settings')
+const logger = createSimpleLogger('Settings')
 
 interface SettingsTab {
   id: string

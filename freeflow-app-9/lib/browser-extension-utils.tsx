@@ -14,9 +14,9 @@
  * - Analytics and usage statistics
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('BrowserExtensionUtils')
+const logger = createSimpleLogger('BrowserExtensionUtils')
 
 // ========================================
 // TYPE DEFINITIONS

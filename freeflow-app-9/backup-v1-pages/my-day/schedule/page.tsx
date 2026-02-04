@@ -37,7 +37,7 @@ import {
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // MY DAY UTILITIES
 import {
@@ -56,7 +56,7 @@ import {
   dbBlockToUIBlock
 } from '@/lib/my-day-queries'
 
-const logger = createFeatureLogger('MyDay-Schedule')
+const logger = createSimpleLogger('MyDay-Schedule')
 
 const BLOCK_TYPE_COLORS: Record<string, string> = {
   focus: 'bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-900/30 dark:border-purple-700 dark:text-purple-300',

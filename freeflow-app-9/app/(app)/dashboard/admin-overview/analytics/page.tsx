@@ -7,7 +7,7 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -33,7 +33,7 @@ import {
   Clock
 } from 'lucide-react'
 
-const logger = createFeatureLogger('admin-analytics')
+const logger = createSimpleLogger('admin-analytics')
 
 export default function AnalyticsPage() {
   const router = useRouter()

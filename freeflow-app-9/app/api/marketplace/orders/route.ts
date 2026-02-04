@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { stripeConnectService } from '@/lib/stripe/stripe-connect-service';
 import { notificationService } from '@/lib/realtime/notification-service';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -44,7 +44,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('marketplace-orders');
+const logger = createSimpleLogger('marketplace-orders');
 
 const createOrderSchema = z.object({
   listing_id: z.string().uuid(),

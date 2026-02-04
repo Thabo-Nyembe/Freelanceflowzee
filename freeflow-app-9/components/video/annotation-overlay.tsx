@@ -18,9 +18,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { Input } from '@/components/ui/input'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AnnotationOverlay')
+const logger = createSimpleLogger('AnnotationOverlay')
 
 // ============================================================================
 // TYPE DEFINITIONS

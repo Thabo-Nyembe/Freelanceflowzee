@@ -11,7 +11,7 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -37,7 +37,7 @@ import {
   ArrowRight
 } from 'lucide-react'
 
-const logger = createFeatureLogger('admin-dashboard-overview')
+const logger = createSimpleLogger('admin-dashboard-overview')
 
 export default function AdminOverviewPage() {
   const router = useRouter()

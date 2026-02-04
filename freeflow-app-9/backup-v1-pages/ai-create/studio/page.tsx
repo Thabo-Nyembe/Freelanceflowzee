@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { updatePreferences, getPreferences, upsertPreferences } from '@/lib/ai-create-queries'
 
 // DATABASE QUERIES - API Keys & Usage
@@ -21,7 +21,7 @@ import {
   APIKey
 } from '@/lib/ai-settings-queries'
 
-const logger = createFeatureLogger('AI-Create-Studio')
+const logger = createSimpleLogger('AI-Create-Studio')
 
 export default function StudioPage() {
   const router = useRouter()

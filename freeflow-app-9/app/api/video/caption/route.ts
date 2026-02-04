@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import {
   generateCaptions,
@@ -55,7 +55,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-VideoCaption')
+const logger = createSimpleLogger('API-VideoCaption')
 
 // Caption output directory
 const CAPTION_DIR = process.env.VIDEO_CAPTION_DIR || '/tmp/video-captions'

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { createClient } from '@/lib/supabase/server';
 
-const logger = createFeatureLogger('API-Gallery');
+const logger = createSimpleLogger('API-Gallery');
 
 // Demo mode constants
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';

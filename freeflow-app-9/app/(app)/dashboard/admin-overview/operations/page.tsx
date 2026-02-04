@@ -7,7 +7,7 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -52,7 +52,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import type { AdminTeamMember } from '@/lib/admin-overview-queries'
 
-const logger = createFeatureLogger('admin-operations')
+const logger = createSimpleLogger('admin-operations')
 
 // Mapper function to convert AdminTeamMember to TeamMember
 function mapAdminTeamMemberToTeamMember(admin: AdminTeamMember): TeamMember {

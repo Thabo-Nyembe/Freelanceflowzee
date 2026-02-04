@@ -28,9 +28,9 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('GuestUploadWizard')
+const logger = createSimpleLogger('GuestUploadWizard')
 
 type Step = 'info' | 'payment' | 'upload' | 'complete'
 

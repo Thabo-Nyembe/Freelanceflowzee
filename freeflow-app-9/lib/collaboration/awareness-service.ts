@@ -10,9 +10,9 @@
  * - Undo/redo stacks per user
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AwarenessService')
+const logger = createSimpleLogger('AwarenessService')
 
 // ============================================================================
 // Types

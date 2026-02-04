@@ -4,9 +4,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 import { OnboardingTourComponent, OnboardingTour } from './onboarding-tour'
 import { PlatformTourOverlay } from './platform-tour-overlay'
 import { useTour, TourProvider, PLATFORM_TOURS, type Tour as PlatformTour } from '@/lib/hooks/use-tour'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('OnboardingProvider')
+const logger = createSimpleLogger('OnboardingProvider')
 
 // ============================================================================
 // ONBOARDING CONTEXT

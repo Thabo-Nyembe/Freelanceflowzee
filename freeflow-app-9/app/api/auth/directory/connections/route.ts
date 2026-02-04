@@ -12,7 +12,7 @@ import {
   listDirectoryConnections,
   type DirectoryProvider
 } from '@/lib/auth/directory-sync'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -48,7 +48,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('directory-connections')
+const logger = createSimpleLogger('directory-connections')
 
 /**
  * List directory connections for organization

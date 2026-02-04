@@ -14,11 +14,11 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { transcribeVideo as openaiTranscribe } from '@/lib/ai/openai-client'
 import { isTranscriptionEnabled } from '@/lib/ai/config'
 
-const logger = createFeatureLogger('video-transcribe')
+const logger = createSimpleLogger('video-transcribe')
 
 // Types
 export interface TranscriptionJob {

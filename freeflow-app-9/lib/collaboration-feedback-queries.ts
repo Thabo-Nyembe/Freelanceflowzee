@@ -10,10 +10,10 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { DatabaseError, toDbError } from '@/lib/types/database'
 
-const logger = createFeatureLogger('CollaborationFeedback')
+const logger = createSimpleLogger('CollaborationFeedback')
 
 // ============================================================================
 // TYPES

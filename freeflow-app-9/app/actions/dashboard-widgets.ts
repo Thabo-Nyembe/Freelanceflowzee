@@ -3,9 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('dashboard-widgets-actions')
+const logger = createSimpleLogger('dashboard-widgets-actions')
 
 export interface DashboardWidgetInput {
   widget_type: string

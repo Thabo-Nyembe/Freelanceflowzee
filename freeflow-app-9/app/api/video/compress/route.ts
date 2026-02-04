@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import {
   compressVideo,
@@ -51,7 +51,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-VideoCompress')
+const logger = createSimpleLogger('API-VideoCompress')
 
 // Compression directory
 const COMPRESS_DIR = process.env.VIDEO_COMPRESS_DIR || '/tmp/video-compressed'

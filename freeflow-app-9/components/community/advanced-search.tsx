@@ -34,9 +34,9 @@ import {
   Crown,
   Globe
 } from 'lucide-react'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AdvancedSearch')
+const logger = createSimpleLogger('AdvancedSearch')
 
 // ============================================================================
 // TYPES

@@ -7,9 +7,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('loyalty-claim-reward-api')
+const logger = createSimpleLogger('loyalty-claim-reward-api')
 
 // Demo mode check
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'

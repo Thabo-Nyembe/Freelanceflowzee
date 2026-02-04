@@ -31,9 +31,9 @@ import {
   actionValidationError,
   ActionResult
 } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('projects-actions')
+const logger = createSimpleLogger('projects-actions')
 
 // ============================================
 // PROJECT ACTIONS

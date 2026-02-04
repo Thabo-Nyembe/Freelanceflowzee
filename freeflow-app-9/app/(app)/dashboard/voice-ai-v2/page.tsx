@@ -58,9 +58,9 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card';
 import { TextShimmer } from '@/components/ui/text-shimmer';
 import { toast } from 'sonner';
 import { useVoiceCommands } from '@/lib/hooks/use-voice-commands';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('VoiceAI-Page');
+const logger = createSimpleLogger('VoiceAI-Page');
 
 // Types
 interface Transcription {

@@ -23,9 +23,9 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('EasyIntegrationSetup')
+const logger = createSimpleLogger('EasyIntegrationSetup')
 
 // ============================================================================
 // INTEGRATION DEFINITIONS

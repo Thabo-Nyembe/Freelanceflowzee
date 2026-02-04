@@ -28,9 +28,9 @@ import {
   actionValidationError,
   ActionResult
 } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('transactions-actions')
+const logger = createSimpleLogger('transactions-actions')
 
 // Refund schema
 const refundSchema = z.object({

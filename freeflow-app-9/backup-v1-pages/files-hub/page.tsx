@@ -29,7 +29,7 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // CLOUD STORAGE INTEGRATION COMPONENTS
@@ -40,7 +40,7 @@ import { StorageActivityLog } from '@/components/storage/storage-activity-log'
 import { StorageOnboardingWizard } from '@/components/storage/storage-onboarding-wizard'
 import { useStorageOnboarding } from '@/lib/hooks/use-storage-onboarding'
 
-const logger = createFeatureLogger('FilesHub')
+const logger = createSimpleLogger('FilesHub')
 
 // ============================================================================
 // FRAMER MOTION ANIMATION COMPONENTS

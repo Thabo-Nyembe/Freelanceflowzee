@@ -10,11 +10,11 @@
  * - Undo/redo tracking per user
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import { JsonValue } from '@/lib/types/database'
 
-const logger = createFeatureLogger('ActivityLogService')
+const logger = createSimpleLogger('ActivityLogService')
 
 // ============================================================================
 // Types

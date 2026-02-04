@@ -6,10 +6,10 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
-const logger = createFeatureLogger('TeamHubQueries')
+const logger = createSimpleLogger('TeamHubQueries')
 
 // Types matching the database schema
 export type MemberStatus = 'online' | 'offline' | 'busy' | 'away'

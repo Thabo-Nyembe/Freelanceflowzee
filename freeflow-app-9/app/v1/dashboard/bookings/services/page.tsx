@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { Plus, Download, Trash2 } from 'lucide-react'
@@ -40,7 +40,7 @@ import type { Service } from '@/lib/bookings-utils'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 
-const logger = createFeatureLogger('BookingsServices')
+const logger = createSimpleLogger('BookingsServices')
 
 // Extended Service interface for form data
 interface ServiceFormData {

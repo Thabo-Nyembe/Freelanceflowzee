@@ -23,10 +23,10 @@ import { useAnnouncer } from '@/lib/accessibility'
 
 // AUTHENTICATION & LOGGING
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
-const logger = createFeatureLogger('ReportingPage')
+const logger = createSimpleLogger('ReportingPage')
 
 type ViewMode = 'overview' | 'templates' | 'my-reports' | 'builder' | 'exports'
 

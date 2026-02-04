@@ -16,7 +16,7 @@ import * as React from 'react'
 import { useMemo, useCallback, useDeferredValue, useTransition, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -124,7 +124,7 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('MicroFeaturesShowcase')
+const logger = createSimpleLogger('MicroFeaturesShowcase')
 
 
 // ============================================================================

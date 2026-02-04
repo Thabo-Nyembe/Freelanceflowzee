@@ -6,9 +6,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('webinars-actions')
+const logger = createSimpleLogger('webinars-actions')
 
 export type WebinarTopic = 'sales' | 'marketing' | 'product' | 'training' | 'demo' | 'onboarding' | 'qa' | 'other'
 export type WebinarStatus = 'scheduled' | 'live' | 'ended' | 'cancelled' | 'recording'

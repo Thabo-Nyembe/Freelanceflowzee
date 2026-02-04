@@ -27,7 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { createFeatureLogger } from "@/lib/logger";
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { NumberFlow } from "@/components/ui/number-flow";
 import {
   Select,
@@ -58,7 +58,7 @@ import type { Team as DBTeam, TeamType } from "@/lib/collaboration-queries";
 import { CardSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorEmptyState } from "@/components/ui/empty-state";
 
-const logger = createFeatureLogger("CollaborationTeams");
+const logger = createSimpleLogger("CollaborationTeams");
 
 interface TeamMember {
   id: string;

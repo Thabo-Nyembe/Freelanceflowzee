@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { Plus, Download } from 'lucide-react'
@@ -21,7 +21,7 @@ import { mockServices } from '@/lib/bookings-utils'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 
-const logger = createFeatureLogger('BookingsServices')
+const logger = createSimpleLogger('BookingsServices')
 
 export default function ServicesPage() {
   // A+++ STATE MANAGEMENT

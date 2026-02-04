@@ -17,9 +17,9 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 // ============================================================================
 // PRODUCTION LOGGER
 // ============================================================================
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AIDesign')
+const logger = createSimpleLogger('AIDesign')
 
 // ============================================================================
 // A+++ SUPABASE INTEGRATION

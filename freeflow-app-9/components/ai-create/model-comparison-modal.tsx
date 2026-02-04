@@ -9,7 +9,7 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
   Zap,
   Clock,
@@ -23,7 +23,7 @@ import {
   RefreshCw
 } from 'lucide-react'
 
-const logger = createFeatureLogger('ModelComparison')
+const logger = createSimpleLogger('ModelComparison')
 
 interface ModelResult {
   model: string

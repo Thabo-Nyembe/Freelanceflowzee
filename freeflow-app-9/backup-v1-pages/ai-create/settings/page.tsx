@@ -13,7 +13,7 @@ import { toast } from 'sonner'
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 
 // DATABASE QUERIES
@@ -25,7 +25,7 @@ import {
   APIKey
 } from '@/lib/ai-settings-queries'
 
-const logger = createFeatureLogger('AI-Create-Settings')
+const logger = createSimpleLogger('AI-Create-Settings')
 
 const API_PROVIDERS = [
   { id: 'openrouter', name: 'OpenRouter', required: true, description: 'Access to 4 FREE models + affordable options' },

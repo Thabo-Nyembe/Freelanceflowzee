@@ -35,10 +35,10 @@ import { usePresence, useBroadcast, type PresenceState } from '@/hooks/use-realt
 
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { OnboardingTourLauncher } from '@/components/onboarding-tour-launcher'
 
-const logger = createFeatureLogger('AdvancedFeaturesDemo')
+const logger = createSimpleLogger('AdvancedFeaturesDemo')
 
 export default function AdvancedFeaturesDemo() {
   const { userId } = useCurrentUser()

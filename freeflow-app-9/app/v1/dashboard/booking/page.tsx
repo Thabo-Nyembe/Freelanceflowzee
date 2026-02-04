@@ -13,10 +13,10 @@ import {
 
 import { Button } from '@/components/ui/button'
 import EnhancedCalendarBooking from '@/components/booking/enhanced-calendar-booking'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
-const logger = createFeatureLogger('Booking')
+const logger = createSimpleLogger('Booking')
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'

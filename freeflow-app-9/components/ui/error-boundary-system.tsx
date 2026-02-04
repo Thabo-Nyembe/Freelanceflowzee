@@ -8,10 +8,10 @@ import {
   AlertTriangle, RefreshCw, Bug, Copy, ExternalLink,
   Shield, Zap, MessageCircle, Home
 } from 'lucide-react'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from '@/components/ui/enhanced-toast'
 
-const logger = createFeatureLogger('ErrorBoundarySystem')
+const logger = createSimpleLogger('ErrorBoundarySystem')
 
 interface ErrorBoundaryState {
   hasError: boolean

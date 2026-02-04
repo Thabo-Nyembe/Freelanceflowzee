@@ -14,9 +14,9 @@
  * - Template library
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('CanvasCollaborationUtils')
+const logger = createSimpleLogger('CanvasCollaborationUtils')
 
 // ========================================
 // TYPE DEFINITIONS

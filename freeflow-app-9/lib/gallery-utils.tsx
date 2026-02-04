@@ -1,9 +1,9 @@
 // SESSION_12: GALLERY UTILITIES - World-Class Media Gallery Management
 // Production-ready gallery system with comprehensive features
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Gallery')
+const logger = createSimpleLogger('Gallery')
 
 // ================================
 // TYPESCRIPT INTERFACES

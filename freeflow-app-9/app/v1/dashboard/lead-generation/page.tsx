@@ -17,7 +17,7 @@ import {
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
@@ -29,7 +29,7 @@ import {
   createLeadGenCampaign
 } from '@/lib/lead-generation-queries'
 
-const logger = createFeatureLogger('LeadGenerationPage')
+const logger = createSimpleLogger('LeadGenerationPage')
 
 type ViewMode = 'overview' | 'leads' | 'forms' | 'pages' | 'campaigns'
 

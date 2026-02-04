@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { uuidSchema } from '@/lib/validations'
 
 // ============================================
@@ -96,7 +96,7 @@ interface ApiKeyStats {
 // LOGGER
 // ============================================
 
-const logger = createFeatureLogger('api-keys')
+const logger = createSimpleLogger('api-keys')
 
 // ============================================
 // API KEY ACTIONS

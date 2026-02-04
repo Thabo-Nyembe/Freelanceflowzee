@@ -27,13 +27,13 @@ import {
   Loader2,
   Sparkles
 } from 'lucide-react'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // AI FEATURES
 import { GrowthActionsWidget } from '@/components/ai/growth-actions-widget'
 import { useCurrentUser, useGrowthPlaybook, useAIRecommendations } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('GrowthHub')
+const logger = createSimpleLogger('GrowthHub')
 
 interface GrowthStrategy {
   quickWins: string[]

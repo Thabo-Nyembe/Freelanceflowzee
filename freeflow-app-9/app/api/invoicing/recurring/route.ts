@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import {
 
@@ -54,7 +54,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   type RecurringInvoiceUpdate
 } from '@/lib/invoicing/recurring-invoice-service'
 
-const logger = createFeatureLogger('API-RecurringInvoice')
+const logger = createSimpleLogger('API-RecurringInvoice')
 
 /**
  * POST /api/invoicing/recurring

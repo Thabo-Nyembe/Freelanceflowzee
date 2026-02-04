@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('maintenance')
+const logger = createSimpleLogger('maintenance')
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 

@@ -17,7 +17,7 @@ import {
   getRecentFiles,
   searchFiles
 } from '@/lib/files-hub-queries'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -53,7 +53,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('files-hub')
+const logger = createSimpleLogger('files-hub')
 
 export async function GET(request: NextRequest) {
   try {

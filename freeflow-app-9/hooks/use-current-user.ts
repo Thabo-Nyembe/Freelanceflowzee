@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 
 interface User {
   id: string
@@ -30,17 +31,31 @@ function isDemoModeEnabled(): boolean {
 
 /**
  * Hook to get the current authenticated user
- * In demo mode, returns the demo user
+ * Checks NextAuth session first, then Supabase Auth, then demo mode
  */
 export function useCurrentUser() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isDemo, setIsDemo] = useState(false)
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // Check for demo mode first
+        // 1. Check NextAuth session first (for logged in users)
+        if (status === 'authenticated' && session?.user) {
+          setUser({
+            id: session.user.id || '',
+            email: session.user.email || '',
+            name: session.user.name || session.user.email?.split('@')[0],
+            avatar_url: session.user.image || undefined,
+            role: (session.user as any).role || 'user'
+          })
+          setIsLoading(false)
+          return
+        }
+
+        // 2. Check for demo mode
         if (isDemoModeEnabled()) {
           setIsDemo(true)
           setUser({
@@ -54,6 +69,7 @@ export function useCurrentUser() {
           return
         }
 
+        // 3. Fall back to Supabase Auth
         const { createClient } = await import('@/lib/supabase/client')
         const supabase = createClient()
         const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -81,8 +97,16 @@ export function useCurrentUser() {
       }
     }
 
-    fetchUser()
-  }, [])
+    // Only fetch when NextAuth has finished loading
+    if (status !== 'loading') {
+      fetchUser()
+    }
+  }, [session, status])
 
-  return { user, isLoading, isDemo }
+  return {
+    user,
+    userId: user?.id || null,
+    loading: isLoading || status === 'loading',
+    isDemo
+  }
 }

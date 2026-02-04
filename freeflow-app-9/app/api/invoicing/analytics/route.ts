@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import {
   getRevenueMetrics,
@@ -54,7 +54,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-PaymentAnalytics')
+const logger = createSimpleLogger('API-PaymentAnalytics')
 
 /**
  * GET /api/invoicing/analytics

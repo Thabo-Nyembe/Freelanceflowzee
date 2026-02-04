@@ -30,7 +30,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
@@ -50,7 +50,7 @@ import {
   toggleAILogging
 } from '@/lib/ai-settings-queries'
 
-const logger = createFeatureLogger('AISettings')
+const logger = createSimpleLogger('AISettings')
 
 interface AIProvider {
   id: string

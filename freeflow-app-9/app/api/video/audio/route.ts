@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import {
   extractAudio,
@@ -50,7 +50,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-VideoAudio')
+const logger = createSimpleLogger('API-VideoAudio')
 
 // Audio output directory
 const AUDIO_DIR = process.env.VIDEO_AUDIO_DIR || '/tmp/video-audio'

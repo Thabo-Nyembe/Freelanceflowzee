@@ -9,9 +9,9 @@ import { Progress } from '@/components/ui/progress'
 import { X, ChevronLeft, ChevronRight, CheckCircle, Sparkles, Trophy, Gift } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('OnboardingTour')
+const logger = createSimpleLogger('OnboardingTour')
 
 // ============================================================================
 // TYPES - USER MANUAL SPEC

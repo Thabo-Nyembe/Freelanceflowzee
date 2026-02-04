@@ -13,9 +13,9 @@
  * - Export in multiple formats
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AIDesignUtils')
+const logger = createSimpleLogger('AIDesignUtils')
 
 // ========================================
 // TYPE DEFINITIONS

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
@@ -30,7 +30,7 @@ import {
   calculateMetrics
 } from '@/lib/my-day-utils'
 
-const logger = createFeatureLogger('MyDay-Analytics')
+const logger = createSimpleLogger('MyDay-Analytics')
 
 export default function AnalyticsPage() {
   // REAL USER AUTH

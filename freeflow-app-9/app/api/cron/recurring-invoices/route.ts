@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { runRecurringInvoiceJob, getRecurringInvoiceProcessor } from '@/lib/jobs/recurring-invoice-processor';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -42,7 +42,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('cron-recurring-invoices');
+const logger = createSimpleLogger('cron-recurring-invoices');
 
 // ============ Security ============
 

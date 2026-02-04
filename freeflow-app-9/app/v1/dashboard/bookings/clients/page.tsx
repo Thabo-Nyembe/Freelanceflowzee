@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { Plus, RefreshCw, FileUp, FileDown, UserCheck } from 'lucide-react'
@@ -15,7 +15,7 @@ import { getClientBookingCount } from '@/lib/bookings-utils'
 import { ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 
-const logger = createFeatureLogger('BookingsClients')
+const logger = createSimpleLogger('BookingsClients')
 
 export default function ClientsPage() {
   // A+++ STATE MANAGEMENT

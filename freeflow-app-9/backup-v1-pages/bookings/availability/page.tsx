@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { Globe, Plus, Settings } from 'lucide-react'
@@ -25,7 +25,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 
-const logger = createFeatureLogger('BookingsAvailability')
+const logger = createSimpleLogger('BookingsAvailability')
 
 const weekDays = [
   'Monday',

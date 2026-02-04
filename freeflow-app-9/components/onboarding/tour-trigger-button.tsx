@@ -9,9 +9,9 @@
 
 import { Button } from '@/components/ui/button'
 import { BookOpen, Play } from 'lucide-react'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('TourTrigger')
+const logger = createSimpleLogger('TourTrigger')
 
 interface TourTriggerButtonProps {
   tourId: string

@@ -6,13 +6,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import { queueExportJob, getJobStatus } from '@/lib/video/video-queue'
 import { getVideoMetadata, checkFFmpegAvailability } from '@/lib/video/ffmpeg-processor'
 import fs from 'fs/promises'
 
-const logger = createFeatureLogger('API-VideoExport')
+const logger = createSimpleLogger('API-VideoExport')
 
 // Supported formats and their configurations
 const SUPPORTED_FORMATS = ['mp4', 'webm', 'mov', 'avi', 'mkv'] as const

@@ -7,9 +7,9 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('useKaziAI')
+const logger = createSimpleLogger('useKaziAI')
 
 export type AITaskType =
   | 'chat'

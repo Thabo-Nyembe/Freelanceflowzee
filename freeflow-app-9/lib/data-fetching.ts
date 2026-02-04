@@ -10,9 +10,9 @@
 
 import { cache } from 'react'
 import 'server-only'
-import { createFeatureLogger } from './logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('DataFetching')
+const logger = createSimpleLogger('DataFetching')
 
 /**
  * Memoized user data fetcher

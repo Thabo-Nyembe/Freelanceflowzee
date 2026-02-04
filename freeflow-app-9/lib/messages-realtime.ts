@@ -33,9 +33,9 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRealtimeTable, usePresence, useBroadcast, useTypingIndicator } from '@/hooks/use-realtime'
 import type { Message, MessageReaction, MessageReadReceipt } from './messages-queries'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('MessagesRealtime')
+const logger = createSimpleLogger('MessagesRealtime')
 
 // ==================== HOOK: REAL-TIME MESSAGES ====================
 

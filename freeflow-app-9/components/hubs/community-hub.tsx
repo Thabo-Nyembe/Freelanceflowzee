@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
   getMembers,
   getPosts
@@ -96,7 +96,7 @@ interface CommunityHubProps {
 }
 
 // MIGRATED: Batch #10 - Removed mock data, using database hooks
-const logger = createFeatureLogger('CommunityHub')
+const logger = createSimpleLogger('CommunityHub')
 
 // Demo/fallback data for when database is unavailable
 const MOCK_MEMBERS: CommunityMember[] = [

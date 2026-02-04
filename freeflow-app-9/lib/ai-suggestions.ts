@@ -32,9 +32,9 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AISuggestions')
+const logger = createSimpleLogger('AISuggestions')
 
 // ==================== TYPES ====================
 

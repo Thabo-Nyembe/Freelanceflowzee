@@ -34,10 +34,10 @@ import {
 } from '@/lib/ai-voice-synthesis-utils'
 
 import type { Voice } from '@/lib/ai-voice-synthesis-types'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
-const logger = createFeatureLogger('AI-Voice-Synthesis')
+const logger = createSimpleLogger('AI-Voice-Synthesis')
 
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'

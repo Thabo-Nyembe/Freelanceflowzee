@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -35,7 +35,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('enterprise-gdpr-compliance');
+const logger = createSimpleLogger('enterprise-gdpr-compliance');
 
 // Phase 8 Gap #2: GDPR Compliance Tools
 // Priority: HIGH | Competitor: All EU-serving platforms

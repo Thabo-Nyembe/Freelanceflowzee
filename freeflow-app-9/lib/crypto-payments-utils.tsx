@@ -3,9 +3,9 @@
  * Comprehensive utilities for cryptocurrency payment processing and wallet management
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Crypto-Payments-Utils')
+const logger = createSimpleLogger('Crypto-Payments-Utils')
 
 // ============================================================================
 // TYPESCRIPT INTERFACES

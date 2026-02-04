@@ -29,7 +29,7 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { KAZI_CLIENT_DATA, File } from '@/lib/client-zone-utils'
 
@@ -40,7 +40,7 @@ import { FileAccessDialog } from '@/components/secure-files/file-access-dialog'
 import { EscrowReleaseDialog } from '@/components/secure-files/escrow-release-dialog'
 import type { FileItem } from '@/components/secure-files/file-gallery'
 
-const logger = createFeatureLogger('ClientZoneFiles')
+const logger = createSimpleLogger('ClientZoneFiles')
 
 // ============================================================================
 // EXTENDED FILE DATA

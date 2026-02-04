@@ -6,10 +6,10 @@ import { motion } from 'framer-motion'
 import { Shield, Lock } from 'lucide-react'
 import { GlowEffect } from './glow-effect'
 import { BorderTrail } from './border-trail'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from '@/components/ui/enhanced-toast'
 
-const logger = createFeatureLogger('RouteGuard')
+const logger = createSimpleLogger('RouteGuard')
 
 /**
  * Route Guard

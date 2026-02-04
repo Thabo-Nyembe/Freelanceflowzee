@@ -68,11 +68,11 @@ import {
 } from '@/lib/real-time-translation-utils'
 
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('RealTimeTranslationPage')
+const logger = createSimpleLogger('RealTimeTranslationPage')
 
 type ViewMode = 'translate' | 'live' | 'documents' | 'history'
 

@@ -14,9 +14,9 @@
  * - Time export (CSV, PDF, JSON)
  */
 
-import { createFeatureLogger } from './logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('TimeTrackingUtils')
+const logger = createSimpleLogger('TimeTrackingUtils')
 
 // ============================================
 // TYPES & INTERFACES

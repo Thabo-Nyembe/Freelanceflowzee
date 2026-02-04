@@ -5,11 +5,11 @@
  * Handles grace periods, fee caps, and compliance
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import type { Invoice, Currency } from '@/lib/invoice-types'
 
-const logger = createFeatureLogger('LateFeeService')
+const logger = createSimpleLogger('LateFeeService')
 
 // ============================================================================
 // Types

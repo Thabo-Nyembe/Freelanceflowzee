@@ -4,9 +4,9 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { ConversationType, MessageContentType } from '@/lib/hooks/use-messaging'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('messaging-actions')
+const logger = createSimpleLogger('messaging-actions')
 
 // =============================================
 // CONVERSATION ACTIONS

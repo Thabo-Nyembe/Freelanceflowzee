@@ -23,9 +23,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { StripePayment, usePaymentIntent } from '@/components/payments/stripe-payment-element'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Payment')
+const logger = createSimpleLogger('Payment')
 
 interface PaymentProps {
   amount: number

@@ -1,8 +1,8 @@
 'use client'
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('SecurityService')
+const logger = createSimpleLogger('SecurityService')
 
 // Enhanced Security System for FreeflowZee
 class SecurityService {

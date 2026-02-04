@@ -27,10 +27,10 @@ import {
 
 // A+++ UTILITIES
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { KAZI_COLLABORATION_DATA } from '@/lib/collaboration-utils'
 
-const logger = createFeatureLogger('CollaborationLayout')
+const logger = createSimpleLogger('CollaborationLayout')
 
 interface CollaborationLayoutProps {
   children: ReactNode

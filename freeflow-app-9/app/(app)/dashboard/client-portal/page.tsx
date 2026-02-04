@@ -23,9 +23,9 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Client-Portal')
+const logger = createSimpleLogger('Client-Portal')
 
 // UI Components
 import { Button } from '@/components/ui/button'

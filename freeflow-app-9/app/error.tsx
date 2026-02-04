@@ -8,9 +8,9 @@ import {
   AlertTriangle, RefreshCw, Home, MessageCircle,
   Bug, Settings, Shield
 } from 'lucide-react'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('ErrorPage')
+const logger = createSimpleLogger('ErrorPage')
 
 interface ErrorProps {
   error: Error & { digest?: string }

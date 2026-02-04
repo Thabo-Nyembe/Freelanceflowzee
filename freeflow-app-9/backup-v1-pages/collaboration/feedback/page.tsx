@@ -26,7 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { createFeatureLogger } from "@/lib/logger";
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { NumberFlow } from "@/components/ui/number-flow";
 import { useCurrentUser } from "@/hooks/use-ai-data";
 import { useAnnouncer } from "@/lib/accessibility";
@@ -70,7 +70,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const logger = createFeatureLogger("CollaborationFeedback");
+const logger = createSimpleLogger("CollaborationFeedback");
 
 interface Feedback {
   id: string;

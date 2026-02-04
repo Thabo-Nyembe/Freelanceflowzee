@@ -1,6 +1,6 @@
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('ToolMessageParts');
+const logger = createSimpleLogger('ToolMessageParts');
 
 // Define the tool types
 interface WeatherToolInput {

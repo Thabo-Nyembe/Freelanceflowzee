@@ -28,12 +28,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useEffect } from 'react'
 
-const logger = createFeatureLogger('SystemInsights')
+const logger = createSimpleLogger('SystemInsights')
 
 export default function SystemInsightsPage() {
   const { userId, loading: userLoading } = useCurrentUser()

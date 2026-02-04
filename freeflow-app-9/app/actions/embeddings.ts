@@ -8,9 +8,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('embeddings-actions')
+const logger = createSimpleLogger('embeddings-actions')
 
 // ============================================
 // TYPES

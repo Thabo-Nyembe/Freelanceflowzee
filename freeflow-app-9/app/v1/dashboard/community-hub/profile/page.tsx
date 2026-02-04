@@ -9,7 +9,7 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import { User, Star, MessageSquare, Heart, Trophy, Users, BookOpen, Award, Edit } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
-const logger = createFeatureLogger('CommunityProfile')
+const logger = createSimpleLogger('CommunityProfile')
 
 export default function CommunityProfilePage() {
   const { userId, loading: userLoading } = useCurrentUser()

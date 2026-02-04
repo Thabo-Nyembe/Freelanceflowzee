@@ -26,11 +26,11 @@ import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { KAZI_ANALYTICS_DATA, formatCurrency, getKaziInsightColor, getKaziInsightIcon } from '@/lib/analytics-utils'
 import type { AnalyticsOverview, PerformanceMetrics } from '@/lib/analytics-queries'
 
-const logger = createFeatureLogger('Analytics - Intelligence')
+const logger = createSimpleLogger('Analytics - Intelligence')
 
 export default function IntelligenceAnalyticsPage() {
   // REAL USER AUTH

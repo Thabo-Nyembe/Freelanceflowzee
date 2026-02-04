@@ -69,7 +69,7 @@ import {
 import { format } from 'date-fns'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // 🚀 NEW: TanStack Query hooks replace ALL manual fetch() calls!
 import {
@@ -95,7 +95,7 @@ const useUpdateTaskStatus = () => {
   }
 }
 
-const logger = createFeatureLogger('TasksPage')
+const logger = createSimpleLogger('TasksPage')
 
 // Types
 type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled'

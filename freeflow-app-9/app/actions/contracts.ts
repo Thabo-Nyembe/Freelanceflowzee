@@ -27,9 +27,9 @@ import {
   actionValidationError,
   ActionResult
 } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('contracts-actions')
+const logger = createSimpleLogger('contracts-actions')
 
 // Signature schema
 const signatureSchema = z.object({

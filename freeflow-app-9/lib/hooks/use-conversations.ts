@@ -8,9 +8,9 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import type { RealtimeChannel } from '@supabase/supabase-js'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Conversations')
+const logger = createSimpleLogger('Conversations')
 
 // ============================================================================
 // TYPES

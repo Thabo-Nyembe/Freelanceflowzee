@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { createFeatureLogger } from "@/lib/logger";
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { NumberFlow } from "@/components/ui/number-flow";
 import {
   Select,
@@ -50,7 +50,7 @@ import {
   type TeamMemberStats as TeamMemberStatsType,
 } from "@/lib/collaboration-analytics-queries";
 
-const logger = createFeatureLogger("CollaborationAnalytics");
+const logger = createSimpleLogger("CollaborationAnalytics");
 
 // Use types from collaboration-analytics-queries
 type AnalyticsData = CollaborationAnalyticsData;

@@ -5,9 +5,9 @@
  * lighting, camera controls, and rendering capabilities.
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('3DModelingUtils')
+const logger = createSimpleLogger('3DModelingUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

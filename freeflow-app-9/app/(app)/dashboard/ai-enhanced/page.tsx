@@ -55,7 +55,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // SUPABASE & QUERIES
 import {
@@ -67,7 +67,7 @@ import {
   bulkDeleteTools
 } from '@/lib/ai-enhanced-queries'
 
-const logger = createFeatureLogger('AI-Enhanced')
+const logger = createSimpleLogger('AI-Enhanced')
 
 // ============================================================================
 // TYPE DEFINITIONS

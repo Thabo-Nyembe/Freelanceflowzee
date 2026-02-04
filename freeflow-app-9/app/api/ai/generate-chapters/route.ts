@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { ChapterGenerationService } from '@/lib/ai/chapter-generation-service'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -36,7 +36,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-GenerateChapters')
+const logger = createSimpleLogger('API-GenerateChapters')
 
 export async function POST(request: Request) {
   try {

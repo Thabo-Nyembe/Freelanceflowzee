@@ -57,7 +57,7 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useKaziAI } from '@/lib/hooks/use-kazi-ai'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { copyToClipboard } from '@/lib/button-handlers'
@@ -69,7 +69,7 @@ import {
   getConversationStats
 } from '@/lib/ai-assistant-queries'
 
-const logger = createFeatureLogger('AIAssistant')
+const logger = createSimpleLogger('AIAssistant')
 
 // Helper function to map insight categories to icons
 function getIconForCategory(category: string): React.ComponentType<{ className?: string }> {

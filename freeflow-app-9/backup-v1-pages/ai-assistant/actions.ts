@@ -2,9 +2,9 @@
 
 import { searchProjects, getProjectDetails } from "@/app/(app)/projects/actions";
 import OpenAI from 'openai';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('AI-Assistant-Actions');
+const logger = createSimpleLogger('AI-Assistant-Actions');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 import {
 
 // ============================================================================
@@ -46,7 +46,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   recategorizeUncategorized,
 } from '@/lib/ai/categorization-service';
 
-const logger = createFeatureLogger('plaid-api');
+const logger = createSimpleLogger('plaid-api');
 
 // POST - Categorize transaction(s) or process feedback
 export async function POST(request: NextRequest) {

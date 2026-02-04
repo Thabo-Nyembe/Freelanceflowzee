@@ -23,14 +23,14 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { GlowEffect } from '@/components/ui/glow-effect'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { ScrollProgress } from '@/components/ui/scroll-progress'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
-const logger = createFeatureLogger('Contact')
+const logger = createSimpleLogger('Contact')
 
 // Help topic types and content
 type HelpTopic = 'getting-started' | 'billing' | 'technical' | 'features'

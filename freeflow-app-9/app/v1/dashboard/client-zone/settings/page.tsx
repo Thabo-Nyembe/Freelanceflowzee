@@ -35,11 +35,11 @@ import {
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { KAZI_CLIENT_DATA } from '@/lib/client-zone-utils'
 
-const logger = createFeatureLogger('ClientSettings')
+const logger = createSimpleLogger('ClientSettings')
 
 // ============================================================================
 // TYPE DEFINITIONS

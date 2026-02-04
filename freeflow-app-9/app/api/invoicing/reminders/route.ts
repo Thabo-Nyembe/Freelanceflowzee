@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import {
 
@@ -55,7 +55,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   type ReminderCreate
 } from '@/lib/invoicing/payment-reminder-service'
 
-const logger = createFeatureLogger('API-PaymentReminders')
+const logger = createSimpleLogger('API-PaymentReminders')
 
 /**
  * GET /api/invoicing/reminders

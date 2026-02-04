@@ -18,7 +18,7 @@ import { authOptions } from '@/lib/auth';
 import { rateLimit } from '@/lib/rate-limit';
 import { getErrorMessage } from '@/lib/error-utils';
 import { getVideoMetadata } from '@/lib/video-utils';
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 
 // ============================================================================
@@ -60,7 +60,7 @@ type AIOperationType = 'transcription' | 'summarization' | 'analysis' | 'generat
 type AIOperationStatus = 'pending' | 'processing' | 'completed' | 'failed';
 type AIProviderType = 'openai' | 'anthropic' | 'google' | 'azure' | 'custom' | 'assemblyai' | 'deepgram';
 
-const logger = createFeatureLogger('API-VideoIntelligence')
+const logger = createSimpleLogger('API-VideoIntelligence')
 
 // Promisify fs functions
 const writeFileAsync = promisify(writeFile);

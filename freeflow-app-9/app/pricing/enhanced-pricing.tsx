@@ -32,9 +32,9 @@ import Marketing2025Wrapper, {
   Enhanced2025HeroSection
 } from '@/components/ui/marketing-2025-wrapper'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Pricing')
+const logger = createSimpleLogger('Pricing')
 
 interface QuickAccessFeature {
   id: string

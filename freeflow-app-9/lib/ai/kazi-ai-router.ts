@@ -7,9 +7,9 @@
 import Anthropic from '@anthropic-ai/sdk'
 import OpenAI from 'openai'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('KaziAI')
+const logger = createSimpleLogger('KaziAI')
 
 // AI Provider Types
 export type AIProvider = 'anthropic' | 'openai' | 'google' | 'openrouter'

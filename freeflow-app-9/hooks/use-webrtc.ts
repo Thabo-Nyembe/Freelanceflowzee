@@ -15,9 +15,9 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('WebRTC')
+const logger = createSimpleLogger('WebRTC')
 
 export interface MediaSettings {
   video: boolean

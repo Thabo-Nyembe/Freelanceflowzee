@@ -7,9 +7,9 @@
  * Based on FreeFlow User Manual - Video Studio Recording System
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('ScreenRecorder')
+const logger = createSimpleLogger('ScreenRecorder')
 
 // ==================== TYPE DEFINITIONS ====================
 

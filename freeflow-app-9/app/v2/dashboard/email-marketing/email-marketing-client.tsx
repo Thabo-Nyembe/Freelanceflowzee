@@ -86,9 +86,9 @@ import {
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('EmailMarketingClient')
+const logger = createSimpleLogger('EmailMarketingClient')
 
 // Types
 type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'paused' | 'failed' | 'cancelled'

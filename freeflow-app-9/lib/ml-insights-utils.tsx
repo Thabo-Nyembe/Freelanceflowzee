@@ -15,9 +15,9 @@
  * - Impact assessment
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('MLInsightsUtils')
+const logger = createSimpleLogger('MLInsightsUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

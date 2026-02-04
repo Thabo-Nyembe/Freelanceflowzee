@@ -40,7 +40,7 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // 🚀 NEW: TanStack Query hooks replace ALL manual fetch() calls!
 import {
@@ -54,7 +54,7 @@ import {
   useExportConversation
 } from '@/lib/api-clients'
 
-const logger = createFeatureLogger('ClientZoneMessages')
+const logger = createSimpleLogger('ClientZoneMessages')
 
 // Simplified message interface (adapts from API)
 interface DisplayMessage {

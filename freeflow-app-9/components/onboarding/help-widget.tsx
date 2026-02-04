@@ -31,10 +31,10 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { useOnboarding } from './onboarding-provider'
 import { getAllTours, getTour } from '@/lib/onboarding-tours'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
-const logger = createFeatureLogger('HelpWidget')
+const logger = createSimpleLogger('HelpWidget')
 
 // ============================================================================
 // HELP WIDGET COMPONENT - USER MANUAL SPEC

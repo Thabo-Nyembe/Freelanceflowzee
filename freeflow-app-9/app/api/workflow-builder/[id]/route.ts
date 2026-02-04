@@ -8,7 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
 
 // ============================================================================
@@ -54,7 +54,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   exportWorkflow
 } from '@/lib/workflow-builder-queries'
 
-const logger = createFeatureLogger('workflow-builder')
+const logger = createSimpleLogger('workflow-builder')
 
 export async function GET(
   request: NextRequest,

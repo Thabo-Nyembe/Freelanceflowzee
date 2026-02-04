@@ -15,7 +15,7 @@ import {
   PaymentNotificationData,
   GenericNotificationData,
 } from '@/lib/email/notification-templates'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -63,7 +63,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
  * - Generic notifications
  */
 
-const logger = createFeatureLogger('NotificationEmail')
+const logger = createSimpleLogger('NotificationEmail')
 
 type NotificationType =
   | 'team_invitation'

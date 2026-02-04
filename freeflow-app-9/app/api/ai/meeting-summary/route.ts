@@ -11,7 +11,7 @@ import {
   SummarizerOptions,
   MeetingTranscript,
 } from '@/lib/ai/meeting-summarizer';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -47,7 +47,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('ai-meeting-summary');
+const logger = createSimpleLogger('ai-meeting-summary');
 
 // Initialize service
 const summarizer = new MeetingSummarizerService();

@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import {
   concatenateVideos,
@@ -50,7 +50,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-VideoMerge')
+const logger = createSimpleLogger('API-VideoMerge')
 
 // Merge output directory
 const MERGE_DIR = process.env.VIDEO_MERGE_DIR || '/tmp/video-merged'

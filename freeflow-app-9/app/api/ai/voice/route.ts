@@ -19,7 +19,7 @@ import {
   TranscriptionOptions,
   TranscriptionResult
 } from '@/lib/whisper/transcription';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { nanoid } from 'nanoid';
 
 // ============================================================================
@@ -56,7 +56,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-VoiceTranscription');
+const logger = createSimpleLogger('API-VoiceTranscription');
 
 // Request types
 interface TranscribeRequest {

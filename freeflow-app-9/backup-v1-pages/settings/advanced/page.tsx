@@ -31,11 +31,11 @@ import {
   defaultNotifications,
   defaultAppearance
 } from '@/lib/settings-utils'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 
-const logger = createFeatureLogger('Settings:Advanced')
+const logger = createSimpleLogger('Settings:Advanced')
 
 export default function AdvancedPage() {
   const { userId, loading: userLoading } = useCurrentUser()

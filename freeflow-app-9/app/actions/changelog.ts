@@ -2,10 +2,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import type { Changelog } from '@/lib/hooks/use-changelog'
 
-const logger = createFeatureLogger('changelog-actions')
+const logger = createSimpleLogger('changelog-actions')
 
 export async function createChange(data: Partial<Changelog>): Promise<ActionResult<Changelog>> {
   try {

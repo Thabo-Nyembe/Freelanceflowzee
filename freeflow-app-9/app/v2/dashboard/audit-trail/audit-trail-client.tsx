@@ -34,10 +34,10 @@ import { useAnnouncer } from '@/lib/accessibility'
 
 // AUTHENTICATION & LOGGING
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
-const logger = createFeatureLogger('AuditTrailPage')
+const logger = createSimpleLogger('AuditTrailPage')
 
 type ViewMode = 'overview' | 'logs' | 'compliance' | 'export'
 

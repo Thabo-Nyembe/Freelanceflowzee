@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { remotionService } from '@/lib/remotion/remotion-service'
 import fs from 'fs/promises'
 import path from 'path'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -45,7 +45,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('remotion-download-api')
+const logger = createSimpleLogger('remotion-download-api')
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {

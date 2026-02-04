@@ -44,7 +44,7 @@ import {
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // DATABASE QUERIES
 import {
@@ -55,7 +55,7 @@ import {
   removeProjectFromMyDay
 } from '@/lib/my-day-queries'
 
-const logger = createFeatureLogger('MyDay-Projects')
+const logger = createSimpleLogger('MyDay-Projects')
 
 interface Project {
   id: string

@@ -15,7 +15,7 @@ import { Slider } from '@/components/ui/slider'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
 import {
@@ -23,7 +23,7 @@ import {
   getProjectStats
 } from '@/lib/3d-modeling-queries'
 
-const logger = createFeatureLogger('3D-Modeling')
+const logger = createSimpleLogger('3D-Modeling')
 
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'

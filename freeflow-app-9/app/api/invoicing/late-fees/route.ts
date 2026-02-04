@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import {
 
@@ -53,7 +53,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   type LateFeeConfig
 } from '@/lib/invoicing/late-fee-service'
 
-const logger = createFeatureLogger('API-LateFees')
+const logger = createSimpleLogger('API-LateFees')
 
 /**
  * GET /api/invoicing/late-fees

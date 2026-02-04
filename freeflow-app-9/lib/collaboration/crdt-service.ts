@@ -8,9 +8,9 @@
  * - Array/list operations
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('CRDTService')
+const logger = createSimpleLogger('CRDTService')
 
 // ============================================================================
 // Types

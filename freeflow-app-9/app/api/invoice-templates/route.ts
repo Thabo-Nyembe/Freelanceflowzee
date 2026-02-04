@@ -11,7 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -47,7 +47,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('invoice-templates')
+const logger = createSimpleLogger('invoice-templates')
 
 // Cached function for user's invoice templates (user-specific, 30 minutes cache)
 const getCachedInvoiceTemplates = unstable_cache(

@@ -9,11 +9,11 @@ import { Mail, Bell, Smartphone } from 'lucide-react'
 import { NotificationSettings, defaultNotifications } from '@/lib/settings-utils'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 
-const logger = createFeatureLogger('Settings:Notifications')
+const logger = createSimpleLogger('Settings:Notifications')
 
 export default function NotificationsPage() {
   const { userId, loading: userLoading } = useCurrentUser()

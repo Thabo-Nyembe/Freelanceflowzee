@@ -18,12 +18,12 @@ import {
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // MY DAY UTILITIES
 import { mockAIInsights, type AIInsight } from '@/lib/my-day-utils'
 
-const logger = createFeatureLogger('MyDay-Insights')
+const logger = createSimpleLogger('MyDay-Insights')
 
 const ADDITIONAL_INSIGHTS: AIInsight[] = [
   {

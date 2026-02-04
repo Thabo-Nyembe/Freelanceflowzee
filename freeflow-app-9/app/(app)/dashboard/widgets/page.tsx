@@ -28,10 +28,10 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('Widgets')
+const logger = createSimpleLogger('Widgets')
 
 // ============================================================================
 // FRAMER MOTION COMPONENTS

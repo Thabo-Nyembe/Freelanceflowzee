@@ -7,7 +7,7 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -47,7 +47,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
-const logger = createFeatureLogger('admin-invoicing')
+const logger = createSimpleLogger('admin-invoicing')
 
 // Mapper function to convert AdminInvoice (snake_case) to Invoice (camelCase)
 function mapAdminInvoiceToInvoice(adminInvoice: AdminInvoice): Invoice {

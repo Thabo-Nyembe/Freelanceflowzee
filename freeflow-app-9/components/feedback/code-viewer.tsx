@@ -21,7 +21,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // Import Prism for proper syntax highlighting
 import Prism from 'prismjs'
@@ -49,7 +49,7 @@ import 'prismjs/components/prism-css'
 import 'prismjs/components/prism-scss'
 import 'prismjs/components/prism-graphql'
 
-const logger = createFeatureLogger('CodeViewer')
+const logger = createSimpleLogger('CodeViewer')
 
 // Language mapping for Prism
 const LANGUAGE_MAP: Record<string, string> = {

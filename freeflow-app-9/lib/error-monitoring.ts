@@ -9,9 +9,9 @@
  * - Performance monitoring
  */
 
-import { createFeatureLogger } from './logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const errorLogger = createFeatureLogger('ErrorMonitoring')
+const errorLogger = createSimpleLogger('ErrorMonitoring')
 
 // ============================================================================
 // TYPES

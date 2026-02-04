@@ -40,13 +40,13 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // AI FEATURES
 import { RevenueInsightsWidget } from '@/components/ai/revenue-insights-widget'
 import { useCurrentUser, useRevenueData } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('Invoices')
+const logger = createSimpleLogger('Invoices')
 import {
   FileText,
   Plus,

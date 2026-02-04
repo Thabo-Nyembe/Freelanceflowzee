@@ -37,7 +37,7 @@ import { AIInsightsPanel } from '@/components/ai/ai-insights-panel'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // PRODUCTION LOGGER
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ANALYTICS UTILS
 import {
@@ -48,7 +48,7 @@ import {
   getGrowthIndicator
 } from '@/lib/analytics-utils'
 
-const logger = createFeatureLogger('Analytics - Overview')
+const logger = createSimpleLogger('Analytics - Overview')
 
 const TextShimmer = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
   return (

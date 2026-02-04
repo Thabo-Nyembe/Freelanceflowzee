@@ -26,9 +26,9 @@ import {
   actionValidationError,
   ActionResult
 } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('clients-actions')
+const logger = createSimpleLogger('clients-actions')
 
 /**
  * Create a new client

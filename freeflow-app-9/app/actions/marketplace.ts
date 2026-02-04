@@ -4,9 +4,9 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { AppCategory, PricingModel } from '@/lib/hooks/use-marketplace'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('marketplace-actions')
+const logger = createSimpleLogger('marketplace-actions')
 
 // =============================================
 // MARKETPLACE APP ACTIONS

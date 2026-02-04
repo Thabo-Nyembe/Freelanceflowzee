@@ -33,9 +33,9 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('PerformanceAnalytics')
+const logger = createSimpleLogger('PerformanceAnalytics')
 
 export default function PerformanceAnalyticsPage() {
   // A+++ STATE MANAGEMENT

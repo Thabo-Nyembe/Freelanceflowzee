@@ -27,12 +27,12 @@ import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { CollapsibleInsightsPanel, InsightsToggleButton, useInsightsPanel } from '@/components/ui/collapsible-insights-panel'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { KAZI_CLIENT_DATA } from '@/lib/client-zone-utils'
 import { useMyReferrals, useMyRewards, useReferralStats, useUserReferralCode } from '@/lib/hooks/use-referrals-extended'
 
-const logger = createFeatureLogger('ReferralLoyaltySystem')
+const logger = createSimpleLogger('ReferralLoyaltySystem')
 
 // ============================================================================
 // TYPE DEFINITIONS

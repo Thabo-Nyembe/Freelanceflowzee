@@ -13,9 +13,9 @@
 
 import { Server as SocketIOServer } from 'socket.io'
 import { Server as HTTPServer } from 'http'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('WebSocket')
+const logger = createSimpleLogger('WebSocket')
 
 export interface User {
   id: string

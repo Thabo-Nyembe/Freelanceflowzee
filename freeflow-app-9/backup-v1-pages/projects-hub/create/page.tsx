@@ -25,10 +25,10 @@ import {
   Rocket,
   Loader2
 } from 'lucide-react'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
-const logger = createFeatureLogger('Projects-Create')
+const logger = createSimpleLogger('Projects-Create')
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'

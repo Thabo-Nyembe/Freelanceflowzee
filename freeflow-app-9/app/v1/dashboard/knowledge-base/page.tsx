@@ -52,12 +52,12 @@ import {
 } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { motion } from 'framer-motion'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { toast } from 'sonner'
 
-const logger = createFeatureLogger('KnowledgeBase')
+const logger = createSimpleLogger('KnowledgeBase')
 
 interface Article {
   id: string
@@ -242,16 +242,16 @@ export default function ClientKnowledgeBase() {
 
   const handleMarkHelpful = async (articleId: string) => {
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
+      const { createSimpleLogger } = await import('@/lib/simple-logger')
+      const logger = createSimpleLogger('knowledge-base')
       const { toast } = await import('sonner')
     const { submitArticleFeedback } = await import('@/lib/knowledge-base-queries')
       // await submitArticleFeedback(articleId, userId, 'helpful')
 
       toast.success('Thank you for your feedback!')
     } catch (err: unknown) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
+      const { createSimpleLogger } = await import('@/lib/simple-logger')
+      const logger = createSimpleLogger('knowledge-base')
       const { toast } = await import('sonner')
       logger.error('Failed to submit feedback', { error: err.message })
       toast.error('Failed to submit feedback')
@@ -260,16 +260,16 @@ export default function ClientKnowledgeBase() {
 
   const handleSearchArticles = async (query: string) => {
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
+      const { createSimpleLogger } = await import('@/lib/simple-logger')
+      const logger = createSimpleLogger('knowledge-base')
     const { searchArticles } = await import('@/lib/knowledge-base-queries')
       // const results = await searchArticles(query, userId)
 
       // Update search results
       setSearchQuery(query)
     } catch (err: unknown) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
+      const { createSimpleLogger } = await import('@/lib/simple-logger')
+      const logger = createSimpleLogger('knowledge-base')
       logger.error('Search failed', { error: err.message })
     }
   }

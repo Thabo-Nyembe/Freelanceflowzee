@@ -7,9 +7,9 @@
  * MIGRATED: Batch #15 - Removed mock data, using database hooks
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AICodeCompletionUtils')
+const logger = createSimpleLogger('AICodeCompletionUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

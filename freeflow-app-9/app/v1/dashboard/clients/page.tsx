@@ -56,13 +56,13 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // AI FEATURES
 import { LeadScoringWidget } from '@/components/ai/lead-scoring-widget'
 import { useCurrentUser, useLeadsData } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('Clients')
+const logger = createSimpleLogger('Clients')
 
 // ============================================================================
 // FRAMER MOTION ANIMATION COMPONENTS

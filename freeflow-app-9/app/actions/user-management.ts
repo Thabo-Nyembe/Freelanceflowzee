@@ -10,14 +10,14 @@ import {
   actionValidationError,
   type ActionResult
 } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { uuidSchema } from '@/lib/validations'
 
 // ============================================
 // LOGGER
 // ============================================
 
-const logger = createFeatureLogger('user-management')
+const logger = createSimpleLogger('user-management')
 
 // ============================================
 // VALIDATION SCHEMAS

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('business-intelligence')
+const logger = createSimpleLogger('business-intelligence')
 
 // ============================================================================
 // Business Intelligence API
@@ -75,12 +75,11 @@ async function getBusinessOverview(supabase: any, userId: string, period: string
       startDate = new Date(now.getFullYear(), now.getMonth(), 1)
   }
 
-  // Fetch revenue data from invoices
+  // Fetch ALL invoices (to calculate total revenue, not just new invoices this period)
   const { data: invoices } = await supabase
     .from('invoices')
-    .select('amount, status, created_at, paid_at')
+    .select('total, status, created_at, paid_date')
     .eq('user_id', userId)
-    .gte('created_at', startDate.toISOString())
 
   // Fetch expenses
   const { data: expenses } = await supabase
@@ -95,12 +94,11 @@ async function getBusinessOverview(supabase: any, userId: string, period: string
     .select('id, name, created_at, status')
     .eq('user_id', userId)
 
-  // Fetch projects
+  // Fetch ALL projects (not just those created in the period)
   const { data: projects } = await supabase
     .from('projects')
     .select('id, title, status, budget, created_at')
     .eq('user_id', userId)
-    .gte('created_at', startDate.toISOString())
 
   // Fetch time entries for utilization
   const { data: timeEntries } = await supabase
@@ -109,9 +107,14 @@ async function getBusinessOverview(supabase: any, userId: string, period: string
     .eq('user_id', userId)
     .gte('created_at', startDate.toISOString())
 
-  // Calculate metrics
+  // Calculate metrics (total revenue from paid invoices)
   const totalRevenue = invoices?.filter((i: any) => i.status === 'paid')
-    .reduce((sum: number, i: any) => sum + (i.amount || 0), 0) || 0
+    .reduce((sum: number, i: any) => sum + (parseFloat(i.total) || 0), 0) || 0
+
+  // Revenue for this period only
+  const periodRevenue = invoices?.filter((i: any) =>
+    i.status === 'paid' && new Date(i.created_at) >= startDate
+  ).reduce((sum: number, i: any) => sum + (parseFloat(i.total) || 0), 0) || 0
 
   const totalExpenses = expenses?.reduce((sum: number, e: any) => sum + (e.amount || 0), 0) || 0
   const grossProfit = totalRevenue - totalExpenses
@@ -119,7 +122,7 @@ async function getBusinessOverview(supabase: any, userId: string, period: string
 
   // Calculate recurring revenue (from retainer invoices)
   const recurringRevenue = invoices?.filter((i: any) => i.status === 'paid')
-    .reduce((sum: number, i: any) => sum + (i.amount || 0) * 0.3, 0) || 0 // Estimate 30% as recurring
+    .reduce((sum: number, i: any) => sum + (parseFloat(i.total) || 0) * 0.3, 0) || 0 // Estimate 30% as recurring
 
   // Client metrics
   const activeClients = clients?.filter((c: any) => c.status === 'active').length || 0
@@ -133,21 +136,24 @@ async function getBusinessOverview(supabase: any, userId: string, period: string
     .reduce((sum: number, t: any) => sum + (t.duration || 0), 0) || 0
   const utilizationRate = totalHours > 0 ? (billableHours / totalHours) * 100 : 0
 
-  // Project metrics
+  // Project metrics (count all projects, new projects this period)
   const completedProjects = projects?.filter((p: any) => p.status === 'completed').length || 0
-  const activeProjects = projects?.filter((p: any) => p.status === 'active').length || 0
+  const activeProjects = projects?.filter((p: any) => p.status === 'active' || p.status === 'in_progress').length || 0
+  const newProjectsThisPeriod = projects?.filter((p: any) =>
+    new Date(p.created_at) >= startDate
+  ).length || 0
 
   // Calculate previous period for comparison
   const prevStartDate = new Date(startDate.getTime() - (now.getTime() - startDate.getTime()))
   const { data: prevInvoices } = await supabase
     .from('invoices')
-    .select('amount, status')
+    .select('total, status')
     .eq('user_id', userId)
     .gte('created_at', prevStartDate.toISOString())
     .lt('created_at', startDate.toISOString())
 
   const prevRevenue = prevInvoices?.filter((i: any) => i.status === 'paid')
-    .reduce((sum: number, i: any) => sum + (i.amount || 0), 0) || 0
+    .reduce((sum: number, i: any) => sum + (parseFloat(i.total) || 0), 0) || 0
 
   const revenueGrowth = prevRevenue > 0
     ? ((totalRevenue - prevRevenue) / prevRevenue) * 100
@@ -155,7 +161,8 @@ async function getBusinessOverview(supabase: any, userId: string, period: string
 
   return NextResponse.json({
     revenue: {
-      total: totalRevenue,
+      total: totalRevenue, // All-time total revenue
+      thisPeriod: periodRevenue, // Revenue for current period
       recurring: recurringRevenue,
       projectBased: totalRevenue - recurringRevenue,
       growth: revenueGrowth
@@ -176,6 +183,7 @@ async function getBusinessOverview(supabase: any, userId: string, period: string
       total: projects?.length || 0,
       active: activeProjects,
       completed: completedProjects,
+      newThisPeriod: newProjectsThisPeriod,
       averageBudget: projects?.length > 0
         ? projects.reduce((sum: number, p: any) => sum + (p.budget || 0), 0) / projects.length
         : 0
@@ -304,7 +312,7 @@ async function getProfitabilityAnalysis(supabase: any, userId: string, startDate
     .select(`
       id, title, budget, status, client_id,
       clients (name),
-      invoices (amount, status),
+      invoices (total, status),
       time_entries (duration, billable)
     `)
     .eq('user_id', userId)
@@ -314,7 +322,7 @@ async function getProfitabilityAnalysis(supabase: any, userId: string, startDate
   const projectProfitability = projects?.map((project: any) => {
     const revenue = project.invoices
       ?.filter((i: any) => i.status === 'paid')
-      .reduce((sum: number, i: any) => sum + (i.amount || 0), 0) || 0
+      .reduce((sum: number, i: any) => sum + (parseFloat(i.total) || 0), 0) || 0
 
     const totalHours = project.time_entries
       ?.reduce((sum: number, t: any) => sum + (t.duration || 0), 0) || 0
@@ -408,14 +416,14 @@ async function getClientValueAnalysis(supabase: any, userId: string) {
     .from('clients')
     .select(`
       id, name, email, status, created_at,
-      invoices (amount, status, created_at),
+      invoices (total, status, created_at),
       projects (id, status, budget)
     `)
     .eq('user_id', userId)
 
   const clientMetrics = clients?.map((client: any) => {
     const paidInvoices = client.invoices?.filter((i: any) => i.status === 'paid') || []
-    const totalRevenue = paidInvoices.reduce((sum: number, i: any) => sum + (i.amount || 0), 0)
+    const totalRevenue = paidInvoices.reduce((sum: number, i: any) => sum + (parseFloat(i.total) || 0), 0)
     const projectCount = client.projects?.length || 0
     const completedProjects = client.projects?.filter((p: any) => p.status === 'completed').length || 0
 
@@ -539,7 +547,7 @@ async function getRevenueForecast(supabase: any, userId: string) {
   // Fetch historical revenue data
   const { data: invoices } = await supabase
     .from('invoices')
-    .select('amount, status, created_at')
+    .select('total, status, created_at')
     .eq('user_id', userId)
     .eq('status', 'paid')
     .order('created_at', { ascending: true })
@@ -548,7 +556,7 @@ async function getRevenueForecast(supabase: any, userId: string) {
   const monthlyRevenue: Record<string, number> = {}
   invoices?.forEach((invoice: any) => {
     const month = invoice.created_at.substring(0, 7) // YYYY-MM
-    monthlyRevenue[month] = (monthlyRevenue[month] || 0) + invoice.amount
+    monthlyRevenue[month] = (monthlyRevenue[month] || 0) + parseFloat(invoice.total || 0)
   })
 
   const months = Object.keys(monthlyRevenue).sort()
@@ -591,11 +599,11 @@ async function getRevenueForecast(supabase: any, userId: string) {
   // Fetch pipeline (pending invoices/proposals)
   const { data: pendingInvoices } = await supabase
     .from('invoices')
-    .select('amount, status')
+    .select('total, status')
     .eq('user_id', userId)
     .in('status', ['pending', 'sent'])
 
-  const pipelineRevenue = pendingInvoices?.reduce((sum: number, i: any) => sum + (i.amount || 0), 0) || 0
+  const pipelineRevenue = pendingInvoices?.reduce((sum: number, i: any) => sum + (parseFloat(i.total) || 0), 0) || 0
 
   return NextResponse.json({
     historical: {

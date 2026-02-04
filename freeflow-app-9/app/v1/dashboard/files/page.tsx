@@ -41,7 +41,7 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // 🚀 NEW: TanStack Query hooks replace ALL manual fetch() calls!
 import {
@@ -71,7 +71,7 @@ const useShareFile = () => {
   })
 }
 
-const logger = createFeatureLogger('ClientZoneFiles')
+const logger = createSimpleLogger('ClientZoneFiles')
 
 // Helper function to format file size
 const formatFileSize = (bytes: number): string => {

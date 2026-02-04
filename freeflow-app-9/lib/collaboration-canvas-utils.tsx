@@ -5,9 +5,9 @@
 // layers, real-time collaboration, and version control
 // ============================================================================
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('CollaborationCanvasUtils')
+const logger = createSimpleLogger('CollaborationCanvasUtils')
 
 // ============================================================================
 // TYPESCRIPT TYPES & INTERFACES

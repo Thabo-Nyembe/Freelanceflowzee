@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { formatPercentage } from '@/lib/admin-overview-utils'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -25,7 +25,7 @@ import {
   TrendingUp
 } from 'lucide-react'
 
-const logger = createFeatureLogger('admin-overview-layout')
+const logger = createSimpleLogger('admin-overview-layout')
 
 interface AdminOverviewLayoutProps {
   children: React.ReactNode

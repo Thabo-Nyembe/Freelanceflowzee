@@ -3,9 +3,9 @@
  * Comprehensive utilities for multi-cloud file storage
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Storage-Utils')
+const logger = createSimpleLogger('Storage-Utils')
 
 // ============================================================================
 // TYPESCRIPT INTERFACES

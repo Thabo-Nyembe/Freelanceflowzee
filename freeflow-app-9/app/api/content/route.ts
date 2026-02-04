@@ -1,42 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
 
-// ============================================================================
-// DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
-// ============================================================================
+// Route configuration for optimization
+export const dynamic = 'force-dynamic'
+export const revalidate = 60 // Cache for 60 seconds
 
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-const DEMO_USER_EMAIL = 'alex@freeflow.io'
-
-function isDemoMode(request: NextRequest): boolean {
-  if (typeof request === 'undefined') return false
-  const url = new URL(request.url)
-  return (
-    url.searchParams.get('demo') === 'true' ||
-    request.cookies.get('demo_mode')?.value === 'true' ||
-    request.headers.get('X-Demo-Mode') === 'true'
-  )
-}
-
-function getDemoUserId(session: any, demoMode: boolean): string | null {
-  if (!session?.user) {
-    return demoMode ? DEMO_USER_ID : null
+// Simple logging without heavy imports
+const log = (level: string, message: string, data?: any) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[${level}] content-api:`, message, data || '')
   }
-
-  const userEmail = session.user.email
-  const isDemoAccount = userEmail === DEMO_USER_EMAIL ||
-                       userEmail === 'demo@kazi.io' ||
-                       userEmail === 'test@kazi.dev'
-
-  if (isDemoAccount || demoMode) {
-    return DEMO_USER_ID
-  }
-
-  return session.user.id || session.user.authId || null
 }
-
-const logger = createFeatureLogger('content-api')
 
 export async function GET(request: Request) {
   try {
@@ -93,9 +67,13 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json(response)
+    return NextResponse.json(response, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120'
+      }
+    })
   } catch (error) {
-    logger.error('Content API error', { error })
+    log('error', 'Content API error', error)
     return NextResponse.json(
       { error: 'Failed to fetch content' },
       { status: 500 }

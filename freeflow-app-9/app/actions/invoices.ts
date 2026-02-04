@@ -27,9 +27,9 @@ import {
   actionValidationError,
   ActionResult
 } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('invoices-actions')
+const logger = createSimpleLogger('invoices-actions')
 
 // Payment data schema for marking as paid
 const paymentDataSchema = z.object({

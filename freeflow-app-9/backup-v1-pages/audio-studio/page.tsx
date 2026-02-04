@@ -16,11 +16,11 @@ import { motion } from 'framer-motion'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('AudioStudio')
+const logger = createSimpleLogger('AudioStudio')
 
 import { Mic, Headphones, Activity, Volume2, VolumeX,
   Play, Pause, Square, Circle,

@@ -21,9 +21,9 @@ import Link from 'next/link';
 import {
   ClientReview
 } from '@/components/video/client-review-panel';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('VideoReview');
+const logger = createSimpleLogger('VideoReview');
 
 interface VideoReviewPageProps {
   params: { id: string };

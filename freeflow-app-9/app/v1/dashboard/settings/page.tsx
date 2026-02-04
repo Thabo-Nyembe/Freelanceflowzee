@@ -29,10 +29,10 @@ import {
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('ClientSettings')
+const logger = createSimpleLogger('ClientSettings')
 
 // Local storage key for persisting settings
 const SETTINGS_STORAGE_KEY = 'kazi_user_settings'

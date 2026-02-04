@@ -10,9 +10,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 
-const logger = createFeatureLogger('CostOptimization');
+const logger = createSimpleLogger('CostOptimization');
 
 // ==========================================================
 // TYPES AND INTERFACES

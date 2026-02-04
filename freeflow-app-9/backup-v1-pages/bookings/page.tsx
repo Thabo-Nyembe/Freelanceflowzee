@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -88,7 +88,7 @@ import {
   validateBookingDate
 } from '@/lib/bookings-utils'
 
-const logger = createFeatureLogger('Bookings')
+const logger = createSimpleLogger('Bookings')
 
 export default function UpcomingBookingsPage() {
   // State Management

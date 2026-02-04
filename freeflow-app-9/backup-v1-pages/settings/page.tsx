@@ -24,11 +24,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { UserProfile, defaultProfile } from '@/lib/settings-utils'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 
-const logger = createFeatureLogger('Settings:Profile')
+const logger = createSimpleLogger('Settings:Profile')
 
 export default function ProfilePage() {
   const { userId, loading: userLoading } = useCurrentUser()

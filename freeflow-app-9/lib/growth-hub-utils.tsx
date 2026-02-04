@@ -5,9 +5,9 @@
  * personalized roadmaps, user type-specific strategies, and business scaling tools.
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('GrowthHubUtils')
+const logger = createSimpleLogger('GrowthHubUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

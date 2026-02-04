@@ -3,9 +3,9 @@
  * Comprehensive utilities for AI-powered video generation and management
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AI-Video-Generation-Utils')
+const logger = createSimpleLogger('AI-Video-Generation-Utils')
 
 // ============================================================================
 // TYPESCRIPT INTERFACES

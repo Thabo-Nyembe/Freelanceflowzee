@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CreditCard } from 'lucide-react'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import {
@@ -31,7 +31,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Check, ArrowRight, Building, Receipt, Download, Star } from 'lucide-react'
 
-const logger = createFeatureLogger('Settings:Billing')
+const logger = createSimpleLogger('Settings:Billing')
 
 interface BillingData {
   subscription?: any

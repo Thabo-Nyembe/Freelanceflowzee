@@ -62,7 +62,7 @@ import {
 
 // A+++ UTILITIES
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // SUPABASE INTEGRATION
@@ -75,7 +75,7 @@ import {
   getCommunityStats,
 } from '@/lib/community-hub-queries'
 
-const logger = createFeatureLogger('Community-Hub')
+const logger = createSimpleLogger('Community-Hub')
 
 interface CommunityMember {
   id: string

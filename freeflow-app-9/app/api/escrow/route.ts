@@ -12,11 +12,11 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { stripeConnectService } from '@/lib/stripe/stripe-connect-service'
 import { randomBytes } from 'crypto'
 
-const logger = createFeatureLogger('API-Escrow')
+const logger = createSimpleLogger('API-Escrow')
 
 // Demo user ID for demo mode
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'

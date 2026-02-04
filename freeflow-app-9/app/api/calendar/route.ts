@@ -6,10 +6,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { calendarService } from '@/lib/calendar/calendar-service';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { getServerSession } from '@/lib/auth';
 
-const logger = createFeatureLogger('calendar');
+const logger = createSimpleLogger('calendar');
 
 // Demo calendar events for investor demo
 function getDemoEvents() {

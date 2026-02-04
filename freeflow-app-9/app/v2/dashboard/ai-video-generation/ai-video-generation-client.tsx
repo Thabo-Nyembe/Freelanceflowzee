@@ -62,7 +62,7 @@ import { EmptyState } from '@/components/ui/empty-states'
 import { useAnnouncer } from '@/lib/accessibility'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // SUPABASE & QUERIES
@@ -75,7 +75,7 @@ import {
   type VideoQuality
 } from '@/lib/ai-video-queries'
 
-const logger = createFeatureLogger('AI-Video-Generation')
+const logger = createSimpleLogger('AI-Video-Generation')
 
 // ============================================================================
 // TYPESCRIPT INTERFACES

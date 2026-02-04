@@ -10,7 +10,7 @@ import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 /**
  * Universal Pinpoint System (UPS) - Visual Feedback Component
  *
@@ -58,7 +58,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react'
 
-const logger = createFeatureLogger('CreativeAssetGenerator')
+const logger = createSimpleLogger('CreativeAssetGenerator')
 
 // Creative fields configuration
 const CREATIVE_FIELDS = [

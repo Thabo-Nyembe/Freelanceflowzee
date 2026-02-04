@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import {
@@ -39,7 +39,7 @@ import {
   type FinancialInsight
 } from '@/lib/financial-hub-utils'
 
-const logger = createFeatureLogger('FinancialOverview')
+const logger = createSimpleLogger('FinancialOverview')
 
 export default function FinancialOverviewPage() {
   const { userId, loading: userLoading } = useCurrentUser()

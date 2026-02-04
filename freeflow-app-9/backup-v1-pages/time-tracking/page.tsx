@@ -31,11 +31,11 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { archiveTimeEntry } from '@/lib/time-tracking-queries'
 
-const logger = createFeatureLogger('TimeTracking')
+const logger = createSimpleLogger('TimeTracking')
 
 interface TimeEntry {
   id: string

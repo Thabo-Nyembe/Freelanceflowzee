@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   Dialog,
@@ -53,7 +53,7 @@ import {
   type Invoice
 } from '@/lib/financial-hub-utils'
 
-const logger = createFeatureLogger('InvoicesPage')
+const logger = createSimpleLogger('InvoicesPage')
 
 // Map database invoice to UI invoice type
 function mapDbInvoiceToUi(dbInvoice: any): Invoice {

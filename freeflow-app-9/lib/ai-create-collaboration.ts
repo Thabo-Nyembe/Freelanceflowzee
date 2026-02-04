@@ -10,9 +10,9 @@
  * - Version control and branching
  */
 
-import { createFeatureLogger } from './logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AICollaboration')
+const logger = createSimpleLogger('AICollaboration')
 
 // ============================================================================
 // TYPES

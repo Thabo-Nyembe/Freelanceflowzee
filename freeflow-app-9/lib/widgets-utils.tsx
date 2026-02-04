@@ -5,9 +5,9 @@
 // templates, analytics, and real-time data visualization
 // ============================================================================
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('WidgetsUtils')
+const logger = createSimpleLogger('WidgetsUtils')
 
 // ============================================================================
 // TYPESCRIPT TYPES & INTERFACES

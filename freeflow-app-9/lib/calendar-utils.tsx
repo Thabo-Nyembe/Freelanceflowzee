@@ -1,9 +1,9 @@
 // SESSION_13: CALENDAR UTILITIES - World-Class Calendar & Scheduling System
 // Production-ready calendar with meeting management, AI scheduling, and analytics
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Calendar')
+const logger = createSimpleLogger('Calendar')
 
 // ================================
 // TYPESCRIPT INTERFACES

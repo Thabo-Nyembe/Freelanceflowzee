@@ -3,9 +3,9 @@
  * Comprehensive utilities for AI tools management and analytics
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AI-Enhanced-Utils')
+const logger = createSimpleLogger('AI-Enhanced-Utils')
 
 // ============================================================================
 // TYPESCRIPT INTERFACES

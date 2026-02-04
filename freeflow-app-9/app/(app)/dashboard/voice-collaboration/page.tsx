@@ -69,7 +69,7 @@ import { EmptyState } from '@/components/ui/empty-states'
 import { useAnnouncer } from '@/lib/accessibility'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   type VoiceRoom,
@@ -88,7 +88,7 @@ import {
   getRoomTypeIcon
 } from '@/lib/voice-collaboration-utils'
 
-const logger = createFeatureLogger('VoiceCollaboration')
+const logger = createSimpleLogger('VoiceCollaboration')
 
 // ========================================
 // REDUCER

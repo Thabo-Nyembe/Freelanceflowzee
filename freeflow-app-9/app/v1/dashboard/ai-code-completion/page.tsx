@@ -20,7 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 
@@ -33,7 +33,7 @@ import {
   type ProgrammingLanguage
 } from '@/lib/ai-code-queries'
 
-const logger = createFeatureLogger('AICodeCompletion')
+const logger = createSimpleLogger('AICodeCompletion')
 
 const PROGRAMMING_LANGUAGES = [
   { id: 'javascript', name: 'JavaScript', icon: '🟨', color: 'bg-yellow-500' },

@@ -47,9 +47,9 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { motion, AnimatePresence } from 'framer-motion'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Plugin-Marketplace')
+const logger = createSimpleLogger('Plugin-Marketplace')
 
 // ============================================================================
 // ============================================================================

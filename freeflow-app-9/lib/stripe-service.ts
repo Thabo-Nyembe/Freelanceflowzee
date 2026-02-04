@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('StripeService')
+const logger = createSimpleLogger('StripeService')
 
 interface PaymentIntentData {
   amount: number

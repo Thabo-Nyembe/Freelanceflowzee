@@ -148,8 +148,8 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // Production Logger
-import { createFeatureLogger } from '@/lib/logger'
-const logger = createFeatureLogger('Messages')
+import { createSimpleLogger } from '@/lib/simple-logger'
+const logger = createSimpleLogger('Messages')
 
 // Messages Utilities - World-class A+++ messaging system
 

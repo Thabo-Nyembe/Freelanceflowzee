@@ -8,8 +8,8 @@ import { Progress } from '@/components/ui/progress'
 import { Users, Clock } from 'lucide-react'
 
 // PRODUCTION LOGGER
-import { createFeatureLogger } from '@/lib/logger'
-const logger = createFeatureLogger('ProjectsHub:Active')
+import { createSimpleLogger } from '@/lib/simple-logger'
+const logger = createSimpleLogger('ProjectsHub:Active')
 
 // A+++ Utilities
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'

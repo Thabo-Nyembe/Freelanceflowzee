@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
   BarChart3,
   TrendingUp,
@@ -26,7 +26,7 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import type { BookingStats } from '@/lib/bookings-queries'
 
-const logger = createFeatureLogger('BookingsAnalytics')
+const logger = createSimpleLogger('BookingsAnalytics')
 
 // Fallback stats for when no real data exists
 const FALLBACK_STATS: BookingStats = {

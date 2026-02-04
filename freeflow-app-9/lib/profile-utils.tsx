@@ -5,9 +5,9 @@
  * experience, portfolio, social links, and account settings.
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('ProfileUtils')
+const logger = createSimpleLogger('ProfileUtils')
 
 // ============================================================================
 // TYPES & INTERFACES

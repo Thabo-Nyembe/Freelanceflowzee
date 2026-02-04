@@ -36,13 +36,13 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 // A+++ UTILITIES
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { KAZI_CLIENT_DATA } from '@/lib/client-zone-utils'
 
 // NEW CLIENT VALUE COMPONENTS
 import { ClientOnboardingTour } from '@/components/onboarding/client-onboarding-tour'
 
-const logger = createFeatureLogger('ClientZoneLayout')
+const logger = createSimpleLogger('ClientZoneLayout')
 
 interface ClientZoneLayoutProps {
   children: ReactNode

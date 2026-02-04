@@ -3,9 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('releases-actions')
+const logger = createSimpleLogger('releases-actions')
 
 // Release Types
 type ReleaseStatus = 'draft' | 'scheduled' | 'rolling' | 'deployed' | 'failed' | 'rolled_back'

@@ -15,9 +15,9 @@
  * - Bulk operations
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('FilesUtils')
+const logger = createSimpleLogger('FilesUtils')
 
 // ========================================
 // TYPE DEFINITIONS

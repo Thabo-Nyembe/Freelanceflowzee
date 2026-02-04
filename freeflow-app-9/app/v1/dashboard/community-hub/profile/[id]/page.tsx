@@ -40,11 +40,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('CommunityProfile')
+const logger = createSimpleLogger('CommunityProfile')
 
 // ============================================================================
 // TYPES

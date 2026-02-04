@@ -29,9 +29,9 @@ import {
   BookOpen
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('TourManager')
+const logger = createSimpleLogger('TourManager')
 
 // ============================================================================
 // TYPES

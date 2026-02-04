@@ -39,9 +39,9 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('Connectors')
+const logger = createSimpleLogger('Connectors')
 
 // ============================================================================
 // TYPE DEFINITIONS - Zapier Level Integration Platform

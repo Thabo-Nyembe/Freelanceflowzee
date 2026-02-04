@@ -5,9 +5,9 @@
 // third-party service connections, and sync monitoring
 // ============================================================================
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('IntegrationsUtils')
+const logger = createSimpleLogger('IntegrationsUtils')
 
 // ============================================================================
 // TYPESCRIPT TYPES & INTERFACES

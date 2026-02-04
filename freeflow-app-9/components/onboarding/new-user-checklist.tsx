@@ -53,10 +53,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
 import { createClient } from '@/lib/supabase/client'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { cn } from '@/lib/utils'
 
-const logger = createFeatureLogger('NewUserChecklist')
+const logger = createSimpleLogger('NewUserChecklist')
 
 // ============================================================================
 // TYPES

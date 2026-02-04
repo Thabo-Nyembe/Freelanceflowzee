@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createFeatureLogger } from '@/lib/logger';
+import { createSimpleLogger } from '@/lib/simple-logger';
 import { z } from 'zod';
 import {
 
@@ -49,7 +49,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   performFullSync
 } from '@/lib/plaid/service';
 
-const logger = createFeatureLogger('plaid-api');
+const logger = createSimpleLogger('plaid-api');
 
 const exchangeTokenSchema = z.object({
   publicToken: z.string().min(1, 'Public token is required'),

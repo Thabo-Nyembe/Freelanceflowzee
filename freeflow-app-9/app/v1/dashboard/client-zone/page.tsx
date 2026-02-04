@@ -55,7 +55,7 @@ import ClientZoneGallery from '@/components/client-zone-gallery'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // CLIENT ZONE DATABASE QUERIES
@@ -86,7 +86,7 @@ import { ClientValueDashboard } from '@/components/client-value-dashboard'
 import { ReferralLoyaltySystem } from '@/components/referral-loyalty-system'
 
 // MIGRATED: Batch #22 - Verified database hook integration
-const logger = createFeatureLogger('ClientZone')
+const logger = createSimpleLogger('ClientZone')
 
 // ============================================================================
 // FRAMER MOTION COMPONENTS

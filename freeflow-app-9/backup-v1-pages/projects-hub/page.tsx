@@ -46,8 +46,8 @@ import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 
 // PRODUCTION LOGGER
-import { createFeatureLogger } from '@/lib/logger'
-const logger = createFeatureLogger('ProjectsHub')
+import { createSimpleLogger } from '@/lib/simple-logger'
+const logger = createSimpleLogger('ProjectsHub')
 
 // A+++ Utilities
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'

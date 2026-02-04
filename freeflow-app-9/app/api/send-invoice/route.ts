@@ -4,9 +4,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('invoice-email-api')
+const logger = createSimpleLogger('invoice-email-api')
 
 interface EmailAttachment {
   filename: string

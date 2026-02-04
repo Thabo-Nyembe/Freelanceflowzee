@@ -19,7 +19,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -32,7 +32,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
-const logger = createFeatureLogger('AutomationPage')
+const logger = createSimpleLogger('AutomationPage')
 
 type ViewMode = 'overview' | 'workflows' | 'templates' | 'builder' | 'executions'
 

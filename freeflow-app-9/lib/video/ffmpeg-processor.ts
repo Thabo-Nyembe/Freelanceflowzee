@@ -5,11 +5,11 @@
  * Handles encoding, transcoding, compression, and format conversion
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import path from 'path'
 import fs from 'fs/promises'
 
-const logger = createFeatureLogger('FFmpegProcessor')
+const logger = createSimpleLogger('FFmpegProcessor')
 
 // FFmpeg instance - lazily initialized
 let ffmpegInstance: any = null

@@ -19,7 +19,7 @@ import {
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useSystemInsights, type SystemInsight } from '@/lib/hooks/use-system-insights'
 
 // MY DAY UTILITIES
@@ -51,7 +51,7 @@ function mapSystemInsightToAIInsight(insight: SystemInsight): AIInsight {
   }
 }
 
-const logger = createFeatureLogger('MyDay-Insights')
+const logger = createSimpleLogger('MyDay-Insights')
 
 const TYPE_STYLES: Record<string, { bg: string; darkBg: string; iconColor: string }> = {
   productivity: { bg: 'bg-purple-100', darkBg: 'dark:bg-purple-900/30', iconColor: 'text-purple-600 dark:text-purple-400' },

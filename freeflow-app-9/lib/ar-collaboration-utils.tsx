@@ -3,9 +3,9 @@
  * Comprehensive utilities for augmented reality collaboration and immersive workspaces
  */
 
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AR-Collaboration-Utils')
+const logger = createSimpleLogger('AR-Collaboration-Utils')
 
 // ============================================================================
 // TYPESCRIPT INTERFACES

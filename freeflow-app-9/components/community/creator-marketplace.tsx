@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -47,7 +47,7 @@ import {
   Play
 } from 'lucide-react'
 
-const logger = createFeatureLogger('CreatorMarketplace')
+const logger = createSimpleLogger('CreatorMarketplace')
 
 interface Portfolio {
   id: string

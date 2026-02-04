@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { createClient } from '@/lib/supabase/server'
 import {
 
@@ -40,7 +40,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   type ScheduleOptimization
 } from '@/lib/ai/work-pattern-analyzer'
 
-const logger = createFeatureLogger('API-MyDayAnalytics')
+const logger = createSimpleLogger('API-MyDayAnalytics')
 
 export const runtime = 'nodejs'
 

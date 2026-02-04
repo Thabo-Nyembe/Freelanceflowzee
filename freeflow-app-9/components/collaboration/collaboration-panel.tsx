@@ -30,10 +30,10 @@ import {
   Minimize2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import type { User } from '@/lib/websocket/socket-server'
 
-const logger = createFeatureLogger('CollaborationPanel')
+const logger = createSimpleLogger('CollaborationPanel')
 
 export interface CollaborationPanelProps {
   user: User

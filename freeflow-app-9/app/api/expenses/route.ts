@@ -10,9 +10,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('expenses')
+const logger = createSimpleLogger('expenses')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION

@@ -30,9 +30,9 @@ import {
   RefreshCw
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('PaymentGate')
+const logger = createSimpleLogger('PaymentGate')
 
 // ============================================================================
 // TYPES

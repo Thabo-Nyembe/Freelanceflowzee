@@ -53,11 +53,11 @@ import {
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import type { TeamMember as DatabaseTeamMember } from '@/lib/team-hub-queries'
 
-const logger = createFeatureLogger('TeamManagement')
+const logger = createSimpleLogger('TeamManagement')
 
 // UI display format for team members
 interface TeamMember extends DatabaseTeamMember {

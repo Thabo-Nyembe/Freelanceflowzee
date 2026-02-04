@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth.config'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import { kaziAI, type AITaskType } from '@/lib/ai/kazi-ai-router'
 
 // ============================================================================
@@ -38,7 +38,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
   return session.user.id || session.user.authId || null
 }
 
-const logger = createFeatureLogger('API-AIChat')
+const logger = createSimpleLogger('API-AIChat')
 
 export async function POST(request: NextRequest) {
   try {

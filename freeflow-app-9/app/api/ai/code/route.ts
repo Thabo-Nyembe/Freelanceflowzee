@@ -10,9 +10,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('ai-code')
+const logger = createSimpleLogger('ai-code')
 
 // Types
 interface CodeRequest {

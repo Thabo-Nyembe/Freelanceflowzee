@@ -53,9 +53,9 @@ import {
 import { AIEnhancedInput } from '@/components/ai-create/ai-enhanced-input'
 
 // Utilities
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('RealtimeChat')
+const logger = createSimpleLogger('RealtimeChat')
 
 // ==================== TYPES ====================
 

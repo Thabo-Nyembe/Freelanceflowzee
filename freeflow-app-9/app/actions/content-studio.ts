@@ -3,9 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { ContentStudio } from '@/lib/hooks/use-content-studio'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('content-studio-actions')
+const logger = createSimpleLogger('content-studio-actions')
 
 export async function createProject(data: Partial<ContentStudio>): Promise<ActionResult<any>> {
   try {

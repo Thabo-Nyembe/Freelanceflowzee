@@ -18,9 +18,9 @@ import { SmartEmailTemplates } from '@/components/ai/smart-email-templates'
 import { AIProposalGenerator } from '@/components/ai/ai-proposal-generator'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
-const logger = createFeatureLogger('AIContentStudio')
+const logger = createSimpleLogger('AIContentStudio')
 
 export default function AIContentStudioPage() {
   const { userId, loading: userLoading } = useCurrentUser()

@@ -22,7 +22,7 @@ import {
   Plus
 } from 'lucide-react'
 import { NumberFlow } from '@/components/ui/number-flow'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -30,7 +30,7 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-const logger = createFeatureLogger('Integrations')
+const logger = createSimpleLogger('Integrations')
 
 // DATABASE QUERIES - Secure API Key Storage
 import { createIntegrationAPIKey } from '@/lib/integrations-management-queries'

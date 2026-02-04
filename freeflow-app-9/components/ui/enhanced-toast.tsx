@@ -6,7 +6,7 @@
  */
 
 import { toast as sonnerToast, ExternalToast } from 'sonner'
-import { createFeatureLogger } from '@/lib/logger'
+import { createSimpleLogger } from '@/lib/simple-logger'
 import {
   CheckCircle2,
   XCircle,
@@ -29,7 +29,7 @@ import {
   Database
 } from 'lucide-react'
 
-const logger = createFeatureLogger('EnhancedToast')
+const logger = createSimpleLogger('EnhancedToast')
 
 // Toast types with icons
 const TOAST_ICONS = {
