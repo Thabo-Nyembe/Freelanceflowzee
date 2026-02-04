@@ -535,10 +535,10 @@ export async function GET(request: NextRequest) {
       query = query.lte('created_at', filters.created_before)
     }
 
-    // Apply sorting
+    // Apply sorting (simplified - stage_order column doesn't exist)
     if (view === 'kanban') {
-      // For kanban, sort by stage order then updated_at
-      query = query.order('stage_order', { ascending: true }).order('updated_at', { ascending: false })
+      // For kanban, sort by stage then updated_at
+      query = query.order('stage', { ascending: true }).order('updated_at', { ascending: false })
     } else {
       query = query.order(sortBy, { ascending: sortOrder === 'asc' })
     }
