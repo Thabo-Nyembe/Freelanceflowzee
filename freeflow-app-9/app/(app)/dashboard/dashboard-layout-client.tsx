@@ -15,6 +15,7 @@ import { AIPanelsProvider } from '@/lib/ai-panels-context'
 import { Button } from '@/components/ui/button'
 import { Minimize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts'
 
 interface UserData {
   id: string
@@ -31,6 +32,9 @@ function DashboardLayoutInner({
   children, user
 }: DashboardLayoutClientProps) {
   const { isCollapsed, isFullscreen, toggleFullscreen } = useSidebar()
+
+  // Enable global keyboard shortcuts
+  useKeyboardShortcuts()
 
   return (
     <OnboardingProvider>

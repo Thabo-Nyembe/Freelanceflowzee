@@ -24,7 +24,7 @@ interface AIPanelsContextValue {
   closeAllPanels: () => void
 }
 
-const AIPanelsContext = createContext<AIPanelsContextValue | undefined>(undefined)
+export const AIPanelsContext = createContext<AIPanelsContextValue | undefined>(undefined)
 
 export function AIPanelsProvider({ children }: { children: React.ReactNode }) {
   const [isIntelligencePanelOpen, setIsIntelligencePanelOpen] = useState(false)
