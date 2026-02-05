@@ -515,11 +515,11 @@ export default function AppStoreClient() {
     if (e) e.stopPropagation()
     if (app.pricing === 'enterprise') {
       // For enterprise, navigate to contact sales
-      router.push(`/dashboard/billing?app=${app.slug}&type=enterprise`)
+      router.push(`/dashboard/billing-v2?app=${app.slug}&type=enterprise`)
       toast.info('Redirecting to enterprise sales...')
     } else {
       // For paid apps, navigate to checkout
-      router.push(`/dashboard/billing/checkout?app=${app.slug}&price=${app.price}`)
+      router.push(`/dashboard/billing-v2?app=${app.slug}&price=${app.price}`)
       toast.info('Redirecting to checkout...')
     }
   }
