@@ -193,10 +193,10 @@ Changed:
 className="fixed bottom-4 right-4 z-50 ..."
 
 // After:
-className="fixed bottom-4 right-20 z-50 ..."
+className="fixed bottom-20 right-28 z-50 ..."
 ```
 
-**Result:** Context7 button positioned to the left of chat button
+**Result:** Context7 button positioned above and to the left of chat button with proper spacing
 
 #### 4.3 React Query Devtools
 **File:** `components/providers/index.tsx`
