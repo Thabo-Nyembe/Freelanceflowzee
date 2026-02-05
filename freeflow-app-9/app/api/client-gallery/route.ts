@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSimpleLogger } from '@/lib/simple-logger';
-import { isDemoMode, getDemoUserId, DEMO_USER_ID } from '@/lib/demo-mode';
+import { isDemoMode, DEMO_USER_ID } from '@/lib/demo-auth';
 
 const logger = createSimpleLogger('client-gallery');
 

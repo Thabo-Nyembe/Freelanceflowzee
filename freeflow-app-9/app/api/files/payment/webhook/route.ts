@@ -11,7 +11,7 @@ import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { handlePaymentWebhook } from '@/lib/payments/file-payment'
 import { createSimpleLogger } from '@/lib/simple-logger'
-import { isDemoMode, getDemoUserId } from '@/lib/demo-mode'
+import { isDemoMode, DEMO_USER_ID } from '@/lib/demo-auth'
 
 const logger = createSimpleLogger('payment-webhook')
 
