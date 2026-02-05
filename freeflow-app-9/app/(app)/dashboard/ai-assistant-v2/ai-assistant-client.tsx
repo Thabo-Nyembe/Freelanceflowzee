@@ -890,7 +890,7 @@ export default function AIAssistantClient() {
         </div>
       </div>
 
-      <div className="px-6 pb-4">
+      <div className="px-6 pt-6 pb-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
             <TabsList className="bg-white dark:bg-gray-800 shadow-sm">
