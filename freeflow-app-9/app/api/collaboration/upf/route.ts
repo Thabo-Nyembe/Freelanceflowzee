@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('upf')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -266,7 +269,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('UPF GET error:', error)
+    logger.error('UPF GET error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to fetch feedback' },
       { status: 500 }
@@ -599,7 +602,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    console.error('UPF POST error:', error)
+    logger.error('UPF POST error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to process feedback' },
       { status: 500 }
@@ -636,7 +639,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ success: true, data })
 
   } catch (error) {
-    console.error('UPF PATCH error:', error)
+    logger.error('UPF PATCH error', { error })
     return NextResponse.json({ error: 'Failed to update feedback' }, { status: 500 })
   }
 }
@@ -679,7 +682,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true, message: 'Feedback deleted successfully' })
 
   } catch (error) {
-    console.error('UPF DELETE error:', error)
+    logger.error('UPF DELETE error', { error })
     return NextResponse.json({ error: 'Failed to delete feedback' }, { status: 500 })
   }
 }

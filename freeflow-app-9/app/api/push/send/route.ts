@@ -6,6 +6,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { pushNotificationService, NotificationType } from '@/lib/push-notifications'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('push-send')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -106,7 +109,7 @@ export async function POST(request: Request) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('Push send error:', error)
+    logger.error('Push send error', { error })
     return NextResponse.json(
       { error: 'Failed to send notification' },
       { status: 500 }

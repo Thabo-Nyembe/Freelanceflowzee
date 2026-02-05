@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('client-feedback')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -306,7 +309,7 @@ export async function GET(request: NextRequest) {
       data: feedback,
     })
   } catch (error) {
-    console.error('Client feedback GET error:', error)
+    logger.error('Client feedback GET error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to fetch client feedback' },
       { status: 500 }
@@ -656,7 +659,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    console.error('Client feedback POST error:', error)
+    logger.error('Client feedback POST error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to process client feedback' },
       { status: 500 }
@@ -692,7 +695,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ success: true, data })
 
   } catch (error) {
-    console.error('Client feedback PATCH error:', error)
+    logger.error('Client feedback PATCH error', { error })
     return NextResponse.json({ error: 'Failed to update feedback' }, { status: 500 })
   }
 }
@@ -723,7 +726,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true, message: 'Feedback deleted successfully' })
 
   } catch (error) {
-    console.error('Client feedback DELETE error:', error)
+    logger.error('Client feedback DELETE error', { error })
     return NextResponse.json({ error: 'Failed to delete feedback' }, { status: 500 })
   }
 }
