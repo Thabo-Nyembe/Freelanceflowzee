@@ -23,9 +23,11 @@ export function isDemoModeEnabled(): boolean {
 }
 
 /**
- * Get the demo user ID
+ * Demo user constants
  */
 export const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+export const DEMO_USER_EMAIL = 'demo@kazi.app'
+export const DEMO_USER_NAME = 'Demo User'
 
 /**
  * Hook that provides demo-aware fetch functionality

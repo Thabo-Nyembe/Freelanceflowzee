@@ -22,7 +22,7 @@ import {
   type AIRecommendation,
   type GrowthPlaybook
 } from '@/lib/supabase/ai-features'
-import { DEMO_USER_ID, isDemoModeEnabled } from '@/lib/hooks/use-demo-fetch'
+import { DEMO_USER_ID, DEMO_USER_EMAIL, DEMO_USER_NAME, isDemoModeEnabled } from '@/lib/hooks/use-demo-fetch'
 
 // ============================================================================
 // USER METRICS TYPE
