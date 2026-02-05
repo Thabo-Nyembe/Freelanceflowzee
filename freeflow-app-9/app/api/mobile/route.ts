@@ -7,11 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createSimpleLogger } from '@/lib/simple-logger';
 import { sendInvoiceEmail } from '@/lib/email/email-templates';
+import { isDemoMode, getDemoUserId } from '@/lib/utils/demo-mode';
 
 const logger = createSimpleLogger('mobile-api');
-
-// Demo user for unauthenticated access
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 // =============================================================================
 // VALIDATION SCHEMAS
