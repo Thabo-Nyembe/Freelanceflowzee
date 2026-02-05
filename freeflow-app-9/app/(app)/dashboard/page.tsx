@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Card, CardContent } from '@/components/ui/card'
@@ -144,6 +144,9 @@ export default function DashboardPage() {
   // A+++ Accessibility
   const { announce } = useAnnouncer()
 
+  // Track if dashboard loaded toast was shown (prevent loops)
+  const dashboardLoadedToastShown = useRef(false)
+
   // AI Panel Toggle
   // showAIPanel state removed - now managed by CollapsibleInsightsPanel
 
@@ -260,9 +263,13 @@ export default function DashboardPage() {
               revenue: stats.revenue?.total
             })
 
-            toast.success('Dashboard loaded', {
-              description: `${stats.projects?.active || 0} active projects • $${(stats.revenue?.total || 0).toLocaleString()} revenue`
-            })
+            // Show toast only once
+            if (!dashboardLoadedToastShown.current) {
+              dashboardLoadedToastShown.current = true
+              toast.success('Dashboard loaded', {
+                description: `${stats.projects?.active || 0} active projects • $${(stats.revenue?.total || 0).toLocaleString()} revenue`
+              })
+            }
           }
 
           setIsLoading(false)
@@ -352,8 +359,9 @@ export default function DashboardPage() {
 
         announce(`Dashboard loaded: ${stats.projects.total} projects, ${stats.clients.total} clients`, 'polite')
 
-        // Only show success toast if we have data
-        if (stats.projects.total > 0 || stats.revenue.total > 0) {
+        // Only show success toast if we have data (and only once)
+        if (!dashboardLoadedToastShown.current && (stats.projects.total > 0 || stats.revenue.total > 0)) {
+          dashboardLoadedToastShown.current = true
           toast.success('Dashboard updated', {
             description: `${stats.projects.active} active projects • ${stats.tasks.inProgress} tasks in progress • $${stats.revenue.total.toLocaleString()} revenue`
           })
@@ -378,7 +386,7 @@ export default function DashboardPage() {
     }, 10000)
 
     return () => clearTimeout(loadingTimeout)
-  }, [userId, userLoading, isDemo, announce]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading, isDemo]) // Removed 'announce' to prevent re-runs
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
