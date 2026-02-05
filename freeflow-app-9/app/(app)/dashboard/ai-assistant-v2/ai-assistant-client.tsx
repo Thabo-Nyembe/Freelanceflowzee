@@ -814,7 +814,7 @@ export default function AIAssistantClient() {
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}
       <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white">
-        <div className="max-w-[1800px] mx-auto px-6 py-8">
+        <div className="max-w-[1800px] mx-auto px-6 py-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
@@ -890,7 +890,7 @@ export default function AIAssistantClient() {
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto p-6">
+      <div className="max-w-[1800px] mx-auto px-6 pb-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
             <TabsList className="bg-white dark:bg-gray-800 shadow-sm">
@@ -986,7 +986,7 @@ export default function AIAssistantClient() {
 
           {/* Chat Tab */}
           <TabsContent value="chat" className="mt-0">
-            <div className="flex gap-6 h-[calc(100vh-380px)] min-h-[600px]">
+            <div className="flex gap-6 h-[calc(100vh-300px)] min-h-[650px]">
               {/* Sidebar */}
               {showSidebar && (
                 <div className="w-80 flex-shrink-0">
