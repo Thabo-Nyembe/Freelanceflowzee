@@ -606,7 +606,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
   if (loading && displayTickets.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 dark:bg-none dark:bg-gray-900 p-6">
-        <div className="max-w-full mx-auto">
+        <div className="max-w-[1800px] mx-auto">
           <div className="flex items-center justify-center h-[60vh]">
             <div className="text-center">
               <Loader2 className="w-12 h-12 animate-spin text-teal-600 mx-auto mb-4" />
@@ -622,7 +622,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
   if (error && displayTickets.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 dark:bg-none dark:bg-gray-900 p-6">
-        <div className="max-w-full mx-auto">
+        <div className="max-w-[1800px] mx-auto">
           <div className="flex items-center justify-center h-[60vh]">
             <div className="text-center">
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
@@ -644,7 +644,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2198,7 +2198,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
 
         {/* My Queue Dialog */}
         <Dialog open={showMyQueueDialog} onOpenChange={setShowMyQueueDialog}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Inbox className="w-5 h-5 text-teal-600" />

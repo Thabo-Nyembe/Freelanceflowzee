@@ -591,7 +591,7 @@ export default function AlertsClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-red-50/30 to-orange-50/20 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2060,7 +2060,7 @@ export default function AlertsClient() {
 
         {/* Alert Detail Dialog */}
         <Dialog open={!!selectedAlert} onOpenChange={() => setSelectedAlert(null)}>
-          <DialogContent className="max-w-5xl max-h-[90vh]">
+          <DialogContent className="max-w-3xl max-h-[90vh]">
             <ScrollArea className="max-h-[80vh]">
               {selectedAlert && (
                 <div className="space-y-6">

@@ -1265,7 +1265,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-full mx-auto space-y-8">
+      <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-2xl p-8 text-white">
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
@@ -2901,7 +2901,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
         {/* Document Detail Modal */}
         {selectedDocument && (
           <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
-            <DialogContent className="max-w-5xl max-h-[80vh] overflow-hidden">
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden">
               <DialogHeader>
                 <div className="flex items-center gap-3">
                   {getFileIcon(selectedDocument.type)}

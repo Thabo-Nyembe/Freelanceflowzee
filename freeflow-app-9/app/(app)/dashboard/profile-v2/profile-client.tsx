@@ -1202,7 +1202,7 @@ export default function ProfileClient() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900">
       <div className="p-6">
-        <div className="max-w-full mx-auto space-y-6">
+        <div className="max-w-[1800px] mx-auto space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -2897,7 +2897,7 @@ export default function ProfileClient() {
 
           {/* Analytics Dialog */}
           <Dialog open={showAnalytics} onOpenChange={setShowAnalytics}>
-            <DialogContent className="max-w-6xl">
+            <DialogContent className="max-w-4xl">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2"><BarChart3 className="w-5 h-5" />Profile Analytics</DialogTitle>
                 <DialogDescription>Track your profile performance over the last 90 days</DialogDescription>

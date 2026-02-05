@@ -558,7 +558,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -2018,7 +2018,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
         {/* Event Detail Dialog */}
         <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
-          <DialogContent className="max-w-5xl bg-slate-900 border-slate-700 text-white">
+          <DialogContent className="max-w-3xl bg-slate-900 border-slate-700 text-white">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 {selectedEvent && getActionIcon(selectedEvent.action)}

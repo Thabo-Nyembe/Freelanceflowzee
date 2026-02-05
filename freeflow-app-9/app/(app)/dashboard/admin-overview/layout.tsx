@@ -214,7 +214,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-full mx-auto px-6 lg:px-8 py-6 lg:py-8 space-y-8">
+      <div className="max-w-[1800px] mx-auto p-8 space-y-8">
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

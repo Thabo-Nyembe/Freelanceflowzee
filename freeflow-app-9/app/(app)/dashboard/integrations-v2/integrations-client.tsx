@@ -689,7 +689,7 @@ export default function IntegrationsClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -1983,7 +1983,7 @@ export default function IntegrationsClient() {
 
         {/* Zap Detail Dialog */}
         <Dialog open={!!selectedZap} onOpenChange={() => setSelectedZap(null)}>
-          <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Zap className="w-5 h-5" />

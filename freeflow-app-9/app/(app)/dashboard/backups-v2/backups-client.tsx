@@ -833,7 +833,7 @@ export default function BackupsClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2110,7 +2110,7 @@ export default function BackupsClient() {
 
         {/* Job Detail Dialog */}
         <Dialog open={!!selectedJob} onOpenChange={() => setSelectedJob(null)}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <ScrollArea className="max-h-[80vh]">
               {selectedJob && (
                 <div className="space-y-6">
@@ -2223,7 +2223,7 @@ export default function BackupsClient() {
 
         {/* Compliance Detail Dialog */}
         <Dialog open={!!selectedCompliance} onOpenChange={() => setSelectedCompliance(null)}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <ScrollArea className="max-h-[80vh]">
               {selectedCompliance && (
                 <div className="space-y-6">

@@ -639,7 +639,7 @@ export default function AICreateClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2203,7 +2203,7 @@ export default function AICreateClient() {
 
         {/* Generation Detail Dialog */}
         <Dialog open={!!selectedGeneration} onOpenChange={() => setSelectedGeneration(null)}>
-          <DialogContent className="max-w-6xl">
+          <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-violet-500 to-purple-500 flex items-center justify-center text-white">
@@ -2674,7 +2674,7 @@ export default function AICreateClient() {
 
         {/* Model Comparison Dialog */}
         <Dialog open={showModelCompareDialog} onOpenChange={setShowModelCompareDialog}>
-          <DialogContent className="max-w-6xl">
+          <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Layers className="w-5 h-5" />

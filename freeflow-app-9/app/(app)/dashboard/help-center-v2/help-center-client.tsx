@@ -1147,7 +1147,7 @@ export default function HelpCenterClient() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
-        <div className="max-w-full mx-auto px-6 py-8">
+        <div className="max-w-[1800px] mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -1233,7 +1233,7 @@ export default function HelpCenterClient() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-full mx-auto px-6 py-6">
+      <div className="max-w-[1800px] mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
             <TabsList className="bg-white dark:bg-gray-800 shadow-sm">
@@ -2178,7 +2178,7 @@ export default function HelpCenterClient() {
 
       {/* Article Detail Dialog */}
       <Dialog open={showArticleDialog} onOpenChange={setShowArticleDialog}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           {selectedArticle && (
             <>
               <DialogHeader>

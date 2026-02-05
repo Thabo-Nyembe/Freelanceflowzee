@@ -1937,7 +1937,7 @@ export default function MediaLibraryClient({
         onChange={(e) => handleFileSelect(e.target.files)}
       />
 
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -3188,7 +3188,7 @@ export default function MediaLibraryClient({
 
         {/* Asset Detail Dialog */}
         <Dialog open={!!selectedAsset} onOpenChange={() => setSelectedAsset(null)}>
-          <DialogContent className="max-w-6xl max-h-[90vh]">
+          <DialogContent className="max-w-4xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 {selectedAsset?.fileName}

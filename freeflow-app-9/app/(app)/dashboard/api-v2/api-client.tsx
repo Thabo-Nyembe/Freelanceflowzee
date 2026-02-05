@@ -1102,7 +1102,7 @@ export default KaziApiClient;`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50/30 to-cyan-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -3045,7 +3045,7 @@ export default KaziApiClient;`
 
         {/* Test Suite Detail Dialog */}
         <Dialog open={!!selectedTestSuite} onOpenChange={() => setSelectedTestSuite(null)}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <FlaskConical className="w-5 h-5" />

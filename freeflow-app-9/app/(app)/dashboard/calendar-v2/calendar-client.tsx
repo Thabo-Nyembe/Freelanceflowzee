@@ -796,7 +796,7 @@ END:VCALENDAR`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-full mx-auto space-y-8">
+      <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-teal-600 via-cyan-600 to-sky-600 rounded-2xl p-8 text-white">
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>

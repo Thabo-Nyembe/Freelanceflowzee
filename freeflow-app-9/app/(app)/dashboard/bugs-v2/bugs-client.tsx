@@ -929,7 +929,7 @@ export default function BugsClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50/30 to-amber-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2127,7 +2127,7 @@ export default function BugsClient() {
 
         {/* Bug Detail Dialog */}
         <Dialog open={!!selectedBug} onOpenChange={() => setSelectedBug(null)}>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 {selectedBug && getTypeIcon(selectedBug.type)}
@@ -3334,7 +3334,7 @@ export default function BugsClient() {
 
         {/* Full Activity Log Dialog */}
         <Dialog open={showFullActivityLogDialog} onOpenChange={setShowFullActivityLogDialog}>
-          <DialogContent className="max-w-5xl max-h-[80vh]">
+          <DialogContent className="max-w-3xl max-h-[80vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <History className="w-5 h-5 text-blue-600" />

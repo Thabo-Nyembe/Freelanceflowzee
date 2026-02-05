@@ -1098,7 +1098,7 @@ export default function MarketingClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2034,7 +2034,7 @@ export default function MarketingClient() {
 
         {/* Campaign Detail Dialog */}
         <Dialog open={!!selectedCampaign} onOpenChange={() => setSelectedCampaign(null)}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center text-white">
@@ -3471,7 +3471,7 @@ export default function MarketingClient() {
 
         {/* Templates Dialog */}
         <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-500" />
@@ -4095,7 +4095,7 @@ export default function MarketingClient() {
 
         {/* Preview Dialog */}
         <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Eye className="w-5 h-5 text-amber-500" />
@@ -4346,7 +4346,7 @@ export default function MarketingClient() {
 
         {/* Dashboards Dialog */}
         <Dialog open={showDashboardsDialog} onOpenChange={setShowDashboardsDialog}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-indigo-500" />

@@ -804,7 +804,7 @@ export default function MarketplaceClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2133,7 +2133,7 @@ export default function MarketplaceClient() {
 
         {/* Product Detail Dialog */}
         <Dialog open={showProductDialog} onOpenChange={setShowProductDialog}>
-          <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
             {selectedProduct && (
               <>
                 <DialogHeader>

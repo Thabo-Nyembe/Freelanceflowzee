@@ -814,7 +814,7 @@ export default function AIAssistantClient() {
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}
       <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white">
-        <div className="max-w-full mx-auto px-6 py-6">
+        <div className="max-w-[1800px] mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
@@ -890,7 +890,7 @@ export default function AIAssistantClient() {
         </div>
       </div>
 
-      <div className="max-w-full mx-auto px-6 pb-6">
+      <div className="max-w-[1800px] mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
             <TabsList className="bg-white dark:bg-gray-800 shadow-sm">
@@ -986,7 +986,7 @@ export default function AIAssistantClient() {
 
           {/* Chat Tab */}
           <TabsContent value="chat" className="mt-0">
-            <div className="flex gap-6 h-[calc(100vh-280px)] min-h-[700px]">
+            <div className="flex gap-6 h-[calc(100vh-380px)] min-h-[600px]">
               {/* Sidebar */}
               {showSidebar && (
                 <div className="w-80 flex-shrink-0">
@@ -1158,7 +1158,7 @@ export default function AIAssistantClient() {
 
                 {/* Messages */}
                 <ScrollArea className="flex-1 p-4">
-                  <div className="max-w-6xl mx-auto space-y-6">
+                  <div className="max-w-4xl mx-auto space-y-6">
                     {messages.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full py-20">
                         <div className="p-6 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-3xl mb-6">
@@ -1329,7 +1329,7 @@ export default function AIAssistantClient() {
 
                 {/* Input Area */}
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="max-w-6xl mx-auto">
+                  <div className="max-w-4xl mx-auto">
                     <div className="relative bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 focus-within:border-violet-500 focus-within:ring-2 focus-within:ring-violet-500/20 transition-all">
                       {/* Attachments Bar */}
                       <div className="flex items-center gap-2 p-3 border-b border-gray-200 dark:border-gray-700">

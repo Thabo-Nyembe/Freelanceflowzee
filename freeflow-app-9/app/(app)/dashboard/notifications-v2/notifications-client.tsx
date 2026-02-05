@@ -862,7 +862,7 @@ export default function NotificationsClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -3847,7 +3847,7 @@ export default function NotificationsClient() {
 
         {/* A/B Test Details Dialog */}
         <Dialog open={showTestDetailsDialog} onOpenChange={setShowTestDetailsDialog}>
-          <DialogContent className="sm:max-w-5xl">
+          <DialogContent className="sm:max-w-3xl">
             <DialogHeader>
               <DialogTitle>A/B Test Details</DialogTitle>
               <DialogDescription>

@@ -70,7 +70,7 @@ export default function LoyaltyClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-orange-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-full mx-auto p-6 space-y-6">
+      <div className="max-w-[1800px] mx-auto p-6 space-y-6">
 
         {/* Header */}
         <div className="flex items-center justify-between">

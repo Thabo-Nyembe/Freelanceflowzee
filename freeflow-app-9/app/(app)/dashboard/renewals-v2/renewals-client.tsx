@@ -1015,7 +1015,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2052,7 +2052,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
         {/* Renewal Detail Dialog */}
         <Dialog open={isRenewalDialogOpen} onOpenChange={setIsRenewalDialogOpen}>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
             {selectedRenewal && (
               <>
                 <DialogHeader>
@@ -2675,7 +2675,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
         {/* Forecast Dialog */}
         <Dialog open={isForecastDialogOpen} onOpenChange={setIsForecastDialogOpen}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <LineChart className="w-5 h-5 text-indigo-600" />
@@ -2881,7 +2881,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
         {/* Customers Dialog */}
         <Dialog open={isCustomersDialogOpen} onOpenChange={setIsCustomersDialogOpen}>
-          <DialogContent className="max-w-5xl max-h-[80vh]">
+          <DialogContent className="max-w-3xl max-h-[80vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-purple-600" />

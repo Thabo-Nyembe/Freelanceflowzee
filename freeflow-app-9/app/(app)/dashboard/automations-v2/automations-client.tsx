@@ -1062,7 +1062,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-full mx-auto space-y-8">
+      <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-8 text-white">
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
@@ -1115,7 +1115,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       New Scenario
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-5xl max-h-[80vh] overflow-hidden">
+                  <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden">
                     <DialogHeader>
                       <DialogTitle>Create New Scenario</DialogTitle>
                     </DialogHeader>
@@ -2768,7 +2768,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
         {/* Workflow Detail Modal */}
         {selectedWorkflow && (
           <Dialog open={!!selectedWorkflow} onOpenChange={() => setSelectedWorkflow(null)}>
-            <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden">
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
               <DialogHeader>
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
@@ -3408,7 +3408,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
         {/* Workflow Editor Dialog */}
         <Dialog open={showWorkflowEditorDialog} onOpenChange={setShowWorkflowEditorDialog}>
-          <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden">
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Workflow className="h-5 w-5 text-emerald-600" />
@@ -3448,7 +3448,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
         {/* Template Preview Dialog */}
         <Dialog open={showTemplatePreviewDialog} onOpenChange={setShowTemplatePreviewDialog}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Eye className="h-5 w-5 text-purple-600" />
@@ -3517,7 +3517,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
         {/* Execution Logs Dialog */}
         <Dialog open={showExecutionLogsDialog} onOpenChange={setShowExecutionLogsDialog}>
-          <DialogContent className="max-w-5xl max-h-[80vh] overflow-hidden">
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Terminal className="h-5 w-5 text-blue-600" />

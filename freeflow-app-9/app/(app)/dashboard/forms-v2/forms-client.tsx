@@ -430,7 +430,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-full mx-auto space-y-8">
+      <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white">
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
@@ -462,7 +462,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                       Templates
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden">
+                  <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
                     <DialogHeader>
                       <DialogTitle>Choose a Template</DialogTitle>
                       <DialogDescription>Start with a pre-built form template</DialogDescription>
@@ -2110,7 +2110,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
         {/* Question Types Dialog */}
         <Dialog open={showQuestionTypesDialog} onOpenChange={setShowQuestionTypesDialog}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>Add Question</DialogTitle>
               <DialogDescription>Choose a question type</DialogDescription>
@@ -2156,7 +2156,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
         {/* Analytics Dialog */}
         <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
-          <DialogContent className="max-w-5xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>{selectedForm?.title} - Analytics</DialogTitle>
             </DialogHeader>

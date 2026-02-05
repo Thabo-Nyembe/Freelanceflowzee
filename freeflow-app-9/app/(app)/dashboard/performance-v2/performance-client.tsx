@@ -690,7 +690,7 @@ export default function PerformanceClient() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}
       <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white">
-        <div className="max-w-full mx-auto px-6 py-8">
+        <div className="max-w-[1800px] mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
@@ -779,7 +779,7 @@ export default function PerformanceClient() {
         </div>
       </div>
 
-      <div className="max-w-full mx-auto p-6">
+      <div className="max-w-[1800px] mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
             <TabsList className="bg-white dark:bg-gray-800 shadow-sm">

@@ -589,7 +589,7 @@ export default function GalleryClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-full mx-auto p-6 space-y-6">
+      <div className="max-w-[1800px] mx-auto p-6 space-y-6">
 
         {/* Premium Header */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 p-8">
@@ -1745,7 +1745,7 @@ export default function GalleryClient() {
 
         {/* Photo Detail Dialog */}
         <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             {selectedPhoto && (
               <div className="space-y-6">
                 {/* Photo Preview */}

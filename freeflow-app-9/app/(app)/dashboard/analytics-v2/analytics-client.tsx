@@ -2474,7 +2474,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-full mx-auto space-y-8">
+      <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Error Banner */}
         {analyticsError && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-center justify-between">
@@ -4659,7 +4659,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
         {/* Metric Detail Modal */}
         {selectedMetric && (
           <Dialog open={!!selectedMetric} onOpenChange={() => setSelectedMetric(null)}>
-            <DialogContent className="max-w-5xl">
+            <DialogContent className="max-w-3xl">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   {selectedMetric.name}

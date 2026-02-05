@@ -408,7 +408,7 @@ export default function ComponentLibraryClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-full mx-auto space-y-8">
+      <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-8 text-white">
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
@@ -1750,7 +1750,7 @@ export default function App() {
         {/* Component Detail Dialog */}
         {selectedComponent && (
           <Dialog open={!!selectedComponent} onOpenChange={() => setSelectedComponent(null)}>
-            <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
               <DialogHeader>
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl text-white">
@@ -1949,7 +1949,7 @@ export default function App() {
 
         {/* Playground Dialog */}
         <Dialog open={showPlaygroundDialog} onOpenChange={setShowPlaygroundDialog}>
-          <DialogContent className="max-w-6xl max-h-[90vh]">
+          <DialogContent className="max-w-4xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Play className="h-5 w-5 text-violet-600" />
@@ -2035,7 +2035,7 @@ export default function App() {
 
         {/* Documentation Dialog */}
         <Dialog open={showDocsDialog} onOpenChange={setShowDocsDialog}>
-          <DialogContent className="max-w-5xl max-h-[80vh]">
+          <DialogContent className="max-w-3xl max-h-[80vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-violet-600" />

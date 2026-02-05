@@ -1171,7 +1171,7 @@ Date: ${new Date().toISOString().split('T')[0]}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-700 rounded-2xl p-8 text-white">
           <div className="flex items-center justify-between mb-6">
@@ -1388,7 +1388,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                               Details
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
+                          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
                               <DialogTitle>Build Details - {build.version}</DialogTitle>
                             </DialogHeader>

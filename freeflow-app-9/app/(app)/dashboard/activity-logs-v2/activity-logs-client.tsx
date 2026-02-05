@@ -1019,7 +1019,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}
       <div className="bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
-        <div className="max-w-full mx-auto px-6 py-8">
+        <div className="max-w-[1800px] mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
@@ -1100,7 +1100,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
         </div>
       </div>
 
-      <div className="max-w-full mx-auto px-6 py-6">
+      <div className="max-w-[1800px] mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
             <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border dark:border-gray-700">
@@ -2381,7 +2381,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
       {/* Log Detail Dialog */}
       <Dialog open={showLogDialog} onOpenChange={setShowLogDialog}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               {selectedLog && (

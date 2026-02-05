@@ -1385,7 +1385,7 @@ export default function WorkflowBuilderClient() {
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}
       <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white">
-        <div className="max-w-full mx-auto px-6 py-6">
+        <div className="max-w-[1800px] mx-auto px-6 py-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
@@ -1527,7 +1527,7 @@ export default function WorkflowBuilderClient() {
         </div>
       </div>
 
-      <div className="max-w-full mx-auto px-6 py-6">
+      <div className="max-w-[1800px] mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-white dark:bg-gray-800 p-1 mb-6">
             <TabsTrigger value="workflows" className="flex items-center gap-2">
@@ -2760,7 +2760,7 @@ export default function WorkflowBuilderClient() {
 
       {/* Workflow Detail Dialog */}
       <Dialog open={showWorkflowDialog} onOpenChange={setShowWorkflowDialog}>
-        <DialogContent className="max-w-6xl max-h-[85vh]">
+        <DialogContent className="max-w-4xl max-h-[85vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               <GitBranch className="w-5 h-5 text-violet-600" />
@@ -2990,7 +2990,7 @@ export default function WorkflowBuilderClient() {
 
       {/* Execution History Dialog */}
       <Dialog open={showExecutionHistoryDialog} onOpenChange={setShowExecutionHistoryDialog}>
-        <DialogContent className="max-w-6xl max-h-[80vh]">
+        <DialogContent className="max-w-4xl max-h-[80vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <History className="w-5 h-5 text-purple-600" />

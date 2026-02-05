@@ -641,7 +641,7 @@ export default function OrdersClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2062,7 +2062,7 @@ export default function OrdersClient() {
 
         {/* Order Detail Dialog */}
         <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-          <DialogContent className="max-w-6xl max-h-[85vh]">
+          <DialogContent className="max-w-4xl max-h-[85vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 <ShoppingCart className="w-5 h-5" />
