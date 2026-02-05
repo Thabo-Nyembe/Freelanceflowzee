@@ -46,18 +46,27 @@ export function useMyDayTasks(initialTasks: MyDayTask[] = []) {
       // Try API first for demo data support
       try {
         const dateParam = date || new Date().toISOString().split('T')[0]
-        const response = await fetch(`/api/my-day?type=tasks&date=${dateParam}`)
+        const apiUrl = `/api/my-day?type=tasks&date=${dateParam}`
+        console.log('[My Day] Fetching from API:', apiUrl)
+
+        const response = await fetch(apiUrl)
+        console.log('[My Day] API response status:', response.status)
 
         if (response.ok) {
           const result = await response.json()
+          console.log('[My Day] API result:', result)
+
           if (result.data) {
+            console.log('[My Day] Setting tasks from API:', result.data.length, 'tasks')
             setTasks(result.data)
             setIsLoading(false)
             return
           }
+        } else {
+          console.log('[My Day] API returned error status:', response.status)
         }
       } catch (apiError) {
-        console.log('API fetch failed, trying direct query:', apiError)
+        console.error('[My Day] API fetch failed:', apiError)
       }
 
       // Fallback to direct Supabase query
@@ -131,6 +140,11 @@ export function useMyDayTasks(initialTasks: MyDayTask[] = []) {
   }
 
   useEffect(() => {
+    // Fetch tasks on mount
+    console.log('[My Day Hook] Component mounted, fetching tasks...')
+    fetchTasks()
+
+    // Set up real-time subscription
     const channel = supabase
       .channel('my_day_tasks_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'my_day_tasks' },
