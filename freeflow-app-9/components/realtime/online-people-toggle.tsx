@@ -156,9 +156,9 @@ export function OnlinePeopleToggle({
                 </div>
               ) : (
                 <div className="space-y-1">
-                  {activeUsers.slice(0, maxDisplay).map((user: any) => (
+                  {activeUsers.slice(0, maxDisplay).map((user: any, index: number) => (
                     <div
-                      key={user.user_id}
+                      key={`${user.user_id}-${index}`}
                       className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
                     >
                       {/* Avatar with status indicator */}
@@ -276,7 +276,7 @@ export function CompactOnlineAvatars({
       <div className="flex -space-x-2">
         {displayUsers.map((user: any, index: number) => (
           <Avatar
-            key={user.user_id}
+            key={`${user.user_id}-${index}`}
             className="h-8 w-8 ring-2 ring-background"
             style={{ zIndex: maxDisplay - index }}
           >
