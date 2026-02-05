@@ -221,8 +221,8 @@ export async function GET(request: NextRequest) {
     const userId = (session.user as { authId?: string; id: string }).authId || session.user.id
     const userEmail = session.user.email
 
-    // Demo mode ONLY for demo account (test@kazi.dev)
-    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
+    // Demo mode for all authenticated users (showcase mode)
+    const isDemoAccount = true // Always show demo data for showcase
 
     if ((isDemoAccount || demoMode) && !taskId) {
       // For demo mode with authenticated user, fetch real data for demo user
