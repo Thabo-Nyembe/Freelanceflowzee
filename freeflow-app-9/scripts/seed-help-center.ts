@@ -8,6 +8,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { config } from 'dotenv'
 import { resolve } from 'path'
+import { DEMO_USER_ID } from '../lib/utils/demo-mode'
 
 // Load environment variables from .env.local
 config({ path: resolve(process.cwd(), '.env.local') })
@@ -25,7 +26,6 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // Demo user ID for seeding
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 // Help Categories (matching actual schema)
 const categories = [

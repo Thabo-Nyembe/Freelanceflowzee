@@ -10,14 +10,13 @@
 
 import { config } from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
+import { DEMO_USER_ID } from '../lib/utils/demo-mode'
 
 config({ path: '.env.local' })
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 async function main() {
   console.log('\n🎯 Seeding Business Intelligence Dashboard Data\n')

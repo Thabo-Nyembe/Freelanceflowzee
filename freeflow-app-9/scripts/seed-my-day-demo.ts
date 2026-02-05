@@ -6,6 +6,7 @@
 import { config } from 'dotenv'
 import { resolve } from 'path'
 import { createClient } from '@supabase/supabase-js'
+import { DEMO_USER_ID } from '../lib/utils/demo-mode'
 
 // Load environment variables
 config({ path: resolve(process.cwd(), '.env.local') })
@@ -13,7 +14,6 @@ config({ path: resolve(process.cwd(), '.env.local') })
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 async function seedMyDayData() {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)

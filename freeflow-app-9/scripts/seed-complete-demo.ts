@@ -15,6 +15,7 @@
 
 import { config } from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
+import { DEMO_USER_ID } from '../lib/utils/demo-mode'
 
 config({ path: '.env.local' })
 
@@ -23,7 +24,6 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 const DEMO_EMAIL = 'alex@freeflow.io'
 
 // ============================================================================
