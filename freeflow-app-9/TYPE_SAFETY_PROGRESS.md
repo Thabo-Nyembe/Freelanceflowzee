@@ -1,16 +1,16 @@
 # Type Safety Migration - Progress Report
 
 **Date**: 2026-02-05
-**Status**: ⏳ IN PROGRESS - 117 files migrated (16.8%)
-**Lines Removed**: 3,978 lines of duplicated code
+**Status**: ⏳ IN PROGRESS - 127 files migrated (18.3%)
+**Lines Removed**: 4,318 lines of duplicated code
 
 ---
 
 ## 📊 Migration Summary
 
-**Completed**: 117 of ~695 API files (16.8%)
-**Code Removed**: 3,978 lines
-**Commits**: 15 batches pushed
+**Completed**: 127 of ~695 API files (18.3%)
+**Code Removed**: 4,318 lines
+**Commits**: 16 batches pushed
 **Batch Size**: Accelerated to 10 files/batch
 
 ---
@@ -136,7 +136,17 @@
 | `app/api/admin-analytics/route.ts` | 34 | 15 |
 | `app/api/ai-voice/route.ts` | 34 | 15 |
 | `app/api/video/route.ts` | 34 | 15 |
-| **Total** | **3,978** | **16.8%** |
+| `app/api/video/calls/route.ts` | 34 | 16 |
+| `app/api/video/thumbnail/route.ts` | 34 | 16 |
+| `app/api/video/drm/route.ts` | 34 | 16 |
+| `app/api/video/caption/route.ts` | 34 | 16 |
+| `app/api/video/collaboration/route.ts` | 34 | 16 |
+| `app/api/video/compress/route.ts` | 34 | 16 |
+| `app/api/video/merge/route.ts` | 34 | 16 |
+| `app/api/video/render/route.ts` | 34 | 16 |
+| `app/api/video/trim/route.ts` | 34 | 16 |
+| `app/api/video/watermark/route.ts` | 34 | 16 |
+| **Total** | **4,318** | **18.3%** |
 
 ---
 
@@ -148,7 +158,7 @@
 - **Reduction**: 97% per file
 
 ### Cumulative Impact
-- 3,978 lines of duplication eliminated
+- 4,318 lines of duplication eliminated
 - Single source of truth established
 - Easier maintenance and updates
 - **Acceleration**: Now migrating 10 files per batch (doubled from 5)
@@ -156,5 +166,5 @@
 
 ---
 
-**Status**: Accelerated progress, 16.8% complete (117/695)
-**Next**: Continue migrating remaining ~578 API files in batches of 10
+**Status**: Accelerated progress, 18.3% complete (127/695)
+**Next**: Continue migrating remaining ~568 API files in batches of 10
