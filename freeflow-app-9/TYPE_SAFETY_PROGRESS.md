@@ -1,16 +1,16 @@
 # Type Safety Migration - Progress Report
 
 **Date**: 2026-02-05
-**Status**: ⏳ IN PROGRESS - 127 files migrated (18.3%)
-**Lines Removed**: 4,318 lines of duplicated code
+**Status**: ⏳ IN PROGRESS - 137 files migrated (19.7%)
+**Lines Removed**: 4,658 lines of duplicated code
 
 ---
 
 ## 📊 Migration Summary
 
-**Completed**: 127 of ~695 API files (18.3%)
-**Code Removed**: 4,318 lines
-**Commits**: 16 batches pushed
+**Completed**: 137 of ~695 API files (19.7%)
+**Code Removed**: 4,658 lines
+**Commits**: 17 batches pushed
 **Batch Size**: Accelerated to 10 files/batch
 
 ---
@@ -146,7 +146,17 @@
 | `app/api/video/render/route.ts` | 34 | 16 |
 | `app/api/video/trim/route.ts` | 34 | 16 |
 | `app/api/video/watermark/route.ts` | 34 | 16 |
-| **Total** | **4,318** | **18.3%** |
+| `app/api/video/audio/route.ts` | 34 | 17 |
+| `app/api/video/upload/route.ts` | 34 | 17 |
+| `app/api/video/process/route.ts` | 34 | 17 |
+| `app/api/video/projects/route.ts` | 34 | 17 |
+| `app/api/video/multicam/route.ts` | 34 | 17 |
+| `app/api/video/hdr-raw/route.ts` | 34 | 17 |
+| `app/api/video/color-grading/route.ts` | 34 | 17 |
+| `app/api/video/camera-cloud/route.ts` | 34 | 17 |
+| `app/api/video/blackmagic-cloud/route.ts` | 34 | 17 |
+| `app/api/video/project/save/route.ts` | 34 | 17 |
+| **Total** | **4,658** | **19.7%** |
 
 ---
 
@@ -158,7 +168,7 @@
 - **Reduction**: 97% per file
 
 ### Cumulative Impact
-- 4,318 lines of duplication eliminated
+- 4,658 lines of duplication eliminated
 - Single source of truth established
 - Easier maintenance and updates
 - **Acceleration**: Now migrating 10 files per batch (doubled from 5)
@@ -166,5 +176,5 @@
 
 ---
 
-**Status**: Accelerated progress, 18.3% complete (127/695)
-**Next**: Continue migrating remaining ~568 API files in batches of 10
+**Status**: Accelerated progress, 19.7% complete (137/695)
+**Next**: Continue migrating remaining ~558 API files in batches of 10
