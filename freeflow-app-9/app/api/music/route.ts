@@ -1,31 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSimpleLogger } from '@/lib/simple-logger'
-
-// ============================================================================
-// DEMO USER CONFIGURATION - For legitimate accounts only
-// ============================================================================
-
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-const DEMO_USER_EMAIL = 'alex@freeflow.io'
-
-// SECURITY: Demo mode bypass removed - users must authenticate properly
-function getDemoUserId(session: any): string | null {
-  if (!session?.user) {
-    return null  // No bypass - require authentication
-  }
-
-  const userEmail = session.user.email
-  const isDemoAccount = userEmail === DEMO_USER_EMAIL ||
-                       userEmail === 'demo@kazi.io' ||
-                       userEmail === 'test@kazi.dev'
-
-  if (isDemoAccount) {
-    return DEMO_USER_ID
-  }
-
-  return session.user.id || session.user.authId || null
-}
+import { getDemoUserId } from '@/lib/utils/demo-mode'
 
 const logger = createSimpleLogger('music')
 
