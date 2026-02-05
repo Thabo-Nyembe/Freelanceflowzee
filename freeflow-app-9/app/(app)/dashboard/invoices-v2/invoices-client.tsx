@@ -2130,25 +2130,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={invoicesAIInsights}
-              title="Invoice Intelligence"
-              onInsightAction={(insight) => {
-                // Handle insight actions based on type
-                if (insight.type === 'warning' && insight.category === 'Collections') {
-                  // Navigate to overdue invoices
-                  setActiveTab('overdue')
-                  toast.info('Showing overdue invoices')
-                } else if (insight.type === 'success') {
-                  toast.success(insight.title)
-                } else if (insight.type === 'info' && insight.category === 'Forecast') {
-                  // Show forecast details
-                  toast.info('Revenue Forecast')
-                } else {
-                  toast.info(insight.title)
-                }
-              }}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
 
           {/* Team Collaboration & Activity */}
@@ -2166,11 +2148,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
 
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={invoicesActivities}
-            title="Billing Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={invoicesQuickActions}
             variant="grid"

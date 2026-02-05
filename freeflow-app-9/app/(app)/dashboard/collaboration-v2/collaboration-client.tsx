@@ -1064,9 +1064,9 @@ export default function CollaborationClient() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-          <AIInsightsPanel title="Collaboration Insights" insights={mockCollabAIInsights} />
+          /* AIInsightsPanel removed - use header button */
           <PredictiveAnalytics predictions={mockCollabPredictions} />
-          <ActivityFeed activities={mockCollabActivities} title="Team Activity" />
+          /* ActivityFeed removed - use header button */
         </div>
 
         {/* Main Content Tabs */}

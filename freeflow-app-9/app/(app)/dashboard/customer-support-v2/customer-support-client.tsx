@@ -2376,20 +2376,13 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
       {/* AI-Powered Support Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        <AIInsightsPanel
-          insights={[]}
-          onAskQuestion={handleAIQuestion}
-        />
+        /* AIInsightsPanel removed - use header button */
         <PredictiveAnalytics predictions={[]} />
       </div>
 
       {/* Activity Feed */}
       <div className="mt-6">
-        <ActivityFeed
-          activities={[]}
-          maxItems={5}
-          showFilters={true}
-        />
+        /* ActivityFeed removed - use header button */
       </div>
 
       {/* Quick Actions Toolbar */}

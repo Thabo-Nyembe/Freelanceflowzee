@@ -143,7 +143,7 @@ export function UpgradesShowcaseClient() {
           {/* AI Insights Tab */}
           <TabsContent value="ai-insights" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <AIInsightsPanel insights={insights} />
+              /* AIInsightsPanel removed - use header button */
               <PredictiveAnalytics predictions={predictions} />
             </div>
             {storySegments.length > 0 && (
@@ -310,13 +310,7 @@ export function UpgradesShowcaseClient() {
 
           {/* Activity Tab */}
           <TabsContent value="activity" className="space-y-6">
-            <ActivityFeed
-              activities={activities}
-              onMarkRead={(id) => toast.success('Marked as read', { description: `Activity ${id} marked as read` })}
-              onMarkAllRead={() => toast.success('All marked as read', { description: 'All activities marked as read' })}
-              onPin={(id) => toast.success('Activity pinned', { description: `Activity ${id} pinned` })}
-              onArchive={(id) => toast.success('Activity archived', { description: `Activity ${id} archived` })}
-            />
+            /* ActivityFeed removed - use header button */
           </TabsContent>
 
           {/* Gamification Tab */}

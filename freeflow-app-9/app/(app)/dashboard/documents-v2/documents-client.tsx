@@ -2874,29 +2874,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={documentsAIInsights}
-              title="Document Intelligence"
-              onInsightAction={(insight) => {
-                // Store insight action in localStorage and navigate based on insight type
-                const insightActions = JSON.parse(localStorage.getItem('document_insights_actions') || '[]')
-                insightActions.push({ insightId: insight.id || Date.now(), action: 'viewed', timestamp: new Date().toISOString() })
-                localStorage.setItem('document_insights_actions', JSON.stringify(insightActions))
-
-                // Navigate based on insight category
-                if (insight.category === 'storage' || insight.title?.toLowerCase().includes('storage')) {
-                  setActiveTab('settings')
-                  setSettingsTab('storage')
-                } else if (insight.category === 'sharing' || insight.title?.toLowerCase().includes('share')) {
-                  setActiveTab('shared')
-                } else if (insight.category === 'organization' || insight.title?.toLowerCase().includes('folder')) {
-                  setActiveTab('folders')
-                } else {
-                  setActiveTab('documents')
-                }
-                toast.success(insight.title || 'AI Insight Applied', { description: insight.description || 'Navigating to relevant section' })
-              }}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2916,19 +2894,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activityLogs.slice(0, 10).map(log => ({
-              id: log.id,
-              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
-              title: log.action,
-              description: log.resource_name || undefined,
-              user: { name: log.user_name || 'System', avatar: undefined },
-              timestamp: log.created_at,
-              isUnread: log.status === 'pending'
-            }))}
-            title="Document Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={documentsQuickActions}
             variant="grid"

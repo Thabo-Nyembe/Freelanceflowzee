@@ -2219,11 +2219,7 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={coursesAIInsights}
-              title="Course Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2243,19 +2239,7 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activityLogs.slice(0, 10).map(log => ({
-              id: log.id,
-              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
-              title: log.action,
-              description: log.resource_name || undefined,
-              user: { name: log.user_name || 'System', avatar: undefined },
-              timestamp: log.created_at,
-              isUnread: log.status === 'pending'
-            }))}
-            title="Course Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={getCoursesQuickActions(setShowCreateCourseDialog, setShowAddLectureDialog, setActiveView)}
             variant="grid"

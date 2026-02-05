@@ -3336,23 +3336,7 @@ export default function MessagesClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={messagesAIInsights}
-              title="Messaging Intelligence"
-              onInsightAction={(insight) => {
-                // Handle AI insight actions
-                if (insight.actionLabel?.toLowerCase().includes('compose')) {
-                  setShowComposeDialog(true)
-                } else if (insight.actionLabel?.toLowerCase().includes('search')) {
-                  const searchTabEl = document.querySelector('[value="search"]') as HTMLElement
-                  if (searchTabEl) searchTabEl.click()
-                } else if (insight.actionLabel?.toLowerCase().includes('filter')) {
-                  setChannelFilter('unread')
-                } else {
-                  toast.info('Insight action triggered')
-                }
-              }}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -3367,11 +3351,7 @@ export default function MessagesClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={messagesActivities}
-            title="Message Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={messagesQuickActions}
             variant="grid"

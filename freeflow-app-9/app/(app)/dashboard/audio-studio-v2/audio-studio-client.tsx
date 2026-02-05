@@ -1921,23 +1921,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={emptyAudioAIInsights}
-              title="Audio Intelligence"
-              onInsightAction={(insight) => {
-                // Apply AI insight based on type
-                if (insight.type === 'warning') {
-                  // For warnings like clipping, apply limiter
-                  toast.success(`Applied fix for "${insight.title}" - Limiter added to master bus`)
-                } else if (insight.type === 'info') {
-                  // For suggestions, navigate to relevant section
-                  setActiveTab('effects')
-                  toast.success(`AI insight "${insight.title}" applied - Check effects tab`)
-                } else {
-                  toast.success(`AI insight "${insight.title}" acknowledged`)
-                }
-              }}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -1952,11 +1936,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activeActivities}
-            title="Studio Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={audioQuickActions}
             variant="grid"

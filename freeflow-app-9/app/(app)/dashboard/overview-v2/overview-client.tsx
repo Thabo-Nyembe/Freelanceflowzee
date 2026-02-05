@@ -2354,20 +2354,13 @@ export default function OverviewClient() {
 
         {/* AI-Powered Infrastructure Insights */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <AIInsightsPanel
-            insights={aiInsights}
-            onAskQuestion={(q) => toast.info('Question submitted')}
-          />
+          /* AIInsightsPanel removed - use header button */
           <PredictiveAnalytics predictions={overviewPredictions} />
         </div>
 
         {/* Activity Feed */}
         <div className="mt-6">
-          <ActivityFeed
-            activities={overviewActivities}
-            maxItems={5}
-            showFilters={true}
-          />
+          /* ActivityFeed removed - use header button */
         </div>
 
         {/* Quick Actions Toolbar */}

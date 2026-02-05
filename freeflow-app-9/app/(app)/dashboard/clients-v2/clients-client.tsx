@@ -2486,39 +2486,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={revenueReport ? [
-                ...(revenueReport.revenueLeaks || []).map((leak: any, i: number) => ({
-                  id: `leak-${i}`,
-                  type: 'warning' as const,
-                  title: 'Revenue Leak Detected',
-                  description: leak.description,
-                  priority: (leak.severity === 'critical' || leak.severity === 'high') ? 'high' as const : 'medium' as const,
-                  timestamp: new Date().toISOString(),
-                  category: 'Revenue Leak'
-                })),
-                ...(revenueReport.upsellOpportunities || []).map((opp: any, i: number) => ({
-                  id: `opp-${i}`,
-                  type: 'success' as const,
-                  title: 'Upsell Opportunity',
-                  description: `${opp.clientName}: ${opp.reasoning}`,
-                  priority: 'medium' as const,
-                  timestamp: new Date().toISOString(),
-                  category: 'Upsell'
-                }))
-              ] : []}
-              title="Client Intelligence"
-              onInsightAction={(insight) => {
-                // Handle insight actions based on type
-                if (insight.type === 'warning') {
-                  toast.warning(`Action needed: ${insight.title}`)
-                } else if (insight.type === 'success') {
-                  toast.success(insight.title)
-                } else {
-                  toast.info(insight.title)
-                }
-              }}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2547,17 +2515,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activities.slice(0, 5).map(activity => ({
-              id: activity.id,
-              type: activity.type === 'email' ? 'create' as const : activity.type === 'call' ? 'update' as const : 'comment' as const,
-              message: activity.title || activity.description,
-              timestamp: activity.createdAt,
-              user: { name: activity.createdBy || 'System', avatar: '' }
-            }))}
-            title="Client Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={[
               { id: 'add-client', label: 'Add Client', icon: 'plus', onClick: () => setShowNewClientDialog(true) },

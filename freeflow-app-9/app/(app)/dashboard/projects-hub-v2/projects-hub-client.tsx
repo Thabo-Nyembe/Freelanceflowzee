@@ -2654,26 +2654,7 @@ export default function ProjectsHubClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={[]}
-              onInsightAction={(insight: any) => {
-                toast.promise(
-                  fetch('/api/projects/insights/apply', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ insightId: insight.id, action: insight.action })
-                  }).then(res => {
-                    if (!res.ok) throw new Error('Failed to apply insight')
-                    return res.json()
-                  }),
-                  {
-                    loading: `Processing insight: ${insight.title || 'AI recommendation'}...`,
-                    success: `Insight action completed: ${insight.title || 'Applied AI recommendation'}`,
-                    error: 'Failed to apply insight'
-                  }
-                )
-              }}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
 
           {/* Team Collaboration & Activity */}
@@ -2690,10 +2671,7 @@ export default function ProjectsHubClient() {
 
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={[]}
           />

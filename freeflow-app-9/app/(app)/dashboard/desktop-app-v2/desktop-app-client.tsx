@@ -2825,11 +2825,7 @@ Date: ${new Date().toISOString().split('T')[0]}
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={desktopAppAIInsights}
-              title="Desktop App Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2844,11 +2840,7 @@ Date: ${new Date().toISOString().split('T')[0]}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={desktopAppActivities}
-            title="Build Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={desktopAppQuickActions}
             variant="grid"

@@ -2858,22 +2858,7 @@ export default function TimeTrackingClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={[]}
-              title="Time Intelligence"
-              onInsightAction={(insight) => {
-                if (insight.type === 'warning') {
-                  toast.promise(
-                    fetch(`/api/time-tracking/insights/${insight.id}/acknowledge`, { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); return insight; }),
-                    { loading: 'Reviewing insight...', success: `Acknowledged: ${insight.title}`, error: 'Failed to process insight' }
-                  )
-                } else if (insight.type === 'success') {
-                  toast.success(`Great job! ${insight.description}`)
-                } else {
-                  toast.info(insight.description)
-                }
-              }}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2888,11 +2873,7 @@ export default function TimeTrackingClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={[]}
-            title="Time Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={timeTrackingQuickActions}
             variant="grid"

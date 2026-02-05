@@ -2934,22 +2934,7 @@ export default KaziApiClient;`
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={emptyApiAIInsights}
-              title="API Intelligence"
-              onInsightAction={async (insight) => {
-                // Real insight action - based on insight type
-                if (insight.type === 'warning' && insight.category === 'Usage') {
-                  // Redirect to usage settings
-                  toast.warning(insight.title)
-                } else if (insight.type === 'success' && insight.category === 'Performance') {
-                  // Show performance details
-                  toast.success(insight.title)
-                } else {
-                  toast.info(insight.title)
-                }
-              }}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2970,21 +2955,7 @@ export default KaziApiClient;`
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activityLogs.slice(0, 10).map(log => ({
-              id: log.id,
-              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
-              title: log.action,
-              user: {
-                id: log.user_id || 'system',
-                name: log.user_name || 'System',
-                avatar: undefined
-              },
-              timestamp: log.created_at
-            }))}
-            title="API Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={emptyApiQuickActions}
             variant="grid"

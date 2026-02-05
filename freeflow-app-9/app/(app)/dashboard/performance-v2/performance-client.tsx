@@ -2194,20 +2194,13 @@ export default function PerformanceClient() {
 
       {/* AI-Powered Performance Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        <AIInsightsPanel
-          insights={[]}
-          onAskQuestion={(q) => toast.info('Question submitted')}
-        />
+        /* AIInsightsPanel removed - use header button */
         <PredictiveAnalytics predictions={[]} />
       </div>
 
       {/* Activity Feed */}
       <div className="mt-6">
-        <ActivityFeed
-          activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
-          maxItems={5}
-          showFilters={true}
-        />
+        /* ActivityFeed removed - use header button */
       </div>
 
       {/* Quick Actions Toolbar */}

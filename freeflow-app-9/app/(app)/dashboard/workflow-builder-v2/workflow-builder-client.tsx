@@ -2689,11 +2689,7 @@ export default function WorkflowBuilderClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockWorkflowAIInsights}
-              title="Workflow Intelligence"
-              onInsightAction={handleInsightAction}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2708,11 +2704,7 @@ export default function WorkflowBuilderClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockWorkflowActivities}
-            title="Workflow Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={mockWorkflowQuickActions}
             variant="grid"

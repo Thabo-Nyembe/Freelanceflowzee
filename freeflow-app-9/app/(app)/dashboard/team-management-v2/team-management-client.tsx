@@ -2447,11 +2447,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={teamManagementAIInsights}
-              title="Team Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2466,11 +2462,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={teamManagementActivities}
-            title="Team Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={teamManagementQuickActions}
             variant="grid"

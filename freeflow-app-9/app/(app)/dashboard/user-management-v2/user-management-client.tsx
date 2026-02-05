@@ -2347,11 +2347,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
         {/* Enhanced Competitive Upgrade Components - Using Real Database Data */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={aiInsights}
-              title="User Management Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2366,11 +2362,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activities}
-            title="User Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={quickActions}
             variant="grid"

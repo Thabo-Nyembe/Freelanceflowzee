@@ -2005,10 +2005,7 @@ export default function MarketingClient() {
             {/* AI Insights & Predictive Analytics Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
               {/* AI Insights Panel - Like ThoughtSpot/Salesforce Einstein */}
-              <AIInsightsPanel
-                insights={aiInsights}
-                className="h-full"
-              />
+              /* AIInsightsPanel removed - use header button */
 
               {/* Predictive Analytics - Like Salesforce Einstein */}
               <PredictiveAnalytics
@@ -2027,13 +2024,7 @@ export default function MarketingClient() {
 
             {/* Activity Feed - Like Slack + Notion Combined */}
             <div className="mt-6">
-              <ActivityFeed
-                activities={activities}
-                onMarkRead={(id) => toast.success('Marked as read', { description: `Item ${id} marked as read` })}
-                onMarkAllRead={() => toast.success('All marked as read')}
-                onPin={(id) => toast.success('Pinned', { description: `Item ${id} pinned` })}
-                onArchive={(id) => toast.success('Archived', { description: `Item ${id} archived` })}
-              />
+              /* ActivityFeed removed - use header button */
             </div>
           </TabsContent>
         </Tabs>

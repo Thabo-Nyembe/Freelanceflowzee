@@ -3167,24 +3167,7 @@ export default function MediaLibraryClient({
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={emptyAIInsights}
-              title="Media Intelligence"
-              onInsightAction={(insight) => {
-                if (insight.category === 'Storage') {
-                  setActiveTab('settings')
-                  setSettingsTab('storage')
-                  toast.info('Navigate to Storage settings')
-                } else if (insight.category === 'Automation') {
-                  handleAITagAll()
-                } else if (insight.category === 'Compliance') {
-                  setShowFilterDialog(true)
-                  toast.info('Review assets with expiring licenses')
-                } else {
-                  toast.info(`Action for: ${insight.title}`)
-                }
-              }}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -3199,11 +3182,7 @@ export default function MediaLibraryClient({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={emptyActivities}
-            title="Library Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={mediaQuickActions}
             variant="grid"

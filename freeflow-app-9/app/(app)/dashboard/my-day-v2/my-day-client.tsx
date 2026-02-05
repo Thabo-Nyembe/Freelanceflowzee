@@ -1793,19 +1793,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={revenueReport?.insights ? revenueReport.insights.map((i: any) => ({
-                id: i.id || Math.random().toString(),
-                type: 'recommendation' as const,
-                title: i.insight || 'Recommendation',
-                description: i.details || i.recommendation || '',
-                priority: (i.impact === 'High' ? 'high' : 'medium') as 'high' | 'medium' | 'low',
-                timestamp: new Date().toISOString(),
-                category: 'Revenue Intelligence'
-              })) : undefined}
-              title="Daily Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
-            />
+            /* AIInsightsPanel removed - use header button */
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -1829,11 +1817,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={activities}
-            title="Today's Activity"
-            maxItems={5}
-          />
+          /* ActivityFeed removed - use header button */
           <QuickActionsToolbar
             actions={quickActions}
             variant="grid"
