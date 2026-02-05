@@ -1,11 +1,9 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { DEMO_USER_ID } from '@/lib/utils/demo-mode'
 
 const logger = createSimpleLogger('kazi-automations')
-
-// Demo user for unauthenticated access
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 // Transform database record to API format
 function transformToApiFormat(record: Record<string, unknown>): Record<string, unknown> {

@@ -6,11 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { createSimpleLogger } from '@/lib/simple-logger';
+import { DEMO_USER_ID } from '@/lib/utils/demo-mode';
 
 const logger = createSimpleLogger('enhanced-users');
-
-// Demo user for unauthenticated access
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
