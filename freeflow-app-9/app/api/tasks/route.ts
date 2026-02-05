@@ -423,7 +423,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       logger.error('Tasks query error', { error })
-      console.error('Tasks query error details:', JSON.stringify(error, null, 2))
+      logger.error('Tasks query error details', { error: JSON.stringify(error, null, 2) })
       return NextResponse.json(
         { error: 'Failed to fetch tasks', details: error.message, code: error.code },
         { status: 500 }

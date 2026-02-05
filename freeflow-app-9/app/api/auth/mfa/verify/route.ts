@@ -5,6 +5,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { mfaService } from '@/lib/auth/mfa-service'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('mfa-verify')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -83,7 +86,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('MFA verification error:', error)
+    logger.error('MFA verification error', { error })
     return NextResponse.json(
       { error: 'Verification failed' },
       { status: 500 }

@@ -5,6 +5,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { mfaService } from '@/lib/auth/mfa-service'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('mfa-status')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -53,7 +56,7 @@ export async function GET() {
 
     return NextResponse.json(status)
   } catch (error) {
-    console.error('MFA status error:', error)
+    logger.error('MFA status error', { error })
     return NextResponse.json(
       { error: 'Failed to get MFA status' },
       { status: 500 }
@@ -84,7 +87,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('MFA disable error:', error)
+    logger.error('MFA disable error', { error })
     return NextResponse.json(
       { error: 'Failed to disable MFA' },
       { status: 500 }

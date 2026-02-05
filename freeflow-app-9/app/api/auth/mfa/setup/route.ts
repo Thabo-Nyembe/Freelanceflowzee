@@ -5,6 +5,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { mfaService } from '@/lib/auth/mfa-service'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('mfa-setup')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -59,7 +62,7 @@ export async function POST(request: Request) {
       recoveryKey: setup.recoveryKey
     })
   } catch (error) {
-    console.error('MFA setup error:', error)
+    logger.error('MFA setup error', { error })
     return NextResponse.json(
       { error: 'Failed to initialize MFA setup' },
       { status: 500 }

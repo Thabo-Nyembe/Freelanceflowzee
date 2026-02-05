@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('sprints')
 
 // Demo user ID for demo mode
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
@@ -71,7 +74,7 @@ export async function GET(request: NextRequest) {
     const { data: sprints, error } = await query
 
     if (error) {
-      console.error('Sprints query error:', error)
+      logger.error('Sprints query error', { error })
       // Return empty array on error for graceful degradation
       return NextResponse.json({
         success: true,
@@ -105,7 +108,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Sprints GET error:', error)
+    logger.error('Sprints GET error', { error })
     return NextResponse.json({
       success: true,
       data: {
@@ -164,7 +167,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Sprint creation error:', error)
+      logger.error('Sprint creation error', { error })
       return NextResponse.json(
         { error: 'Failed to create sprint' },
         { status: 500 }
@@ -176,7 +179,7 @@ export async function POST(request: NextRequest) {
       data: sprint
     }, { status: 201 })
   } catch (error) {
-    console.error('Sprints POST error:', error)
+    logger.error('Sprints POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -215,7 +218,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Sprint update error:', error)
+      logger.error('Sprint update error', { error })
       return NextResponse.json(
         { error: 'Failed to update sprint' },
         { status: 500 }
@@ -227,7 +230,7 @@ export async function PUT(request: NextRequest) {
       data: sprint
     })
   } catch (error) {
-    console.error('Sprints PUT error:', error)
+    logger.error('Sprints PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -261,7 +264,7 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Sprint deletion error:', error)
+      logger.error('Sprint deletion error', { error })
       return NextResponse.json(
         { error: 'Failed to delete sprint' },
         { status: 500 }
@@ -273,7 +276,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Sprint deleted successfully'
     })
   } catch (error) {
-    console.error('Sprints DELETE error:', error)
+    logger.error('Sprints DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
