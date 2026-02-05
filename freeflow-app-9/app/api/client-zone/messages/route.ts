@@ -8,14 +8,9 @@ import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { DEMO_USER_ID, isDemoMode } from '@/lib/demo-auth'
 
 const logger = createSimpleLogger('client-zone-messages-api')
-
-// Demo mode check
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-function isDemoMode(): boolean {
-  return process.env.NEXT_PUBLIC_DEMO_MODE === 'true' || process.env.DEMO_MODE === 'true'
-}
 
 // Message types matching database schema
 type MessageType = 'text' | 'system' | 'notification'

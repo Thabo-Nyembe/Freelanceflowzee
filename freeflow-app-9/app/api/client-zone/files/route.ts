@@ -9,14 +9,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createSimpleLogger } from '@/lib/simple-logger'
 import { randomBytes } from 'crypto'
+import { DEMO_USER_ID, isDemoMode } from '@/lib/demo-mode'
 
 const logger = createSimpleLogger('client-zone-files-api')
-
-// Demo mode check
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-function isDemoMode(): boolean {
-  return process.env.NEXT_PUBLIC_DEMO_MODE === 'true' || process.env.DEMO_MODE === 'true'
-}
 
 // File type categories
 const FILE_TYPE_MAP: Record<string, string> = {
