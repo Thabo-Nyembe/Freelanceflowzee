@@ -729,7 +729,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center rounded-xl overflow-hidden">
         <div className="text-center">
           <RefreshCw className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400">Loading audio studio...</p>
@@ -741,7 +741,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
   // Error state
   if (dbError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400 mb-4">Failed to load audio data</p>
@@ -755,8 +755,8 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

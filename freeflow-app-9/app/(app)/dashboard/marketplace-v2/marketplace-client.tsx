@@ -780,7 +780,7 @@ export default function MarketplaceClient() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center rounded-xl overflow-hidden">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-violet-600 mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400">Loading marketplace...</p>
@@ -792,7 +792,7 @@ export default function MarketplaceClient() {
   // Error state
   if (appsError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 flex flex-col items-center justify-center gap-4">
+      <div className="bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 flex flex-col items-center justify-center gap-4">
         <p className="text-red-500">Error loading marketplace data</p>
         <Button onClick={() => { refetchApps(); refetchReviews(); refetchFeatured(); }}>
           <RefreshCw className="w-4 h-4 mr-2" />
@@ -803,8 +803,8 @@ export default function MarketplaceClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

@@ -1387,7 +1387,7 @@ export default function AnnouncementsClient() {
   // Loading state
   if (dbLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center rounded-xl overflow-hidden">
         <div className="text-center">
           <RefreshCw className="w-12 h-12 text-violet-600 animate-spin mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400">Loading announcements...</p>
@@ -1399,7 +1399,7 @@ export default function AnnouncementsClient() {
   // Error state
   if (dbError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <p className="text-red-600 dark:text-red-400 font-medium mb-2">Failed to load announcements</p>
@@ -1416,8 +1416,8 @@ export default function AnnouncementsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="mx-auto space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-8 text-white">
           <div className="flex items-center justify-between">

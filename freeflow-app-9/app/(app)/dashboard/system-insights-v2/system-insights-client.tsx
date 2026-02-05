@@ -975,8 +975,8 @@ export default function SystemInsightsClient() {
   if (hookError) return <div className="flex flex-col items-center justify-center h-full gap-4"><p className="text-red-500">Error loading data</p><Button onClick={() => { refetchInsights(); refetchServers(); refetchAlerts(); refreshActiveAlerts(); refreshStatus(); refreshExtendedInsights(); }}>Retry</Button></div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-[1800px] mx-auto space-y-8">
+    <div className="bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8 rounded-xl overflow-hidden">
+      <div className="mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-slate-700 via-gray-700 to-zinc-700 rounded-2xl p-8 text-white">
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>

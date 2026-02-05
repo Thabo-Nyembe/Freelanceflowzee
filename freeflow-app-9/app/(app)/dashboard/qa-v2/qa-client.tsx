@@ -1087,7 +1087,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center rounded-xl overflow-hidden">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
           <p className="text-gray-600 dark:text-gray-400">Loading QA test cases...</p>
@@ -1099,7 +1099,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
             <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
@@ -1118,8 +1118,8 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

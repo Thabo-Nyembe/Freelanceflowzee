@@ -1491,8 +1491,8 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50/30 to-yellow-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="bg-gradient-to-br from-orange-50 via-amber-50/30 to-yellow-50/40 dark:bg-none dark:bg-gray-900 p-6 rounded-xl overflow-hidden">
+      <div className="mx-auto space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-8 text-white">
           <div className="flex items-center justify-between">

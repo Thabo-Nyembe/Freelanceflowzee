@@ -1170,8 +1170,8 @@ Date: ${new Date().toISOString().split('T')[0]}
   ], [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-6 rounded-xl overflow-hidden">
+      <div className="mx-auto space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-700 rounded-2xl p-8 text-white">
           <div className="flex items-center justify-between mb-6">

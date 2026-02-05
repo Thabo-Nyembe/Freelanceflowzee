@@ -911,7 +911,7 @@ export default function SprintsClient() {
   // Loading state
   if (isLoadingSprints) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center rounded-xl overflow-hidden">
         <div className="text-center">
           <RefreshCw className="w-12 h-12 text-teal-600 animate-spin mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400">Loading sprints...</p>
@@ -921,8 +921,8 @@ export default function SprintsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+    <div className="bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:bg-none dark:bg-gray-900">
+      <div className="mx-auto p-6 space-y-6">
 
         {/* Header */}
         <div className="flex items-center justify-between">

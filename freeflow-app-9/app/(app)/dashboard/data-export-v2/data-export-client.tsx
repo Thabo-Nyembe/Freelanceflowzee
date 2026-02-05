@@ -390,10 +390,10 @@ export default function DataExportClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:bg-none dark:bg-gray-900">
+    <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:bg-none dark:bg-gray-900 rounded-xl overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white">
-        <div className="max-w-[1800px] mx-auto px-6 py-8">
+        <div className="px-6 py-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-white/20 rounded-xl">
@@ -476,7 +476,7 @@ export default function DataExportClient() {
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-6 py-6">
+      <div className="mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="pipelines" className="flex items-center gap-2">

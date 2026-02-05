@@ -831,10 +831,10 @@ export default function PollsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:bg-none dark:bg-gray-900">
+    <div className="bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:bg-none dark:bg-gray-900 rounded-xl overflow-hidden">
       {/* Premium Header */}
       <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white">
-        <div className="max-w-[1800px] mx-auto px-6 py-8">
+        <div className="px-6 py-4">
           <div className="flex items-center justify-between mb-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
@@ -893,7 +893,7 @@ export default function PollsClient() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-[1800px] mx-auto px-6 py-6">
+      <div className="mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
             <TabsList className="bg-white dark:bg-gray-800 shadow-sm">

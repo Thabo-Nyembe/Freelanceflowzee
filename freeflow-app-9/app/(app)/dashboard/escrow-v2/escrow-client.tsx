@@ -694,8 +694,8 @@ export default function EscrowClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+    <div className="bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900 rounded-xl overflow-hidden">
+      <div className="mx-auto p-6 space-y-6">
 
         {/* Premium Header */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 p-8">

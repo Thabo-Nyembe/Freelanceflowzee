@@ -1025,8 +1025,8 @@ export default function AuditLogsClient() {
   // Show error state (skip for demo accounts)
   if (hasError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
-        <div className="max-w-[1800px] mx-auto">
+      <div className="bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6 rounded-xl overflow-hidden">
+        <div className="mx-auto">
           <Card className="border-red-200 dark:border-red-900/50">
             <CardContent className="p-8 text-center">
               <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
@@ -1048,8 +1048,8 @@ export default function AuditLogsClient() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
-        <div className="max-w-[1800px] mx-auto flex items-center justify-center h-[calc(100vh-6rem)]">
+      <div className="bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
+        <div className="mx-auto flex items-center justify-center h-[calc(100vh-6rem)]">
           <div className="text-center">
             <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mx-auto mb-4" />
             <p className="text-gray-500 dark:text-gray-400">Loading audit logs...</p>
@@ -1060,8 +1060,8 @@ export default function AuditLogsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

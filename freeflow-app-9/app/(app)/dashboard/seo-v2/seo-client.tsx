@@ -908,7 +908,7 @@ export default function SEOClient({ initialKeywords: _initialKeywords, initialBa
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6 flex items-center justify-center rounded-xl overflow-hidden">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Loading SEO Data</h2>
@@ -921,7 +921,7 @@ export default function SEOClient({ initialKeywords: _initialKeywords, initialBa
   // Error state
   if (hasError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6 flex items-center justify-center">
         <Card className="p-8 max-w-md text-center">
           <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
             <XCircle className="w-8 h-8 text-red-500" />
@@ -945,8 +945,8 @@ export default function SEOClient({ initialKeywords: _initialKeywords, initialBa
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

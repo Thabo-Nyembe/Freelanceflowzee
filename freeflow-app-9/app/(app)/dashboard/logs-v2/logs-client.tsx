@@ -801,10 +801,10 @@ export default function LogsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 dark:bg-none dark:bg-gray-900">
+    <div className="bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 dark:bg-none dark:bg-gray-900 rounded-xl overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-gray-800 via-slate-800 to-zinc-800 text-white">
-        <div className="max-w-[1800px] mx-auto px-6 py-6">
+        <div className="mx-auto px-6 py-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl shadow-lg">
@@ -995,7 +995,7 @@ export default function LogsClient() {
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-6 py-6">
+      <div className="mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 bg-white dark:bg-gray-800 p-1">
             <TabsTrigger value="explorer" className="flex items-center gap-2">

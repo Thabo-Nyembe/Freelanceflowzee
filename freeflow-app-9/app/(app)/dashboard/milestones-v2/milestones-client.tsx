@@ -1331,7 +1331,7 @@ export default function MilestonesClient() {
   // Show error state (skip for demo accounts)
   if (hookError && !isDemoAccount) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-rose-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center rounded-xl overflow-hidden">
         <Card className="max-w-md mx-auto">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
@@ -1348,8 +1348,8 @@ export default function MilestonesClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+    <div className="bg-gradient-to-br from-rose-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900">
+      <div className="mx-auto p-6 space-y-6">
 
         {/* Header */}
         <div className="flex items-center justify-between">
