@@ -39,8 +39,10 @@ export async function validateApiKey(request: NextRequest): Promise<{ context?: 
 
   const supabase = await createClient()
 
-  // Hash the key to compare with stored hash
-  const keyHash = Buffer.from(apiKey).toString('base64')
+  // SECURITY FIX: Use cryptographic hashing instead of Base64 encoding
+  // SHA-256 is much more secure than simple Base64
+  const crypto = await import('crypto')
+  const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex')
 
   // Look up the API key
   const { data: keyData, error: keyError } = await supabase

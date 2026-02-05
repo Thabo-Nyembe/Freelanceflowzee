@@ -3,25 +3,17 @@ import { authOptions } from '@/lib/auth.config'
 import type { NextRequest } from 'next/server'
 
 // ============================================================================
-// DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
+// DEMO USER CONFIGURATION - For legitimate alex@freeflow.io account only
 // ============================================================================
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 const DEMO_USER_EMAIL = 'alex@freeflow.io'
 
-function isDemoMode(request: NextRequest): boolean {
-  if (typeof request === 'undefined') return false
-  const url = new URL(request.url)
-  return (
-    url.searchParams.get('demo') === 'true' ||
-    request.cookies.get('demo_mode')?.value === 'true' ||
-    request.headers.get('X-Demo-Mode') === 'true'
-  )
-}
-
-function getDemoUserId(session: any, demoMode: boolean): string | null {
+// SECURITY: Demo mode bypass removed - users must authenticate properly
+// Only returns demo ID if user is actually logged in as demo account
+function getDemoUserId(session: any): string | null {
   if (!session?.user) {
-    return demoMode ? DEMO_USER_ID : null
+    return null  // CHANGED: No bypass - require proper authentication
   }
 
   const userEmail = session.user.email
@@ -29,7 +21,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
                        userEmail === 'demo@kazi.io' ||
                        userEmail === 'test@kazi.dev'
 
-  if (isDemoAccount || demoMode) {
+  if (isDemoAccount) {
     return DEMO_USER_ID
   }
 

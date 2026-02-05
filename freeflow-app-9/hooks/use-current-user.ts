@@ -11,27 +11,10 @@ interface User {
   role?: string
 }
 
-// Demo user constants
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-const DEMO_USER_EMAIL = 'alex@freeflow.io'
-const DEMO_USER_NAME = 'Alexandra Chen'
-
-// Check if demo mode is enabled
-function isDemoModeEnabled(): boolean {
-  if (typeof window === 'undefined') return false
-  const urlParams = new URLSearchParams(window.location.search)
-  if (urlParams.get('demo') === 'true') return true
-  const cookies = document.cookie.split(';')
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split('=')
-    if (name === 'demo_mode' && value === 'true') return true
-  }
-  return false
-}
-
 /**
  * Hook to get the current authenticated user
- * Checks NextAuth session first, then Supabase Auth, then demo mode
+ * Checks NextAuth session first, then Supabase Auth
+ * SECURITY: Demo mode bypass removed - users must authenticate properly
  */
 export function useCurrentUser() {
   const [user, setUser] = useState<User | null>(null)
@@ -51,25 +34,16 @@ export function useCurrentUser() {
             avatar_url: session.user.image || undefined,
             role: (session.user as any).role || 'user'
           })
+
+          // Check if this is the legitimate demo account
+          const isDemoAccount = session.user.email === 'alex@freeflow.io' ||
+                               session.user.email === 'demo@kazi.io'
+          setIsDemo(isDemoAccount)
           setIsLoading(false)
           return
         }
 
-        // 2. Check for demo mode
-        if (isDemoModeEnabled()) {
-          setIsDemo(true)
-          setUser({
-            id: DEMO_USER_ID,
-            email: DEMO_USER_EMAIL,
-            name: DEMO_USER_NAME,
-            avatar_url: '/images/avatars/alex.jpg',
-            role: 'pro'
-          })
-          setIsLoading(false)
-          return
-        }
-
-        // 3. Fall back to Supabase Auth
+        // 2. Fall back to Supabase Auth (REMOVED: demo mode bypass)
         const { createClient } = await import('@/lib/supabase/client')
         const supabase = createClient()
         const { data: { user: authUser } } = await supabase.auth.getUser()

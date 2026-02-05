@@ -94,8 +94,8 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    // TODO: Set to false once TypeScript errors in test files and dashboard components are fixed
-    ignoreBuildErrors: true,
+    // SECURITY FIX: Enabled TypeScript checking to catch errors before production
+    ignoreBuildErrors: false,
   },
   experimental: {
     externalDir: true,
