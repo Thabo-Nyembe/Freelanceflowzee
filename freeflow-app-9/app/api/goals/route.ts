@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { DEMO_USER_ID } from '@/lib/utils/demo-mode'
 
 const logger = createSimpleLogger('goals')
 
@@ -83,8 +84,6 @@ interface GoalProgress {
 // ============================================================================
 // DEMO DATA
 // ============================================================================
-
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 const demoGoals: Goal[] = [
   {

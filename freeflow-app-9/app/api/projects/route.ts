@@ -13,6 +13,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { DEMO_USER_ID } from '@/lib/utils/demo-mode'
 
 const logger = createSimpleLogger('projects-api')
 
@@ -83,9 +84,6 @@ export async function GET(request: NextRequest) {
     const demoModeRequested = searchParams.get('demo') === 'true' ||
       request.cookies.get('demo_mode')?.value === 'true' ||
       request.headers.get('X-Demo-Mode') === 'true'
-
-    // Demo user ID for demo mode
-    const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
     // Unauthenticated users
     if (!session?.user) {

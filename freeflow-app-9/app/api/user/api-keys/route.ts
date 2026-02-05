@@ -1,23 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
+import { isDemoMode, DEMO_USER_ID } from '@/lib/utils/demo-mode';
 
 /**
  * User API Keys Management
  *
  * Allows users to store and manage their own API keys (BYOK - Bring Your Own Key)
  */
-
-// Demo mode constants
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
-
-function isDemoMode(request: NextRequest): boolean {
-  const url = new URL(request.url);
-  return (
-    url.searchParams.get('demo') === 'true' ||
-    request.cookies.get('demo_mode')?.value === 'true' ||
-    request.headers.get('X-Demo-Mode') === 'true'
-  );
-}
 
 // Demo API keys for unauthenticated demo users
 function getDemoUserApiKeys(): UserAPIKey[] {
