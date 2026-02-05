@@ -3,20 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-
-// Demo mode detection
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-function isDemoModeEnabled(): boolean {
-  if (typeof window === 'undefined') return false
-  const urlParams = new URLSearchParams(window.location.search)
-  if (urlParams.get('demo') === 'true') return true
-  const cookies = document.cookie.split(';')
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split('=')
-    if (name === 'demo_mode' && value === 'true') return true
-  }
-  return false
-}
+import { DEMO_USER_ID, isDemoModeEnabled } from '@/lib/hooks/use-demo-fetch'
 
 export interface Project {
   id: string

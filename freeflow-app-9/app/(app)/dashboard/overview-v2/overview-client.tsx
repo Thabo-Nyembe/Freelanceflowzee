@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { DEMO_USER_ID, isDemoModeEnabled } from '@/lib/hooks/use-demo-fetch'
 import {
   useDashboardStats,
   useDashboardNotifications,
@@ -382,23 +383,6 @@ const overviewActivities: { id: string; type: 'status_change' | 'update' | 'crea
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
-
-// Demo user ID for demo mode
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-
-// Check if demo mode is enabled
-function isDemoModeEnabled(): boolean {
-  if (typeof window === 'undefined') return false
-  const urlParams = new URLSearchParams(window.location.search)
-  if (urlParams.get('demo') === 'true') return true
-  const cookies = document.cookie.split(';')
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split('=')
-    if (name === 'demo_mode' && value === 'true') return true
-  }
-  return false
-}
-
 export default function OverviewClient() {
   // User state for hooks
   const [userId, setUserId] = useState<string | undefined>(undefined)

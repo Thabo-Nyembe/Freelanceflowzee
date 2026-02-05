@@ -22,6 +22,7 @@ import {
   type AIRecommendation,
   type GrowthPlaybook
 } from '@/lib/supabase/ai-features'
+import { DEMO_USER_ID, isDemoModeEnabled } from '@/lib/hooks/use-demo-fetch'
 
 // ============================================================================
 // USER METRICS TYPE
@@ -543,24 +544,6 @@ export function useUserMetrics(userId?: string) {
 // ============================================================================
 // CURRENT USER HOOK - Fetches session via API (no SessionProvider required)
 // ============================================================================
-
-// Demo user constants
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-const DEMO_USER_EMAIL = 'alex@freeflow.io'
-const DEMO_USER_NAME = 'Alexandra Chen'
-
-// Check if demo mode is enabled
-function isDemoModeEnabled(): boolean {
-  if (typeof window === 'undefined') return false
-  const urlParams = new URLSearchParams(window.location.search)
-  if (urlParams.get('demo') === 'true') return true
-  const cookies = document.cookie.split(';')
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split('=')
-    if (name === 'demo_mode' && value === 'true') return true
-  }
-  return false
-}
 
 export function useCurrentUser() {
   const [session, setSession] = useState<any>(null)
