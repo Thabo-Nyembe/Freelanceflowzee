@@ -396,9 +396,10 @@ export async function DELETE(request: NextRequest) {
 // =====================================================
 
 async function getNotificationSettings(supabase: any, userId: string) {
+  // PERFORMANCE FIX: Select only needed notification setting fields
   const { data, error } = await supabase
     .from('notification_settings')
-    .select('*')
+    .select('id, user_id, email_notifications, push_notifications, sms_notifications, notification_types, frequency, quiet_hours_start, quiet_hours_end, updated_at')
     .eq('user_id', userId)
     .single();
 
@@ -408,9 +409,10 @@ async function getNotificationSettings(supabase: any, userId: string) {
 }
 
 async function getSecuritySettings(supabase: any, userId: string) {
+  // PERFORMANCE FIX: Select only needed security setting fields
   const { data, error } = await supabase
     .from('security_settings')
-    .select('*')
+    .select('id, user_id, two_factor_enabled, login_alerts, session_timeout, password_expiry_days, allowed_ip_addresses, updated_at')
     .eq('user_id', userId)
     .single();
 
@@ -420,9 +422,10 @@ async function getSecuritySettings(supabase: any, userId: string) {
 }
 
 async function getAppearanceSettings(supabase: any, userId: string) {
+  // PERFORMANCE FIX: Select only needed appearance setting fields
   const { data, error } = await supabase
     .from('appearance_settings')
-    .select('*')
+    .select('id, user_id, theme, color_scheme, font_size, language, timezone, date_format, time_format, updated_at')
     .eq('user_id', userId)
     .single();
 
@@ -448,9 +451,10 @@ async function getPrivacySettings(supabase: any, userId: string) {
 }
 
 async function getBillingSettings(supabase: any, userId: string) {
+  // PERFORMANCE FIX: Select only needed subscription fields
   const { data: subscription } = await supabase
     .from('subscriptions')
-    .select('*')
+    .select('id, user_id, plan_id, plan_name, status, current_period_start, current_period_end, trial_end, cancel_at_period_end, created_at, updated_at')
     .eq('user_id', userId)
     .eq('status', 'active')
     .single();

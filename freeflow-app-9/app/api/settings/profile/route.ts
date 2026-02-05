@@ -17,9 +17,10 @@ async function handleGetSettings(category: string, userId?: string, supabase?: a
     if (userId && supabase) {
       switch (category) {
         case 'profile': {
+          // PERFORMANCE FIX: Select only needed profile fields
           const { data: profile } = await supabase
             .from('profiles')
-            .select('*')
+            .select('id, first_name, last_name, email, phone, bio, location, website, company, position, title, avatar_url, timezone, language')
             .eq('id', userId)
             .single()
 
@@ -48,9 +49,10 @@ async function handleGetSettings(category: string, userId?: string, supabase?: a
           break
         }
         case 'notifications': {
+          // PERFORMANCE FIX: Select only needed notification setting fields
           const { data: notifSettings } = await supabase
             .from('notification_settings')
-            .select('*')
+            .select('user_id, email_notifications, push_notifications, sms_notifications, project_updates, client_messages, payment_alerts, marketing_emails, weekly_digest, desktop_notifications, mobile_notifications, sound_enabled, vibration_enabled')
             .eq('user_id', userId)
             .single()
 
@@ -79,9 +81,10 @@ async function handleGetSettings(category: string, userId?: string, supabase?: a
           break
         }
         case 'security': {
+          // PERFORMANCE FIX: Select only needed security setting fields
           const { data: securitySettings } = await supabase
             .from('security_settings')
-            .select('*')
+            .select('user_id, two_factor_auth, login_alerts, session_timeout, biometric_auth, trusted_devices_count, password_last_changed')
             .eq('user_id', userId)
             .single()
 
@@ -93,9 +96,10 @@ async function handleGetSettings(category: string, userId?: string, supabase?: a
             .eq('is_active', true)
 
           // Get login history
+          // PERFORMANCE FIX: Select only needed security event fields
           const { data: loginHistory } = await supabase
             .from('security_events')
-            .select('*')
+            .select('user_id, event_type, user_agent, location, timestamp')
             .eq('user_id', userId)
             .in('event_type', ['login_success', 'login_failure'])
             .order('timestamp', { ascending: false })
@@ -125,9 +129,10 @@ async function handleGetSettings(category: string, userId?: string, supabase?: a
           })
         }
         case 'appearance': {
+          // PERFORMANCE FIX: Select only needed appearance setting fields
           const { data: appearanceSettings } = await supabase
             .from('appearance_settings')
-            .select('*')
+            .select('user_id, theme, language, timezone, date_format, time_format, currency, compact_mode, animations, reduced_motion, high_contrast, font_size, color_scheme')
             .eq('user_id', userId)
             .single()
 
@@ -156,9 +161,10 @@ async function handleGetSettings(category: string, userId?: string, supabase?: a
           break
         }
         case 'preferences': {
+          // PERFORMANCE FIX: Select only needed user preference fields
           const { data: prefSettings } = await supabase
             .from('user_preferences')
-            .select('*')
+            .select('user_id, dashboard_layout, default_view, items_per_page, auto_save, collaboration_mode, ai_assistance, smart_suggestions, keyboard_shortcuts, advanced_features, beta_features, analytics_tracking, data_collection')
             .eq('user_id', userId)
             .single()
 
