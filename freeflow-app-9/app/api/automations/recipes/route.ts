@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { recipeBuilderService } from '@/lib/automations/recipe-builder';
 import { createSimpleLogger } from '@/lib/simple-logger';
-import { DEMO_USER_ID } from '@/lib/demo-mode';
+import { DEMO_USER_ID } from '@/lib/demo-auth';
 
 const logger = createSimpleLogger('automations-recipes');
 
