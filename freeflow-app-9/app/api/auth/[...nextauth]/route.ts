@@ -1,32 +1,7 @@
 import NextAuth from 'next-auth'
 import { authOptions } from '@/lib/auth.config'
 import type { NextRequest } from 'next/server'
-
-// ============================================================================
-// DEMO USER CONFIGURATION - For legitimate alex@freeflow.io account only
-// ============================================================================
-
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-const DEMO_USER_EMAIL = 'alex@freeflow.io'
-
-// SECURITY: Demo mode bypass removed - users must authenticate properly
-// Only returns demo ID if user is actually logged in as demo account
-function getDemoUserId(session: any): string | null {
-  if (!session?.user) {
-    return null  // CHANGED: No bypass - require proper authentication
-  }
-
-  const userEmail = session.user.email
-  const isDemoAccount = userEmail === DEMO_USER_EMAIL ||
-                       userEmail === 'demo@kazi.io' ||
-                       userEmail === 'test@kazi.dev'
-
-  if (isDemoAccount) {
-    return DEMO_USER_ID
-  }
-
-  return session.user.id || session.user.authId || null
-}
+import { isDemoMode, getDemoUserId } from '@/lib/utils/demo-mode'
 
 /**
  * NextAuth.js API Route Handler

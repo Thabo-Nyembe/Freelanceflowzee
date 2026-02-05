@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { isDemoMode, getDemoUserId } from '@/lib/utils/demo-mode'
 
 const logger = createSimpleLogger('business-intelligence')
 
@@ -9,9 +10,6 @@ const logger = createSimpleLogger('business-intelligence')
 // Provides comprehensive business metrics, profitability analysis,
 // client value tracking, and revenue forecasting
 // ============================================================================
-
-// Demo user ID for unauthenticated access
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 export async function GET(request: Request) {
   try {
@@ -26,7 +24,8 @@ export async function GET(request: Request) {
     const period = searchParams.get('period') || 'month' // day, week, month, quarter, year
 
     // Use provided userId or fallback to demo user for public access
-    const targetUserId = userId || DEMO_USER_ID
+    const demoUserId = getDemoUserId(null, true)
+    const targetUserId = userId || demoUserId
 
     switch (type) {
       case 'overview':
@@ -750,7 +749,8 @@ export async function POST(request: Request) {
     const body = await request.json()
 
     // Use provided userId or demo user for unauthenticated access
-    const userId = body.userId || DEMO_USER_ID
+    const demoUserId = getDemoUserId(null, true)
+    const userId = body.userId || demoUserId
 
     const { action, ...data } = body
 

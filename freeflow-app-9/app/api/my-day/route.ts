@@ -9,33 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { isDemoMode, getDemoUserId } from '@/lib/utils/demo-mode'
 
 const logger = createSimpleLogger('my-day')
-
-// ============================================================================
-// DEMO USER CONFIGURATION - For legitimate alex@freeflow.io account only
-// ============================================================================
-
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-const DEMO_USER_EMAIL = 'alex@freeflow.io'
-
-// SECURITY: Demo mode bypass removed - users must authenticate properly
-function getDemoUserId(session: any): string | null {
-  if (!session?.user) {
-    return null  // CHANGED: No bypass - require proper authentication
-  }
-
-  const userEmail = session.user.email
-  const isDemoAccount = userEmail === DEMO_USER_EMAIL ||
-                       userEmail === 'demo@kazi.io' ||
-                       userEmail === 'test@kazi.dev'
-
-  if (isDemoAccount) {
-    return DEMO_USER_ID
-  }
-
-  return session.user.id || session.user.authId || null
-}
 
 import {
   getGoals,

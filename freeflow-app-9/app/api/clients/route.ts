@@ -13,6 +13,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { isDemoMode, getDemoUserId } from '@/lib/utils/demo-mode'
 
 const logger = createSimpleLogger('clients-api')
 
@@ -123,22 +124,18 @@ export async function GET(request: NextRequest) {
     const includeInteractions = searchParams.get('include_interactions') === 'true'
 
     // Check for demo mode via query param, cookie, or header
-    const demoModeRequested = searchParams.get('demo') === 'true' ||
-      request.cookies.get('demo_mode')?.value === 'true' ||
-      request.headers.get('X-Demo-Mode') === 'true'
-
-    // Demo user ID for demo mode
-    const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+    const demoModeRequested = isDemoMode(request)
+    const demoUserId = getDemoUserId(session, demoModeRequested)
 
     // Demo mode for unauthenticated users
     if (!session?.user) {
-      if (demoModeRequested) {
+      if (demoModeRequested && demoUserId) {
         // Fetch real demo data from database
         // PERFORMANCE FIX: Select only needed client fields
         const { data: demoClients, error: demoError } = await supabase
           .from('clients')
           .select('id, name, email, phone, company, status, type, total_revenue, projects_count, last_contact_date, created_at, updated_at')
-          .eq('user_id', DEMO_USER_ID)
+          .eq('user_id', demoUserId)
           .order('updated_at', { ascending: false })
           .limit(limit)
 
@@ -173,19 +170,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Use authId for database queries (auth.users FK constraints)
-    const userId = (session.user as { authId?: string; id: string }).authId || session.user.id
-    const userEmail = session.user.email
+    const userId = demoUserId || (session.user as { authId?: string; id: string }).authId || session.user.id
 
     // Demo mode for demo accounts or when demo is requested
-    const isDemoAccount = userEmail === 'test@kazi.dev' || userEmail === 'demo@kazi.io' || userEmail === 'alex@freeflow.io'
-
-    if ((isDemoAccount || demoModeRequested) && !clientId) {
+    if (demoUserId && !clientId) {
       // Fetch real demo data from database for demo user
       // PERFORMANCE FIX: Select only needed client fields
       const { data: demoClients, error: demoError } = await supabase
         .from('clients')
         .select('id, name, email, phone, company, status, type, total_revenue, projects_count, last_contact_date, created_at, updated_at')
-        .eq('user_id', DEMO_USER_ID)
+        .eq('user_id', demoUserId)
         .order('updated_at', { ascending: false })
         .limit(limit)
 
