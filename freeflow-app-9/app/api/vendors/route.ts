@@ -47,7 +47,8 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type')
     const limit = parseInt(searchParams.get('limit') || '50')
 
-    let query = supabase.from('vendors').select('*')
+    // PERFORMANCE FIX: Select only needed vendor fields
+    let query = supabase.from('vendors').select('id, name, email, phone, address, type, status, payment_terms, tax_id, created_at')
 
     if (status) {
       query = query.eq('status', status)

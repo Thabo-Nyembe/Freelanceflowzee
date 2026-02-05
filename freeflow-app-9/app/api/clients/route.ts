@@ -134,9 +134,10 @@ export async function GET(request: NextRequest) {
     if (!session?.user) {
       if (demoModeRequested) {
         // Fetch real demo data from database
+        // PERFORMANCE FIX: Select only needed client fields
         const { data: demoClients, error: demoError } = await supabase
           .from('clients')
-          .select('*')
+          .select('id, name, email, phone, company, status, type, total_revenue, projects_count, last_contact_date, created_at, updated_at')
           .eq('user_id', DEMO_USER_ID)
           .order('updated_at', { ascending: false })
           .limit(limit)
@@ -180,9 +181,10 @@ export async function GET(request: NextRequest) {
 
     if ((isDemoAccount || demoModeRequested) && !clientId) {
       // Fetch real demo data from database for demo user
+      // PERFORMANCE FIX: Select only needed client fields
       const { data: demoClients, error: demoError } = await supabase
         .from('clients')
-        .select('*')
+        .select('id, name, email, phone, company, status, type, total_revenue, projects_count, last_contact_date, created_at, updated_at')
         .eq('user_id', DEMO_USER_ID)
         .order('updated_at', { ascending: false })
         .limit(limit)
@@ -215,9 +217,10 @@ export async function GET(request: NextRequest) {
         )
       }
 
+      // PERFORMANCE FIX: Select only needed fields for single client
       const { data: client, error } = await supabase
         .from('clients')
-        .select('*')
+        .select('id, name, email, phone, company, address, city, state, postal_code, country, status, type, industry, website, notes, total_revenue, projects_count, last_contact_date, created_at, updated_at')
         .eq('id', clientId)
         .single()
 
@@ -238,9 +241,10 @@ export async function GET(request: NextRequest) {
       }
 
       if (includeContacts) {
+        // PERFORMANCE FIX: Select only needed contact fields
         const { data: contactData } = await supabase
           .from('client_contacts')
-          .select('*')
+          .select('id, name, email, phone, position, is_primary, notes, created_at')
           .eq('client_id', clientId)
           .order('is_primary', { ascending: false })
 
