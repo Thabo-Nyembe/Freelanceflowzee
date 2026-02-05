@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('features-notify')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -70,7 +73,7 @@ export async function POST(request: NextRequest) {
             // If table doesn't exist, create a fallback notification log
             if (error.code === '42P01') {
                 // Table doesn't exist - log to console for now
-                console.log('Feature notification subscription:', { email, user_id, feature, source })
+                logger.info('Feature notification subscription', { email, user_id, feature, source })
                 return NextResponse.json({
                     success: true,
                     message: 'Subscription received (logging mode)',
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
             data
         })
     } catch (error) {
-        console.error('Feature notify error:', error)
+        logger.error('Feature notify error', { error })
         return NextResponse.json({
             success: false,
             error: error instanceof Error ? error.message : 'Failed to subscribe'

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('community')
 
 // Community Hub API
 // Supports: Posts, Connections, Likes, Comments, Shares, Bookmarks
@@ -45,7 +48,7 @@ async function handleLikePost(postId: string, userId: string = 'user-1', unlike:
         .match({ post_id: postId, user_id: userId })
 
       if (deleteError) {
-        console.error('[Community API] Failed to delete like:', deleteError.message)
+        logger.error('Failed to delete like', { error: deleteError })
       }
 
       // Decrement likes count
@@ -56,7 +59,7 @@ async function handleLikePost(postId: string, userId: string = 'user-1', unlike:
         .single()
 
       if (fetchError) {
-        console.error('[Community API] Failed to fetch post for unlike:', fetchError.message)
+        logger.error('Failed to fetch post for unlike', { error: fetchError })
       }
 
       if (post) {
@@ -67,7 +70,7 @@ async function handleLikePost(postId: string, userId: string = 'user-1', unlike:
           .eq('id', postId)
 
         if (updateError) {
-          console.error('[Community API] Failed to update likes count:', updateError.message)
+          logger.error('Failed to update likes count', { error: updateError })
         }
       }
     } else {
@@ -77,7 +80,7 @@ async function handleLikePost(postId: string, userId: string = 'user-1', unlike:
         .upsert({ post_id: postId, user_id: userId, created_at: new Date().toISOString() })
 
       if (upsertError) {
-        console.error('[Community API] Failed to upsert like:', upsertError.message)
+        logger.error('Failed to upsert like', { error: upsertError })
       }
 
       // Increment likes count
@@ -88,7 +91,7 @@ async function handleLikePost(postId: string, userId: string = 'user-1', unlike:
         .single()
 
       if (fetchError) {
-        console.error('[Community API] Failed to fetch post for like:', fetchError.message)
+        logger.error('Failed to fetch post for like', { error: fetchError })
       }
 
       if (post) {
@@ -99,7 +102,7 @@ async function handleLikePost(postId: string, userId: string = 'user-1', unlike:
           .eq('id', postId)
 
         if (updateError) {
-          console.error('[Community API] Failed to update likes count:', updateError.message)
+          logger.error('Failed to update likes count', { error: updateError })
         }
       }
     }
@@ -145,13 +148,13 @@ async function handleBookmarkPost(postId: string, userId: string = 'user-1', unb
         .match({ post_id: postId, user_id: userId })
 
       if (deleteError) {
-        console.error('[Community API] Failed to delete bookmark:', deleteError.message)
+        logger.error('Failed to delete bookmark', { error: deleteError })
       }
 
       // Decrement bookmarks count
       const { error: rpcError } = await supabase.rpc('decrement_bookmarks', { post_id_param: postId })
       if (rpcError) {
-        console.error('[Community API] Failed to decrement bookmarks:', rpcError.message)
+        logger.error('Failed to decrement bookmarks', { error: rpcError })
       }
     } else {
       const { error: upsertError } = await supabase
@@ -164,13 +167,13 @@ async function handleBookmarkPost(postId: string, userId: string = 'user-1', unb
         })
 
       if (upsertError) {
-        console.error('[Community API] Failed to upsert bookmark:', upsertError.message)
+        logger.error('Failed to upsert bookmark', { error: upsertError })
       }
 
       // Increment bookmarks count
       const { error: rpcError } = await supabase.rpc('increment_bookmarks', { post_id_param: postId })
       if (rpcError) {
-        console.error('[Community API] Failed to increment bookmarks:', rpcError.message)
+        logger.error('Failed to increment bookmarks', { error: rpcError })
       }
     }
 
@@ -214,7 +217,7 @@ async function handleSharePost(postId: string, data: any): Promise<NextResponse>
       })
 
     if (shareError) {
-      console.error('[Community API] Failed to track share:', shareError.message)
+      logger.error('Failed to track share', { error: shareError })
     }
 
     // Increment shares count on post
@@ -233,7 +236,7 @@ async function handleSharePost(postId: string, data: any): Promise<NextResponse>
         .eq('id', postId)
 
       if (updateError) {
-        console.error('[Community API] Failed to update shares count:', updateError.message)
+        logger.error('Failed to update shares count', { error: updateError })
       }
     }
 
@@ -346,7 +349,7 @@ async function handleConnectionAction(memberId: string, userId: string = 'user-1
         .or(`and(requester_id.eq.${userId},recipient_id.eq.${memberId}),and(requester_id.eq.${memberId},recipient_id.eq.${userId})`)
 
       if (deleteError) {
-        console.error('[Community API] Failed to remove connection:', deleteError.message)
+        logger.error('Failed to remove connection', { error: deleteError })
       }
     } else {
       // Create connection request
@@ -360,7 +363,7 @@ async function handleConnectionAction(memberId: string, userId: string = 'user-1
         })
 
       if (upsertError) {
-        console.error('[Community API] Failed to create connection:', upsertError.message)
+        logger.error('Failed to create connection', { error: upsertError })
       }
     }
 
@@ -407,7 +410,7 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
         .match({ follower_id: userId, following_id: memberId })
 
       if (deleteError) {
-        console.error('[Community API] Failed to remove follow:', deleteError.message)
+        logger.error('Failed to remove follow', { error: deleteError })
       }
 
       // Update follower count
@@ -418,7 +421,7 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
         .single()
 
       if (fetchError) {
-        console.error('[Community API] Failed to fetch member for unfollow:', fetchError.message)
+        logger.error('Failed to fetch member for unfollow', { error: fetchError })
       }
 
       if (member) {
@@ -429,7 +432,7 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
           .eq('user_id', memberId)
 
         if (updateError) {
-          console.error('[Community API] Failed to update follower count:', updateError.message)
+          logger.error('Failed to update follower count', { error: updateError })
         }
       }
     } else {
@@ -443,7 +446,7 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
         })
 
       if (upsertError) {
-        console.error('[Community API] Failed to add follow:', upsertError.message)
+        logger.error('Failed to add follow', { error: upsertError })
       }
 
       // Update follower count
@@ -454,7 +457,7 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
         .single()
 
       if (fetchError) {
-        console.error('[Community API] Failed to fetch member for follow:', fetchError.message)
+        logger.error('Failed to fetch member for follow', { error: fetchError })
       }
 
       if (member) {
@@ -465,7 +468,7 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
           .eq('user_id', memberId)
 
         if (updateError) {
-          console.error('[Community API] Failed to update follower count:', updateError.message)
+          logger.error('Failed to update follower count', { error: updateError })
         }
       }
 
@@ -477,7 +480,7 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
         .single()
 
       if (userFetchError) {
-        console.error('[Community API] Failed to fetch user member:', userFetchError.message)
+        logger.error('Failed to fetch user member', { error: userFetchError })
       }
 
       if (userMember) {
@@ -487,7 +490,7 @@ async function handleFollowAction(memberId: string, userId: string = 'user-1', u
           .eq('user_id', userId)
 
         if (userUpdateError) {
-          console.error('[Community API] Failed to update following count:', userUpdateError.message)
+          logger.error('Failed to update following count', { error: userUpdateError })
         }
       }
     }

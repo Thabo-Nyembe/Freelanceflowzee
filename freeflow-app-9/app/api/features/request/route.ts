@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('features-request')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -71,7 +74,7 @@ export async function POST(request: NextRequest) {
             // If table doesn't exist, create a fallback request log
             if (error.code === '42P01') {
                 // Table doesn't exist - log to console for now
-                console.log('Feature request:', { feature_request, user_id, source, priority })
+                logger.info('Feature request', { feature_request, user_id, source, priority })
                 return NextResponse.json({
                     success: true,
                     message: 'Request received (logging mode)',
@@ -82,7 +85,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Log the request for analytics
-        console.log('New feature request:', {
+        logger.info('New feature request', {
             id: data.id,
             request: feature_request,
             user_id,
@@ -95,7 +98,7 @@ export async function POST(request: NextRequest) {
             data
         })
     } catch (error) {
-        console.error('Feature request error:', error)
+        logger.error('Feature request error', { error })
         return NextResponse.json({
             success: false,
             error: error instanceof Error ? error.message : 'Failed to submit request'
@@ -161,7 +164,7 @@ export async function GET(request: NextRequest) {
             }
         })
     } catch (error) {
-        console.error('Get feature requests error:', error)
+        logger.error('Get feature requests error', { error })
         return NextResponse.json({
             success: false,
             error: error instanceof Error ? error.message : 'Failed to fetch requests'
