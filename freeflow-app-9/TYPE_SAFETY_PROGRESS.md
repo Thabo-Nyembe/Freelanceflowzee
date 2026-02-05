@@ -1,16 +1,16 @@
 # Type Safety Migration - Progress Report
 
 **Date**: 2026-02-05
-**Status**: ⏳ IN PROGRESS - 205 files migrated (29.5%)
-**Lines Removed**: 6,960 lines of duplicated code
+**Status**: ⏳ IN PROGRESS - 215 files migrated (30.9%)
+**Lines Removed**: 7,300 lines of duplicated code
 
 ---
 
 ## 📊 Migration Summary
 
-**Completed**: 205 of ~695 API files (29.5%)
-**Code Removed**: 6,960 lines
-**Commits**: 42 batches pushed
+**Completed**: 215 of ~695 API files (30.9%)
+**Code Removed**: 7,300 lines
+**Commits**: 32 batches pushed
 **Batch Size**: Accelerated to 10 files/batch
 
 ---
@@ -224,7 +224,17 @@
 | `app/api/segments/route.ts` | 34 | 22 |
 | `app/api/widgets/[id]/route.ts` | 34 | 22 |
 | `app/api/widgets/route.ts` | 34 | 22 |
-| **Total** | **6,960** | **29.5%** |
+| `app/api/dashboard/route.ts` | 34 | 32 |
+| `app/api/engagement/track/route.ts` | 34 | 32 |
+| `app/api/capacity/route.ts` | 34 | 32 |
+| `app/api/team-collaboration/[id]/route.ts` | 34 | 32 |
+| `app/api/team-collaboration/route.ts` | 34 | 32 |
+| `app/api/realtime-translation/[id]/route.ts` | 34 | 32 |
+| `app/api/realtime-translation/route.ts` | 34 | 32 |
+| `app/api/investor-metrics/[id]/route.ts` | 34 | 32 |
+| `app/api/investor-metrics/route.ts` | 34 | 32 |
+| `app/api/billing-settings/[id]/route.ts` | 34 | 32 |
+| **Total** | **7,300** | **30.9%** |
 
 ---
 

@@ -8,22 +8,11 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth.config';
 import { createSimpleLogger } from '@/lib/simple-logger';
+import { isDemoMode, getDemoUserId } from '@/lib/utils/demo-mode';
 
 const logger = createSimpleLogger('dashboard');
 
-// Demo user for unauthenticated access
-// Demo mode can be enabled via ?demo=true query parameter
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
-
-// Check if demo mode is enabled via query param, cookie, or header
-function isDemoMode(request: NextRequest): boolean {
-  const url = new URL(request.url);
-  if (url.searchParams.get('demo') === 'true') return true;
-  if (request.cookies.get('demo_mode')?.value === 'true') return true;
-  if (request.headers.get('X-Demo-Mode') === 'true') return true;
-  return false;
-}
 
 // =====================================================
 // GET - Dashboard stats, recent activity, quick actions
