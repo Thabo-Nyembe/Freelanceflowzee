@@ -1262,7 +1262,7 @@ export default function ReportingClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+      <div className="max-w-full mx-auto p-6 space-y-6">
 
         {/* Premium Header */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-8">
@@ -2580,7 +2580,7 @@ export default function ReportingClient() {
 
         {/* Dashboard Preview Dialog */}
         <Dialog open={!!selectedDashboard} onOpenChange={() => setSelectedDashboard(null)}>
-          <DialogContent className="max-w-4xl">
+          <DialogContent className="max-w-6xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 <LayoutDashboard className="w-5 h-5 text-indigo-500" />

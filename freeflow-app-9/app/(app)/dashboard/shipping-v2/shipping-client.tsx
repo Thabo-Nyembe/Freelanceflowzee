@@ -1091,7 +1091,7 @@ export default function ShippingClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2815,7 +2815,7 @@ export default function ShippingClient() {
 
         {/* Shipment Detail Dialog */}
         <Dialog open={!!selectedShipment} onOpenChange={() => setSelectedShipment(null)}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white">
@@ -3518,7 +3518,7 @@ export default function ShippingClient() {
 
         {/* Map View Dialog */}
         <Dialog open={showMapViewDialog} onOpenChange={setShowMapViewDialog}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             <DialogHeader>
               <DialogTitle>Shipment Map View</DialogTitle>
               <DialogDescription>View all shipment locations on the map</DialogDescription>

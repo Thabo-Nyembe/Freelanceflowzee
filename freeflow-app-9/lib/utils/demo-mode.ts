@@ -23,7 +23,9 @@ export function isDemoMode(request: NextRequest | undefined): boolean {
   return (
     url.searchParams.get('demo') === 'true' ||
     request.cookies.get('demo_mode')?.value === 'true' ||
-    request.headers.get('X-Demo-Mode') === 'true'
+    request.headers.get('X-Demo-Mode') === 'true' ||
+    process.env.NEXT_PUBLIC_DEMO_MODE === 'true' ||
+    process.env.DEMO_MODE === 'true'
   )
 }
 

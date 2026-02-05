@@ -718,7 +718,7 @@ export default function FeaturesClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white">
           <div className="flex items-center justify-between">
@@ -1833,7 +1833,7 @@ export default function FeaturesClient() {
 
       {/* Feature Detail Dialog */}
       <Dialog open={!!selectedFeature} onOpenChange={() => setSelectedFeature(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
           {selectedFeature && (
             <>
               <DialogHeader>

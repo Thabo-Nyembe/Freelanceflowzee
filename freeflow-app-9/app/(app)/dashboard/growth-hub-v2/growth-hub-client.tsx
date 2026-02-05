@@ -586,7 +586,7 @@ export default function GrowthHubClient() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
       {/* Header */}
       <div className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-[1800px] mx-auto px-6 py-4">
+        <div className="max-w-full mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
@@ -619,7 +619,7 @@ export default function GrowthHubClient() {
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+      <div className="max-w-full mx-auto p-6 space-y-6">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {[
@@ -1777,7 +1777,7 @@ export default function GrowthHubClient() {
 
       {/* Funnel Detail Dialog */}
       <Dialog open={!!selectedFunnel} onOpenChange={() => setSelectedFunnel(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogContent className="max-w-6xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Filter className="w-5 h-5 text-blue-500" />
@@ -1847,7 +1847,7 @@ export default function GrowthHubClient() {
 
       {/* Cohort Detail Dialog */}
       <Dialog open={!!selectedCohort} onOpenChange={() => setSelectedCohort(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh]">
+        <DialogContent className="max-w-5xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Users className="w-5 h-5 text-purple-500" />
@@ -1893,7 +1893,7 @@ export default function GrowthHubClient() {
 
       {/* Experiment Detail Dialog */}
       <Dialog open={!!selectedExperiment} onOpenChange={() => setSelectedExperiment(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogContent className="max-w-6xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FlaskConical className="w-5 h-5 text-orange-500" />

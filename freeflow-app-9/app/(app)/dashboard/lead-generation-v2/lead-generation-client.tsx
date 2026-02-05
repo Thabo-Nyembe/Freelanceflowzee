@@ -1528,7 +1528,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50/30 to-red-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2838,7 +2838,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
         {/* Lead Detail Dialog */}
         <Dialog open={isLeadDialogOpen} onOpenChange={setIsLeadDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
             {selectedLead && (
               <>
                 <DialogHeader>

@@ -1059,7 +1059,7 @@ export default function EmailMarketingClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50/30 to-purple-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -1935,7 +1935,7 @@ export default function EmailMarketingClient() {
 
         {/* Campaign Detail Dialog */}
         <Dialog open={!!selectedCampaign} onOpenChange={() => setSelectedCampaign(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogContent className="max-w-6xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 {selectedCampaign?.name}
@@ -2116,7 +2116,7 @@ export default function EmailMarketingClient() {
 
         {/* Automation Detail Dialog */}
         <Dialog open={!!selectedAutomation} onOpenChange={() => setSelectedAutomation(null)}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600">
@@ -2519,7 +2519,7 @@ export default function EmailMarketingClient() {
 
         {/* All Subscribers Dialog */}
         <Dialog open={showAllSubscribersDialog} onOpenChange={setShowAllSubscribersDialog}>
-          <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogContent className="max-w-6xl max-h-[80vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center justify-between">
                 <span>All Subscribers ({subscribers.length})</span>

@@ -1041,7 +1041,7 @@ export default function WebhooksClient({
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}
       <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white">
-        <div className="max-w-[1800px] mx-auto px-6 py-8">
+        <div className="max-w-full mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
@@ -1117,7 +1117,7 @@ export default function WebhooksClient({
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-6 py-6">
+      <div className="max-w-full mx-auto px-6 py-6">
         {/* Related Dashboards Navigation */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
           <div className="flex items-center justify-between mb-3">
@@ -2408,7 +2408,7 @@ export default function WebhooksClient({
 
       {/* Delivery Log Detail Dialog */}
       <Dialog open={showLogDialog} onOpenChange={setShowLogDialog}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${

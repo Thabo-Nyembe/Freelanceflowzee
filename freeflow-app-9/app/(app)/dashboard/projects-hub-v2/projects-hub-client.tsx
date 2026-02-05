@@ -957,7 +957,7 @@ export default function ProjectsHubClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2678,7 +2678,7 @@ export default function ProjectsHubClient() {
 
         {/* Project Detail Dialog */}
         <Dialog open={showProjectDialog} onOpenChange={setShowProjectDialog}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             {selectedProject && (
               <>
                 <DialogHeader>
@@ -2748,7 +2748,7 @@ export default function ProjectsHubClient() {
 
         {/* Issue Detail Dialog */}
         <Dialog open={showIssueDialog} onOpenChange={setShowIssueDialog}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             {selectedIssue && (
               <>
                 <DialogHeader>
@@ -3007,7 +3007,7 @@ export default function ProjectsHubClient() {
 
         {/* Sprint Board Dialog */}
         <Dialog open={showSprintBoardDialog} onOpenChange={setShowSprintBoardDialog}>
-          <DialogContent className="max-w-4xl">
+          <DialogContent className="max-w-6xl">
             <DialogHeader>
               <DialogTitle>{selectedSprint?.name || 'Sprint'} Board</DialogTitle>
               <DialogDescription>View and manage sprint tasks</DialogDescription>

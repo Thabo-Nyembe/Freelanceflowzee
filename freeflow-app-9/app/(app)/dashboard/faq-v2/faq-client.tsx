@@ -729,7 +729,7 @@ export default function FAQClient() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900">
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
-        <div className="max-w-[1800px] mx-auto px-6 py-8">
+        <div className="max-w-full mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
@@ -819,7 +819,7 @@ export default function FAQClient() {
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-6 py-6">
+      <div className="max-w-full mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
             <TabsList className="bg-white dark:bg-gray-800 shadow-sm">
@@ -2120,7 +2120,7 @@ export default function FAQClient() {
         setShowCreateDialog(open)
         if (!open) resetForm()
       }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>{editingArticle ? 'Edit Article' : 'Create New Article'}</DialogTitle>
           </DialogHeader>
@@ -2280,7 +2280,7 @@ export default function FAQClient() {
 
       
       <Dialog open={!!selectedArticle} onOpenChange={() => setSelectedArticle(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               {selectedArticle?.title}

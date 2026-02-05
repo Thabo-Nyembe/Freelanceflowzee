@@ -818,7 +818,7 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 dark:bg-none dark:bg-gray-900">
-        <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+        <div className="max-w-full mx-auto p-6 space-y-6">
           <div className="flex items-center justify-center h-64">
             <div className="flex flex-col items-center gap-4">
               <RefreshCw className="w-8 h-8 text-cyan-500 animate-spin" />
@@ -834,7 +834,7 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 dark:bg-none dark:bg-gray-900">
-        <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+        <div className="max-w-full mx-auto p-6 space-y-6">
           <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -857,7 +857,7 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+      <div className="max-w-full mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

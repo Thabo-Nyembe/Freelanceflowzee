@@ -589,7 +589,7 @@ export default function AIDesignClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+      <div className="max-w-full mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -1994,7 +1994,7 @@ export default function AIDesignClient() {
 
         {/* Generation Detail Dialog */}
         <Dialog open={showGenerationDialog} onOpenChange={setShowGenerationDialog}>
-          <DialogContent className="max-w-4xl">
+          <DialogContent className="max-w-6xl">
             <DialogHeader>
               <DialogTitle>Generation Details</DialogTitle>
             </DialogHeader>
@@ -2101,7 +2101,7 @@ export default function AIDesignClient() {
 
         {/* History Dialog */}
         <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <History className="w-5 h-5 text-fuchsia-500" />

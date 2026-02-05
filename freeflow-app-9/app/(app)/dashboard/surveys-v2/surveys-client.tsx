@@ -821,7 +821,7 @@ export default function SurveysClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2244,7 +2244,7 @@ export default function SurveysClient() {
 
         {/* Survey Detail Dialog */}
         <Dialog open={!!selectedSurvey} onOpenChange={() => setSelectedSurvey(null)}>
-          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <ClipboardList className="w-5 h-5" />
@@ -3370,7 +3370,7 @@ export default function SurveysClient() {
 
         {/* Logic Builder Dialog */}
         <Dialog open={showLogicBuilderDialog} onOpenChange={setShowLogicBuilderDialog}>
-          <DialogContent className="max-w-4xl max-h-[85vh]">
+          <DialogContent className="max-w-6xl max-h-[85vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <GitBranch className="w-5 h-5 text-yellow-600" />

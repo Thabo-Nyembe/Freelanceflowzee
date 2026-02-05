@@ -1,0 +1,365 @@
+app/(app)/dashboard/customers-v2/customers-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/ai-design-v2/ai-design-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/gallery-v2/gallery-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/security-audit-v2/security-audit-client.tsx
+  - Replaced 1 instance(s) of max-w-[1600px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/performance-v2/performance-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/projects-hub-v2/projects-hub-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/activity-logs-v2/activity-logs-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/webhooks-v2/webhooks-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/faq-v2/faq-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/learning-v2/learning-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/ai-video-v2/ai-video-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/polls-v2/polls-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/escrow-v2/escrow-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/analytics-v2/analytics-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/employees-v2/employees-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/invoicing-v2/invoicing-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/motion-graphics-v2/motion-graphics-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/reporting-v2/reporting-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/wallet-v2/wallet-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/gamification-v2/gamification-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/dependencies-v2/dependencies-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/media-library-v2/media-library-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/health-score-v2/health-score-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/loyalty-v2/loyalty-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/qa-v2/qa-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 3 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/integrations-v2/integrations-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/announcements-v2/announcements-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/renewals-v2/renewals-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 2 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/logs-v2/logs-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/automations-v2/automations-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 3 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/add-ons-v2/add-ons-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/video-studio-v2/video-studio-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/bugs-v2/bugs-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/growth-hub-v2/growth-hub-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/calendar-v2/calendar-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/third-party-integrations-v2/third-party-integrations-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/extensions-v2/extensions-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/forms-v2/forms-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 2 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/ai-create-v2/ai-create-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/api-v2/api-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/audit-logs-v2/audit-logs-client.tsx
+  - Replaced 3 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/team-hub-v2/team-hub-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/registrations-v2/registrations-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/app-store-v2/app-store-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/resources-v2/resources-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/notifications-v2/notifications-client.tsx
+  - Replaced 1 instance(s) of max-w-[1600px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/workflows-v2/workflows-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/permissions-v2/permissions-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/allocation-v2/allocation-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/deployments-v2/deployments-client.tsx
+  - Replaced 1 instance(s) of max-w-[1600px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 3 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/shipping-v2/shipping-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/settings-v2/settings-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/marketplace-v2/marketplace-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/email-marketing-v2/email-marketing-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/reports-v2/reports-client.tsx
+  - Replaced 1 instance(s) of max-w-[1600px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/desktop-app-v2/desktop-app-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/messages-v2/messages-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/pricing-v2/pricing-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/ai-voice-v2/ai-voice-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/data-export-v2/data-export-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/surveys-v2/surveys-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/security-v2/security-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/profile-v2/profile-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/files-hub-v2/files-hub-client.tsx
+  - Replaced 3 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/documents-v2/documents-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/milestones-v2/milestones-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/crm-v2/crm-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/bookings-v2/bookings-client.tsx
+  - Replaced 1 instance(s) of max-w-[1600px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/monitoring-v2/monitoring-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/system-insights-v2/system-insights-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/stock-v2/stock-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/support-tickets-v2/support-tickets-client.tsx
+  - Replaced 3 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/orders-v2/orders-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/products-v2/products-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/knowledge-articles-v2/knowledge-articles-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/features-v2/features-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/docs-v2/docs-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/builds-v2/builds-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/customer-success-v2/customer-success-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/sprints-v2/sprints-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/workflow-builder-v2/workflow-builder-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/documentation-v2/documentation-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/lead-generation-v2/lead-generation-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/plugins-v2/plugins-client.tsx
+  - Replaced 1 instance(s) of max-w-[1600px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/alerts-v2/alerts-client.tsx
+  - Replaced 1 instance(s) of max-w-[1600px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/time-tracking-v2/time-tracking-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/component-library-v2/component-library-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 2 content width(s): max-w-4xl → max-w-6xl
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/compliance-v2/compliance-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/seo-v2/seo-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/audio-studio-v2/audio-studio-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/audit-v2/audit-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/marketing-v2/marketing-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 4 content width(s): max-w-3xl → max-w-5xl
+
+app/(app)/dashboard/help-center-v2/help-center-client.tsx
+  - Replaced 2 instance(s) of max-w-[1800px] → max-w-full
+  - Expanded 1 content width(s): max-w-4xl → max-w-6xl
+
+app/(app)/dashboard/my-day-v2/my-day-client.tsx
+  - Replaced 1 instance(s) of max-w-[1800px] → max-w-full
+
+app/(app)/dashboard/backups-v2/backups-client.tsx
+  - Replaced 1 instance(s) of max-w-[1600px] → max-w-full
+  - Expanded 2 content width(s): max-w-3xl → max-w-5xl

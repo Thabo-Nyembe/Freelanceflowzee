@@ -681,7 +681,7 @@ export default function CustomerSuccessClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-8 text-white">
           <div className="flex items-center justify-between">
@@ -2220,7 +2220,7 @@ export default function CustomerSuccessClient() {
 
       {/* Enrollments Dialog */}
       <Dialog open={showEnrollmentsDialog} onOpenChange={setShowEnrollmentsDialog}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-5xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-pink-600" />

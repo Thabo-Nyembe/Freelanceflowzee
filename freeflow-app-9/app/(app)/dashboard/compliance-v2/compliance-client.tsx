@@ -1669,7 +1669,7 @@ export default function ComplianceClient() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-cyan-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}
       <div className="bg-gradient-to-r from-green-600 via-teal-600 to-cyan-600 text-white">
-        <div className="max-w-[1800px] mx-auto px-6 py-8">
+        <div className="max-w-full mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-white/20 rounded-xl">
@@ -1752,7 +1752,7 @@ export default function ComplianceClient() {
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-6 py-6">
+      <div className="max-w-full mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="frameworks" className="flex items-center gap-2">

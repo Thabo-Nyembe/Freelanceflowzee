@@ -1459,7 +1459,7 @@ export default function MessagesClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -3514,7 +3514,7 @@ export default function MessagesClient() {
 
       {/* Browse Files Dialog */}
       <Dialog open={showBrowseFilesDialog} onOpenChange={setShowBrowseFilesDialog}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-5xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FolderOpen className="w-5 h-5 text-indigo-600" />

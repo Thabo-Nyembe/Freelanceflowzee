@@ -1119,7 +1119,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -2510,7 +2510,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
         {/* Test Case Detail Dialog */}
         <Dialog open={!!selectedTestCase} onOpenChange={() => setSelectedTestCase(null)}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <FlaskConical className="w-5 h-5 text-green-600" />
@@ -3140,7 +3140,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
         {/* QA Reports Dialog */}
         <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" />
@@ -3741,7 +3741,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
         {/* Custom Builder Dialog */}
         <Dialog open={showCustomBuilderDialog} onOpenChange={setShowCustomBuilderDialog}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <PieChart className="w-5 h-5 text-purple-600" />

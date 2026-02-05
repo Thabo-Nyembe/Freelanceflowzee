@@ -1244,7 +1244,7 @@ export default function DeploymentsClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1600px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2415,7 +2415,7 @@ export default function DeploymentsClient() {
 
         {/* Build Logs Dialog */}
         <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>
-          <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogContent className="max-w-6xl max-h-[80vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2"><Terminal className="h-5 w-5" />Build Logs - {selectedDeployment?.name}</DialogTitle>
               <DialogDescription>Deployment {selectedDeployment?.commit} • {selectedDeployment?.environment}</DialogDescription>
@@ -3347,7 +3347,7 @@ export default function DeploymentsClient() {
 
         {/* View All Errors Dialog */}
         <Dialog open={showErrorsDialog} onOpenChange={setShowErrorsDialog}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2"><AlertCircle className="h-5 w-5 text-red-600" />All Errors</DialogTitle>
               <DialogDescription>View all error logs from your deployments</DialogDescription>
@@ -3439,7 +3439,7 @@ export default function DeploymentsClient() {
 
         {/* Log Analytics Dialog */}
         <Dialog open={showLogAnalyticsDialog} onOpenChange={setShowLogAnalyticsDialog}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5 text-blue-600" />Log Analytics</DialogTitle>
               <DialogDescription>Analyze log patterns and trends</DialogDescription>
@@ -3974,7 +3974,7 @@ export default function DeploymentsClient() {
 
         {/* Browse Marketplace Dialog */}
         <Dialog open={showMarketplaceDialog} onOpenChange={setShowMarketplaceDialog}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2"><Package className="h-5 w-5" />Plugin Marketplace</DialogTitle>
               <DialogDescription>Browse and install build plugins</DialogDescription>

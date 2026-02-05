@@ -512,7 +512,7 @@ export default function MonitoringClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-zinc-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -1940,7 +1940,7 @@ export default function MonitoringClient() {
 
         {/* Host Detail Dialog */}
         <Dialog open={!!selectedHost} onOpenChange={() => setSelectedHost(null)}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 <Server className="w-5 h-5" />
@@ -2311,7 +2311,7 @@ export default function MonitoringClient() {
 
         {/* Metrics Explorer Dialog */}
         <Dialog open={showMetricsExplorerDialog} onOpenChange={setShowMetricsExplorerDialog}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Activity className="w-5 h-5" />

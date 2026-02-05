@@ -668,7 +668,7 @@ export default function MotionGraphicsClient({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -2038,7 +2038,7 @@ export default function MotionGraphicsClient({
 
         {/* Animation Detail Dialog */}
         <Dialog open={!!selectedAnimation} onOpenChange={() => setSelectedAnimation(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogContent className="max-w-6xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 {selectedAnimation?.title}
@@ -2372,7 +2372,7 @@ export default function MotionGraphicsClient({
 
         {/* Templates Gallery Dialog */}
         <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <LayoutTemplate className="w-5 h-5 text-blue-500" />

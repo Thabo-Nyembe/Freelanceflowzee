@@ -756,7 +756,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-[1600px] mx-auto space-y-8">
+      <div className="max-w-full mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 rounded-2xl p-8 text-white">
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
@@ -958,7 +958,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                       <Settings className="h-5 w-5" />
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Booking Settings</DialogTitle>
                     </DialogHeader>

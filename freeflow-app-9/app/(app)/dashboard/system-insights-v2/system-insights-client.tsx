@@ -976,7 +976,7 @@ export default function SystemInsightsClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-[1800px] mx-auto space-y-8">
+      <div className="max-w-full mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-slate-700 via-gray-700 to-zinc-700 rounded-2xl p-8 text-white">
           <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
@@ -2939,7 +2939,7 @@ docker run -d --name kazi-agent \\
 
       {/* System Logs Dialog */}
       <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-6xl">
           <DialogHeader>
             <DialogTitle>System Logs</DialogTitle>
           </DialogHeader>
@@ -2998,7 +2998,7 @@ docker run -d --name kazi-agent \\
 
       {/* Metrics Dashboard Dialog */}
       <Dialog open={showMetricsDialog} onOpenChange={setShowMetricsDialog}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-6xl">
           <DialogHeader>
             <DialogTitle>Metrics Dashboard</DialogTitle>
           </DialogHeader>
