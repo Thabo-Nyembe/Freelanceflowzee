@@ -1,16 +1,16 @@
 # Type Safety Migration - Progress Report
 
 **Date**: 2026-02-05
-**Status**: ⏳ IN PROGRESS - 107 files migrated (15.4%)
-**Lines Removed**: 3,638 lines of duplicated code
+**Status**: ⏳ IN PROGRESS - 117 files migrated (16.8%)
+**Lines Removed**: 3,978 lines of duplicated code
 
 ---
 
 ## 📊 Migration Summary
 
-**Completed**: 107 of ~695 API files (15.4%)
-**Code Removed**: 3,638 lines
-**Commits**: 14 batches pushed
+**Completed**: 117 of ~695 API files (16.8%)
+**Code Removed**: 3,978 lines
+**Commits**: 15 batches pushed
 **Batch Size**: Accelerated to 10 files/batch
 
 ---
@@ -126,7 +126,17 @@
 | `app/api/scim/v2/Bulk/route.ts` | 34 | 14 |
 | `app/api/crypto/create-payment/route.ts` | 34 | 14 |
 | `app/api/crypto/exchange-rates/route.ts` | 34 | 14 |
-| **Total** | **3,638** | **15.4%** |
+| `app/api/scim/v2/Groups/route.ts` | 34 | 15 |
+| `app/api/scim/v2/Groups/[id]/route.ts` | 34 | 15 |
+| `app/api/scim/v2/Users/route.ts` | 34 | 15 |
+| `app/api/scim/v2/Users/[id]/route.ts` | 34 | 15 |
+| `app/api/captions/route.ts` | 34 | 15 |
+| `app/api/releases/route.ts` | 34 | 15 |
+| `app/api/calendar-scheduling/route.ts` | 34 | 15 |
+| `app/api/admin-analytics/route.ts` | 34 | 15 |
+| `app/api/ai-voice/route.ts` | 34 | 15 |
+| `app/api/video/route.ts` | 34 | 15 |
+| **Total** | **3,978** | **16.8%** |
 
 ---
 
@@ -138,7 +148,7 @@
 - **Reduction**: 97% per file
 
 ### Cumulative Impact
-- 3,638 lines of duplication eliminated
+- 3,978 lines of duplication eliminated
 - Single source of truth established
 - Easier maintenance and updates
 - **Acceleration**: Now migrating 10 files per batch (doubled from 5)
@@ -146,5 +156,5 @@
 
 ---
 
-**Status**: Accelerated progress, 15.4% complete (107/695)
-**Next**: Continue migrating remaining ~588 API files in batches of 10
+**Status**: Accelerated progress, 16.8% complete (117/695)
+**Next**: Continue migrating remaining ~578 API files in batches of 10
