@@ -49,11 +49,21 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Invalid email or password')
           }
 
-          // Check if email is verified (skip in development or for test users)
-          const isTestUser = user.email.startsWith('test-')
-          const isDevelopment = process.env.NODE_ENV === 'development'
-          if (!user.email_verified && !isTestUser && !isDevelopment) {
-            throw new Error('Please verify your email before logging in')
+          // SECURITY FIX: Enforce email verification in production
+          // Only skip for test users in development (never in production)
+          const isTestUser = user.email.startsWith('test-') && process.env.NODE_ENV === 'development'
+          const isProductionDomain = process.env.NEXT_PUBLIC_APP_URL?.includes('yourdomain.com') // TODO: Update with your production domain
+
+          // Always require verification in production, regardless of NODE_ENV
+          if (!user.email_verified && !isTestUser) {
+            // Extra strict check for production
+            if (isProductionDomain || process.env.VERCEL_ENV === 'production') {
+              throw new Error('Please verify your email before logging in. Check your inbox for the verification link.')
+            }
+            // In development, still require verification unless test user
+            if (process.env.NODE_ENV !== 'development') {
+              throw new Error('Please verify your email before logging in')
+            }
           }
 
           // Return user object for session

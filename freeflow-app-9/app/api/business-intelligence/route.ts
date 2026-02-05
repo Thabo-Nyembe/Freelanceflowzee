@@ -647,9 +647,10 @@ async function getRevenueForecast(supabase: any, userId: string) {
 // Get KPI Dashboard
 async function getKPIDashboard(supabase: any, userId: string) {
   // Fetch KPI goals for user
+  // PERFORMANCE FIX: Select only needed fields instead of SELECT *
   const { data: goals } = await supabase
     .from('kpi_goals')
-    .select('*')
+    .select('id, title, description, target_value, current_value, unit, status, deadline, category, created_at, updated_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
