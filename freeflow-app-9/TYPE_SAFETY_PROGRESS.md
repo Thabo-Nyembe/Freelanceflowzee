@@ -1,16 +1,16 @@
 # Type Safety Migration - Progress Report
 
 **Date**: 2026-02-05
-**Status**: ⏳ IN PROGRESS - 87 files migrated (12.5%)
-**Lines Removed**: 2,958 lines of duplicated code
+**Status**: ⏳ IN PROGRESS - 97 files migrated (14.0%)
+**Lines Removed**: 3,298 lines of duplicated code
 
 ---
 
 ## 📊 Migration Summary
 
-**Completed**: 87 of ~695 API files (12.5%)
-**Code Removed**: 2,958 lines
-**Commits**: 12 batches pushed
+**Completed**: 97 of ~695 API files (14.0%)
+**Code Removed**: 3,298 lines
+**Commits**: 13 batches pushed
 **Batch Size**: Accelerated to 10 files/batch
 
 ---
@@ -106,7 +106,17 @@
 | `app/api/enterprise/ip-whitelisting/route.ts` | 34 | 12 |
 | `app/api/enterprise/data-residency/route.ts` | 34 | 12 |
 | `app/api/enterprise/rate-limiting/route.ts` | 34 | 12 |
-| **Total** | **2,958** | **12.5%** |
+| `app/api/enterprise/audit-logs/route.ts` | 34 | 13 |
+| `app/api/enterprise/session-management/route.ts` | 34 | 13 |
+| `app/api/kazi/metrics/route.ts` | 34 | 13 |
+| `app/api/kazi/workflows/templates/route.ts` | 34 | 13 |
+| `app/api/kazi/workflows/[id]/route.ts` | 34 | 13 |
+| `app/api/kazi/workflows/[id]/execute/route.ts` | 34 | 13 |
+| `app/api/kazi/automations/templates/route.ts` | 34 | 13 |
+| `app/api/kazi/automations/[id]/route.ts` | 34 | 13 |
+| `app/api/kazi/automations/[id]/execute/route.ts` | 34 | 13 |
+| `app/api/kazi/automations/[id]/logs/route.ts` | 34 | 13 |
+| **Total** | **3,298** | **14.0%** |
 
 ---
 
@@ -118,7 +128,7 @@
 - **Reduction**: 97% per file
 
 ### Cumulative Impact
-- 2,958 lines of duplication eliminated
+- 3,298 lines of duplication eliminated
 - Single source of truth established
 - Easier maintenance and updates
 - **Acceleration**: Now migrating 10 files per batch (doubled from 5)
@@ -126,5 +136,5 @@
 
 ---
 
-**Status**: Accelerated progress, 12.5% complete (87/695)
-**Next**: Continue migrating remaining ~608 API files in batches of 10
+**Status**: Accelerated progress, 14.0% complete (97/695)
+**Next**: Continue migrating remaining ~598 API files in batches of 10
