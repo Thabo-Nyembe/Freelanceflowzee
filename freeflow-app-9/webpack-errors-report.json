@@ -1,0 +1,134 @@
+{
+  "timestamp": "2026-02-05T23:51:38.900Z",
+  "totalRoutes": 25,
+  "successfulPages": 0,
+  "errors": [
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/my-day-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/context7-docs"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/react-query-devtools"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/files-hub-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/api-keys-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/automation-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/profile-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/settings-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/analytics-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/clients-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/projects-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/tasks-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/invoices-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/expenses-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/time-tracking-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/deals-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/messages-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/calendar-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/contacts-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/documents-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/video-studio-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/collaboration-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/crm-v2"
+    },
+    {
+      "type": "Next.js Compilation Error",
+      "message": "Unknown error",
+      "url": "/dashboard/business-intelligence-v2"
+    }
+  ],
+  "warnings": [],
+  "successPages": []
+}
