@@ -43,6 +43,24 @@ export function useMyDayTasks(initialTasks: MyDayTask[] = []) {
   const fetchTasks = useCallback(async (date?: string) => {
     setIsLoading(true)
     try {
+      // Try API first for demo data support
+      try {
+        const dateParam = date || new Date().toISOString().split('T')[0]
+        const response = await fetch(`/api/my-day?type=tasks&date=${dateParam}`)
+
+        if (response.ok) {
+          const result = await response.json()
+          if (result.data) {
+            setTasks(result.data)
+            setIsLoading(false)
+            return
+          }
+        }
+      } catch (apiError) {
+        console.log('API fetch failed, trying direct query:', apiError)
+      }
+
+      // Fallback to direct Supabase query
       let query = supabase
         .from('my_day_tasks')
         .select('*')
@@ -55,10 +73,16 @@ export function useMyDayTasks(initialTasks: MyDayTask[] = []) {
 
       const { data, error } = await query
 
-      if (error) throw error
-      setTasks(data || [])
+      if (error) {
+        // If table doesn't exist, just set empty array
+        console.log('Supabase query error:', error)
+        setTasks([])
+      } else {
+        setTasks(data || [])
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to fetch tasks')
+      setTasks([])
     } finally {
       setIsLoading(false)
     }
