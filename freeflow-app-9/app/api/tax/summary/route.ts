@@ -10,17 +10,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { taxService } from '@/lib/tax/tax-service'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { isDemoMode, getDemoUserId } from '@/lib/utils/demo-mode'
 
 const logger = createSimpleLogger('tax-api')
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-
-function isDemoMode(request: NextRequest): boolean {
-  return (
-    request.nextUrl.searchParams.get('demo') === 'true' ||
-    request.cookies.get('demo_mode')?.value === 'true' ||
-    request.headers.get('X-Demo-Mode') === 'true'
-  )
-}
 
 /**
  * Get tax summary for a year

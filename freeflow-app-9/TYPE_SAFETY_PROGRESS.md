@@ -1,16 +1,16 @@
 # Type Safety Migration - Progress Report
 
 **Date**: 2026-02-05
-**Status**: ⏳ IN PROGRESS - 215 files migrated (30.9%)
-**Lines Removed**: 7,300 lines of duplicated code
+**Status**: ⏳ IN PROGRESS - 225 files migrated (32.4%)
+**Lines Removed**: 7,640 lines of duplicated code
 
 ---
 
 ## 📊 Migration Summary
 
-**Completed**: 215 of ~695 API files (30.9%)
-**Code Removed**: 7,300 lines
-**Commits**: 32 batches pushed
+**Completed**: 225 of ~695 API files (32.4%)
+**Code Removed**: 7,640 lines
+**Commits**: 33 batches pushed
 **Batch Size**: Accelerated to 10 files/batch
 
 ---
@@ -234,7 +234,17 @@
 | `app/api/investor-metrics/[id]/route.ts` | 34 | 32 |
 | `app/api/investor-metrics/route.ts` | 34 | 32 |
 | `app/api/billing-settings/[id]/route.ts` | 34 | 32 |
-| **Total** | **7,300** | **30.9%** |
+| `app/api/tax/reports/route.ts` | 34 | 33 |
+| `app/api/tax/summary/route.ts` | 34 | 33 |
+| `app/api/tax/exemptions/route.ts` | 34 | 33 |
+| `app/api/tax/validate-address/route.ts` | 34 | 33 |
+| `app/api/tax/refunds/route.ts` | 34 | 33 |
+| `app/api/tax/filings/[id]/route.ts` | 34 | 33 |
+| `app/api/tax/filings/route.ts` | 34 | 33 |
+| `app/api/tax/profile/route.ts` | 34 | 33 |
+| `app/api/tax/nexus/route.ts` | 34 | 33 |
+| `app/api/tax/transactions/route.ts` | 34 | 33 |
+| **Total** | **7,640** | **32.4%** |
 
 ---
 
