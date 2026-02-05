@@ -14,8 +14,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, Bell, User, Settings, LogOut, Moon, Sun, Menu } from 'lucide-react'
+import { Search, Bell, User, Settings, LogOut, Moon, Sun, Menu, Maximize2, Minimize2 } from 'lucide-react'
 import { OnlinePeopleToggle } from '@/components/realtime/online-people-toggle'
+import { useSidebar } from '@/lib/sidebar-context'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -42,6 +43,7 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
     const router = useRouter()
     const { theme, setTheme } = useTheme()
+    const { isFullscreen, toggleFullscreen } = useSidebar()
     const [searchQuery, setSearchQuery] = useState('')
 
     const userName = user.user_metadata?.name || user.email.split('@')[0]
@@ -108,6 +110,21 @@ export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
                     <div className="hidden sm:block">
                         <OnlinePeopleToggle position="header" />
                     </div>
+
+                    {/* Fullscreen Toggle */}
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={toggleFullscreen}
+                        className="hidden sm:flex"
+                        title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                    >
+                        {isFullscreen ? (
+                            <Minimize2 className="h-5 w-5" />
+                        ) : (
+                            <Maximize2 className="h-5 w-5" />
+                        )}
+                    </Button>
 
                     {/* Notifications */}
                     <DropdownMenu>
