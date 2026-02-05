@@ -55,7 +55,7 @@ export function Providers({ children }: ProvidersProps) {
           </ThemeProvider>
         </NextThemeProvider>
         {process.env.NODE_ENV === 'development' && (
-          <ReactQueryDevtools initialIsOpen={false} position="bottom" />
+          <ReactQueryDevtools initialIsOpen={false} position="bottom-left" />
         )}
       </QueryClientProvider>
     </SupabaseContext.Provider>

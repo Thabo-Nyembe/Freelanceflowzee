@@ -65,7 +65,7 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
     return (
       <Button
         onClick={onToggle}
-        className="fixed bottom-4 right-4 z-50 shadow-lg hover:shadow-xl transition-all"
+        className="fixed bottom-4 right-20 z-50 shadow-lg hover:shadow-xl transition-all"
         size="sm"
         aria-label="Open Context7 Documentation"
       >
