@@ -33,9 +33,7 @@ export function RootProviders({ children }: { children: React.ReactNode }) {
         {children}
         <Toaster />
       </ThemeProvider>
-      {process.env.NODE_ENV === 'development' && (
-        <ReactQueryDevtools initialIsOpen={false} position="bottom" />
-      )}
+      {/* React Query Devtools now in sidebar Code Builders section */}
     </QueryClientProvider>
   )
 } 
