@@ -66,8 +66,7 @@ import { createSimpleLogger } from '@/lib/simple-logger'
 import { toast } from 'sonner'
 
 // AI FEATURES
-import { AIInsightsPanel } from '@/components/ai/ai-insights-panel'
-import { CollapsibleInsightsPanel } from '@/components/ui/collapsible-insights-panel'
+// AIInsightsPanel and CollapsibleInsightsPanel moved to header - use header buttons instead
 import { useCurrentUser, useAIData } from '@/hooks/use-ai-data'
 
 // TAX INTELLIGENCE
@@ -1157,20 +1156,8 @@ export default function DashboardPage() {
           <TaxSummaryDashboardWidget />
         </ScrollReveal>
 
-        {/* AI INSIGHTS PANEL - Sidebar Mode */}
-        {userId && (
-          <CollapsibleInsightsPanel
-            position="sidebar"
-            title="AI Business Insights"
-            defaultOpen={false}
-          >
-            <AIInsightsPanel
-              userId={userId}
-              defaultExpanded={true}
-              showHeader={true}
-            />
-          </CollapsibleInsightsPanel>
-        )}
+        {/* AI INSIGHTS PANEL - Now accessible from header button */}
+        {/* Removed inline panel - use header "AI Intelligence" button instead */}
 
         {/* NEW: Collaboration Features Showcase */}
         <ScrollReveal animation="fade-up" delay={0.2}>
