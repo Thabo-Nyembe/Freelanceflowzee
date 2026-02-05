@@ -1,16 +1,16 @@
 # Type Safety Migration - Progress Report
 
 **Date**: 2026-02-05
-**Status**: ⏳ IN PROGRESS - 137 files migrated (19.7%)
-**Lines Removed**: 4,658 lines of duplicated code
+**Status**: ⏳ IN PROGRESS - 147 files migrated (21.2%)
+**Lines Removed**: 4,988 lines of duplicated code
 
 ---
 
 ## 📊 Migration Summary
 
-**Completed**: 137 of ~695 API files (19.7%)
-**Code Removed**: 4,658 lines
-**Commits**: 17 batches pushed
+**Completed**: 147 of ~695 API files (21.2%)
+**Code Removed**: 4,988 lines
+**Commits**: 18 batches pushed
 **Batch Size**: Accelerated to 10 files/batch
 
 ---
@@ -156,7 +156,17 @@
 | `app/api/video/camera-cloud/route.ts` | 34 | 17 |
 | `app/api/video/blackmagic-cloud/route.ts` | 34 | 17 |
 | `app/api/video/project/save/route.ts` | 34 | 17 |
-| **Total** | **4,658** | **19.7%** |
+| `app/api/video/projects/[id]/duplicate/route.ts` | 34 | 18 |
+| `app/api/video/projects/[id]/publish/route.ts` | 34 | 18 |
+| `app/api/video/projects/[id]/route.ts` | 34 | 18 |
+| `app/api/video/templates/vertical/route.ts` | 34 | 18 |
+| `app/api/video/presets/social/route.ts` | 34 | 18 |
+| `app/api/financial/invoices/route.ts` | 34 | 18 |
+| `app/api/projects/manage/route.ts` | 34 | 18 |
+| `app/api/ai/agent/route.ts` | 34 | 18 |
+| `app/api/ai-tools/route.ts` | 34 | 18 |
+| `app/api/automation/route.ts` | 34 | 18 |
+| **Total** | **4,988** | **21.2%** |
 
 ---
 
@@ -168,7 +178,7 @@
 - **Reduction**: 97% per file
 
 ### Cumulative Impact
-- 4,658 lines of duplication eliminated
+- 4,988 lines of duplication eliminated
 - Single source of truth established
 - Easier maintenance and updates
 - **Acceleration**: Now migrating 10 files per batch (doubled from 5)
@@ -176,5 +186,5 @@
 
 ---
 
-**Status**: Accelerated progress, 19.7% complete (137/695)
-**Next**: Continue migrating remaining ~558 API files in batches of 10
+**Status**: Accelerated progress, 21.2% complete (147/695)
+**Next**: Continue migrating remaining ~548 API files in batches of 10
