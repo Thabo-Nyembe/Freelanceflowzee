@@ -1331,11 +1331,6 @@ export function SidebarEnhanced() {
         </div>
       </div>
 
-      {/* Online Presence Widget */}
-      <div className="px-4 pb-4">
-        <GlobalPresenceWidget userId={userId || '00000000-0000-0000-0000-000000000001'} />
-      </div>
-
       {/* Code Builders - Developer Tools Section */}
       {process.env.NODE_ENV === 'development' && (
         <div className="px-4 pb-4 space-y-2">

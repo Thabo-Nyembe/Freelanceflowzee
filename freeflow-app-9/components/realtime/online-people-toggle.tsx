@@ -51,8 +51,29 @@ export function OnlinePeopleToggle({
   const [open, setOpen] = useState(false)
   const { onlineUsers } = useOnlinePresence()
 
-  // Filter online users
-  const activeUsers = onlineUsers.filter((u: any) => u.status !== 'offline')
+  // Deduplicate users - only show unique users, not multiple tabs
+  const uniqueUsersMap = new Map()
+  onlineUsers.forEach((user: any) => {
+    const userId = user.user_id
+    // Only keep the first occurrence of each user (or most recent if we want to sort)
+    if (!uniqueUsersMap.has(userId)) {
+      uniqueUsersMap.set(userId, user)
+    }
+  })
+
+  // Filter online users and exclude demo/system users
+  const activeUsers = Array.from(uniqueUsersMap.values()).filter((u: any) => {
+    // Exclude offline users
+    if (u.status === 'offline') return false
+
+    // Exclude demo/test users (those with all zeros or specific patterns)
+    const isDemoUser = u.user_id?.includes('00000000-0000-0000-0000-000000000001') ||
+                       u.user_id?.includes('00000000') ||
+                       u.username?.toLowerCase().includes('demo')
+
+    return !isDemoUser
+  })
+
   const onlineCount = activeUsers.length
 
   // Status color mapping
@@ -225,7 +246,25 @@ export function CompactOnlineAvatars({
   className
 }: CompactOnlineAvatarsProps) {
   const { onlineUsers } = useOnlinePresence()
-  const activeUsers = onlineUsers.filter((u: any) => u.status !== 'offline')
+
+  // Deduplicate users - only show unique users, not multiple tabs
+  const uniqueUsersMap = new Map()
+  onlineUsers.forEach((user: any) => {
+    const userId = user.user_id
+    if (!uniqueUsersMap.has(userId)) {
+      uniqueUsersMap.set(userId, user)
+    }
+  })
+
+  // Filter online users and exclude demo/system users
+  const activeUsers = Array.from(uniqueUsersMap.values()).filter((u: any) => {
+    if (u.status === 'offline') return false
+    const isDemoUser = u.user_id?.includes('00000000-0000-0000-0000-000000000001') ||
+                       u.user_id?.includes('00000000') ||
+                       u.username?.toLowerCase().includes('demo')
+    return !isDemoUser
+  })
+
   const displayUsers = activeUsers.slice(0, maxDisplay)
   const remainingCount = Math.max(0, activeUsers.length - maxDisplay)
 
