@@ -1162,13 +1162,12 @@ export default function DashboardPage() {
           <CollapsibleInsightsPanel
             position="sidebar"
             title="AI Business Insights"
-            description="Real-time analytics and predictions powered by AI"
             defaultOpen={false}
           >
             <AIInsightsPanel
               userId={userId}
-              defaultExpanded={false}
-              showHeader={false}
+              defaultExpanded={true}
+              showHeader={true}
             />
           </CollapsibleInsightsPanel>
         )}

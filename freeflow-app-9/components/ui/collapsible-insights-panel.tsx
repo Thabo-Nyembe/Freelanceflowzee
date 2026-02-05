@@ -55,23 +55,25 @@ export function CollapsibleInsightsPanel({
       <div className={cn('relative', className)}>
         {/* Toggle Button - Fixed at top right */}
         <Button
-          variant="outline"
-          size="sm"
+          variant={isOpen ? "secondary" : "default"}
+          size="default"
           onClick={() => handleOpenChange(!isOpen)}
           className={cn(
-            'fixed top-20 z-50 transition-all duration-300 shadow-lg',
+            'fixed top-24 z-50 transition-all duration-300 shadow-xl',
+            'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0',
+            !isOpen && 'animate-pulse',
             isOpen ? 'right-[340px]' : 'right-4'
           )}
         >
           {isOpen ? (
             <>
-              <PanelRightClose className="h-4 w-4 mr-2" />
-              Hide Insights
+              <PanelRightClose className="h-5 w-5 mr-2" />
+              Hide AI Insights
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4 mr-2" />
-              Show Insights
+              <Sparkles className="h-5 w-5 mr-2 animate-pulse" />
+              AI Insights
             </>
           )}
         </Button>
