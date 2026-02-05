@@ -7,11 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { recipeBuilderService } from '@/lib/automations/recipe-builder';
 import { createSimpleLogger } from '@/lib/simple-logger';
+import { DEMO_USER_ID } from '@/lib/demo-mode';
 
 const logger = createSimpleLogger('automations-recipes');
-
-// Demo user for unauthenticated access
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 // =============================================================================
 // VALIDATION SCHEMAS

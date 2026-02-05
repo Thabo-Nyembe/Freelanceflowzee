@@ -1,19 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { isDemoMode, DEMO_USER_ID } from '@/lib/demo-mode'
 
 const logger = createSimpleLogger('maintenance')
-
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-
-function isDemoMode(request: NextRequest): boolean {
-  const url = new URL(request.url)
-  return (
-    url.searchParams.get('demo') === 'true' ||
-    request.cookies.get('demo_mode')?.value === 'true' ||
-    request.headers.get('X-Demo-Mode') === 'true'
-  )
-}
 
 // Demo data for investor presentations
 const demoWorkOrders = [
