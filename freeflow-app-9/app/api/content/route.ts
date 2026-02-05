@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('content')
 
 // Route configuration for optimization
 export const dynamic = 'force-dynamic'
@@ -8,7 +11,7 @@ export const revalidate = 60 // Cache for 60 seconds
 // Simple logging without heavy imports
 const log = (level: string, message: string, data?: any) => {
   if (process.env.NODE_ENV === 'development') {
-    console.log(`[${level}] content-api:`, message, data || '')
+    logger.info(`[${level}] content-api:`, message, data || '')
   }
 }
 

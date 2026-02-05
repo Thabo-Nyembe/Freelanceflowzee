@@ -337,7 +337,7 @@ export async function GET(request: NextRequest) {
       error: 'Invalid view parameter',
     }, { status: 400 })
   } catch (error) {
-    console.error('Hydration error GET error:', error)
+    logger.error('Hydration error GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch hydration errors' },
       { status: 500 }

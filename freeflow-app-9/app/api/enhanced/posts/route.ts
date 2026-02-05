@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('posts')
 import { z } from 'zod'
 
 // ============================================================================
@@ -467,7 +470,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Posts GET error:', error)
+    logger.error('Posts GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch posts' },
       { status: 500 }
@@ -900,7 +903,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    console.error('Posts POST error:', error)
+    logger.error('Posts POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to process post request' },
       { status: 500 }

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('projects')
 import { z } from 'zod'
 
 // ============================================================================
@@ -253,7 +256,7 @@ export async function GET(
       data: access,
     })
   } catch (error) {
-    console.error('Project access GET error:', error)
+    logger.error('Project access GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch project access' },
       { status: 500 }
@@ -606,7 +609,7 @@ export async function POST(
         { status: 400 }
       )
     }
-    console.error('Project access POST error:', error)
+    logger.error('Project access POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to process access request' },
       { status: 500 }

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('projects')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -155,7 +158,7 @@ export async function POST(
       data: result,
     })
   } catch (error) {
-    console.error('URL validation error:', error)
+    logger.error('URL validation error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to validate URL' },
       { status: 500 }
@@ -408,7 +411,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    console.error('URL validation history error:', error)
+    logger.error('URL validation history error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch validation history' },
       { status: 500 }

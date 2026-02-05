@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('automation-logs')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -88,7 +91,7 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + limit - 1)
 
     if (error) {
-      console.error('Error fetching execution logs:', error)
+      logger.error('Error fetching execution logs', { error })
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -124,7 +127,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Error in GET /api/kazi/automations/logs:', error)
+    logger.error('Error in GET /api/kazi/automations/logs', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

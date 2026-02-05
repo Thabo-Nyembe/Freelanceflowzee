@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       })
 
     if (error) {
-      console.error('Database error:', error)
+      logger.error('Database error:', error)
       return NextResponse.json(
         { error: 'Failed to save conversion' },
         { status: 500 }

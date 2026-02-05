@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('enhanced')
 import { z } from 'zod'
 
 // ============================================================================
@@ -285,7 +288,7 @@ export async function GET(request: NextRequest) {
       error: 'Project ID required for status check',
     }, { status: 400 })
   } catch (error) {
-    console.error('Project unlock GET error:', error)
+    logger.error('Project unlock GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch unlock status' },
       { status: 500 }
@@ -770,7 +773,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    console.error('Project unlock POST error:', error)
+    logger.error('Project unlock POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to process unlock request' },
       { status: 500 }

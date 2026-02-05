@@ -365,7 +365,7 @@ export async function GET(request: NextRequest) {
       error: 'Invalid view parameter',
     }, { status: 400 })
   } catch (error) {
-    console.error('Email notification GET error:', error)
+    logger.error('Email notification GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch email data' },
       { status: 500 }

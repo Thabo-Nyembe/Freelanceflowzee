@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createSimpleLogger } from '@/lib/simple-logger'
+
+const logger = createSimpleLogger('projects')
 
 // ============================================================================
 // DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
@@ -164,7 +167,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Rate limits GET error:', error)
+    logger.error('Rate limits GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch rate limits' },
       { status: 500 }
@@ -404,7 +407,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Rate limits POST error:', error)
+    logger.error('Rate limits POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to process rate limit operation' },
       { status: 500 }
