@@ -1,16 +1,16 @@
 # Type Safety Migration - Progress Report
 
 **Date**: 2026-02-05
-**Status**: ⏳ IN PROGRESS - 255 files migrated (36.7%)
-**Lines Removed**: 8,660 lines of duplicated code
+**Status**: ⏳ IN PROGRESS - 265 files migrated (38.1%)
+**Lines Removed**: 9,000 lines of duplicated code
 
 ---
 
 ## 📊 Migration Summary
 
-**Completed**: 255 of ~695 API files (36.7%)
-**Code Removed**: 8,660 lines
-**Commits**: 36 batches pushed
+**Completed**: 265 of ~695 API files (38.1%)
+**Code Removed**: 9,000 lines
+**Commits**: 37 batches pushed
 **Batch Size**: Accelerated to 10 files/batch
 
 ---
@@ -264,7 +264,27 @@
 | `app/api/admin/analytics/route.ts` | 34 | 24 |
 | `app/api/admin/automation/route.ts` | 34 | 24 |
 | `app/api/admin/crm/route.ts` | 34 | 24 |
-| **Total** | **8,660** | **36.7%** |
+| `app/api/admin/error-stats/route.ts` | 34 | 25 |
+| `app/api/admin/invoicing/route.ts` | 34 | 25 |
+| `app/api/admin/marketing/route.ts` | 34 | 25 |
+| `app/api/admin/operations/route.ts` | 34 | 25 |
+| `app/api/admin/overview/route.ts` | 34 | 25 |
+| `app/api/advanced-analytics/[id]/route.ts` | 34 | 25 |
+| `app/api/advanced-analytics/route.ts` | 34 | 25 |
+| `app/api/advanced-settings/[id]/route.ts` | 34 | 25 |
+| `app/api/advanced-settings/route.ts` | 34 | 25 |
+| `app/api/ai-business/[id]/route.ts` | 34 | 25 |
+| `app/api/disputes/[id]/route.ts` | 34 | 53 |
+| `app/api/disputes/[id]/evidence/route.ts` | 34 | 53 |
+| `app/api/disputes/[id]/messages/route.ts` | 34 | 53 |
+| `app/api/disputes/route.ts` | 34 | 53 |
+| `app/api/marketplace/reviews/route.ts` | 34 | 53 |
+| `app/api/marketplace/freelancers/search/route.ts` | 34 | 53 |
+| `app/api/marketplace/jobs/route.ts` | 34 | 53 |
+| `app/api/marketplace/orders/route.ts` | 34 | 53 |
+| `app/api/marketplace/featured/route.ts` | 34 | 53 |
+| `app/api/marketplace/portfolio/route.ts` | 34 | 53 |
+| **Total** | **9,000** | **38.1%** |
 
 ---
 
@@ -284,5 +304,5 @@
 
 ---
 
-**Status**: Accelerated progress, 36.7% complete (255/695)
-**Next**: Continue migrating remaining ~440 API files with parallel agents
+**Status**: Accelerated progress, 38.1% complete (265/695)
+**Next**: Continue migrating remaining ~430 API files with parallel agents

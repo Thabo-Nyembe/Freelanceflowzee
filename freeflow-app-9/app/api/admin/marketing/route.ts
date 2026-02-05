@@ -7,21 +7,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { isDemoMode, DEMO_USER_ID } from '@/lib/utils/demo-mode'
 
 const logger = createSimpleLogger('admin-marketing-api')
-
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-
-function isDemoMode(request: NextRequest): boolean {
-  const url = new URL(request.url)
-  return (
-    url.searchParams.get('demo') === 'true' ||
-    request.cookies.get('demo_mode')?.value === 'true' ||
-    request.headers.get('X-Demo-Mode') === 'true' ||
-    process.env.NEXT_PUBLIC_DEMO_MODE === 'true' ||
-    process.env.DEMO_MODE === 'true'
-  )
-}
 
 // Demo data for fallback
 const DEMO_CAMPAIGNS = [
