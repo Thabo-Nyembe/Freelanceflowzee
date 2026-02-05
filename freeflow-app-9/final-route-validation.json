@@ -1,0 +1,1522 @@
+{
+  "working": [
+    {
+      "route": "3d-modeling-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/3d-modeling-v2"
+    },
+    {
+      "route": "access-control-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/access-control-v2"
+    },
+    {
+      "route": "access-logs-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/access-logs-v2"
+    },
+    {
+      "route": "activity-logs-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/activity-logs-v2"
+    },
+    {
+      "route": "add-ons-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/add-ons-v2"
+    },
+    {
+      "route": "admin-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/admin-v2"
+    },
+    {
+      "route": "affiliate-payouts-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/affiliate-payouts-v2"
+    },
+    {
+      "route": "ai-assistant-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/ai-assistant-v2"
+    },
+    {
+      "route": "ai-code-builder-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/ai-code-builder-v2"
+    },
+    {
+      "route": "ai-code-builder",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/ai-code-builder"
+    },
+    {
+      "route": "ai-create-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/ai-create-v2"
+    },
+    {
+      "route": "ai-design-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/ai-design-v2"
+    },
+    {
+      "route": "ai-video-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/ai-video-v2"
+    },
+    {
+      "route": "ai-voice-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/ai-voice-v2"
+    },
+    {
+      "route": "alerts-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/alerts-v2"
+    },
+    {
+      "route": "allocation-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/allocation-v2"
+    },
+    {
+      "route": "analytics-advanced-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/analytics-advanced-v2"
+    },
+    {
+      "route": "analytics-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/analytics-v2"
+    },
+    {
+      "route": "announcements-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/announcements-v2"
+    },
+    {
+      "route": "api-docs-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/api-docs-v2"
+    },
+    {
+      "route": "api-keys-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/api-keys-v2"
+    },
+    {
+      "route": "api-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/api-v2"
+    },
+    {
+      "route": "app-store-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/app-store-v2"
+    },
+    {
+      "route": "appointments-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/appointments-v2"
+    },
+    {
+      "route": "assets-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/assets-v2"
+    },
+    {
+      "route": "audio-studio-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/audio-studio-v2"
+    },
+    {
+      "route": "audit-log-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/audit-log-v2"
+    },
+    {
+      "route": "audit-logs-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/audit-logs-v2"
+    },
+    {
+      "route": "audit-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/audit-v2"
+    },
+    {
+      "route": "auditorium-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/auditorium-v2"
+    },
+    {
+      "route": "audits-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/audits-v2"
+    },
+    {
+      "route": "automation-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/automation-v2"
+    },
+    {
+      "route": "automations-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/automations-v2"
+    },
+    {
+      "route": "backup-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/backup-v2"
+    },
+    {
+      "route": "backups-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/backups-v2"
+    },
+    {
+      "route": "badges-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/badges-v2"
+    },
+    {
+      "route": "benefits-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/benefits-v2"
+    },
+    {
+      "route": "billing-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/billing-v2"
+    },
+    {
+      "route": "bookings-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/bookings-v2"
+    },
+    {
+      "route": "bookmarks-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/bookmarks-v2"
+    },
+    {
+      "route": "brand-kit-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/brand-kit-v2"
+    },
+    {
+      "route": "breakroom-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/breakroom-v2"
+    },
+    {
+      "route": "broadcasts-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/broadcasts-v2"
+    },
+    {
+      "route": "budgets-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/budgets-v2"
+    },
+    {
+      "route": "bugs-tracking-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/bugs-tracking-v2"
+    },
+    {
+      "route": "bugs-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/bugs-v2"
+    },
+    {
+      "route": "builds-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/builds-v2"
+    },
+    {
+      "route": "business-intelligence-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/business-intelligence-v2"
+    },
+    {
+      "route": "cafeteria-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/cafeteria-v2"
+    },
+    {
+      "route": "calendar-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/calendar-v2"
+    },
+    {
+      "route": "campaigns-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/campaigns-v2"
+    },
+    {
+      "route": "candidates-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/candidates-v2"
+    },
+    {
+      "route": "canvas-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/canvas-v2"
+    },
+    {
+      "route": "capacity-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/capacity-v2"
+    },
+    {
+      "route": "certifications-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/certifications-v2"
+    },
+    {
+      "route": "changelog-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/changelog-v2"
+    },
+    {
+      "route": "chat-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/chat-v2"
+    },
+    {
+      "route": "childcare-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/childcare-v2"
+    },
+    {
+      "route": "ci-cd-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/ci-cd-v2"
+    },
+    {
+      "route": "client-portal-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/client-portal-v2"
+    },
+    {
+      "route": "clients-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/clients-v2"
+    },
+    {
+      "route": "cloud-storage-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/cloud-storage-v2"
+    },
+    {
+      "route": "collaboration-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/collaboration-v2"
+    },
+    {
+      "route": "commissions-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/commissions-v2"
+    },
+    {
+      "route": "community-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/community-v2"
+    },
+    {
+      "route": "complaints-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/complaints-v2"
+    },
+    {
+      "route": "compliance-tracking-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/compliance-tracking-v2"
+    },
+    {
+      "route": "compliance-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/compliance-v2"
+    },
+    {
+      "route": "component-library-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/component-library-v2"
+    },
+    {
+      "route": "components-showcase-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/components-showcase-v2"
+    },
+    {
+      "route": "concierge-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/concierge-v2"
+    },
+    {
+      "route": "connectors-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/connectors-v2"
+    },
+    {
+      "route": "contacts-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/contacts-v2"
+    },
+    {
+      "route": "content-calendar-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/content-calendar-v2"
+    },
+    {
+      "route": "content-studio-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/content-studio-v2"
+    },
+    {
+      "route": "content-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/content-v2"
+    },
+    {
+      "route": "contracts-management-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/contracts-management-v2"
+    },
+    {
+      "route": "contracts-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/contracts-v2"
+    },
+    {
+      "route": "cost-analysis-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/cost-analysis-v2"
+    },
+    {
+      "route": "coupons-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/coupons-v2"
+    },
+    {
+      "route": "courses-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/courses-v2"
+    },
+    {
+      "route": "crm-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/crm-v2"
+    },
+    {
+      "route": "customer-service-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/customer-service-v2"
+    },
+    {
+      "route": "customer-success-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/customer-success-v2"
+    },
+    {
+      "route": "customer-support-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/customer-support-v2"
+    },
+    {
+      "route": "customers-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/customers-v2"
+    },
+    {
+      "route": "data-export-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/data-export-v2"
+    },
+    {
+      "route": "data-studio-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/data-studio-v2"
+    },
+    {
+      "route": "deals-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/deals-v2"
+    },
+    {
+      "route": "departments-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/departments-v2"
+    },
+    {
+      "route": "dependencies-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/dependencies-v2"
+    },
+    {
+      "route": "deployments-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/deployments-v2"
+    },
+    {
+      "route": "desktop-app-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/desktop-app-v2"
+    },
+    {
+      "route": "directory-sync-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/directory-sync-v2"
+    },
+    {
+      "route": "disputes-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/disputes-v2"
+    },
+    {
+      "route": "docs-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/docs-v2"
+    },
+    {
+      "route": "documentation-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/documentation-v2"
+    },
+    {
+      "route": "documents-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/documents-v2"
+    },
+    {
+      "route": "email-agent-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/email-agent-v2"
+    },
+    {
+      "route": "email-campaigns-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/email-campaigns-v2"
+    },
+    {
+      "route": "email-marketing-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/email-marketing-v2"
+    },
+    {
+      "route": "employees-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/employees-v2"
+    },
+    {
+      "route": "equipment-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/equipment-v2"
+    },
+    {
+      "route": "escrow-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/escrow-v2"
+    },
+    {
+      "route": "events-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/events-v2"
+    },
+    {
+      "route": "expenses-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/expenses-v2"
+    },
+    {
+      "route": "extensions-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/extensions-v2"
+    },
+    {
+      "route": "facilities-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/facilities-v2"
+    },
+    {
+      "route": "faq-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/faq-v2"
+    },
+    {
+      "route": "features-backlog-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/features-backlog-v2"
+    },
+    {
+      "route": "features-hub-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/features-hub-v2"
+    },
+    {
+      "route": "features-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/features-v2"
+    },
+    {
+      "route": "feedback-hub-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/feedback-hub-v2"
+    },
+    {
+      "route": "feedback-surveys-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/feedback-surveys-v2"
+    },
+    {
+      "route": "feedback-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/feedback-v2"
+    },
+    {
+      "route": "files-hub-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/files-hub-v2"
+    },
+    {
+      "route": "financial-reports-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/financial-reports-v2"
+    },
+    {
+      "route": "financial-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/financial-v2"
+    },
+    {
+      "route": "fleet-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/fleet-v2"
+    },
+    {
+      "route": "focus-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/focus-v2"
+    },
+    {
+      "route": "forecasting-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/forecasting-v2"
+    },
+    {
+      "route": "forms-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/forms-v2"
+    },
+    {
+      "route": "gallery-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/gallery-v2"
+    },
+    {
+      "route": "gamification-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/gamification-v2"
+    },
+    {
+      "route": "garage-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/garage-v2"
+    },
+    {
+      "route": "gdpr-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/gdpr-v2"
+    },
+    {
+      "route": "goals-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/goals-v2"
+    },
+    {
+      "route": "gratitude-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/gratitude-v2"
+    },
+    {
+      "route": "growth-hub-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/growth-hub-v2"
+    },
+    {
+      "route": "gym-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/gym-v2"
+    },
+    {
+      "route": "habits-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/habits-v2"
+    },
+    {
+      "route": "health-score-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/health-score-v2"
+    },
+    {
+      "route": "help-center-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/help-center-v2"
+    },
+    {
+      "route": "help-docs-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/help-docs-v2"
+    },
+    {
+      "route": "helpdesk-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/helpdesk-v2"
+    },
+    {
+      "route": "ideas-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/ideas-v2"
+    },
+    {
+      "route": "inbox-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/inbox-v2"
+    },
+    {
+      "route": "incidents-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/incidents-v2"
+    },
+    {
+      "route": "integrations-marketplace-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/integrations-marketplace-v2"
+    },
+    {
+      "route": "integrations-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/integrations-v2"
+    },
+    {
+      "route": "inventory-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/inventory-v2"
+    },
+    {
+      "route": "investor-metrics-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/investor-metrics-v2"
+    },
+    {
+      "route": "invoices-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/invoices-v2"
+    },
+    {
+      "route": "invoicing-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/invoicing-v2"
+    },
+    {
+      "route": "journals-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/journals-v2"
+    },
+    {
+      "route": "kazi-automations-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/kazi-automations-v2"
+    },
+    {
+      "route": "kazi-workflows-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/kazi-workflows-v2"
+    },
+    {
+      "route": "knowledge-articles-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/knowledge-articles-v2"
+    },
+    {
+      "route": "knowledge-base-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/knowledge-base-v2"
+    },
+    {
+      "route": "kpis-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/kpis-v2"
+    },
+    {
+      "route": "landing-pages-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/landing-pages-v2"
+    },
+    {
+      "route": "laundry-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/laundry-v2"
+    },
+    {
+      "route": "lead-generation-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/lead-generation-v2"
+    },
+    {
+      "route": "leads-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/leads-v2"
+    },
+    {
+      "route": "learning-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/learning-v2"
+    },
+    {
+      "route": "leave-management-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/leave-management-v2"
+    },
+    {
+      "route": "leave-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/leave-v2"
+    },
+    {
+      "route": "library-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/library-v2"
+    },
+    {
+      "route": "live-chat-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/live-chat-v2"
+    },
+    {
+      "route": "lockers-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/lockers-v2"
+    },
+    {
+      "route": "logistics-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/logistics-v2"
+    },
+    {
+      "route": "logs-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/logs-v2"
+    },
+    {
+      "route": "loyalty-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/loyalty-v2"
+    },
+    {
+      "route": "maintenance-schedules-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/maintenance-schedules-v2"
+    },
+    {
+      "route": "maintenance-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/maintenance-v2"
+    },
+    {
+      "route": "marketing-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/marketing-v2"
+    },
+    {
+      "route": "marketplace-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/marketplace-v2"
+    },
+    {
+      "route": "media-library-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/media-library-v2"
+    },
+    {
+      "route": "mentorship-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/mentorship-v2"
+    },
+    {
+      "route": "messages-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/messages-v2"
+    },
+    {
+      "route": "messaging-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/messaging-v2"
+    },
+    {
+      "route": "milestones-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/milestones-v2"
+    },
+    {
+      "route": "mobile-app-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/mobile-app-v2"
+    },
+    {
+      "route": "monitoring-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/monitoring-v2"
+    },
+    {
+      "route": "mood-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/mood-v2"
+    },
+    {
+      "route": "motion-graphics-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/motion-graphics-v2"
+    },
+    {
+      "route": "my-day-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/my-day-v2"
+    },
+    {
+      "route": "notification-settings-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/notification-settings-v2"
+    },
+    {
+      "route": "notifications-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/notifications-v2"
+    },
+    {
+      "route": "offboarding-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/offboarding-v2"
+    },
+    {
+      "route": "okrs-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/okrs-v2"
+    },
+    {
+      "route": "onboarding-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/onboarding-v2"
+    },
+    {
+      "route": "opportunities-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/opportunities-v2"
+    },
+    {
+      "route": "orders-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/orders-v2"
+    },
+    {
+      "route": "overview-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/overview-v2"
+    },
+    {
+      "route": "parking-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/parking-v2"
+    },
+    {
+      "route": "patents-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/patents-v2"
+    },
+    {
+      "route": "payments-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/payments-v2"
+    },
+    {
+      "route": "payroll-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/payroll-v2"
+    },
+    {
+      "route": "penetration-testing-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/penetration-testing-v2"
+    },
+    {
+      "route": "performance-analytics-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/performance-analytics-v2"
+    },
+    {
+      "route": "performance-monitoring-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/performance-monitoring-v2"
+    },
+    {
+      "route": "performance-reviews-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/performance-reviews-v2"
+    },
+    {
+      "route": "performance-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/performance-v2"
+    },
+    {
+      "route": "permissions-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/permissions-v2"
+    },
+    {
+      "route": "pipeline-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/pipeline-v2"
+    },
+    {
+      "route": "plugins-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/plugins-v2"
+    },
+    {
+      "route": "podcast-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/podcast-v2"
+    },
+    {
+      "route": "policies-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/policies-v2"
+    },
+    {
+      "route": "polls-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/polls-v2"
+    },
+    {
+      "route": "pomodoro-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/pomodoro-v2"
+    },
+    {
+      "route": "portfolio-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/portfolio-v2"
+    },
+    {
+      "route": "pricing-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/pricing-v2"
+    },
+    {
+      "route": "printing-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/printing-v2"
+    },
+    {
+      "route": "procurement-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/procurement-v2"
+    },
+    {
+      "route": "products-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/products-v2"
+    },
+    {
+      "route": "profile-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/profile-v2"
+    },
+    {
+      "route": "projects-archive-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/projects-archive-v2"
+    },
+    {
+      "route": "projects-hub-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/projects-hub-v2"
+    },
+    {
+      "route": "proposals-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/proposals-v2"
+    },
+    {
+      "route": "qa-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/qa-v2"
+    },
+    {
+      "route": "quality-control-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/quality-control-v2"
+    },
+    {
+      "route": "quotes-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/quotes-v2"
+    },
+    {
+      "route": "reception-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/reception-v2"
+    },
+    {
+      "route": "recognition-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/recognition-v2"
+    },
+    {
+      "route": "recruitment-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/recruitment-v2"
+    },
+    {
+      "route": "referrals-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/referrals-v2"
+    },
+    {
+      "route": "refunds-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/refunds-v2"
+    },
+    {
+      "route": "registrations-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/registrations-v2"
+    },
+    {
+      "route": "release-notes-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/release-notes-v2"
+    },
+    {
+      "route": "releases-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/releases-v2"
+    },
+    {
+      "route": "renewals-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/renewals-v2"
+    },
+    {
+      "route": "reporting-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/reporting-v2"
+    },
+    {
+      "route": "reports-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/reports-v2"
+    },
+    {
+      "route": "reservations-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/reservations-v2"
+    },
+    {
+      "route": "resources-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/resources-v2"
+    },
+    {
+      "route": "returns-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/returns-v2"
+    },
+    {
+      "route": "revenue-tracking-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/revenue-tracking-v2"
+    },
+    {
+      "route": "reviews-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/reviews-v2"
+    },
+    {
+      "route": "rewards-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/rewards-v2"
+    },
+    {
+      "route": "risks-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/risks-v2"
+    },
+    {
+      "route": "roadmap-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/roadmap-v2"
+    },
+    {
+      "route": "roles-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/roles-v2"
+    },
+    {
+      "route": "rooms-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/rooms-v2"
+    },
+    {
+      "route": "sales-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/sales-v2"
+    },
+    {
+      "route": "screen-recording-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/screen-recording-v2"
+    },
+    {
+      "route": "security-audit-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/security-audit-v2"
+    },
+    {
+      "route": "security-monitoring-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/security-monitoring-v2"
+    },
+    {
+      "route": "security-policies-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/security-policies-v2"
+    },
+    {
+      "route": "security-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/security-v2"
+    },
+    {
+      "route": "seller-dashboard",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/seller-dashboard"
+    },
+    {
+      "route": "seller-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/seller-v2"
+    },
+    {
+      "route": "seo-analytics-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/seo-analytics-v2"
+    },
+    {
+      "route": "seo-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/seo-v2"
+    },
+    {
+      "route": "service-desk-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/service-desk-v2"
+    },
+    {
+      "route": "settings-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/settings-v2"
+    },
+    {
+      "route": "shipping-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/shipping-v2"
+    },
+    {
+      "route": "shuttle-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/shuttle-v2"
+    },
+    {
+      "route": "sitemap-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/sitemap-v2"
+    },
+    {
+      "route": "skills-matrix-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/skills-matrix-v2"
+    },
+    {
+      "route": "social-media-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/social-media-v2"
+    },
+    {
+      "route": "sprints-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/sprints-v2"
+    },
+    {
+      "route": "sso-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/sso-v2"
+    },
+    {
+      "route": "stock-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/stock-v2"
+    },
+    {
+      "route": "storage-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/storage-v2"
+    },
+    {
+      "route": "streaming-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/streaming-v2"
+    },
+    {
+      "route": "subscriptions-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/subscriptions-v2"
+    },
+    {
+      "route": "suggestions-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/suggestions-v2"
+    },
+    {
+      "route": "suppliers-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/suppliers-v2"
+    },
+    {
+      "route": "supply-chain-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/supply-chain-v2"
+    },
+    {
+      "route": "support-tickets-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/support-tickets-v2"
+    },
+    {
+      "route": "support-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/support-v2"
+    },
+    {
+      "route": "surveys-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/surveys-v2"
+    },
+    {
+      "route": "sustainability-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/sustainability-v2"
+    },
+    {
+      "route": "system-health-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/system-health-v2"
+    },
+    {
+      "route": "system-insights-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/system-insights-v2"
+    },
+    {
+      "route": "tasks-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/tasks-v2"
+    },
+    {
+      "route": "tax-intelligence-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/tax-intelligence-v2"
+    },
+    {
+      "route": "taxes-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/taxes-v2"
+    },
+    {
+      "route": "team-hub-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/team-hub-v2"
+    },
+    {
+      "route": "team-management-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/team-management-v2"
+    },
+    {
+      "route": "templates-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/templates-v2"
+    },
+    {
+      "route": "territories-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/territories-v2"
+    },
+    {
+      "route": "testimonials-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/testimonials-v2"
+    },
+    {
+      "route": "testing-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/testing-v2"
+    },
+    {
+      "route": "theme-store-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/theme-store-v2"
+    },
+    {
+      "route": "third-party-integrations-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/third-party-integrations-v2"
+    },
+    {
+      "route": "tickets-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/tickets-v2"
+    },
+    {
+      "route": "time-off-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/time-off-v2"
+    },
+    {
+      "route": "time-tracking-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/time-tracking-v2"
+    },
+    {
+      "route": "training-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/training-v2"
+    },
+    {
+      "route": "transactions-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/transactions-v2"
+    },
+    {
+      "route": "tutorials-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/tutorials-v2"
+    },
+    {
+      "route": "upgrades-showcase",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/upgrades-showcase"
+    },
+    {
+      "route": "user-management-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/user-management-v2"
+    },
+    {
+      "route": "vending-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/vending-v2"
+    },
+    {
+      "route": "vendors-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/vendors-v2"
+    },
+    {
+      "route": "video-review-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/video-review-v2"
+    },
+    {
+      "route": "video-studio-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/video-studio-v2"
+    },
+    {
+      "route": "visitors-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/visitors-v2"
+    },
+    {
+      "route": "volunteering-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/volunteering-v2"
+    },
+    {
+      "route": "vulnerabilities-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/vulnerabilities-v2"
+    },
+    {
+      "route": "vulnerability-scan-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/vulnerability-scan-v2"
+    },
+    {
+      "route": "wallet-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/wallet-v2"
+    },
+    {
+      "route": "warehouse-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/warehouse-v2"
+    },
+    {
+      "route": "webhooks-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/webhooks-v2"
+    },
+    {
+      "route": "webinars-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/webinars-v2"
+    },
+    {
+      "route": "wellness-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/wellness-v2"
+    },
+    {
+      "route": "widget-library-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/widget-library-v2"
+    },
+    {
+      "route": "work-orders-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/work-orders-v2"
+    },
+    {
+      "route": "workflow-builder-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/workflow-builder-v2"
+    },
+    {
+      "route": "workflows-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/workflows-v2"
+    },
+    {
+      "route": "workspace-v2",
+      "status": 307,
+      "url": "http://localhost:9323/dashboard/workspace-v2"
+    }
+  ],
+  "errors": [],
+  "total": 303,
+  "timestamp": "2026-02-05T22:05:56.598Z"
+}
