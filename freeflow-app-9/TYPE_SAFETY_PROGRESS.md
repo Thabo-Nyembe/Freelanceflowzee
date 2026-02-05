@@ -1,16 +1,16 @@
 # Type Safety Migration - Progress Report
 
 **Date**: 2026-02-05
-**Status**: ⏳ IN PROGRESS - 235 files migrated (33.8%)
-**Lines Removed**: 7,980 lines of duplicated code
+**Status**: ⏳ IN PROGRESS - 245 files migrated (35.3%)
+**Lines Removed**: 8,320 lines of duplicated code
 
 ---
 
 ## 📊 Migration Summary
 
-**Completed**: 235 of ~695 API files (33.8%)
-**Code Removed**: 7,980 lines
-**Commits**: 34 batches pushed
+**Completed**: 245 of ~695 API files (35.3%)
+**Code Removed**: 8,320 lines
+**Commits**: 35 batches pushed
 **Batch Size**: Accelerated to 10 files/batch
 
 ---
@@ -244,7 +244,17 @@
 | `app/api/tax/profile/route.ts` | 34 | 33 |
 | `app/api/tax/nexus/route.ts` | 34 | 33 |
 | `app/api/tax/transactions/route.ts` | 34 | 33 |
-| **Total** | **7,640** | **32.4%** |
+| `app/api/admin-agents/[id]/route.ts` | 34 | 24 |
+| `app/api/admin-agents/route.ts` | 34 | 24 |
+| `app/api/admin-analytics/[id]/route.ts` | 34 | 24 |
+| `app/api/admin-marketing/[id]/route.ts` | 34 | 24 |
+| `app/api/admin-marketing/route.ts` | 34 | 24 |
+| `app/api/admin-overview/[id]/route.ts` | 34 | 24 |
+| `app/api/admin-overview/route.ts` | 34 | 24 |
+| `app/api/admin/analytics/route.ts` | 34 | 24 |
+| `app/api/admin/automation/route.ts` | 34 | 24 |
+| `app/api/admin/crm/route.ts` | 34 | 24 |
+| **Total** | **8,320** | **35.3%** |
 
 ---
 
