@@ -1,16 +1,16 @@
 # Type Safety Migration - Progress Report
 
 **Date**: 2026-02-05
-**Status**: ⏳ IN PROGRESS - 195 files migrated (28.1%)
-**Lines Removed**: 6,620 lines of duplicated code
+**Status**: ⏳ IN PROGRESS - 205 files migrated (29.5%)
+**Lines Removed**: 6,960 lines of duplicated code
 
 ---
 
 ## 📊 Migration Summary
 
-**Completed**: 195 of ~695 API files (28.1%)
-**Code Removed**: 6,620 lines
-**Commits**: 41 batches pushed
+**Completed**: 205 of ~695 API files (29.5%)
+**Code Removed**: 6,960 lines
+**Commits**: 42 batches pushed
 **Batch Size**: Accelerated to 10 files/batch
 
 ---
@@ -214,7 +214,17 @@
 | `app/api/ml-insights/[id]/route.ts` | 34 | 31 |
 | `app/api/ml-insights/route.ts` | 34 | 31 |
 | `app/api/ai-content/route.ts` | 34 | 31 |
-| **Total** | **6,328** | **26.3%** |
+| `app/api/client-portal/route.ts` | 34 | 22 |
+| `app/api/cron/token-refresh/route.ts` | 34 | 22 |
+| `app/api/cron/recurring-invoices/route.ts` | 34 | 22 |
+| `app/api/resource-library/[id]/route.ts` | 34 | 22 |
+| `app/api/resource-library/route.ts` | 34 | 22 |
+| `app/api/proposals/route.ts` | 34 | 22 |
+| `app/api/segments/[id]/route.ts` | 34 | 22 |
+| `app/api/segments/route.ts` | 34 | 22 |
+| `app/api/widgets/[id]/route.ts` | 34 | 22 |
+| `app/api/widgets/route.ts` | 34 | 22 |
+| **Total** | **6,960** | **29.5%** |
 
 ---
 
