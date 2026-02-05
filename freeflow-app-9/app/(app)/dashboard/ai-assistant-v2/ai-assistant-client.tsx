@@ -811,10 +811,10 @@ export default function AIAssistantClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
+    <div className="-mx-4 lg:-mx-6 min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}
       <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white">
-        <div className="max-w-[1800px] mx-auto px-6 py-4">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
@@ -890,7 +890,7 @@ export default function AIAssistantClient() {
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-6 pb-4">
+      <div className="container mx-auto px-6 pb-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
             <TabsList className="bg-white dark:bg-gray-800 shadow-sm">
