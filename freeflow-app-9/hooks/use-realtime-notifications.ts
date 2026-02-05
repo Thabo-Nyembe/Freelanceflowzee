@@ -56,7 +56,7 @@ export function useRealtimeNotifications(
 ): UseRealtimeNotificationsReturn {
   const {
     enabled = true,
-    pollingInterval = 30000, // 30 seconds
+    pollingInterval = 60000, // 60 seconds (reduced from 30s to prevent server load)
     showToasts = true,
     playSound = true,
     requestDesktopPermission = false

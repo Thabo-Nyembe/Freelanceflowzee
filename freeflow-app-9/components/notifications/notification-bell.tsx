@@ -155,6 +155,15 @@ export function NotificationBell({
   const [shownToasts, setShownToasts] = useState<Set<string>>(new Set())
   const supabase = createClient()
 
+  // Cleanup old shown toasts every 5 minutes to prevent memory leak
+  useEffect(() => {
+    const cleanupInterval = setInterval(() => {
+      setShownToasts(new Set()) // Clear all tracked toasts
+    }, 5 * 60 * 1000) // 5 minutes
+
+    return () => clearInterval(cleanupInterval)
+  }, [])
+
   // Handler for new notifications - shows toast (with deduplication)
   const handleNewNotification = useCallback((notification: Notification) => {
     if (!showToastOnNew || notification.is_silent) return

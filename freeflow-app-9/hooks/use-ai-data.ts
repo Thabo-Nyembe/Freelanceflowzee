@@ -56,6 +56,7 @@ export function useRevenueData(userId?: string) {
 
     const supabase = createClient()
     let isMounted = true
+    let debounceTimer: NodeJS.Timeout | null = null
 
     const fetchData = async () => {
       try {
@@ -78,6 +79,14 @@ export function useRevenueData(userId?: string) {
       }
     }
 
+    // Debounced fetch to prevent rapid-fire refetches
+    const debouncedFetch = () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        fetchData()
+      }, 1000) // Wait 1 second before refetching
+    }
+
     fetchData()
 
     // Real-time subscription for invoice updates
@@ -92,8 +101,8 @@ export function useRevenueData(userId?: string) {
           filter: `user_id=eq.${userId}`
         },
         () => {
-          // Refetch when invoices change
-          fetchData()
+          // Debounced refetch when invoices change
+          debouncedFetch()
         }
       )
       .on(
@@ -105,14 +114,15 @@ export function useRevenueData(userId?: string) {
           filter: `user_id=eq.${userId}`
         },
         () => {
-          // Refetch when projects change
-          fetchData()
+          // Debounced refetch when projects change
+          debouncedFetch()
         }
       )
       .subscribe()
 
     return () => {
       isMounted = false
+      if (debounceTimer) clearTimeout(debounceTimer)
       supabase.removeChannel(channel)
     }
   }, [userId])
@@ -153,6 +163,7 @@ export function useLeadsData(userId?: string) {
 
     const supabase = createClient()
     let isMounted = true
+    let debounceTimer: NodeJS.Timeout | null = null
 
     const fetchData = async () => {
       try {
@@ -179,6 +190,14 @@ export function useLeadsData(userId?: string) {
       }
     }
 
+    // Debounced fetch to prevent rapid-fire refetches
+    const debouncedFetch = () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        fetchData()
+      }, 1000) // Wait 1 second before refetching
+    }
+
     fetchData()
 
     // Real-time subscription for leads updates
@@ -193,13 +212,14 @@ export function useLeadsData(userId?: string) {
           filter: `user_id=eq.${userId}`
         },
         () => {
-          fetchData()
+          debouncedFetch()
         }
       )
       .subscribe()
 
     return () => {
       isMounted = false
+      if (debounceTimer) clearTimeout(debounceTimer)
       supabase.removeChannel(channel)
     }
   }, [userId])
@@ -243,6 +263,7 @@ export function useAIRecommendations(userId?: string, status?: 'pending' | 'acce
 
     const supabase = createClient()
     let isMounted = true
+    let debounceTimer: NodeJS.Timeout | null = null
 
     const fetchData = async () => {
       try {
@@ -264,6 +285,14 @@ export function useAIRecommendations(userId?: string, status?: 'pending' | 'acce
       }
     }
 
+    // Debounced fetch to prevent rapid-fire refetches
+    const debouncedFetch = () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        fetchData()
+      }, 1000) // Wait 1 second before refetching
+    }
+
     fetchData()
 
     // Real-time subscription for recommendations updates
@@ -278,13 +307,14 @@ export function useAIRecommendations(userId?: string, status?: 'pending' | 'acce
           filter: `user_id=eq.${userId}`
         },
         () => {
-          fetchData()
+          debouncedFetch()
         }
       )
       .subscribe()
 
     return () => {
       isMounted = false
+      if (debounceTimer) clearTimeout(debounceTimer)
       supabase.removeChannel(channel)
     }
   }, [userId, status])
@@ -324,6 +354,7 @@ export function useGrowthPlaybook(userId?: string) {
 
     const supabase = createClient()
     let isMounted = true
+    let debounceTimer: NodeJS.Timeout | null = null
 
     const fetchData = async () => {
       try {
@@ -347,6 +378,14 @@ export function useGrowthPlaybook(userId?: string) {
       }
     }
 
+    // Debounced fetch to prevent rapid-fire refetches
+    const debouncedFetch = () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        fetchData()
+      }, 1000) // Wait 1 second before refetching
+    }
+
     fetchData()
 
     // Real-time subscription for playbook updates
@@ -361,13 +400,14 @@ export function useGrowthPlaybook(userId?: string) {
           filter: `user_id=eq.${userId}`
         },
         () => {
-          fetchData()
+          debouncedFetch()
         }
       )
       .subscribe()
 
     return () => {
       isMounted = false
+      if (debounceTimer) clearTimeout(debounceTimer)
       supabase.removeChannel(channel)
     }
   }, [userId])
@@ -407,6 +447,7 @@ export function useUserMetrics(userId?: string) {
 
     const supabase = createClient()
     let isMounted = true
+    let debounceTimer: NodeJS.Timeout | null = null
 
     const fetchData = async () => {
       try {
@@ -427,6 +468,14 @@ export function useUserMetrics(userId?: string) {
       }
     }
 
+    // Debounced fetch to prevent rapid-fire refetches
+    const debouncedFetch = () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        fetchData()
+      }, 2000) // Wait 2 seconds (longer for metrics with 3 tables)
+    }
+
     fetchData()
 
     // Real-time subscription for metrics updates (projects, tasks, time_entries)
@@ -440,7 +489,7 @@ export function useUserMetrics(userId?: string) {
           table: 'projects',
           filter: `user_id=eq.${userId}`
         },
-        () => fetchData()
+        () => debouncedFetch()
       )
       .on(
         'postgres_changes',
@@ -450,7 +499,7 @@ export function useUserMetrics(userId?: string) {
           table: 'tasks',
           filter: `user_id=eq.${userId}`
         },
-        () => fetchData()
+        () => debouncedFetch()
       )
       .on(
         'postgres_changes',
@@ -460,12 +509,13 @@ export function useUserMetrics(userId?: string) {
           table: 'time_entries',
           filter: `user_id=eq.${userId}`
         },
-        () => fetchData()
+        () => debouncedFetch()
       )
       .subscribe()
 
     return () => {
       isMounted = false
+      if (debounceTimer) clearTimeout(debounceTimer)
       supabase.removeChannel(channel)
     }
   }, [userId])

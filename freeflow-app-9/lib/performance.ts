@@ -260,10 +260,11 @@ export function initPerformanceMonitoring() {
   logBundleInfo()
 
   // Monitor memory usage periodically
-  setInterval(monitorMemoryUsage, 30000) // Every 30 seconds
+  const memoryMonitorInterval = setInterval(monitorMemoryUsage, 30000) // Every 30 seconds
 
   // Cleanup on page unload
   window.addEventListener('beforeunload', () => {
+    clearInterval(memoryMonitorInterval) // Clear memory monitor interval
     optimizer.cleanup()
   })
 }
