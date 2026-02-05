@@ -3,25 +3,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSimpleLogger } from '@/lib/simple-logger'
 
 // ============================================================================
-// DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
+// DEMO USER CONFIGURATION - For legitimate accounts only
 // ============================================================================
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 const DEMO_USER_EMAIL = 'alex@freeflow.io'
 
-function isDemoMode(request: NextRequest): boolean {
-  if (typeof request === 'undefined') return false
-  const url = new URL(request.url)
-  return (
-    url.searchParams.get('demo') === 'true' ||
-    request.cookies.get('demo_mode')?.value === 'true' ||
-    request.headers.get('X-Demo-Mode') === 'true'
-  )
-}
-
-function getDemoUserId(session: any, demoMode: boolean): string | null {
+// SECURITY: Demo mode bypass removed - users must authenticate properly
+function getDemoUserId(session: any): string | null {
   if (!session?.user) {
-    return demoMode ? DEMO_USER_ID : null
+    return null  // No bypass - require authentication
   }
 
   const userEmail = session.user.email
@@ -29,7 +20,7 @@ function getDemoUserId(session: any, demoMode: boolean): string | null {
                        userEmail === 'demo@kazi.io' ||
                        userEmail === 'test@kazi.dev'
 
-  if (isDemoAccount || demoMode) {
+  if (isDemoAccount) {
     return DEMO_USER_ID
   }
 
@@ -46,9 +37,10 @@ export async function GET(request: NextRequest) {
 
     switch (action) {
       case 'tracks': {
+        // PERFORMANCE FIX: Select only needed fields
         const { data, error } = await supabase
           .from('music_tracks')
-          .select('*')
+          .select('id, title, artist, album, duration, genre, bpm, file_url, cover_url, created_at')
           .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -60,9 +52,10 @@ export async function GET(request: NextRequest) {
         const trackId = searchParams.get('trackId')
 
         if (trackId) {
+          // PERFORMANCE FIX: Select only needed fields for single track export
           const { data, error } = await supabase
             .from('music_tracks')
-            .select('*')
+            .select('id, title, artist, album, duration, file_url, name, format, size')
             .eq('id', trackId)
             .single()
 
@@ -79,9 +72,10 @@ export async function GET(request: NextRequest) {
         }
 
         // Export all tracks metadata
+        // PERFORMANCE FIX: Select only needed fields for batch export
         const { data, error } = await supabase
           .from('music_tracks')
-          .select('*')
+          .select('id, title, artist, album, duration, genre, bpm, created_at')
 
         if (error) throw error
         return NextResponse.json({ data })
@@ -90,9 +84,10 @@ export async function GET(request: NextRequest) {
       case 'settings': {
         const { data: { user } } = await supabase.auth.getUser()
 
+        // PERFORMANCE FIX: Select only needed settings fields
         const { data, error } = await supabase
           .from('music_studio_settings')
-          .select('*')
+          .select('id, user_id, defaultGenre, defaultTempo, outputFormat, quality, autoSave, updated_at')
           .eq('user_id', user?.id)
           .single()
 
@@ -109,9 +104,10 @@ export async function GET(request: NextRequest) {
       }
 
       default: {
+        // PERFORMANCE FIX: Select only needed fields for default track list
         const { data, error } = await supabase
           .from('music_tracks')
-          .select('*')
+          .select('id, title, artist, album, duration, genre, cover_url, created_at')
           .order('created_at', { ascending: false })
           .limit(20)
 

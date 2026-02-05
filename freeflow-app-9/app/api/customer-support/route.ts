@@ -61,9 +61,10 @@ export async function GET(request: NextRequest) {
 
     // Single ticket fetch
     if (ticketId) {
+      // PERFORMANCE FIX: Select only needed fields for ticket details
       const { data: ticket, error } = await supabase
         .from('support_tickets')
-        .select('*')
+        .select('id, ticket_number, subject, description, status, priority, category, customer_id, assigned_to, created_at, updated_at, resolved_at')
         .eq('id', ticketId)
         .single()
 

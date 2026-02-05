@@ -353,9 +353,10 @@ export async function POST(request: NextRequest) {
         // Create reversing entry if already posted
         if (entry.status === 'posted') {
           // Get original lines
+          // PERFORMANCE FIX: Select only needed fields for reversing entry
           const { data: lines } = await supabase
             .from('journal_lines')
-            .select('*')
+            .select('account_id, debit, credit, description, line_number')
             .eq('journal_entry_id', entry_id);
 
           // Create reversing entry with swapped debits/credits
@@ -420,9 +421,10 @@ export async function POST(request: NextRequest) {
         const params = reportParamsSchema.parse(body);
 
         // Get accounts and entries
+        // PERFORMANCE FIX: Select only needed fields for chart of accounts
         const { data: accounts } = await supabase
           .from('chart_of_accounts')
-          .select('*')
+          .select('id, code, name, account_type, parent_id, balance, is_active')
           .eq('user_id', user.id)
           .eq('is_active', true)
           .order('code');
@@ -514,9 +516,10 @@ export async function POST(request: NextRequest) {
         }
 
         // Get expense accounts
+        // PERFORMANCE FIX: Select only needed fields for expense accounts
         const { data: accounts } = await supabase
           .from('chart_of_accounts')
-          .select('*')
+          .select('id, code, name, account_type, balance, currency')
           .eq('user_id', user.id)
           .eq('account_type', 'expense')
           .eq('is_active', true);
@@ -633,9 +636,10 @@ export async function GET(request: NextRequest) {
         const type = searchParams.get('type');
         const active = searchParams.get('active') !== 'false';
 
+        // PERFORMANCE FIX: Select only needed fields for accounts list
         let query = supabase
           .from('chart_of_accounts')
-          .select('*')
+          .select('id, code, name, account_type, parent_id, balance, currency, is_active, created_at')
           .eq('user_id', user.id)
           .order('code');
 

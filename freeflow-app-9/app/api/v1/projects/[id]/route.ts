@@ -57,9 +57,24 @@ export async function GET(
   const supabase = await createClient()
 
   try {
+    // PERFORMANCE FIX: Select only needed fields with proper joins
     const { data, error: queryError } = await supabase
       .from('projects')
-      .select('*')
+      .select(`
+        id,
+        name,
+        description,
+        status,
+        start_date,
+        end_date,
+        budget,
+        currency,
+        client_id,
+        progress,
+        priority,
+        created_at,
+        updated_at
+      `)
       .eq('id', id)
       .eq('user_id', context.userId)
       .single()
