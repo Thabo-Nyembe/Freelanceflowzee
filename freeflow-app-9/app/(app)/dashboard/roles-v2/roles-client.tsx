@@ -152,7 +152,6 @@ interface UserGroup {
   isSystem: boolean
 }
 
-
 // Helper functions
 const getStatusColor = (status: RoleStatus): string => {
   const colors: Record<RoleStatus, string> = {
@@ -203,7 +202,6 @@ const formatDate = (date: string) => {
 const formatDateTime = (date: string) => {
   return new Date(date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
-
 
 // Quick actions will be defined inside the component to access state setters and handlers
 
@@ -2642,7 +2640,7 @@ export default function RolesClient() {
           {/* Enhanced Competitive Upgrade Components */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div className="lg:col-span-2">
-              /* AIInsightsPanel removed - use header button */
+              
             </div>
             <div className="space-y-6">
               <CollaborationIndicator
@@ -2657,7 +2655,7 @@ export default function RolesClient() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            /* ActivityFeed removed - use header button */
+            
             <QuickActionsToolbar
               actions={rolesQuickActions}
               variant="grid"

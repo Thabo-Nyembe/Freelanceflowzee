@@ -1,6 +1,5 @@
 'use client'
 
-
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
@@ -113,7 +112,6 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
-
 
 // Types
 type MemberStatus = 'online' | 'away' | 'dnd' | 'offline' | 'in-meeting'
@@ -368,7 +366,6 @@ interface SearchResult {
   channelName: string
   highlights: string[]
 }
-
 
 // Database Types
 interface DbTeamMember {
@@ -3004,13 +3001,13 @@ export default function TeamHubClient() {
 
         {/* AI-Powered Team Insights */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          /* AIInsightsPanel removed - use header button */
+          
           <PredictiveAnalytics predictions={teamHubPredictions} />
         </div>
 
         {/* Activity Feed */}
         <div className="mt-6">
-          /* ActivityFeed removed - use header button */
+          
         </div>
 
         {/* Quick Actions Toolbar */}

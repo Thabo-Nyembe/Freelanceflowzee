@@ -115,9 +115,6 @@ const QuickActionsToolbar = dynamic(
   }
 )
 
-
-
-
 // ============================================================================
 // DATABASE TYPES
 // ============================================================================
@@ -2653,7 +2650,7 @@ export default function ShippingClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2668,7 +2665,7 @@ export default function ShippingClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={shippingQuickActions}
             variant="grid"

@@ -41,7 +41,6 @@ import {
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -2874,7 +2873,7 @@ export default function ProfileClient() {
           {/* Enhanced Competitive Upgrade Components */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div className="lg:col-span-2">
-              /* AIInsightsPanel removed - use header button */
+              
             </div>
             <div className="space-y-6">
               <CollaborationIndicator
@@ -2889,7 +2888,7 @@ export default function ProfileClient() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            /* ActivityFeed removed - use header button */
+            
             <QuickActionsToolbar
               actions={profileQuickActions}
               variant="grid"

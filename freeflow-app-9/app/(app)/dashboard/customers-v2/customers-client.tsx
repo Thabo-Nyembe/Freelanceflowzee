@@ -38,9 +38,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
-
 import { useClients, type Client } from '@/lib/hooks/use-clients'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
 import { useTeam } from '@/lib/hooks/use-team'
@@ -365,7 +362,6 @@ const getAccountRatingColor = (rating: 'hot' | 'warm' | 'cold') => {
   const colors = { hot: 'bg-red-100 text-red-700', warm: 'bg-orange-100 text-orange-700', cold: 'bg-blue-100 text-blue-700' }
   return colors[rating]
 }
-
 
 // ============================================================================
 // MAIN COMPONENT
@@ -2723,7 +2719,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2743,7 +2739,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={[
               { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => setShowAddContact(true) },

@@ -97,7 +97,6 @@ const QuickActionsToolbar = dynamic(
   }
 )
 
-
 // Project status configuration
 const projectsStatusColumns = [
   { id: 'planning', label: 'Planning', color: 'bg-blue-500' },
@@ -2654,7 +2653,7 @@ export default function ProjectsHubClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
 
           {/* Team Collaboration & Activity */}
@@ -2671,7 +2670,7 @@ export default function ProjectsHubClient() {
 
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={[]}
           />

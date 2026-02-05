@@ -72,9 +72,6 @@ import {
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
-
-
-
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -178,7 +175,6 @@ interface AutomationRule {
   executionCount: number
 }
 
-
 // Helper functions
 const getStatusColor = (status: TicketStatus): string => {
   const colors: Record<TicketStatus, string> = {
@@ -253,7 +249,6 @@ interface SupportClientProps {
   initialTickets?: any[]
   initialStats?: any
 }
-
 
 export default function SupportClient({ initialTickets, initialStats }: SupportClientProps) {
   // Use the support tickets hook for data fetching and mutations
@@ -1681,7 +1676,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -1696,7 +1691,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={[]}
             variant="grid"

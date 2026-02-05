@@ -2005,7 +2005,7 @@ export default function MarketingClient() {
             {/* AI Insights & Predictive Analytics Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
               {/* AI Insights Panel - Like ThoughtSpot/Salesforce Einstein */}
-              /* AIInsightsPanel removed - use header button */
+              
 
               {/* Predictive Analytics - Like Salesforce Einstein */}
               <PredictiveAnalytics
@@ -2024,7 +2024,7 @@ export default function MarketingClient() {
 
             {/* Activity Feed - Like Slack + Notion Combined */}
             <div className="mt-6">
-              /* ActivityFeed removed - use header button */
+              
             </div>
           </TabsContent>
         </Tabs>

@@ -208,7 +208,6 @@ interface EmailTemplate {
   useCount: number
 }
 
-
 // Helper Functions
 const getStatusColor = (status: CampaignStatus): string => {
   const colors: Record<CampaignStatus, string> = {
@@ -299,7 +298,6 @@ const getTemplateCategoryColor = (category: TemplateCategory): string => {
 
 // MIGRATED: Using Supabase hooks for real data
 // Props removed - all data now comes from hooks
-
 
 // Helper function to download data as CSV
 const downloadAsCsv = (data: Record<string, unknown>[], filename: string) => {
@@ -1913,7 +1911,7 @@ export default function EmailMarketingClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -1928,7 +1926,7 @@ export default function EmailMarketingClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={emailQuickActions}
             variant="grid"

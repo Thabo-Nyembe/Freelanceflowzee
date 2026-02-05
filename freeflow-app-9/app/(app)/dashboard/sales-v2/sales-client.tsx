@@ -53,8 +53,6 @@ import {
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
-
-
 // Salesforce Sales Cloud level types
 type DealStage = 'prospecting' | 'qualification' | 'needs_analysis' | 'value_proposition' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'
 type DealType = 'new_business' | 'existing_business' | 'renewal' | 'upsell' | 'cross_sell'
@@ -2433,7 +2431,7 @@ Generated on: ${new Date().toLocaleString()}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
 
           {/* Team Collaboration & Activity */}
@@ -2456,7 +2454,7 @@ Generated on: ${new Date().toLocaleString()}
 
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={salesQuickActions}
             variant="grid"

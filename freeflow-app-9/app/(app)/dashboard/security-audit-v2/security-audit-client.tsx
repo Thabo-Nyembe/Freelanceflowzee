@@ -151,7 +151,6 @@ interface ComplianceControl {
   owner: string
 }
 
-
 const complianceFrameworks = [
   { id: 'SOC2', name: 'SOC 2 Type II', score: 94, controls: 89, passed: 84, icon: ShieldCheck },
   { id: 'ISO27001', name: 'ISO 27001', score: 88, controls: 114, passed: 100, icon: Shield },
@@ -1791,7 +1790,7 @@ export default function SecurityAuditClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -1806,7 +1805,7 @@ export default function SecurityAuditClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={[].map(action => ({
               ...action,

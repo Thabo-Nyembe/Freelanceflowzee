@@ -35,9 +35,6 @@ import {
   ActivityFeed,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
-
 // ============================================================================
 // TYPE DEFINITIONS - Contentful Level CMS
 // ============================================================================
@@ -1824,7 +1821,7 @@ export default function ContentStudioClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -1839,7 +1836,7 @@ export default function ContentStudioClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <Card className="border-0 shadow-sm dark:bg-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

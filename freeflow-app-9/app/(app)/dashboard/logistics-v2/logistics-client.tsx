@@ -33,7 +33,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -248,7 +247,6 @@ const formatDate = (date: string) => {
 const formatDateTime = (date: string) => {
   return new Date(date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
-
 
 // Database types matching Supabase schema
 interface DbShipment {
@@ -3104,7 +3102,7 @@ export default function LogisticsClient() {
           {/* Enhanced Competitive Upgrade Components */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div className="lg:col-span-2">
-              /* AIInsightsPanel removed - use header button */
+              
             </div>
             <div className="space-y-6">
               <CollaborationIndicator
@@ -3119,7 +3117,7 @@ export default function LogisticsClient() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            /* ActivityFeed removed - use header button */
+            
             <QuickActionsToolbar
               actions={logisticsQuickActions}
               variant="grid"

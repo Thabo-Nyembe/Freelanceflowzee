@@ -70,9 +70,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
-
 // Types
 type IdeaStatus = 'new' | 'under_review' | 'planned' | 'in_progress' | 'shipped' | 'declined' | 'duplicate'
 type IdeaCategory = 'feature' | 'improvement' | 'bug' | 'integration' | 'ux' | 'performance' | 'other'
@@ -2514,7 +2511,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2529,7 +2526,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={feedbackQuickActions}
             variant="grid"

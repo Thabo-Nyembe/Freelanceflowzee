@@ -143,7 +143,7 @@ export function UpgradesShowcaseClient() {
           {/* AI Insights Tab */}
           <TabsContent value="ai-insights" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              /* AIInsightsPanel removed - use header button */
+              
               <PredictiveAnalytics predictions={predictions} />
             </div>
             {storySegments.length > 0 && (
@@ -310,7 +310,7 @@ export function UpgradesShowcaseClient() {
 
           {/* Activity Tab */}
           <TabsContent value="activity" className="space-y-6">
-            /* ActivityFeed removed - use header button */
+            
           </TabsContent>
 
           {/* Gamification Tab */}

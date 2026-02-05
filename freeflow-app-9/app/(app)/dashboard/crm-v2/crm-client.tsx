@@ -46,7 +46,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
 // Types
 type ContactType = 'lead' | 'prospect' | 'customer' | 'partner' | 'vendor'
 type ContactStatus = 'active' | 'vip' | 'new' | 'qualified' | 'inactive' | 'churned'
@@ -3271,13 +3270,13 @@ export default function CrmClient() {
 
         {/* AI-Powered CRM Insights */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          /* AIInsightsPanel removed - use header button */
+          
           <PredictiveAnalytics predictions={crmPredictions} />
         </div>
 
         {/* Activity Feed */}
         <div className="mt-6">
-          /* ActivityFeed removed - use header button */
+          
         </div>
 
         {/* Quick Actions Toolbar */}

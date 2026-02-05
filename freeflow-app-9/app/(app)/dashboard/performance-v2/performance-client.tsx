@@ -59,9 +59,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -139,7 +136,6 @@ interface HistoricalData {
   fid: number
   cls: number
 }
-
 
 // Helper Functions
 const getScoreColor = (score: number): string => {
@@ -2194,13 +2190,13 @@ export default function PerformanceClient() {
 
       {/* AI-Powered Performance Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        /* AIInsightsPanel removed - use header button */
+        
         <PredictiveAnalytics predictions={[]} />
       </div>
 
       {/* Activity Feed */}
       <div className="mt-6">
-        /* ActivityFeed removed - use header button */
+        
       </div>
 
       {/* Quick Actions Toolbar */}

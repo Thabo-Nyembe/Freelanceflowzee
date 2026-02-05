@@ -73,9 +73,6 @@ import {
 
 import { downloadAsCsv, apiPost } from '@/lib/button-handlers'
 
-
-
-
 import { Switch } from '@/components/ui/switch'
 import { CardDescription } from '@/components/ui/card'
 
@@ -172,7 +169,6 @@ interface Playbook {
   successRate: number
   activeAccounts: number
 }
-
 
 // Helper function for exporting customer success data
 function exportCustomerSuccessData(customers: Customer[]) {
@@ -1777,7 +1773,7 @@ export default function CustomerSuccessClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -1792,7 +1788,7 @@ export default function CustomerSuccessClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={mockCSQuickActions}
             variant="grid"

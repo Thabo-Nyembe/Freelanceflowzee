@@ -103,7 +103,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
 // Types
 type AnnouncementStatus = 'draft' | 'scheduled' | 'published' | 'archived'
 type AnnouncementPriority = 'low' | 'normal' | 'high' | 'urgent' | 'critical'
@@ -193,7 +192,6 @@ interface ChangelogEntry {
   publishedAt: string
   author: Author
 }
-
 
 const typeIcons: Record<AnnouncementType, React.ReactNode> = {
   feature: <Sparkles className="h-4 w-4" />,
@@ -2780,7 +2778,7 @@ export default function AnnouncementsClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2795,7 +2793,7 @@ export default function AnnouncementsClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={announcementsQuickActions}
             variant="grid"

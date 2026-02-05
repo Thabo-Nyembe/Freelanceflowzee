@@ -38,9 +38,6 @@ import type { ActivityItem as ExtendedActivityItem } from '@/components/ui/compe
 // Initialize Supabase client
 const supabase = createClient()
 
-
-
-
 // ============================================================================
 // CONTENTFUL/STRAPI-LEVEL CMS - Headless Content Management System
 // Features: Rich editor, Asset library, Content types, Localization, Versioning
@@ -1586,7 +1583,7 @@ export default function ContentClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -1601,7 +1598,7 @@ export default function ContentClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={contentQuickActionsWithHandlers}
             variant="grid"

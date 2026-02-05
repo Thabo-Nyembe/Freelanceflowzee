@@ -49,9 +49,6 @@ import {
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
-
-
-
 // Types
 type Platform = 'ios' | 'android' | 'all'
 type BuildStatus = 'processing' | 'ready' | 'submitted' | 'in-review' | 'approved' | 'rejected' | 'released'
@@ -142,7 +139,6 @@ interface MobileAppClientProps {
   initialVersions: any[]
   initialStats: any
 }
-
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -2066,7 +2062,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2081,7 +2077,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={[
               { id: '1', label: 'New Build', icon: 'plus', action: () => setShowQueueBuildDialog(true), variant: 'default' as const },

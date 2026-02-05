@@ -231,7 +231,6 @@ interface Webhook {
   createdAt: string
 }
 
-
 // Helper functions for real marketplace actions
 const installApp = async (appId: string, appName: string) => {
   const response = await fetch('/api/marketplace/install', {
@@ -294,7 +293,6 @@ const mockMarketplaceQuickActions = [
 ]
 
 export default function MarketplaceClient() {
-
 
   const [activeTab, setActiveTab] = useState('browse')
   const [searchQuery, setSearchQuery] = useState('')
@@ -2111,7 +2109,7 @@ export default function MarketplaceClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2126,7 +2124,7 @@ export default function MarketplaceClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={mockMarketplaceQuickActions}
             variant="grid"

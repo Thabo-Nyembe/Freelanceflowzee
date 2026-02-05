@@ -1284,7 +1284,6 @@ export default function SettingsClient() {
     { label: 'Theme', value: theme.charAt(0).toUpperCase() + theme.slice(1), change: 0, icon: Palette, color: 'from-teal-500 to-green-500' }
   ]
 
-
   // Loading skeleton component
   const LoadingSkeleton = () => (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-zinc-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -3587,7 +3586,7 @@ export default function SettingsClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -3602,7 +3601,7 @@ export default function SettingsClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={getSettingsQuickActions(handleExportData)}
             variant="grid"

@@ -92,9 +92,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
-
 import { Switch } from '@/components/ui/switch'
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
@@ -189,7 +186,6 @@ interface RenderJob {
   estimatedTime?: number
 }
 
-
 // Helper Functions
 const getStatusColor = (status: AnimationStatus): string => {
   const colors: Record<AnimationStatus, string> = {
@@ -253,7 +249,6 @@ const formatFileSize = (bytes: number): string => {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
-
 
 // Database types
 interface DbProject {
@@ -2014,7 +2009,7 @@ export default function MotionGraphicsClient({
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2034,7 +2029,7 @@ export default function MotionGraphicsClient({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={quickActions}
             variant="grid"

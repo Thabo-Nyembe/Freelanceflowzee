@@ -87,9 +87,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
-
 import { Switch } from '@/components/ui/switch'
 import { CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -1999,7 +1996,7 @@ export default function TemplatesClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2014,7 +2011,7 @@ export default function TemplatesClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={quickActions}
             variant="grid"

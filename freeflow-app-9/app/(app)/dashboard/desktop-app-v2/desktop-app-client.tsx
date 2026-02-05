@@ -61,7 +61,6 @@ import {
 // Initialize Supabase client once at module level
 const supabase = createClient()
 
-
 // Types
 type Platform = 'windows' | 'macos' | 'linux' | 'all'
 type BuildStatus = 'queued' | 'building' | 'signing' | 'notarizing' | 'uploading' | 'completed' | 'failed' | 'cancelled'
@@ -249,7 +248,6 @@ const desktopAppPredictions: { id: string; metric: string; currentValue: number;
 const desktopAppActivities: { id: string; type: string; description: string; timestamp: string; user: string }[] = []
 
 export default function DesktopAppClient() {
-
 
   // Core UI state
   const [activeTab, setActiveTab] = useState('builds')
@@ -2825,7 +2823,7 @@ Date: ${new Date().toISOString().split('T')[0]}
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2840,7 +2838,7 @@ Date: ${new Date().toISOString().split('T')[0]}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={desktopAppQuickActions}
             variant="grid"

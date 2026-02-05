@@ -65,9 +65,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
-
 // Types
 type GenerationStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'upscaling'
 type StylePreset = 'photorealistic' | 'anime' | 'digital_art' | 'oil_painting' | 'watercolor' | 'sketch' | '3d_render' | 'neon' | 'vintage' | 'minimalist'
@@ -140,7 +137,6 @@ interface AIDesignStats {
   favoriteCount: number
 }
 
-
 // Style templates - to be fetched from real API endpoint /api/ai-design/templates
 // Using hook-based data fetching pattern for style templates
 const styleTemplates: StyleTemplate[] = []
@@ -199,7 +195,6 @@ const formatDate = (date: string) => {
     minute: '2-digit'
   })
 }
-
 
 export default function AIDesignClient() {
   // Team and activity hooks for collaboration features
@@ -1965,7 +1960,7 @@ export default function AIDesignClient() {
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -1980,7 +1975,7 @@ export default function AIDesignClient() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={[].map(action => ({
               ...action,

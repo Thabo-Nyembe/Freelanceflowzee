@@ -36,8 +36,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
 // View types
 type ViewType = 'calendar' | 'list' | 'agenda'
 type CalendarView = 'month' | 'week' | 'day'
@@ -70,7 +68,6 @@ interface TeamMember {
   availability: string[]
   bookingsToday: number
 }
-
 
 // Quick actions are defined inside the component to access state setters
 
@@ -2550,7 +2547,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2565,7 +2562,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={bookingsQuickActions}
             variant="grid"

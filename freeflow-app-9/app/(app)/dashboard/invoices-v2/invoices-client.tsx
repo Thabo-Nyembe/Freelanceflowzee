@@ -26,10 +26,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
-
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -2130,7 +2126,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
 
           {/* Team Collaboration & Activity */}
@@ -2148,7 +2144,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
 
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={invoicesQuickActions}
             variant="grid"

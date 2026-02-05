@@ -1,6 +1,5 @@
 "use client"
 
-
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -69,9 +68,6 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
-
-
-
 
 // Types
 type BillingPeriod = 'monthly' | 'quarterly' | 'annual' | 'lifetime'
@@ -321,7 +317,6 @@ const emptyPricingActivities: { id: string; user: string; action: string; target
 export default function PricingClient({
   initialPlans = emptyPlans
 }: PricingClientProps) {
-
 
   // Core UI state
   const [activeTab, setActiveTab] = useState('plans')
@@ -2295,7 +2290,7 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
-            /* AIInsightsPanel removed - use header button */
+            
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
@@ -2310,7 +2305,7 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          /* ActivityFeed removed - use header button */
+          
           <QuickActionsToolbar
             actions={pricingQuickActions}
             variant="grid"

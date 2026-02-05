@@ -2354,13 +2354,13 @@ export default function OverviewClient() {
 
         {/* AI-Powered Infrastructure Insights */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          /* AIInsightsPanel removed - use header button */
+          
           <PredictiveAnalytics predictions={overviewPredictions} />
         </div>
 
         {/* Activity Feed */}
         <div className="mt-6">
-          /* ActivityFeed removed - use header button */
+          
         </div>
 
         {/* Quick Actions Toolbar */}
