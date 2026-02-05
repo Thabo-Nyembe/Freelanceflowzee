@@ -6,11 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { createSimpleLogger } from '@/lib/simple-logger';
+import { isDemoMode, getDemoUserId } from '@/lib/utils/demo-mode'
 
 const logger = createSimpleLogger('analytics-comprehensive');
-
-// Demo user for unauthenticated access
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 // =====================================================
 // GET - Fetch analytics data
@@ -26,7 +24,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const endDate = searchParams.get('endDate');
 
     // Use provided userId or demo user for public access
-    const userId = searchParams.get('userId') || DEMO_USER_ID;
+    const userId = searchParams.get('userId') || getDemoUserId(null, true);
 
     // Calculate date range
     const dateRange = getDateRange(period, startDate, endDate);

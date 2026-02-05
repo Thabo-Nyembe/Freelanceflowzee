@@ -1,20 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { isDemoMode, getDemoUserId } from '@/lib/utils/demo-mode'
 
 const logger = createSimpleLogger('API-Analytics')
-
-// Demo mode support
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-
-function isDemoMode(request: NextRequest): boolean {
-  const url = new URL(request.url)
-  return (
-    url.searchParams.get('demo') === 'true' ||
-    request.cookies.get('demo_mode')?.value === 'true' ||
-    request.headers.get('X-Demo-Mode') === 'true'
-  )
-}
 
 // =====================================================
 // GET - Fetch Analytics Data
@@ -25,7 +14,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const { data: { user } } = await supabase.auth.getUser();
     const demoMode = isDemoMode(request);
 
-    const effectiveUserId = user?.id || (demoMode ? DEMO_USER_ID : null);
+    const effectiveUserId = user?.id || (demoMode ? getDemoUserId(null, true) : null);
 
     if (!effectiveUserId) {
       return NextResponse.json(
@@ -61,7 +50,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     const { data: { user } } = await supabase.auth.getUser();
     const demoMode = isDemoMode(request);
 
-    const effectiveUserId = user?.id || (demoMode ? DEMO_USER_ID : null);
+    const effectiveUserId = user?.id || (demoMode ? getDemoUserId(null, true) : null);
 
     if (!effectiveUserId) {
       return NextResponse.json(
@@ -123,7 +112,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     const { data: { user } } = await supabase.auth.getUser();
     const demoMode = isDemoMode(request);
 
-    const effectiveUserId = user?.id || (demoMode ? DEMO_USER_ID : null);
+    const effectiveUserId = user?.id || (demoMode ? getDemoUserId(null, true) : null);
 
     if (!effectiveUserId) {
       return NextResponse.json(
