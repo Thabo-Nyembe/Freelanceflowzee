@@ -14,9 +14,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, Bell, User, Settings, LogOut, Moon, Sun, Menu, Maximize2, Minimize2 } from 'lucide-react'
+import { Search, Bell, User, Settings, LogOut, Moon, Sun, Menu, Maximize2, Minimize2, Brain, Activity } from 'lucide-react'
 import { OnlinePeopleToggle } from '@/components/realtime/online-people-toggle'
 import { useSidebar } from '@/lib/sidebar-context'
+import { useAIPanels } from '@/lib/ai-panels-context'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -44,6 +45,12 @@ export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
     const router = useRouter()
     const { theme, setTheme } = useTheme()
     const { isFullscreen, toggleFullscreen } = useSidebar()
+    const {
+        isIntelligencePanelOpen,
+        toggleIntelligencePanel,
+        isActivityPanelOpen,
+        toggleActivityPanel,
+    } = useAIPanels()
     const [searchQuery, setSearchQuery] = useState('')
 
     const userName = user.user_metadata?.name || user.email.split('@')[0]
@@ -110,6 +117,30 @@ export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
                     <div className="hidden sm:block">
                         <OnlinePeopleToggle position="header" />
                     </div>
+
+                    {/* AI Intelligence Toggle */}
+                    <Button
+                        variant={isIntelligencePanelOpen ? "default" : "ghost"}
+                        size="sm"
+                        onClick={toggleIntelligencePanel}
+                        className="hidden sm:flex gap-2"
+                        title="AI Intelligence"
+                    >
+                        <Brain className="h-5 w-5" />
+                        <span className="hidden lg:inline text-sm">AI Intelligence</span>
+                    </Button>
+
+                    {/* AI Activity Toggle */}
+                    <Button
+                        variant={isActivityPanelOpen ? "default" : "ghost"}
+                        size="sm"
+                        onClick={toggleActivityPanel}
+                        className="hidden sm:flex gap-2"
+                        title="AI Activity"
+                    >
+                        <Activity className="h-5 w-5" />
+                        <span className="hidden lg:inline text-sm">AI Activity</span>
+                    </Button>
 
                     {/* Fullscreen Toggle */}
                     <Button
