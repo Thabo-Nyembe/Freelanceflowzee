@@ -97,16 +97,24 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   useEffect(() => {
     if (!realtime) return
 
+    // Use unique channel name to prevent conflicts
+    const channelName = `notifications-realtime-${Math.random().toString(36).slice(2, 11)}`
     const channel = supabase
-      .channel('notifications-realtime')
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'notifications' },
         (payload) => {
           const newNotification = payload.new as Notification
-          setRealtimeNotifications(prev => [newNotification, ...prev])
 
-          // Call the callback if provided
+          // Deduplicate - check if notification already exists
+          setRealtimeNotifications(prev => {
+            const exists = prev.some(n => n.id === newNotification.id)
+            if (exists) return prev
+            return [newNotification, ...prev]
+          })
+
+          // Call the callback if provided (only once per notification)
           if (onNewNotificationRef.current) {
             onNewNotificationRef.current(newNotification)
           }
@@ -135,7 +143,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [realtime, supabase])
+  }, [realtime])
 
   // Merge database data with realtime updates
   const notifications = useMemo(() => {

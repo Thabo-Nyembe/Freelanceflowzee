@@ -152,11 +152,20 @@ export function NotificationBell({
   showToastOnNew = true
 }: NotificationBellProps) {
   const [open, setOpen] = useState(false)
+  const [shownToasts, setShownToasts] = useState<Set<string>>(new Set())
   const supabase = createClient()
 
-  // Handler for new notifications - shows toast
+  // Handler for new notifications - shows toast (with deduplication)
   const handleNewNotification = useCallback((notification: Notification) => {
     if (!showToastOnNew || notification.is_silent) return
+
+    // Deduplicate - only show toast once per notification ID
+    if (shownToasts.has(notification.id)) {
+      return
+    }
+
+    // Mark as shown
+    setShownToasts(prev => new Set(prev).add(notification.id))
 
     // Map notification type to toast type
     const toastFn = notification.notification_type === 'error' ? toast.error
@@ -172,7 +181,7 @@ export function NotificationBell({
       } : undefined,
       duration: notification.priority === 'critical' || notification.priority === 'urgent' ? 10000 : 5000
     })
-  }, [showToastOnNew])
+  }, [showToastOnNew, shownToasts])
 
   const {
     notifications,

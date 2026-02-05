@@ -13,6 +13,9 @@ interface SidebarContextValue {
     isCollapsed: boolean
     toggleSidebar: () => void
     setSidebarCollapsed: (collapsed: boolean) => void
+    isFullscreen: boolean
+    toggleFullscreen: () => void
+    setFullscreen: (fullscreen: boolean) => void
 }
 
 const SidebarContext = createContext<SidebarContextValue | undefined>(undefined)
@@ -31,6 +34,7 @@ interface SidebarProviderProps {
 
 export function SidebarProvider({ children }: SidebarProviderProps) {
     const [isCollapsed, setIsCollapsed] = useState(false)
+    const [isFullscreen, setIsFullscreenState] = useState(false)
     const [isMounted, setIsMounted] = useState(false)
 
     // Load saved state from localStorage on mount
@@ -39,6 +43,10 @@ export function SidebarProvider({ children }: SidebarProviderProps) {
         const saved = localStorage.getItem('kazi-sidebar-collapsed')
         if (saved !== null) {
             setIsCollapsed(saved === 'true')
+        }
+        const savedFullscreen = localStorage.getItem('kazi-fullscreen-mode')
+        if (savedFullscreen !== null) {
+            setIsFullscreenState(savedFullscreen === 'true')
         }
     }, [])
 
@@ -59,10 +67,30 @@ export function SidebarProvider({ children }: SidebarProviderProps) {
         }
     }
 
+    const toggleFullscreen = () => {
+        setIsFullscreenState(prev => {
+            const newValue = !prev
+            if (isMounted) {
+                localStorage.setItem('kazi-fullscreen-mode', String(newValue))
+            }
+            return newValue
+        })
+    }
+
+    const setFullscreen = (fullscreen: boolean) => {
+        setIsFullscreenState(fullscreen)
+        if (isMounted) {
+            localStorage.setItem('kazi-fullscreen-mode', String(fullscreen))
+        }
+    }
+
     const value: SidebarContextValue = {
         isCollapsed,
         toggleSidebar,
-        setSidebarCollapsed
+        setSidebarCollapsed,
+        isFullscreen,
+        toggleFullscreen,
+        setFullscreen
     }
 
     return (
