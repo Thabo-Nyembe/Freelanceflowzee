@@ -151,6 +151,25 @@ export function GlobalPresenceWidget({ userId }: { userId: string }) {
     logger.info('Global presence initialized', { userId })
   }, [userId, updateStatus])
 
+  // Deduplicate users - only show unique users, not multiple tabs
+  const uniqueUsersMap = new Map()
+  onlineUsers.forEach((user: any) => {
+    const uid = user.user_id
+    if (!uniqueUsersMap.has(uid)) {
+      uniqueUsersMap.set(uid, user)
+    }
+  })
+
+  // Filter out demo/system users
+  const activeUsers = Array.from(uniqueUsersMap.values()).filter((u: any) => {
+    const isDemoUser = u.user_id?.includes('00000000-0000-0000-0000-000000000001') ||
+                       u.user_id?.includes('00000000') ||
+                       u.username?.toLowerCase().includes('demo')
+    return !isDemoUser
+  })
+
+  const uniqueCount = activeUsers.length
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -159,14 +178,14 @@ export function GlobalPresenceWidget({ userId }: { userId: string }) {
             <Users className="w-4 h-4" />
             Online Now
           </CardTitle>
-          <Badge variant="secondary">{count}</Badge>
+          <Badge variant="secondary">{uniqueCount}</Badge>
         </div>
         <CardDescription className="text-xs">
           Real-time presence tracking
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
-        {onlineUsers.slice(0, 5).map((user: any, index) => {
+        {activeUsers.slice(0, 5).map((user: any, index) => {
           const status = user.status || 'online'
           const config = {
             online: 'bg-green-500',
@@ -190,13 +209,13 @@ export function GlobalPresenceWidget({ userId }: { userId: string }) {
           )
         })}
 
-        {count > 5 && (
+        {uniqueCount > 5 && (
           <p className="text-xs text-muted-foreground text-center pt-2">
-            +{count - 5} more online
+            +{uniqueCount - 5} more online
           </p>
         )}
 
-        {count === 0 && (
+        {uniqueCount === 0 && (
           <p className="text-xs text-muted-foreground text-center py-4">
             No one else is online
           </p>
@@ -211,6 +230,25 @@ export function GlobalPresenceWidget({ userId }: { userId: string }) {
 export function OnlineUsersList({ currentUserId }: { currentUserId: string }) {
   const { onlineUsers, count } = useOnlinePresence(currentUserId)
 
+  // Deduplicate users - only show unique users, not multiple tabs
+  const uniqueUsersMap = new Map()
+  onlineUsers.forEach((user: any) => {
+    const uid = user.user_id
+    if (!uniqueUsersMap.has(uid)) {
+      uniqueUsersMap.set(uid, user)
+    }
+  })
+
+  // Filter out demo/system users
+  const activeUsers = Array.from(uniqueUsersMap.values()).filter((u: any) => {
+    const isDemoUser = u.user_id?.includes('00000000-0000-0000-0000-000000000001') ||
+                       u.user_id?.includes('00000000') ||
+                       u.username?.toLowerCase().includes('demo')
+    return !isDemoUser
+  })
+
+  const uniqueCount = activeUsers.length
+
   const statusConfig = {
     online: { color: 'bg-green-500', label: 'Online' },
     away: { color: 'bg-yellow-500', label: 'Away' },
@@ -224,12 +262,12 @@ export function OnlineUsersList({ currentUserId }: { currentUserId: string }) {
         <h4 className="text-sm font-medium">Online Users</h4>
         <Badge variant="secondary" className="text-xs">
           <Circle className="w-2 h-2 mr-1 fill-green-500 text-green-500" />
-          {count} online
+          {uniqueCount} online
         </Badge>
       </div>
 
       <div className="space-y-1">
-        {onlineUsers.map((user: any, index) => {
+        {activeUsers.map((user: any, index) => {
           const status = (user.status || 'online') as UserStatus
           const config = statusConfig[status]
 
@@ -270,7 +308,7 @@ export function OnlineUsersList({ currentUserId }: { currentUserId: string }) {
           )
         })}
 
-        {count === 0 && (
+        {uniqueCount === 0 && (
           <div className="text-center py-8">
             <Users className="w-12 h-12 mx-auto mb-2 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">No users online</p>
