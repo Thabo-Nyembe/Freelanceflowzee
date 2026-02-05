@@ -10,24 +10,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import { DEMO_USER_ID, isDemoMode } from '@/lib/demo-auth'
 
 const logger = createSimpleLogger('project-templates')
 import {
-
-// ============================================================================
-// DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
-// ============================================================================
-
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
-const DEMO_USER_EMAIL = 'alex@freeflow.io'
-
-function isDemoMode(request: NextRequest): boolean {
-  if (typeof request === 'undefined') return false
-  const url = new URL(request.url)
-  return (
-    url.searchParams.get('demo') === 'true' ||
-    request.cookies.get('demo_mode')?.value === 'true' ||
-    request.headers.get('X-Demo-Mode') === 'true'
   )
 }
 
