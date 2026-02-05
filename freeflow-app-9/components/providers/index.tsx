@@ -54,9 +54,7 @@ export function Providers({ children }: ProvidersProps) {
             {children}
           </ThemeProvider>
         </NextThemeProvider>
-        {process.env.NODE_ENV === 'development' && (
-          <ReactQueryDevtools initialIsOpen={false} position="bottom-left" />
-        )}
+        {/* React Query Devtools now in sidebar - removed floating button */}
       </QueryClientProvider>
     </SupabaseContext.Provider>
   )

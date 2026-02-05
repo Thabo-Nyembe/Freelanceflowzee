@@ -61,18 +61,9 @@ export function Context7Helper({ isVisible = false, onToggle }: Context7HelperPr
     // You could add a toast notification here
   };
 
+  // Don't show floating button - now integrated in sidebar
   if (!isVisible) {
-    return (
-      <Button
-        onClick={onToggle}
-        className="fixed bottom-20 right-28 z-50 shadow-lg hover:shadow-xl transition-all"
-        size="sm"
-        aria-label="Open Context7 Documentation"
-      >
-        <Book className="h-4 w-4 mr-2" />
-        Context7 Docs
-      </Button>
-    );
+    return null;
   }
 
   return (

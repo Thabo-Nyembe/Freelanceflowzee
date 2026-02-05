@@ -1336,6 +1336,29 @@ export function SidebarEnhanced() {
         <GlobalPresenceWidget userId={userId || '00000000-0000-0000-0000-000000000001'} />
       </div>
 
+      {/* Code Builders - Developer Tools Section */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="px-4 pb-4 space-y-2">
+          <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+            Code Builders
+          </div>
+          <Link
+            href="/dashboard/context7-docs"
+            className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <BookOpen className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">Context7 Docs</span>
+          </Link>
+          <Link
+            href="/dashboard/react-query-devtools"
+            className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <Code className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">React Query Devtools</span>
+          </Link>
+        </div>
+      )}
+
       {/* Customize Navigation - Bottom Section */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
         <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
