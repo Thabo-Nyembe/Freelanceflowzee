@@ -1,5 +1,3 @@
-'use client'
-
 export const dynamic = 'force-dynamic';
 
 import ThemeStoreClient from './theme-store-client'

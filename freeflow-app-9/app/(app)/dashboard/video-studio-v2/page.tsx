@@ -1,5 +1,3 @@
-'use client'
-
 export const dynamic = 'force-dynamic';
 
 import VideoStudioClient from './video-studio-client'

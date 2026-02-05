@@ -1,5 +1,3 @@
-'use client'
-
 export const dynamic = 'force-dynamic';
 
 import CostAnalysisClient from './cost-analysis-client'

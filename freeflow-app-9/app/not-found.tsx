@@ -5,13 +5,13 @@ import { Home, ArrowLeft } from 'lucide-react'
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="max-w-lg w-full text-center space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4 overflow-x-hidden max-w-full">
+      <div className="max-w-lg w-full text-center space-y-8 px-4">
         {/* Logo/Brand */}
-        <div className="flex items-center gap-3 mb-6">
-          <img 
-            src="/kazi-brand/logo.svg" 
-            alt="KAZI" 
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <img
+            src="/kazi-brand/logo.svg"
+            alt="KAZI"
             className="h-8 w-auto"
           />
           <span className="text-2xl font-bold text-purple-600">KAZI</span>
@@ -27,36 +27,36 @@ export default function NotFound() {
         </div>
 
         {/* Actions */}
-        <Card className="p-6">
-          <CardContent className="space-y-4">
+        <Card className="p-6 w-full">
+          <CardContent className="space-y-4 p-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Button asChild className="w-full">
-                <Link href="/" className="flex items-center gap-2">
+              <Button asChild className="w-full justify-center">
+                <Link href="/" className="flex items-center justify-center gap-2">
                   <Home className="w-4 h-4" />
                   Go Home
                 </Link>
               </Button>
-              <Button variant="outline" asChild className="w-full">
-                <Link href="/dashboard" className="flex items-center gap-2">
+              <Button variant="outline" asChild className="w-full justify-center">
+                <Link href="/dashboard" className="flex items-center justify-center gap-2">
                   <ArrowLeft className="w-4 h-4" />
                   Dashboard
                 </Link>
               </Button>
             </div>
-            
+
             <div className="pt-4 border-t">
               <h3 className="font-semibold text-gray-700 mb-3">Try these popular pages:</h3>
               <div className="space-y-2">
-                <Button variant="ghost" asChild className="w-full justify-start">
+                <Button variant="ghost" asChild className="w-full justify-start px-3">
                   <Link href="/dashboard/video-studio-v2">AI Video Studio</Link>
                 </Button>
-                <Button variant="ghost" asChild className="w-full justify-start">
+                <Button variant="ghost" asChild className="w-full justify-start px-3">
                   <Link href="/dashboard/projects-hub-v2">Projects Hub</Link>
                 </Button>
-                <Button variant="ghost" asChild className="w-full justify-start">
+                <Button variant="ghost" asChild className="w-full justify-start px-3">
                   <Link href="/dashboard/community-v2">Community</Link>
                 </Button>
-                <Button variant="ghost" asChild className="w-full justify-start">
+                <Button variant="ghost" asChild className="w-full justify-start px-3">
                   <Link href="/pricing">Pricing</Link>
                 </Button>
               </div>

@@ -41,14 +41,14 @@ function DashboardLayoutInner({
 
             {!isFullscreen && (
               <div className={cn(
-                "hidden lg:block flex-shrink-0 transition-all duration-300 ease-in-out",
+                "hidden lg:block flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
                 isCollapsed ? "w-16" : "w-64"
               )}>
                 <SidebarEnhanced />
               </div>
             )}
 
-            <main role="main" className="flex-1 overflow-y-auto">
+            <main role="main" className="flex-1 overflow-y-auto overflow-x-hidden">
               {/* Mobile Header */}
               {!isFullscreen && (
                 <div className="lg:hidden sticky top-0 z-40 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 py-3">

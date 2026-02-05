@@ -875,7 +875,7 @@ function SortableSubcategory({
       <button
         onClick={onToggle}
         className={cn(
-          'w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium rounded-md transition-all group',
+          'w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium rounded-md transition-all group min-w-0',
           'hover:bg-gray-50 dark:hover:bg-gray-900',
           hasActiveItem
             ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'
@@ -883,13 +883,13 @@ function SortableSubcategory({
           !subcategory.visible && 'opacity-50'
         )}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           {isCustomizing && (
-            <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
+            <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing flex-shrink-0">
               <GripVertical className="h-3 w-3 text-gray-400" />
             </div>
           )}
-          <span className="uppercase tracking-wide">{subcategory.name}</span>
+          <span className="uppercase tracking-wide truncate">{subcategory.name}</span>
         </div>
         <motion.div
           animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -919,7 +919,7 @@ function SortableSubcategory({
                   href={versionedHref}
                   data-tour={`nav-${item.id}`}
                   className={cn(
-                    'flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-all duration-200 group',
+                    'flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-all duration-200 group min-w-0',
                     itemIsActive
                       ? 'bg-blue-600 text-white shadow-sm'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -933,11 +933,11 @@ function SortableSubcategory({
                         : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200'
                     )}
                   />
-                  <span className="flex-1 truncate">{item.name}</span>
+                  <span className="flex-1 truncate min-w-0">{item.name}</span>
                   {item.badge && (
                     <span
                       className={cn(
-                        'px-1.5 py-0.5 text-xs font-medium rounded',
+                        'px-1.5 py-0.5 text-xs font-medium rounded flex-shrink-0',
                         itemIsActive
                           ? 'bg-white/20 text-white'
                           : item.badge === 'Pro'
@@ -1238,11 +1238,11 @@ export function SidebarEnhanced() {
     <aside
       data-tour="sidebar-nav"
       className={cn(
-        "fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col transition-all duration-300 ease-in-out",
+        "fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col transition-all duration-300 ease-in-out overflow-hidden",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="flex-1 overflow-y-auto overscroll-contain scroll-smooth p-4 space-y-1">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scroll-smooth p-4 space-y-1">
         {/* Navigation Categories */}
         {categories.map((category) => {
           if (!category.visible) return null
@@ -1255,14 +1255,14 @@ export function SidebarEnhanced() {
               <button
                 onClick={() => toggleCategory(category.id)}
                 className={cn(
-                  'w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200',
+                  'w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 min-w-0',
                   'hover:bg-gray-100 dark:hover:bg-gray-800',
                   'text-gray-900 dark:text-gray-100'
                 )}
               >
-                <div className="flex items-center gap-2.5">
-                  <CategoryIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <span>{category.name}</span>
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <CategoryIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                  <span className="truncate">{category.name}</span>
                 </div>
                 <motion.div
                   animate={{ rotate: isCategoryExpanded ? 180 : 0 }}
@@ -1316,15 +1316,15 @@ export function SidebarEnhanced() {
           <Link
             href={getVersionedHref('/dashboard/coming-soon', pathname)}
             className={cn(
-              'flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-all duration-200',
+              'flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-all duration-200 min-w-0',
               isActive(getVersionedHref('/dashboard/coming-soon', pathname))
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
             )}
           >
-            <Rocket className="h-4 w-4" />
-            <span>Coming Soon</span>
-            <span className="ml-auto px-1.5 py-0.5 text-xs font-medium rounded bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+            <Rocket className="h-4 w-4 flex-shrink-0" />
+            <span className="flex-1 truncate">Coming Soon</span>
+            <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gradient-to-r from-blue-500 to-purple-500 text-white flex-shrink-0">
               New
             </span>
           </Link>
@@ -1337,16 +1337,16 @@ export function SidebarEnhanced() {
       </div>
 
       {/* Customize Navigation - Bottom Section */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
         <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
           <DialogTrigger asChild>
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-start gap-2"
+              className="w-full justify-start gap-2 min-w-0"
             >
-              <Settings className="h-4 w-4" />
-              Customize Navigation
+              <Settings className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Customize Navigation</span>
             </Button>
           </DialogTrigger>
           <DialogContent
