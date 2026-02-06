@@ -55,7 +55,26 @@ import {
   Copy,
   RefreshCw,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Lock,
+  KeyRound,
+  UserCheck,
+  ShieldCheck,
+  Mail,
+  BellRing,
+  BellDot,
+  Calendar,
+  RotateCcw,
+  EyeOff,
+  Scale,
+  BarChart2,
+  Archive,
+  Brain,
+  HeartPulse,
+  Copy as CopyIcon,
+  ToggleRight,
+  Server,
+  ShieldAlert
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -463,6 +482,85 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     secondaryFeedbackIds: [] as string[],
     mergeReason: ''
   })
+
+  // Category Settings State - for each category toggle
+  const [categoryToggles, setCategoryToggles] = useState<Record<string, boolean>>({
+    'Feature Request': true,
+    'Improvement': true,
+    'Bug Report': true,
+    'Integration': true,
+    'UX/UI': true,
+    'Performance': true
+  })
+
+  // Portal Access Settings State
+  const [publicPortal, setPublicPortal] = useState(true)
+  const [requireAuth, setRequireAuth] = useState(true)
+  const [ssoOnly, setSsoOnly] = useState(false)
+  const [moderatedSubmissions, setModeratedSubmissions] = useState(false)
+
+  // Email Notifications State
+  const [newIdeaNotify, setNewIdeaNotify] = useState(true)
+  const [statusChangeNotify, setStatusChangeNotify] = useState(true)
+  const [newCommentNotify, setNewCommentNotify] = useState(true)
+  const [voteMilestoneNotify, setVoteMilestoneNotify] = useState(true)
+  const [weeklyDigest, setWeeklyDigest] = useState(false)
+
+  // Admin Notifications State
+  const [dailySummary, setDailySummary] = useState(true)
+  const [criticalAlerts, setCriticalAlerts] = useState(true)
+  const [npsDetractorAlerts, setNpsDetractorAlerts] = useState(true)
+
+  // Voting Settings State
+  const [allowVoteChanges, setAllowVoteChanges] = useState(true)
+  const [showVoteCount, setShowVoteCount] = useState(true)
+  const [showVoterNames, setShowVoterNames] = useState(false)
+  const [enableVoteWeighting, setEnableVoteWeighting] = useState(true)
+  const [enableNpsSurveys, setEnableNpsSurveys] = useState(true)
+
+  // Integrations State
+  const [enableApiAccess, setEnableApiAccess] = useState(true)
+  const [webhookEvents, setWebhookEvents] = useState<Record<string, boolean>>({
+    'idea.created': true,
+    'idea.voted': true,
+    'idea.status_changed': true,
+    'comment.created': true,
+    'nps.submitted': true
+  })
+
+  // Advanced Settings State
+  const [autoArchiveOldIdeas, setAutoArchiveOldIdeas] = useState(true)
+  const [aiPoweredInsights, setAiPoweredInsights] = useState(true)
+  const [sentimentAnalysis, setSentimentAnalysis] = useState(true)
+  const [duplicateDetection, setDuplicateDetection] = useState(true)
+  const [debugMode, setDebugMode] = useState(false)
+  const [twoFactorAuth, setTwoFactorAuth] = useState(true)
+  const [ipAllowlist, setIpAllowlist] = useState(false)
+
+  // Toggle handler with toast feedback
+  const handleToggle = (
+    setter: React.Dispatch<React.SetStateAction<boolean>>,
+    currentValue: boolean,
+    label: string
+  ) => {
+    const newValue = !currentValue
+    setter(newValue)
+    toast.success(`${label} ${newValue ? 'enabled' : 'disabled'}`)
+  }
+
+  // Category toggle handler
+  const handleCategoryToggle = (category: string) => {
+    const newValue = !categoryToggles[category]
+    setCategoryToggles(prev => ({ ...prev, [category]: newValue }))
+    toast.success(`${category} ${newValue ? 'enabled' : 'disabled'}`)
+  }
+
+  // Webhook event toggle handler
+  const handleWebhookEventToggle = (event: string) => {
+    const newValue = !webhookEvents[event]
+    setWebhookEvents(prev => ({ ...prev, [event]: newValue }))
+    toast.success(`Webhook event ${event} ${newValue ? 'enabled' : 'disabled'}`)
+  }
 
   // Create feedback via hook mutation
   const handleCreateFeedback = async () => {
@@ -1828,9 +1926,15 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                         <div className="space-y-2">
                           {['Feature Request', 'Improvement', 'Bug Report', 'Integration', 'UX/UI', 'Performance'].map((cat) => (
                             <div key={cat} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                              <span className="font-medium">{cat}</span>
                               <div className="flex items-center gap-2">
-                                <Switch defaultChecked />
+                                <ToggleRight className="w-4 h-4 text-gray-500" />
+                                <span className="font-medium">{cat}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Switch
+                                  checked={categoryToggles[cat] ?? true}
+                                  onCheckedChange={() => handleCategoryToggle(cat)}
+                                />
                                 <Button variant="ghost" size="sm" onClick={() => handleUpdateCategory(cat)}>Edit</Button>
                               </div>
                             </div>
@@ -1922,32 +2026,56 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Public Portal</Label>
-                            <p className="text-sm text-gray-500">Anyone can view and submit ideas</p>
+                          <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <Label>Public Portal</Label>
+                              <p className="text-sm text-gray-500">Anyone can view and submit ideas</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={publicPortal}
+                            onCheckedChange={() => handleToggle(setPublicPortal, publicPortal, 'Public Portal')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Require Authentication</Label>
-                            <p className="text-sm text-gray-500">Users must log in to submit or vote</p>
+                          <div className="flex items-center gap-2">
+                            <Lock className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <Label>Require Authentication</Label>
+                              <p className="text-sm text-gray-500">Users must log in to submit or vote</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={requireAuth}
+                            onCheckedChange={() => handleToggle(setRequireAuth, requireAuth, 'Require Authentication')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>SSO Only</Label>
-                            <p className="text-sm text-gray-500">Only allow SSO authentication</p>
+                          <div className="flex items-center gap-2">
+                            <KeyRound className="w-4 h-4 text-indigo-500" />
+                            <div>
+                              <Label>SSO Only</Label>
+                              <p className="text-sm text-gray-500">Only allow SSO authentication</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ssoOnly}
+                            onCheckedChange={() => handleToggle(setSsoOnly, ssoOnly, 'SSO Only')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Moderated Submissions</Label>
-                            <p className="text-sm text-gray-500">Require approval before publishing</p>
+                          <div className="flex items-center gap-2">
+                            <UserCheck className="w-4 h-4 text-green-500" />
+                            <div>
+                              <Label>Moderated Submissions</Label>
+                              <p className="text-sm text-gray-500">Require approval before publishing</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={moderatedSubmissions}
+                            onCheckedChange={() => handleToggle(setModeratedSubmissions, moderatedSubmissions, 'Moderated Submissions')}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1983,39 +2111,69 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>New Idea Submitted</Label>
-                            <p className="text-sm text-gray-500">Notify when a new idea is submitted</p>
+                          <div className="flex items-center gap-2">
+                            <Lightbulb className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <Label>New Idea Submitted</Label>
+                              <p className="text-sm text-gray-500">Notify when a new idea is submitted</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={newIdeaNotify}
+                            onCheckedChange={() => handleToggle(setNewIdeaNotify, newIdeaNotify, 'New Idea Notifications')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Idea Status Changed</Label>
-                            <p className="text-sm text-gray-500">Notify subscribers of status changes</p>
+                          <div className="flex items-center gap-2">
+                            <RefreshCw className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <Label>Idea Status Changed</Label>
+                              <p className="text-sm text-gray-500">Notify subscribers of status changes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={statusChangeNotify}
+                            onCheckedChange={() => handleToggle(setStatusChangeNotify, statusChangeNotify, 'Status Change Notifications')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>New Comment</Label>
-                            <p className="text-sm text-gray-500">Notify idea author of new comments</p>
+                          <div className="flex items-center gap-2">
+                            <MessageCircle className="w-4 h-4 text-green-500" />
+                            <div>
+                              <Label>New Comment</Label>
+                              <p className="text-sm text-gray-500">Notify idea author of new comments</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={newCommentNotify}
+                            onCheckedChange={() => handleToggle(setNewCommentNotify, newCommentNotify, 'New Comment Notifications')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Vote Milestone</Label>
-                            <p className="text-sm text-gray-500">Notify when ideas reach vote thresholds</p>
+                          <div className="flex items-center gap-2">
+                            <Award className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <Label>Vote Milestone</Label>
+                              <p className="text-sm text-gray-500">Notify when ideas reach vote thresholds</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={voteMilestoneNotify}
+                            onCheckedChange={() => handleToggle(setVoteMilestoneNotify, voteMilestoneNotify, 'Vote Milestone Notifications')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Weekly Digest</Label>
-                            <p className="text-sm text-gray-500">Send weekly summary of activity</p>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <Label>Weekly Digest</Label>
+                              <p className="text-sm text-gray-500">Send weekly summary of activity</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={weeklyDigest}
+                            onCheckedChange={() => handleToggle(setWeeklyDigest, weeklyDigest, 'Weekly Digest')}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2032,25 +2190,43 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <p className="text-xs text-gray-500">Comma-separated email addresses</p>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Daily Summary</Label>
-                            <p className="text-sm text-gray-500">Receive daily activity summary</p>
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <Label>Daily Summary</Label>
+                              <p className="text-sm text-gray-500">Receive daily activity summary</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dailySummary}
+                            onCheckedChange={() => handleToggle(setDailySummary, dailySummary, 'Daily Summary')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Critical Alerts</Label>
-                            <p className="text-sm text-gray-500">Immediate alerts for high-priority items</p>
+                          <div className="flex items-center gap-2">
+                            <BellRing className="w-4 h-4 text-red-500" />
+                            <div>
+                              <Label>Critical Alerts</Label>
+                              <p className="text-sm text-gray-500">Immediate alerts for high-priority items</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={criticalAlerts}
+                            onCheckedChange={() => handleToggle(setCriticalAlerts, criticalAlerts, 'Critical Alerts')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>NPS Detractor Alerts</Label>
-                            <p className="text-sm text-gray-500">Alert when detractor responses received</p>
+                          <div className="flex items-center gap-2">
+                            <BellDot className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <Label>NPS Detractor Alerts</Label>
+                              <p className="text-sm text-gray-500">Alert when detractor responses received</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={npsDetractorAlerts}
+                            onCheckedChange={() => handleToggle(setNpsDetractorAlerts, npsDetractorAlerts, 'NPS Detractor Alerts')}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2121,25 +2297,43 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Allow Vote Changes</Label>
-                            <p className="text-sm text-gray-500">Users can remove their votes</p>
+                          <div className="flex items-center gap-2">
+                            <RotateCcw className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <Label>Allow Vote Changes</Label>
+                              <p className="text-sm text-gray-500">Users can remove their votes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowVoteChanges}
+                            onCheckedChange={() => handleToggle(setAllowVoteChanges, allowVoteChanges, 'Allow Vote Changes')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Show Vote Count</Label>
-                            <p className="text-sm text-gray-500">Display vote counts publicly</p>
+                          <div className="flex items-center gap-2">
+                            <Eye className="w-4 h-4 text-green-500" />
+                            <div>
+                              <Label>Show Vote Count</Label>
+                              <p className="text-sm text-gray-500">Display vote counts publicly</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showVoteCount}
+                            onCheckedChange={() => handleToggle(setShowVoteCount, showVoteCount, 'Show Vote Count')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Show Voter Names</Label>
-                            <p className="text-sm text-gray-500">Display who voted on ideas</p>
+                          <div className="flex items-center gap-2">
+                            <EyeOff className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <Label>Show Voter Names</Label>
+                              <p className="text-sm text-gray-500">Display who voted on ideas</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={showVoterNames}
+                            onCheckedChange={() => handleToggle(setShowVoterNames, showVoterNames, 'Show Voter Names')}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2151,11 +2345,17 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Vote Weighting</Label>
-                            <p className="text-sm text-gray-500">Weight votes by user plan or segment</p>
+                          <div className="flex items-center gap-2">
+                            <Scale className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <Label>Enable Vote Weighting</Label>
+                              <p className="text-sm text-gray-500">Weight votes by user plan or segment</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableVoteWeighting}
+                            onCheckedChange={() => handleToggle(setEnableVoteWeighting, enableVoteWeighting, 'Vote Weighting')}
+                          />
                         </div>
                         <div className="space-y-2">
                           {[
@@ -2182,11 +2382,17 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable NPS Surveys</Label>
-                            <p className="text-sm text-gray-500">Collect NPS scores from users</p>
+                          <div className="flex items-center gap-2">
+                            <BarChart2 className="w-4 h-4 text-indigo-500" />
+                            <div>
+                              <Label>Enable NPS Surveys</Label>
+                              <p className="text-sm text-gray-500">Collect NPS scores from users</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableNpsSurveys}
+                            onCheckedChange={() => handleToggle(setEnableNpsSurveys, enableNpsSurveys, 'NPS Surveys')}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
@@ -2245,11 +2451,17 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable API Access</Label>
-                            <p className="text-sm text-gray-500">Allow external API access</p>
+                          <div className="flex items-center gap-2">
+                            <Server className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <Label>Enable API Access</Label>
+                              <p className="text-sm text-gray-500">Allow external API access</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableApiAccess}
+                            onCheckedChange={() => handleToggle(setEnableApiAccess, enableApiAccess, 'API Access')}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Rate Limit</Label>
@@ -2292,7 +2504,11 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                             {['idea.created', 'idea.voted', 'idea.status_changed', 'comment.created', 'nps.submitted'].map((event) => (
                               <div key={event} className="flex items-center gap-2">
-                                <Switch defaultChecked />
+                                <Webhook className="w-3 h-3 text-gray-500" />
+                                <Switch
+                                  checked={webhookEvents[event] ?? true}
+                                  onCheckedChange={() => handleWebhookEventToggle(event)}
+                                />
                                 <span className="text-sm font-mono">{event}</span>
                               </div>
                             ))}
@@ -2349,11 +2565,17 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Auto-Archive Old Ideas</Label>
-                            <p className="text-sm text-gray-500">Archive ideas with no activity</p>
+                          <div className="flex items-center gap-2">
+                            <Archive className="w-4 h-4 text-amber-500" />
+                            <div>
+                              <Label>Auto-Archive Old Ideas</Label>
+                              <p className="text-sm text-gray-500">Archive ideas with no activity</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoArchiveOldIdeas}
+                            onCheckedChange={() => handleToggle(setAutoArchiveOldIdeas, autoArchiveOldIdeas, 'Auto-Archive Old Ideas')}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
@@ -2405,32 +2627,56 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>AI-Powered Insights</Label>
-                            <p className="text-sm text-gray-500">Use AI to analyze feedback trends</p>
+                          <div className="flex items-center gap-2">
+                            <Brain className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <Label>AI-Powered Insights</Label>
+                              <p className="text-sm text-gray-500">Use AI to analyze feedback trends</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={aiPoweredInsights}
+                            onCheckedChange={() => handleToggle(setAiPoweredInsights, aiPoweredInsights, 'AI-Powered Insights')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Sentiment Analysis</Label>
-                            <p className="text-sm text-gray-500">Automatically analyze idea sentiment</p>
+                          <div className="flex items-center gap-2">
+                            <HeartPulse className="w-4 h-4 text-pink-500" />
+                            <div>
+                              <Label>Sentiment Analysis</Label>
+                              <p className="text-sm text-gray-500">Automatically analyze idea sentiment</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sentimentAnalysis}
+                            onCheckedChange={() => handleToggle(setSentimentAnalysis, sentimentAnalysis, 'Sentiment Analysis')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Duplicate Detection</Label>
-                            <p className="text-sm text-gray-500">Flag potential duplicate ideas</p>
+                          <div className="flex items-center gap-2">
+                            <CopyIcon className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <Label>Duplicate Detection</Label>
+                              <p className="text-sm text-gray-500">Flag potential duplicate ideas</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={duplicateDetection}
+                            onCheckedChange={() => handleToggle(setDuplicateDetection, duplicateDetection, 'Duplicate Detection')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Debug Mode</Label>
-                            <p className="text-sm text-gray-500">Enable detailed logging</p>
+                          <div className="flex items-center gap-2">
+                            <Bug className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <Label>Debug Mode</Label>
+                              <p className="text-sm text-gray-500">Enable detailed logging</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={debugMode}
+                            onCheckedChange={() => handleToggle(setDebugMode, debugMode, 'Debug Mode')}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2442,18 +2688,30 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Two-Factor Authentication</Label>
-                            <p className="text-sm text-gray-500">Require 2FA for admin access</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-green-500" />
+                            <div>
+                              <Label>Two-Factor Authentication</Label>
+                              <p className="text-sm text-gray-500">Require 2FA for admin access</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={twoFactorAuth}
+                            onCheckedChange={() => handleToggle(setTwoFactorAuth, twoFactorAuth, 'Two-Factor Authentication')}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>IP Allowlist</Label>
-                            <p className="text-sm text-gray-500">Restrict API access by IP</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldAlert className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <Label>IP Allowlist</Label>
+                              <p className="text-sm text-gray-500">Restrict API access by IP</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ipAllowlist}
+                            onCheckedChange={() => handleToggle(setIpAllowlist, ipAllowlist, 'IP Allowlist')}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Allowed IPs</Label>

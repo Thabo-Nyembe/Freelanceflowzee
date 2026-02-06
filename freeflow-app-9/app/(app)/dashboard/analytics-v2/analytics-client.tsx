@@ -106,7 +106,9 @@ import {
   Calendar, Filter, Layers, Zap, Bell, ChevronRight, MoreVertical,
   AreaChart, Gauge, Globe, Smartphone, Monitor, Search, Play, Pause,
   FileText, Layout, Share2, Trash2, Copy, Edit3, Database, GitBranch, Workflow, Mail,
-  Loader2, ExternalLink
+  Loader2, ExternalLink, ToggleLeft, Video, Flame, AlertTriangle, FileCode, ShieldCheck,
+  Cookie, Lock, Ban, Clock, Key, MessageSquare, Phone, BellRing, BrainCircuit,
+  TrendingDown, Bug, CalendarClock, Code, CheckCircle2, Fingerprint, Link2
 } from 'lucide-react'
 
 // Lazy-loaded Competitive Upgrade Components for code splitting
@@ -276,6 +278,44 @@ export default function AnalyticsClient() {
     'Hotjar': true,
   })
   const [apiKey, setApiKey] = useState('ak_live_demo_key_2024')
+
+  // Settings switch states - General Settings
+  const [enableAnalytics, setEnableAnalytics] = useState(true)
+  const [realtimeDashboard, setRealtimeDashboard] = useState(true)
+
+  // Settings switch states - Tracking Settings
+  const [sessionRecording, setSessionRecording] = useState(true)
+  const [heatmaps, setHeatmaps] = useState(true)
+  const [errorTracking, setErrorTracking] = useState(true)
+  const [formAnalytics, setFormAnalytics] = useState(true)
+
+  // Settings switch states - Privacy Settings
+  const [ipAnonymization, setIpAnonymization] = useState(true)
+  const [cookieConsent, setCookieConsent] = useState(true)
+  const [gdprMode, setGdprMode] = useState(true)
+  const [doNotTrack, setDoNotTrack] = useState(false)
+  const [autoDeleteOldData, setAutoDeleteOldData] = useState(true)
+
+  // Settings switch states - Integrations
+  const [enableApiAccess, setEnableApiAccess] = useState(true)
+
+  // Settings switch states - Notifications
+  const [emailAlerts, setEmailAlerts] = useState(true)
+  const [slackNotifications, setSlackNotifications] = useState(false)
+  const [smsAlerts, setSmsAlerts] = useState(false)
+  const [inAppNotifications, setInAppNotifications] = useState(true)
+  const [anomalyDetection, setAnomalyDetection] = useState(true)
+  const [trendPredictions, setTrendPredictions] = useState(false)
+
+  // Settings switch states - Advanced
+  const [batchUploads, setBatchUploads] = useState(true)
+  const [debugMode, setDebugMode] = useState(false)
+  const [scheduledExports, setScheduledExports] = useState(false)
+  const [customEventTracking, setCustomEventTracking] = useState(true)
+  const [eventValidation, setEventValidation] = useState(true)
+  const [autoCaptureEvents, setAutoCaptureEvents] = useState(false)
+  const [crossDeviceTracking, setCrossDeviceTracking] = useState(true)
+  const [sessionStitching, setSessionStitching] = useState(true)
 
   // New state for enhanced features
   const [showSaveReportDialog, setShowSaveReportDialog] = useState(false)
@@ -3997,18 +4037,36 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Enable Analytics</Label>
-                            <p className="text-sm text-gray-500">Collect user behavior data</p>
+                          <div className="flex items-center gap-2">
+                            <ToggleLeft className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Enable Analytics</Label>
+                              <p className="text-sm text-gray-500">Collect user behavior data</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableAnalytics}
+                            onCheckedChange={(checked) => {
+                              setEnableAnalytics(checked)
+                              toast.success(checked ? 'Analytics enabled' : 'Analytics disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Real-time Dashboard</Label>
-                            <p className="text-sm text-gray-500">Show live data updates</p>
+                          <div className="flex items-center gap-2">
+                            <Activity className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Real-time Dashboard</Label>
+                              <p className="text-sm text-gray-500">Show live data updates</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={realtimeDashboard}
+                            onCheckedChange={(checked) => {
+                              setRealtimeDashboard(checked)
+                              toast.success(checked ? 'Real-time updates enabled' : 'Real-time updates disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -4064,32 +4122,68 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Session Recording</Label>
-                            <p className="text-sm text-gray-500">Record user sessions for playback</p>
+                          <div className="flex items-center gap-2">
+                            <Video className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Session Recording</Label>
+                              <p className="text-sm text-gray-500">Record user sessions for playback</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sessionRecording}
+                            onCheckedChange={(checked) => {
+                              setSessionRecording(checked)
+                              toast.success(checked ? 'Session recording enabled' : 'Session recording disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Heatmaps</Label>
-                            <p className="text-sm text-gray-500">Track click and scroll patterns</p>
+                          <div className="flex items-center gap-2">
+                            <Flame className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Heatmaps</Label>
+                              <p className="text-sm text-gray-500">Track click and scroll patterns</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={heatmaps}
+                            onCheckedChange={(checked) => {
+                              setHeatmaps(checked)
+                              toast.success(checked ? 'Heatmaps enabled' : 'Heatmaps disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Error Tracking</Label>
-                            <p className="text-sm text-gray-500">Capture JavaScript errors</p>
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Error Tracking</Label>
+                              <p className="text-sm text-gray-500">Capture JavaScript errors</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={errorTracking}
+                            onCheckedChange={(checked) => {
+                              setErrorTracking(checked)
+                              toast.success(checked ? 'Error tracking enabled' : 'Error tracking disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Form Analytics</Label>
-                            <p className="text-sm text-gray-500">Track form submissions and abandonment</p>
+                          <div className="flex items-center gap-2">
+                            <FileCode className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Form Analytics</Label>
+                              <p className="text-sm text-gray-500">Track form submissions and abandonment</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={formAnalytics}
+                            onCheckedChange={(checked) => {
+                              setFormAnalytics(checked)
+                              toast.success(checked ? 'Form analytics enabled' : 'Form analytics disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -4160,32 +4254,68 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>IP Anonymization</Label>
-                            <p className="text-sm text-gray-500">Mask user IP addresses</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>IP Anonymization</Label>
+                              <p className="text-sm text-gray-500">Mask user IP addresses</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={ipAnonymization}
+                            onCheckedChange={(checked) => {
+                              setIpAnonymization(checked)
+                              toast.success(checked ? 'IP anonymization enabled' : 'IP anonymization disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Cookie Consent</Label>
-                            <p className="text-sm text-gray-500">Require consent before tracking</p>
+                          <div className="flex items-center gap-2">
+                            <Cookie className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Cookie Consent</Label>
+                              <p className="text-sm text-gray-500">Require consent before tracking</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={cookieConsent}
+                            onCheckedChange={(checked) => {
+                              setCookieConsent(checked)
+                              toast.success(checked ? 'Cookie consent required' : 'Cookie consent disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>GDPR Mode</Label>
-                            <p className="text-sm text-gray-500">Enable GDPR compliance features</p>
+                          <div className="flex items-center gap-2">
+                            <Lock className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>GDPR Mode</Label>
+                              <p className="text-sm text-gray-500">Enable GDPR compliance features</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={gdprMode}
+                            onCheckedChange={(checked) => {
+                              setGdprMode(checked)
+                              toast.success(checked ? 'GDPR mode enabled' : 'GDPR mode disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Do Not Track</Label>
-                            <p className="text-sm text-gray-500">Respect DNT browser settings</p>
+                          <div className="flex items-center gap-2">
+                            <Ban className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Do Not Track</Label>
+                              <p className="text-sm text-gray-500">Respect DNT browser settings</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={doNotTrack}
+                            onCheckedChange={(checked) => {
+                              setDoNotTrack(checked)
+                              toast.success(checked ? 'Do Not Track respected' : 'Do Not Track ignored')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -4212,11 +4342,20 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Auto-delete Old Data</Label>
-                            <p className="text-sm text-gray-500">Automatically purge expired data</p>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Auto-delete Old Data</Label>
+                              <p className="text-sm text-gray-500">Automatically purge expired data</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoDeleteOldData}
+                            onCheckedChange={(checked) => {
+                              setAutoDeleteOldData(checked)
+                              toast.success(checked ? 'Auto-delete enabled' : 'Auto-delete disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -4315,11 +4454,20 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                           <p className="text-xs text-gray-500 mt-1">Full key: {apiKey}</p>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Enable API Access</Label>
-                            <p className="text-sm text-gray-500">Allow programmatic data access</p>
+                          <div className="flex items-center gap-2">
+                            <Key className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Enable API Access</Label>
+                              <p className="text-sm text-gray-500">Allow programmatic data access</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableApiAccess}
+                            onCheckedChange={(checked) => {
+                              setEnableApiAccess(checked)
+                              toast.success(checked ? 'API access enabled' : 'API access disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -4336,32 +4484,68 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Email Alerts</Label>
-                            <p className="text-sm text-gray-500">Receive alerts via email</p>
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Email Alerts</Label>
+                              <p className="text-sm text-gray-500">Receive alerts via email</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={emailAlerts}
+                            onCheckedChange={(checked) => {
+                              setEmailAlerts(checked)
+                              toast.success(checked ? 'Email alerts enabled' : 'Email alerts disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Slack Notifications</Label>
-                            <p className="text-sm text-gray-500">Send alerts to Slack</p>
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Slack Notifications</Label>
+                              <p className="text-sm text-gray-500">Send alerts to Slack</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={slackNotifications}
+                            onCheckedChange={(checked) => {
+                              setSlackNotifications(checked)
+                              toast.success(checked ? 'Slack notifications enabled' : 'Slack notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>SMS Alerts</Label>
-                            <p className="text-sm text-gray-500">Critical alerts via SMS</p>
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>SMS Alerts</Label>
+                              <p className="text-sm text-gray-500">Critical alerts via SMS</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={smsAlerts}
+                            onCheckedChange={(checked) => {
+                              setSmsAlerts(checked)
+                              toast.success(checked ? 'SMS alerts enabled' : 'SMS alerts disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>In-app Notifications</Label>
-                            <p className="text-sm text-gray-500">Show alerts in dashboard</p>
+                          <div className="flex items-center gap-2">
+                            <BellRing className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>In-app Notifications</Label>
+                              <p className="text-sm text-gray-500">Show alerts in dashboard</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={inAppNotifications}
+                            onCheckedChange={(checked) => {
+                              setInAppNotifications(checked)
+                              toast.success(checked ? 'In-app notifications enabled' : 'In-app notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -4371,18 +4555,36 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Anomaly Detection</Label>
-                            <p className="text-sm text-gray-500">AI-powered anomaly alerts</p>
+                          <div className="flex items-center gap-2">
+                            <BrainCircuit className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Anomaly Detection</Label>
+                              <p className="text-sm text-gray-500">AI-powered anomaly alerts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={anomalyDetection}
+                            onCheckedChange={(checked) => {
+                              setAnomalyDetection(checked)
+                              toast.success(checked ? 'Anomaly detection enabled' : 'Anomaly detection disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Trend Predictions</Label>
-                            <p className="text-sm text-gray-500">Alert on predicted trend changes</p>
+                          <div className="flex items-center gap-2">
+                            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Trend Predictions</Label>
+                              <p className="text-sm text-gray-500">Alert on predicted trend changes</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={trendPredictions}
+                            onCheckedChange={(checked) => {
+                              setTrendPredictions(checked)
+                              toast.success(checked ? 'Trend predictions enabled' : 'Trend predictions disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -4416,18 +4618,36 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Batch Uploads</Label>
-                            <p className="text-sm text-gray-500">Queue events before sending</p>
+                          <div className="flex items-center gap-2">
+                            <Layers className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Batch Uploads</Label>
+                              <p className="text-sm text-gray-500">Queue events before sending</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={batchUploads}
+                            onCheckedChange={(checked) => {
+                              setBatchUploads(checked)
+                              toast.success(checked ? 'Batch uploads enabled' : 'Batch uploads disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Debug Mode</Label>
-                            <p className="text-sm text-gray-500">Enable verbose logging</p>
+                          <div className="flex items-center gap-2">
+                            <Bug className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Debug Mode</Label>
+                              <p className="text-sm text-gray-500">Enable verbose logging</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={debugMode}
+                            onCheckedChange={(checked) => {
+                              setDebugMode(checked)
+                              toast.success(checked ? 'Debug mode enabled' : 'Debug mode disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -4478,11 +4698,20 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                           </Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Scheduled Exports</Label>
-                            <p className="text-sm text-gray-500">Automatic data exports</p>
+                          <div className="flex items-center gap-2">
+                            <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Scheduled Exports</Label>
+                              <p className="text-sm text-gray-500">Automatic data exports</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={scheduledExports}
+                            onCheckedChange={(checked) => {
+                              setScheduledExports(checked)
+                              toast.success(checked ? 'Scheduled exports enabled' : 'Scheduled exports disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -4493,30 +4722,60 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Custom Event Tracking</Label>
-                            <p className="text-sm text-gray-500">Enable custom event collection</p>
+                          <div className="flex items-center gap-2">
+                            <Code className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Custom Event Tracking</Label>
+                              <p className="text-sm text-gray-500">Enable custom event collection</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={customEventTracking}
+                            onCheckedChange={(checked) => {
+                              setCustomEventTracking(checked)
+                              toast.success(checked ? 'Custom event tracking enabled' : 'Custom event tracking disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Event Validation</Label>
-                            <p className="text-sm text-gray-500">Validate events before storage</p>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Event Validation</Label>
+                              <p className="text-sm text-gray-500">Validate events before storage</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={eventValidation}
+                            onCheckedChange={(checked) => {
+                              setEventValidation(checked)
+                              toast.success(checked ? 'Event validation enabled' : 'Event validation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Auto-capture Events</Label>
-                            <p className="text-sm text-gray-500">Automatically track common events</p>
+                          <div className="flex items-center gap-2">
+                            <Zap className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Auto-capture Events</Label>
+                              <p className="text-sm text-gray-500">Automatically track common events</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={autoCaptureEvents}
+                            onCheckedChange={(checked) => {
+                              setAutoCaptureEvents(checked)
+                              toast.success(checked ? 'Auto-capture events enabled' : 'Auto-capture events disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Event Schema</Label>
-                            <p className="text-sm text-gray-500">Define event structure</p>
+                          <div className="flex items-center gap-2">
+                            <Database className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Event Schema</Label>
+                              <p className="text-sm text-gray-500">Define event structure</p>
+                            </div>
                           </div>
                           <Button variant="outline" size="sm" onClick={async () => {
                             await supabase.from('analytics_activity').insert({
@@ -4537,23 +4796,44 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Cross-device Tracking</Label>
-                            <p className="text-sm text-gray-500">Track users across devices</p>
+                          <div className="flex items-center gap-2">
+                            <Fingerprint className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Cross-device Tracking</Label>
+                              <p className="text-sm text-gray-500">Track users across devices</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={crossDeviceTracking}
+                            onCheckedChange={(checked) => {
+                              setCrossDeviceTracking(checked)
+                              toast.success(checked ? 'Cross-device tracking enabled' : 'Cross-device tracking disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Session Stitching</Label>
-                            <p className="text-sm text-gray-500">Combine anonymous and identified sessions</p>
+                          <div className="flex items-center gap-2">
+                            <Link2 className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Session Stitching</Label>
+                              <p className="text-sm text-gray-500">Combine anonymous and identified sessions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sessionStitching}
+                            onCheckedChange={(checked) => {
+                              setSessionStitching(checked)
+                              toast.success(checked ? 'Session stitching enabled' : 'Session stitching disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Identity Resolution</Label>
-                            <p className="text-sm text-gray-500">Advanced user matching</p>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <Label>Identity Resolution</Label>
+                              <p className="text-sm text-gray-500">Advanced user matching</p>
+                            </div>
                           </div>
                           <Badge className="bg-purple-100 text-purple-700">Premium</Badge>
                         </div>

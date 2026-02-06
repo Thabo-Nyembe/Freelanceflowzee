@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 
 // Import shipping hooks for real Supabase data
 import { useShipments, useShippingCarriers } from '@/lib/hooks/use-shipments'
@@ -66,7 +66,19 @@ import {
   Archive,
   AlertTriangle,
   ShoppingCart,
-  ExternalLink
+  ExternalLink,
+  ToggleRight,
+  PenTool,
+  ShieldCheck,
+  Smartphone,
+  BellRing,
+  Bug,
+  TestTube,
+  Layers,
+  Power,
+  FolderArchive,
+  FileCheck,
+  MonitorSmartphone
 } from 'lucide-react'
 
 // Lazy-loaded Enhanced & Competitive Upgrade Components for code splitting
@@ -648,6 +660,74 @@ export default function ShippingClient() {
   const [selectedLabel, setSelectedLabel] = useState<Label | null>(null)
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null)
   const [trackingInput, setTrackingInput] = useState('')
+
+  // ========== Switch State Management ==========
+  // General Settings Switches
+  const [autoRateShopping, setAutoRateShopping] = useState(true)
+  const [signatureRequiredDefault, setSignatureRequiredDefault] = useState(false)
+  const [insuranceDefault, setInsuranceDefault] = useState(false)
+
+  // Rate Preferences Switches
+  const [showRetailRates, setShowRetailRates] = useState(true)
+  const [includeDeliveryEstimates, setIncludeDeliveryEstimates] = useState(true)
+  const [cacheRates, setCacheRates] = useState(true)
+
+  // Shipment Notifications Switches (dynamic array for mapped items)
+  const [notificationSettings, setNotificationSettings] = useState({
+    labelCreated: true,
+    packageShipped: true,
+    inTransitUpdates: true,
+    outForDelivery: true,
+    delivered: true,
+    exceptions: false
+  })
+
+  // Customer Notifications Switches
+  const [sendTrackingEmails, setSendTrackingEmails] = useState(true)
+  const [smsNotifications, setSmsNotifications] = useState(false)
+
+  // Security Settings Switches
+  const [twoFactorAuth, setTwoFactorAuth] = useState(true)
+  const [ipWhitelisting, setIpWhitelisting] = useState(false)
+  const [auditLogging, setAuditLogging] = useState(true)
+
+  // Access Control Switches
+  const [highValueApproval, setHighValueApproval] = useState(true)
+  const [restrictInternational, setRestrictInternational] = useState(false)
+  const [labelVoidConfirmation, setLabelVoidConfirmation] = useState(true)
+
+  // Advanced Configuration Switches
+  const [debugMode, setDebugMode] = useState(false)
+  const [sandboxMode, setSandboxMode] = useState(false)
+  const [batchProcessing, setBatchProcessing] = useState(true)
+
+  // Data Management Switches
+  const [autoArchive, setAutoArchive] = useState(true)
+
+  // Alerts Dialog Switches
+  const [emailAlerts, setEmailAlerts] = useState(true)
+  const [smsAlerts, setSmsAlerts] = useState(false)
+  const [pushNotifications, setPushNotifications] = useState(true)
+
+  // Label Settings Dialog Switches
+  const [includePackingSlip, setIncludePackingSlip] = useState(true)
+  const [autoPrintOnCreation, setAutoPrintOnCreation] = useState(false)
+
+  // Insurance Dialog Switches
+  const [defaultInsuranceEnabled, setDefaultInsuranceEnabled] = useState(false)
+
+  // International Dialog Switches
+  const [internationalEnabled, setInternationalEnabled] = useState(true)
+
+  // Carrier Config Dialog Switch
+  const [carrierConfigActive, setCarrierConfigActive] = useState(true)
+
+  // Sync carrierConfigActive when selectedCarrier changes
+  useEffect(() => {
+    if (selectedCarrier) {
+      setCarrierConfigActive(selectedCarrier.isActive)
+    }
+  }, [selectedCarrier])
 
   // Carrier form state for add/edit dialogs
   const [carrierFormState, setCarrierFormState] = useState({
@@ -2161,25 +2241,52 @@ export default function ShippingClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Automatic Rate Shopping</p>
-                            <p className="text-sm text-gray-500">Automatically select cheapest carrier</p>
+                          <div className="flex items-center gap-2">
+                            <Zap className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Automatic Rate Shopping</p>
+                              <p className="text-sm text-gray-500">Automatically select cheapest carrier</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoRateShopping}
+                            onCheckedChange={(checked) => {
+                              setAutoRateShopping(checked)
+                              toast.success(checked ? 'Automatic rate shopping enabled' : 'Automatic rate shopping disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Signature Required by Default</p>
-                            <p className="text-sm text-gray-500">Require signature for all shipments</p>
+                          <div className="flex items-center gap-2">
+                            <PenTool className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Signature Required by Default</p>
+                              <p className="text-sm text-gray-500">Require signature for all shipments</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={signatureRequiredDefault}
+                            onCheckedChange={(checked) => {
+                              setSignatureRequiredDefault(checked)
+                              toast.success(checked ? 'Signature requirement enabled by default' : 'Signature requirement disabled by default')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Insurance by Default</p>
-                            <p className="text-sm text-gray-500">Add insurance to all shipments</p>
+                          <div className="flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Insurance by Default</p>
+                              <p className="text-sm text-gray-500">Add insurance to all shipments</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={insuranceDefault}
+                            onCheckedChange={(checked) => {
+                              setInsuranceDefault(checked)
+                              toast.success(checked ? 'Default insurance enabled' : 'Default insurance disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2308,25 +2415,52 @@ export default function ShippingClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Show Retail Rates</p>
-                            <p className="text-sm text-gray-500">Display retail pricing alongside discounted rates</p>
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Show Retail Rates</p>
+                              <p className="text-sm text-gray-500">Display retail pricing alongside discounted rates</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showRetailRates}
+                            onCheckedChange={(checked) => {
+                              setShowRetailRates(checked)
+                              toast.success(checked ? 'Retail rates displayed' : 'Retail rates hidden')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Include Delivery Estimates</p>
-                            <p className="text-sm text-gray-500">Show estimated delivery dates with rates</p>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Include Delivery Estimates</p>
+                              <p className="text-sm text-gray-500">Show estimated delivery dates with rates</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={includeDeliveryEstimates}
+                            onCheckedChange={(checked) => {
+                              setIncludeDeliveryEstimates(checked)
+                              toast.success(checked ? 'Delivery estimates included' : 'Delivery estimates excluded')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Cache Rates</p>
-                            <p className="text-sm text-gray-500">Cache rates for faster quote retrieval</p>
+                          <div className="flex items-center gap-2">
+                            <Database className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Cache Rates</p>
+                              <p className="text-sm text-gray-500">Cache rates for faster quote retrieval</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={cacheRates}
+                            onCheckedChange={(checked) => {
+                              setCacheRates(checked)
+                              toast.success(checked ? 'Rate caching enabled' : 'Rate caching disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2346,19 +2480,28 @@ export default function ShippingClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         {[
-                          { label: 'Label Created', desc: 'Notify when shipping label is generated' },
-                          { label: 'Package Shipped', desc: 'Notify when package is picked up' },
-                          { label: 'In Transit Updates', desc: 'Notify on transit milestones' },
-                          { label: 'Out for Delivery', desc: 'Notify when package is out for delivery' },
-                          { label: 'Delivered', desc: 'Notify when package is delivered' },
-                          { label: 'Exceptions', desc: 'Notify on delivery issues or delays' }
-                        ].map((notif, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div>
-                              <p className="font-medium text-gray-900 dark:text-white">{notif.label}</p>
-                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                          { key: 'labelCreated', label: 'Label Created', desc: 'Notify when shipping label is generated', icon: FileText },
+                          { key: 'packageShipped', label: 'Package Shipped', desc: 'Notify when package is picked up', icon: Package },
+                          { key: 'inTransitUpdates', label: 'In Transit Updates', desc: 'Notify on transit milestones', icon: Truck },
+                          { key: 'outForDelivery', label: 'Out for Delivery', desc: 'Notify when package is out for delivery', icon: Navigation },
+                          { key: 'delivered', label: 'Delivered', desc: 'Notify when package is delivered', icon: CheckCircle },
+                          { key: 'exceptions', label: 'Exceptions', desc: 'Notify on delivery issues or delays', icon: AlertTriangle }
+                        ].map((notif) => (
+                          <div key={notif.key} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <notif.icon className="w-4 h-4 text-blue-500" />
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{notif.label}</p>
+                                <p className="text-sm text-gray-500">{notif.desc}</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked={idx < 5} />
+                            <Switch
+                              checked={notificationSettings[notif.key as keyof typeof notificationSettings]}
+                              onCheckedChange={(checked) => {
+                                setNotificationSettings(prev => ({ ...prev, [notif.key]: checked }))
+                                toast.success(checked ? `${notif.label} notifications enabled` : `${notif.label} notifications disabled`)
+                              }}
+                            />
                           </div>
                         ))}
                       </CardContent>
@@ -2373,18 +2516,36 @@ export default function ShippingClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Send Tracking Emails</p>
-                            <p className="text-sm text-gray-500">Automatically email tracking info to customers</p>
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Send Tracking Emails</p>
+                              <p className="text-sm text-gray-500">Automatically email tracking info to customers</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sendTrackingEmails}
+                            onCheckedChange={(checked) => {
+                              setSendTrackingEmails(checked)
+                              toast.success(checked ? 'Tracking email notifications enabled' : 'Tracking email notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">SMS Notifications</p>
-                            <p className="text-sm text-gray-500">Send SMS updates for delivery status</p>
+                          <div className="flex items-center gap-2">
+                            <Smartphone className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">SMS Notifications</p>
+                              <p className="text-sm text-gray-500">Send SMS updates for delivery status</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={smsNotifications}
+                            onCheckedChange={(checked) => {
+                              setSmsNotifications(checked)
+                              toast.success(checked ? 'SMS notifications enabled' : 'SMS notifications disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Custom Email Template</Label>
@@ -2479,25 +2640,52 @@ export default function ShippingClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
-                            <p className="text-sm text-gray-500">Require 2FA for shipping operations</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
+                              <p className="text-sm text-gray-500">Require 2FA for shipping operations</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={twoFactorAuth}
+                            onCheckedChange={(checked) => {
+                              setTwoFactorAuth(checked)
+                              toast.success(checked ? '2FA enabled for shipping' : '2FA disabled for shipping')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">IP Whitelisting</p>
-                            <p className="text-sm text-gray-500">Restrict API access to specific IPs</p>
+                          <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">IP Whitelisting</p>
+                              <p className="text-sm text-gray-500">Restrict API access to specific IPs</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ipWhitelisting}
+                            onCheckedChange={(checked) => {
+                              setIpWhitelisting(checked)
+                              toast.success(checked ? 'IP whitelisting enabled' : 'IP whitelisting disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
-                            <p className="text-sm text-gray-500">Log all shipping activities</p>
+                          <div className="flex items-center gap-2">
+                            <History className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                              <p className="text-sm text-gray-500">Log all shipping activities</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditLogging}
+                            onCheckedChange={(checked) => {
+                              setAuditLogging(checked)
+                              toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2511,25 +2699,52 @@ export default function ShippingClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Require Approval for High-Value Shipments</p>
-                            <p className="text-sm text-gray-500">Shipments over $500 require manager approval</p>
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Require Approval for High-Value Shipments</p>
+                              <p className="text-sm text-gray-500">Shipments over $500 require manager approval</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={highValueApproval}
+                            onCheckedChange={(checked) => {
+                              setHighValueApproval(checked)
+                              toast.success(checked ? 'High-value approval requirement enabled' : 'High-value approval requirement disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Restrict International Shipping</p>
-                            <p className="text-sm text-gray-500">Only admins can create international shipments</p>
+                          <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Restrict International Shipping</p>
+                              <p className="text-sm text-gray-500">Only admins can create international shipments</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={restrictInternational}
+                            onCheckedChange={(checked) => {
+                              setRestrictInternational(checked)
+                              toast.success(checked ? 'International shipping restricted to admins' : 'International shipping open to all users')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Label Void Confirmation</p>
-                            <p className="text-sm text-gray-500">Require confirmation before voiding labels</p>
+                          <div className="flex items-center gap-2">
+                            <FileCheck className="w-4 h-4 text-red-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Label Void Confirmation</p>
+                              <p className="text-sm text-gray-500">Require confirmation before voiding labels</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={labelVoidConfirmation}
+                            onCheckedChange={(checked) => {
+                              setLabelVoidConfirmation(checked)
+                              toast.success(checked ? 'Label void confirmation enabled' : 'Label void confirmation disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2549,25 +2764,52 @@ export default function ShippingClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Debug Mode</p>
-                            <p className="text-sm text-gray-500">Enable verbose logging for troubleshooting</p>
+                          <div className="flex items-center gap-2">
+                            <Bug className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Debug Mode</p>
+                              <p className="text-sm text-gray-500">Enable verbose logging for troubleshooting</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={debugMode}
+                            onCheckedChange={(checked) => {
+                              setDebugMode(checked)
+                              toast.success(checked ? 'Debug mode enabled' : 'Debug mode disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Sandbox Mode</p>
-                            <p className="text-sm text-gray-500">Use test credentials for all carriers</p>
+                          <div className="flex items-center gap-2">
+                            <TestTube className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Sandbox Mode</p>
+                              <p className="text-sm text-gray-500">Use test credentials for all carriers</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={sandboxMode}
+                            onCheckedChange={(checked) => {
+                              setSandboxMode(checked)
+                              toast.success(checked ? 'Sandbox mode enabled - using test credentials' : 'Sandbox mode disabled - using production credentials')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Batch Processing</p>
-                            <p className="text-sm text-gray-500">Process shipments in batches for performance</p>
+                          <div className="flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Batch Processing</p>
+                              <p className="text-sm text-gray-500">Process shipments in batches for performance</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={batchProcessing}
+                            onCheckedChange={(checked) => {
+                              setBatchProcessing(checked)
+                              toast.success(checked ? 'Batch processing enabled' : 'Batch processing disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>API Timeout (seconds)</Label>
@@ -2589,11 +2831,20 @@ export default function ShippingClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Auto-Archive Old Shipments</p>
-                            <p className="text-sm text-gray-500">Archive shipments older than 90 days</p>
+                          <div className="flex items-center gap-2">
+                            <FolderArchive className="w-4 h-4 text-amber-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Auto-Archive Old Shipments</p>
+                              <p className="text-sm text-gray-500">Archive shipments older than 90 days</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoArchive}
+                            onCheckedChange={(checked) => {
+                              setAutoArchive(checked)
+                              toast.success(checked ? 'Auto-archive enabled' : 'Auto-archive disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Data Retention Period (days)</Label>
@@ -3545,16 +3796,43 @@ export default function ShippingClient() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <span>Email Alerts</span>
-                <Switch defaultChecked />
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-blue-500" />
+                  <span>Email Alerts</span>
+                </div>
+                <Switch
+                  checked={emailAlerts}
+                  onCheckedChange={(checked) => {
+                    setEmailAlerts(checked)
+                    toast.success(checked ? 'Email alerts enabled' : 'Email alerts disabled')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <span>SMS Alerts</span>
-                <Switch />
+                <div className="flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-green-500" />
+                  <span>SMS Alerts</span>
+                </div>
+                <Switch
+                  checked={smsAlerts}
+                  onCheckedChange={(checked) => {
+                    setSmsAlerts(checked)
+                    toast.success(checked ? 'SMS alerts enabled' : 'SMS alerts disabled')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <span>Push Notifications</span>
-                <Switch defaultChecked />
+                <div className="flex items-center gap-2">
+                  <BellRing className="w-4 h-4 text-purple-500" />
+                  <span>Push Notifications</span>
+                </div>
+                <Switch
+                  checked={pushNotifications}
+                  onCheckedChange={(checked) => {
+                    setPushNotifications(checked)
+                    toast.success(checked ? 'Push notifications enabled' : 'Push notifications disabled')
+                  }}
+                />
               </div>
             </div>
             <div className="flex justify-end gap-2">
@@ -3896,12 +4174,30 @@ export default function ShippingClient() {
                 <Input defaultValue="4x6 PDF" className="mt-1" />
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <span>Include packing slip</span>
-                <Switch defaultChecked />
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-blue-500" />
+                  <span>Include packing slip</span>
+                </div>
+                <Switch
+                  checked={includePackingSlip}
+                  onCheckedChange={(checked) => {
+                    setIncludePackingSlip(checked)
+                    toast.success(checked ? 'Packing slip will be included' : 'Packing slip will not be included')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <span>Auto-print on creation</span>
-                <Switch />
+                <div className="flex items-center gap-2">
+                  <Printer className="w-4 h-4 text-green-500" />
+                  <span>Auto-print on creation</span>
+                </div>
+                <Switch
+                  checked={autoPrintOnCreation}
+                  onCheckedChange={(checked) => {
+                    setAutoPrintOnCreation(checked)
+                    toast.success(checked ? 'Auto-print enabled' : 'Auto-print disabled')
+                  }}
+                />
               </div>
             </div>
             <div className="flex justify-end gap-2">
@@ -4192,8 +4488,17 @@ export default function ShippingClient() {
                   />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <span>Active</span>
-                  <Switch defaultChecked={selectedCarrier.isActive} id="carrier-config-active" />
+                  <div className="flex items-center gap-2">
+                    <Power className="w-4 h-4 text-green-500" />
+                    <span>Active</span>
+                  </div>
+                  <Switch
+                    checked={carrierConfigActive}
+                    onCheckedChange={(checked) => {
+                      setCarrierConfigActive(checked)
+                      toast.success(checked ? 'Carrier will be activated' : 'Carrier will be deactivated')
+                    }}
+                  />
                 </div>
               </div>
             )}
@@ -4222,12 +4527,11 @@ export default function ShippingClient() {
                 if (originalCarrier) {
                   const nameInput = document.getElementById('carrier-config-name') as HTMLInputElement
                   const accountInput = document.getElementById('carrier-config-account') as HTMLInputElement
-                  const activeSwitch = document.getElementById('carrier-config-active') as HTMLInputElement
 
                   await handleUpdateCarrier(originalCarrier.id, {
                     name: nameInput?.value || selectedCarrier.name,
                     account_number: accountInput?.value || null,
-                    is_active: activeSwitch?.checked ?? selectedCarrier.isActive
+                    is_active: carrierConfigActive
                   })
                 }
               }}>Save</Button>
@@ -4312,8 +4616,17 @@ export default function ShippingClient() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <span>Default Insurance</span>
-                <Switch />
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-green-500" />
+                  <span>Default Insurance</span>
+                </div>
+                <Switch
+                  checked={defaultInsuranceEnabled}
+                  onCheckedChange={(checked) => {
+                    setDefaultInsuranceEnabled(checked)
+                    toast.success(checked ? 'Default insurance enabled' : 'Default insurance disabled')
+                  }}
+                />
               </div>
               <div>
                 <Label>Minimum Value for Insurance</Label>
@@ -4353,8 +4666,17 @@ export default function ShippingClient() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <span>Enable International</span>
-                <Switch defaultChecked />
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-blue-500" />
+                  <span>Enable International</span>
+                </div>
+                <Switch
+                  checked={internationalEnabled}
+                  onCheckedChange={(checked) => {
+                    setInternationalEnabled(checked)
+                    toast.success(checked ? 'International shipping enabled' : 'International shipping disabled')
+                  }}
+                />
               </div>
               <div>
                 <Label>Default Customs Declaration</Label>

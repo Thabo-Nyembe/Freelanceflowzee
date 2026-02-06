@@ -30,7 +30,10 @@ import {
   Settings, Download, Upload, Edit3, Trash2, Bell, BookOpen, Cake,
   Plane, Umbrella, Coffee, Home, BarChart3, TrendingDown, ArrowUpRight,
   UserCheck, UserMinus, Layers, Wallet, Shield, Lock, Key, Plus,
-  Play, FileCheck, Clipboard, Activity, AlertCircle, RefreshCw
+  Play, FileCheck, Clipboard, Activity, AlertCircle, RefreshCw,
+  Globe, CalendarClock, CalendarDays, RefreshCcw, ClipboardCheck, UsersRound,
+  Award, UserRoundPlus, LogOut, FolderOpen, Network, UserCog, BarChart2,
+  PenLine, Archive, FileType, ShieldCheck, LockKeyhole
 } from 'lucide-react'
 
 // Real button handlers
@@ -237,6 +240,45 @@ export default function EmployeesClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [compensationTab, setCompensationTab] = useState('salary')
   const [performanceTab, setPerformanceTab] = useState('reviews')
+
+  // Settings switches state - General Settings
+  const [multiLocationSupport, setMultiLocationSupport] = useState(true)
+  const [accrualBasedPTO, setAccrualBasedPTO] = useState(true)
+  const [unlimitedPTO, setUnlimitedPTO] = useState(false)
+  const [carryoverPolicy, setCarryoverPolicy] = useState(true)
+  const [selfReviews, setSelfReviews] = useState(true)
+  const [enable360Feedback, setEnable360Feedback] = useState(false)
+
+  // Settings switches state - Notifications
+  const [notifyTimeOffRequests, setNotifyTimeOffRequests] = useState(true)
+  const [notifyPerformanceReviews, setNotifyPerformanceReviews] = useState(true)
+  const [notifyOnboardingTasks, setNotifyOnboardingTasks] = useState(true)
+  const [notifyDocumentExpiry, setNotifyDocumentExpiry] = useState(true)
+  const [notifyWorkAnniversaries, setNotifyWorkAnniversaries] = useState(true)
+  const [notifyBirthdays, setNotifyBirthdays] = useState(true)
+  const [notifyNewHires, setNotifyNewHires] = useState(true)
+  const [notifyDepartures, setNotifyDepartures] = useState(false)
+
+  // Settings switches state - Permissions
+  const [directoryAccess, setDirectoryAccess] = useState(true)
+  const [orgChartAccess, setOrgChartAccess] = useState(true)
+  const [selfServicePortal, setSelfServicePortal] = useState(true)
+  const [teamAnalytics, setTeamAnalytics] = useState(true)
+
+  // Settings switches state - Documents
+  const [eSignatureRequired, setESignatureRequired] = useState(true)
+  const [autoArchive, setAutoArchive] = useState(true)
+  const [versionControl, setVersionControl] = useState(true)
+
+  // Settings switches state - Advanced/Compliance
+  const [auditLogging, setAuditLogging] = useState(true)
+  const [gdprCompliance, setGdprCompliance] = useState(true)
+  const [dataEncryption, setDataEncryption] = useState(true)
+
+  // Dialog switches state
+  const [surveyAnonymous, setSurveyAnonymous] = useState(true)
+  const [reviewIncludeSelf, setReviewIncludeSelf] = useState(true)
+  const [reviewEnable360, setReviewEnable360] = useState(false)
 
   // Database integration - now with search and department filtering
   const {
@@ -1456,11 +1498,20 @@ export default function EmployeesClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Multi-location Support</div>
-                            <div className="text-sm text-gray-500">Enable multiple office locations</div>
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Multi-location Support</div>
+                              <div className="text-sm text-gray-500">Enable multiple office locations</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={multiLocationSupport}
+                            onCheckedChange={(checked) => {
+                              setMultiLocationSupport(checked)
+                              toast.success(checked ? 'Multi-location support enabled' : 'Multi-location support disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1474,25 +1525,52 @@ export default function EmployeesClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Accrual Based PTO</div>
-                            <div className="text-sm text-gray-500">Employees accrue time off monthly</div>
+                          <div className="flex items-center gap-2">
+                            <CalendarClock className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Accrual Based PTO</div>
+                              <div className="text-sm text-gray-500">Employees accrue time off monthly</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={accrualBasedPTO}
+                            onCheckedChange={(checked) => {
+                              setAccrualBasedPTO(checked)
+                              toast.success(checked ? 'Accrual based PTO enabled' : 'Accrual based PTO disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Unlimited PTO</div>
-                            <div className="text-sm text-gray-500">No set limit on time off</div>
+                          <div className="flex items-center gap-2">
+                            <CalendarDays className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Unlimited PTO</div>
+                              <div className="text-sm text-gray-500">No set limit on time off</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={unlimitedPTO}
+                            onCheckedChange={(checked) => {
+                              setUnlimitedPTO(checked)
+                              toast.success(checked ? 'Unlimited PTO enabled' : 'Unlimited PTO disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Carryover Policy</div>
-                            <div className="text-sm text-gray-500">Allow unused PTO to carry over</div>
+                          <div className="flex items-center gap-2">
+                            <RefreshCcw className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Carryover Policy</div>
+                              <div className="text-sm text-gray-500">Allow unused PTO to carry over</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={carryoverPolicy}
+                            onCheckedChange={(checked) => {
+                              setCarryoverPolicy(checked)
+                              toast.success(checked ? 'Carryover policy enabled' : 'Carryover policy disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -1565,18 +1643,36 @@ export default function EmployeesClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Self-Reviews</div>
-                            <div className="text-sm text-gray-500">Include employee self-assessments</div>
+                          <div className="flex items-center gap-2">
+                            <ClipboardCheck className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Self-Reviews</div>
+                              <div className="text-sm text-gray-500">Include employee self-assessments</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={selfReviews}
+                            onCheckedChange={(checked) => {
+                              setSelfReviews(checked)
+                              toast.success(checked ? 'Self-reviews enabled' : 'Self-reviews disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">360 Feedback</div>
-                            <div className="text-sm text-gray-500">Enable peer feedback collection</div>
+                          <div className="flex items-center gap-2">
+                            <UsersRound className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">360 Feedback</div>
+                              <div className="text-sm text-gray-500">Enable peer feedback collection</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enable360Feedback}
+                            onCheckedChange={(checked) => {
+                              setEnable360Feedback(checked)
+                              toast.success(checked ? '360 feedback enabled' : '360 feedback disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1595,32 +1691,68 @@ export default function EmployeesClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Time Off Requests</div>
-                            <div className="text-sm text-gray-500">Get notified of new requests</div>
+                          <div className="flex items-center gap-2">
+                            <Plane className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Time Off Requests</div>
+                              <div className="text-sm text-gray-500">Get notified of new requests</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyTimeOffRequests}
+                            onCheckedChange={(checked) => {
+                              setNotifyTimeOffRequests(checked)
+                              toast.success(checked ? 'Time off request notifications enabled' : 'Time off request notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Performance Reviews</div>
-                            <div className="text-sm text-gray-500">Review cycle reminders</div>
+                          <div className="flex items-center gap-2">
+                            <Target className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Performance Reviews</div>
+                              <div className="text-sm text-gray-500">Review cycle reminders</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyPerformanceReviews}
+                            onCheckedChange={(checked) => {
+                              setNotifyPerformanceReviews(checked)
+                              toast.success(checked ? 'Performance review notifications enabled' : 'Performance review notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Onboarding Tasks</div>
-                            <div className="text-sm text-gray-500">New hire task notifications</div>
+                          <div className="flex items-center gap-2">
+                            <Clipboard className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Onboarding Tasks</div>
+                              <div className="text-sm text-gray-500">New hire task notifications</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyOnboardingTasks}
+                            onCheckedChange={(checked) => {
+                              setNotifyOnboardingTasks(checked)
+                              toast.success(checked ? 'Onboarding task notifications enabled' : 'Onboarding task notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Document Expiry</div>
-                            <div className="text-sm text-gray-500">Alert when documents expire</div>
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Document Expiry</div>
+                              <div className="text-sm text-gray-500">Alert when documents expire</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyDocumentExpiry}
+                            onCheckedChange={(checked) => {
+                              setNotifyDocumentExpiry(checked)
+                              toast.success(checked ? 'Document expiry notifications enabled' : 'Document expiry notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1634,32 +1766,68 @@ export default function EmployeesClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Work Anniversaries</div>
-                            <div className="text-sm text-gray-500">Employee milestone alerts</div>
+                          <div className="flex items-center gap-2">
+                            <Award className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Work Anniversaries</div>
+                              <div className="text-sm text-gray-500">Employee milestone alerts</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyWorkAnniversaries}
+                            onCheckedChange={(checked) => {
+                              setNotifyWorkAnniversaries(checked)
+                              toast.success(checked ? 'Work anniversary notifications enabled' : 'Work anniversary notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Birthday Reminders</div>
-                            <div className="text-sm text-gray-500">Get reminded of birthdays</div>
+                          <div className="flex items-center gap-2">
+                            <Cake className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Birthday Reminders</div>
+                              <div className="text-sm text-gray-500">Get reminded of birthdays</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyBirthdays}
+                            onCheckedChange={(checked) => {
+                              setNotifyBirthdays(checked)
+                              toast.success(checked ? 'Birthday notifications enabled' : 'Birthday notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">New Hire Announcements</div>
-                            <div className="text-sm text-gray-500">Announce new team members</div>
+                          <div className="flex items-center gap-2">
+                            <UserRoundPlus className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">New Hire Announcements</div>
+                              <div className="text-sm text-gray-500">Announce new team members</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyNewHires}
+                            onCheckedChange={(checked) => {
+                              setNotifyNewHires(checked)
+                              toast.success(checked ? 'New hire notifications enabled' : 'New hire notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Departure Notifications</div>
-                            <div className="text-sm text-gray-500">Notify about employee departures</div>
+                          <div className="flex items-center gap-2">
+                            <LogOut className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Departure Notifications</div>
+                              <div className="text-sm text-gray-500">Notify about employee departures</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={notifyDepartures}
+                            onCheckedChange={(checked) => {
+                              setNotifyDepartures(checked)
+                              toast.success(checked ? 'Departure notifications enabled' : 'Departure notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1776,32 +1944,68 @@ export default function EmployeesClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Directory Access</div>
-                            <div className="text-sm text-gray-500">Employee directory visibility</div>
+                          <div className="flex items-center gap-2">
+                            <FolderOpen className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Directory Access</div>
+                              <div className="text-sm text-gray-500">Employee directory visibility</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={directoryAccess}
+                            onCheckedChange={(checked) => {
+                              setDirectoryAccess(checked)
+                              toast.success(checked ? 'Directory access enabled' : 'Directory access disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Org Chart Access</div>
-                            <div className="text-sm text-gray-500">Who can view org structure</div>
+                          <div className="flex items-center gap-2">
+                            <Network className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Org Chart Access</div>
+                              <div className="text-sm text-gray-500">Who can view org structure</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={orgChartAccess}
+                            onCheckedChange={(checked) => {
+                              setOrgChartAccess(checked)
+                              toast.success(checked ? 'Org chart access enabled' : 'Org chart access disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Self-Service Portal</div>
-                            <div className="text-sm text-gray-500">Allow employees to update their info</div>
+                          <div className="flex items-center gap-2">
+                            <UserCog className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Self-Service Portal</div>
+                              <div className="text-sm text-gray-500">Allow employees to update their info</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={selfServicePortal}
+                            onCheckedChange={(checked) => {
+                              setSelfServicePortal(checked)
+                              toast.success(checked ? 'Self-service portal enabled' : 'Self-service portal disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Team Analytics</div>
-                            <div className="text-sm text-gray-500">Managers can view team metrics</div>
+                          <div className="flex items-center gap-2">
+                            <BarChart2 className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Team Analytics</div>
+                              <div className="text-sm text-gray-500">Managers can view team metrics</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={teamAnalytics}
+                            onCheckedChange={(checked) => {
+                              setTeamAnalytics(checked)
+                              toast.success(checked ? 'Team analytics enabled' : 'Team analytics disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2012,25 +2216,52 @@ export default function EmployeesClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">E-Signature Required</div>
-                            <div className="text-sm text-gray-500">Require digital signatures for all documents</div>
+                          <div className="flex items-center gap-2">
+                            <PenLine className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">E-Signature Required</div>
+                              <div className="text-sm text-gray-500">Require digital signatures for all documents</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={eSignatureRequired}
+                            onCheckedChange={(checked) => {
+                              setESignatureRequired(checked)
+                              toast.success(checked ? 'E-signature requirement enabled' : 'E-signature requirement disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Auto-Archive</div>
-                            <div className="text-sm text-gray-500">Archive documents older than 5 years</div>
+                          <div className="flex items-center gap-2">
+                            <Archive className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Auto-Archive</div>
+                              <div className="text-sm text-gray-500">Archive documents older than 5 years</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoArchive}
+                            onCheckedChange={(checked) => {
+                              setAutoArchive(checked)
+                              toast.success(checked ? 'Auto-archive enabled' : 'Auto-archive disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Version Control</div>
-                            <div className="text-sm text-gray-500">Keep history of document changes</div>
+                          <div className="flex items-center gap-2">
+                            <FileType className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Version Control</div>
+                              <div className="text-sm text-gray-500">Keep history of document changes</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={versionControl}
+                            onCheckedChange={(checked) => {
+                              setVersionControl(checked)
+                              toast.success(checked ? 'Version control enabled' : 'Version control disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Document Retention</Label>
@@ -2131,25 +2362,52 @@ export default function EmployeesClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Audit Logging</div>
-                            <div className="text-sm text-gray-500">Track all HR system changes</div>
+                          <div className="flex items-center gap-2">
+                            <Activity className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Audit Logging</div>
+                              <div className="text-sm text-gray-500">Track all HR system changes</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditLogging}
+                            onCheckedChange={(checked) => {
+                              setAuditLogging(checked)
+                              toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">GDPR Compliance Mode</div>
-                            <div className="text-sm text-gray-500">Enable EU data protection features</div>
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">GDPR Compliance Mode</div>
+                              <div className="text-sm text-gray-500">Enable EU data protection features</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={gdprCompliance}
+                            onCheckedChange={(checked) => {
+                              setGdprCompliance(checked)
+                              toast.success(checked ? 'GDPR compliance mode enabled' : 'GDPR compliance mode disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Data Encryption</div>
-                            <div className="text-sm text-gray-500">Encrypt sensitive employee data</div>
+                          <div className="flex items-center gap-2">
+                            <LockKeyhole className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Data Encryption</div>
+                              <div className="text-sm text-gray-500">Encrypt sensitive employee data</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dataEncryption}
+                            onCheckedChange={(checked) => {
+                              setDataEncryption(checked)
+                              toast.success(checked ? 'Data encryption enabled' : 'Data encryption disabled')
+                            }}
+                          />
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
                           const complianceData = {
@@ -2422,7 +2680,7 @@ export default function EmployeesClient() {
               <div><Label>Survey Type</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="engagement">Engagement Survey</SelectItem><SelectItem value="pulse">Pulse Check</SelectItem><SelectItem value="feedback">Feedback Survey</SelectItem><SelectItem value="exit">Exit Interview</SelectItem></SelectContent></Select></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Start Date</Label><Input type="date" className="mt-1" /></div><div><Label>Close Date</Label><Input type="date" className="mt-1" /></div></div>
               <div><Label>Recipients</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select recipients" /></SelectTrigger><SelectContent><SelectItem value="all">All Employees</SelectItem><SelectItem value="engineering">Engineering Only</SelectItem><SelectItem value="managers">Managers Only</SelectItem><SelectItem value="custom">Custom Selection</SelectItem></SelectContent></Select></div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Anonymous Responses</p><p className="text-sm text-gray-500">Protect respondent identity</p></div><Switch defaultChecked /></div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-2"><Shield className="h-4 w-4 text-gray-500" /><div><p className="font-medium">Anonymous Responses</p><p className="text-sm text-gray-500">Protect respondent identity</p></div></div><Switch checked={surveyAnonymous} onCheckedChange={(checked) => { setSurveyAnonymous(checked); toast.success(checked ? 'Anonymous responses enabled' : 'Anonymous responses disabled') }} /></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowSurveyDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={async () => {
               const result = await apiPost('/api/employees/surveys', {
@@ -2450,10 +2708,26 @@ export default function EmployeesClient() {
               <div><Label>Employee</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select employee" /></SelectTrigger><SelectContent>{[].map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
               <div><Label>Review Period</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select period" /></SelectTrigger><SelectContent><SelectItem value="q1">Q1 2024</SelectItem><SelectItem value="q2">Q2 2024</SelectItem><SelectItem value="annual">Annual 2024</SelectItem></SelectContent></Select></div>
               <div><Label>Reviewer</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select reviewer" /></SelectTrigger><SelectContent>{[].filter(e => e.directReports > 0).map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Include Self-Review</p><p className="text-sm text-gray-500">Allow employee to self-assess</p></div><Switch defaultChecked /></div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">360 Feedback</p><p className="text-sm text-gray-500">Collect peer feedback</p></div><Switch /></div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-2"><ClipboardCheck className="h-4 w-4 text-gray-500" /><div><p className="font-medium">Include Self-Review</p><p className="text-sm text-gray-500">Allow employee to self-assess</p></div></div><Switch checked={reviewIncludeSelf} onCheckedChange={(checked) => { setReviewIncludeSelf(checked); toast.success(checked ? 'Self-review included' : 'Self-review excluded') }} /></div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-2"><UsersRound className="h-4 w-4 text-gray-500" /><div><p className="font-medium">360 Feedback</p><p className="text-sm text-gray-500">Collect peer feedback</p></div></div><Switch checked={reviewEnable360} onCheckedChange={(checked) => { setReviewEnable360(checked); toast.success(checked ? '360 feedback enabled' : '360 feedback disabled') }} /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowReviewDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600">Start Review</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowReviewDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={async () => {
+              const result = await apiPost('/api/employees/reviews', {
+                period: 'Q1 2024',
+                includeSelfReview: reviewIncludeSelf,
+                enable360Feedback: reviewEnable360,
+                status: 'in_progress',
+                createdAt: new Date().toISOString()
+              }, {
+                loading: 'Starting performance review...',
+                success: 'Performance review started successfully',
+                error: 'Failed to start performance review'
+              })
+              if (result.success) {
+                setShowReviewDialog(false)
+                refetch()
+              }
+            }}>Start Review</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 

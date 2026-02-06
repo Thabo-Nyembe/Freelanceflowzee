@@ -24,7 +24,9 @@ import {
   PlayCircle, CheckCircle2, AlertTriangle,
   TrendingUp, TrendingDown,
   Layers, GitBranch, Bug, FileText, Lightbulb, RefreshCw, Bell, Award, RotateCcw, GripVertical, Flame, Webhook, Key, Shield,
-  HardDrive, AlertOctagon, CreditCard, Sliders, Globe, Download, Copy, Trash2
+  HardDrive, AlertOctagon, CreditCard, Sliders, Globe, Download, Copy, Trash2,
+  Eye, UserCheck, ListTree, Palette, LayoutList, Timer, ArrowRight, ClipboardList, Gauge, AlertCircle,
+  Clock, Calendar, MessageSquare, Rocket, UserPlus, GitPullRequest, Lock, ScrollText, Network
 } from 'lucide-react'
 
 // Import Supabase hooks for real data operations
@@ -283,6 +285,63 @@ export default function SprintsClient() {
   const [newTaskPriority, setNewTaskPriority] = useState('medium')
   const [newTaskStoryPoints, setNewTaskStoryPoints] = useState('3')
   const [newTaskEstimatedHours, setNewTaskEstimatedHours] = useState('8')
+
+  // ============================================================================
+  // SETTINGS SWITCH STATES
+  // ============================================================================
+
+  // General Settings
+  const [publicBoard, setPublicBoard] = useState(false)
+  const [autoAssignReporter, setAutoAssignReporter] = useState(true)
+
+  // Board Configuration
+  const [showSubtasks, setShowSubtasks] = useState(true)
+  const [cardColorsByPriority, setCardColorsByPriority] = useState(true)
+  const [showSwimlanes, setShowSwimlanes] = useState(false)
+
+  // Sprint Configuration
+  const [autoStartNextSprint, setAutoStartNextSprint] = useState(false)
+  const [carryOverIncompleteTasks, setCarryOverIncompleteTasks] = useState(true)
+  const [requireSprintGoal, setRequireSprintGoal] = useState(true)
+
+  // Velocity Settings
+  const [showVelocityTrend, setShowVelocityTrend] = useState(true)
+  const [commitmentWarning, setCommitmentWarning] = useState(true)
+
+  // Sprint Notifications
+  const [sprintStartReminder, setSprintStartReminder] = useState(true)
+  const [sprintEndReminder, setSprintEndReminder] = useState(true)
+  const [dailyStandupReminder, setDailyStandupReminder] = useState(true)
+  const [retrospectiveReminder, setRetrospectiveReminder] = useState(true)
+
+  // Issue Alerts
+  const [blockedTaskAlert, setBlockedTaskAlert] = useState(true)
+  const [overdueTaskAlert, setOverdueTaskAlert] = useState(true)
+  const [scopeCreepWarning, setScopeCreepWarning] = useState(false)
+  const [burndownOffTrackAlert, setBurndownOffTrackAlert] = useState(true)
+
+  // Team Settings
+  const [allowSelfAssignment, setAllowSelfAssignment] = useState(true)
+  const [requireReviewer, setRequireReviewer] = useState(true)
+
+  // Webhook Events
+  const [webhookSprintEvents, setWebhookSprintEvents] = useState(true)
+  const [webhookTaskUpdates, setWebhookTaskUpdates] = useState(true)
+  const [webhookComments, setWebhookComments] = useState(false)
+  const [webhookBlockers, setWebhookBlockers] = useState(true)
+
+  // API Access
+  const [apiAccessEnabled, setApiAccessEnabled] = useState(true)
+
+  // Git Integration
+  const [autoLinkCommits, setAutoLinkCommits] = useState(true)
+  const [smartTransitions, setSmartTransitions] = useState(false)
+  const [prStatusUpdates, setPrStatusUpdates] = useState(true)
+
+  // Security Settings
+  const [require2FA, setRequire2FA] = useState(false)
+  const [auditLogging, setAuditLogging] = useState(true)
+  const [ipAllowlist, setIpAllowlist] = useState(false)
 
   // ============================================================================
   // REAL SUPABASE DATA HOOKS
@@ -843,6 +902,23 @@ export default function SprintsClient() {
       console.error('Error regenerating API key:', error)
       toast.error('Failed to regenerate API key')
     }
+  }
+
+  // Helper function for switch toggles with toast feedback
+  const handleSwitchToggle = (
+    settingName: string,
+    newValue: boolean,
+    setter: (value: boolean) => void
+  ) => {
+    setter(newValue)
+    toast.success(`${settingName} ${newValue ? 'enabled' : 'disabled'}`)
+  }
+
+  // Handle role configuration
+  const handleConfigureRole = (role: string) => {
+    toast.info(`Configure ${role}`, {
+      description: `Opening ${role} permissions configuration`
+    })
   }
 
   // Export sprint data as JSON/CSV
@@ -1789,19 +1865,31 @@ export default function SprintsClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Public Board</p>
-                            <p className="text-sm text-gray-500">Allow anyone to view the board</p>
+                          <div className="flex items-center gap-3">
+                            <Eye className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Public Board</p>
+                              <p className="text-sm text-gray-500">Allow anyone to view the board</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={publicBoard}
+                            onCheckedChange={(checked) => handleSwitchToggle('Public Board', checked, setPublicBoard)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-assign Reporter</p>
-                            <p className="text-sm text-gray-500">Set task creator as reporter automatically</p>
+                          <div className="flex items-center gap-3">
+                            <UserCheck className="w-5 h-5 text-green-500" />
+                            <div>
+                              <p className="font-medium">Auto-assign Reporter</p>
+                              <p className="text-sm text-gray-500">Set task creator as reporter automatically</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoAssignReporter}
+                            onCheckedChange={(checked) => handleSwitchToggle('Auto-assign Reporter', checked, setAutoAssignReporter)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1816,27 +1904,45 @@ export default function SprintsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Show Subtasks</p>
-                            <p className="text-sm text-gray-500">Display subtasks on the board</p>
+                          <div className="flex items-center gap-3">
+                            <ListTree className="w-5 h-5 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Show Subtasks</p>
+                              <p className="text-sm text-gray-500">Display subtasks on the board</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showSubtasks}
+                            onCheckedChange={(checked) => handleSwitchToggle('Show Subtasks', checked, setShowSubtasks)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Card Colors by Priority</p>
-                            <p className="text-sm text-gray-500">Color-code cards by priority level</p>
+                          <div className="flex items-center gap-3">
+                            <Palette className="w-5 h-5 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Card Colors by Priority</p>
+                              <p className="text-sm text-gray-500">Color-code cards by priority level</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={cardColorsByPriority}
+                            onCheckedChange={(checked) => handleSwitchToggle('Card Colors by Priority', checked, setCardColorsByPriority)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Show Swimlanes</p>
-                            <p className="text-sm text-gray-500">Group tasks by assignee or epic</p>
+                          <div className="flex items-center gap-3">
+                            <LayoutList className="w-5 h-5 text-cyan-500" />
+                            <div>
+                              <p className="font-medium">Show Swimlanes</p>
+                              <p className="text-sm text-gray-500">Group tasks by assignee or epic</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={showSwimlanes}
+                            onCheckedChange={(checked) => handleSwitchToggle('Show Swimlanes', checked, setShowSwimlanes)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1886,27 +1992,45 @@ export default function SprintsClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-start Next Sprint</p>
-                            <p className="text-sm text-gray-500">Automatically start next sprint when current ends</p>
+                          <div className="flex items-center gap-3">
+                            <Timer className="w-5 h-5 text-teal-500" />
+                            <div>
+                              <p className="font-medium">Auto-start Next Sprint</p>
+                              <p className="text-sm text-gray-500">Automatically start next sprint when current ends</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={autoStartNextSprint}
+                            onCheckedChange={(checked) => handleSwitchToggle('Auto-start Next Sprint', checked, setAutoStartNextSprint)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Carry Over Incomplete Tasks</p>
-                            <p className="text-sm text-gray-500">Move incomplete tasks to next sprint</p>
+                          <div className="flex items-center gap-3">
+                            <ArrowRight className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Carry Over Incomplete Tasks</p>
+                              <p className="text-sm text-gray-500">Move incomplete tasks to next sprint</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={carryOverIncompleteTasks}
+                            onCheckedChange={(checked) => handleSwitchToggle('Carry Over Incomplete Tasks', checked, setCarryOverIncompleteTasks)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Require Sprint Goal</p>
-                            <p className="text-sm text-gray-500">Mandate sprint goal before starting</p>
+                          <div className="flex items-center gap-3">
+                            <Target className="w-5 h-5 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Require Sprint Goal</p>
+                              <p className="text-sm text-gray-500">Mandate sprint goal before starting</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={requireSprintGoal}
+                            onCheckedChange={(checked) => handleSwitchToggle('Require Sprint Goal', checked, setRequireSprintGoal)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1936,19 +2060,31 @@ export default function SprintsClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Show Velocity Trend</p>
-                            <p className="text-sm text-gray-500">Display velocity trend on dashboard</p>
+                          <div className="flex items-center gap-3">
+                            <TrendingUp className="w-5 h-5 text-green-500" />
+                            <div>
+                              <p className="font-medium">Show Velocity Trend</p>
+                              <p className="text-sm text-gray-500">Display velocity trend on dashboard</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showVelocityTrend}
+                            onCheckedChange={(checked) => handleSwitchToggle('Show Velocity Trend', checked, setShowVelocityTrend)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Commitment Warning</p>
-                            <p className="text-sm text-gray-500">Warn when committing above average velocity</p>
+                          <div className="flex items-center gap-3">
+                            <AlertCircle className="w-5 h-5 text-amber-500" />
+                            <div>
+                              <p className="font-medium">Commitment Warning</p>
+                              <p className="text-sm text-gray-500">Warn when committing above average velocity</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={commitmentWarning}
+                            onCheckedChange={(checked) => handleSwitchToggle('Commitment Warning', checked, setCommitmentWarning)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1968,35 +2104,59 @@ export default function SprintsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Sprint Start Reminder</p>
-                            <p className="text-sm text-gray-500">Notify 1 day before sprint starts</p>
+                          <div className="flex items-center gap-3">
+                            <Rocket className="w-5 h-5 text-green-500" />
+                            <div>
+                              <p className="font-medium">Sprint Start Reminder</p>
+                              <p className="text-sm text-gray-500">Notify 1 day before sprint starts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sprintStartReminder}
+                            onCheckedChange={(checked) => handleSwitchToggle('Sprint Start Reminder', checked, setSprintStartReminder)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Sprint End Reminder</p>
-                            <p className="text-sm text-gray-500">Notify 2 days before sprint ends</p>
+                          <div className="flex items-center gap-3">
+                            <Calendar className="w-5 h-5 text-red-500" />
+                            <div>
+                              <p className="font-medium">Sprint End Reminder</p>
+                              <p className="text-sm text-gray-500">Notify 2 days before sprint ends</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sprintEndReminder}
+                            onCheckedChange={(checked) => handleSwitchToggle('Sprint End Reminder', checked, setSprintEndReminder)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Daily Standup Reminder</p>
-                            <p className="text-sm text-gray-500">Daily notification at standup time</p>
+                          <div className="flex items-center gap-3">
+                            <Clock className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Daily Standup Reminder</p>
+                              <p className="text-sm text-gray-500">Daily notification at standup time</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dailyStandupReminder}
+                            onCheckedChange={(checked) => handleSwitchToggle('Daily Standup Reminder', checked, setDailyStandupReminder)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Retrospective Reminder</p>
-                            <p className="text-sm text-gray-500">Notify to schedule retrospective</p>
+                          <div className="flex items-center gap-3">
+                            <RotateCcw className="w-5 h-5 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Retrospective Reminder</p>
+                              <p className="text-sm text-gray-500">Notify to schedule retrospective</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={retrospectiveReminder}
+                            onCheckedChange={(checked) => handleSwitchToggle('Retrospective Reminder', checked, setRetrospectiveReminder)}
+                          />
                         </div>
 
                         <div className="space-y-2 pt-4">
@@ -2017,35 +2177,59 @@ export default function SprintsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Blocked Task Alert</p>
-                            <p className="text-sm text-gray-500">Notify when tasks become blocked</p>
+                          <div className="flex items-center gap-3">
+                            <AlertOctagon className="w-5 h-5 text-red-500" />
+                            <div>
+                              <p className="font-medium">Blocked Task Alert</p>
+                              <p className="text-sm text-gray-500">Notify when tasks become blocked</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={blockedTaskAlert}
+                            onCheckedChange={(checked) => handleSwitchToggle('Blocked Task Alert', checked, setBlockedTaskAlert)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Overdue Task Alert</p>
-                            <p className="text-sm text-gray-500">Notify when tasks pass due date</p>
+                          <div className="flex items-center gap-3">
+                            <Clock className="w-5 h-5 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Overdue Task Alert</p>
+                              <p className="text-sm text-gray-500">Notify when tasks pass due date</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={overdueTaskAlert}
+                            onCheckedChange={(checked) => handleSwitchToggle('Overdue Task Alert', checked, setOverdueTaskAlert)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Scope Creep Warning</p>
-                            <p className="text-sm text-gray-500">Alert when new tasks added mid-sprint</p>
+                          <div className="flex items-center gap-3">
+                            <Layers className="w-5 h-5 text-yellow-500" />
+                            <div>
+                              <p className="font-medium">Scope Creep Warning</p>
+                              <p className="text-sm text-gray-500">Alert when new tasks added mid-sprint</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={scopeCreepWarning}
+                            onCheckedChange={(checked) => handleSwitchToggle('Scope Creep Warning', checked, setScopeCreepWarning)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Burndown Off-Track Alert</p>
-                            <p className="text-sm text-gray-500">Notify when burndown deviates from ideal</p>
+                          <div className="flex items-center gap-3">
+                            <TrendingDown className="w-5 h-5 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Burndown Off-Track Alert</p>
+                              <p className="text-sm text-gray-500">Notify when burndown deviates from ideal</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={burndownOffTrackAlert}
+                            onCheckedChange={(checked) => handleSwitchToggle('Burndown Off-Track Alert', checked, setBurndownOffTrackAlert)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2086,19 +2270,31 @@ export default function SprintsClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Allow Self-Assignment</p>
-                            <p className="text-sm text-gray-500">Team members can assign tasks to themselves</p>
+                          <div className="flex items-center gap-3">
+                            <UserPlus className="w-5 h-5 text-green-500" />
+                            <div>
+                              <p className="font-medium">Allow Self-Assignment</p>
+                              <p className="text-sm text-gray-500">Team members can assign tasks to themselves</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowSelfAssignment}
+                            onCheckedChange={(checked) => handleSwitchToggle('Allow Self-Assignment', checked, setAllowSelfAssignment)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Require Reviewer</p>
-                            <p className="text-sm text-gray-500">Tasks need reviewer before done</p>
+                          <div className="flex items-center gap-3">
+                            <UserCheck className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Require Reviewer</p>
+                              <p className="text-sm text-gray-500">Tasks need reviewer before done</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={requireReviewer}
+                            onCheckedChange={(checked) => handleSwitchToggle('Require Reviewer', checked, setRequireReviewer)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2126,7 +2322,10 @@ export default function SprintsClient() {
                                 <p className="text-sm text-gray-500">{item.desc}</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Configure</Button>
+                            <Button variant="outline" size="sm" onClick={() => handleConfigureRole(item.role)}>
+                              <Settings className="w-4 h-4 mr-2" />
+                              Configure
+                            </Button>
                           </div>
                         ))}
                       </CardContent>
@@ -2153,24 +2352,48 @@ export default function SprintsClient() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="flex items-center space-x-2">
-                            <Switch id="wh-sprint" defaultChecked />
+                            <Switch
+                              id="wh-sprint"
+                              checked={webhookSprintEvents}
+                              onCheckedChange={(checked) => handleSwitchToggle('Sprint Events Webhook', checked, setWebhookSprintEvents)}
+                            />
+                            <Zap className="w-4 h-4 text-teal-500" />
                             <Label htmlFor="wh-sprint">Sprint Events</Label>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Switch id="wh-task" defaultChecked />
+                            <Switch
+                              id="wh-task"
+                              checked={webhookTaskUpdates}
+                              onCheckedChange={(checked) => handleSwitchToggle('Task Updates Webhook', checked, setWebhookTaskUpdates)}
+                            />
+                            <ClipboardList className="w-4 h-4 text-blue-500" />
                             <Label htmlFor="wh-task">Task Updates</Label>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Switch id="wh-comment" />
+                            <Switch
+                              id="wh-comment"
+                              checked={webhookComments}
+                              onCheckedChange={(checked) => handleSwitchToggle('Comments Webhook', checked, setWebhookComments)}
+                            />
+                            <MessageSquare className="w-4 h-4 text-green-500" />
                             <Label htmlFor="wh-comment">Comments</Label>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Switch id="wh-blocked" defaultChecked />
+                            <Switch
+                              id="wh-blocked"
+                              checked={webhookBlockers}
+                              onCheckedChange={(checked) => handleSwitchToggle('Blockers Webhook', checked, setWebhookBlockers)}
+                            />
+                            <AlertOctagon className="w-4 h-4 text-red-500" />
                             <Label htmlFor="wh-blocked">Blockers</Label>
                           </div>
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => toast.info('Add Webhook', { description: 'Opening webhook configuration' })}
+                        >
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -2200,11 +2423,17 @@ export default function SprintsClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">API Access</p>
-                            <p className="text-sm text-gray-500">Enable external API access</p>
+                          <div className="flex items-center gap-3">
+                            <Network className="w-5 h-5 text-violet-500" />
+                            <div>
+                              <p className="font-medium">API Access</p>
+                              <p className="text-sm text-gray-500">Enable external API access</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={apiAccessEnabled}
+                            onCheckedChange={(checked) => handleSwitchToggle('API Access', checked, setApiAccessEnabled)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2219,27 +2448,45 @@ export default function SprintsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-link Commits</p>
-                            <p className="text-sm text-gray-500">Link commits by task key (e.g., PROJ-101)</p>
+                          <div className="flex items-center gap-3">
+                            <GitBranch className="w-5 h-5 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Auto-link Commits</p>
+                              <p className="text-sm text-gray-500">Link commits by task key (e.g., PROJ-101)</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoLinkCommits}
+                            onCheckedChange={(checked) => handleSwitchToggle('Auto-link Commits', checked, setAutoLinkCommits)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Smart Transitions</p>
-                            <p className="text-sm text-gray-500">Auto-move tasks based on branch activity</p>
+                          <div className="flex items-center gap-3">
+                            <RefreshCw className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Smart Transitions</p>
+                              <p className="text-sm text-gray-500">Auto-move tasks based on branch activity</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={smartTransitions}
+                            onCheckedChange={(checked) => handleSwitchToggle('Smart Transitions', checked, setSmartTransitions)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">PR Status Updates</p>
-                            <p className="text-sm text-gray-500">Show PR status on task cards</p>
+                          <div className="flex items-center gap-3">
+                            <GitPullRequest className="w-5 h-5 text-purple-500" />
+                            <div>
+                              <p className="font-medium">PR Status Updates</p>
+                              <p className="text-sm text-gray-500">Show PR status on task cards</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={prStatusUpdates}
+                            onCheckedChange={(checked) => handleSwitchToggle('PR Status Updates', checked, setPrStatusUpdates)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2259,27 +2506,45 @@ export default function SprintsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Require 2FA</p>
-                            <p className="text-sm text-gray-500">Enforce 2FA for all team members</p>
+                          <div className="flex items-center gap-3">
+                            <Lock className="w-5 h-5 text-green-500" />
+                            <div>
+                              <p className="font-medium">Require 2FA</p>
+                              <p className="text-sm text-gray-500">Enforce 2FA for all team members</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={require2FA}
+                            onCheckedChange={(checked) => handleSwitchToggle('Require 2FA', checked, setRequire2FA)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Audit Logging</p>
-                            <p className="text-sm text-gray-500">Log all changes to sprints and tasks</p>
+                          <div className="flex items-center gap-3">
+                            <ScrollText className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Audit Logging</p>
+                              <p className="text-sm text-gray-500">Log all changes to sprints and tasks</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditLogging}
+                            onCheckedChange={(checked) => handleSwitchToggle('Audit Logging', checked, setAuditLogging)}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">IP Allowlist</p>
-                            <p className="text-sm text-gray-500">Restrict access to specific IPs</p>
+                          <div className="flex items-center gap-3">
+                            <Shield className="w-5 h-5 text-amber-500" />
+                            <div>
+                              <p className="font-medium">IP Allowlist</p>
+                              <p className="text-sm text-gray-500">Restrict access to specific IPs</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ipAllowlist}
+                            onCheckedChange={(checked) => handleSwitchToggle('IP Allowlist', checked, setIpAllowlist)}
+                          />
                         </div>
                       </CardContent>
                     </Card>

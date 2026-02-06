@@ -25,7 +25,11 @@ import {
   Globe, Link2, CheckCircle2, Edit2, Trash2,
   Copy, ExternalLink, Download, Share2,
   BarChart3, Timer, CalendarCheck, CalendarClock, Zap, MessageSquare, FileText,
-  AlertCircle, Loader2, RefreshCw, CheckSquare, Folder, Sun
+  AlertCircle, Loader2, RefreshCw, CheckSquare, Folder, Sun,
+  Eye, EyeOff, Hash, GripVertical, MousePointer, Palette, Cake, Flag,
+  Clock12, MapPinned, Keyboard, Sparkles, XCircle, Timer as TimerIcon,
+  Target, DollarSign, Car, Brain, PieChart, FileDown, Webhook,
+  Mail, BellRing, CalendarRange, CalendarX, Send, UserCheck, AlertTriangle, RotateCcw
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -693,6 +697,50 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
     'Slack': true,
     'Notion': false,
   })
+
+  // General settings state
+  const [showWeekends, setShowWeekends] = useState(true)
+  const [showDeclinedEvents, setShowDeclinedEvents] = useState(false)
+  const [showWeekNumbers, setShowWeekNumbers] = useState(false)
+  const [enableDragDrop, setEnableDragDrop] = useState(true)
+  const [showEventHover, setShowEventHover] = useState(true)
+  const [colorCodeByType, setColorCodeByType] = useState(true)
+  const [showBirthdays, setShowBirthdays] = useState(true)
+  const [showHolidays, setShowHolidays] = useState(true)
+
+  // Time zone settings state
+  const [showSecondaryTimezone, setShowSecondaryTimezone] = useState(false)
+  const [autoDetectTimezone, setAutoDetectTimezone] = useState(true)
+  const [use24HourFormat, setUse24HourFormat] = useState(false)
+  const [showWorldClock, setShowWorldClock] = useState(false)
+  const [showAttendeeTimezones, setShowAttendeeTimezones] = useState(true)
+
+  // Notification settings state
+  const [notificationSettings, setNotificationSettings] = useState({
+    emailReminders: true,
+    pushNotifications: true,
+    dailyDigest: false,
+    weekAhead: true,
+    eventInvitations: true,
+    rsvpUpdates: true,
+    eventChanges: true,
+    cancellations: true,
+    rescheduling: true,
+    schedulingConflicts: true,
+  })
+
+  // Advanced settings state
+  const [keyboardShortcuts, setKeyboardShortcuts] = useState(true)
+  const [quickAddEvents, setQuickAddEvents] = useState(true)
+  const [autoDeclineConflicts, setAutoDeclineConflicts] = useState(false)
+  const [speedyMeetings, setSpeedyMeetings] = useState(false)
+  const [focusTimeBlocking, setFocusTimeBlocking] = useState(true)
+  const [meetingCostCalculator, setMeetingCostCalculator] = useState(false)
+  const [travelTimeBlocking, setTravelTimeBlocking] = useState(false)
+  const [smartScheduling, setSmartScheduling] = useState(true)
+  const [meetingAnalytics, setMeetingAnalytics] = useState(true)
+  const [icalExport, setIcalExport] = useState(true)
+  const [webhookNotifications, setWebhookNotifications] = useState(false)
 
   // Handle updating an event
   const handleUpdateEvent = async () => {
@@ -1983,46 +2031,100 @@ END:VCALENDAR`
                         </select>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Weekends</p>
-                          <p className="text-sm text-gray-500">Display Saturday and Sunday</p>
+                        <div className="flex items-center gap-2">
+                          <Eye className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Weekends</p>
+                            <p className="text-sm text-gray-500">Display Saturday and Sunday</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showWeekends}
+                          onCheckedChange={(checked) => {
+                            setShowWeekends(checked)
+                            toast.success(checked ? 'Weekends now visible' : 'Weekends hidden')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Declined Events</p>
-                          <p className="text-sm text-gray-500">Display events you declined</p>
+                        <div className="flex items-center gap-2">
+                          <EyeOff className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Declined Events</p>
+                            <p className="text-sm text-gray-500">Display events you declined</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={showDeclinedEvents}
+                          onCheckedChange={(checked) => {
+                            setShowDeclinedEvents(checked)
+                            toast.success(checked ? 'Declined events now visible' : 'Declined events hidden')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Week Numbers</p>
-                          <p className="text-sm text-gray-500">Display week numbers in calendar</p>
+                        <div className="flex items-center gap-2">
+                          <Hash className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Week Numbers</p>
+                            <p className="text-sm text-gray-500">Display week numbers in calendar</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={showWeekNumbers}
+                          onCheckedChange={(checked) => {
+                            setShowWeekNumbers(checked)
+                            toast.success(checked ? 'Week numbers enabled' : 'Week numbers disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Enable Drag and Drop</p>
-                          <p className="text-sm text-gray-500">Move events by dragging</p>
+                        <div className="flex items-center gap-2">
+                          <GripVertical className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Drag and Drop</p>
+                            <p className="text-sm text-gray-500">Move events by dragging</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={enableDragDrop}
+                          onCheckedChange={(checked) => {
+                            setEnableDragDrop(checked)
+                            toast.success(checked ? 'Drag and drop enabled' : 'Drag and drop disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Event Details on Hover</p>
-                          <p className="text-sm text-gray-500">Preview events with a tooltip</p>
+                        <div className="flex items-center gap-2">
+                          <MousePointer className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Event Details on Hover</p>
+                            <p className="text-sm text-gray-500">Preview events with a tooltip</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showEventHover}
+                          onCheckedChange={(checked) => {
+                            setShowEventHover(checked)
+                            toast.success(checked ? 'Hover preview enabled' : 'Hover preview disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Color Code by Type</p>
-                          <p className="text-sm text-gray-500">Color events by category</p>
+                        <div className="flex items-center gap-2">
+                          <Palette className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Color Code by Type</p>
+                            <p className="text-sm text-gray-500">Color events by category</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={colorCodeByType}
+                          onCheckedChange={(checked) => {
+                            setColorCodeByType(checked)
+                            toast.success(checked ? 'Color coding enabled' : 'Color coding disabled')
+                          }}
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Event Duration</label>
@@ -2045,18 +2147,36 @@ END:VCALENDAR`
                         </select>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Birthdays</p>
-                          <p className="text-sm text-gray-500">Display birthdays from contacts</p>
+                        <div className="flex items-center gap-2">
+                          <Cake className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Birthdays</p>
+                            <p className="text-sm text-gray-500">Display birthdays from contacts</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showBirthdays}
+                          onCheckedChange={(checked) => {
+                            setShowBirthdays(checked)
+                            toast.success(checked ? 'Birthdays now visible' : 'Birthdays hidden')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Holidays</p>
-                          <p className="text-sm text-gray-500">Display public holidays</p>
+                        <div className="flex items-center gap-2">
+                          <Flag className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Holidays</p>
+                            <p className="text-sm text-gray-500">Display public holidays</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showHolidays}
+                          onCheckedChange={(checked) => {
+                            setShowHolidays(checked)
+                            toast.success(checked ? 'Holidays now visible' : 'Holidays hidden')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -2198,39 +2318,84 @@ END:VCALENDAR`
                         </select>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Secondary Time Zone</p>
-                          <p className="text-sm text-gray-500">Display a second time zone in calendar</p>
+                        <div className="flex items-center gap-2">
+                          <Globe className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Secondary Time Zone</p>
+                            <p className="text-sm text-gray-500">Display a second time zone in calendar</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={showSecondaryTimezone}
+                          onCheckedChange={(checked) => {
+                            setShowSecondaryTimezone(checked)
+                            toast.success(checked ? 'Secondary time zone enabled' : 'Secondary time zone disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Auto-detect Time Zone</p>
-                          <p className="text-sm text-gray-500">Update based on your location</p>
+                        <div className="flex items-center gap-2">
+                          <MapPinned className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-detect Time Zone</p>
+                            <p className="text-sm text-gray-500">Update based on your location</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoDetectTimezone}
+                          onCheckedChange={(checked) => {
+                            setAutoDetectTimezone(checked)
+                            toast.success(checked ? 'Auto-detect enabled' : 'Auto-detect disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">24-Hour Format</p>
-                          <p className="text-sm text-gray-500">Use 24-hour time format</p>
+                        <div className="flex items-center gap-2">
+                          <Clock12 className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">24-Hour Format</p>
+                            <p className="text-sm text-gray-500">Use 24-hour time format</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={use24HourFormat}
+                          onCheckedChange={(checked) => {
+                            setUse24HourFormat(checked)
+                            toast.success(checked ? '24-hour format enabled' : '12-hour format enabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show World Clock</p>
-                          <p className="text-sm text-gray-500">Display multiple time zones</p>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show World Clock</p>
+                            <p className="text-sm text-gray-500">Display multiple time zones</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={showWorldClock}
+                          onCheckedChange={(checked) => {
+                            setShowWorldClock(checked)
+                            toast.success(checked ? 'World clock enabled' : 'World clock disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Attendee Time Zones</p>
-                          <p className="text-sm text-gray-500">Display time in attendee&apos;s local time</p>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Attendee Time Zones</p>
+                            <p className="text-sm text-gray-500">Display time in attendee&apos;s local time</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showAttendeeTimezones}
+                          onCheckedChange={(checked) => {
+                            setShowAttendeeTimezones(checked)
+                            toast.success(checked ? 'Attendee time zones visible' : 'Attendee time zones hidden')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -2246,26 +2411,166 @@ END:VCALENDAR`
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {[
-                        { label: 'Email Reminders', desc: 'Receive email reminders before events', enabled: true },
-                        { label: 'Push Notifications', desc: 'Get notified on your devices', enabled: true },
-                        { label: 'Daily Digest', desc: 'Summary of your schedule each morning', enabled: false },
-                        { label: 'Week Ahead', desc: 'Weekly overview every Sunday', enabled: true },
-                        { label: 'Event Invitations', desc: 'Notify when invited to events', enabled: true },
-                        { label: 'RSVP Updates', desc: 'Notify when attendees respond', enabled: true },
-                        { label: 'Event Changes', desc: 'Notify when events are modified', enabled: true },
-                        { label: 'Cancellations', desc: 'Notify when events are cancelled', enabled: true },
-                        { label: 'Rescheduling', desc: 'Notify when events are moved', enabled: true },
-                        { label: 'Scheduling Conflicts', desc: 'Warn about double-bookings', enabled: true },
-                      ].map((setting, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-gray-500" />
                           <div>
-                            <p className="font-medium text-gray-900 dark:text-white">{setting.label}</p>
-                            <p className="text-sm text-gray-500">{setting.desc}</p>
+                            <p className="font-medium text-gray-900 dark:text-white">Email Reminders</p>
+                            <p className="text-sm text-gray-500">Receive email reminders before events</p>
                           </div>
-                          <Switch defaultChecked={setting.enabled} />
                         </div>
-                      ))}
+                        <Switch
+                          checked={notificationSettings.emailReminders}
+                          onCheckedChange={(checked) => {
+                            setNotificationSettings(prev => ({ ...prev, emailReminders: checked }))
+                            toast.success(checked ? 'Email reminders enabled' : 'Email reminders disabled')
+                          }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <BellRing className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Push Notifications</p>
+                            <p className="text-sm text-gray-500">Get notified on your devices</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={notificationSettings.pushNotifications}
+                          onCheckedChange={(checked) => {
+                            setNotificationSettings(prev => ({ ...prev, pushNotifications: checked }))
+                            toast.success(checked ? 'Push notifications enabled' : 'Push notifications disabled')
+                          }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <CalendarRange className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Daily Digest</p>
+                            <p className="text-sm text-gray-500">Summary of your schedule each morning</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={notificationSettings.dailyDigest}
+                          onCheckedChange={(checked) => {
+                            setNotificationSettings(prev => ({ ...prev, dailyDigest: checked }))
+                            toast.success(checked ? 'Daily digest enabled' : 'Daily digest disabled')
+                          }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <CalendarDays className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Week Ahead</p>
+                            <p className="text-sm text-gray-500">Weekly overview every Sunday</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={notificationSettings.weekAhead}
+                          onCheckedChange={(checked) => {
+                            setNotificationSettings(prev => ({ ...prev, weekAhead: checked }))
+                            toast.success(checked ? 'Week ahead enabled' : 'Week ahead disabled')
+                          }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Send className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Event Invitations</p>
+                            <p className="text-sm text-gray-500">Notify when invited to events</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={notificationSettings.eventInvitations}
+                          onCheckedChange={(checked) => {
+                            setNotificationSettings(prev => ({ ...prev, eventInvitations: checked }))
+                            toast.success(checked ? 'Invitation notifications enabled' : 'Invitation notifications disabled')
+                          }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <UserCheck className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">RSVP Updates</p>
+                            <p className="text-sm text-gray-500">Notify when attendees respond</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={notificationSettings.rsvpUpdates}
+                          onCheckedChange={(checked) => {
+                            setNotificationSettings(prev => ({ ...prev, rsvpUpdates: checked }))
+                            toast.success(checked ? 'RSVP notifications enabled' : 'RSVP notifications disabled')
+                          }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Edit2 className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Event Changes</p>
+                            <p className="text-sm text-gray-500">Notify when events are modified</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={notificationSettings.eventChanges}
+                          onCheckedChange={(checked) => {
+                            setNotificationSettings(prev => ({ ...prev, eventChanges: checked }))
+                            toast.success(checked ? 'Change notifications enabled' : 'Change notifications disabled')
+                          }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <CalendarX className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Cancellations</p>
+                            <p className="text-sm text-gray-500">Notify when events are cancelled</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={notificationSettings.cancellations}
+                          onCheckedChange={(checked) => {
+                            setNotificationSettings(prev => ({ ...prev, cancellations: checked }))
+                            toast.success(checked ? 'Cancellation notifications enabled' : 'Cancellation notifications disabled')
+                          }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <RotateCcw className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Rescheduling</p>
+                            <p className="text-sm text-gray-500">Notify when events are moved</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={notificationSettings.rescheduling}
+                          onCheckedChange={(checked) => {
+                            setNotificationSettings(prev => ({ ...prev, rescheduling: checked }))
+                            toast.success(checked ? 'Reschedule notifications enabled' : 'Reschedule notifications disabled')
+                          }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Scheduling Conflicts</p>
+                            <p className="text-sm text-gray-500">Warn about double-bookings</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={notificationSettings.schedulingConflicts}
+                          onCheckedChange={(checked) => {
+                            setNotificationSettings(prev => ({ ...prev, schedulingConflicts: checked }))
+                            toast.success(checked ? 'Conflict warnings enabled' : 'Conflict warnings disabled')
+                          }}
+                        />
+                      </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notification Channels</label>
                         <div className="flex gap-2">
@@ -2299,88 +2604,190 @@ END:VCALENDAR`
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Keyboard Shortcuts</p>
-                          <p className="text-sm text-gray-500">Enable keyboard navigation</p>
+                        <div className="flex items-center gap-2">
+                          <Keyboard className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Keyboard Shortcuts</p>
+                            <p className="text-sm text-gray-500">Enable keyboard navigation</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={keyboardShortcuts}
+                          onCheckedChange={(checked) => {
+                            setKeyboardShortcuts(checked)
+                            toast.success(checked ? 'Keyboard shortcuts enabled' : 'Keyboard shortcuts disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Quick Add Events</p>
-                          <p className="text-sm text-gray-500">Create events with natural language</p>
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Quick Add Events</p>
+                            <p className="text-sm text-gray-500">Create events with natural language</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={quickAddEvents}
+                          onCheckedChange={(checked) => {
+                            setQuickAddEvents(checked)
+                            toast.success(checked ? 'Quick add enabled' : 'Quick add disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Auto-decline Conflicts</p>
-                          <p className="text-sm text-gray-500">Automatically decline overlapping events</p>
+                        <div className="flex items-center gap-2">
+                          <XCircle className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-decline Conflicts</p>
+                            <p className="text-sm text-gray-500">Automatically decline overlapping events</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={autoDeclineConflicts}
+                          onCheckedChange={(checked) => {
+                            setAutoDeclineConflicts(checked)
+                            toast.success(checked ? 'Auto-decline enabled' : 'Auto-decline disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Speedy Meetings</p>
-                          <p className="text-sm text-gray-500">End meetings 5 minutes early</p>
+                        <div className="flex items-center gap-2">
+                          <TimerIcon className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Speedy Meetings</p>
+                            <p className="text-sm text-gray-500">End meetings 5 minutes early</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={speedyMeetings}
+                          onCheckedChange={(checked) => {
+                            setSpeedyMeetings(checked)
+                            toast.success(checked ? 'Speedy meetings enabled' : 'Speedy meetings disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Focus Time Blocking</p>
-                          <p className="text-sm text-gray-500">Auto-block deep work periods</p>
+                        <div className="flex items-center gap-2">
+                          <Target className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Focus Time Blocking</p>
+                            <p className="text-sm text-gray-500">Auto-block deep work periods</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={focusTimeBlocking}
+                          onCheckedChange={(checked) => {
+                            setFocusTimeBlocking(checked)
+                            toast.success(checked ? 'Focus time blocking enabled' : 'Focus time blocking disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Meeting Cost Calculator</p>
-                          <p className="text-sm text-gray-500">Show estimated cost of meetings</p>
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Meeting Cost Calculator</p>
+                            <p className="text-sm text-gray-500">Show estimated cost of meetings</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={meetingCostCalculator}
+                          onCheckedChange={(checked) => {
+                            setMeetingCostCalculator(checked)
+                            toast.success(checked ? 'Meeting cost calculator enabled' : 'Meeting cost calculator disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Travel Time Blocking</p>
-                          <p className="text-sm text-gray-500">Auto-block travel time between events</p>
+                        <div className="flex items-center gap-2">
+                          <Car className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Travel Time Blocking</p>
+                            <p className="text-sm text-gray-500">Auto-block travel time between events</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={travelTimeBlocking}
+                          onCheckedChange={(checked) => {
+                            setTravelTimeBlocking(checked)
+                            toast.success(checked ? 'Travel time blocking enabled' : 'Travel time blocking disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Smart Scheduling</p>
-                          <p className="text-sm text-gray-500">AI-powered optimal meeting times</p>
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Smart Scheduling</p>
+                            <p className="text-sm text-gray-500">AI-powered optimal meeting times</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={smartScheduling}
+                          onCheckedChange={(checked) => {
+                            setSmartScheduling(checked)
+                            toast.success(checked ? 'Smart scheduling enabled' : 'Smart scheduling disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Meeting Analytics</p>
-                          <p className="text-sm text-gray-500">Track time spent in meetings</p>
+                        <div className="flex items-center gap-2">
+                          <PieChart className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Meeting Analytics</p>
+                            <p className="text-sm text-gray-500">Track time spent in meetings</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={meetingAnalytics}
+                          onCheckedChange={(checked) => {
+                            setMeetingAnalytics(checked)
+                            toast.success(checked ? 'Meeting analytics enabled' : 'Meeting analytics disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">iCal Export</p>
-                          <p className="text-sm text-gray-500">Allow external iCal subscriptions</p>
+                        <div className="flex items-center gap-2">
+                          <FileDown className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">iCal Export</p>
+                            <p className="text-sm text-gray-500">Allow external iCal subscriptions</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={icalExport}
+                          onCheckedChange={(checked) => {
+                            setIcalExport(checked)
+                            toast.success(checked ? 'iCal export enabled' : 'iCal export disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">API Access</p>
-                          <p className="text-sm text-gray-500">Enable calendar API integrations</p>
+                        <div className="flex items-center gap-2">
+                          <Link2 className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">API Access</p>
+                            <p className="text-sm text-gray-500">Enable calendar API integrations</p>
+                          </div>
                         </div>
                         <Badge className="bg-green-100 text-green-700">Enabled</Badge>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Webhook Notifications</p>
-                          <p className="text-sm text-gray-500">Send events to external endpoints</p>
+                        <div className="flex items-center gap-2">
+                          <Webhook className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Webhook Notifications</p>
+                            <p className="text-sm text-gray-500">Send events to external endpoints</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={webhookNotifications}
+                          onCheckedChange={(checked) => {
+                            setWebhookNotifications(checked)
+                            toast.success(checked ? 'Webhook notifications enabled' : 'Webhook notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="pt-6 border-t dark:border-gray-700">
                         <h4 className="font-medium text-red-600 mb-4">Danger Zone</h4>

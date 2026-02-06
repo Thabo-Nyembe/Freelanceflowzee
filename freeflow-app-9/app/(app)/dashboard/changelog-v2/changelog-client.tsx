@@ -17,7 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Tag, GitBranch, GitCommit, Download, FileArchive,
   Users, MessageSquare, TrendingUp, Webhook, Settings, Calendar, CheckCircle, AlertCircle, AlertTriangle,
-  Package, Shield, RefreshCw, Code, FileCode, Copy, Bell, Slack, Search, Plus, ArrowUpRight, Lock, Loader2
+  Package, Shield, RefreshCw, Code, FileCode, Copy, Bell, Slack, Search, Plus, ArrowUpRight, Lock, Loader2,
+  Hash, Eye, BarChart3, UserCircle, Sparkles, Link2, ListTree, FolderArchive, Upload, KeyRound, FileSignature,
+  ShieldCheck, GitBranchPlus, CircuitBoard, History, Undo2, LineChart, Trash2, RotateCcw, Flag, Server, ClipboardList
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -260,6 +262,56 @@ export default function ChangelogClient() {
   const [isCompareDialogOpen, setIsCompareDialogOpen] = useState(false)
   const [isReleaseNotesDialogOpen, setIsReleaseNotesDialogOpen] = useState(false)
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null)
+
+  // Settings state management for switches
+  // General Settings
+  const [autoIncrementVersion, setAutoIncrementVersion] = useState(true)
+  // Display Preferences
+  const [showReleaseDates, setShowReleaseDates] = useState(true)
+  const [showDownloadStats, setShowDownloadStats] = useState(true)
+  const [showContributors, setShowContributors] = useState(true)
+  // Release Notes Generation
+  const [autoGenerateNotes, setAutoGenerateNotes] = useState(true)
+  const [includePRLinks, setIncludePRLinks] = useState(true)
+  const [includeIssueRefs, setIncludeIssueRefs] = useState(true)
+  const [categorizeChanges, setCategorizeChanges] = useState(true)
+  // Asset Management
+  const [autoUploadBinaries, setAutoUploadBinaries] = useState(true)
+  const [generateChecksums, setGenerateChecksums] = useState(true)
+  // Email Notification preferences
+  const [emailNotifications, setEmailNotifications] = useState<Record<string, boolean>>({
+    'New Release Published': true,
+    'Pre-release Created': true,
+    'Release Edited': false,
+    'Release Deleted': true,
+    'Download Milestone': false,
+  })
+  // Slack Integration
+  const [slackPostReleases, setSlackPostReleases] = useState(true)
+  const [slackIncludeNotes, setSlackIncludeNotes] = useState(true)
+  // Security Settings
+  const [gpgSigning, setGpgSigning] = useState(true)
+  const [requireSignedCommits, setRequireSignedCommits] = useState(false)
+  const [branchProtection, setBranchProtection] = useState(true)
+  const [requireCIPassing, setRequireCIPassing] = useState(true)
+  // Retention Policy
+  const [autoDeletePrereleases, setAutoDeletePrereleases] = useState(false)
+  const [archiveOldAssets, setArchiveOldAssets] = useState(true)
+  // Feature Flags
+  const [enableFeatureFlags, setEnableFeatureFlags] = useState(true)
+  // Audit Logs
+  const [enableAuditLogging, setEnableAuditLogging] = useState(true)
+  // Rollback Configuration
+  const [autoRollback, setAutoRollback] = useState(true)
+  const [keepRollbackHistory, setKeepRollbackHistory] = useState(true)
+  // Analytics
+  const [enableAnalytics, setEnableAnalytics] = useState(true)
+  // CI/CD trigger events
+  const [ciTriggerEvents, setCiTriggerEvents] = useState<Record<string, boolean>>({
+    'On Release Created': false,
+    'On Release Published': true,
+    'On Tag Push': false,
+  })
 
   // Real Supabase data via hook
   const { changelog, loading, error, createChange, updateChange, deleteChange, refetch } = useChangelog()
@@ -1764,7 +1816,12 @@ export default function ChangelogClient() {
                             <div className="text-gray-500">{new Date(webhook.lastTriggered).toLocaleDateString()}</div>
                           </div>
                         )}
-                        <Switch checked={webhook.isActive} />
+                        <Switch
+                          checked={webhook.isActive}
+                          onCheckedChange={(checked) => {
+                            toast.success(checked ? `Webhook "${webhook.name}" activated` : `Webhook "${webhook.name}" deactivated`)
+                          }}
+                        />
                       </div>
                     </div>
                   </CardContent>
@@ -1902,11 +1959,20 @@ export default function ChangelogClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-increment Version</p>
-                            <p className="text-sm text-gray-500">Automatically increment version on release</p>
+                          <div className="flex items-center gap-3">
+                            <Hash className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Auto-increment Version</p>
+                              <p className="text-sm text-gray-500">Automatically increment version on release</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoIncrementVersion}
+                            onCheckedChange={(checked) => {
+                              setAutoIncrementVersion(checked)
+                              toast.success(checked ? 'Auto-increment enabled' : 'Auto-increment disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1918,25 +1984,52 @@ export default function ChangelogClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Show Release Dates</p>
-                            <p className="text-sm text-gray-500">Display publication dates</p>
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Show Release Dates</p>
+                              <p className="text-sm text-gray-500">Display publication dates</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showReleaseDates}
+                            onCheckedChange={(checked) => {
+                              setShowReleaseDates(checked)
+                              toast.success(checked ? 'Release dates will be shown' : 'Release dates hidden')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Show Download Stats</p>
-                            <p className="text-sm text-gray-500">Display download counts</p>
+                          <div className="flex items-center gap-3">
+                            <BarChart3 className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Show Download Stats</p>
+                              <p className="text-sm text-gray-500">Display download counts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showDownloadStats}
+                            onCheckedChange={(checked) => {
+                              setShowDownloadStats(checked)
+                              toast.success(checked ? 'Download stats will be shown' : 'Download stats hidden')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Show Contributors</p>
-                            <p className="text-sm text-gray-500">List contributors per release</p>
+                          <div className="flex items-center gap-3">
+                            <UserCircle className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Show Contributors</p>
+                              <p className="text-sm text-gray-500">List contributors per release</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showContributors}
+                            onCheckedChange={(checked) => {
+                              setShowContributors(checked)
+                              toast.success(checked ? 'Contributors will be listed' : 'Contributors hidden')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Releases per Page</Label>
@@ -1967,35 +2060,68 @@ export default function ChangelogClient() {
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
                             <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                              <RefreshCw className="h-5 w-5 text-green-600" />
+                              <Sparkles className="h-5 w-5 text-green-600" />
                             </div>
                             <div>
                               <p className="font-medium">Auto-generate Release Notes</p>
                               <p className="text-sm text-gray-500">Generate from commit messages</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoGenerateNotes}
+                            onCheckedChange={(checked) => {
+                              setAutoGenerateNotes(checked)
+                              toast.success(checked ? 'Auto-generation enabled' : 'Auto-generation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Include PR Links</p>
-                            <p className="text-sm text-gray-500">Link to pull requests in notes</p>
+                          <div className="flex items-center gap-3">
+                            <Link2 className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Include PR Links</p>
+                              <p className="text-sm text-gray-500">Link to pull requests in notes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={includePRLinks}
+                            onCheckedChange={(checked) => {
+                              setIncludePRLinks(checked)
+                              toast.success(checked ? 'PR links will be included' : 'PR links removed')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Include Issue References</p>
-                            <p className="text-sm text-gray-500">Link to closed issues</p>
+                          <div className="flex items-center gap-3">
+                            <AlertCircle className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Include Issue References</p>
+                              <p className="text-sm text-gray-500">Link to closed issues</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={includeIssueRefs}
+                            onCheckedChange={(checked) => {
+                              setIncludeIssueRefs(checked)
+                              toast.success(checked ? 'Issue references will be included' : 'Issue references removed')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Categorize Changes</p>
-                            <p className="text-sm text-gray-500">Group by feature, fix, etc.</p>
+                          <div className="flex items-center gap-3">
+                            <ListTree className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Categorize Changes</p>
+                              <p className="text-sm text-gray-500">Group by feature, fix, etc.</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={categorizeChanges}
+                            onCheckedChange={(checked) => {
+                              setCategorizeChanges(checked)
+                              toast.success(checked ? 'Changes will be categorized' : 'Categorization disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2039,18 +2165,36 @@ Thanks to all contributors!`}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-upload Binaries</p>
-                            <p className="text-sm text-gray-500">Upload build artifacts automatically</p>
+                          <div className="flex items-center gap-3">
+                            <Upload className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Auto-upload Binaries</p>
+                              <p className="text-sm text-gray-500">Upload build artifacts automatically</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoUploadBinaries}
+                            onCheckedChange={(checked) => {
+                              setAutoUploadBinaries(checked)
+                              toast.success(checked ? 'Auto-upload enabled' : 'Auto-upload disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Generate Checksums</p>
-                            <p className="text-sm text-gray-500">SHA256 checksums for assets</p>
+                          <div className="flex items-center gap-3">
+                            <KeyRound className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Generate Checksums</p>
+                              <p className="text-sm text-gray-500">SHA256 checksums for assets</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={generateChecksums}
+                            onCheckedChange={(checked) => {
+                              setGenerateChecksums(checked)
+                              toast.success(checked ? 'Checksum generation enabled' : 'Checksum generation disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Max Asset Size</Label>
@@ -2079,18 +2223,27 @@ Thanks to all contributors!`}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         {[
-                          { label: 'New Release Published', desc: 'When a new version is released', enabled: true },
-                          { label: 'Pre-release Created', desc: 'Beta and RC versions', enabled: true },
-                          { label: 'Release Edited', desc: 'When release notes change', enabled: false },
-                          { label: 'Release Deleted', desc: 'When a release is removed', enabled: true },
-                          { label: 'Download Milestone', desc: 'When downloads hit thresholds', enabled: false },
+                          { label: 'New Release Published', desc: 'When a new version is released', icon: Tag },
+                          { label: 'Pre-release Created', desc: 'Beta and RC versions', icon: GitBranch },
+                          { label: 'Release Edited', desc: 'When release notes change', icon: FileCode },
+                          { label: 'Release Deleted', desc: 'When a release is removed', icon: Trash2 },
+                          { label: 'Download Milestone', desc: 'When downloads hit thresholds', icon: TrendingUp },
                         ].map((notif, i) => (
                           <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div>
-                              <p className="font-medium">{notif.label}</p>
-                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                            <div className="flex items-center gap-3">
+                              <notif.icon className="h-4 w-4 text-gray-500" />
+                              <div>
+                                <p className="font-medium">{notif.label}</p>
+                                <p className="text-sm text-gray-500">{notif.desc}</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked={notif.enabled} />
+                            <Switch
+                              checked={emailNotifications[notif.label] ?? false}
+                              onCheckedChange={(checked) => {
+                                setEmailNotifications(prev => ({ ...prev, [notif.label]: checked }))
+                                toast.success(checked ? `${notif.label} notifications enabled` : `${notif.label} notifications disabled`)
+                              }}
+                            />
                           </div>
                         ))}
                       </CardContent>
@@ -2115,18 +2268,36 @@ Thanks to all contributors!`}
                           <Badge className="bg-green-100 text-green-700">Connected</Badge>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Post New Releases</p>
-                            <p className="text-sm text-gray-500">Announce in channel</p>
+                          <div className="flex items-center gap-3">
+                            <MessageSquare className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Post New Releases</p>
+                              <p className="text-sm text-gray-500">Announce in channel</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={slackPostReleases}
+                            onCheckedChange={(checked) => {
+                              setSlackPostReleases(checked)
+                              toast.success(checked ? 'Slack announcements enabled' : 'Slack announcements disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Include Release Notes</p>
-                            <p className="text-sm text-gray-500">Full notes in message</p>
+                          <div className="flex items-center gap-3">
+                            <FileCode className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Include Release Notes</p>
+                              <p className="text-sm text-gray-500">Full notes in message</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={slackIncludeNotes}
+                            onCheckedChange={(checked) => {
+                              setSlackIncludeNotes(checked)
+                              toast.success(checked ? 'Release notes will be included' : 'Release notes excluded from messages')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2217,21 +2388,36 @@ Thanks to all contributors!`}
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
                             <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                              <Shield className="h-5 w-5 text-green-600" />
+                              <FileSignature className="h-5 w-5 text-green-600" />
                             </div>
                             <div>
                               <p className="font-medium">GPG Signing</p>
                               <p className="text-sm text-gray-500">Sign releases with GPG</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={gpgSigning}
+                            onCheckedChange={(checked) => {
+                              setGpgSigning(checked)
+                              toast.success(checked ? 'GPG signing enabled' : 'GPG signing disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Require Signed Commits</p>
-                            <p className="text-sm text-gray-500">Only include verified commits</p>
+                          <div className="flex items-center gap-3">
+                            <GitCommit className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Require Signed Commits</p>
+                              <p className="text-sm text-gray-500">Only include verified commits</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={requireSignedCommits}
+                            onCheckedChange={(checked) => {
+                              setRequireSignedCommits(checked)
+                              toast.success(checked ? 'Signed commits required' : 'Signed commits not required')
+                            }}
+                          />
                         </div>
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
@@ -2261,18 +2447,36 @@ Thanks to all contributors!`}
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Branch Protection</p>
-                            <p className="text-sm text-gray-500">Only release from protected branches</p>
+                          <div className="flex items-center gap-3">
+                            <GitBranchPlus className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Branch Protection</p>
+                              <p className="text-sm text-gray-500">Only release from protected branches</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={branchProtection}
+                            onCheckedChange={(checked) => {
+                              setBranchProtection(checked)
+                              toast.success(checked ? 'Branch protection enabled' : 'Branch protection disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Require CI Passing</p>
-                            <p className="text-sm text-gray-500">All checks must pass</p>
+                          <div className="flex items-center gap-3">
+                            <ShieldCheck className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Require CI Passing</p>
+                              <p className="text-sm text-gray-500">All checks must pass</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={requireCIPassing}
+                            onCheckedChange={(checked) => {
+                              setRequireCIPassing(checked)
+                              toast.success(checked ? 'CI checks required' : 'CI checks optional')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2317,11 +2521,20 @@ Thanks to all contributors!`}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-delete Pre-releases</p>
-                            <p className="text-sm text-gray-500">Remove old beta/RC versions</p>
+                          <div className="flex items-center gap-3">
+                            <Trash2 className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Auto-delete Pre-releases</p>
+                              <p className="text-sm text-gray-500">Remove old beta/RC versions</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={autoDeletePrereleases}
+                            onCheckedChange={(checked) => {
+                              setAutoDeletePrereleases(checked)
+                              toast.success(checked ? 'Auto-delete enabled for pre-releases' : 'Auto-delete disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Keep Pre-releases For</Label>
@@ -2336,11 +2549,20 @@ Thanks to all contributors!`}
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Archive Old Assets</p>
-                            <p className="text-sm text-gray-500">Move to cold storage</p>
+                          <div className="flex items-center gap-3">
+                            <FolderArchive className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Archive Old Assets</p>
+                              <p className="text-sm text-gray-500">Move to cold storage</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={archiveOldAssets}
+                            onCheckedChange={(checked) => {
+                              setArchiveOldAssets(checked)
+                              toast.success(checked ? 'Asset archiving enabled' : 'Asset archiving disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2383,11 +2605,20 @@ Thanks to all contributors!`}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable Feature Flags</p>
-                            <p className="text-sm text-gray-500">Link releases to feature flags</p>
+                          <div className="flex items-center gap-3">
+                            <Flag className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Enable Feature Flags</p>
+                              <p className="text-sm text-gray-500">Link releases to feature flags</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableFeatureFlags}
+                            onCheckedChange={(checked) => {
+                              setEnableFeatureFlags(checked)
+                              toast.success(checked ? 'Feature flags enabled' : 'Feature flags disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-4 border rounded-lg">
@@ -2455,11 +2686,20 @@ Thanks to all contributors!`}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable Audit Logging</p>
-                            <p className="text-sm text-gray-500">Log all release activities</p>
+                          <div className="flex items-center gap-3">
+                            <ClipboardList className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Enable Audit Logging</p>
+                              <p className="text-sm text-gray-500">Log all release activities</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableAuditLogging}
+                            onCheckedChange={(checked) => {
+                              setEnableAuditLogging(checked)
+                              toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Log Retention</Label>
@@ -2499,11 +2739,20 @@ Thanks to all contributors!`}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-Rollback</p>
-                            <p className="text-sm text-gray-500">Automatically rollback on errors</p>
+                          <div className="flex items-center gap-3">
+                            <Undo2 className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Auto-Rollback</p>
+                              <p className="text-sm text-gray-500">Automatically rollback on errors</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoRollback}
+                            onCheckedChange={(checked) => {
+                              setAutoRollback(checked)
+                              toast.success(checked ? 'Auto-rollback enabled' : 'Auto-rollback disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Error Threshold</Label>
@@ -2518,11 +2767,20 @@ Thanks to all contributors!`}
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Keep Rollback History</p>
-                            <p className="text-sm text-gray-500">Maintain rollback points</p>
+                          <div className="flex items-center gap-3">
+                            <History className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Keep Rollback History</p>
+                              <p className="text-sm text-gray-500">Maintain rollback points</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={keepRollbackHistory}
+                            onCheckedChange={(checked) => {
+                              setKeepRollbackHistory(checked)
+                              toast.success(checked ? 'Rollback history will be kept' : 'Rollback history disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-3 border rounded-lg text-center">
@@ -2544,11 +2802,20 @@ Thanks to all contributors!`}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable Analytics</p>
-                            <p className="text-sm text-gray-500">Track adoption and impact</p>
+                          <div className="flex items-center gap-3">
+                            <LineChart className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Enable Analytics</p>
+                              <p className="text-sm text-gray-500">Track adoption and impact</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableAnalytics}
+                            onCheckedChange={(checked) => {
+                              setEnableAnalytics(checked)
+                              toast.success(checked ? 'Analytics enabled' : 'Analytics disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-3 border rounded-lg text-center">
@@ -3021,7 +3288,13 @@ Thanks to all contributors!`}
                 <div className="space-y-2">
                   {['On Release Created', 'On Release Published', 'On Tag Push'].map(event => (
                     <div key={event} className="flex items-center gap-2">
-                      <Switch defaultChecked={event === 'On Release Published'} />
+                      <Switch
+                        checked={ciTriggerEvents[event] ?? false}
+                        onCheckedChange={(checked) => {
+                          setCiTriggerEvents(prev => ({ ...prev, [event]: checked }))
+                          toast.success(checked ? `${event} trigger enabled` : `${event} trigger disabled`)
+                        }}
+                      />
                       <Label className="font-normal">{event}</Label>
                     </div>
                   ))}

@@ -77,7 +77,18 @@ import {
   RefreshCw,
   Loader2,
   Folder,
-  Receipt
+  Receipt,
+  ToggleLeft,
+  Shuffle,
+  Timer,
+  MessageSquare,
+  Sparkles,
+  Brain,
+  Volume2,
+  Smartphone,
+  CalendarX,
+  Shield,
+  ClipboardList
 } from 'lucide-react'
 
 // World-class TanStack Table integration
@@ -370,6 +381,63 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     delay: 2
   })
   const [importFile, setImportFile] = useState<File | null>(null)
+
+  // Settings switches state - Client Fields
+  const [clientFieldsEnabled, setClientFieldsEnabled] = useState<Record<string, boolean>>({
+    'Company Name': true,
+    'Industry': true,
+    'Revenue': true,
+    'Employee Count': true,
+    'Website': true
+  })
+
+  // Settings switches state - Team Settings
+  const [territoryManagement, setTerritoryManagement] = useState(true)
+  const [roundRobinAssignment, setRoundRobinAssignment] = useState(true)
+
+  // Settings switches state - Deal Settings
+  const [autoCloseStaleDeals, setAutoCloseStaleDeals] = useState(false)
+  const [requireCloseReason, setRequireCloseReason] = useState(true)
+  const [dealScoring, setDealScoring] = useState(true)
+
+  // Settings switches state - Forecasting
+  const [aiForecasting, setAiForecasting] = useState(true)
+
+  // Settings switches state - Workflow Automation
+  const [leadAssignment, setLeadAssignment] = useState(true)
+  const [followUpReminders, setFollowUpReminders] = useState(true)
+  const [dealStageUpdates, setDealStageUpdates] = useState(false)
+  const [winLossAnalysis, setWinLossAnalysis] = useState(true)
+
+  // Settings switches state - Email Sequences
+  const [emailSequences, setEmailSequences] = useState<Record<string, boolean>>({
+    'New Lead Welcome': true,
+    'Re-engagement': true,
+    'Post-Demo Follow-up': false
+  })
+
+  // Settings switches state - AI Assistant
+  const [emailSuggestions, setEmailSuggestions] = useState(true)
+  const [meetingPrep, setMeetingPrep] = useState(true)
+  const [dealInsights, setDealInsights] = useState(true)
+
+  // Settings switches state - Email Notifications
+  const [newLeadAssigned, setNewLeadAssigned] = useState(true)
+  const [dealStageChange, setDealStageChange] = useState(true)
+  const [dealWonLost, setDealWonLost] = useState(true)
+  const [taskDue, setTaskDue] = useState(true)
+
+  // Settings switches state - In-App Notifications
+  const [realTimeUpdates, setRealTimeUpdates] = useState(true)
+  const [soundAlerts, setSoundAlerts] = useState(false)
+  const [desktopNotifications, setDesktopNotifications] = useState(true)
+
+  // Settings switches state - Mobile Push
+  const [enablePush, setEnablePush] = useState(true)
+
+  // Settings switches state - Advanced
+  const [scheduledExports, setScheduledExports] = useState(true)
+  const [enableAuditLog, setEnableAuditLog] = useState(true)
 
   // Form states for new dialogs
   const [dealForm, setDealForm] = useState({
@@ -1854,10 +1922,17 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                         {['Company Name', 'Industry', 'Revenue', 'Employee Count', 'Website'].map((field, i) => (
                           <div key={field} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-3">
+                              <FileText className="w-4 h-4 text-gray-500" />
                               <span className="font-medium">{field}</span>
                               {i < 2 && <Badge className="bg-red-100 text-red-700">Required</Badge>}
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={clientFieldsEnabled[field]}
+                              onCheckedChange={(checked) => {
+                                setClientFieldsEnabled(prev => ({ ...prev, [field]: checked }))
+                                toast.success(`${field} field ${checked ? 'enabled' : 'disabled'}`)
+                              }}
+                            />
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => setShowCustomFieldDialog(true)}>
@@ -1888,18 +1963,36 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Territory Management</p>
-                            <p className="text-sm text-gray-500">Auto-assign by region</p>
+                          <div className="flex items-center gap-3">
+                            <MapPin className="w-4 h-4 text-indigo-500" />
+                            <div>
+                              <p className="font-medium">Territory Management</p>
+                              <p className="text-sm text-gray-500">Auto-assign by region</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={territoryManagement}
+                            onCheckedChange={(checked) => {
+                              setTerritoryManagement(checked)
+                              toast.success(`Territory management ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Round Robin Assignment</p>
-                            <p className="text-sm text-gray-500">Equal lead distribution</p>
+                          <div className="flex items-center gap-3">
+                            <Shuffle className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Round Robin Assignment</p>
+                              <p className="text-sm text-gray-500">Equal lead distribution</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={roundRobinAssignment}
+                            onCheckedChange={(checked) => {
+                              setRoundRobinAssignment(checked)
+                              toast.success(`Round robin assignment ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1959,25 +2052,52 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-close Stale Deals</p>
-                            <p className="text-sm text-gray-500">Close after 90 days inactive</p>
+                          <div className="flex items-center gap-3">
+                            <Timer className="w-4 h-4 text-amber-500" />
+                            <div>
+                              <p className="font-medium">Auto-close Stale Deals</p>
+                              <p className="text-sm text-gray-500">Close after 90 days inactive</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={autoCloseStaleDeals}
+                            onCheckedChange={(checked) => {
+                              setAutoCloseStaleDeals(checked)
+                              toast.success(`Auto-close stale deals ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Require Close Reason</p>
-                            <p className="text-sm text-gray-500">On won/lost deals</p>
+                          <div className="flex items-center gap-3">
+                            <MessageSquare className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Require Close Reason</p>
+                              <p className="text-sm text-gray-500">On won/lost deals</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={requireCloseReason}
+                            onCheckedChange={(checked) => {
+                              setRequireCloseReason(checked)
+                              toast.success(`Require close reason ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Deal Scoring</p>
-                            <p className="text-sm text-gray-500">AI-powered deal scoring</p>
+                          <div className="flex items-center gap-3">
+                            <Sparkles className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Deal Scoring</p>
+                              <p className="text-sm text-gray-500">AI-powered deal scoring</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dealScoring}
+                            onCheckedChange={(checked) => {
+                              setDealScoring(checked)
+                              toast.success(`Deal scoring ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2000,11 +2120,20 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable AI Forecasting</p>
-                            <p className="text-sm text-gray-500">Predictive analytics</p>
+                          <div className="flex items-center gap-3">
+                            <Brain className="w-4 h-4 text-indigo-500" />
+                            <div>
+                              <p className="font-medium">Enable AI Forecasting</p>
+                              <p className="text-sm text-gray-500">Predictive analytics</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={aiForecasting}
+                            onCheckedChange={(checked) => {
+                              setAiForecasting(checked)
+                              toast.success(`AI forecasting ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
                           <div>
@@ -2031,32 +2160,68 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Lead Assignment</p>
-                            <p className="text-sm text-gray-500">Auto-assign new leads</p>
+                          <div className="flex items-center gap-3">
+                            <UserPlus className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Lead Assignment</p>
+                              <p className="text-sm text-gray-500">Auto-assign new leads</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={leadAssignment}
+                            onCheckedChange={(checked) => {
+                              setLeadAssignment(checked)
+                              toast.success(`Lead assignment ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Follow-up Reminders</p>
-                            <p className="text-sm text-gray-500">Auto-schedule reminders</p>
+                          <div className="flex items-center gap-3">
+                            <Bell className="w-4 h-4 text-amber-500" />
+                            <div>
+                              <p className="font-medium">Follow-up Reminders</p>
+                              <p className="text-sm text-gray-500">Auto-schedule reminders</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={followUpReminders}
+                            onCheckedChange={(checked) => {
+                              setFollowUpReminders(checked)
+                              toast.success(`Follow-up reminders ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Deal Stage Updates</p>
-                            <p className="text-sm text-gray-500">Trigger on activity</p>
+                          <div className="flex items-center gap-3">
+                            <Activity className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Deal Stage Updates</p>
+                              <p className="text-sm text-gray-500">Trigger on activity</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={dealStageUpdates}
+                            onCheckedChange={(checked) => {
+                              setDealStageUpdates(checked)
+                              toast.success(`Deal stage updates ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Win/Loss Analysis</p>
-                            <p className="text-sm text-gray-500">Auto-generate reports</p>
+                          <div className="flex items-center gap-3">
+                            <BarChart3 className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Win/Loss Analysis</p>
+                              <p className="text-sm text-gray-500">Auto-generate reports</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={winLossAnalysis}
+                            onCheckedChange={(checked) => {
+                              setWinLossAnalysis(checked)
+                              toast.success(`Win/loss analysis ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => setShowWorkflowBuilderDialog(true)}>
                           Create Custom Workflow
@@ -2076,11 +2241,20 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           { name: 'Post-Demo Follow-up', emails: 4, active: false },
                         ].map((seq) => (
                           <div key={seq.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div>
-                              <p className="font-medium">{seq.name}</p>
-                              <p className="text-xs text-gray-500">{seq.emails} emails</p>
+                            <div className="flex items-center gap-3">
+                              <Mail className="w-4 h-4 text-indigo-500" />
+                              <div>
+                                <p className="font-medium">{seq.name}</p>
+                                <p className="text-xs text-gray-500">{seq.emails} emails</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked={seq.active} />
+                            <Switch
+                              checked={emailSequences[seq.name]}
+                              onCheckedChange={(checked) => {
+                                setEmailSequences(prev => ({ ...prev, [seq.name]: checked }))
+                                toast.success(`${seq.name} sequence ${checked ? 'activated' : 'deactivated'}`)
+                              }}
+                            />
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => setShowSequenceDialog(true)}>
@@ -2097,25 +2271,52 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Email Suggestions</p>
-                            <p className="text-sm text-gray-500">AI-written email drafts</p>
+                          <div className="flex items-center gap-3">
+                            <Sparkles className="w-4 h-4 text-violet-500" />
+                            <div>
+                              <p className="font-medium">Email Suggestions</p>
+                              <p className="text-sm text-gray-500">AI-written email drafts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={emailSuggestions}
+                            onCheckedChange={(checked) => {
+                              setEmailSuggestions(checked)
+                              toast.success(`Email suggestions ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Meeting Prep</p>
-                            <p className="text-sm text-gray-500">Auto-generate briefs</p>
+                          <div className="flex items-center gap-3">
+                            <CalendarClock className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Meeting Prep</p>
+                              <p className="text-sm text-gray-500">Auto-generate briefs</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={meetingPrep}
+                            onCheckedChange={(checked) => {
+                              setMeetingPrep(checked)
+                              toast.success(`Meeting prep ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Deal Insights</p>
-                            <p className="text-sm text-gray-500">Risk analysis & suggestions</p>
+                          <div className="flex items-center gap-3">
+                            <Brain className="w-4 h-4 text-emerald-500" />
+                            <div>
+                              <p className="font-medium">Deal Insights</p>
+                              <p className="text-sm text-gray-500">Risk analysis & suggestions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dealInsights}
+                            onCheckedChange={(checked) => {
+                              setDealInsights(checked)
+                              toast.success(`Deal insights ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2206,32 +2407,68 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">New Lead Assigned</p>
-                            <p className="text-sm text-gray-500">When a lead is assigned to you</p>
+                          <div className="flex items-center gap-3">
+                            <UserPlus className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">New Lead Assigned</p>
+                              <p className="text-sm text-gray-500">When a lead is assigned to you</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={newLeadAssigned}
+                            onCheckedChange={(checked) => {
+                              setNewLeadAssigned(checked)
+                              toast.success(`New lead assigned notifications ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Deal Stage Change</p>
-                            <p className="text-sm text-gray-500">When a deal moves stages</p>
+                          <div className="flex items-center gap-3">
+                            <Activity className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Deal Stage Change</p>
+                              <p className="text-sm text-gray-500">When a deal moves stages</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dealStageChange}
+                            onCheckedChange={(checked) => {
+                              setDealStageChange(checked)
+                              toast.success(`Deal stage change notifications ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Deal Won/Lost</p>
-                            <p className="text-sm text-gray-500">When deals close</p>
+                          <div className="flex items-center gap-3">
+                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Deal Won/Lost</p>
+                              <p className="text-sm text-gray-500">When deals close</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dealWonLost}
+                            onCheckedChange={(checked) => {
+                              setDealWonLost(checked)
+                              toast.success(`Deal won/lost notifications ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Task Due</p>
-                            <p className="text-sm text-gray-500">Reminder before due date</p>
+                          <div className="flex items-center gap-3">
+                            <Clock className="w-4 h-4 text-amber-500" />
+                            <div>
+                              <p className="font-medium">Task Due</p>
+                              <p className="text-sm text-gray-500">Reminder before due date</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={taskDue}
+                            onCheckedChange={(checked) => {
+                              setTaskDue(checked)
+                              toast.success(`Task due notifications ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2243,25 +2480,52 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Real-time Updates</p>
-                            <p className="text-sm text-gray-500">Show live notifications</p>
+                          <div className="flex items-center gap-3">
+                            <Zap className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <p className="font-medium">Real-time Updates</p>
+                              <p className="text-sm text-gray-500">Show live notifications</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={realTimeUpdates}
+                            onCheckedChange={(checked) => {
+                              setRealTimeUpdates(checked)
+                              toast.success(`Real-time updates ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Sound Alerts</p>
-                            <p className="text-sm text-gray-500">Play notification sounds</p>
+                          <div className="flex items-center gap-3">
+                            <Volume2 className="w-4 h-4 text-indigo-500" />
+                            <div>
+                              <p className="font-medium">Sound Alerts</p>
+                              <p className="text-sm text-gray-500">Play notification sounds</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={soundAlerts}
+                            onCheckedChange={(checked) => {
+                              setSoundAlerts(checked)
+                              toast.success(`Sound alerts ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Desktop Notifications</p>
-                            <p className="text-sm text-gray-500">Browser push notifications</p>
+                          <div className="flex items-center gap-3">
+                            <Bell className="w-4 h-4 text-rose-500" />
+                            <div>
+                              <p className="font-medium">Desktop Notifications</p>
+                              <p className="text-sm text-gray-500">Browser push notifications</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={desktopNotifications}
+                            onCheckedChange={(checked) => {
+                              setDesktopNotifications(checked)
+                              toast.success(`Desktop notifications ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2273,11 +2537,20 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable Push</p>
-                            <p className="text-sm text-gray-500">Receive on mobile</p>
+                          <div className="flex items-center gap-3">
+                            <Smartphone className="w-4 h-4 text-teal-500" />
+                            <div>
+                              <p className="font-medium">Enable Push</p>
+                              <p className="text-sm text-gray-500">Receive on mobile</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enablePush}
+                            onCheckedChange={(checked) => {
+                              setEnablePush(checked)
+                              toast.success(`Mobile push notifications ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Quiet Hours</Label>
@@ -2342,11 +2615,20 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Scheduled Exports</p>
-                            <p className="text-sm text-gray-500">Weekly backup exports</p>
+                          <div className="flex items-center gap-3">
+                            <CalendarX className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Scheduled Exports</p>
+                              <p className="text-sm text-gray-500">Weekly backup exports</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={scheduledExports}
+                            onCheckedChange={(checked) => {
+                              setScheduledExports(checked)
+                              toast.success(`Scheduled exports ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2391,11 +2673,20 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable Audit Log</p>
-                            <p className="text-sm text-gray-500">Track all CRM changes</p>
+                          <div className="flex items-center gap-3">
+                            <ClipboardList className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Enable Audit Log</p>
+                              <p className="text-sm text-gray-500">Track all CRM changes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableAuditLog}
+                            onCheckedChange={(checked) => {
+                              setEnableAuditLog(checked)
+                              toast.success(`Audit log ${checked ? 'enabled' : 'disabled'}`)
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Log Retention</Label>
