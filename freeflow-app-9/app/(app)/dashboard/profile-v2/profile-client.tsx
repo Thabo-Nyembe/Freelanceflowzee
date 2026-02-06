@@ -550,6 +550,11 @@ interface ProfileSettings {
   email_notifications: boolean
   push_notifications: boolean
   marketing_emails: boolean
+  private_browsing?: boolean
+  activity_broadcasts?: boolean
+  data_sharing?: boolean
+  two_factor_enabled?: boolean
+  login_alerts?: boolean
   language: string
   theme: string
 }
@@ -2658,25 +2663,43 @@ export default function ProfileClient() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Profile Viewing Mode</p>
-                              <p className="text-sm text-gray-500">Browse profiles privately</p>
+                            <div className="flex items-center gap-3">
+                              <Eye className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                              <div>
+                                <p className="font-medium">Profile Viewing Mode</p>
+                                <p className="text-sm text-gray-500">Browse profiles privately</p>
+                              </div>
                             </div>
-                            <Switch />
+                            <Switch
+                              checked={settings?.private_browsing ?? false}
+                              onCheckedChange={(checked) => handleUpdateSettings({ private_browsing: checked })}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Activity Broadcasts</p>
-                              <p className="text-sm text-gray-500">Share activity updates with network</p>
+                            <div className="flex items-center gap-3">
+                              <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                              <div>
+                                <p className="font-medium">Activity Broadcasts</p>
+                                <p className="text-sm text-gray-500">Share activity updates with network</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={settings?.activity_broadcasts ?? true}
+                              onCheckedChange={(checked) => handleUpdateSettings({ activity_broadcasts: checked })}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Data Sharing</p>
-                              <p className="text-sm text-gray-500">Allow data for personalization</p>
+                            <div className="flex items-center gap-3">
+                              <Database className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                              <div>
+                                <p className="font-medium">Data Sharing</p>
+                                <p className="text-sm text-gray-500">Allow data for personalization</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={settings?.data_sharing ?? true}
+                              onCheckedChange={(checked) => handleUpdateSettings({ data_sharing: checked })}
+                            />
                           </div>
                         </CardContent>
                       </Card>
@@ -2715,18 +2738,30 @@ export default function ProfileClient() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Two-Factor Authentication</p>
-                              <p className="text-sm text-gray-500">Add an extra layer of security</p>
+                            <div className="flex items-center gap-3">
+                              <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+                              <div>
+                                <p className="font-medium">Two-Factor Authentication</p>
+                                <p className="text-sm text-gray-500">Add an extra layer of security</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={settings?.two_factor_enabled ?? false}
+                              onCheckedChange={(checked) => handleUpdateSettings({ two_factor_enabled: checked })}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Login Alerts</p>
-                              <p className="text-sm text-gray-500">Get notified of new logins</p>
+                            <div className="flex items-center gap-3">
+                              <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                              <div>
+                                <p className="font-medium">Login Alerts</p>
+                                <p className="text-sm text-gray-500">Get notified of new logins</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={settings?.login_alerts ?? true}
+                              onCheckedChange={(checked) => handleUpdateSettings({ login_alerts: checked })}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
@@ -2795,11 +2830,17 @@ export default function ProfileClient() {
                             <Input defaultValue="America/Los_Angeles" className="w-48" />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Dark Mode</p>
-                              <p className="text-sm text-gray-500">Enable dark theme</p>
+                            <div className="flex items-center gap-3">
+                              <Moon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                              <div>
+                                <p className="font-medium">Dark Mode</p>
+                                <p className="text-sm text-gray-500">Enable dark theme</p>
+                              </div>
                             </div>
-                            <Switch />
+                            <Switch
+                              checked={settings?.theme === 'dark'}
+                              onCheckedChange={(checked) => handleUpdateSettings({ theme: checked ? 'dark' : 'light' })}
+                            />
                           </div>
                         </CardContent>
                       </Card>

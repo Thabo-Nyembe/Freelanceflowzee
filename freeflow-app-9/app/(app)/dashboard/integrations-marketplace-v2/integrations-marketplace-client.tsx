@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useMarketplaceIntegrations, MarketplaceIntegration, MarketplaceStats } from '@/lib/hooks/use-marketplace-integrations'
-import { Search, Star, Download, ExternalLink, Shield, Zap, Users, TrendingUp, CheckCircle, Settings, Code, CreditCard, Package, Grid3X3, List, ChevronRight, Heart, Flag, MessageSquare, Plus, Sparkles, Verified, Lock, RefreshCw, Bell, Webhook, Key, AlertOctagon, Sliders, Mail, Copy, Loader2 } from 'lucide-react'
+import { Search, Star, Download, ExternalLink, Shield, Zap, Users, TrendingUp, CheckCircle, Settings, Code, CreditCard, Package, Grid3X3, List, ChevronRight, Heart, Flag, MessageSquare, Plus, Sparkles, Verified, Lock, RefreshCw, Bell, Webhook, Key, AlertOctagon, Sliders, Mail, Copy, Loader2, Eye, BarChart3, Globe, Lightbulb, FlaskConical, Unplug, CloudSync, Share2, Calendar, Megaphone, AlertCircle, Newspaper, DollarSign, Smartphone, Clock, ShieldCheck, Fingerprint, Network, FileText, Terminal, Timer, Bug, TestTube, RotateCcw, AlertTriangle } from 'lucide-react'
 import { apiPost, apiDelete, copyToClipboard, downloadAsJson } from '@/lib/button-handlers'
 
 // Enhanced & Competitive Upgrade Components
@@ -157,6 +157,49 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
   const [installedAppsList, setInstalledAppsList] = useState<AppListing[]>([])
   const [showWebhookDialog, setShowWebhookDialog] = useState(false)
   const [showBlockAppDialog, setShowBlockAppDialog] = useState(false)
+
+  // Settings state for controlled switches
+  // General Settings
+  const [showFeaturedApps, setShowFeaturedApps] = useState(true)
+  const [showAppRatings, setShowAppRatings] = useState(true)
+  const [showInstallCount, setShowInstallCount] = useState(true)
+  const [autoUpdateApps, setAutoUpdateApps] = useState(false)
+  const [personalizedRecommendations, setPersonalizedRecommendations] = useState(true)
+  const [showBetaApps, setShowBetaApps] = useState(false)
+
+  // Apps & Connections Settings
+  const [autoReconnect, setAutoReconnect] = useState(true)
+  const [backgroundSync, setBackgroundSync] = useState(true)
+  const [shareUsageAnalytics, setShareUsageAnalytics] = useState(false)
+  const [shareContactData, setShareContactData] = useState(false)
+  const [shareCalendarAccess, setShareCalendarAccess] = useState(true)
+
+  // Notifications Settings
+  const [newAppReleases, setNewAppReleases] = useState(true)
+  const [appUpdatesAvailable, setAppUpdatesAvailable] = useState(true)
+  const [connectionIssues, setConnectionIssues] = useState(true)
+  const [weeklyDigest, setWeeklyDigest] = useState(false)
+  const [priceChanges, setPriceChanges] = useState(true)
+  const [emailNotifications, setEmailNotifications] = useState(true)
+  const [pushNotifications, setPushNotifications] = useState(true)
+  const [slackNotifications, setSlackNotifications] = useState(false)
+  const [quietHours, setQuietHours] = useState(false)
+
+  // Security Settings
+  const [requireApproval, setRequireApproval] = useState(true)
+  const [twoFactorAuth, setTwoFactorAuth] = useState(true)
+  const [ipAllowlist, setIpAllowlist] = useState(false)
+  const [auditLogging, setAuditLogging] = useState(true)
+
+  // Advanced/Developer Settings
+  const [developerMode, setDeveloperMode] = useState(false)
+  const [showApiResponseTimes, setShowApiResponseTimes] = useState(false)
+  const [consoleLogging, setConsoleLogging] = useState(false)
+  const [mockMode, setMockMode] = useState(false)
+
+  // Configure Dialog Settings
+  const [configAutoSync, setConfigAutoSync] = useState(true)
+  const [configErrorNotifications, setConfigErrorNotifications] = useState(true)
 
   // Map MarketplaceIntegration (snake_case) to AppListing (camelCase) for UI
   const apps = useMemo<AppListing[]>(() => {
@@ -751,7 +794,16 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                   <Sparkles className="w-5 h-5 text-yellow-500" />
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Featured Apps</h2>
                 </div>
-                <Button variant="ghost" size="sm" className="text-teal-600">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-teal-600"
+                  onClick={() => {
+                    setSelectedCategory('all')
+                    toast.info(`Showing all ${apps.length} featured apps`)
+                  }}
+                >
+                  <Eye className="w-4 h-4 mr-1" />
                   View all <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1048,32 +1100,68 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
 
                         <div className="space-y-4">
                           <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="font-medium">Show Featured Apps</div>
-                              <div className="text-sm text-gray-500">Display featured apps at the top of discover page</div>
+                            <div className="flex items-center gap-3">
+                              <Sparkles className="w-5 h-5 text-yellow-500" />
+                              <div>
+                                <div className="font-medium">Show Featured Apps</div>
+                                <div className="text-sm text-gray-500">Display featured apps at the top of discover page</div>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={showFeaturedApps}
+                              onCheckedChange={(checked) => {
+                                setShowFeaturedApps(checked)
+                                toast.success(checked ? 'Featured apps will be shown' : 'Featured apps hidden')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="font-medium">Show App Ratings</div>
-                              <div className="text-sm text-gray-500">Display ratings and reviews on app cards</div>
+                            <div className="flex items-center gap-3">
+                              <Star className="w-5 h-5 text-amber-500" />
+                              <div>
+                                <div className="font-medium">Show App Ratings</div>
+                                <div className="text-sm text-gray-500">Display ratings and reviews on app cards</div>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={showAppRatings}
+                              onCheckedChange={(checked) => {
+                                setShowAppRatings(checked)
+                                toast.success(checked ? 'App ratings enabled' : 'App ratings hidden')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="font-medium">Show Install Count</div>
-                              <div className="text-sm text-gray-500">Display how many users have installed each app</div>
+                            <div className="flex items-center gap-3">
+                              <Download className="w-5 h-5 text-blue-500" />
+                              <div>
+                                <div className="font-medium">Show Install Count</div>
+                                <div className="text-sm text-gray-500">Display how many users have installed each app</div>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={showInstallCount}
+                              onCheckedChange={(checked) => {
+                                setShowInstallCount(checked)
+                                toast.success(checked ? 'Install counts visible' : 'Install counts hidden')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="font-medium">Auto-Update Apps</div>
-                              <div className="text-sm text-gray-500">Automatically update apps when new versions are available</div>
+                            <div className="flex items-center gap-3">
+                              <RefreshCw className="w-5 h-5 text-green-500" />
+                              <div>
+                                <div className="font-medium">Auto-Update Apps</div>
+                                <div className="text-sm text-gray-500">Automatically update apps when new versions are available</div>
+                              </div>
                             </div>
-                            <Switch />
+                            <Switch
+                              checked={autoUpdateApps}
+                              onCheckedChange={(checked) => {
+                                setAutoUpdateApps(checked)
+                                toast.success(checked ? 'Auto-updates enabled' : 'Auto-updates disabled')
+                              }}
+                            />
                           </div>
                         </div>
                       </CardContent>
@@ -1118,18 +1206,36 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
 
                         <div className="space-y-4">
                           <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="font-medium">Personalized Recommendations</div>
-                              <div className="text-sm text-gray-500">Use your usage data to suggest relevant apps</div>
+                            <div className="flex items-center gap-3">
+                              <Lightbulb className="w-5 h-5 text-purple-500" />
+                              <div>
+                                <div className="font-medium">Personalized Recommendations</div>
+                                <div className="text-sm text-gray-500">Use your usage data to suggest relevant apps</div>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={personalizedRecommendations}
+                              onCheckedChange={(checked) => {
+                                setPersonalizedRecommendations(checked)
+                                toast.success(checked ? 'Personalized recommendations enabled' : 'Personalized recommendations disabled')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="font-medium">Show Beta Apps</div>
-                              <div className="text-sm text-gray-500">Include apps that are in beta testing</div>
+                            <div className="flex items-center gap-3">
+                              <FlaskConical className="w-5 h-5 text-orange-500" />
+                              <div>
+                                <div className="font-medium">Show Beta Apps</div>
+                                <div className="text-sm text-gray-500">Include apps that are in beta testing</div>
+                              </div>
                             </div>
-                            <Switch />
+                            <Switch
+                              checked={showBetaApps}
+                              onCheckedChange={(checked) => {
+                                setShowBetaApps(checked)
+                                toast.success(checked ? 'Beta apps will be shown' : 'Beta apps hidden')
+                              }}
+                            />
                           </div>
                         </div>
                       </CardContent>
@@ -1246,23 +1352,44 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Auto-Reconnect</div>
-                            <div className="text-sm text-gray-500">Automatically reconnect when connection is lost</div>
+                          <div className="flex items-center gap-3">
+                            <Unplug className="w-5 h-5 text-teal-500" />
+                            <div>
+                              <div className="font-medium">Auto-Reconnect</div>
+                              <div className="text-sm text-gray-500">Automatically reconnect when connection is lost</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoReconnect}
+                            onCheckedChange={(checked) => {
+                              setAutoReconnect(checked)
+                              toast.success(checked ? 'Auto-reconnect enabled' : 'Auto-reconnect disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Background Sync</div>
-                            <div className="text-sm text-gray-500">Keep data synced in the background</div>
+                          <div className="flex items-center gap-3">
+                            <CloudSync className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Background Sync</div>
+                              <div className="text-sm text-gray-500">Keep data synced in the background</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={backgroundSync}
+                            onCheckedChange={(checked) => {
+                              setBackgroundSync(checked)
+                              toast.success(checked ? 'Background sync enabled' : 'Background sync disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Sync Frequency</div>
-                            <div className="text-sm text-gray-500">How often to sync data with connected apps</div>
+                          <div className="flex items-center gap-3">
+                            <Clock className="w-5 h-5 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Sync Frequency</div>
+                              <div className="text-sm text-gray-500">How often to sync data with connected apps</div>
+                            </div>
                           </div>
                           <Select defaultValue="5">
                             <SelectTrigger className="w-[180px]">
@@ -1286,25 +1413,52 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Share Usage Analytics</div>
-                            <div className="text-sm text-gray-500">Help apps improve by sharing anonymous usage data</div>
+                          <div className="flex items-center gap-3">
+                            <BarChart3 className="w-5 h-5 text-indigo-500" />
+                            <div>
+                              <div className="font-medium">Share Usage Analytics</div>
+                              <div className="text-sm text-gray-500">Help apps improve by sharing anonymous usage data</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={shareUsageAnalytics}
+                            onCheckedChange={(checked) => {
+                              setShareUsageAnalytics(checked)
+                              toast.success(checked ? 'Usage analytics sharing enabled' : 'Usage analytics sharing disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Share Contact Data</div>
-                            <div className="text-sm text-gray-500">Allow apps to access your contact list</div>
+                          <div className="flex items-center gap-3">
+                            <Users className="w-5 h-5 text-cyan-500" />
+                            <div>
+                              <div className="font-medium">Share Contact Data</div>
+                              <div className="text-sm text-gray-500">Allow apps to access your contact list</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={shareContactData}
+                            onCheckedChange={(checked) => {
+                              setShareContactData(checked)
+                              toast.success(checked ? 'Contact data sharing enabled' : 'Contact data sharing disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Share Calendar Access</div>
-                            <div className="text-sm text-gray-500">Allow apps to view and manage your calendar</div>
+                          <div className="flex items-center gap-3">
+                            <Calendar className="w-5 h-5 text-rose-500" />
+                            <div>
+                              <div className="font-medium">Share Calendar Access</div>
+                              <div className="text-sm text-gray-500">Allow apps to view and manage your calendar</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={shareCalendarAccess}
+                            onCheckedChange={(checked) => {
+                              setShareCalendarAccess(checked)
+                              toast.success(checked ? 'Calendar access enabled' : 'Calendar access disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1325,39 +1479,84 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                       <CardContent className="space-y-6">
                         <div className="space-y-4">
                           <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="font-medium">New App Releases</div>
-                              <div className="text-sm text-gray-500">Get notified when new apps are added to the marketplace</div>
+                            <div className="flex items-center gap-3">
+                              <Megaphone className="w-5 h-5 text-green-500" />
+                              <div>
+                                <div className="font-medium">New App Releases</div>
+                                <div className="text-sm text-gray-500">Get notified when new apps are added to the marketplace</div>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={newAppReleases}
+                              onCheckedChange={(checked) => {
+                                setNewAppReleases(checked)
+                                toast.success(checked ? 'New app release notifications enabled' : 'New app release notifications disabled')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="font-medium">App Updates Available</div>
-                              <div className="text-sm text-gray-500">Notify when updates are available for installed apps</div>
+                            <div className="flex items-center gap-3">
+                              <RefreshCw className="w-5 h-5 text-blue-500" />
+                              <div>
+                                <div className="font-medium">App Updates Available</div>
+                                <div className="text-sm text-gray-500">Notify when updates are available for installed apps</div>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={appUpdatesAvailable}
+                              onCheckedChange={(checked) => {
+                                setAppUpdatesAvailable(checked)
+                                toast.success(checked ? 'App update notifications enabled' : 'App update notifications disabled')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="font-medium">Connection Issues</div>
-                              <div className="text-sm text-gray-500">Alert when an app loses connection or encounters errors</div>
+                            <div className="flex items-center gap-3">
+                              <AlertCircle className="w-5 h-5 text-red-500" />
+                              <div>
+                                <div className="font-medium">Connection Issues</div>
+                                <div className="text-sm text-gray-500">Alert when an app loses connection or encounters errors</div>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={connectionIssues}
+                              onCheckedChange={(checked) => {
+                                setConnectionIssues(checked)
+                                toast.success(checked ? 'Connection issue alerts enabled' : 'Connection issue alerts disabled')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="font-medium">Weekly Digest</div>
-                              <div className="text-sm text-gray-500">Receive a weekly summary of marketplace activity</div>
+                            <div className="flex items-center gap-3">
+                              <Newspaper className="w-5 h-5 text-purple-500" />
+                              <div>
+                                <div className="font-medium">Weekly Digest</div>
+                                <div className="text-sm text-gray-500">Receive a weekly summary of marketplace activity</div>
+                              </div>
                             </div>
-                            <Switch />
+                            <Switch
+                              checked={weeklyDigest}
+                              onCheckedChange={(checked) => {
+                                setWeeklyDigest(checked)
+                                toast.success(checked ? 'Weekly digest enabled' : 'Weekly digest disabled')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="font-medium">Price Changes</div>
-                              <div className="text-sm text-gray-500">Notify when pricing changes for installed apps</div>
+                            <div className="flex items-center gap-3">
+                              <DollarSign className="w-5 h-5 text-emerald-500" />
+                              <div>
+                                <div className="font-medium">Price Changes</div>
+                                <div className="text-sm text-gray-500">Notify when pricing changes for installed apps</div>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={priceChanges}
+                              onCheckedChange={(checked) => {
+                                setPriceChanges(checked)
+                                toast.success(checked ? 'Price change notifications enabled' : 'Price change notifications disabled')
+                              }}
+                            />
                           </div>
                         </div>
                       </CardContent>
@@ -1379,19 +1578,31 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                               <div className="text-sm text-gray-500">user@example.com</div>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={emailNotifications}
+                            onCheckedChange={(checked) => {
+                              setEmailNotifications(checked)
+                              toast.success(checked ? 'Email notifications enabled' : 'Email notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
                           <div className="flex items-center gap-3">
                             <div className="p-2 bg-purple-100 rounded-lg">
-                              <Bell className="w-5 h-5 text-purple-600" />
+                              <Smartphone className="w-5 h-5 text-purple-600" />
                             </div>
                             <div>
                               <div className="font-medium">Push Notifications</div>
                               <div className="text-sm text-gray-500">Browser & mobile push</div>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={pushNotifications}
+                            onCheckedChange={(checked) => {
+                              setPushNotifications(checked)
+                              toast.success(checked ? 'Push notifications enabled' : 'Push notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
                           <div className="flex items-center gap-3">
@@ -1403,7 +1614,13 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                               <div className="text-sm text-gray-500">#integrations channel</div>
                             </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={slackNotifications}
+                            onCheckedChange={(checked) => {
+                              setSlackNotifications(checked)
+                              toast.success(checked ? 'Slack notifications enabled' : 'Slack notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1415,11 +1632,20 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Enable Quiet Hours</div>
-                            <div className="text-sm text-gray-500">Pause notifications during specified times</div>
+                          <div className="flex items-center gap-3">
+                            <Clock className="w-5 h-5 text-gray-500" />
+                            <div>
+                              <div className="font-medium">Enable Quiet Hours</div>
+                              <div className="text-sm text-gray-500">Pause notifications during specified times</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={quietHours}
+                            onCheckedChange={(checked) => {
+                              setQuietHours(checked)
+                              toast.success(checked ? 'Quiet hours enabled' : 'Quiet hours disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
@@ -1602,32 +1828,68 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Require Approval for New Apps</div>
-                            <div className="text-sm text-gray-500">Admin must approve before apps can be installed</div>
+                          <div className="flex items-center gap-3">
+                            <ShieldCheck className="w-5 h-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">Require Approval for New Apps</div>
+                              <div className="text-sm text-gray-500">Admin must approve before apps can be installed</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={requireApproval}
+                            onCheckedChange={(checked) => {
+                              setRequireApproval(checked)
+                              toast.success(checked ? 'App approval required' : 'App approval not required')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Two-Factor Authentication</div>
-                            <div className="text-sm text-gray-500">Require 2FA for sensitive app operations</div>
+                          <div className="flex items-center gap-3">
+                            <Fingerprint className="w-5 h-5 text-purple-500" />
+                            <div>
+                              <div className="font-medium">Two-Factor Authentication</div>
+                              <div className="text-sm text-gray-500">Require 2FA for sensitive app operations</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={twoFactorAuth}
+                            onCheckedChange={(checked) => {
+                              setTwoFactorAuth(checked)
+                              toast.success(checked ? '2FA requirement enabled' : '2FA requirement disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">IP Allowlist</div>
-                            <div className="text-sm text-gray-500">Restrict API access to specific IP addresses</div>
+                          <div className="flex items-center gap-3">
+                            <Network className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">IP Allowlist</div>
+                              <div className="text-sm text-gray-500">Restrict API access to specific IP addresses</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ipAllowlist}
+                            onCheckedChange={(checked) => {
+                              setIpAllowlist(checked)
+                              toast.success(checked ? 'IP allowlist enabled' : 'IP allowlist disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Audit Logging</div>
-                            <div className="text-sm text-gray-500">Log all app installations and configuration changes</div>
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-5 h-5 text-orange-500" />
+                            <div>
+                              <div className="font-medium">Audit Logging</div>
+                              <div className="text-sm text-gray-500">Log all app installations and configuration changes</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditLogging}
+                            onCheckedChange={(checked) => {
+                              setAuditLogging(checked)
+                              toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1726,32 +1988,68 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Developer Mode</div>
-                            <div className="text-sm text-gray-500">Enable advanced debugging and logging features</div>
+                          <div className="flex items-center gap-3">
+                            <Terminal className="w-5 h-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">Developer Mode</div>
+                              <div className="text-sm text-gray-500">Enable advanced debugging and logging features</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={developerMode}
+                            onCheckedChange={(checked) => {
+                              setDeveloperMode(checked)
+                              toast.success(checked ? 'Developer mode enabled' : 'Developer mode disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Show API Response Times</div>
-                            <div className="text-sm text-gray-500">Display response time metrics in the UI</div>
+                          <div className="flex items-center gap-3">
+                            <Timer className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Show API Response Times</div>
+                              <div className="text-sm text-gray-500">Display response time metrics in the UI</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={showApiResponseTimes}
+                            onCheckedChange={(checked) => {
+                              setShowApiResponseTimes(checked)
+                              toast.success(checked ? 'API response times visible' : 'API response times hidden')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Console Logging</div>
-                            <div className="text-sm text-gray-500">Log integration events to browser console</div>
+                          <div className="flex items-center gap-3">
+                            <Bug className="w-5 h-5 text-orange-500" />
+                            <div>
+                              <div className="font-medium">Console Logging</div>
+                              <div className="text-sm text-gray-500">Log integration events to browser console</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={consoleLogging}
+                            onCheckedChange={(checked) => {
+                              setConsoleLogging(checked)
+                              toast.success(checked ? 'Console logging enabled' : 'Console logging disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <div className="font-medium">Mock Mode</div>
-                            <div className="text-sm text-gray-500">Use mock data instead of live API calls</div>
+                          <div className="flex items-center gap-3">
+                            <TestTube className="w-5 h-5 text-purple-500" />
+                            <div>
+                              <div className="font-medium">Mock Mode</div>
+                              <div className="text-sm text-gray-500">Use mock data instead of live API calls</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={mockMode}
+                            onCheckedChange={(checked) => {
+                              setMockMode(checked)
+                              toast.success(checked ? 'Mock mode enabled' : 'Mock mode disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2208,18 +2506,36 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                 </Select>
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <div className="font-medium">Auto-sync</div>
-                  <div className="text-sm text-gray-500">Automatically sync data</div>
+                <div className="flex items-center gap-3">
+                  <RefreshCw className="w-5 h-5 text-teal-500" />
+                  <div>
+                    <div className="font-medium">Auto-sync</div>
+                    <div className="text-sm text-gray-500">Automatically sync data</div>
+                  </div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={configAutoSync}
+                  onCheckedChange={(checked) => {
+                    setConfigAutoSync(checked)
+                    toast.success(checked ? 'Auto-sync enabled' : 'Auto-sync disabled')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <div className="font-medium">Error Notifications</div>
-                  <div className="text-sm text-gray-500">Get notified on sync failures</div>
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-500" />
+                  <div>
+                    <div className="font-medium">Error Notifications</div>
+                    <div className="text-sm text-gray-500">Get notified on sync failures</div>
+                  </div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={configErrorNotifications}
+                  onCheckedChange={(checked) => {
+                    setConfigErrorNotifications(checked)
+                    toast.success(checked ? 'Error notifications enabled' : 'Error notifications disabled')
+                  }}
+                />
               </div>
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowConfigureDialog(false)}>

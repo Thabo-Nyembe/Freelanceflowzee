@@ -27,7 +27,8 @@ import {
   Inbox, UserCheck, Hourglass, CheckCheck, AlertCircle,
   Bot, Copy, MessageCircle,
   Bell, Key, Webhook, Shield, Cpu, AlertOctagon, Palette, Globe, Headphones, Sliders,
-  Loader2, ArrowLeft, HelpCircle
+  Loader2, ArrowLeft, HelpCircle,
+  ToggleLeft, ToggleRight, Sparkles, Target, Megaphone, Eye, ShieldCheck, Database, Smartphone
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -256,10 +257,16 @@ function TicketRepliesSection({
         />
         <div className="flex items-center justify-between p-2 border-t bg-gray-50 dark:bg-gray-800/50">
           <div className="flex items-center gap-2">
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+            <button
+              onClick={() => toast.info('Attach File', { description: 'File attachment feature coming soon!' })}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+            >
               <Paperclip className="w-4 h-4" />
             </button>
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+            <button
+              onClick={() => toast.info('AI Assist', { description: 'AI-powered response suggestions coming soon!' })}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+            >
               <Bot className="w-4 h-4" />
             </button>
           </div>
@@ -319,6 +326,66 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
   // Dialog states for QuickActions
   const [showMyQueueDialog, setShowMyQueueDialog] = useState(false)
   const [showMacrosQuickDialog, setShowMacrosQuickDialog] = useState(false)
+
+  // General Settings switches
+  const [autoAssignTickets, setAutoAssignTickets] = useState(true)
+  const [csatSurveys, setCsatSurveys] = useState(true)
+  const [allowTicketReopening, setAllowTicketReopening] = useState(true)
+  const [showPoweredBy, setShowPoweredBy] = useState(false)
+
+  // SLA & Routing switches
+  const [roundRobinAssignment, setRoundRobinAssignment] = useState(true)
+  const [skillBasedRouting, setSkillBasedRouting] = useState(true)
+  const [loadBalancing, setLoadBalancing] = useState(true)
+  const [autoEscalateSLA, setAutoEscalateSLA] = useState(true)
+  const [managerNotifications, setManagerNotifications] = useState(true)
+
+  // Agent Notifications switches
+  const [newTicketAssigned, setNewTicketAssigned] = useState(true)
+  const [customerReply, setCustomerReply] = useState(true)
+  const [slaWarning, setSlaWarning] = useState(true)
+  const [ticketEscalated, setTicketEscalated] = useState(true)
+  const [internalNoteAdded, setInternalNoteAdded] = useState(false)
+
+  // Customer Notifications switches
+  const [ticketCreatedConfirmation, setTicketCreatedConfirmation] = useState(true)
+  const [agentReplyNotification, setAgentReplyNotification] = useState(true)
+  const [ticketResolvedNotification, setTicketResolvedNotification] = useState(true)
+  const [satisfactionSurvey, setSatisfactionSurvey] = useState(true)
+
+  // Channels switches
+  const [emailSupport, setEmailSupport] = useState(true)
+  const [autoCreateFromEmail, setAutoCreateFromEmail] = useState(true)
+  const [enableLiveChat, setEnableLiveChat] = useState(true)
+  const [chatWidget, setChatWidget] = useState(true)
+  const [convertToTicket, setConvertToTicket] = useState(true)
+  const [enablePhoneSupport, setEnablePhoneSupport] = useState(false)
+
+  // AI & Automation switches
+  const [aiAutoResponses, setAiAutoResponses] = useState(true)
+  const [smartClassification, setSmartClassification] = useState(true)
+  const [sentimentAnalysis, setSentimentAnalysis] = useState(true)
+  const [answerBot, setAnswerBot] = useState(false)
+
+  // Macros switches
+  const [enableMacros, setEnableMacros] = useState(true)
+  const [personalMacros, setPersonalMacros] = useState(true)
+  const [macroAnalytics, setMacroAnalytics] = useState(true)
+
+  // Security switches
+  const [twoFactorAuth, setTwoFactorAuth] = useState(true)
+  const [ipWhitelisting, setIpWhitelisting] = useState(false)
+  const [auditLogging, setAuditLogging] = useState(true)
+  const [piiRedaction, setPiiRedaction] = useState(false)
+
+  // Triggers state (for the workflow triggers)
+  const [triggerStates, setTriggerStates] = useState<Record<string, boolean>>({
+    'Auto-close Resolved Tickets': true,
+    'Priority Escalation': true,
+    'Tag by Keyword': true,
+    'VIP Customer Routing': false,
+    'Merge Duplicate Tickets': false
+  })
 
   // My Queue data - empty array, data fetched from Supabase
   const [myQueueTickets] = useState<{ id: string; subject: string; priority: TicketPriority; status: string; customer: string; createdAt: string; overdue: boolean }[]>([])
@@ -666,7 +733,13 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+            <button
+              onClick={() => {
+                setActiveTab('settings')
+                toast.info('Settings', { description: 'Opened settings panel' })
+              }}
+              className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
               <Settings className="w-4 h-4" />
               Settings
             </button>
@@ -928,7 +1001,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           <Badge className={getPriorityColor(selectedTicket.priority)}>
                             {selectedTicket.priority}
                           </Badge>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                          <button
+                            onClick={() => toast.info('More Actions', { description: 'Additional options coming soon!' })}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                          >
                             <MoreHorizontal className="w-4 h-4" />
                           </button>
                         </div>
@@ -1023,11 +1099,17 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                             Close
                           </button>
                         )}
-                        <button className="px-3 py-1.5 bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded text-sm flex items-center gap-1">
+                        <button
+                          onClick={() => toast.info('Merge Tickets', { description: 'Select multiple tickets to merge them' })}
+                          className="px-3 py-1.5 bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded text-sm flex items-center gap-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
                           <Merge className="w-4 h-4" />
                           Merge
                         </button>
-                        <button className="px-3 py-1.5 bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded text-sm flex items-center gap-1">
+                        <button
+                          onClick={() => toast.info('Link Ticket', { description: 'Link this ticket to related issues' })}
+                          className="px-3 py-1.5 bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded text-sm flex items-center gap-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
                           <Link2 className="w-4 h-4" />
                           Link
                         </button>
@@ -1118,7 +1200,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                 <h2 className="text-xl font-semibold">Response Templates</h2>
                 <p className="text-muted-foreground">Pre-written responses for common scenarios</p>
               </div>
-              <button className="px-4 py-2 bg-teal-600 text-white rounded-lg flex items-center gap-2">
+              <button
+                onClick={() => toast.info('Create Macro', { description: 'Macro builder coming soon!' })}
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg flex items-center gap-2 hover:bg-teal-700"
+              >
                 <Plus className="w-4 h-4" />
                 Create Macro
               </button>
@@ -1139,7 +1224,13 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                     </p>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Used {macro.usageCount} times</span>
-                      <button className="text-teal-600 hover:text-teal-700 flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(macro.content)
+                          toast.success('Copied to clipboard', { description: `"${macro.name}" macro content copied` })
+                        }}
+                        className="text-teal-600 hover:text-teal-700 flex items-center gap-1"
+                      >
                         <Copy className="w-4 h-4" />
                         Copy
                       </button>
@@ -1307,25 +1398,52 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                         </div>
                         <div className="border-t pt-4 space-y-4">
                           <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">Auto-assign Tickets</p>
-                              <p className="text-sm text-muted-foreground">Automatically assign tickets based on agent availability</p>
+                            <div className="flex items-center gap-2">
+                              <Target className="w-4 h-4 text-teal-500" />
+                              <div>
+                                <p className="font-medium">Auto-assign Tickets</p>
+                                <p className="text-sm text-muted-foreground">Automatically assign tickets based on agent availability</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={autoAssignTickets}
+                              onCheckedChange={(checked) => {
+                                setAutoAssignTickets(checked)
+                                toast.success(checked ? 'Auto-assign enabled' : 'Auto-assign disabled')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">Customer Satisfaction Surveys</p>
-                              <p className="text-sm text-muted-foreground">Send CSAT surveys after ticket resolution</p>
+                            <div className="flex items-center gap-2">
+                              <Smile className="w-4 h-4 text-yellow-500" />
+                              <div>
+                                <p className="font-medium">Customer Satisfaction Surveys</p>
+                                <p className="text-sm text-muted-foreground">Send CSAT surveys after ticket resolution</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={csatSurveys}
+                              onCheckedChange={(checked) => {
+                                setCsatSurveys(checked)
+                                toast.success(checked ? 'CSAT surveys enabled' : 'CSAT surveys disabled')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">Allow Ticket Reopening</p>
-                              <p className="text-sm text-muted-foreground">Let customers reopen closed tickets within 7 days</p>
+                            <div className="flex items-center gap-2">
+                              <RefreshCw className="w-4 h-4 text-blue-500" />
+                              <div>
+                                <p className="font-medium">Allow Ticket Reopening</p>
+                                <p className="text-sm text-muted-foreground">Let customers reopen closed tickets within 7 days</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={allowTicketReopening}
+                              onCheckedChange={(checked) => {
+                                setAllowTicketReopening(checked)
+                                toast.success(checked ? 'Ticket reopening enabled' : 'Ticket reopening disabled')
+                              }}
+                            />
                           </div>
                         </div>
                       </CardContent>
@@ -1353,11 +1471,20 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Show "Powered by FreeFlow"</p>
-                            <p className="text-sm text-muted-foreground">Display branding on customer portal</p>
+                          <div className="flex items-center gap-2">
+                            <Eye className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Show "Powered by FreeFlow"</p>
+                              <p className="text-sm text-muted-foreground">Display branding on customer portal</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={showPoweredBy}
+                            onCheckedChange={(checked) => {
+                              setShowPoweredBy(checked)
+                              toast.success(checked ? 'Branding enabled' : 'Branding disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1394,7 +1521,12 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                                   <p className="font-medium">{sla.resolution}</p>
                                 </div>
                               </div>
-                              <button className="text-orange-600 hover:text-orange-700 text-sm font-medium">Edit</button>
+                              <button
+                                onClick={() => toast.info(`Edit ${sla.priority} SLA`, { description: 'SLA editor coming soon!' })}
+                                className="text-orange-600 hover:text-orange-700 text-sm font-medium"
+                              >
+                                Edit
+                              </button>
                             </div>
                           ))}
                         </div>
@@ -1410,25 +1542,52 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Round Robin Assignment</p>
-                            <p className="text-sm text-muted-foreground">Distribute tickets evenly among agents</p>
+                          <div className="flex items-center gap-2">
+                            <RefreshCw className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Round Robin Assignment</p>
+                              <p className="text-sm text-muted-foreground">Distribute tickets evenly among agents</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={roundRobinAssignment}
+                            onCheckedChange={(checked) => {
+                              setRoundRobinAssignment(checked)
+                              toast.success(checked ? 'Round robin enabled' : 'Round robin disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Skill-based Routing</p>
-                            <p className="text-sm text-muted-foreground">Route based on agent skills and expertise</p>
+                          <div className="flex items-center gap-2">
+                            <Target className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Skill-based Routing</p>
+                              <p className="text-sm text-muted-foreground">Route based on agent skills and expertise</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={skillBasedRouting}
+                            onCheckedChange={(checked) => {
+                              setSkillBasedRouting(checked)
+                              toast.success(checked ? 'Skill-based routing enabled' : 'Skill-based routing disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Load Balancing</p>
-                            <p className="text-sm text-muted-foreground">Consider agent workload when assigning</p>
+                          <div className="flex items-center gap-2">
+                            <BarChart3 className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Load Balancing</p>
+                              <p className="text-sm text-muted-foreground">Consider agent workload when assigning</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={loadBalancing}
+                            onCheckedChange={(checked) => {
+                              setLoadBalancing(checked)
+                              toast.success(checked ? 'Load balancing enabled' : 'Load balancing disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Max Tickets per Agent</Label>
@@ -1446,18 +1605,36 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Auto-escalate Breached SLA</p>
-                            <p className="text-sm text-muted-foreground">Escalate tickets that breach SLA targets</p>
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4 text-red-500" />
+                            <div>
+                              <p className="font-medium">Auto-escalate Breached SLA</p>
+                              <p className="text-sm text-muted-foreground">Escalate tickets that breach SLA targets</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoEscalateSLA}
+                            onCheckedChange={(checked) => {
+                              setAutoEscalateSLA(checked)
+                              toast.success(checked ? 'Auto-escalation enabled' : 'Auto-escalation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Manager Notifications</p>
-                            <p className="text-sm text-muted-foreground">Notify managers when tickets escalate</p>
+                          <div className="flex items-center gap-2">
+                            <Megaphone className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Manager Notifications</p>
+                              <p className="text-sm text-muted-foreground">Notify managers when tickets escalate</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={managerNotifications}
+                            onCheckedChange={(checked) => {
+                              setManagerNotifications(checked)
+                              toast.success(checked ? 'Manager notifications enabled' : 'Manager notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Escalation After (minutes)</Label>
@@ -1479,39 +1656,84 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">New Ticket Assigned</p>
-                            <p className="text-sm text-muted-foreground">Notify when a ticket is assigned to you</p>
+                          <div className="flex items-center gap-2">
+                            <Inbox className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">New Ticket Assigned</p>
+                              <p className="text-sm text-muted-foreground">Notify when a ticket is assigned to you</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={newTicketAssigned}
+                            onCheckedChange={(checked) => {
+                              setNewTicketAssigned(checked)
+                              toast.success(checked ? 'New ticket notifications enabled' : 'New ticket notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Customer Reply</p>
-                            <p className="text-sm text-muted-foreground">Notify when customer replies to ticket</p>
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Customer Reply</p>
+                              <p className="text-sm text-muted-foreground">Notify when customer replies to ticket</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={customerReply}
+                            onCheckedChange={(checked) => {
+                              setCustomerReply(checked)
+                              toast.success(checked ? 'Customer reply notifications enabled' : 'Customer reply notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">SLA Warning</p>
-                            <p className="text-sm text-muted-foreground">Warn before SLA breach</p>
+                          <div className="flex items-center gap-2">
+                            <Timer className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium">SLA Warning</p>
+                              <p className="text-sm text-muted-foreground">Warn before SLA breach</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={slaWarning}
+                            onCheckedChange={(checked) => {
+                              setSlaWarning(checked)
+                              toast.success(checked ? 'SLA warnings enabled' : 'SLA warnings disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Ticket Escalated</p>
-                            <p className="text-sm text-muted-foreground">Notify when ticket is escalated</p>
+                          <div className="flex items-center gap-2">
+                            <Flag className="w-4 h-4 text-red-500" />
+                            <div>
+                              <p className="font-medium">Ticket Escalated</p>
+                              <p className="text-sm text-muted-foreground">Notify when ticket is escalated</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={ticketEscalated}
+                            onCheckedChange={(checked) => {
+                              setTicketEscalated(checked)
+                              toast.success(checked ? 'Escalation notifications enabled' : 'Escalation notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Internal Note Added</p>
-                            <p className="text-sm text-muted-foreground">Notify when colleague adds internal note</p>
+                          <div className="flex items-center gap-2">
+                            <Lock className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Internal Note Added</p>
+                              <p className="text-sm text-muted-foreground">Notify when colleague adds internal note</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={internalNoteAdded}
+                            onCheckedChange={(checked) => {
+                              setInternalNoteAdded(checked)
+                              toast.success(checked ? 'Internal note notifications enabled' : 'Internal note notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1525,32 +1747,68 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Ticket Created Confirmation</p>
-                            <p className="text-sm text-muted-foreground">Send confirmation when ticket is created</p>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Ticket Created Confirmation</p>
+                              <p className="text-sm text-muted-foreground">Send confirmation when ticket is created</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={ticketCreatedConfirmation}
+                            onCheckedChange={(checked) => {
+                              setTicketCreatedConfirmation(checked)
+                              toast.success(checked ? 'Ticket confirmation enabled' : 'Ticket confirmation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Agent Reply Notification</p>
-                            <p className="text-sm text-muted-foreground">Notify customer when agent replies</p>
+                          <div className="flex items-center gap-2">
+                            <Send className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Agent Reply Notification</p>
+                              <p className="text-sm text-muted-foreground">Notify customer when agent replies</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={agentReplyNotification}
+                            onCheckedChange={(checked) => {
+                              setAgentReplyNotification(checked)
+                              toast.success(checked ? 'Agent reply notifications enabled' : 'Agent reply notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Ticket Resolved</p>
-                            <p className="text-sm text-muted-foreground">Notify when ticket is resolved</p>
+                          <div className="flex items-center gap-2">
+                            <CheckCheck className="w-4 h-4 text-teal-500" />
+                            <div>
+                              <p className="font-medium">Ticket Resolved</p>
+                              <p className="text-sm text-muted-foreground">Notify when ticket is resolved</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={ticketResolvedNotification}
+                            onCheckedChange={(checked) => {
+                              setTicketResolvedNotification(checked)
+                              toast.success(checked ? 'Resolution notifications enabled' : 'Resolution notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Satisfaction Survey</p>
-                            <p className="text-sm text-muted-foreground">Send CSAT survey after resolution</p>
+                          <div className="flex items-center gap-2">
+                            <Star className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <p className="font-medium">Satisfaction Survey</p>
+                              <p className="text-sm text-muted-foreground">Send CSAT survey after resolution</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={satisfactionSurvey}
+                            onCheckedChange={(checked) => {
+                              setSatisfactionSurvey(checked)
+                              toast.success(checked ? 'Satisfaction surveys enabled' : 'Satisfaction surveys disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1570,7 +1828,12 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                                 <FileText className="w-4 h-4 text-muted-foreground" />
                                 <span>{template}</span>
                               </div>
-                              <button className="text-orange-600 hover:text-orange-700 text-sm font-medium">Edit</button>
+                              <button
+                                onClick={() => toast.info(`Edit "${template}" Template`, { description: 'Template editor coming soon!' })}
+                                className="text-orange-600 hover:text-orange-700 text-sm font-medium"
+                              >
+                                Edit
+                              </button>
                             </div>
                           ))}
                         </div>
@@ -1590,11 +1853,20 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Email Support</p>
-                            <p className="text-sm text-muted-foreground">Accept tickets via email</p>
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Email Support</p>
+                              <p className="text-sm text-muted-foreground">Accept tickets via email</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={emailSupport}
+                            onCheckedChange={(checked) => {
+                              setEmailSupport(checked)
+                              toast.success(checked ? 'Email support enabled' : 'Email support disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
@@ -1607,11 +1879,20 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Auto-create Tickets from Email</p>
-                            <p className="text-sm text-muted-foreground">Automatically create tickets from incoming emails</p>
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Auto-create Tickets from Email</p>
+                              <p className="text-sm text-muted-foreground">Automatically create tickets from incoming emails</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoCreateFromEmail}
+                            onCheckedChange={(checked) => {
+                              setAutoCreateFromEmail(checked)
+                              toast.success(checked ? 'Auto-create enabled' : 'Auto-create disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1625,18 +1906,36 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Enable Live Chat</p>
-                            <p className="text-sm text-muted-foreground">Allow customers to chat in real-time</p>
+                          <div className="flex items-center gap-2">
+                            <MessageCircle className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Enable Live Chat</p>
+                              <p className="text-sm text-muted-foreground">Allow customers to chat in real-time</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableLiveChat}
+                            onCheckedChange={(checked) => {
+                              setEnableLiveChat(checked)
+                              toast.success(checked ? 'Live chat enabled' : 'Live chat disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Chat Widget</p>
-                            <p className="text-sm text-muted-foreground">Show chat widget on website</p>
+                          <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-teal-500" />
+                            <div>
+                              <p className="font-medium">Chat Widget</p>
+                              <p className="text-sm text-muted-foreground">Show chat widget on website</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={chatWidget}
+                            onCheckedChange={(checked) => {
+                              setChatWidget(checked)
+                              toast.success(checked ? 'Chat widget enabled' : 'Chat widget disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Business Hours Only</Label>
@@ -1652,11 +1951,20 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           </Select>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Convert to Ticket</p>
-                            <p className="text-sm text-muted-foreground">Convert chat transcripts to tickets</p>
+                          <div className="flex items-center gap-2">
+                            <Ticket className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Convert to Ticket</p>
+                              <p className="text-sm text-muted-foreground">Convert chat transcripts to tickets</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={convertToTicket}
+                            onCheckedChange={(checked) => {
+                              setConvertToTicket(checked)
+                              toast.success(checked ? 'Chat-to-ticket enabled' : 'Chat-to-ticket disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1702,20 +2010,29 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Enable Phone Support</p>
-                            <p className="text-sm text-muted-foreground">Accept calls and create tickets</p>
+                          <div className="flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Enable Phone Support</p>
+                              <p className="text-sm text-muted-foreground">Accept calls and create tickets</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enablePhoneSupport}
+                            onCheckedChange={(checked) => {
+                              setEnablePhoneSupport(checked)
+                              toast.success(checked ? 'Phone support enabled' : 'Phone support disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Support Phone Number</Label>
-                            <Input placeholder="+1 (555) 000-0000" disabled />
+                            <Input placeholder="+1 (555) 000-0000" disabled={!enablePhoneSupport} />
                           </div>
                           <div className="space-y-2">
                             <Label>Call Recording</Label>
-                            <Select defaultValue="disabled" disabled>
+                            <Select defaultValue="disabled" disabled={!enablePhoneSupport}>
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
@@ -1743,32 +2060,68 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">AI Auto-responses</p>
-                            <p className="text-sm text-muted-foreground">Use AI to suggest or auto-send responses</p>
+                          <div className="flex items-center gap-2">
+                            <Bot className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">AI Auto-responses</p>
+                              <p className="text-sm text-muted-foreground">Use AI to suggest or auto-send responses</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={aiAutoResponses}
+                            onCheckedChange={(checked) => {
+                              setAiAutoResponses(checked)
+                              toast.success(checked ? 'AI auto-responses enabled' : 'AI auto-responses disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Smart Ticket Classification</p>
-                            <p className="text-sm text-muted-foreground">AI categorizes and prioritizes tickets</p>
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Smart Ticket Classification</p>
+                              <p className="text-sm text-muted-foreground">AI categorizes and prioritizes tickets</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={smartClassification}
+                            onCheckedChange={(checked) => {
+                              setSmartClassification(checked)
+                              toast.success(checked ? 'Smart classification enabled' : 'Smart classification disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Sentiment Analysis</p>
-                            <p className="text-sm text-muted-foreground">Detect customer sentiment in messages</p>
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Sentiment Analysis</p>
+                              <p className="text-sm text-muted-foreground">Detect customer sentiment in messages</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sentimentAnalysis}
+                            onCheckedChange={(checked) => {
+                              setSentimentAnalysis(checked)
+                              toast.success(checked ? 'Sentiment analysis enabled' : 'Sentiment analysis disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Answer Bot</p>
-                            <p className="text-sm text-muted-foreground">AI bot answers common questions</p>
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4 text-teal-500" />
+                            <div>
+                              <p className="font-medium">Answer Bot</p>
+                              <p className="text-sm text-muted-foreground">AI bot answers common questions</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={answerBot}
+                            onCheckedChange={(checked) => {
+                              setAnswerBot(checked)
+                              toast.success(checked ? 'Answer bot enabled' : 'Answer bot disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>AI Confidence Threshold</Label>
@@ -1791,25 +2144,34 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                         <p className="text-sm text-muted-foreground">Automate actions based on ticket conditions</p>
                         <div className="space-y-3">
                           {[
-                            { name: 'Auto-close Resolved Tickets', description: 'Close after 3 days of no response', active: true },
-                            { name: 'Priority Escalation', description: 'Escalate high-priority after 1 hour', active: true },
-                            { name: 'Tag by Keyword', description: 'Auto-tag based on subject keywords', active: true },
-                            { name: 'VIP Customer Routing', description: 'Route VIP customers to senior agents', active: false },
-                            { name: 'Merge Duplicate Tickets', description: 'Auto-merge tickets from same customer', active: false }
+                            { name: 'Auto-close Resolved Tickets', description: 'Close after 3 days of no response', icon: <Timer className="w-4 h-4 text-blue-500" /> },
+                            { name: 'Priority Escalation', description: 'Escalate high-priority after 1 hour', icon: <Flag className="w-4 h-4 text-red-500" /> },
+                            { name: 'Tag by Keyword', description: 'Auto-tag based on subject keywords', icon: <FileText className="w-4 h-4 text-purple-500" /> },
+                            { name: 'VIP Customer Routing', description: 'Route VIP customers to senior agents', icon: <Star className="w-4 h-4 text-yellow-500" /> },
+                            { name: 'Merge Duplicate Tickets', description: 'Auto-merge tickets from same customer', icon: <Merge className="w-4 h-4 text-green-500" /> }
                           ].map(trigger => (
                             <div key={trigger.name} className="flex items-center justify-between p-3 border rounded-lg">
                               <div className="flex items-center gap-3">
-                                <Cpu className="w-4 h-4 text-muted-foreground" />
+                                {trigger.icon}
                                 <div>
                                   <p className="font-medium">{trigger.name}</p>
                                   <p className="text-sm text-muted-foreground">{trigger.description}</p>
                                 </div>
                               </div>
-                              <Switch checked={trigger.active} />
+                              <Switch
+                                checked={triggerStates[trigger.name]}
+                                onCheckedChange={(checked) => {
+                                  setTriggerStates(prev => ({ ...prev, [trigger.name]: checked }))
+                                  toast.success(checked ? `${trigger.name} enabled` : `${trigger.name} disabled`)
+                                }}
+                              />
                             </div>
                           ))}
                         </div>
-                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-orange-300 transition-colors">
+                        <button
+                          onClick={() => toast.info('Create New Trigger', { description: 'Trigger builder coming soon!' })}
+                          className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-orange-300 transition-colors"
+                        >
                           <Plus className="w-4 h-4 inline-block mr-2" />
                           Create New Trigger
                         </button>
@@ -1825,25 +2187,52 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Enable Macros</p>
-                            <p className="text-sm text-muted-foreground">Allow agents to use quick response templates</p>
+                          <div className="flex items-center gap-2">
+                            <Zap className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <p className="font-medium">Enable Macros</p>
+                              <p className="text-sm text-muted-foreground">Allow agents to use quick response templates</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableMacros}
+                            onCheckedChange={(checked) => {
+                              setEnableMacros(checked)
+                              toast.success(checked ? 'Macros enabled' : 'Macros disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Personal Macros</p>
-                            <p className="text-sm text-muted-foreground">Allow agents to create personal macros</p>
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Personal Macros</p>
+                              <p className="text-sm text-muted-foreground">Allow agents to create personal macros</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={personalMacros}
+                            onCheckedChange={(checked) => {
+                              setPersonalMacros(checked)
+                              toast.success(checked ? 'Personal macros enabled' : 'Personal macros disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Macro Usage Analytics</p>
-                            <p className="text-sm text-muted-foreground">Track macro usage and effectiveness</p>
+                          <div className="flex items-center gap-2">
+                            <BarChart3 className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Macro Usage Analytics</p>
+                              <p className="text-sm text-muted-foreground">Track macro usage and effectiveness</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={macroAnalytics}
+                            onCheckedChange={(checked) => {
+                              setMacroAnalytics(checked)
+                              toast.success(checked ? 'Macro analytics enabled' : 'Macro analytics disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1864,7 +2253,13 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} readOnly className="font-mono" />
-                            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '')
+                                toast.success('API Key copied', { description: 'API key has been copied to clipboard' })
+                              }}
+                              className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                            >
                               <Copy className="w-4 h-4" />
                             </button>
                           </div>
@@ -1925,32 +2320,68 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Two-Factor Authentication</p>
-                            <p className="text-sm text-muted-foreground">Require 2FA for all agents</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Two-Factor Authentication</p>
+                              <p className="text-sm text-muted-foreground">Require 2FA for all agents</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={twoFactorAuth}
+                            onCheckedChange={(checked) => {
+                              setTwoFactorAuth(checked)
+                              toast.success(checked ? '2FA requirement enabled' : '2FA requirement disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">IP Whitelisting</p>
-                            <p className="text-sm text-muted-foreground">Restrict access to specific IPs</p>
+                          <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">IP Whitelisting</p>
+                              <p className="text-sm text-muted-foreground">Restrict access to specific IPs</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ipWhitelisting}
+                            onCheckedChange={(checked) => {
+                              setIpWhitelisting(checked)
+                              toast.success(checked ? 'IP whitelisting enabled' : 'IP whitelisting disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Audit Logging</p>
-                            <p className="text-sm text-muted-foreground">Log all agent actions</p>
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Audit Logging</p>
+                              <p className="text-sm text-muted-foreground">Log all agent actions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditLogging}
+                            onCheckedChange={(checked) => {
+                              setAuditLogging(checked)
+                              toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">PII Redaction</p>
-                            <p className="text-sm text-muted-foreground">Auto-redact sensitive data in tickets</p>
+                          <div className="flex items-center gap-2">
+                            <Database className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium">PII Redaction</p>
+                              <p className="text-sm text-muted-foreground">Auto-redact sensitive data in tickets</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={piiRedaction}
+                            onCheckedChange={(checked) => {
+                              setPiiRedaction(checked)
+                              toast.success(checked ? 'PII redaction enabled' : 'PII redaction disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Data Retention (days)</Label>
@@ -1972,7 +2403,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                             <p className="font-medium text-red-600">Purge All Tickets</p>
                             <p className="text-sm text-muted-foreground">Permanently delete all closed tickets</p>
                           </div>
-                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
+                          <button
+                            onClick={() => toast.warning('Purge All Tickets', { description: 'This action requires admin confirmation. Feature coming soon.' })}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                          >
                             <Trash2 className="w-4 h-4" />
                             Purge
                           </button>
@@ -1982,7 +2416,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                             <p className="font-medium text-red-600">Reset All Settings</p>
                             <p className="text-sm text-muted-foreground">Reset all support settings to defaults</p>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                          <button
+                            onClick={() => toast.warning('Reset Settings', { description: 'This action requires admin confirmation. Feature coming soon.' })}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                          >
                             <RefreshCw className="w-4 h-4" />
                             Reset
                           </button>
@@ -1992,7 +2429,13 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                             <p className="font-medium text-red-600">Export All Data</p>
                             <p className="text-sm text-muted-foreground">Download all tickets and customer data</p>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              handleExportTickets()
+                              toast.info('Export Started', { description: 'Preparing your data export...' })
+                            }}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                          >
                             <Download className="w-4 h-4" />
                             Export
                           </button>

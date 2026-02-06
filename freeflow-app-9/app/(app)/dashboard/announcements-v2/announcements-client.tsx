@@ -89,6 +89,22 @@ import {
   BellRing,
   Slack,
   Braces,
+  Languages,
+  Zap,
+  Timer,
+  Calendar,
+  BarChart,
+  BellOff,
+  Bookmark,
+  Code,
+  Hash,
+  Lock,
+  Power,
+  Repeat,
+  ShieldCheck,
+  ToggleRight,
+  UserCheck,
+  Volume2,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -351,6 +367,53 @@ export default function AnnouncementsClient() {
     skipDuplicates: true,
     overwriteExisting: false
   })
+
+  // Settings switches state - General Settings
+  const [showPinnedFirst, setShowPinnedFirst] = useState(true)
+  const [showReactions, setShowReactions] = useState(true)
+  const [showViewCount, setShowViewCount] = useState(true)
+  const [enableComments, setEnableComments] = useState(true)
+  const [enableReactionsDefault, setEnableReactionsDefault] = useState(true)
+  const [enableLocalization, setEnableLocalization] = useState(false)
+
+  // Settings switches state - Delivery Settings
+  const [webDeliveryEnabled, setWebDeliveryEnabled] = useState(true)
+  const [mobileDeliveryEnabled, setMobileDeliveryEnabled] = useState(true)
+  const [emailDeliveryEnabled, setEmailDeliveryEnabled] = useState(true)
+  const [pushDeliveryEnabled, setPushDeliveryEnabled] = useState(false)
+  const [smartSchedulingEnabled, setSmartSchedulingEnabled] = useState(false)
+  const [timezoneOptimizationEnabled, setTimezoneOptimizationEnabled] = useState(false)
+  const [respectQuietHours, setRespectQuietHours] = useState(true)
+  const [batchSimilarAnnouncements, setBatchSimilarAnnouncements] = useState(false)
+
+  // Settings switches state - Notifications Settings
+  const [notifyOnPublish, setNotifyOnPublish] = useState(true)
+  const [notifyOnMilestone, setNotifyOnMilestone] = useState(true)
+  const [notifyOnComment, setNotifyOnComment] = useState(true)
+  const [weeklyDigestEnabled, setWeeklyDigestEnabled] = useState(false)
+  const [slackPostNewAnnouncements, setSlackPostNewAnnouncements] = useState(true)
+  const [slackEngagementAlerts, setSlackEngagementAlerts] = useState(false)
+
+  // Settings switches state - Branding Settings
+  const [showPoweredByBadge, setShowPoweredByBadge] = useState(false)
+  const [enableMarkdown, setEnableMarkdown] = useState(true)
+  const [enableHtml, setEnableHtml] = useState(false)
+  const [autoEmbedLinks, setAutoEmbedLinks] = useState(true)
+
+  // Settings switches state - Advanced Settings
+  const [cdnCachingEnabled, setCdnCachingEnabled] = useState(true)
+  const [requireApproval, setRequireApproval] = useState(false)
+  const [twoPersonRule, setTwoPersonRule] = useState(false)
+
+  // Dialog-specific switches state
+  const [segmentEmailDelivery, setSegmentEmailDelivery] = useState(true)
+  const [segmentPushDelivery, setSegmentPushDelivery] = useState(false)
+  const [slackIncludePreview, setSlackIncludePreview] = useState(true)
+  const [slackMentionChannel, setSlackMentionChannel] = useState(false)
+  const [slackIncludeMetrics, setSlackIncludeMetrics] = useState(true)
+  const [integrationAutoSync, setIntegrationAutoSync] = useState(true)
+  const [integrationSyncEngagement, setIntegrationSyncEngagement] = useState(true)
+  const [integrationBidirectionalSync, setIntegrationBidirectionalSync] = useState(false)
 
   // Fetch webhooks and API keys on mount
   useEffect(() => {
@@ -1923,25 +1986,52 @@ export default function AnnouncementsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Show Pinned First</div>
-                            <div className="text-sm text-gray-500">Always display pinned announcements at the top</div>
+                          <div className="flex items-center gap-3">
+                            <Pin className="h-5 w-5 text-violet-500" />
+                            <div>
+                              <div className="font-medium">Show Pinned First</div>
+                              <div className="text-sm text-gray-500">Always display pinned announcements at the top</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showPinnedFirst}
+                            onCheckedChange={(checked) => {
+                              setShowPinnedFirst(checked)
+                              toast.success(checked ? 'Pinned items will appear first' : 'Pinned priority disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Show Reactions</div>
-                            <div className="text-sm text-gray-500">Display reaction counts on announcement cards</div>
+                          <div className="flex items-center gap-3">
+                            <Heart className="h-5 w-5 text-pink-500" />
+                            <div>
+                              <div className="font-medium">Show Reactions</div>
+                              <div className="text-sm text-gray-500">Display reaction counts on announcement cards</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showReactions}
+                            onCheckedChange={(checked) => {
+                              setShowReactions(checked)
+                              toast.success(checked ? 'Reactions enabled' : 'Reactions hidden')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Show View Count</div>
-                            <div className="text-sm text-gray-500">Display view metrics on announcement cards</div>
+                          <div className="flex items-center gap-3">
+                            <Eye className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Show View Count</div>
+                              <div className="text-sm text-gray-500">Display view metrics on announcement cards</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showViewCount}
+                            onCheckedChange={(checked) => {
+                              setShowViewCount(checked)
+                              toast.success(checked ? 'View counts visible' : 'View counts hidden')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1998,18 +2088,36 @@ export default function AnnouncementsClient() {
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Enable Comments</div>
-                            <div className="text-sm text-gray-500">Allow users to comment on announcements by default</div>
+                          <div className="flex items-center gap-3">
+                            <MessageSquare className="h-5 w-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">Enable Comments</div>
+                              <div className="text-sm text-gray-500">Allow users to comment on announcements by default</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableComments}
+                            onCheckedChange={(checked) => {
+                              setEnableComments(checked)
+                              toast.success(checked ? 'Comments enabled by default' : 'Comments disabled by default')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Enable Reactions</div>
-                            <div className="text-sm text-gray-500">Allow users to react to announcements by default</div>
+                          <div className="flex items-center gap-3">
+                            <ThumbsUp className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Enable Reactions</div>
+                              <div className="text-sm text-gray-500">Allow users to react to announcements by default</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableReactionsDefault}
+                            onCheckedChange={(checked) => {
+                              setEnableReactionsDefault(checked)
+                              toast.success(checked ? 'Reactions enabled by default' : 'Reactions disabled by default')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2053,11 +2161,20 @@ export default function AnnouncementsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Localization</div>
-                            <div className="text-sm text-gray-500">Enable multi-language support for announcements</div>
+                          <div className="flex items-center gap-3">
+                            <Languages className="h-5 w-5 text-indigo-500" />
+                            <div>
+                              <div className="font-medium">Localization</div>
+                              <div className="text-sm text-gray-500">Enable multi-language support for announcements</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enableLocalization}
+                            onCheckedChange={(checked) => {
+                              setEnableLocalization(checked)
+                              toast.success(checked ? 'Multi-language support enabled' : 'Multi-language support disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2083,7 +2200,13 @@ export default function AnnouncementsClient() {
                               <div className="text-sm text-gray-500">Display announcements in the web app</div>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={webDeliveryEnabled}
+                            onCheckedChange={(checked) => {
+                              setWebDeliveryEnabled(checked)
+                              toast.success(checked ? 'Web delivery enabled' : 'Web delivery disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2093,7 +2216,13 @@ export default function AnnouncementsClient() {
                               <div className="text-sm text-gray-500">Show in mobile app feed</div>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={mobileDeliveryEnabled}
+                            onCheckedChange={(checked) => {
+                              setMobileDeliveryEnabled(checked)
+                              toast.success(checked ? 'Mobile delivery enabled' : 'Mobile delivery disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2103,7 +2232,13 @@ export default function AnnouncementsClient() {
                               <div className="text-sm text-gray-500">Send email notifications for announcements</div>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={emailDeliveryEnabled}
+                            onCheckedChange={(checked) => {
+                              setEmailDeliveryEnabled(checked)
+                              toast.success(checked ? 'Email delivery enabled' : 'Email delivery disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2113,7 +2248,13 @@ export default function AnnouncementsClient() {
                               <div className="text-sm text-gray-500">Send push notifications for urgent announcements</div>
                             </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={pushDeliveryEnabled}
+                            onCheckedChange={(checked) => {
+                              setPushDeliveryEnabled(checked)
+                              toast.success(checked ? 'Push notifications enabled' : 'Push notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2157,18 +2298,36 @@ export default function AnnouncementsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Smart Scheduling</div>
-                            <div className="text-sm text-gray-500">Automatically schedule based on user engagement patterns</div>
+                          <div className="flex items-center gap-3">
+                            <Zap className="h-5 w-5 text-amber-500" />
+                            <div>
+                              <div className="font-medium">Smart Scheduling</div>
+                              <div className="text-sm text-gray-500">Automatically schedule based on user engagement patterns</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={smartSchedulingEnabled}
+                            onCheckedChange={(checked) => {
+                              setSmartSchedulingEnabled(checked)
+                              toast.success(checked ? 'Smart scheduling enabled' : 'Smart scheduling disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Timezone Optimization</div>
-                            <div className="text-sm text-gray-500">Deliver at optimal local time for each user</div>
+                          <div className="flex items-center gap-3">
+                            <Timer className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Timezone Optimization</div>
+                              <div className="text-sm text-gray-500">Deliver at optimal local time for each user</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={timezoneOptimizationEnabled}
+                            onCheckedChange={(checked) => {
+                              setTimezoneOptimizationEnabled(checked)
+                              toast.success(checked ? 'Timezone optimization enabled' : 'Timezone optimization disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2211,18 +2370,36 @@ export default function AnnouncementsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Respect Quiet Hours</div>
-                            <div className="text-sm text-gray-500">Don't send notifications during user quiet hours</div>
+                          <div className="flex items-center gap-3">
+                            <BellOff className="h-5 w-5 text-violet-500" />
+                            <div>
+                              <div className="font-medium">Respect Quiet Hours</div>
+                              <div className="text-sm text-gray-500">Don't send notifications during user quiet hours</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={respectQuietHours}
+                            onCheckedChange={(checked) => {
+                              setRespectQuietHours(checked)
+                              toast.success(checked ? 'Quiet hours respected' : 'Quiet hours ignored')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Batch Similar Announcements</div>
-                            <div className="text-sm text-gray-500">Group related announcements into a digest</div>
+                          <div className="flex items-center gap-3">
+                            <Layers className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <div className="font-medium">Batch Similar Announcements</div>
+                              <div className="text-sm text-gray-500">Group related announcements into a digest</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={batchSimilarAnnouncements}
+                            onCheckedChange={(checked) => {
+                              setBatchSimilarAnnouncements(checked)
+                              toast.success(checked ? 'Announcement batching enabled' : 'Announcement batching disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2241,32 +2418,68 @@ export default function AnnouncementsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">New Announcement Published</div>
-                            <div className="text-sm text-gray-500">Notify admins when announcements go live</div>
+                          <div className="flex items-center gap-3">
+                            <Send className="h-5 w-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">New Announcement Published</div>
+                              <div className="text-sm text-gray-500">Notify admins when announcements go live</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyOnPublish}
+                            onCheckedChange={(checked) => {
+                              setNotifyOnPublish(checked)
+                              toast.success(checked ? 'Publish notifications enabled' : 'Publish notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Engagement Milestones</div>
-                            <div className="text-sm text-gray-500">Get notified when announcements reach engagement goals</div>
+                          <div className="flex items-center gap-3">
+                            <TrendingUp className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Engagement Milestones</div>
+                              <div className="text-sm text-gray-500">Get notified when announcements reach engagement goals</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyOnMilestone}
+                            onCheckedChange={(checked) => {
+                              setNotifyOnMilestone(checked)
+                              toast.success(checked ? 'Milestone notifications enabled' : 'Milestone notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Comment Notifications</div>
-                            <div className="text-sm text-gray-500">Receive emails for new comments on announcements</div>
+                          <div className="flex items-center gap-3">
+                            <MessageCircle className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <div className="font-medium">Comment Notifications</div>
+                              <div className="text-sm text-gray-500">Receive emails for new comments on announcements</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyOnComment}
+                            onCheckedChange={(checked) => {
+                              setNotifyOnComment(checked)
+                              toast.success(checked ? 'Comment notifications enabled' : 'Comment notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Weekly Digest</div>
-                            <div className="text-sm text-gray-500">Receive a weekly summary of announcement performance</div>
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-amber-500" />
+                            <div>
+                              <div className="font-medium">Weekly Digest</div>
+                              <div className="text-sm text-gray-500">Receive a weekly summary of announcement performance</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={weeklyDigestEnabled}
+                            onCheckedChange={(checked) => {
+                              setWeeklyDigestEnabled(checked)
+                              toast.success(checked ? 'Weekly digest enabled' : 'Weekly digest disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2293,18 +2506,36 @@ export default function AnnouncementsClient() {
                           <Button variant="outline" size="sm" onClick={() => setShowConfigureSlackDialog(true)}>Configure Channel</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Post New Announcements</div>
-                            <div className="text-sm text-gray-500">Share new announcements to Slack automatically</div>
+                          <div className="flex items-center gap-3">
+                            <Megaphone className="h-5 w-5 text-violet-500" />
+                            <div>
+                              <div className="font-medium">Post New Announcements</div>
+                              <div className="text-sm text-gray-500">Share new announcements to Slack automatically</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={slackPostNewAnnouncements}
+                            onCheckedChange={(checked) => {
+                              setSlackPostNewAnnouncements(checked)
+                              toast.success(checked ? 'Slack posting enabled' : 'Slack posting disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Engagement Alerts</div>
-                            <div className="text-sm text-gray-500">Post when announcements get significant engagement</div>
+                          <div className="flex items-center gap-3">
+                            <BarChart className="h-5 w-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">Engagement Alerts</div>
+                              <div className="text-sm text-gray-500">Post when announcements get significant engagement</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={slackEngagementAlerts}
+                            onCheckedChange={(checked) => {
+                              setSlackEngagementAlerts(checked)
+                              toast.success(checked ? 'Engagement alerts enabled' : 'Engagement alerts disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2573,11 +2804,20 @@ export default function AnnouncementsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Show "Powered by" Badge</div>
-                            <div className="text-sm text-gray-500">Display branding on public changelog</div>
+                          <div className="flex items-center gap-3">
+                            <Bookmark className="h-5 w-5 text-violet-500" />
+                            <div>
+                              <div className="font-medium">Show "Powered by" Badge</div>
+                              <div className="text-sm text-gray-500">Display branding on public changelog</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={showPoweredByBadge}
+                            onCheckedChange={(checked) => {
+                              setShowPoweredByBadge(checked)
+                              toast.success(checked ? 'Powered by badge shown' : 'Powered by badge hidden')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2591,25 +2831,52 @@ export default function AnnouncementsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Enable Markdown</div>
-                            <div className="text-sm text-gray-500">Allow markdown formatting in announcements</div>
+                          <div className="flex items-center gap-3">
+                            <Hash className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Enable Markdown</div>
+                              <div className="text-sm text-gray-500">Allow markdown formatting in announcements</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableMarkdown}
+                            onCheckedChange={(checked) => {
+                              setEnableMarkdown(checked)
+                              toast.success(checked ? 'Markdown enabled' : 'Markdown disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Enable HTML</div>
-                            <div className="text-sm text-gray-500">Allow HTML content in announcements</div>
+                          <div className="flex items-center gap-3">
+                            <Code className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <div className="font-medium">Enable HTML</div>
+                              <div className="text-sm text-gray-500">Allow HTML content in announcements</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enableHtml}
+                            onCheckedChange={(checked) => {
+                              setEnableHtml(checked)
+                              toast.success(checked ? 'HTML content enabled' : 'HTML content disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Auto-embed Links</div>
-                            <div className="text-sm text-gray-500">Automatically embed YouTube, Twitter, and other media</div>
+                          <div className="flex items-center gap-3">
+                            <Link2 className="h-5 w-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">Auto-embed Links</div>
+                              <div className="text-sm text-gray-500">Automatically embed YouTube, Twitter, and other media</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoEmbedLinks}
+                            onCheckedChange={(checked) => {
+                              setAutoEmbedLinks(checked)
+                              toast.success(checked ? 'Auto-embedding enabled' : 'Auto-embedding disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2663,11 +2930,20 @@ export default function AnnouncementsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Enable CDN Caching</div>
-                            <div className="text-sm text-gray-500">Cache announcements at edge locations</div>
+                          <div className="flex items-center gap-3">
+                            <Zap className="h-5 w-5 text-amber-500" />
+                            <div>
+                              <div className="font-medium">Enable CDN Caching</div>
+                              <div className="text-sm text-gray-500">Cache announcements at edge locations</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={cdnCachingEnabled}
+                            onCheckedChange={(checked) => {
+                              setCdnCachingEnabled(checked)
+                              toast.success(checked ? 'CDN caching enabled' : 'CDN caching disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Cache TTL</Label>
@@ -2699,18 +2975,36 @@ export default function AnnouncementsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Require Approval</div>
-                            <div className="text-sm text-gray-500">Announcements need admin approval before publishing</div>
+                          <div className="flex items-center gap-3">
+                            <ShieldCheck className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Require Approval</div>
+                              <div className="text-sm text-gray-500">Announcements need admin approval before publishing</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={requireApproval}
+                            onCheckedChange={(checked) => {
+                              setRequireApproval(checked)
+                              toast.success(checked ? 'Approval required for publishing' : 'Approval no longer required')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Two-Person Rule</div>
-                            <div className="text-sm text-gray-500">Require two approvals for critical announcements</div>
+                          <div className="flex items-center gap-3">
+                            <UserCheck className="h-5 w-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">Two-Person Rule</div>
+                              <div className="text-sm text-gray-500">Require two approvals for critical announcements</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={twoPersonRule}
+                            onCheckedChange={(checked) => {
+                              setTwoPersonRule(checked)
+                              toast.success(checked ? 'Two-person approval enabled' : 'Two-person approval disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Allowed Publishers</Label>
@@ -3386,11 +3680,25 @@ export default function AnnouncementsClient() {
                 <Label>Delivery Channels</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   <div className="flex items-center gap-2 p-2 border rounded-lg">
-                    <Switch defaultChecked />
+                    <Mail className="h-4 w-4 text-purple-500" />
+                    <Switch
+                      checked={segmentEmailDelivery}
+                      onCheckedChange={(checked) => {
+                        setSegmentEmailDelivery(checked)
+                        toast.success(checked ? 'Email delivery enabled' : 'Email delivery disabled')
+                      }}
+                    />
                     <span className="text-sm">Email</span>
                   </div>
                   <div className="flex items-center gap-2 p-2 border rounded-lg">
-                    <Switch />
+                    <BellRing className="h-4 w-4 text-amber-500" />
+                    <Switch
+                      checked={segmentPushDelivery}
+                      onCheckedChange={(checked) => {
+                        setSegmentPushDelivery(checked)
+                        toast.success(checked ? 'Push notifications enabled' : 'Push notifications disabled')
+                      }}
+                    />
                     <span className="text-sm">Push Notification</span>
                   </div>
                 </div>
@@ -3432,16 +3740,43 @@ export default function AnnouncementsClient() {
               <Label>Notification Settings</Label>
               <div className="space-y-2">
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <span className="text-sm">Include preview image</span>
-                  <Switch defaultChecked />
+                  <div className="flex items-center gap-2">
+                    <Image className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm">Include preview image</span>
+                  </div>
+                  <Switch
+                    checked={slackIncludePreview}
+                    onCheckedChange={(checked) => {
+                      setSlackIncludePreview(checked)
+                      toast.success(checked ? 'Preview images enabled' : 'Preview images disabled')
+                    }}
+                  />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <span className="text-sm">Mention @channel for urgent</span>
-                  <Switch />
+                  <div className="flex items-center gap-2">
+                    <Volume2 className="h-4 w-4 text-amber-500" />
+                    <span className="text-sm">Mention @channel for urgent</span>
+                  </div>
+                  <Switch
+                    checked={slackMentionChannel}
+                    onCheckedChange={(checked) => {
+                      setSlackMentionChannel(checked)
+                      toast.success(checked ? 'Channel mentions enabled' : 'Channel mentions disabled')
+                    }}
+                  />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <span className="text-sm">Include metrics in updates</span>
-                  <Switch defaultChecked />
+                  <div className="flex items-center gap-2">
+                    <BarChart className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">Include metrics in updates</span>
+                  </div>
+                  <Switch
+                    checked={slackIncludeMetrics}
+                    onCheckedChange={(checked) => {
+                      setSlackIncludeMetrics(checked)
+                      toast.success(checked ? 'Metrics included' : 'Metrics excluded')
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -3536,16 +3871,43 @@ export default function AnnouncementsClient() {
               <Label>Sync Settings</Label>
               <div className="space-y-2">
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <span className="text-sm">Auto-sync announcements</span>
-                  <Switch defaultChecked />
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm">Auto-sync announcements</span>
+                  </div>
+                  <Switch
+                    checked={integrationAutoSync}
+                    onCheckedChange={(checked) => {
+                      setIntegrationAutoSync(checked)
+                      toast.success(checked ? 'Auto-sync enabled' : 'Auto-sync disabled')
+                    }}
+                  />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <span className="text-sm">Sync user engagement data</span>
-                  <Switch defaultChecked />
+                  <div className="flex items-center gap-2">
+                    <BarChart className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">Sync user engagement data</span>
+                  </div>
+                  <Switch
+                    checked={integrationSyncEngagement}
+                    onCheckedChange={(checked) => {
+                      setIntegrationSyncEngagement(checked)
+                      toast.success(checked ? 'Engagement sync enabled' : 'Engagement sync disabled')
+                    }}
+                  />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <span className="text-sm">Enable bidirectional sync</span>
-                  <Switch />
+                  <div className="flex items-center gap-2">
+                    <Repeat className="h-4 w-4 text-violet-500" />
+                    <span className="text-sm">Enable bidirectional sync</span>
+                  </div>
+                  <Switch
+                    checked={integrationBidirectionalSync}
+                    onCheckedChange={(checked) => {
+                      setIntegrationBidirectionalSync(checked)
+                      toast.success(checked ? 'Bidirectional sync enabled' : 'Bidirectional sync disabled')
+                    }}
+                  />
                 </div>
               </div>
             </div>

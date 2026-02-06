@@ -24,7 +24,11 @@ import { Search, FileText, MessageCircle, ThumbsUp, ThumbsDown,
   Edit, AlertCircle, CheckCircle, Home, Layers, Settings,
   MessageSquare, Globe, Zap, Phone, Mail, Video, Headphones, Bot,
   BarChart3, Ticket, Languages, History, Send, Play, Download, Upload, RefreshCw, Bell, Archive,
-  Loader2, Check, X
+  Loader2, Check, X,
+  // Additional icons for settings switches
+  Power, Lock, Sparkles, Link2, Code, Webhook, ChartPie,
+  AtSign, BrainCircuit, ListChecks, Route, Heart,
+  CircleQuestionMark
 } from 'lucide-react'
 
 // Import real button handlers
@@ -342,6 +346,54 @@ export default function HelpDocsClient() {
     meta_title: '',
     meta_description: ''
   })
+
+  // Settings State - General
+  const [enableHelpCenter, setEnableHelpCenter] = useState(true)
+  const [requireLogin, setRequireLogin] = useState(false)
+  const [showArticleViews, setShowArticleViews] = useState(true)
+  const [enableSearchSuggestions, setEnableSearchSuggestions] = useState(true)
+
+  // Settings State - Content
+  const [articleFeedback, setArticleFeedback] = useState(true)
+  const [allowComments, setAllowComments] = useState(true)
+  const [showRelatedArticles, setShowRelatedArticles] = useState(true)
+  const [enableVersionHistory, setEnableVersionHistory] = useState(true)
+  const [communityFeatures, setCommunityFeatures] = useState(true)
+  const [autoArchiveOldArticles, setAutoArchiveOldArticles] = useState(false)
+
+  // Settings State - AI & Chatbot
+  const [enableAIAssistant, setEnableAIAssistant] = useState(true)
+  const [aiPoweredSearch, setAIPoweredSearch] = useState(true)
+  const [autoSuggestArticles, setAutoSuggestArticles] = useState(true)
+  const [smartTicketRouting, setSmartTicketRouting] = useState(true)
+  const [sentimentAnalysis, setSentimentAnalysis] = useState(true)
+  const [autoGenerateFAQs, setAutoGenerateFAQs] = useState(false)
+
+  // Settings State - Languages
+  const [multiLanguageSupport, setMultiLanguageSupport] = useState(true)
+  const [languageEnglish, setLanguageEnglish] = useState(true)
+  const [languageSpanish, setLanguageSpanish] = useState(true)
+  const [languageFrench, setLanguageFrench] = useState(false)
+  const [languageGerman, setLanguageGerman] = useState(false)
+  const [languageJapanese, setLanguageJapanese] = useState(false)
+  const [languageChinese, setLanguageChinese] = useState(false)
+  const [autoTranslate, setAutoTranslate] = useState(false)
+
+  // Settings State - Notifications
+  const [newTicketAlerts, setNewTicketAlerts] = useState(true)
+  const [articleComments, setArticleComments] = useState(true)
+  const [communityMentions, setCommunityMentions] = useState(true)
+  const [negativeFeedback, setNegativeFeedback] = useState(true)
+  const [weeklyReports, setWeeklyReports] = useState(true)
+  const [slackIntegration, setSlackIntegration] = useState(false)
+
+  // Settings State - Advanced
+  const [apiAccess, setApiAccess] = useState(true)
+  const [customDomain, setCustomDomain] = useState(false)
+  const [ssoIntegration, setSsoIntegration] = useState(true)
+  const [customCSS, setCustomCSS] = useState(false)
+  const [webhooks, setWebhooks] = useState(false)
+  const [analyticsExport, setAnalyticsExport] = useState(false)
 
   const toggleCategoryExpand = (categoryId: string) => {
     setExpandedCategories(prev =>
@@ -1946,32 +1998,68 @@ export default function HelpDocsClient() {
                         <Input defaultValue="Find answers to your questions and get support" placeholder="Describe your help center" />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Enable Help Center</h4>
-                          <p className="text-sm text-gray-500">Make help center accessible to users</p>
+                        <div className="flex items-center gap-3">
+                          <Power className="w-5 h-5 text-green-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Enable Help Center</h4>
+                            <p className="text-sm text-gray-500">Make help center accessible to users</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={enableHelpCenter}
+                          onCheckedChange={(checked) => {
+                            setEnableHelpCenter(checked)
+                            toast.success(checked ? 'Help Center enabled' : 'Help Center disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Require Login</h4>
-                          <p className="text-sm text-gray-500">Users must sign in to view articles</p>
+                        <div className="flex items-center gap-3">
+                          <Lock className="w-5 h-5 text-amber-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Require Login</h4>
+                            <p className="text-sm text-gray-500">Users must sign in to view articles</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={requireLogin}
+                          onCheckedChange={(checked) => {
+                            setRequireLogin(checked)
+                            toast.success(checked ? 'Login required for articles' : 'Articles are now public')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Show Article Views</h4>
-                          <p className="text-sm text-gray-500">Display view counts on articles</p>
+                        <div className="flex items-center gap-3">
+                          <Eye className="w-5 h-5 text-blue-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Show Article Views</h4>
+                            <p className="text-sm text-gray-500">Display view counts on articles</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showArticleViews}
+                          onCheckedChange={(checked) => {
+                            setShowArticleViews(checked)
+                            toast.success(checked ? 'Article views visible' : 'Article views hidden')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Enable Search Suggestions</h4>
-                          <p className="text-sm text-gray-500">Show popular searches as users type</p>
+                        <div className="flex items-center gap-3">
+                          <Sparkles className="w-5 h-5 text-purple-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Enable Search Suggestions</h4>
+                            <p className="text-sm text-gray-500">Show popular searches as users type</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={enableSearchSuggestions}
+                          onCheckedChange={(checked) => {
+                            setEnableSearchSuggestions(checked)
+                            toast.success(checked ? 'Search suggestions enabled' : 'Search suggestions disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1989,46 +2077,100 @@ export default function HelpDocsClient() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Article Feedback</h4>
-                          <p className="text-sm text-gray-500">Show "Was this helpful?" on articles</p>
+                        <div className="flex items-center gap-3">
+                          <ThumbsUp className="w-5 h-5 text-green-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Article Feedback</h4>
+                            <p className="text-sm text-gray-500">Show "Was this helpful?" on articles</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={articleFeedback}
+                          onCheckedChange={(checked) => {
+                            setArticleFeedback(checked)
+                            toast.success(checked ? 'Article feedback enabled' : 'Article feedback disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Allow Comments</h4>
-                          <p className="text-sm text-gray-500">Enable comments on articles</p>
+                        <div className="flex items-center gap-3">
+                          <MessageCircle className="w-5 h-5 text-blue-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Allow Comments</h4>
+                            <p className="text-sm text-gray-500">Enable comments on articles</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={allowComments}
+                          onCheckedChange={(checked) => {
+                            setAllowComments(checked)
+                            toast.success(checked ? 'Comments enabled' : 'Comments disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Show Related Articles</h4>
-                          <p className="text-sm text-gray-500">Display related content suggestions</p>
+                        <div className="flex items-center gap-3">
+                          <Link2 className="w-5 h-5 text-purple-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Show Related Articles</h4>
+                            <p className="text-sm text-gray-500">Display related content suggestions</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showRelatedArticles}
+                          onCheckedChange={(checked) => {
+                            setShowRelatedArticles(checked)
+                            toast.success(checked ? 'Related articles shown' : 'Related articles hidden')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Enable Version History</h4>
-                          <p className="text-sm text-gray-500">Track article revisions</p>
+                        <div className="flex items-center gap-3">
+                          <History className="w-5 h-5 text-amber-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Enable Version History</h4>
+                            <p className="text-sm text-gray-500">Track article revisions</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={enableVersionHistory}
+                          onCheckedChange={(checked) => {
+                            setEnableVersionHistory(checked)
+                            toast.success(checked ? 'Version history enabled' : 'Version history disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Community Features</h4>
-                          <p className="text-sm text-gray-500">Enable community discussions and Q&A</p>
+                        <div className="flex items-center gap-3">
+                          <Users className="w-5 h-5 text-indigo-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Community Features</h4>
+                            <p className="text-sm text-gray-500">Enable community discussions and Q&A</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={communityFeatures}
+                          onCheckedChange={(checked) => {
+                            setCommunityFeatures(checked)
+                            toast.success(checked ? 'Community features enabled' : 'Community features disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Auto-Archive Old Articles</h4>
-                          <p className="text-sm text-gray-500">Archive articles after 12 months without updates</p>
+                        <div className="flex items-center gap-3">
+                          <Archive className="w-5 h-5 text-gray-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Auto-Archive Old Articles</h4>
+                            <p className="text-sm text-gray-500">Archive articles after 12 months without updates</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={autoArchiveOldArticles}
+                          onCheckedChange={(checked) => {
+                            setAutoArchiveOldArticles(checked)
+                            toast.success(checked ? 'Auto-archive enabled' : 'Auto-archive disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -2046,46 +2188,100 @@ export default function HelpDocsClient() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Enable AI Assistant</h4>
-                          <p className="text-sm text-gray-500">Allow users to chat with AI for instant help</p>
+                        <div className="flex items-center gap-3">
+                          <Bot className="w-5 h-5 text-purple-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Enable AI Assistant</h4>
+                            <p className="text-sm text-gray-500">Allow users to chat with AI for instant help</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={enableAIAssistant}
+                          onCheckedChange={(checked) => {
+                            setEnableAIAssistant(checked)
+                            toast.success(checked ? 'AI Assistant enabled' : 'AI Assistant disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">AI-Powered Search</h4>
-                          <p className="text-sm text-gray-500">Use AI to improve search results</p>
+                        <div className="flex items-center gap-3">
+                          <BrainCircuit className="w-5 h-5 text-blue-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">AI-Powered Search</h4>
+                            <p className="text-sm text-gray-500">Use AI to improve search results</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={aiPoweredSearch}
+                          onCheckedChange={(checked) => {
+                            setAIPoweredSearch(checked)
+                            toast.success(checked ? 'AI search enabled' : 'AI search disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Auto-Suggest Articles</h4>
-                          <p className="text-sm text-gray-500">AI suggests relevant articles during chat</p>
+                        <div className="flex items-center gap-3">
+                          <ListChecks className="w-5 h-5 text-green-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Auto-Suggest Articles</h4>
+                            <p className="text-sm text-gray-500">AI suggests relevant articles during chat</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoSuggestArticles}
+                          onCheckedChange={(checked) => {
+                            setAutoSuggestArticles(checked)
+                            toast.success(checked ? 'Article suggestions enabled' : 'Article suggestions disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Smart Ticket Routing</h4>
-                          <p className="text-sm text-gray-500">AI assigns tickets to appropriate agents</p>
+                        <div className="flex items-center gap-3">
+                          <Route className="w-5 h-5 text-amber-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Smart Ticket Routing</h4>
+                            <p className="text-sm text-gray-500">AI assigns tickets to appropriate agents</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={smartTicketRouting}
+                          onCheckedChange={(checked) => {
+                            setSmartTicketRouting(checked)
+                            toast.success(checked ? 'Smart routing enabled' : 'Smart routing disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Sentiment Analysis</h4>
-                          <p className="text-sm text-gray-500">Analyze customer sentiment in tickets</p>
+                        <div className="flex items-center gap-3">
+                          <Heart className="w-5 h-5 text-pink-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Sentiment Analysis</h4>
+                            <p className="text-sm text-gray-500">Analyze customer sentiment in tickets</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={sentimentAnalysis}
+                          onCheckedChange={(checked) => {
+                            setSentimentAnalysis(checked)
+                            toast.success(checked ? 'Sentiment analysis enabled' : 'Sentiment analysis disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Auto-Generate FAQs</h4>
-                          <p className="text-sm text-gray-500">AI creates FAQs from common queries</p>
+                        <div className="flex items-center gap-3">
+                          <CircleQuestionMark className="w-5 h-5 text-indigo-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Auto-Generate FAQs</h4>
+                            <p className="text-sm text-gray-500">AI creates FAQs from common queries</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={autoGenerateFAQs}
+                          onCheckedChange={(checked) => {
+                            setAutoGenerateFAQs(checked)
+                            toast.success(checked ? 'FAQ auto-generation enabled' : 'FAQ auto-generation disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -2103,11 +2299,20 @@ export default function HelpDocsClient() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Multi-language Support</h4>
-                          <p className="text-sm text-gray-500">Enable article translations</p>
+                        <div className="flex items-center gap-3">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Multi-language Support</h4>
+                            <p className="text-sm text-gray-500">Enable article translations</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={multiLanguageSupport}
+                          onCheckedChange={(checked) => {
+                            setMultiLanguageSupport(checked)
+                            toast.success(checked ? 'Multi-language support enabled' : 'Multi-language support disabled')
+                          }}
+                        />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
@@ -2139,22 +2344,88 @@ export default function HelpDocsClient() {
                         </div>
                       </div>
                       <div className="space-y-4">
-                        <Label>Enabled Languages</Label>
+                        <Label className="flex items-center gap-2">
+                          <Languages className="w-4 h-4" />
+                          Enabled Languages
+                        </Label>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-                          {['English', 'Spanish', 'French', 'German', 'Japanese', 'Chinese'].map(lang => (
-                            <div key={lang} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <Switch defaultChecked={lang === 'English' || lang === 'Spanish'} />
-                              <span className="text-sm text-gray-900 dark:text-white">{lang}</span>
-                            </div>
-                          ))}
+                          <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <Switch
+                              checked={languageEnglish}
+                              onCheckedChange={(checked) => {
+                                setLanguageEnglish(checked)
+                                toast.success(checked ? 'English enabled' : 'English disabled')
+                              }}
+                            />
+                            <span className="text-sm text-gray-900 dark:text-white">English</span>
+                          </div>
+                          <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <Switch
+                              checked={languageSpanish}
+                              onCheckedChange={(checked) => {
+                                setLanguageSpanish(checked)
+                                toast.success(checked ? 'Spanish enabled' : 'Spanish disabled')
+                              }}
+                            />
+                            <span className="text-sm text-gray-900 dark:text-white">Spanish</span>
+                          </div>
+                          <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <Switch
+                              checked={languageFrench}
+                              onCheckedChange={(checked) => {
+                                setLanguageFrench(checked)
+                                toast.success(checked ? 'French enabled' : 'French disabled')
+                              }}
+                            />
+                            <span className="text-sm text-gray-900 dark:text-white">French</span>
+                          </div>
+                          <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <Switch
+                              checked={languageGerman}
+                              onCheckedChange={(checked) => {
+                                setLanguageGerman(checked)
+                                toast.success(checked ? 'German enabled' : 'German disabled')
+                              }}
+                            />
+                            <span className="text-sm text-gray-900 dark:text-white">German</span>
+                          </div>
+                          <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <Switch
+                              checked={languageJapanese}
+                              onCheckedChange={(checked) => {
+                                setLanguageJapanese(checked)
+                                toast.success(checked ? 'Japanese enabled' : 'Japanese disabled')
+                              }}
+                            />
+                            <span className="text-sm text-gray-900 dark:text-white">Japanese</span>
+                          </div>
+                          <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <Switch
+                              checked={languageChinese}
+                              onCheckedChange={(checked) => {
+                                setLanguageChinese(checked)
+                                toast.success(checked ? 'Chinese enabled' : 'Chinese disabled')
+                              }}
+                            />
+                            <span className="text-sm text-gray-900 dark:text-white">Chinese</span>
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Auto-Translate</h4>
-                          <p className="text-sm text-gray-500">Automatically translate new articles</p>
+                        <div className="flex items-center gap-3">
+                          <RefreshCw className="w-5 h-5 text-green-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Auto-Translate</h4>
+                            <p className="text-sm text-gray-500">Automatically translate new articles</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={autoTranslate}
+                          onCheckedChange={(checked) => {
+                            setAutoTranslate(checked)
+                            toast.success(checked ? 'Auto-translate enabled' : 'Auto-translate disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -2172,46 +2443,100 @@ export default function HelpDocsClient() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">New Ticket Alerts</h4>
-                          <p className="text-sm text-gray-500">Get notified when new tickets arrive</p>
+                        <div className="flex items-center gap-3">
+                          <Ticket className="w-5 h-5 text-blue-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">New Ticket Alerts</h4>
+                            <p className="text-sm text-gray-500">Get notified when new tickets arrive</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={newTicketAlerts}
+                          onCheckedChange={(checked) => {
+                            setNewTicketAlerts(checked)
+                            toast.success(checked ? 'Ticket alerts enabled' : 'Ticket alerts disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Article Comments</h4>
-                          <p className="text-sm text-gray-500">Notify when articles receive comments</p>
+                        <div className="flex items-center gap-3">
+                          <MessageSquare className="w-5 h-5 text-green-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Article Comments</h4>
+                            <p className="text-sm text-gray-500">Notify when articles receive comments</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={articleComments}
+                          onCheckedChange={(checked) => {
+                            setArticleComments(checked)
+                            toast.success(checked ? 'Comment notifications enabled' : 'Comment notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Community Mentions</h4>
-                          <p className="text-sm text-gray-500">Alert when mentioned in discussions</p>
+                        <div className="flex items-center gap-3">
+                          <AtSign className="w-5 h-5 text-purple-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Community Mentions</h4>
+                            <p className="text-sm text-gray-500">Alert when mentioned in discussions</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={communityMentions}
+                          onCheckedChange={(checked) => {
+                            setCommunityMentions(checked)
+                            toast.success(checked ? 'Mention alerts enabled' : 'Mention alerts disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Negative Feedback</h4>
-                          <p className="text-sm text-gray-500">Notify on negative article feedback</p>
+                        <div className="flex items-center gap-3">
+                          <ThumbsDown className="w-5 h-5 text-red-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Negative Feedback</h4>
+                            <p className="text-sm text-gray-500">Notify on negative article feedback</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={negativeFeedback}
+                          onCheckedChange={(checked) => {
+                            setNegativeFeedback(checked)
+                            toast.success(checked ? 'Feedback alerts enabled' : 'Feedback alerts disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Weekly Reports</h4>
-                          <p className="text-sm text-gray-500">Receive weekly analytics summary</p>
+                        <div className="flex items-center gap-3">
+                          <BarChart3 className="w-5 h-5 text-amber-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Weekly Reports</h4>
+                            <p className="text-sm text-gray-500">Receive weekly analytics summary</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={weeklyReports}
+                          onCheckedChange={(checked) => {
+                            setWeeklyReports(checked)
+                            toast.success(checked ? 'Weekly reports enabled' : 'Weekly reports disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Slack Integration</h4>
-                          <p className="text-sm text-gray-500">Send notifications to Slack</p>
+                        <div className="flex items-center gap-3">
+                          <MessageCircle className="w-5 h-5 text-indigo-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Slack Integration</h4>
+                            <p className="text-sm text-gray-500">Send notifications to Slack</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={slackIntegration}
+                          onCheckedChange={(checked) => {
+                            setSlackIntegration(checked)
+                            toast.success(checked ? 'Slack integration enabled' : 'Slack integration disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -2229,46 +2554,100 @@ export default function HelpDocsClient() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">API Access</h4>
-                          <p className="text-sm text-gray-500">Enable REST API access</p>
+                        <div className="flex items-center gap-3">
+                          <Code className="w-5 h-5 text-blue-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">API Access</h4>
+                            <p className="text-sm text-gray-500">Enable REST API access</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={apiAccess}
+                          onCheckedChange={(checked) => {
+                            setApiAccess(checked)
+                            toast.success(checked ? 'API access enabled' : 'API access disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Custom Domain</h4>
-                          <p className="text-sm text-gray-500">Use custom domain for help center</p>
+                        <div className="flex items-center gap-3">
+                          <Globe className="w-5 h-5 text-green-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Custom Domain</h4>
+                            <p className="text-sm text-gray-500">Use custom domain for help center</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={customDomain}
+                          onCheckedChange={(checked) => {
+                            setCustomDomain(checked)
+                            toast.success(checked ? 'Custom domain enabled' : 'Custom domain disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">SSO Integration</h4>
-                          <p className="text-sm text-gray-500">Enable single sign-on</p>
+                        <div className="flex items-center gap-3">
+                          <Lock className="w-5 h-5 text-purple-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">SSO Integration</h4>
+                            <p className="text-sm text-gray-500">Enable single sign-on</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={ssoIntegration}
+                          onCheckedChange={(checked) => {
+                            setSsoIntegration(checked)
+                            toast.success(checked ? 'SSO integration enabled' : 'SSO integration disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Custom CSS</h4>
-                          <p className="text-sm text-gray-500">Add custom styling</p>
+                        <div className="flex items-center gap-3">
+                          <Layers className="w-5 h-5 text-amber-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Custom CSS</h4>
+                            <p className="text-sm text-gray-500">Add custom styling</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={customCSS}
+                          onCheckedChange={(checked) => {
+                            setCustomCSS(checked)
+                            toast.success(checked ? 'Custom CSS enabled' : 'Custom CSS disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Webhooks</h4>
-                          <p className="text-sm text-gray-500">Send events to external services</p>
+                        <div className="flex items-center gap-3">
+                          <Webhook className="w-5 h-5 text-indigo-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Webhooks</h4>
+                            <p className="text-sm text-gray-500">Send events to external services</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={webhooks}
+                          onCheckedChange={(checked) => {
+                            setWebhooks(checked)
+                            toast.success(checked ? 'Webhooks enabled' : 'Webhooks disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">Analytics Export</h4>
-                          <p className="text-sm text-gray-500">Export analytics to third-party tools</p>
+                        <div className="flex items-center gap-3">
+                          <ChartPie className="w-5 h-5 text-pink-600" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Analytics Export</h4>
+                            <p className="text-sm text-gray-500">Export analytics to third-party tools</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={analyticsExport}
+                          onCheckedChange={(checked) => {
+                            setAnalyticsExport(checked)
+                            toast.success(checked ? 'Analytics export enabled' : 'Analytics export disabled')
+                          }}
+                        />
                       </div>
                       <div className="pt-6 border-t dark:border-gray-700">
                         <h4 className="font-medium text-red-600 mb-4">Danger Zone</h4>

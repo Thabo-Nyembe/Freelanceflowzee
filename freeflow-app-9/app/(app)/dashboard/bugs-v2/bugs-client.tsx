@@ -57,7 +57,40 @@ import {
   Workflow,
   Archive,
   History,
-  Loader2
+  Loader2,
+  UserCog,
+  Search as SearchIcon,
+  Clock,
+  FileText,
+  Undo,
+  MessageCircle,
+  Power,
+  Mail,
+  Hash,
+  AlertOctagon,
+  CalendarDays,
+  AtSign,
+  Key,
+  Network,
+  ScrollText,
+  LogOut,
+  EyeOff,
+  Code,
+  Webhook,
+  FormInput,
+  FlaskConical,
+  TestTube,
+  Link as LinkIcon,
+  MonitorPlay,
+  RefreshCcw,
+  ClipboardCheck,
+  PieChart,
+  UsersRound,
+  Gauge,
+  MessagesSquare,
+  Copy as CopyIcon,
+  UserPlus,
+  Lock
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -370,6 +403,57 @@ export default function BugsClient() {
   const [isImporting, setIsImporting] = useState(false)
   const [selectedLabelFilters, setSelectedLabelFilters] = useState<string[]>([])
   const [showFullActivityLogDialog, setShowFullActivityLogDialog] = useState(false)
+
+  // Settings Switch States - General
+  const [autoAssignBugs, setAutoAssignBugs] = useState(true)
+  const [duplicateDetection, setDuplicateDetection] = useState(true)
+  const [timeTracking, setTimeTracking] = useState(true)
+  const [requireDescription, setRequireDescription] = useState(false)
+
+  // Settings Switch States - Workflow
+  const [allowBackwardTransitions, setAllowBackwardTransitions] = useState(true)
+  const [requireCommentsOnTransition, setRequireCommentsOnTransition] = useState(false)
+  const [autoCloseResolvedBugs, setAutoCloseResolvedBugs] = useState(true)
+
+  // Settings Switch States - Notifications
+  const [emailNotifications, setEmailNotifications] = useState(true)
+  const [slackNotifications, setSlackNotifications] = useState(true)
+  const [criticalBugAlerts, setCriticalBugAlerts] = useState(true)
+  const [dailyDigest, setDailyDigest] = useState(false)
+  const [mentionNotifications, setMentionNotifications] = useState(true)
+
+  // Settings Switch States - Security
+  const [twoFactorAuth, setTwoFactorAuth] = useState(true)
+  const [ipWhitelist, setIpWhitelist] = useState(false)
+  const [auditLogging, setAuditLogging] = useState(true)
+  const [sessionTimeout, setSessionTimeout] = useState(true)
+  const [sensitiveBugMasking, setSensitiveBugMasking] = useState(true)
+
+  // Settings Switch States - Advanced
+  const [apiAccess, setApiAccess] = useState(true)
+  const [webhooks, setWebhooks] = useState(true)
+  const [customFields, setCustomFields] = useState(true)
+  const [betaFeatures, setBetaFeatures] = useState(false)
+
+  // Test Suite Switch States
+  const [unitTests, setUnitTests] = useState(true)
+  const [integrationTests, setIntegrationTests] = useState(true)
+  const [e2eTests, setE2eTests] = useState(false)
+  const [regressionTests, setRegressionTests] = useState(true)
+
+  // Export Report Switch States
+  const [includeBugDetails, setIncludeBugDetails] = useState(true)
+  const [includeResolutionStats, setIncludeResolutionStats] = useState(true)
+  const [includeTeamPerformance, setIncludeTeamPerformance] = useState(true)
+  const [includeSeverityBreakdown, setIncludeSeverityBreakdown] = useState(true)
+  const [includeCommentsActivity, setIncludeCommentsActivity] = useState(false)
+
+  // Import Dialog Switch States
+  const [skipDuplicates, setSkipDuplicates] = useState(true)
+  const [autoAssignToMe, setAutoAssignToMe] = useState(false)
+
+  // Comment Dialog Switch State
+  const [isInternalNote, setIsInternalNote] = useState(false)
 
   // Handler for toggling label filter
   const handleLabelFilterToggle = (labelId: string, labelName: string) => {
@@ -1700,32 +1784,68 @@ export default function BugsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Auto-assign Bugs</p>
-                            <p className="text-sm text-gray-500">Automatically assign new bugs based on component</p>
+                          <div className="flex items-center gap-3">
+                            <UserCog className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Auto-assign Bugs</p>
+                              <p className="text-sm text-gray-500">Automatically assign new bugs based on component</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoAssignBugs}
+                            onCheckedChange={(checked) => {
+                              setAutoAssignBugs(checked)
+                              toast.success(checked ? 'Auto-assign bugs enabled' : 'Auto-assign bugs disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Duplicate Detection</p>
-                            <p className="text-sm text-gray-500">Suggest potential duplicates when creating bugs</p>
+                          <div className="flex items-center gap-3">
+                            <SearchIcon className="w-5 h-5 text-purple-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Duplicate Detection</p>
+                              <p className="text-sm text-gray-500">Suggest potential duplicates when creating bugs</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={duplicateDetection}
+                            onCheckedChange={(checked) => {
+                              setDuplicateDetection(checked)
+                              toast.success(checked ? 'Duplicate detection enabled' : 'Duplicate detection disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Time Tracking</p>
-                            <p className="text-sm text-gray-500">Enable time estimates and logging</p>
+                          <div className="flex items-center gap-3">
+                            <Clock className="w-5 h-5 text-green-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Time Tracking</p>
+                              <p className="text-sm text-gray-500">Enable time estimates and logging</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={timeTracking}
+                            onCheckedChange={(checked) => {
+                              setTimeTracking(checked)
+                              toast.success(checked ? 'Time tracking enabled' : 'Time tracking disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Require Description</p>
-                            <p className="text-sm text-gray-500">Make description field mandatory</p>
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-5 h-5 text-orange-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Require Description</p>
+                              <p className="text-sm text-gray-500">Make description field mandatory</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={requireDescription}
+                            onCheckedChange={(checked) => {
+                              setRequireDescription(checked)
+                              toast.success(checked ? 'Description is now required' : 'Description is now optional')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1784,25 +1904,52 @@ export default function BugsClient() {
                         ))}
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Allow Backward Transitions</p>
-                          <p className="text-sm text-gray-500">Enable moving bugs to previous states</p>
+                        <div className="flex items-center gap-3">
+                          <Undo className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Allow Backward Transitions</p>
+                            <p className="text-sm text-gray-500">Enable moving bugs to previous states</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={allowBackwardTransitions}
+                          onCheckedChange={(checked) => {
+                            setAllowBackwardTransitions(checked)
+                            toast.success(checked ? 'Backward transitions enabled' : 'Backward transitions disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Require Comments on Transition</p>
-                          <p className="text-sm text-gray-500">Force comment when changing status</p>
+                        <div className="flex items-center gap-3">
+                          <MessageCircle className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Require Comments on Transition</p>
+                            <p className="text-sm text-gray-500">Force comment when changing status</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={requireCommentsOnTransition}
+                          onCheckedChange={(checked) => {
+                            setRequireCommentsOnTransition(checked)
+                            toast.success(checked ? 'Comments required on status change' : 'Comments optional on status change')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Auto-close Resolved Bugs</p>
-                          <p className="text-sm text-gray-500">Automatically close after 14 days</p>
+                        <div className="flex items-center gap-3">
+                          <Power className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-close Resolved Bugs</p>
+                            <p className="text-sm text-gray-500">Automatically close after 14 days</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoCloseResolvedBugs}
+                          onCheckedChange={(checked) => {
+                            setAutoCloseResolvedBugs(checked)
+                            toast.success(checked ? 'Auto-close enabled for resolved bugs' : 'Auto-close disabled for resolved bugs')
+                          }}
+                        />
                       </div>
                       <Button variant="outline" className="w-full" onClick={() => {
                         const statusName = prompt('Enter custom status name:')
@@ -1829,39 +1976,84 @@ export default function BugsClient() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Email Notifications</p>
-                          <p className="text-sm text-gray-500">Receive bug updates via email</p>
+                        <div className="flex items-center gap-3">
+                          <Mail className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Email Notifications</p>
+                            <p className="text-sm text-gray-500">Receive bug updates via email</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={emailNotifications}
+                          onCheckedChange={(checked) => {
+                            setEmailNotifications(checked)
+                            toast.success(checked ? 'Email notifications enabled' : 'Email notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Slack Notifications</p>
-                          <p className="text-sm text-gray-500">Get notified in Slack channels</p>
+                        <div className="flex items-center gap-3">
+                          <Hash className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Slack Notifications</p>
+                            <p className="text-sm text-gray-500">Get notified in Slack channels</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={slackNotifications}
+                          onCheckedChange={(checked) => {
+                            setSlackNotifications(checked)
+                            toast.success(checked ? 'Slack notifications enabled' : 'Slack notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Critical Bug Alerts</p>
-                          <p className="text-sm text-gray-500">Immediate alerts for critical issues</p>
+                        <div className="flex items-center gap-3">
+                          <AlertOctagon className="w-5 h-5 text-red-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Critical Bug Alerts</p>
+                            <p className="text-sm text-gray-500">Immediate alerts for critical issues</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={criticalBugAlerts}
+                          onCheckedChange={(checked) => {
+                            setCriticalBugAlerts(checked)
+                            toast.success(checked ? 'Critical bug alerts enabled' : 'Critical bug alerts disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Daily Digest</p>
-                          <p className="text-sm text-gray-500">Summary of bug activity each day</p>
+                        <div className="flex items-center gap-3">
+                          <CalendarDays className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Daily Digest</p>
+                            <p className="text-sm text-gray-500">Summary of bug activity each day</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={dailyDigest}
+                          onCheckedChange={(checked) => {
+                            setDailyDigest(checked)
+                            toast.success(checked ? 'Daily digest enabled' : 'Daily digest disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Mention Notifications</p>
-                          <p className="text-sm text-gray-500">Alert when mentioned in comments</p>
+                        <div className="flex items-center gap-3">
+                          <AtSign className="w-5 h-5 text-orange-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Mention Notifications</p>
+                            <p className="text-sm text-gray-500">Alert when mentioned in comments</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={mentionNotifications}
+                          onCheckedChange={(checked) => {
+                            setMentionNotifications(checked)
+                            toast.success(checked ? 'Mention notifications enabled' : 'Mention notifications disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1931,39 +2123,84 @@ export default function BugsClient() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
-                          <p className="text-sm text-gray-500">Require 2FA for all users</p>
+                        <div className="flex items-center gap-3">
+                          <Key className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
+                            <p className="text-sm text-gray-500">Require 2FA for all users</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={twoFactorAuth}
+                          onCheckedChange={(checked) => {
+                            setTwoFactorAuth(checked)
+                            toast.success(checked ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">IP Whitelist</p>
-                          <p className="text-sm text-gray-500">Restrict access by IP address</p>
+                        <div className="flex items-center gap-3">
+                          <Network className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">IP Whitelist</p>
+                            <p className="text-sm text-gray-500">Restrict access by IP address</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={ipWhitelist}
+                          onCheckedChange={(checked) => {
+                            setIpWhitelist(checked)
+                            toast.success(checked ? 'IP whitelist enabled' : 'IP whitelist disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
-                          <p className="text-sm text-gray-500">Track all user actions</p>
+                        <div className="flex items-center gap-3">
+                          <ScrollText className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                            <p className="text-sm text-gray-500">Track all user actions</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={auditLogging}
+                          onCheckedChange={(checked) => {
+                            setAuditLogging(checked)
+                            toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Session Timeout</p>
-                          <p className="text-sm text-gray-500">Auto-logout after 30 minutes of inactivity</p>
+                        <div className="flex items-center gap-3">
+                          <LogOut className="w-5 h-5 text-orange-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Session Timeout</p>
+                            <p className="text-sm text-gray-500">Auto-logout after 30 minutes of inactivity</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={sessionTimeout}
+                          onCheckedChange={(checked) => {
+                            setSessionTimeout(checked)
+                            toast.success(checked ? 'Session timeout enabled' : 'Session timeout disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Sensitive Bug Masking</p>
-                          <p className="text-sm text-gray-500">Hide security bugs from non-members</p>
+                        <div className="flex items-center gap-3">
+                          <EyeOff className="w-5 h-5 text-red-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Sensitive Bug Masking</p>
+                            <p className="text-sm text-gray-500">Hide security bugs from non-members</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={sensitiveBugMasking}
+                          onCheckedChange={(checked) => {
+                            setSensitiveBugMasking(checked)
+                            toast.success(checked ? 'Sensitive bug masking enabled' : 'Sensitive bug masking disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1982,32 +2219,68 @@ export default function BugsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">API Access</p>
-                            <p className="text-sm text-gray-500">Enable REST API for bug management</p>
+                          <div className="flex items-center gap-3">
+                            <Code className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">API Access</p>
+                              <p className="text-sm text-gray-500">Enable REST API for bug management</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={apiAccess}
+                            onCheckedChange={(checked) => {
+                              setApiAccess(checked)
+                              toast.success(checked ? 'API access enabled' : 'API access disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Webhooks</p>
-                            <p className="text-sm text-gray-500">Send events to external endpoints</p>
+                          <div className="flex items-center gap-3">
+                            <Webhook className="w-5 h-5 text-purple-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Webhooks</p>
+                              <p className="text-sm text-gray-500">Send events to external endpoints</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={webhooks}
+                            onCheckedChange={(checked) => {
+                              setWebhooks(checked)
+                              toast.success(checked ? 'Webhooks enabled' : 'Webhooks disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Custom Fields</p>
-                            <p className="text-sm text-gray-500">Add custom fields to bug forms</p>
+                          <div className="flex items-center gap-3">
+                            <FormInput className="w-5 h-5 text-green-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Custom Fields</p>
+                              <p className="text-sm text-gray-500">Add custom fields to bug forms</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={customFields}
+                            onCheckedChange={(checked) => {
+                              setCustomFields(checked)
+                              toast.success(checked ? 'Custom fields enabled' : 'Custom fields disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">Beta Features</p>
-                            <p className="text-sm text-gray-500">Access experimental features</p>
+                          <div className="flex items-center gap-3">
+                            <FlaskConical className="w-5 h-5 text-orange-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Beta Features</p>
+                              <p className="text-sm text-gray-500">Access experimental features</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={betaFeatures}
+                            onCheckedChange={(checked) => {
+                              setBetaFeatures(checked)
+                              toast.success(checked ? 'Beta features enabled' : 'Beta features disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2599,20 +2872,56 @@ export default function BugsClient() {
                 <Label>Test Configuration</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <span className="text-sm">Unit Tests</span>
-                    <Switch defaultChecked />
+                    <div className="flex items-center gap-2">
+                      <TestTube className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm">Unit Tests</span>
+                    </div>
+                    <Switch
+                      checked={unitTests}
+                      onCheckedChange={(checked) => {
+                        setUnitTests(checked)
+                        toast.info(checked ? 'Unit tests enabled' : 'Unit tests disabled')
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <span className="text-sm">Integration Tests</span>
-                    <Switch defaultChecked />
+                    <div className="flex items-center gap-2">
+                      <LinkIcon className="w-4 h-4 text-purple-500" />
+                      <span className="text-sm">Integration Tests</span>
+                    </div>
+                    <Switch
+                      checked={integrationTests}
+                      onCheckedChange={(checked) => {
+                        setIntegrationTests(checked)
+                        toast.info(checked ? 'Integration tests enabled' : 'Integration tests disabled')
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <span className="text-sm">E2E Tests</span>
-                    <Switch />
+                    <div className="flex items-center gap-2">
+                      <MonitorPlay className="w-4 h-4 text-green-500" />
+                      <span className="text-sm">E2E Tests</span>
+                    </div>
+                    <Switch
+                      checked={e2eTests}
+                      onCheckedChange={(checked) => {
+                        setE2eTests(checked)
+                        toast.info(checked ? 'E2E tests enabled' : 'E2E tests disabled')
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <span className="text-sm">Regression Tests</span>
-                    <Switch defaultChecked />
+                    <div className="flex items-center gap-2">
+                      <RefreshCcw className="w-4 h-4 text-orange-500" />
+                      <span className="text-sm">Regression Tests</span>
+                    </div>
+                    <Switch
+                      checked={regressionTests}
+                      onCheckedChange={(checked) => {
+                        setRegressionTests(checked)
+                        toast.info(checked ? 'Regression tests enabled' : 'Regression tests disabled')
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -2719,24 +3028,69 @@ export default function BugsClient() {
                 <Label>Include in Report</Label>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <span className="text-sm">Bug Details</span>
-                    <Switch defaultChecked />
+                    <div className="flex items-center gap-2">
+                      <ClipboardCheck className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm">Bug Details</span>
+                    </div>
+                    <Switch
+                      checked={includeBugDetails}
+                      onCheckedChange={(checked) => {
+                        setIncludeBugDetails(checked)
+                        toast.info(checked ? 'Bug details will be included' : 'Bug details will be excluded')
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <span className="text-sm">Resolution Statistics</span>
-                    <Switch defaultChecked />
+                    <div className="flex items-center gap-2">
+                      <PieChart className="w-4 h-4 text-green-500" />
+                      <span className="text-sm">Resolution Statistics</span>
+                    </div>
+                    <Switch
+                      checked={includeResolutionStats}
+                      onCheckedChange={(checked) => {
+                        setIncludeResolutionStats(checked)
+                        toast.info(checked ? 'Resolution stats will be included' : 'Resolution stats will be excluded')
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <span className="text-sm">Team Performance</span>
-                    <Switch defaultChecked />
+                    <div className="flex items-center gap-2">
+                      <UsersRound className="w-4 h-4 text-purple-500" />
+                      <span className="text-sm">Team Performance</span>
+                    </div>
+                    <Switch
+                      checked={includeTeamPerformance}
+                      onCheckedChange={(checked) => {
+                        setIncludeTeamPerformance(checked)
+                        toast.info(checked ? 'Team performance will be included' : 'Team performance will be excluded')
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <span className="text-sm">Severity Breakdown</span>
-                    <Switch defaultChecked />
+                    <div className="flex items-center gap-2">
+                      <Gauge className="w-4 h-4 text-orange-500" />
+                      <span className="text-sm">Severity Breakdown</span>
+                    </div>
+                    <Switch
+                      checked={includeSeverityBreakdown}
+                      onCheckedChange={(checked) => {
+                        setIncludeSeverityBreakdown(checked)
+                        toast.info(checked ? 'Severity breakdown will be included' : 'Severity breakdown will be excluded')
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <span className="text-sm">Comments & Activity</span>
-                    <Switch />
+                    <div className="flex items-center gap-2">
+                      <MessagesSquare className="w-4 h-4 text-teal-500" />
+                      <span className="text-sm">Comments & Activity</span>
+                    </div>
+                    <Switch
+                      checked={includeCommentsActivity}
+                      onCheckedChange={(checked) => {
+                        setIncludeCommentsActivity(checked)
+                        toast.info(checked ? 'Comments & activity will be included' : 'Comments & activity will be excluded')
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -3023,12 +3377,30 @@ export default function BugsClient() {
               )}
               <div className="space-y-2">
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <span className="text-sm">Skip duplicates</span>
-                  <Switch defaultChecked />
+                  <div className="flex items-center gap-2">
+                    <CopyIcon className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm">Skip duplicates</span>
+                  </div>
+                  <Switch
+                    checked={skipDuplicates}
+                    onCheckedChange={(checked) => {
+                      setSkipDuplicates(checked)
+                      toast.info(checked ? 'Duplicates will be skipped' : 'Duplicates will be imported')
+                    }}
+                  />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <span className="text-sm">Auto-assign to me</span>
-                  <Switch />
+                  <div className="flex items-center gap-2">
+                    <UserPlus className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">Auto-assign to me</span>
+                  </div>
+                  <Switch
+                    checked={autoAssignToMe}
+                    onCheckedChange={(checked) => {
+                      setAutoAssignToMe(checked)
+                      toast.info(checked ? 'Bugs will be auto-assigned to you' : 'Bugs will not be auto-assigned')
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -3224,12 +3596,21 @@ export default function BugsClient() {
                 />
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                <span className="text-sm">Internal note (team only)</span>
-                <Switch />
+                <div className="flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-orange-500" />
+                  <span className="text-sm">Internal note (team only)</span>
+                </div>
+                <Switch
+                  checked={isInternalNote}
+                  onCheckedChange={(checked) => {
+                    setIsInternalNote(checked)
+                    toast.info(checked ? 'Comment will be internal (team only)' : 'Comment will be public')
+                  }}
+                />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => { setShowAddCommentDialog(false); setCommentText(''); }}>
+              <Button variant="outline" onClick={() => { setShowAddCommentDialog(false); setCommentText(''); setIsInternalNote(false); }}>
                 Cancel
               </Button>
               <Button onClick={handleAddComment} disabled={!commentText.trim()}>

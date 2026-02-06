@@ -73,7 +73,36 @@ import {
   Fingerprint,
   ScanEye,
   Network,
-  Unplug
+  Unplug,
+  Eye,
+  BarChart3,
+  BadgeCheck,
+  Zap,
+  FlaskConical,
+  MousePointerClick,
+  AlertTriangle,
+  ShieldOff,
+  FileCheck,
+  ShieldAlert,
+  UserX,
+  Ban,
+  Activity,
+  BellPlus,
+  ShieldQuestion,
+  Newspaper,
+  UserCog,
+  MessageSquareReply,
+  BellMinus,
+  Rocket,
+  PauseCircle,
+  Monitor,
+  WifiOff,
+  Wifi,
+  Terminal,
+  Bug,
+  Radio,
+  BookMarked,
+  UserCheck
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -203,6 +232,62 @@ export default function ExtensionsClient() {
   const [extensions, setExtensions] = useState<Extension[]>(initialExtensions)
   const [configDialogOpen, setConfigDialogOpen] = useState(false)
   const [configExtension, setConfigExtension] = useState<Extension | null>(null)
+
+  // Display settings state
+  const [showRatings, setShowRatings] = useState(true)
+  const [showInstallCounts, setShowInstallCounts] = useState(true)
+  const [showVerifiedBadges, setShowVerifiedBadges] = useState(true)
+
+  // Update settings state
+  const [autoUpdateExtensions, setAutoUpdateExtensions] = useState(true)
+  const [prereleaseUpdates, setPrereleaseUpdates] = useState(false)
+
+  // Permissions settings state
+  const [clickToActivate, setClickToActivate] = useState(false)
+  const [siteAccessWarnings, setSiteAccessWarnings] = useState(true)
+  const [blockOnSecureSites, setBlockOnSecureSites] = useState(true)
+  const [reviewPermissionsOnUpdate, setReviewPermissionsOnUpdate] = useState(true)
+  const [blockHighRiskPermissions, setBlockHighRiskPermissions] = useState(true)
+  const [incognitoModeAccess, setIncognitoModeAccess] = useState(false)
+
+  // Privacy settings state
+  const [blockDataCollection, setBlockDataCollection] = useState(false)
+  const [extensionAnalytics, setExtensionAnalytics] = useState(false)
+
+  // Notification settings state
+  const [notifyUpdateAvailable, setNotifyUpdateAvailable] = useState(true)
+  const [notifyPermissionChanges, setNotifyPermissionChanges] = useState(true)
+  const [notifySecurityAlerts, setNotifySecurityAlerts] = useState(true)
+  const [notifyNewFeatured, setNotifyNewFeatured] = useState(false)
+
+  // Email notification settings state
+  const [weeklyStoreDigest, setWeeklyStoreDigest] = useState(false)
+  const [developerUpdates, setDeveloperUpdates] = useState(true)
+  const [reviewResponses, setReviewResponses] = useState(true)
+
+  // Push notification settings state
+  const [criticalAlertsOnly, setCriticalAlertsOnly] = useState(false)
+
+  // Performance settings state
+  const [lazyLoading, setLazyLoading] = useState(true)
+  const [suspendInactive, setSuspendInactive] = useState(false)
+  const [hardwareAcceleration, setHardwareAcceleration] = useState(true)
+
+  // Network settings state
+  const [limitBackgroundData, setLimitBackgroundData] = useState(false)
+  const [offlineMode, setOfflineMode] = useState(true)
+
+  // Developer settings state
+  const [developerMode, setDeveloperMode] = useState(false)
+  const [serviceWorkerLogging, setServiceWorkerLogging] = useState(false)
+  const [errorReporting, setErrorReporting] = useState(true)
+  const [networkInspection, setNetworkInspection] = useState(false)
+
+  // Advanced settings state
+  const [keepInstallationHistory, setKeepInstallationHistory] = useState(true)
+
+  // Config dialog settings state
+  const [runInIncognito, setRunInIncognito] = useState(false)
 
   // Team and activity data hooks
   const { members: teamMembers } = useTeam()
@@ -1167,25 +1252,52 @@ export default function ExtensionsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Show Ratings</div>
-                            <div className="text-sm text-gray-500">Display star ratings on extension cards</div>
+                          <div className="flex items-center gap-3">
+                            <Star className="h-5 w-5 text-yellow-500" />
+                            <div>
+                              <div className="font-medium">Show Ratings</div>
+                              <div className="text-sm text-gray-500">Display star ratings on extension cards</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showRatings}
+                            onCheckedChange={(checked) => {
+                              setShowRatings(checked)
+                              toast.success(checked ? 'Ratings are now visible' : 'Ratings are now hidden')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Show Install Counts</div>
-                            <div className="text-sm text-gray-500">Display user counts on extension cards</div>
+                          <div className="flex items-center gap-3">
+                            <BarChart3 className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Show Install Counts</div>
+                              <div className="text-sm text-gray-500">Display user counts on extension cards</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showInstallCounts}
+                            onCheckedChange={(checked) => {
+                              setShowInstallCounts(checked)
+                              toast.success(checked ? 'Install counts are now visible' : 'Install counts are now hidden')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Show Verified Badges</div>
-                            <div className="text-sm text-gray-500">Display developer verification badges</div>
+                          <div className="flex items-center gap-3">
+                            <BadgeCheck className="h-5 w-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">Show Verified Badges</div>
+                              <div className="text-sm text-gray-500">Display developer verification badges</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showVerifiedBadges}
+                            onCheckedChange={(checked) => {
+                              setShowVerifiedBadges(checked)
+                              toast.success(checked ? 'Verified badges are now visible' : 'Verified badges are now hidden')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1199,11 +1311,20 @@ export default function ExtensionsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Auto-update Extensions</div>
-                            <div className="text-sm text-gray-500">Automatically install extension updates</div>
+                          <div className="flex items-center gap-3">
+                            <Zap className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <div className="font-medium">Auto-update Extensions</div>
+                              <div className="text-sm text-gray-500">Automatically install extension updates</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoUpdateExtensions}
+                            onCheckedChange={(checked) => {
+                              setAutoUpdateExtensions(checked)
+                              toast.success(checked ? 'Auto-updates enabled' : 'Auto-updates disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Update Check Frequency</Label>
@@ -1220,11 +1341,20 @@ export default function ExtensionsClient() {
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Pre-release Updates</div>
-                            <div className="text-sm text-gray-500">Receive beta and pre-release updates</div>
+                          <div className="flex items-center gap-3">
+                            <FlaskConical className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <div className="font-medium">Pre-release Updates</div>
+                              <div className="text-sm text-gray-500">Receive beta and pre-release updates</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={prereleaseUpdates}
+                            onCheckedChange={(checked) => {
+                              setPrereleaseUpdates(checked)
+                              toast.success(checked ? 'Pre-release updates enabled' : 'Pre-release updates disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1285,25 +1415,52 @@ export default function ExtensionsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Click to Activate</div>
-                            <div className="text-sm text-gray-500">Require manual activation on each site</div>
+                          <div className="flex items-center gap-3">
+                            <MousePointerClick className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Click to Activate</div>
+                              <div className="text-sm text-gray-500">Require manual activation on each site</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={clickToActivate}
+                            onCheckedChange={(checked) => {
+                              setClickToActivate(checked)
+                              toast.success(checked ? 'Click to activate enabled' : 'Click to activate disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Site Access Warnings</div>
-                            <div className="text-sm text-gray-500">Show warnings when accessing sensitive sites</div>
+                          <div className="flex items-center gap-3">
+                            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                            <div>
+                              <div className="font-medium">Site Access Warnings</div>
+                              <div className="text-sm text-gray-500">Show warnings when accessing sensitive sites</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={siteAccessWarnings}
+                            onCheckedChange={(checked) => {
+                              setSiteAccessWarnings(checked)
+                              toast.success(checked ? 'Site access warnings enabled' : 'Site access warnings disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Block Extensions on Secure Sites</div>
-                            <div className="text-sm text-gray-500">Disable extensions on banking and payment sites</div>
+                          <div className="flex items-center gap-3">
+                            <ShieldOff className="h-5 w-5 text-red-500" />
+                            <div>
+                              <div className="font-medium">Block Extensions on Secure Sites</div>
+                              <div className="text-sm text-gray-500">Disable extensions on banking and payment sites</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={blockOnSecureSites}
+                            onCheckedChange={(checked) => {
+                              setBlockOnSecureSites(checked)
+                              toast.success(checked ? 'Extensions blocked on secure sites' : 'Extensions allowed on secure sites')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Default Site Access</Label>
@@ -1330,25 +1487,52 @@ export default function ExtensionsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Review Permissions on Update</div>
-                            <div className="text-sm text-gray-500">Show permission changes when extensions update</div>
+                          <div className="flex items-center gap-3">
+                            <FileCheck className="h-5 w-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">Review Permissions on Update</div>
+                              <div className="text-sm text-gray-500">Show permission changes when extensions update</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={reviewPermissionsOnUpdate}
+                            onCheckedChange={(checked) => {
+                              setReviewPermissionsOnUpdate(checked)
+                              toast.success(checked ? 'Permission review enabled' : 'Permission review disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Block High-Risk Permissions</div>
-                            <div className="text-sm text-gray-500">Warn before installing extensions with sensitive permissions</div>
+                          <div className="flex items-center gap-3">
+                            <ShieldAlert className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <div className="font-medium">Block High-Risk Permissions</div>
+                              <div className="text-sm text-gray-500">Warn before installing extensions with sensitive permissions</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={blockHighRiskPermissions}
+                            onCheckedChange={(checked) => {
+                              setBlockHighRiskPermissions(checked)
+                              toast.success(checked ? 'High-risk permission blocking enabled' : 'High-risk permission blocking disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Incognito Mode Access</div>
-                            <div className="text-sm text-gray-500">Allow extensions to run in incognito mode</div>
+                          <div className="flex items-center gap-3">
+                            <UserX className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <div className="font-medium">Incognito Mode Access</div>
+                              <div className="text-sm text-gray-500">Allow extensions to run in incognito mode</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={incognitoModeAccess}
+                            onCheckedChange={(checked) => {
+                              setIncognitoModeAccess(checked)
+                              toast.success(checked ? 'Incognito access enabled' : 'Incognito access disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1362,18 +1546,36 @@ export default function ExtensionsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Block Data Collection</div>
-                            <div className="text-sm text-gray-500">Prevent extensions from collecting browsing data</div>
+                          <div className="flex items-center gap-3">
+                            <Ban className="h-5 w-5 text-red-500" />
+                            <div>
+                              <div className="font-medium">Block Data Collection</div>
+                              <div className="text-sm text-gray-500">Prevent extensions from collecting browsing data</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={blockDataCollection}
+                            onCheckedChange={(checked) => {
+                              setBlockDataCollection(checked)
+                              toast.success(checked ? 'Data collection blocked' : 'Data collection allowed')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Extension Analytics</div>
-                            <div className="text-sm text-gray-500">Share anonymous usage data to improve extensions</div>
+                          <div className="flex items-center gap-3">
+                            <Activity className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Extension Analytics</div>
+                              <div className="text-sm text-gray-500">Share anonymous usage data to improve extensions</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={extensionAnalytics}
+                            onCheckedChange={(checked) => {
+                              setExtensionAnalytics(checked)
+                              toast.success(checked ? 'Analytics sharing enabled' : 'Analytics sharing disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1392,32 +1594,68 @@ export default function ExtensionsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Update Available</div>
-                            <div className="text-sm text-gray-500">Notify when extension updates are available</div>
+                          <div className="flex items-center gap-3">
+                            <Download className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Update Available</div>
+                              <div className="text-sm text-gray-500">Notify when extension updates are available</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyUpdateAvailable}
+                            onCheckedChange={(checked) => {
+                              setNotifyUpdateAvailable(checked)
+                              toast.success(checked ? 'Update notifications enabled' : 'Update notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Permission Changes</div>
-                            <div className="text-sm text-gray-500">Alert when extensions request new permissions</div>
+                          <div className="flex items-center gap-3">
+                            <ShieldQuestion className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <div className="font-medium">Permission Changes</div>
+                              <div className="text-sm text-gray-500">Alert when extensions request new permissions</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyPermissionChanges}
+                            onCheckedChange={(checked) => {
+                              setNotifyPermissionChanges(checked)
+                              toast.success(checked ? 'Permission change alerts enabled' : 'Permission change alerts disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Security Alerts</div>
-                            <div className="text-sm text-gray-500">Warn about compromised or malicious extensions</div>
+                          <div className="flex items-center gap-3">
+                            <ShieldAlert className="h-5 w-5 text-red-500" />
+                            <div>
+                              <div className="font-medium">Security Alerts</div>
+                              <div className="text-sm text-gray-500">Warn about compromised or malicious extensions</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifySecurityAlerts}
+                            onCheckedChange={(checked) => {
+                              setNotifySecurityAlerts(checked)
+                              toast.success(checked ? 'Security alerts enabled' : 'Security alerts disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">New Featured Extensions</div>
-                            <div className="text-sm text-gray-500">Get notified about editor's picks</div>
+                          <div className="flex items-center gap-3">
+                            <BellPlus className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <div className="font-medium">New Featured Extensions</div>
+                              <div className="text-sm text-gray-500">Get notified about editor's picks</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={notifyNewFeatured}
+                            onCheckedChange={(checked) => {
+                              setNotifyNewFeatured(checked)
+                              toast.success(checked ? 'Featured extension notifications enabled' : 'Featured extension notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1431,25 +1669,52 @@ export default function ExtensionsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Weekly Store Digest</div>
-                            <div className="text-sm text-gray-500">Receive weekly roundup of new extensions</div>
+                          <div className="flex items-center gap-3">
+                            <Newspaper className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Weekly Store Digest</div>
+                              <div className="text-sm text-gray-500">Receive weekly roundup of new extensions</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={weeklyStoreDigest}
+                            onCheckedChange={(checked) => {
+                              setWeeklyStoreDigest(checked)
+                              toast.success(checked ? 'Weekly digest enabled' : 'Weekly digest disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Developer Updates</div>
-                            <div className="text-sm text-gray-500">News about your published extensions</div>
+                          <div className="flex items-center gap-3">
+                            <UserCog className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <div className="font-medium">Developer Updates</div>
+                              <div className="text-sm text-gray-500">News about your published extensions</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={developerUpdates}
+                            onCheckedChange={(checked) => {
+                              setDeveloperUpdates(checked)
+                              toast.success(checked ? 'Developer updates enabled' : 'Developer updates disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Review Responses</div>
-                            <div className="text-sm text-gray-500">When developers reply to your reviews</div>
+                          <div className="flex items-center gap-3">
+                            <MessageSquareReply className="h-5 w-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">Review Responses</div>
+                              <div className="text-sm text-gray-500">When developers reply to your reviews</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={reviewResponses}
+                            onCheckedChange={(checked) => {
+                              setReviewResponses(checked)
+                              toast.success(checked ? 'Review response notifications enabled' : 'Review response notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1473,11 +1738,20 @@ export default function ExtensionsClient() {
                           <Badge className="bg-green-100 text-green-700">Enabled</Badge>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Critical Alerts Only</div>
-                            <div className="text-sm text-gray-500">Only receive security-related notifications</div>
+                          <div className="flex items-center gap-3">
+                            <BellMinus className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <div className="font-medium">Critical Alerts Only</div>
+                              <div className="text-sm text-gray-500">Only receive security-related notifications</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={criticalAlertsOnly}
+                            onCheckedChange={(checked) => {
+                              setCriticalAlertsOnly(checked)
+                              toast.success(checked ? 'Critical alerts only mode enabled' : 'All push notifications enabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1510,25 +1784,52 @@ export default function ExtensionsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Lazy Loading</div>
-                            <div className="text-sm text-gray-500">Only load extensions when needed</div>
+                          <div className="flex items-center gap-3">
+                            <Rocket className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Lazy Loading</div>
+                              <div className="text-sm text-gray-500">Only load extensions when needed</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={lazyLoading}
+                            onCheckedChange={(checked) => {
+                              setLazyLoading(checked)
+                              toast.success(checked ? 'Lazy loading enabled' : 'Lazy loading disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Suspend Inactive Extensions</div>
-                            <div className="text-sm text-gray-500">Pause extensions not used in 30 minutes</div>
+                          <div className="flex items-center gap-3">
+                            <PauseCircle className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <div className="font-medium">Suspend Inactive Extensions</div>
+                              <div className="text-sm text-gray-500">Pause extensions not used in 30 minutes</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={suspendInactive}
+                            onCheckedChange={(checked) => {
+                              setSuspendInactive(checked)
+                              toast.success(checked ? 'Inactive extension suspension enabled' : 'Inactive extension suspension disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Hardware Acceleration</div>
-                            <div className="text-sm text-gray-500">Use GPU for extension rendering</div>
+                          <div className="flex items-center gap-3">
+                            <Monitor className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <div className="font-medium">Hardware Acceleration</div>
+                              <div className="text-sm text-gray-500">Use GPU for extension rendering</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={hardwareAcceleration}
+                            onCheckedChange={(checked) => {
+                              setHardwareAcceleration(checked)
+                              toast.success(checked ? 'Hardware acceleration enabled' : 'Hardware acceleration disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1592,18 +1893,36 @@ export default function ExtensionsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Limit Background Data</div>
-                            <div className="text-sm text-gray-500">Restrict extension network usage</div>
+                          <div className="flex items-center gap-3">
+                            <WifiOff className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <div className="font-medium">Limit Background Data</div>
+                              <div className="text-sm text-gray-500">Restrict extension network usage</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={limitBackgroundData}
+                            onCheckedChange={(checked) => {
+                              setLimitBackgroundData(checked)
+                              toast.success(checked ? 'Background data limited' : 'Background data unrestricted')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Offline Mode</div>
-                            <div className="text-sm text-gray-500">Allow extensions to work without internet</div>
+                          <div className="flex items-center gap-3">
+                            <Wifi className="h-5 w-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">Offline Mode</div>
+                              <div className="text-sm text-gray-500">Allow extensions to work without internet</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={offlineMode}
+                            onCheckedChange={(checked) => {
+                              setOfflineMode(checked)
+                              toast.success(checked ? 'Offline mode enabled' : 'Offline mode disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1623,13 +1942,19 @@ export default function ExtensionsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                           <div className="flex items-center gap-3">
-                            <Code className="h-6 w-6 text-yellow-600" />
+                            <Terminal className="h-6 w-6 text-yellow-600" />
                             <div>
                               <div className="font-medium">Developer Mode</div>
                               <div className="text-sm text-gray-500">Load unpacked extensions</div>
                             </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={developerMode}
+                            onCheckedChange={(checked) => {
+                              setDeveloperMode(checked)
+                              toast.success(checked ? 'Developer mode enabled' : 'Developer mode disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -1671,25 +1996,52 @@ export default function ExtensionsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Service Worker Logging</div>
-                            <div className="text-sm text-gray-500">Log background script activity</div>
+                          <div className="flex items-center gap-3">
+                            <Cpu className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Service Worker Logging</div>
+                              <div className="text-sm text-gray-500">Log background script activity</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={serviceWorkerLogging}
+                            onCheckedChange={(checked) => {
+                              setServiceWorkerLogging(checked)
+                              toast.success(checked ? 'Service worker logging enabled' : 'Service worker logging disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Error Reporting</div>
-                            <div className="text-sm text-gray-500">Show extension errors in console</div>
+                          <div className="flex items-center gap-3">
+                            <Bug className="h-5 w-5 text-red-500" />
+                            <div>
+                              <div className="font-medium">Error Reporting</div>
+                              <div className="text-sm text-gray-500">Show extension errors in console</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={errorReporting}
+                            onCheckedChange={(checked) => {
+                              setErrorReporting(checked)
+                              toast.success(checked ? 'Error reporting enabled' : 'Error reporting disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Network Inspection</div>
-                            <div className="text-sm text-gray-500">Monitor extension network requests</div>
+                          <div className="flex items-center gap-3">
+                            <Radio className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <div className="font-medium">Network Inspection</div>
+                              <div className="text-sm text-gray-500">Monitor extension network requests</div>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={networkInspection}
+                            onCheckedChange={(checked) => {
+                              setNetworkInspection(checked)
+                              toast.success(checked ? 'Network inspection enabled' : 'Network inspection disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1795,11 +2147,20 @@ export default function ExtensionsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <div className="font-medium">Keep Installation History</div>
-                            <div className="text-sm text-gray-500">Track installed and removed extensions</div>
+                          <div className="flex items-center gap-3">
+                            <BookMarked className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Keep Installation History</div>
+                              <div className="text-sm text-gray-500">Track installed and removed extensions</div>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={keepInstallationHistory}
+                            onCheckedChange={(checked) => {
+                              setKeepInstallationHistory(checked)
+                              toast.success(checked ? 'Installation history tracking enabled' : 'Installation history tracking disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>History Retention</Label>
@@ -2102,11 +2463,20 @@ export default function ExtensionsClient() {
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <div className="font-medium">Run in Incognito</div>
-                    <div className="text-sm text-gray-500">Allow in private browsing mode</div>
+                  <div className="flex items-center gap-3">
+                    <UserCheck className="h-5 w-5 text-purple-500" />
+                    <div>
+                      <div className="font-medium">Run in Incognito</div>
+                      <div className="text-sm text-gray-500">Allow in private browsing mode</div>
+                    </div>
                   </div>
-                  <Switch />
+                  <Switch
+                    checked={runInIncognito}
+                    onCheckedChange={(checked) => {
+                      setRunInIncognito(checked)
+                      toast.success(checked ? 'Incognito access enabled for this extension' : 'Incognito access disabled for this extension')
+                    }}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">

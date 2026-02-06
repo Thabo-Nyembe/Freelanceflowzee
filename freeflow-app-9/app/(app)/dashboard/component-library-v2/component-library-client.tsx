@@ -24,7 +24,9 @@ import {
   Github, Plus, CheckCircle, AlertTriangle, Paintbrush,
   Type, LayoutGrid, History, RefreshCw, Package, Sparkles, FileText,
   Key, Webhook, Database, Trash2, Lock, Bell, Link2,
-  Upload, AlertOctagon, Loader2
+  Upload, AlertOctagon, Loader2, Laptop, Minimize2, Focus, ToggleRight,
+  Zap, MousePointer, PanelTop, Wand2, Hash, Braces, Quote, Clipboard,
+  BellRing, BellOff, FileWarning, Newspaper, RatioIcon, Timer
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -142,6 +144,82 @@ export default function ComponentLibraryClient() {
   const [iconSearch, setIconSearch] = useState('')
   const [settingsTab, setSettingsTab] = useState('display')
   const [showApiKey, setShowApiKey] = useState(false)
+
+  // Settings state management for all switches
+  // Theme Settings
+  const [systemTheme, setSystemTheme] = useState(false)
+
+  // UI Preferences
+  const [compactView, setCompactView] = useState(false)
+  const [showAccessibilityInfo, setShowAccessibilityInfo] = useState(true)
+  const [showStatusBadges, setShowStatusBadges] = useState(true)
+  const [animationsEnabled, setAnimationsEnabled] = useState(true)
+
+  // Preview Settings
+  const [autoPreviewOnHover, setAutoPreviewOnHover] = useState(true)
+  const [showPropsPanel, setShowPropsPanel] = useState(true)
+
+  // Responsive Preview
+  const [showDeviceFrames, setShowDeviceFrames] = useState(false)
+  const [showBreakpoints, setShowBreakpoints] = useState(true)
+
+  // Component Defaults
+  const [enableLoadingStates, setEnableLoadingStates] = useState(true)
+  const [autoFocusFirstInput, setAutoFocusFirstInput] = useState(true)
+
+  // Accessibility Settings
+  const [focusIndicators, setFocusIndicators] = useState(true)
+  const [reduceMotion, setReduceMotion] = useState(false)
+  const [highContrast, setHighContrast] = useState(false)
+
+  // Variants & States
+  const [showAllVariants, setShowAllVariants] = useState(true)
+  const [showStateExamples, setShowStateExamples] = useState(true)
+  const [interactiveStates, setInteractiveStates] = useState(true)
+
+  // Design Tokens
+  const [showTokenNames, setShowTokenNames] = useState(true)
+  const [showRawValues, setShowRawValues] = useState(false)
+
+  // Code Display
+  const [showLineNumbers, setShowLineNumbers] = useState(true)
+  const [syntaxHighlighting, setSyntaxHighlighting] = useState(true)
+  const [wordWrap, setWordWrap] = useState(false)
+
+  // Code Generation
+  const [includeImports, setIncludeImports] = useState(true)
+  const [includeTypes, setIncludeTypes] = useState(true)
+  const [minifyOutput, setMinifyOutput] = useState(false)
+
+  // Clipboard
+  const [copyOnClick, setCopyOnClick] = useState(true)
+  const [showCopyFeedback, setShowCopyFeedback] = useState(true)
+  const [copyNotification, setCopyNotification] = useState(false)
+
+  // Publishing/Versioning
+  const [autoGenerateChangelog, setAutoGenerateChangelog] = useState(true)
+  const [preReleaseTags, setPreReleaseTags] = useState(false)
+
+  // Cache & Storage
+  const [enableCaching, setEnableCaching] = useState(true)
+
+  // Notifications
+  const [componentUpdates, setComponentUpdates] = useState(true)
+  const [breakingChanges, setBreakingChanges] = useState(true)
+  const [newFeatures, setNewFeatures] = useState(false)
+  const [weeklyDigest, setWeeklyDigest] = useState(false)
+
+  // Security
+  const [apiRateLimiting, setApiRateLimiting] = useState(true)
+
+  // Playground
+  const [playgroundDisabled, setPlaygroundDisabled] = useState(false)
+
+  // Webhook events
+  const [webhookComponentCreated, setWebhookComponentCreated] = useState(true)
+  const [webhookComponentUpdated, setWebhookComponentUpdated] = useState(true)
+  const [webhookComponentDeleted, setWebhookComponentDeleted] = useState(false)
+  const [webhookComponentPublished, setWebhookComponentPublished] = useState(true)
 
   // Dialog states for quick actions
   const [showNewComponentDialog, setShowNewComponentDialog] = useState(false)
@@ -852,7 +930,15 @@ export default function App() {
                           <Label className="font-medium">System Theme</Label>
                           <p className="text-sm text-gray-500">Follow system preference</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={systemTheme}
+                          onCheckedChange={(checked) => {
+                            setSystemTheme(checked)
+                            toast.success(checked ? 'System theme enabled' : 'System theme disabled', {
+                              icon: <Laptop className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Accent Color</Label>
@@ -896,28 +982,60 @@ export default function App() {
                           <Label className="font-medium">Compact View</Label>
                           <p className="text-sm text-gray-500">Reduce spacing in components</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={compactView}
+                          onCheckedChange={(checked) => {
+                            setCompactView(checked)
+                            toast.success(checked ? 'Compact view enabled' : 'Compact view disabled', {
+                              icon: <Minimize2 className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Show Accessibility Info</Label>
                           <p className="text-sm text-gray-500">Display a11y badges on components</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showAccessibilityInfo}
+                          onCheckedChange={(checked) => {
+                            setShowAccessibilityInfo(checked)
+                            toast.success(checked ? 'Accessibility info visible' : 'Accessibility info hidden', {
+                              icon: <Accessibility className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Show Status Badges</Label>
                           <p className="text-sm text-gray-500">Display stable/beta/experimental</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showStatusBadges}
+                          onCheckedChange={(checked) => {
+                            setShowStatusBadges(checked)
+                            toast.success(checked ? 'Status badges visible' : 'Status badges hidden', {
+                              icon: <ToggleRight className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Animations</Label>
                           <p className="text-sm text-gray-500">Enable UI animations</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={animationsEnabled}
+                          onCheckedChange={(checked) => {
+                            setAnimationsEnabled(checked)
+                            toast.success(checked ? 'Animations enabled' : 'Animations disabled', {
+                              icon: <Zap className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Default View Mode</Label>
@@ -947,14 +1065,30 @@ export default function App() {
                           <Label className="font-medium">Auto-preview on Hover</Label>
                           <p className="text-sm text-gray-500">Show component preview</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoPreviewOnHover}
+                          onCheckedChange={(checked) => {
+                            setAutoPreviewOnHover(checked)
+                            toast.success(checked ? 'Auto-preview enabled' : 'Auto-preview disabled', {
+                              icon: <MousePointer className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Show Props Panel</Label>
                           <p className="text-sm text-gray-500">Display editable props</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showPropsPanel}
+                          onCheckedChange={(checked) => {
+                            setShowPropsPanel(checked)
+                            toast.success(checked ? 'Props panel visible' : 'Props panel hidden', {
+                              icon: <PanelTop className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Preview Background</Label>
@@ -986,7 +1120,15 @@ export default function App() {
                           <Label className="font-medium">Show Device Frames</Label>
                           <p className="text-sm text-gray-500">Display device mockups</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={showDeviceFrames}
+                          onCheckedChange={(checked) => {
+                            setShowDeviceFrames(checked)
+                            toast.success(checked ? 'Device frames enabled' : 'Device frames disabled', {
+                              icon: <Monitor className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Default Viewport</Label>
@@ -1006,7 +1148,15 @@ export default function App() {
                           <Label className="font-medium">Show Breakpoints</Label>
                           <p className="text-sm text-gray-500">Display breakpoint indicators</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showBreakpoints}
+                          onCheckedChange={(checked) => {
+                            setShowBreakpoints(checked)
+                            toast.success(checked ? 'Breakpoints visible' : 'Breakpoints hidden', {
+                              icon: <RatioIcon className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1056,14 +1206,30 @@ export default function App() {
                           <Label className="font-medium">Enable Loading States</Label>
                           <p className="text-sm text-gray-500">Show loading spinners</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={enableLoadingStates}
+                          onCheckedChange={(checked) => {
+                            setEnableLoadingStates(checked)
+                            toast.success(checked ? 'Loading states enabled' : 'Loading states disabled', {
+                              icon: <Loader2 className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Auto-focus First Input</Label>
                           <p className="text-sm text-gray-500">Focus forms automatically</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoFocusFirstInput}
+                          onCheckedChange={(checked) => {
+                            setAutoFocusFirstInput(checked)
+                            toast.success(checked ? 'Auto-focus enabled' : 'Auto-focus disabled', {
+                              icon: <Focus className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1081,21 +1247,45 @@ export default function App() {
                           <Label className="font-medium">Focus Indicators</Label>
                           <p className="text-sm text-gray-500">Enhanced focus rings</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={focusIndicators}
+                          onCheckedChange={(checked) => {
+                            setFocusIndicators(checked)
+                            toast.success(checked ? 'Focus indicators enabled' : 'Focus indicators disabled', {
+                              icon: <Focus className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Reduce Motion</Label>
                           <p className="text-sm text-gray-500">Minimize animations</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={reduceMotion}
+                          onCheckedChange={(checked) => {
+                            setReduceMotion(checked)
+                            toast.success(checked ? 'Reduced motion enabled' : 'Reduced motion disabled', {
+                              icon: <Zap className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">High Contrast</Label>
                           <p className="text-sm text-gray-500">Increase color contrast</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={highContrast}
+                          onCheckedChange={(checked) => {
+                            setHighContrast(checked)
+                            toast.success(checked ? 'High contrast enabled' : 'High contrast disabled', {
+                              icon: <Sun className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">WCAG Target</Label>
@@ -1126,21 +1316,45 @@ export default function App() {
                           <Label className="font-medium">Show All Variants</Label>
                           <p className="text-sm text-gray-500">Display every variant</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showAllVariants}
+                          onCheckedChange={(checked) => {
+                            setShowAllVariants(checked)
+                            toast.success(checked ? 'All variants visible' : 'Variants hidden', {
+                              icon: <Layers className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Show State Examples</Label>
                           <p className="text-sm text-gray-500">Hover, focus, disabled states</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showStateExamples}
+                          onCheckedChange={(checked) => {
+                            setShowStateExamples(checked)
+                            toast.success(checked ? 'State examples visible' : 'State examples hidden', {
+                              icon: <MousePointer className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Interactive States</Label>
                           <p className="text-sm text-gray-500">Enable state interaction</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={interactiveStates}
+                          onCheckedChange={(checked) => {
+                            setInteractiveStates(checked)
+                            toast.success(checked ? 'Interactive states enabled' : 'Interactive states disabled', {
+                              icon: <Wand2 className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1158,14 +1372,30 @@ export default function App() {
                           <Label className="font-medium">Show Token Names</Label>
                           <p className="text-sm text-gray-500">Display CSS variable names</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showTokenNames}
+                          onCheckedChange={(checked) => {
+                            setShowTokenNames(checked)
+                            toast.success(checked ? 'Token names visible' : 'Token names hidden', {
+                              icon: <Hash className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Show Raw Values</Label>
                           <p className="text-sm text-gray-500">Display computed values</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={showRawValues}
+                          onCheckedChange={(checked) => {
+                            setShowRawValues(checked)
+                            toast.success(checked ? 'Raw values visible' : 'Raw values hidden', {
+                              icon: <Braces className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Token Format</Label>
@@ -1216,21 +1446,45 @@ export default function App() {
                           <Label className="font-medium">Show Line Numbers</Label>
                           <p className="text-sm text-gray-500">In code examples</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showLineNumbers}
+                          onCheckedChange={(checked) => {
+                            setShowLineNumbers(checked)
+                            toast.success(checked ? 'Line numbers visible' : 'Line numbers hidden', {
+                              icon: <Hash className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Syntax Highlighting</Label>
                           <p className="text-sm text-gray-500">Colorize code blocks</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={syntaxHighlighting}
+                          onCheckedChange={(checked) => {
+                            setSyntaxHighlighting(checked)
+                            toast.success(checked ? 'Syntax highlighting enabled' : 'Syntax highlighting disabled', {
+                              icon: <Palette className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Word Wrap</Label>
                           <p className="text-sm text-gray-500">Wrap long lines</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={wordWrap}
+                          onCheckedChange={(checked) => {
+                            setWordWrap(checked)
+                            toast.success(checked ? 'Word wrap enabled' : 'Word wrap disabled', {
+                              icon: <Type className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1301,21 +1555,45 @@ export default function App() {
                           <Label className="font-medium">Include Imports</Label>
                           <p className="text-sm text-gray-500">Add import statements</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={includeImports}
+                          onCheckedChange={(checked) => {
+                            setIncludeImports(checked)
+                            toast.success(checked ? 'Imports included' : 'Imports excluded', {
+                              icon: <FileCode className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Include Types</Label>
                           <p className="text-sm text-gray-500">Add TypeScript types</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={includeTypes}
+                          onCheckedChange={(checked) => {
+                            setIncludeTypes(checked)
+                            toast.success(checked ? 'TypeScript types included' : 'TypeScript types excluded', {
+                              icon: <Braces className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Minify Output</Label>
                           <p className="text-sm text-gray-500">Compact code output</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={minifyOutput}
+                          onCheckedChange={(checked) => {
+                            setMinifyOutput(checked)
+                            toast.success(checked ? 'Output minified' : 'Output expanded', {
+                              icon: <Minimize2 className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Quote Style</Label>
@@ -1345,21 +1623,45 @@ export default function App() {
                           <Label className="font-medium">Copy on Click</Label>
                           <p className="text-sm text-gray-500">Click code to copy</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={copyOnClick}
+                          onCheckedChange={(checked) => {
+                            setCopyOnClick(checked)
+                            toast.success(checked ? 'Copy on click enabled' : 'Copy on click disabled', {
+                              icon: <MousePointer className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Show Copy Feedback</Label>
                           <p className="text-sm text-gray-500">Animate copy button</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showCopyFeedback}
+                          onCheckedChange={(checked) => {
+                            setShowCopyFeedback(checked)
+                            toast.success(checked ? 'Copy feedback enabled' : 'Copy feedback disabled', {
+                              icon: <Clipboard className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Copy Notification</Label>
                           <p className="text-sm text-gray-500">Toast on successful copy</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={copyNotification}
+                          onCheckedChange={(checked) => {
+                            setCopyNotification(checked)
+                            toast.success(checked ? 'Copy notifications enabled' : 'Copy notifications disabled', {
+                              icon: <Bell className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1517,14 +1819,30 @@ export default function App() {
                           <Label className="font-medium">Auto-generate Changelog</Label>
                           <p className="text-sm text-gray-500">From commits</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoGenerateChangelog}
+                          onCheckedChange={(checked) => {
+                            setAutoGenerateChangelog(checked)
+                            toast.success(checked ? 'Auto changelog enabled' : 'Auto changelog disabled', {
+                              icon: <History className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Pre-release Tags</Label>
                           <p className="text-sm text-gray-500">Alpha/Beta releases</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={preReleaseTags}
+                          onCheckedChange={(checked) => {
+                            setPreReleaseTags(checked)
+                            toast.success(checked ? 'Pre-release tags enabled' : 'Pre-release tags disabled', {
+                              icon: <GitBranch className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1595,7 +1913,15 @@ export default function App() {
                           <Label className="font-medium">Enable Caching</Label>
                           <p className="text-sm text-gray-500">Cache component data</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={enableCaching}
+                          onCheckedChange={(checked) => {
+                            setEnableCaching(checked)
+                            toast.success(checked ? 'Caching enabled' : 'Caching disabled', {
+                              icon: <Database className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Cache Duration</Label>
@@ -1626,28 +1952,60 @@ export default function App() {
                           <Label className="font-medium">Component Updates</Label>
                           <p className="text-sm text-gray-500">When components are updated</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={componentUpdates}
+                          onCheckedChange={(checked) => {
+                            setComponentUpdates(checked)
+                            toast.success(checked ? 'Component update notifications enabled' : 'Component update notifications disabled', {
+                              icon: <BellRing className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Breaking Changes</Label>
                           <p className="text-sm text-gray-500">Alert on breaking changes</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={breakingChanges}
+                          onCheckedChange={(checked) => {
+                            setBreakingChanges(checked)
+                            toast.success(checked ? 'Breaking change alerts enabled' : 'Breaking change alerts disabled', {
+                              icon: <FileWarning className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">New Features</Label>
                           <p className="text-sm text-gray-500">New component announcements</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={newFeatures}
+                          onCheckedChange={(checked) => {
+                            setNewFeatures(checked)
+                            toast.success(checked ? 'New feature notifications enabled' : 'New feature notifications disabled', {
+                              icon: <Sparkles className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Weekly Digest</Label>
                           <p className="text-sm text-gray-500">Weekly library summary</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={weeklyDigest}
+                          onCheckedChange={(checked) => {
+                            setWeeklyDigest(checked)
+                            toast.success(checked ? 'Weekly digest enabled' : 'Weekly digest disabled', {
+                              icon: <Newspaper className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1665,7 +2023,15 @@ export default function App() {
                           <Label className="font-medium">API Rate Limiting</Label>
                           <p className="text-sm text-gray-500">Limit API requests</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={apiRateLimiting}
+                          onCheckedChange={(checked) => {
+                            setApiRateLimiting(checked)
+                            toast.success(checked ? 'API rate limiting enabled' : 'API rate limiting disabled', {
+                              icon: <Timer className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Rate Limit</Label>
@@ -2004,7 +2370,15 @@ export default function App() {
                       </div>
                       <div className="flex items-center justify-between">
                         <Label className="text-sm">disabled</Label>
-                        <Switch />
+                        <Switch
+                          checked={playgroundDisabled}
+                          onCheckedChange={(checked) => {
+                            setPlaygroundDisabled(checked)
+                            toast.success(checked ? 'Component disabled' : 'Component enabled', {
+                              icon: <ToggleRight className="h-4 w-4" />
+                            })
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -2166,19 +2540,51 @@ export default function App() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-normal">component.created</Label>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={webhookComponentCreated}
+                      onCheckedChange={(checked) => {
+                        setWebhookComponentCreated(checked)
+                        toast.success(checked ? 'Subscribed to component.created' : 'Unsubscribed from component.created', {
+                          icon: <Plus className="h-4 w-4" />
+                        })
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-normal">component.updated</Label>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={webhookComponentUpdated}
+                      onCheckedChange={(checked) => {
+                        setWebhookComponentUpdated(checked)
+                        toast.success(checked ? 'Subscribed to component.updated' : 'Unsubscribed from component.updated', {
+                          icon: <RefreshCw className="h-4 w-4" />
+                        })
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-normal">component.deleted</Label>
-                    <Switch />
+                    <Switch
+                      checked={webhookComponentDeleted}
+                      onCheckedChange={(checked) => {
+                        setWebhookComponentDeleted(checked)
+                        toast.success(checked ? 'Subscribed to component.deleted' : 'Unsubscribed from component.deleted', {
+                          icon: <Trash2 className="h-4 w-4" />
+                        })
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-normal">component.published</Label>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={webhookComponentPublished}
+                      onCheckedChange={(checked) => {
+                        setWebhookComponentPublished(checked)
+                        toast.success(checked ? 'Subscribed to component.published' : 'Unsubscribed from component.published', {
+                          icon: <Upload className="h-4 w-4" />
+                        })
+                      }}
+                    />
                   </div>
                 </div>
               </div>

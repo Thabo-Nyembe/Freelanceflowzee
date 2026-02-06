@@ -41,7 +41,31 @@ import {
   TrendingUp,
   BarChart3,
   Search,
-  ExternalLink
+  ExternalLink,
+  Maximize2,
+  Save,
+  Pin,
+  MonitorSmartphone,
+  Minimize2,
+  Power,
+  FolderArchive,
+  Map,
+  Cpu,
+  Layers,
+  CloudDownload,
+  Rocket,
+  Zap,
+  ShieldCheck,
+  Box,
+  FileCode,
+  HardDrive,
+  Store,
+  Smartphone,
+  MessageSquare,
+  Database,
+  AlertTriangle,
+  Gauge,
+  Camera
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -281,6 +305,72 @@ export default function DesktopAppClient() {
   const [parallelBuilds, setParallelBuilds] = useState(true)
   const [autoUpdateCheck, setAutoUpdateCheck] = useState(true)
   const [prereleaseUpdates, setPrereleaseUpdates] = useState(false)
+
+  // Window settings state
+  const [framelessWindow, setFramelessWindow] = useState(false)
+  const [rememberWindowState, setRememberWindowState] = useState(true)
+  const [alwaysOnTop, setAlwaysOnTop] = useState(false)
+
+  // System tray settings state
+  const [showTrayIcon, setShowTrayIcon] = useState(true)
+  const [minimizeToTray, setMinimizeToTray] = useState(true)
+  const [startMinimized, setStartMinimized] = useState(false)
+
+  // Build settings state
+  const [asarPackaging, setAsarPackaging] = useState(true)
+  const [sourceMapSupport, setSourceMapSupport] = useState(false)
+  const [autoRebuild, setAutoRebuild] = useState(true)
+
+  // Auto update settings state
+  const [enableAutoUpdates, setEnableAutoUpdates] = useState(true)
+  const [downloadAutomatically, setDownloadAutomatically] = useState(true)
+  const [enableDeltaUpdates, setEnableDeltaUpdates] = useState(true)
+
+  // Security settings state
+  const [enableCSP, setEnableCSP] = useState(true)
+  const [disableNodeIntegration, setDisableNodeIntegration] = useState(true)
+  const [contextIsolation, setContextIsolation] = useState(true)
+  const [sandboxMode, setSandboxMode] = useState(true)
+  const [hardenedRuntime, setHardenedRuntime] = useState(true)
+
+  // Entitlements state
+  const [allowJIT, setAllowJIT] = useState(true)
+  const [allowUnsignedMemory, setAllowUnsignedMemory] = useState(true)
+  const [allowDYLDVariables, setAllowDYLDVariables] = useState(false)
+  const [cameraAccess, setCameraAccess] = useState(false)
+  const [microphoneAccess, setMicrophoneAccess] = useState(false)
+
+  // Platform settings state - macOS
+  const [universalBinary, setUniversalBinary] = useState(true)
+  const [dmgInstaller, setDmgInstaller] = useState(true)
+  const [macAppStore, setMacAppStore] = useState(false)
+
+  // Platform settings state - Windows
+  const [perMachineInstall, setPerMachineInstall] = useState(true)
+  const [arm64Support, setArm64Support] = useState(false)
+  const [microsoftStore, setMicrosoftStore] = useState(false)
+
+  // Platform settings state - Linux
+  const [debPackage, setDebPackage] = useState(true)
+  const [rpmPackage, setRpmPackage] = useState(true)
+  const [appImagePackage, setAppImagePackage] = useState(true)
+  const [snapPackage, setSnapPackage] = useState(false)
+  const [flatpakPackage, setFlatpakPackage] = useState(false)
+  const [desktopEntry, setDesktopEntry] = useState(true)
+
+  // Advanced settings state
+  const [enableIPCLogging, setEnableIPCLogging] = useState(false)
+  const [validateIPCSchema, setValidateIPCSchema] = useState(true)
+  const [hardwareAcceleration, setHardwareAcceleration] = useState(true)
+  const [v8Snapshots, setV8Snapshots] = useState(true)
+  const [backgroundThrottling, setBackgroundThrottling] = useState(true)
+  const [enableCrashReports, setEnableCrashReports] = useState(true)
+  const [includeSourceMaps, setIncludeSourceMaps] = useState(true)
+
+  // Build config dialog state
+  const [codeSigning, setCodeSigning] = useState(true)
+  const [minifyCode, setMinifyCode] = useState(true)
+  const [generateSourceMaps, setGenerateSourceMaps] = useState(false)
 
   // Supabase state
   const [dbProjects, setDbProjects] = useState<DbProject[]>([])
@@ -2098,25 +2188,52 @@ Date: ${new Date().toISOString().split('T')[0]}
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Frameless Window</p>
-                            <p className="text-sm text-gray-500">Use custom title bar</p>
+                          <div className="flex items-center gap-2">
+                            <Maximize2 className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Frameless Window</p>
+                              <p className="text-sm text-gray-500">Use custom title bar</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={framelessWindow}
+                            onCheckedChange={(checked) => {
+                              setFramelessWindow(checked)
+                              toast.success(checked ? 'Frameless window enabled' : 'Frameless window disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Remember Window State</p>
-                            <p className="text-sm text-gray-500">Save position and size</p>
+                          <div className="flex items-center gap-2">
+                            <Save className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Remember Window State</p>
+                              <p className="text-sm text-gray-500">Save position and size</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={rememberWindowState}
+                            onCheckedChange={(checked) => {
+                              setRememberWindowState(checked)
+                              toast.success(checked ? 'Window state will be remembered' : 'Window state will not be saved')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Always On Top</p>
-                            <p className="text-sm text-gray-500">Keep window above others</p>
+                          <div className="flex items-center gap-2">
+                            <Pin className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Always On Top</p>
+                              <p className="text-sm text-gray-500">Keep window above others</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={alwaysOnTop}
+                            onCheckedChange={(checked) => {
+                              setAlwaysOnTop(checked)
+                              toast.success(checked ? 'Window will stay on top' : 'Window will behave normally')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2128,25 +2245,52 @@ Date: ${new Date().toISOString().split('T')[0]}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Show Tray Icon</p>
-                            <p className="text-sm text-gray-500">Display in system tray</p>
+                          <div className="flex items-center gap-2">
+                            <MonitorSmartphone className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Show Tray Icon</p>
+                              <p className="text-sm text-gray-500">Display in system tray</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showTrayIcon}
+                            onCheckedChange={(checked) => {
+                              setShowTrayIcon(checked)
+                              toast.success(checked ? 'Tray icon enabled' : 'Tray icon disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Minimize to Tray</p>
-                            <p className="text-sm text-gray-500">Hide window to tray</p>
+                          <div className="flex items-center gap-2">
+                            <Minimize2 className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Minimize to Tray</p>
+                              <p className="text-sm text-gray-500">Hide window to tray</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={minimizeToTray}
+                            onCheckedChange={(checked) => {
+                              setMinimizeToTray(checked)
+                              toast.success(checked ? 'Minimize to tray enabled' : 'Minimize to tray disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Start Minimized</p>
-                            <p className="text-sm text-gray-500">Start in tray on login</p>
+                          <div className="flex items-center gap-2">
+                            <Power className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Start Minimized</p>
+                              <p className="text-sm text-gray-500">Start in tray on login</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={startMinimized}
+                            onCheckedChange={(checked) => {
+                              setStartMinimized(checked)
+                              toast.success(checked ? 'App will start minimized' : 'App will start normally')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2178,18 +2322,36 @@ Date: ${new Date().toISOString().split('T')[0]}
                           <Input defaultValue="./out" className="mt-1 font-mono" />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">ASAR Packaging</p>
-                            <p className="text-sm text-gray-500">Bundle app into archive</p>
+                          <div className="flex items-center gap-2">
+                            <FolderArchive className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">ASAR Packaging</p>
+                              <p className="text-sm text-gray-500">Bundle app into archive</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={asarPackaging}
+                            onCheckedChange={(checked) => {
+                              setAsarPackaging(checked)
+                              toast.success(checked ? 'ASAR packaging enabled' : 'ASAR packaging disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Source Map Support</p>
-                            <p className="text-sm text-gray-500">Include source maps for debugging</p>
+                          <div className="flex items-center gap-2">
+                            <Map className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Source Map Support</p>
+                              <p className="text-sm text-gray-500">Include source maps for debugging</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={sourceMapSupport}
+                            onCheckedChange={(checked) => {
+                              setSourceMapSupport(checked)
+                              toast.success(checked ? 'Source maps enabled' : 'Source maps disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2201,11 +2363,20 @@ Date: ${new Date().toISOString().split('T')[0]}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto Rebuild</p>
-                            <p className="text-sm text-gray-500">Rebuild on Electron version change</p>
+                          <div className="flex items-center gap-2">
+                            <Cpu className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Auto Rebuild</p>
+                              <p className="text-sm text-gray-500">Rebuild on Electron version change</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoRebuild}
+                            onCheckedChange={(checked) => {
+                              setAutoRebuild(checked)
+                              toast.success(checked ? 'Auto rebuild enabled' : 'Auto rebuild disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <p className="font-medium text-sm">Native Modules</p>
@@ -2280,11 +2451,20 @@ Date: ${new Date().toISOString().split('T')[0]}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable Auto Updates</p>
-                            <p className="text-sm text-gray-500">Check for updates automatically</p>
+                          <div className="flex items-center gap-2">
+                            <CloudDownload className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Enable Auto Updates</p>
+                              <p className="text-sm text-gray-500">Check for updates automatically</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableAutoUpdates}
+                            onCheckedChange={(checked) => {
+                              setEnableAutoUpdates(checked)
+                              toast.success(checked ? 'Auto updates enabled' : 'Auto updates disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Update Server URL</Label>
@@ -2303,11 +2483,20 @@ Date: ${new Date().toISOString().split('T')[0]}
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Download Automatically</p>
-                            <p className="text-sm text-gray-500">Download updates in background</p>
+                          <div className="flex items-center gap-2">
+                            <Download className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Download Automatically</p>
+                              <p className="text-sm text-gray-500">Download updates in background</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={downloadAutomatically}
+                            onCheckedChange={(checked) => {
+                              setDownloadAutomatically(checked)
+                              toast.success(checked ? 'Automatic downloads enabled' : 'Automatic downloads disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2345,11 +2534,20 @@ Date: ${new Date().toISOString().split('T')[0]}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable Delta Updates</p>
-                            <p className="text-sm text-gray-500">Download only changes</p>
+                          <div className="flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Enable Delta Updates</p>
+                              <p className="text-sm text-gray-500">Download only changes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableDeltaUpdates}
+                            onCheckedChange={(checked) => {
+                              setEnableDeltaUpdates(checked)
+                              toast.success(checked ? 'Delta updates enabled' : 'Delta updates disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                           <div>
@@ -2427,32 +2625,68 @@ Date: ${new Date().toISOString().split('T')[0]}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable CSP</p>
-                            <p className="text-sm text-gray-500">Content Security Policy</p>
+                          <div className="flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Enable CSP</p>
+                              <p className="text-sm text-gray-500">Content Security Policy</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableCSP}
+                            onCheckedChange={(checked) => {
+                              setEnableCSP(checked)
+                              toast.success(checked ? 'CSP enabled' : 'CSP disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Disable Node Integration</p>
-                            <p className="text-sm text-gray-500">In renderer process</p>
+                          <div className="flex items-center gap-2">
+                            <XCircle className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Disable Node Integration</p>
+                              <p className="text-sm text-gray-500">In renderer process</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={disableNodeIntegration}
+                            onCheckedChange={(checked) => {
+                              setDisableNodeIntegration(checked)
+                              toast.success(checked ? 'Node integration disabled in renderer' : 'Node integration enabled in renderer')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Context Isolation</p>
-                            <p className="text-sm text-gray-500">Isolate preload scripts</p>
+                          <div className="flex items-center gap-2">
+                            <Box className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Context Isolation</p>
+                              <p className="text-sm text-gray-500">Isolate preload scripts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={contextIsolation}
+                            onCheckedChange={(checked) => {
+                              setContextIsolation(checked)
+                              toast.success(checked ? 'Context isolation enabled' : 'Context isolation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Sandbox Mode</p>
-                            <p className="text-sm text-gray-500">Run renderers in sandbox</p>
+                          <div className="flex items-center gap-2">
+                            <Lock className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Sandbox Mode</p>
+                              <p className="text-sm text-gray-500">Run renderers in sandbox</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sandboxMode}
+                            onCheckedChange={(checked) => {
+                              setSandboxMode(checked)
+                              toast.success(checked ? 'Sandbox mode enabled' : 'Sandbox mode disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2464,26 +2698,88 @@ Date: ${new Date().toISOString().split('T')[0]}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable Hardened Runtime</p>
-                            <p className="text-sm text-gray-500">Required for notarization</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Enable Hardened Runtime</p>
+                              <p className="text-sm text-gray-500">Required for notarization</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={hardenedRuntime}
+                            onCheckedChange={(checked) => {
+                              setHardenedRuntime(checked)
+                              toast.success(checked ? 'Hardened runtime enabled' : 'Hardened runtime disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <p className="font-medium text-sm">Entitlements</p>
-                          {[
-                            { name: 'Allow JIT', enabled: true },
-                            { name: 'Allow Unsigned Memory', enabled: true },
-                            { name: 'Allow DYLD Variables', enabled: false },
-                            { name: 'Camera Access', enabled: false },
-                            { name: 'Microphone Access', enabled: false },
-                          ].map((ent) => (
-                            <div key={ent.name} className="flex items-center justify-between p-2 border rounded-lg">
-                              <span className="text-sm">{ent.name}</span>
-                              <Switch defaultChecked={ent.enabled} />
+                          <div className="flex items-center justify-between p-2 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Zap className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">Allow JIT</span>
                             </div>
-                          ))}
+                            <Switch
+                              checked={allowJIT}
+                              onCheckedChange={(checked) => {
+                                setAllowJIT(checked)
+                                toast.success(checked ? 'JIT allowed' : 'JIT disabled')
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between p-2 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Database className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">Allow Unsigned Memory</span>
+                            </div>
+                            <Switch
+                              checked={allowUnsignedMemory}
+                              onCheckedChange={(checked) => {
+                                setAllowUnsignedMemory(checked)
+                                toast.success(checked ? 'Unsigned memory allowed' : 'Unsigned memory disabled')
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between p-2 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <AlertTriangle className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">Allow DYLD Variables</span>
+                            </div>
+                            <Switch
+                              checked={allowDYLDVariables}
+                              onCheckedChange={(checked) => {
+                                setAllowDYLDVariables(checked)
+                                toast.success(checked ? 'DYLD variables allowed' : 'DYLD variables disabled')
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between p-2 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Camera className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">Camera Access</span>
+                            </div>
+                            <Switch
+                              checked={cameraAccess}
+                              onCheckedChange={(checked) => {
+                                setCameraAccess(checked)
+                                toast.success(checked ? 'Camera access enabled' : 'Camera access disabled')
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between p-2 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Activity className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">Microphone Access</span>
+                            </div>
+                            <Switch
+                              checked={microphoneAccess}
+                              onCheckedChange={(checked) => {
+                                setMicrophoneAccess(checked)
+                                toast.success(checked ? 'Microphone access enabled' : 'Microphone access disabled')
+                              }}
+                            />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -2518,25 +2814,52 @@ Date: ${new Date().toISOString().split('T')[0]}
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Universal Binary</p>
-                            <p className="text-sm text-gray-500">Support Intel + Apple Silicon</p>
+                          <div className="flex items-center gap-2">
+                            <Cpu className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Universal Binary</p>
+                              <p className="text-sm text-gray-500">Support Intel + Apple Silicon</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={universalBinary}
+                            onCheckedChange={(checked) => {
+                              setUniversalBinary(checked)
+                              toast.success(checked ? 'Universal binary enabled' : 'Universal binary disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">DMG Installer</p>
-                            <p className="text-sm text-gray-500">Create DMG disk image</p>
+                          <div className="flex items-center gap-2">
+                            <HardDrive className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">DMG Installer</p>
+                              <p className="text-sm text-gray-500">Create DMG disk image</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dmgInstaller}
+                            onCheckedChange={(checked) => {
+                              setDmgInstaller(checked)
+                              toast.success(checked ? 'DMG installer enabled' : 'DMG installer disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Mac App Store</p>
-                            <p className="text-sm text-gray-500">Build for MAS</p>
+                          <div className="flex items-center gap-2">
+                            <Store className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Mac App Store</p>
+                              <p className="text-sm text-gray-500">Build for MAS</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={macAppStore}
+                            onCheckedChange={(checked) => {
+                              setMacAppStore(checked)
+                              toast.success(checked ? 'Mac App Store build enabled' : 'Mac App Store build disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2560,25 +2883,52 @@ Date: ${new Date().toISOString().split('T')[0]}
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Per-Machine Install</p>
-                            <p className="text-sm text-gray-500">Install for all users</p>
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Per-Machine Install</p>
+                              <p className="text-sm text-gray-500">Install for all users</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={perMachineInstall}
+                            onCheckedChange={(checked) => {
+                              setPerMachineInstall(checked)
+                              toast.success(checked ? 'Per-machine install enabled' : 'Per-user install enabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">ARM64 Support</p>
-                            <p className="text-sm text-gray-500">Windows on ARM</p>
+                          <div className="flex items-center gap-2">
+                            <Smartphone className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">ARM64 Support</p>
+                              <p className="text-sm text-gray-500">Windows on ARM</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={arm64Support}
+                            onCheckedChange={(checked) => {
+                              setArm64Support(checked)
+                              toast.success(checked ? 'ARM64 support enabled' : 'ARM64 support disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Microsoft Store</p>
-                            <p className="text-sm text-gray-500">Build for Store</p>
+                          <div className="flex items-center gap-2">
+                            <Store className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Microsoft Store</p>
+                              <p className="text-sm text-gray-500">Build for Store</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={microsoftStore}
+                            onCheckedChange={(checked) => {
+                              setMicrosoftStore(checked)
+                              toast.success(checked ? 'Microsoft Store build enabled' : 'Microsoft Store build disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2591,19 +2941,87 @@ Date: ${new Date().toISOString().split('T')[0]}
                       <CardContent className="space-y-4">
                         <div className="space-y-3">
                           <p className="font-medium text-sm">Package Formats</p>
-                          {['DEB (Debian/Ubuntu)', 'RPM (Fedora/RHEL)', 'AppImage', 'Snap', 'Flatpak'].map((format, i) => (
-                            <div key={format} className="flex items-center justify-between p-2 border rounded-lg">
-                              <span className="text-sm">{format}</span>
-                              <Switch defaultChecked={i < 3} />
+                          <div className="flex items-center justify-between p-2 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Package className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">DEB (Debian/Ubuntu)</span>
                             </div>
-                          ))}
+                            <Switch
+                              checked={debPackage}
+                              onCheckedChange={(checked) => {
+                                setDebPackage(checked)
+                                toast.success(checked ? 'DEB package enabled' : 'DEB package disabled')
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between p-2 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Package className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">RPM (Fedora/RHEL)</span>
+                            </div>
+                            <Switch
+                              checked={rpmPackage}
+                              onCheckedChange={(checked) => {
+                                setRpmPackage(checked)
+                                toast.success(checked ? 'RPM package enabled' : 'RPM package disabled')
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between p-2 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Archive className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">AppImage</span>
+                            </div>
+                            <Switch
+                              checked={appImagePackage}
+                              onCheckedChange={(checked) => {
+                                setAppImagePackage(checked)
+                                toast.success(checked ? 'AppImage enabled' : 'AppImage disabled')
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between p-2 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Box className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">Snap</span>
+                            </div>
+                            <Switch
+                              checked={snapPackage}
+                              onCheckedChange={(checked) => {
+                                setSnapPackage(checked)
+                                toast.success(checked ? 'Snap package enabled' : 'Snap package disabled')
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between p-2 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Layers className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">Flatpak</span>
+                            </div>
+                            <Switch
+                              checked={flatpakPackage}
+                              onCheckedChange={(checked) => {
+                                setFlatpakPackage(checked)
+                                toast.success(checked ? 'Flatpak enabled' : 'Flatpak disabled')
+                              }}
+                            />
+                          </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Desktop Entry</p>
-                            <p className="text-sm text-gray-500">Create .desktop file</p>
+                          <div className="flex items-center gap-2">
+                            <FileCode className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Desktop Entry</p>
+                              <p className="text-sm text-gray-500">Create .desktop file</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={desktopEntry}
+                            onCheckedChange={(checked) => {
+                              setDesktopEntry(checked)
+                              toast.success(checked ? 'Desktop entry enabled' : 'Desktop entry disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2620,11 +3038,20 @@ Date: ${new Date().toISOString().split('T')[0]}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable IPC Logging</p>
-                            <p className="text-sm text-gray-500">Log all IPC messages</p>
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Enable IPC Logging</p>
+                              <p className="text-sm text-gray-500">Log all IPC messages</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enableIPCLogging}
+                            onCheckedChange={(checked) => {
+                              setEnableIPCLogging(checked)
+                              toast.success(checked ? 'IPC logging enabled' : 'IPC logging disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Message Size Limit</Label>
@@ -2639,11 +3066,20 @@ Date: ${new Date().toISOString().split('T')[0]}
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Validate IPC Schema</p>
-                            <p className="text-sm text-gray-500">Type-check IPC messages</p>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Validate IPC Schema</p>
+                              <p className="text-sm text-gray-500">Type-check IPC messages</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={validateIPCSchema}
+                            onCheckedChange={(checked) => {
+                              setValidateIPCSchema(checked)
+                              toast.success(checked ? 'IPC schema validation enabled' : 'IPC schema validation disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2655,25 +3091,52 @@ Date: ${new Date().toISOString().split('T')[0]}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Hardware Acceleration</p>
-                            <p className="text-sm text-gray-500">Use GPU rendering</p>
+                          <div className="flex items-center gap-2">
+                            <Gauge className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Hardware Acceleration</p>
+                              <p className="text-sm text-gray-500">Use GPU rendering</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={hardwareAcceleration}
+                            onCheckedChange={(checked) => {
+                              setHardwareAcceleration(checked)
+                              toast.success(checked ? 'Hardware acceleration enabled' : 'Hardware acceleration disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">V8 Snapshots</p>
-                            <p className="text-sm text-gray-500">Faster startup</p>
+                          <div className="flex items-center gap-2">
+                            <Zap className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">V8 Snapshots</p>
+                              <p className="text-sm text-gray-500">Faster startup</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={v8Snapshots}
+                            onCheckedChange={(checked) => {
+                              setV8Snapshots(checked)
+                              toast.success(checked ? 'V8 snapshots enabled' : 'V8 snapshots disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Background Throttling</p>
-                            <p className="text-sm text-gray-500">Reduce CPU when hidden</p>
+                          <div className="flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Background Throttling</p>
+                              <p className="text-sm text-gray-500">Reduce CPU when hidden</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={backgroundThrottling}
+                            onCheckedChange={(checked) => {
+                              setBackgroundThrottling(checked)
+                              toast.success(checked ? 'Background throttling enabled' : 'Background throttling disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Renderer Process Limit</Label>
@@ -2697,22 +3160,40 @@ Date: ${new Date().toISOString().split('T')[0]}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable Crash Reports</p>
-                            <p className="text-sm text-gray-500">Collect crash dumps</p>
+                          <div className="flex items-center gap-2">
+                            <Bug className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Enable Crash Reports</p>
+                              <p className="text-sm text-gray-500">Collect crash dumps</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableCrashReports}
+                            onCheckedChange={(checked) => {
+                              setEnableCrashReports(checked)
+                              toast.success(checked ? 'Crash reporting enabled' : 'Crash reporting disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Crash Server URL</Label>
                           <Input defaultValue="https://crashes.myapp.com/submit" className="mt-1 font-mono" />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Include Source Maps</p>
-                            <p className="text-sm text-gray-500">Better stack traces</p>
+                          <div className="flex items-center gap-2">
+                            <Map className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Include Source Maps</p>
+                              <p className="text-sm text-gray-500">Better stack traces</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={includeSourceMaps}
+                            onCheckedChange={(checked) => {
+                              setIncludeSourceMaps(checked)
+                              toast.success(checked ? 'Source maps included in crash reports' : 'Source maps excluded from crash reports')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
@@ -3240,25 +3721,52 @@ Date: ${new Date().toISOString().split('T')[0]}
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div>
-                  <p className="font-medium">Code Signing</p>
-                  <p className="text-sm text-muted-foreground">Sign executables with certificates</p>
+                <div className="flex items-center gap-2">
+                  <Key className="w-4 h-4 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Code Signing</p>
+                    <p className="text-sm text-muted-foreground">Sign executables with certificates</p>
+                  </div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={codeSigning}
+                  onCheckedChange={(checked) => {
+                    setCodeSigning(checked)
+                    toast.success(checked ? 'Code signing enabled' : 'Code signing disabled')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div>
-                  <p className="font-medium">Minify Code</p>
-                  <p className="text-sm text-muted-foreground">Reduce bundle size</p>
+                <div className="flex items-center gap-2">
+                  <Minimize2 className="w-4 h-4 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Minify Code</p>
+                    <p className="text-sm text-muted-foreground">Reduce bundle size</p>
+                  </div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={minifyCode}
+                  onCheckedChange={(checked) => {
+                    setMinifyCode(checked)
+                    toast.success(checked ? 'Code minification enabled' : 'Code minification disabled')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div>
-                  <p className="font-medium">Generate Source Maps</p>
-                  <p className="text-sm text-muted-foreground">For debugging production builds</p>
+                <div className="flex items-center gap-2">
+                  <FileCode className="w-4 h-4 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Generate Source Maps</p>
+                    <p className="text-sm text-muted-foreground">For debugging production builds</p>
+                  </div>
                 </div>
-                <Switch />
+                <Switch
+                  checked={generateSourceMaps}
+                  onCheckedChange={(checked) => {
+                    setGenerateSourceMaps(checked)
+                    toast.success(checked ? 'Source maps will be generated' : 'Source maps disabled')
+                  }}
+                />
               </div>
             </div>
             <div className="flex justify-end gap-3">

@@ -28,7 +28,10 @@ import {
   Bug, Cpu, Apple,
   RefreshCw, Send, ChevronRight,
   Key, Webhook, Mail, Database, Lock, AlertOctagon, Trash2,
-  Copy, GitBranch, Image, Loader2
+  Copy, GitBranch, Image, Loader2,
+  Search, ShoppingBag, Baby, Zap, Link, Share2,
+  MessageSquare, AlertTriangle, Slack, MessageCircle,
+  UserPlus, FileText, MapPin, Fingerprint, Heart
 } from 'lucide-react'
 
 // Supabase hooks for data fetching
@@ -207,6 +210,56 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const [selectedCiCd, setSelectedCiCd] = useState<{name: string; connected: boolean} | null>(null)
   const [showCreateTesterGroupDialog, setShowCreateTesterGroupDialog] = useState(false)
   const [testerGroupName, setTesterGroupName] = useState('')
+
+  // Switch states for Store Presence settings
+  const [showInSearch, setShowInSearch] = useState(true)
+  const [preOrderEnabled, setPreOrderEnabled] = useState(false)
+  const [madeForKids, setMadeForKids] = useState(false)
+
+  // Switch states for Distribution settings
+  const [phasedRelease, setPhasedRelease] = useState(true)
+  const [testFlightEnabled, setTestFlightEnabled] = useState(true)
+  const [publicLink, setPublicLink] = useState(true)
+  const [autoDistributeBuilds, setAutoDistributeBuilds] = useState(false)
+
+  // Switch states for Notification settings
+  const [reviewStatusNotif, setReviewStatusNotif] = useState(true)
+  const [newRatingsNotif, setNewRatingsNotif] = useState(true)
+  const [crashReportsNotif, setCrashReportsNotif] = useState(true)
+  const [salesReportsNotif, setSalesReportsNotif] = useState(false)
+  const [slackIntegration, setSlackIntegration] = useState(true)
+  const [discordIntegration, setDiscordIntegration] = useState(false)
+
+  // Switch states for Tester settings
+  const [internalTeamActive, setInternalTeamActive] = useState(true)
+  const [betaTestersActive, setBetaTestersActive] = useState(true)
+  const [publicBetaActive, setPublicBetaActive] = useState(false)
+  const [autoInviteOnBuild, setAutoInviteOnBuild] = useState(true)
+  const [requireNda, setRequireNda] = useState(false)
+
+  // Switch states for Advanced/Security settings
+  const [appTransportSecurity, setAppTransportSecurity] = useState(true)
+  const [encryptionExport, setEncryptionExport] = useState(true)
+  const [crashReporting, setCrashReporting] = useState(true)
+  const [appAnalytics, setAppAnalytics] = useState(true)
+
+  // Switch states for TestFlight Dialog
+  const [testFlightDialogEnabled, setTestFlightDialogEnabled] = useState(true)
+  const [autoDistributeToTesters, setAutoDistributeToTesters] = useState(true)
+  const [publicBetaLink, setPublicBetaLink] = useState(false)
+
+  // Switch states for Privacy Dialog
+  const [contactInfoPrivacy, setContactInfoPrivacy] = useState(true)
+  const [usageDataPrivacy, setUsageDataPrivacy] = useState(true)
+  const [identifiersPrivacy, setIdentifiersPrivacy] = useState(true)
+  const [locationDataPrivacy, setLocationDataPrivacy] = useState(false)
+  const [sensitiveDataPrivacy, setSensitiveDataPrivacy] = useState(false)
+
+  // Switch states for CI/CD Dialog
+  const [autoBuildOnPush, setAutoBuildOnPush] = useState(true)
+
+  // Switch states for Create Tester Group Dialog
+  const [autoAddToNewBuilds, setAutoAddToNewBuilds] = useState(true)
   const [showExportAnalyticsDialog, setShowExportAnalyticsDialog] = useState(false)
   const [showRemoveFromStoreDialog, setShowRemoveFromStoreDialog] = useState(false)
   const [showDeleteAppDialog, setShowDeleteAppDialog] = useState(false)
@@ -1608,25 +1661,52 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Show in Search</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Allow app to appear in search</p>
+                          <div className="flex items-center gap-2">
+                            <Search className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Show in Search</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Allow app to appear in search</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showInSearch}
+                            onCheckedChange={(checked) => {
+                              setShowInSearch(checked)
+                              toast.success(checked ? 'App will appear in search results' : 'App hidden from search results')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Pre-order Enabled</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Allow pre-orders for new versions</p>
+                          <div className="flex items-center gap-2">
+                            <ShoppingBag className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Pre-order Enabled</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Allow pre-orders for new versions</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={preOrderEnabled}
+                            onCheckedChange={(checked) => {
+                              setPreOrderEnabled(checked)
+                              toast.success(checked ? 'Pre-orders enabled for your app' : 'Pre-orders disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Made for Kids</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">App is designed for children</p>
+                          <div className="flex items-center gap-2">
+                            <Baby className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Made for Kids</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">App is designed for children</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={madeForKids}
+                            onCheckedChange={(checked) => {
+                              setMadeForKids(checked)
+                              toast.success(checked ? 'App marked as Made for Kids' : 'Made for Kids label removed')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1673,11 +1753,20 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Phased Release</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Gradually roll out to users</p>
+                          <div className="flex items-center gap-2">
+                            <Zap className="h-4 w-4 text-green-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Phased Release</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Gradually roll out to users</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={phasedRelease}
+                            onCheckedChange={(checked) => {
+                              setPhasedRelease(checked)
+                              toast.success(checked ? 'Phased release enabled - updates will roll out gradually' : 'Phased release disabled - instant rollout')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1696,25 +1785,52 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">TestFlight Enabled</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable beta testing</p>
+                          <div className="flex items-center gap-2">
+                            <Smartphone className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">TestFlight Enabled</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Enable beta testing</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={testFlightEnabled}
+                            onCheckedChange={(checked) => {
+                              setTestFlightEnabled(checked)
+                              toast.success(checked ? 'TestFlight beta testing enabled' : 'TestFlight beta testing disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Public Link</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Allow public test invites</p>
+                          <div className="flex items-center gap-2">
+                            <Link className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Public Link</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Allow public test invites</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={publicLink}
+                            onCheckedChange={(checked) => {
+                              setPublicLink(checked)
+                              toast.success(checked ? 'Public TestFlight link enabled' : 'Public TestFlight link disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Auto-distribute Builds</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically send to testers</p>
+                          <div className="flex items-center gap-2">
+                            <Share2 className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Auto-distribute Builds</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically send to testers</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={autoDistributeBuilds}
+                            onCheckedChange={(checked) => {
+                              setAutoDistributeBuilds(checked)
+                              toast.success(checked ? 'Builds will be auto-distributed to testers' : 'Manual distribution enabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1738,32 +1854,68 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Review Status</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Get notified on review updates</p>
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Review Status</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Get notified on review updates</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={reviewStatusNotif}
+                            onCheckedChange={(checked) => {
+                              setReviewStatusNotif(checked)
+                              toast.success(checked ? 'Review status notifications enabled' : 'Review status notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">New Ratings</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Daily summary of new ratings</p>
+                          <div className="flex items-center gap-2">
+                            <Star className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">New Ratings</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Daily summary of new ratings</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={newRatingsNotif}
+                            onCheckedChange={(checked) => {
+                              setNewRatingsNotif(checked)
+                              toast.success(checked ? 'New ratings notifications enabled' : 'New ratings notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Crash Reports</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert on crash spikes</p>
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Crash Reports</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Alert on crash spikes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={crashReportsNotif}
+                            onCheckedChange={(checked) => {
+                              setCrashReportsNotif(checked)
+                              toast.success(checked ? 'Crash report alerts enabled' : 'Crash report alerts disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Sales Reports</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Weekly sales summary</p>
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Sales Reports</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Weekly sales summary</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={salesReportsNotif}
+                            onCheckedChange={(checked) => {
+                              setSalesReportsNotif(checked)
+                              toast.success(checked ? 'Weekly sales reports enabled' : 'Weekly sales reports disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1782,18 +1934,36 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Slack Integration</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Post updates to Slack</p>
+                          <div className="flex items-center gap-2">
+                            <Slack className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Slack Integration</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Post updates to Slack</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={slackIntegration}
+                            onCheckedChange={(checked) => {
+                              setSlackIntegration(checked)
+                              toast.success(checked ? 'Slack integration enabled' : 'Slack integration disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Discord</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Send to Discord channels</p>
+                          <div className="flex items-center gap-2">
+                            <MessageCircle className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Discord</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Send to Discord channels</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={discordIntegration}
+                            onCheckedChange={(checked) => {
+                              setDiscordIntegration(checked)
+                              toast.success(checked ? 'Discord integration enabled' : 'Discord integration disabled')
+                            }}
+                          />
                         </div>
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook</Label>
@@ -1894,19 +2064,54 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {[
-                          { name: 'Internal Team', testers: 25, active: true },
-                          { name: 'Beta Testers', testers: 150, active: true },
-                          { name: 'Public Beta', testers: 1000, active: false }
-                        ].map(group => (
-                          <div key={group.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-cyan-500" />
                             <div>
-                              <Label className="text-gray-900 dark:text-white font-medium">{group.name}</Label>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">{group.testers} testers</p>
+                              <Label className="text-gray-900 dark:text-white font-medium">Internal Team</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">25 testers</p>
                             </div>
-                            <Switch defaultChecked={group.active} />
                           </div>
-                        ))}
+                          <Switch
+                            checked={internalTeamActive}
+                            onCheckedChange={(checked) => {
+                              setInternalTeamActive(checked)
+                              toast.success(checked ? 'Internal Team group activated' : 'Internal Team group deactivated')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-cyan-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Beta Testers</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">150 testers</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={betaTestersActive}
+                            onCheckedChange={(checked) => {
+                              setBetaTestersActive(checked)
+                              toast.success(checked ? 'Beta Testers group activated' : 'Beta Testers group deactivated')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-cyan-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Public Beta</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">1000 testers</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={publicBetaActive}
+                            onCheckedChange={(checked) => {
+                              setPublicBetaActive(checked)
+                              toast.success(checked ? 'Public Beta group activated' : 'Public Beta group deactivated')
+                            }}
+                          />
+                        </div>
                         <Button variant="outline" className="w-full" onClick={() => setShowCreateTesterGroupDialog(true)}>
                           <Users className="h-4 w-4 mr-2" />
                           Create New Group
@@ -1928,18 +2133,36 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Auto-invite on Build</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Invite testers when new build is ready</p>
+                          <div className="flex items-center gap-2">
+                            <UserPlus className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Auto-invite on Build</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Invite testers when new build is ready</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoInviteOnBuild}
+                            onCheckedChange={(checked) => {
+                              setAutoInviteOnBuild(checked)
+                              toast.success(checked ? 'Auto-invite on build enabled' : 'Auto-invite on build disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Require NDA</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Testers must accept NDA</p>
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Require NDA</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Testers must accept NDA</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={requireNda}
+                            onCheckedChange={(checked) => {
+                              setRequireNda(checked)
+                              toast.success(checked ? 'NDA requirement enabled' : 'NDA requirement disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1963,18 +2186,36 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">App Transport Security</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Require HTTPS connections</p>
+                          <div className="flex items-center gap-2">
+                            <Lock className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">App Transport Security</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Require HTTPS connections</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={appTransportSecurity}
+                            onCheckedChange={(checked) => {
+                              setAppTransportSecurity(checked)
+                              toast.success(checked ? 'App Transport Security enabled - HTTPS required' : 'App Transport Security disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Encryption Export</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Uses encryption requiring export compliance</p>
+                          <div className="flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Encryption Export</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Uses encryption requiring export compliance</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={encryptionExport}
+                            onCheckedChange={(checked) => {
+                              setEncryptionExport(checked)
+                              toast.success(checked ? 'Encryption export compliance enabled' : 'Encryption export compliance disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1993,18 +2234,36 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Crash Reporting</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Collect crash reports</p>
+                          <div className="flex items-center gap-2">
+                            <Bug className="h-4 w-4 text-indigo-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Crash Reporting</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Collect crash reports</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={crashReporting}
+                            onCheckedChange={(checked) => {
+                              setCrashReporting(checked)
+                              toast.success(checked ? 'Crash reporting enabled' : 'Crash reporting disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">App Analytics</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Share data with analytics</p>
+                          <div className="flex items-center gap-2">
+                            <BarChart3 className="h-4 w-4 text-indigo-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">App Analytics</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Share data with analytics</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={appAnalytics}
+                            onCheckedChange={(checked) => {
+                              setAppAnalytics(checked)
+                              toast.success(checked ? 'App analytics enabled' : 'App analytics disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex gap-3">
                           <Button variant="outline" className="flex-1" onClick={() => setShowExportAnalyticsDialog(true)}>
@@ -2618,25 +2877,52 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <Label className="font-medium">Enable TestFlight</Label>
-                  <p className="text-xs text-gray-500">Allow beta testing through TestFlight</p>
+                <div className="flex items-center gap-2">
+                  <Smartphone className="h-4 w-4 text-purple-500" />
+                  <div>
+                    <Label className="font-medium">Enable TestFlight</Label>
+                    <p className="text-xs text-gray-500">Allow beta testing through TestFlight</p>
+                  </div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={testFlightDialogEnabled}
+                  onCheckedChange={(checked) => {
+                    setTestFlightDialogEnabled(checked)
+                    toast.success(checked ? 'TestFlight beta testing enabled' : 'TestFlight beta testing disabled')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <Label className="font-medium">Auto-distribute to Testers</Label>
-                  <p className="text-xs text-gray-500">Automatically send builds to all testers</p>
+                <div className="flex items-center gap-2">
+                  <Share2 className="h-4 w-4 text-purple-500" />
+                  <div>
+                    <Label className="font-medium">Auto-distribute to Testers</Label>
+                    <p className="text-xs text-gray-500">Automatically send builds to all testers</p>
+                  </div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={autoDistributeToTesters}
+                  onCheckedChange={(checked) => {
+                    setAutoDistributeToTesters(checked)
+                    toast.success(checked ? 'Auto-distribution to testers enabled' : 'Auto-distribution to testers disabled')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <Label className="font-medium">Public Beta Link</Label>
-                  <p className="text-xs text-gray-500">Allow public access via link</p>
+                <div className="flex items-center gap-2">
+                  <Link className="h-4 w-4 text-purple-500" />
+                  <div>
+                    <Label className="font-medium">Public Beta Link</Label>
+                    <p className="text-xs text-gray-500">Allow public access via link</p>
+                  </div>
                 </div>
-                <Switch />
+                <Switch
+                  checked={publicBetaLink}
+                  onCheckedChange={(checked) => {
+                    setPublicBetaLink(checked)
+                    toast.success(checked ? 'Public beta link enabled' : 'Public beta link disabled')
+                  }}
+                />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
@@ -2687,39 +2973,84 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <Label className="font-medium">Contact Info</Label>
-                  <p className="text-xs text-gray-500">Email, phone number, name</p>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-teal-500" />
+                  <div>
+                    <Label className="font-medium">Contact Info</Label>
+                    <p className="text-xs text-gray-500">Email, phone number, name</p>
+                  </div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={contactInfoPrivacy}
+                  onCheckedChange={(checked) => {
+                    setContactInfoPrivacy(checked)
+                    toast.success(checked ? 'Contact info collection enabled' : 'Contact info collection disabled')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <Label className="font-medium">Usage Data</Label>
-                  <p className="text-xs text-gray-500">App interactions, analytics</p>
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-teal-500" />
+                  <div>
+                    <Label className="font-medium">Usage Data</Label>
+                    <p className="text-xs text-gray-500">App interactions, analytics</p>
+                  </div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={usageDataPrivacy}
+                  onCheckedChange={(checked) => {
+                    setUsageDataPrivacy(checked)
+                    toast.success(checked ? 'Usage data collection enabled' : 'Usage data collection disabled')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <Label className="font-medium">Identifiers</Label>
-                  <p className="text-xs text-gray-500">User ID, device ID</p>
+                <div className="flex items-center gap-2">
+                  <Fingerprint className="h-4 w-4 text-teal-500" />
+                  <div>
+                    <Label className="font-medium">Identifiers</Label>
+                    <p className="text-xs text-gray-500">User ID, device ID</p>
+                  </div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={identifiersPrivacy}
+                  onCheckedChange={(checked) => {
+                    setIdentifiersPrivacy(checked)
+                    toast.success(checked ? 'Identifier collection enabled' : 'Identifier collection disabled')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <Label className="font-medium">Location Data</Label>
-                  <p className="text-xs text-gray-500">Precise or coarse location</p>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-teal-500" />
+                  <div>
+                    <Label className="font-medium">Location Data</Label>
+                    <p className="text-xs text-gray-500">Precise or coarse location</p>
+                  </div>
                 </div>
-                <Switch />
+                <Switch
+                  checked={locationDataPrivacy}
+                  onCheckedChange={(checked) => {
+                    setLocationDataPrivacy(checked)
+                    toast.success(checked ? 'Location data collection enabled' : 'Location data collection disabled')
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <Label className="font-medium">Sensitive Data</Label>
-                  <p className="text-xs text-gray-500">Health, financial data</p>
+                <div className="flex items-center gap-2">
+                  <Heart className="h-4 w-4 text-teal-500" />
+                  <div>
+                    <Label className="font-medium">Sensitive Data</Label>
+                    <p className="text-xs text-gray-500">Health, financial data</p>
+                  </div>
                 </div>
-                <Switch />
+                <Switch
+                  checked={sensitiveDataPrivacy}
+                  onCheckedChange={(checked) => {
+                    setSensitiveDataPrivacy(checked)
+                    toast.success(checked ? 'Sensitive data collection enabled' : 'Sensitive data collection disabled')
+                  }}
+                />
               </div>
             </div>
             <DialogFooter>
@@ -3093,11 +3424,20 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                   </Select>
                 </div>
                 <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <Label className="font-medium">Auto-build on Push</Label>
-                    <p className="text-xs text-gray-500">Automatically trigger builds on push</p>
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-green-500" />
+                    <div>
+                      <Label className="font-medium">Auto-build on Push</Label>
+                      <p className="text-xs text-gray-500">Automatically trigger builds on push</p>
+                    </div>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={autoBuildOnPush}
+                    onCheckedChange={(checked) => {
+                      setAutoBuildOnPush(checked)
+                      toast.success(checked ? 'Auto-build on push enabled' : 'Auto-build on push disabled')
+                    }}
+                  />
                 </div>
               </>
             ) : (
@@ -3190,11 +3530,20 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               <textarea className="w-full px-3 py-2 border rounded-lg min-h-[60px] dark:bg-gray-800 dark:border-gray-700" placeholder="Describe this tester group..." />
             </div>
             <div className="flex items-center justify-between p-3 border rounded-lg">
-              <div>
-                <Label className="font-medium">Auto-add to New Builds</Label>
-                <p className="text-xs text-gray-500">Automatically include in new beta releases</p>
+              <div className="flex items-center gap-2">
+                <Package className="h-4 w-4 text-cyan-500" />
+                <div>
+                  <Label className="font-medium">Auto-add to New Builds</Label>
+                  <p className="text-xs text-gray-500">Automatically include in new beta releases</p>
+                </div>
               </div>
-              <Switch defaultChecked />
+              <Switch
+                checked={autoAddToNewBuilds}
+                onCheckedChange={(checked) => {
+                  setAutoAddToNewBuilds(checked)
+                  toast.success(checked ? 'Group will be auto-added to new builds' : 'Manual addition to builds enabled')
+                }}
+              />
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateTesterGroupDialog(false)}>Cancel</Button>

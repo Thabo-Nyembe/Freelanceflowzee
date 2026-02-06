@@ -190,6 +190,82 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
   const [featuresInput, setFeaturesInput] = useState('')
   const [tagsInput, setTagsInput] = useState('')
 
+  // Display Preferences
+  const [showVersionNumbers, setShowVersionNumbers] = useState(true)
+  const [showMetrics, setShowMetrics] = useState(true)
+  const [showAuthorInfo, setShowAuthorInfo] = useState(true)
+  const [compactView, setCompactView] = useState(false)
+
+  // Roadmap Settings
+  const [publicRoadmap, setPublicRoadmap] = useState(true)
+  const [allowVoting, setAllowVoting] = useState(true)
+  const [showVoteCounts, setShowVoteCounts] = useState(true)
+
+  // Feature Flag Defaults
+  const [autoArchiveFlags, setAutoArchiveFlags] = useState(false)
+  const [requireFlagApproval, setRequireFlagApproval] = useState(true)
+
+  // Platform Settings
+  const [trackIos, setTrackIos] = useState(true)
+  const [trackAndroid, setTrackAndroid] = useState(true)
+  const [trackWeb, setTrackWeb] = useState(true)
+  const [trackDesktop, setTrackDesktop] = useState(true)
+  const [trackApi, setTrackApi] = useState(false)
+
+  // Release Workflow
+  const [requireReleaseApproval, setRequireReleaseApproval] = useState(true)
+  const [autoDraftFromGit, setAutoDraftFromGit] = useState(true)
+  const [requireChangelog, setRequireChangelog] = useState(true)
+
+  // Scheduling
+  const [allowScheduling, setAllowScheduling] = useState(true)
+  const [avoidWeekends, setAvoidWeekends] = useState(true)
+
+  // Rollout Settings
+  const [gradualRollout, setGradualRollout] = useState(true)
+  const [autoPauseOnErrors, setAutoPauseOnErrors] = useState(true)
+
+  // Version Control
+  const [autoIncrementVersion, setAutoIncrementVersion] = useState(true)
+  const [linkToGitTags, setLinkToGitTags] = useState(true)
+
+  // Email Notifications
+  const [emailNewRelease, setEmailNewRelease] = useState(true)
+  const [emailReleaseScheduled, setEmailReleaseScheduled] = useState(true)
+  const [emailRolloutProgress, setEmailRolloutProgress] = useState(false)
+  const [emailWeeklyDigest, setEmailWeeklyDigest] = useState(false)
+
+  // Slack Integration
+  const [slackNewReleases, setSlackNewReleases] = useState(true)
+  const [slackRolloutMilestones, setSlackRolloutMilestones] = useState(true)
+  const [slackFeatureFlagChanges, setSlackFeatureFlagChanges] = useState(false)
+
+  // In-App Notifications
+  const [showReleaseBanner, setShowReleaseBanner] = useState(true)
+  const [whatsNewModal, setWhatsNewModal] = useState(true)
+  const [changelogLink, setChangelogLink] = useState(true)
+
+  // Integrations
+  const [publicChangelog, setPublicChangelog] = useState(true)
+
+  // Changelog Sections
+  const [showNewFeatures, setShowNewFeatures] = useState(true)
+  const [showImprovements, setShowImprovements] = useState(true)
+  const [showBugFixes, setShowBugFixes] = useState(true)
+  const [showBreakingChanges, setShowBreakingChanges] = useState(true)
+  const [showKnownIssues, setShowKnownIssues] = useState(true)
+  const [showMigrationGuide, setShowMigrationGuide] = useState(false)
+
+  // Cache & Performance
+  const [enableCaching, setEnableCaching] = useState(true)
+
+  // Access Control
+  const [requireLogin, setRequireLogin] = useState(false)
+  const [internalOnly, setInternalOnly] = useState(false)
+
+  // Feature Flag Dialog
+  const [enableFlagImmediately, setEnableFlagImmediately] = useState(false)
+
   // Filter database releases based on search and filters
   const filteredReleases = useMemo(() => {
     let filtered = [...releases]
@@ -1007,28 +1083,52 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">Show Version Numbers</Label>
                           <p className="text-sm text-gray-500">Display version badges on releases</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showVersionNumbers}
+                          onCheckedChange={(checked) => {
+                            setShowVersionNumbers(checked)
+                            toast.success(checked ? 'Version numbers enabled' : 'Version numbers disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Show Metrics</Label>
                           <p className="text-sm text-gray-500">Display download and view counts</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showMetrics}
+                          onCheckedChange={(checked) => {
+                            setShowMetrics(checked)
+                            toast.success(checked ? 'Metrics display enabled' : 'Metrics display disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Show Author Info</Label>
                           <p className="text-sm text-gray-500">Display author avatar and name</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showAuthorInfo}
+                          onCheckedChange={(checked) => {
+                            setShowAuthorInfo(checked)
+                            toast.success(checked ? 'Author info enabled' : 'Author info disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Compact View</Label>
                           <p className="text-sm text-gray-500">Reduce card size for more content</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={compactView}
+                          onCheckedChange={(checked) => {
+                            setCompactView(checked)
+                            toast.success(checked ? 'Compact view enabled' : 'Standard view enabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Default View</Label>
@@ -1059,21 +1159,39 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">Public Roadmap</Label>
                           <p className="text-sm text-gray-500">Share roadmap with users</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={publicRoadmap}
+                          onCheckedChange={(checked) => {
+                            setPublicRoadmap(checked)
+                            toast.success(checked ? 'Roadmap is now public' : 'Roadmap is now private')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Allow Voting</Label>
                           <p className="text-sm text-gray-500">Let users vote on features</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={allowVoting}
+                          onCheckedChange={(checked) => {
+                            setAllowVoting(checked)
+                            toast.success(checked ? 'Voting enabled' : 'Voting disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Show Vote Counts</Label>
                           <p className="text-sm text-gray-500">Display vote counts publicly</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showVoteCounts}
+                          onCheckedChange={(checked) => {
+                            setShowVoteCounts(checked)
+                            toast.success(checked ? 'Vote counts visible' : 'Vote counts hidden')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Default Quarter View</Label>
@@ -1118,14 +1236,26 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">Auto-archive Old Flags</Label>
                           <p className="text-sm text-gray-500">Archive flags after 90 days at 100%</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={autoArchiveFlags}
+                          onCheckedChange={(checked) => {
+                            setAutoArchiveFlags(checked)
+                            toast.success(checked ? 'Auto-archive enabled' : 'Auto-archive disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Require Approval</Label>
                           <p className="text-sm text-gray-500">Require approval for production flags</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={requireFlagApproval}
+                          onCheckedChange={(checked) => {
+                            setRequireFlagApproval(checked)
+                            toast.success(checked ? 'Approval required for flags' : 'Approval not required for flags')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1143,35 +1273,65 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">iOS</Label>
                           <p className="text-sm text-gray-500">Track iOS releases</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={trackIos}
+                          onCheckedChange={(checked) => {
+                            setTrackIos(checked)
+                            toast.success(checked ? 'iOS tracking enabled' : 'iOS tracking disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Android</Label>
                           <p className="text-sm text-gray-500">Track Android releases</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={trackAndroid}
+                          onCheckedChange={(checked) => {
+                            setTrackAndroid(checked)
+                            toast.success(checked ? 'Android tracking enabled' : 'Android tracking disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Web</Label>
                           <p className="text-sm text-gray-500">Track Web releases</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={trackWeb}
+                          onCheckedChange={(checked) => {
+                            setTrackWeb(checked)
+                            toast.success(checked ? 'Web tracking enabled' : 'Web tracking disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Desktop</Label>
                           <p className="text-sm text-gray-500">Track Desktop releases</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={trackDesktop}
+                          onCheckedChange={(checked) => {
+                            setTrackDesktop(checked)
+                            toast.success(checked ? 'Desktop tracking enabled' : 'Desktop tracking disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">API</Label>
                           <p className="text-sm text-gray-500">Track API releases</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={trackApi}
+                          onCheckedChange={(checked) => {
+                            setTrackApi(checked)
+                            toast.success(checked ? 'API tracking enabled' : 'API tracking disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1194,21 +1354,39 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">Require Approval</Label>
                           <p className="text-sm text-gray-500">Releases need approval before publishing</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={requireReleaseApproval}
+                          onCheckedChange={(checked) => {
+                            setRequireReleaseApproval(checked)
+                            toast.success(checked ? 'Release approval required' : 'Release approval not required')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Auto-draft from Git</Label>
                           <p className="text-sm text-gray-500">Create drafts from git tags</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoDraftFromGit}
+                          onCheckedChange={(checked) => {
+                            setAutoDraftFromGit(checked)
+                            toast.success(checked ? 'Auto-draft from Git enabled' : 'Auto-draft from Git disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Require Changelog</Label>
                           <p className="text-sm text-gray-500">Releases must have changelog</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={requireChangelog}
+                          onCheckedChange={(checked) => {
+                            setRequireChangelog(checked)
+                            toast.success(checked ? 'Changelog required' : 'Changelog not required')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Default Approvers</Label>
@@ -1230,7 +1408,13 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">Allow Scheduling</Label>
                           <p className="text-sm text-gray-500">Schedule releases for later</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={allowScheduling}
+                          onCheckedChange={(checked) => {
+                            setAllowScheduling(checked)
+                            toast.success(checked ? 'Release scheduling enabled' : 'Release scheduling disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Default Publish Time</Label>
@@ -1265,7 +1449,13 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">Avoid Weekends</Label>
                           <p className="text-sm text-gray-500">Do not publish on weekends</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={avoidWeekends}
+                          onCheckedChange={(checked) => {
+                            setAvoidWeekends(checked)
+                            toast.success(checked ? 'Weekend publishing blocked' : 'Weekend publishing allowed')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1283,7 +1473,13 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">Gradual Rollout</Label>
                           <p className="text-sm text-gray-500">Roll out releases gradually</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={gradualRollout}
+                          onCheckedChange={(checked) => {
+                            setGradualRollout(checked)
+                            toast.success(checked ? 'Gradual rollout enabled' : 'Gradual rollout disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Default Rollout Schedule</Label>
@@ -1303,7 +1499,13 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">Auto-pause on Errors</Label>
                           <p className="text-sm text-gray-500">Pause rollout if error rate spikes</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoPauseOnErrors}
+                          onCheckedChange={(checked) => {
+                            setAutoPauseOnErrors(checked)
+                            toast.success(checked ? 'Auto-pause on errors enabled' : 'Auto-pause on errors disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Error Threshold</Label>
@@ -1347,14 +1549,26 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">Auto-increment Version</Label>
                           <p className="text-sm text-gray-500">Automatically bump version</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoIncrementVersion}
+                          onCheckedChange={(checked) => {
+                            setAutoIncrementVersion(checked)
+                            toast.success(checked ? 'Auto-increment version enabled' : 'Auto-increment version disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Link to Git Tags</Label>
                           <p className="text-sm text-gray-500">Associate releases with git tags</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={linkToGitTags}
+                          onCheckedChange={(checked) => {
+                            setLinkToGitTags(checked)
+                            toast.success(checked ? 'Git tag linking enabled' : 'Git tag linking disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1377,28 +1591,52 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">New Release Published</Label>
                           <p className="text-sm text-gray-500">Email when releases go live</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={emailNewRelease}
+                          onCheckedChange={(checked) => {
+                            setEmailNewRelease(checked)
+                            toast.success(checked ? 'New release emails enabled' : 'New release emails disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Release Scheduled</Label>
                           <p className="text-sm text-gray-500">Reminder before scheduled release</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={emailReleaseScheduled}
+                          onCheckedChange={(checked) => {
+                            setEmailReleaseScheduled(checked)
+                            toast.success(checked ? 'Scheduled release emails enabled' : 'Scheduled release emails disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Rollout Progress</Label>
                           <p className="text-sm text-gray-500">Updates during gradual rollout</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={emailRolloutProgress}
+                          onCheckedChange={(checked) => {
+                            setEmailRolloutProgress(checked)
+                            toast.success(checked ? 'Rollout progress emails enabled' : 'Rollout progress emails disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Weekly Digest</Label>
                           <p className="text-sm text-gray-500">Weekly release summary</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={emailWeeklyDigest}
+                          onCheckedChange={(checked) => {
+                            setEmailWeeklyDigest(checked)
+                            toast.success(checked ? 'Weekly digest enabled' : 'Weekly digest disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Notification Email</Label>
@@ -1430,21 +1668,39 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">New Releases</Label>
                           <p className="text-sm text-gray-500">Post when releases are published</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={slackNewReleases}
+                          onCheckedChange={(checked) => {
+                            setSlackNewReleases(checked)
+                            toast.success(checked ? 'Slack new releases enabled' : 'Slack new releases disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Rollout Milestones</Label>
                           <p className="text-sm text-gray-500">Post at 25%, 50%, 75%, 100%</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={slackRolloutMilestones}
+                          onCheckedChange={(checked) => {
+                            setSlackRolloutMilestones(checked)
+                            toast.success(checked ? 'Slack rollout milestones enabled' : 'Slack rollout milestones disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Feature Flag Changes</Label>
                           <p className="text-sm text-gray-500">Post when flags are toggled</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={slackFeatureFlagChanges}
+                          onCheckedChange={(checked) => {
+                            setSlackFeatureFlagChanges(checked)
+                            toast.success(checked ? 'Slack flag change notifications enabled' : 'Slack flag change notifications disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1462,21 +1718,39 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">Show Release Banner</Label>
                           <p className="text-sm text-gray-500">Show banner in app for new releases</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showReleaseBanner}
+                          onCheckedChange={(checked) => {
+                            setShowReleaseBanner(checked)
+                            toast.success(checked ? 'Release banner enabled' : 'Release banner disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Whats New Modal</Label>
                           <p className="text-sm text-gray-500">Show modal on first visit after update</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={whatsNewModal}
+                          onCheckedChange={(checked) => {
+                            setWhatsNewModal(checked)
+                            toast.success(checked ? 'Whats New modal enabled' : 'Whats New modal disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Changelog Link</Label>
                           <p className="text-sm text-gray-500">Show link to full changelog</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={changelogLink}
+                          onCheckedChange={(checked) => {
+                            setChangelogLink(checked)
+                            toast.success(checked ? 'Changelog link enabled' : 'Changelog link disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Banner Duration</Label>
@@ -1671,7 +1945,13 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">Public Changelog</Label>
                           <p className="text-sm text-gray-500">Allow public access to changelog</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={publicChangelog}
+                          onCheckedChange={(checked) => {
+                            setPublicChangelog(checked)
+                            toast.success(checked ? 'Public changelog enabled' : 'Public changelog disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1734,42 +2014,78 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <Label className="font-medium">New Features</Label>
                           <p className="text-sm text-gray-500">Show new feature section</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showNewFeatures}
+                          onCheckedChange={(checked) => {
+                            setShowNewFeatures(checked)
+                            toast.success(checked ? 'New Features section enabled' : 'New Features section disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Improvements</Label>
                           <p className="text-sm text-gray-500">Show improvements section</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showImprovements}
+                          onCheckedChange={(checked) => {
+                            setShowImprovements(checked)
+                            toast.success(checked ? 'Improvements section enabled' : 'Improvements section disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Bug Fixes</Label>
                           <p className="text-sm text-gray-500">Show bug fixes section</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showBugFixes}
+                          onCheckedChange={(checked) => {
+                            setShowBugFixes(checked)
+                            toast.success(checked ? 'Bug Fixes section enabled' : 'Bug Fixes section disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Breaking Changes</Label>
                           <p className="text-sm text-gray-500">Show breaking changes section</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showBreakingChanges}
+                          onCheckedChange={(checked) => {
+                            setShowBreakingChanges(checked)
+                            toast.success(checked ? 'Breaking Changes section enabled' : 'Breaking Changes section disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Known Issues</Label>
                           <p className="text-sm text-gray-500">Show known issues section</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showKnownIssues}
+                          onCheckedChange={(checked) => {
+                            setShowKnownIssues(checked)
+                            toast.success(checked ? 'Known Issues section enabled' : 'Known Issues section disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Migration Guide</Label>
                           <p className="text-sm text-gray-500">Show migration guide section</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={showMigrationGuide}
+                          onCheckedChange={(checked) => {
+                            setShowMigrationGuide(checked)
+                            toast.success(checked ? 'Migration Guide section enabled' : 'Migration Guide section disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1906,7 +2222,13 @@ ${r.features?.length ? '### Features\n' + r.features.map(f => `- ${f}`).join('\n
                           <Label className="font-medium">Enable Caching</Label>
                           <p className="text-sm text-gray-500">Cache release data</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={enableCaching}
+                          onCheckedChange={(checked) => {
+                            setEnableCaching(checked)
+                            toast.success(checked ? 'Caching enabled' : 'Caching disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Cache Duration</Label>
@@ -1957,14 +2279,26 @@ ${r.features?.length ? '### Features\n' + r.features.map(f => `- ${f}`).join('\n
                           <Label className="font-medium">Require Login</Label>
                           <p className="text-sm text-gray-500">Users must login to view releases</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={requireLogin}
+                          onCheckedChange={(checked) => {
+                            setRequireLogin(checked)
+                            toast.success(checked ? 'Login required to view releases' : 'Public access enabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Internal Only</Label>
                           <p className="text-sm text-gray-500">Only show to team members</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={internalOnly}
+                          onCheckedChange={(checked) => {
+                            setInternalOnly(checked)
+                            toast.success(checked ? 'Internal only mode enabled' : 'External access enabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-medium">Allowed Domains</Label>
@@ -2581,7 +2915,14 @@ ${r.features?.length ? '### Features\n' + r.features.map(f => `- ${f}`).join('\n
               </Select>
             </div>
             <div className="flex items-center gap-2">
-              <Switch id="flag-enabled" />
+              <Switch
+                id="flag-enabled"
+                checked={enableFlagImmediately}
+                onCheckedChange={(checked) => {
+                  setEnableFlagImmediately(checked)
+                  toast.success(checked ? 'Flag will be enabled immediately' : 'Flag will start disabled')
+                }}
+              />
               <Label htmlFor="flag-enabled">Enable flag immediately</Label>
             </div>
           </div>

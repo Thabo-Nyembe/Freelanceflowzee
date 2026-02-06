@@ -56,7 +56,23 @@ import {
   Bell,
   Server,
   Network,
-  Gauge
+  Gauge,
+  Save,
+  Lightbulb,
+  ShieldCheck,
+  ListFilter,
+  FileText,
+  RotateCcw,
+  Database,
+  CheckSquare,
+  Layers,
+  Mail,
+  Link2,
+  Fingerprint,
+  Bug,
+  FileCode,
+  ToggleLeft,
+  Scale
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -198,6 +214,55 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
   const [newDescription, setNewDescription] = useState('')
   const [newTriggerType, setNewTriggerType] = useState('webhook')
   const [newSchedule, setNewSchedule] = useState('0 9 * * *')
+
+  // Settings switch states - General Settings
+  const [autoSaveWorkflows, setAutoSaveWorkflows] = useState(true)
+  const [showWorkflowHints, setShowWorkflowHints] = useState(true)
+  const [allowExternalWebhooks, setAllowExternalWebhooks] = useState(true)
+
+  // Settings switch states - Triggers
+  const [webhookAuthentication, setWebhookAuthentication] = useState(true)
+  const [ipWhitelist, setIpWhitelist] = useState(false)
+  const [logAllRequests, setLogAllRequests] = useState(true)
+  const [skipMissedExecutions, setSkipMissedExecutions] = useState(false)
+  const [catchUpMode, setCatchUpMode] = useState(true)
+  const [deduplication, setDeduplication] = useState(true)
+
+  // Settings switch states - Executions
+  const [errorWorkflow, setErrorWorkflow] = useState(true)
+  const [continueOnError, setContinueOnError] = useState(false)
+  const [saveExecutionData, setSaveExecutionData] = useState(true)
+  const [saveSuccessfulExecutions, setSaveSuccessfulExecutions] = useState(true)
+  const [pruneDataOnSuccess, setPruneDataOnSuccess] = useState(false)
+  const [queueExcessExecutions, setQueueExcessExecutions] = useState(true)
+
+  // Settings switch states - Notifications
+  const [workflowFailuresNotif, setWorkflowFailuresNotif] = useState(true)
+  const [connectionIssuesNotif, setConnectionIssuesNotif] = useState(true)
+  const [dailySummaryNotif, setDailySummaryNotif] = useState(false)
+  const [weeklyReportNotif, setWeeklyReportNotif] = useState(true)
+  const [sendToSlack, setSendToSlack] = useState(true)
+  const [enableWebhookAlerts, setEnableWebhookAlerts] = useState(false)
+  const [executionStartedEvent, setExecutionStartedEvent] = useState(true)
+  const [executionCompletedEvent, setExecutionCompletedEvent] = useState(true)
+  const [executionFailedEvent, setExecutionFailedEvent] = useState(true)
+  const [workflowActivatedEvent, setWorkflowActivatedEvent] = useState(false)
+
+  // Settings switch states - Connections
+  const [autoRefreshOAuth, setAutoRefreshOAuth] = useState(true)
+  const [testConnectionsOnStartup, setTestConnectionsOnStartup] = useState(true)
+  const [encryptCredentials, setEncryptCredentials] = useState(true)
+  const [auditCredentialAccess, setAuditCredentialAccess] = useState(true)
+  const [verifySSLCertificates, setVerifySSLCertificates] = useState(true)
+
+  // Settings switch states - Advanced
+  const [autoScaleWorkers, setAutoScaleWorkers] = useState(false)
+  const [debugMode, setDebugMode] = useState(false)
+  const [logToFile, setLogToFile] = useState(true)
+  const [includeStackTraces, setIncludeStackTraces] = useState(true)
+  const [twoFactorAuth, setTwoFactorAuth] = useState(true)
+  const [ipBasedAccessControl, setIpBasedAccessControl] = useState(false)
+  const [auditLogging, setAuditLogging] = useState(true)
 
   // Hook for automation data with CRUD operations
   const {
@@ -1143,19 +1208,37 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Auto-save Workflows</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically save changes while editing</p>
+                          <div className="flex items-center gap-3">
+                            <Save className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <Label className="text-base">Auto-save Workflows</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically save changes while editing</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoSaveWorkflows}
+                            onCheckedChange={(checked) => {
+                              setAutoSaveWorkflows(checked)
+                              toast.success(checked ? 'Auto-save enabled' : 'Auto-save disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Show Workflow Hints</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Display helpful tips in the workflow editor</p>
+                          <div className="flex items-center gap-3">
+                            <Lightbulb className="h-5 w-5 text-yellow-500" />
+                            <div>
+                              <Label className="text-base">Show Workflow Hints</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Display helpful tips in the workflow editor</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showWorkflowHints}
+                            onCheckedChange={(checked) => {
+                              setShowWorkflowHints(checked)
+                              toast.success(checked ? 'Workflow hints enabled' : 'Workflow hints disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1213,11 +1296,20 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Allow External Webhooks</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Accept webhook requests from external sources</p>
+                          <div className="flex items-center gap-3">
+                            <Globe className="h-5 w-5 text-green-500" />
+                            <div>
+                              <Label className="text-base">Allow External Webhooks</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Accept webhook requests from external sources</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowExternalWebhooks}
+                            onCheckedChange={(checked) => {
+                              setAllowExternalWebhooks(checked)
+                              toast.success(checked ? 'External webhooks enabled' : 'External webhooks disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1248,27 +1340,54 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Webhook Authentication</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Require authentication for webhook endpoints</p>
+                          <div className="flex items-center gap-3">
+                            <ShieldCheck className="h-5 w-5 text-green-500" />
+                            <div>
+                              <Label className="text-base">Webhook Authentication</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Require authentication for webhook endpoints</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={webhookAuthentication}
+                            onCheckedChange={(checked) => {
+                              setWebhookAuthentication(checked)
+                              toast.success(checked ? 'Webhook authentication enabled' : 'Webhook authentication disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">IP Whitelist</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Only accept requests from whitelisted IPs</p>
+                          <div className="flex items-center gap-3">
+                            <ListFilter className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <Label className="text-base">IP Whitelist</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Only accept requests from whitelisted IPs</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ipWhitelist}
+                            onCheckedChange={(checked) => {
+                              setIpWhitelist(checked)
+                              toast.success(checked ? 'IP whitelist enabled' : 'IP whitelist disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Log All Requests</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Store all incoming webhook payloads for debugging</p>
+                          <div className="flex items-center gap-3">
+                            <FileText className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <Label className="text-base">Log All Requests</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Store all incoming webhook payloads for debugging</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={logAllRequests}
+                            onCheckedChange={(checked) => {
+                              setLogAllRequests(checked)
+                              toast.success(checked ? 'Request logging enabled' : 'Request logging disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1303,19 +1422,37 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Skip Missed Executions</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Skip executions that were missed during downtime</p>
+                          <div className="flex items-center gap-3">
+                            <Clock className="h-5 w-5 text-gray-500" />
+                            <div>
+                              <Label className="text-base">Skip Missed Executions</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Skip executions that were missed during downtime</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={skipMissedExecutions}
+                            onCheckedChange={(checked) => {
+                              setSkipMissedExecutions(checked)
+                              toast.success(checked ? 'Skip missed executions enabled' : 'Skip missed executions disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Catch Up Mode</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Run all missed schedules upon restart</p>
+                          <div className="flex items-center gap-3">
+                            <RotateCcw className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <Label className="text-base">Catch Up Mode</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Run all missed schedules upon restart</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={catchUpMode}
+                            onCheckedChange={(checked) => {
+                              setCatchUpMode(checked)
+                              toast.success(checked ? 'Catch up mode enabled' : 'Catch up mode disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1341,11 +1478,20 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Deduplication</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Prevent processing duplicate items</p>
+                          <div className="flex items-center gap-3">
+                            <Layers className="h-5 w-5 text-indigo-500" />
+                            <div>
+                              <Label className="text-base">Deduplication</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Prevent processing duplicate items</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={deduplication}
+                            onCheckedChange={(checked) => {
+                              setDeduplication(checked)
+                              toast.success(checked ? 'Deduplication enabled' : 'Deduplication disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1407,19 +1553,37 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Error Workflow</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Run a specific workflow when errors occur</p>
+                          <div className="flex items-center gap-3">
+                            <AlertTriangle className="h-5 w-5 text-red-500" />
+                            <div>
+                              <Label className="text-base">Error Workflow</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Run a specific workflow when errors occur</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={errorWorkflow}
+                            onCheckedChange={(checked) => {
+                              setErrorWorkflow(checked)
+                              toast.success(checked ? 'Error workflow enabled' : 'Error workflow disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Continue on Error</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Continue execution even if some nodes fail</p>
+                          <div className="flex items-center gap-3">
+                            <Play className="h-5 w-5 text-green-500" />
+                            <div>
+                              <Label className="text-base">Continue on Error</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Continue execution even if some nodes fail</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={continueOnError}
+                            onCheckedChange={(checked) => {
+                              setContinueOnError(checked)
+                              toast.success(checked ? 'Continue on error enabled' : 'Continue on error disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1457,27 +1621,54 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Save Execution Data</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Store input/output data for each execution</p>
+                          <div className="flex items-center gap-3">
+                            <Database className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <Label className="text-base">Save Execution Data</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Store input/output data for each execution</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={saveExecutionData}
+                            onCheckedChange={(checked) => {
+                              setSaveExecutionData(checked)
+                              toast.success(checked ? 'Execution data saving enabled' : 'Execution data saving disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Save Successful Executions</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Keep history of successful runs</p>
+                          <div className="flex items-center gap-3">
+                            <CheckSquare className="h-5 w-5 text-green-500" />
+                            <div>
+                              <Label className="text-base">Save Successful Executions</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Keep history of successful runs</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={saveSuccessfulExecutions}
+                            onCheckedChange={(checked) => {
+                              setSaveSuccessfulExecutions(checked)
+                              toast.success(checked ? 'Successful execution saving enabled' : 'Successful execution saving disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Prune Data on Success</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Delete execution data after successful completion</p>
+                          <div className="flex items-center gap-3">
+                            <Trash2 className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <Label className="text-base">Prune Data on Success</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Delete execution data after successful completion</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={pruneDataOnSuccess}
+                            onCheckedChange={(checked) => {
+                              setPruneDataOnSuccess(checked)
+                              toast.success(checked ? 'Prune on success enabled' : 'Prune on success disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1503,11 +1694,20 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Queue Excess Executions</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Queue requests when rate limit is reached instead of rejecting</p>
+                          <div className="flex items-center gap-3">
+                            <Layers className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <Label className="text-base">Queue Excess Executions</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Queue requests when rate limit is reached instead of rejecting</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={queueExcessExecutions}
+                            onCheckedChange={(checked) => {
+                              setQueueExcessExecutions(checked)
+                              toast.success(checked ? 'Queue excess executions enabled' : 'Queue excess executions disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1532,35 +1732,71 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Workflow Failures</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Email when a workflow execution fails</p>
+                          <div className="flex items-center gap-3">
+                            <XCircle className="h-5 w-5 text-red-500" />
+                            <div>
+                              <Label className="text-base">Workflow Failures</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Email when a workflow execution fails</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={workflowFailuresNotif}
+                            onCheckedChange={(checked) => {
+                              setWorkflowFailuresNotif(checked)
+                              toast.success(checked ? 'Workflow failure notifications enabled' : 'Workflow failure notifications disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Connection Issues</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Email when app connections fail or expire</p>
+                          <div className="flex items-center gap-3">
+                            <Link2 className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <Label className="text-base">Connection Issues</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Email when app connections fail or expire</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={connectionIssuesNotif}
+                            onCheckedChange={(checked) => {
+                              setConnectionIssuesNotif(checked)
+                              toast.success(checked ? 'Connection issue notifications enabled' : 'Connection issue notifications disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Daily Summary</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Receive daily execution summary</p>
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <Label className="text-base">Daily Summary</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Receive daily execution summary</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={dailySummaryNotif}
+                            onCheckedChange={(checked) => {
+                              setDailySummaryNotif(checked)
+                              toast.success(checked ? 'Daily summary enabled' : 'Daily summary disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Weekly Report</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Receive weekly automation analytics report</p>
+                          <div className="flex items-center gap-3">
+                            <BarChart3 className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <Label className="text-base">Weekly Report</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Receive weekly automation analytics report</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={weeklyReportNotif}
+                            onCheckedChange={(checked) => {
+                              setWeeklyReportNotif(checked)
+                              toast.success(checked ? 'Weekly report enabled' : 'Weekly report disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1589,11 +1825,20 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Send to Slack</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable Slack notifications</p>
+                          <div className="flex items-center gap-3">
+                            <MessageSquare className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <Label className="text-base">Send to Slack</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Enable Slack notifications</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sendToSlack}
+                            onCheckedChange={(checked) => {
+                              setSendToSlack(checked)
+                              toast.success(checked ? 'Slack notifications enabled' : 'Slack notifications disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2">
@@ -1628,30 +1873,67 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Enable Webhook Alerts</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Send execution events to webhook</p>
+                          <div className="flex items-center gap-3">
+                            <Bell className="h-5 w-5 text-amber-500" />
+                            <div>
+                              <Label className="text-base">Enable Webhook Alerts</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Send execution events to webhook</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enableWebhookAlerts}
+                            onCheckedChange={(checked) => {
+                              setEnableWebhookAlerts(checked)
+                              toast.success(checked ? 'Webhook alerts enabled' : 'Webhook alerts disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2">
                           <Label>Events to Send</Label>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-2">
                             <div className="flex items-center gap-2">
-                              <Switch defaultChecked />
+                              <Play className="h-4 w-4 text-green-500" />
+                              <Switch
+                                checked={executionStartedEvent}
+                                onCheckedChange={(checked) => {
+                                  setExecutionStartedEvent(checked)
+                                  toast.success(checked ? 'Execution started event enabled' : 'Execution started event disabled')
+                                }}
+                              />
                               <Label className="font-normal">Execution Started</Label>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Switch defaultChecked />
+                              <CheckCircle className="h-4 w-4 text-blue-500" />
+                              <Switch
+                                checked={executionCompletedEvent}
+                                onCheckedChange={(checked) => {
+                                  setExecutionCompletedEvent(checked)
+                                  toast.success(checked ? 'Execution completed event enabled' : 'Execution completed event disabled')
+                                }}
+                              />
                               <Label className="font-normal">Execution Completed</Label>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Switch defaultChecked />
+                              <XCircle className="h-4 w-4 text-red-500" />
+                              <Switch
+                                checked={executionFailedEvent}
+                                onCheckedChange={(checked) => {
+                                  setExecutionFailedEvent(checked)
+                                  toast.success(checked ? 'Execution failed event enabled' : 'Execution failed event disabled')
+                                }}
+                              />
                               <Label className="font-normal">Execution Failed</Label>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Switch />
+                              <Zap className="h-4 w-4 text-orange-500" />
+                              <Switch
+                                checked={workflowActivatedEvent}
+                                onCheckedChange={(checked) => {
+                                  setWorkflowActivatedEvent(checked)
+                                  toast.success(checked ? 'Workflow activated event enabled' : 'Workflow activated event disabled')
+                                }}
+                              />
                               <Label className="font-normal">Workflow Activated</Label>
                             </div>
                           </div>
@@ -1674,27 +1956,54 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Auto-refresh OAuth Tokens</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically refresh expired OAuth tokens</p>
+                          <div className="flex items-center gap-3">
+                            <RefreshCw className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <Label className="text-base">Auto-refresh OAuth Tokens</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically refresh expired OAuth tokens</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoRefreshOAuth}
+                            onCheckedChange={(checked) => {
+                              setAutoRefreshOAuth(checked)
+                              toast.success(checked ? 'OAuth auto-refresh enabled' : 'OAuth auto-refresh disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Test Connections on Startup</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Verify all connections when system starts</p>
+                          <div className="flex items-center gap-3">
+                            <Activity className="h-5 w-5 text-green-500" />
+                            <div>
+                              <Label className="text-base">Test Connections on Startup</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Verify all connections when system starts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={testConnectionsOnStartup}
+                            onCheckedChange={(checked) => {
+                              setTestConnectionsOnStartup(checked)
+                              toast.success(checked ? 'Startup connection tests enabled' : 'Startup connection tests disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Encrypt Credentials</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Encrypt all stored credentials at rest</p>
+                          <div className="flex items-center gap-3">
+                            <Lock className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <Label className="text-base">Encrypt Credentials</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Encrypt all stored credentials at rest</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={encryptCredentials}
+                            onCheckedChange={(checked) => {
+                              setEncryptCredentials(checked)
+                              toast.success(checked ? 'Credential encryption enabled' : 'Credential encryption disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2">
@@ -1745,11 +2054,20 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Audit Credential Access</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Log all credential access for security</p>
+                          <div className="flex items-center gap-3">
+                            <Fingerprint className="h-5 w-5 text-indigo-500" />
+                            <div>
+                              <Label className="text-base">Audit Credential Access</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Log all credential access for security</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditCredentialAccess}
+                            onCheckedChange={(checked) => {
+                              setAuditCredentialAccess(checked)
+                              toast.success(checked ? 'Credential access audit enabled' : 'Credential access audit disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1774,11 +2092,20 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Verify SSL Certificates</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Validate SSL certificates for all connections</p>
+                          <div className="flex items-center gap-3">
+                            <ShieldCheck className="h-5 w-5 text-green-500" />
+                            <div>
+                              <Label className="text-base">Verify SSL Certificates</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Validate SSL certificates for all connections</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={verifySSLCertificates}
+                            onCheckedChange={(checked) => {
+                              setVerifySSLCertificates(checked)
+                              toast.success(checked ? 'SSL verification enabled' : 'SSL verification disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1839,11 +2166,20 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Auto-scale Workers</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically adjust worker count based on load</p>
+                          <div className="flex items-center gap-3">
+                            <Scale className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <Label className="text-base">Auto-scale Workers</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically adjust worker count based on load</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={autoScaleWorkers}
+                            onCheckedChange={(checked) => {
+                              setAutoScaleWorkers(checked)
+                              toast.success(checked ? 'Worker auto-scaling enabled' : 'Worker auto-scaling disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1874,27 +2210,54 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Debug Mode</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable detailed debug logging</p>
+                          <div className="flex items-center gap-3">
+                            <Bug className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <Label className="text-base">Debug Mode</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Enable detailed debug logging</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={debugMode}
+                            onCheckedChange={(checked) => {
+                              setDebugMode(checked)
+                              toast.success(checked ? 'Debug mode enabled' : 'Debug mode disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Log to File</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Write logs to local file system</p>
+                          <div className="flex items-center gap-3">
+                            <FileText className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <Label className="text-base">Log to File</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Write logs to local file system</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={logToFile}
+                            onCheckedChange={(checked) => {
+                              setLogToFile(checked)
+                              toast.success(checked ? 'File logging enabled' : 'File logging disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Include Stack Traces</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Include full stack traces in error logs</p>
+                          <div className="flex items-center gap-3">
+                            <FileCode className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <Label className="text-base">Include Stack Traces</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Include full stack traces in error logs</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={includeStackTraces}
+                            onCheckedChange={(checked) => {
+                              setIncludeStackTraces(checked)
+                              toast.success(checked ? 'Stack traces enabled' : 'Stack traces disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1909,27 +2272,54 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Two-Factor Authentication</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for all users</p>
+                          <div className="flex items-center gap-3">
+                            <Fingerprint className="h-5 w-5 text-green-500" />
+                            <div>
+                              <Label className="text-base">Two-Factor Authentication</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for all users</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={twoFactorAuth}
+                            onCheckedChange={(checked) => {
+                              setTwoFactorAuth(checked)
+                              toast.success(checked ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">IP-based Access Control</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Restrict access to specific IP ranges</p>
+                          <div className="flex items-center gap-3">
+                            <Network className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <Label className="text-base">IP-based Access Control</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Restrict access to specific IP ranges</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ipBasedAccessControl}
+                            onCheckedChange={(checked) => {
+                              setIpBasedAccessControl(checked)
+                              toast.success(checked ? 'IP-based access control enabled' : 'IP-based access control disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Audit Logging</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Log all user actions for compliance</p>
+                          <div className="flex items-center gap-3">
+                            <History className="h-5 w-5 text-indigo-500" />
+                            <div>
+                              <Label className="text-base">Audit Logging</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Log all user actions for compliance</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditLogging}
+                            onCheckedChange={(checked) => {
+                              setAuditLogging(checked)
+                              toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2">

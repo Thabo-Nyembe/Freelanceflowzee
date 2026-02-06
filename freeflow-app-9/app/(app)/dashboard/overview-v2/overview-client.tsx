@@ -26,7 +26,9 @@ import {
   Search, Filter, MoreHorizontal, Download, ArrowUpRight, ArrowDownRight, BarChart3,
   Target, Cloud, Play,
   ExternalLink, Copy, Gauge, Timer, Webhook, Sliders, AlertOctagon, Trash2, Edit3, Mail,
-  Loader2
+  Loader2, Moon, Columns, Eye, Sparkles, PlayCircle, Database, Tag, Tags, Group, CalendarOff,
+  FileText, Repeat, Clock, History, Save, TrendingUpIcon, LineChart, Palette, MousePointer,
+  ShieldCheck, Network, FileCheck, Lock, Key, Zap as RateLimitIcon, MessageSquare, Phone, Smartphone
 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -546,6 +548,99 @@ export default function OverviewClient() {
     refreshInterval: '30',
     defaultTimeRange: '4h',
     defaultTab: 'overview'
+  })
+
+  // Metrics Settings State
+  const [metricsSettings, setMetricsSettings] = useState({
+    enableCollection: true,
+    includeHostTags: true,
+    customMetricTags: false
+  })
+
+  // Metric Categories State
+  const [metricCategories, setMetricCategories] = useState({
+    infrastructure: true,
+    applicationPerformance: true,
+    businessMetrics: true,
+    customEvents: true,
+    userBehavior: false
+  })
+
+  // Alert Notification Channels State
+  const [alertChannels, setAlertChannels] = useState({
+    email: true,
+    slack: true,
+    pagerduty: true,
+    teams: false,
+    webhook: false
+  })
+
+  // Alert Policies State
+  const [alertPolicies, setAlertPolicies] = useState({
+    aggregateSimilar: true,
+    weekendQuietHours: false,
+    includeContextData: true
+  })
+
+  // Dashboard Auto-refresh State
+  const [dashboardSettings, setDashboardSettings] = useState({
+    enableAutoRefresh: true,
+    showRefreshIndicator: true,
+    rememberLastView: true,
+    persistFilters: true
+  })
+
+  // Widget Settings State
+  const [widgetSettings, setWidgetSettings] = useState({
+    showTrendIndicators: true,
+    showSparklines: true,
+    colorCodedStatus: true,
+    hoverTooltips: true
+  })
+
+  // Integrations API State
+  const [apiSettings, setApiSettings] = useState({
+    enableApi: true,
+    rateLimiting: true
+  })
+
+  // Security Settings State
+  const [securitySettings, setSecuritySettings] = useState({
+    twoFactorAuth: true,
+    ipAllowlist: false,
+    auditLogging: true,
+    dataEncryption: true
+  })
+
+  // Cloud Provider Auto-sync State
+  const [autoSyncMetrics, setAutoSyncMetrics] = useState(true)
+
+  // Edit Channel Dialog Alert Types State
+  const [editChannelAlertTypes, setEditChannelAlertTypes] = useState({
+    critical: true,
+    warning: true,
+    info: false
+  })
+
+  // Edit Escalation Channels State
+  const [editEscalationChannels, setEditEscalationChannels] = useState({
+    pagerduty: true,
+    sms: false,
+    phoneCall: false
+  })
+
+  // Edit Webhook Events State
+  const [editWebhookEvents, setEditWebhookEvents] = useState({
+    metrics: true,
+    alerts: true,
+    logs: false
+  })
+
+  // Add Webhook Events State
+  const [addWebhookEvents, setAddWebhookEvents] = useState({
+    metrics: true,
+    alerts: false,
+    logs: false
   })
 
   const timeRanges: { value: TimeRange; label: string }[] = [
@@ -1506,11 +1601,20 @@ export default function OverviewClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Metric Collection</Label>
-                            <p className="text-sm text-gray-500">Collect and aggregate metrics</p>
+                          <div className="flex items-center gap-2">
+                            <Database className="h-4 w-4 text-indigo-600" />
+                            <div>
+                              <Label>Enable Metric Collection</Label>
+                              <p className="text-sm text-gray-500">Collect and aggregate metrics</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={metricsSettings.enableCollection}
+                            onCheckedChange={(checked) => {
+                              setMetricsSettings(prev => ({ ...prev, enableCollection: checked }))
+                              toast.success(checked ? 'Metric collection enabled' : 'Metric collection disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -1543,18 +1647,36 @@ export default function OverviewClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Include Host Tags</Label>
-                            <p className="text-sm text-gray-500">Add host metadata to metrics</p>
+                          <div className="flex items-center gap-2">
+                            <Tag className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <Label>Include Host Tags</Label>
+                              <p className="text-sm text-gray-500">Add host metadata to metrics</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={metricsSettings.includeHostTags}
+                            onCheckedChange={(checked) => {
+                              setMetricsSettings(prev => ({ ...prev, includeHostTags: checked }))
+                              toast.success(checked ? 'Host tags enabled' : 'Host tags disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Custom Metric Tags</Label>
-                            <p className="text-sm text-gray-500">Add custom tags to all metrics</p>
+                          <div className="flex items-center gap-2">
+                            <Tags className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Custom Metric Tags</Label>
+                              <p className="text-sm text-gray-500">Add custom tags to all metrics</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={metricsSettings.customMetricTags}
+                            onCheckedChange={(checked) => {
+                              setMetricsSettings(prev => ({ ...prev, customMetricTags: checked }))
+                              toast.success(checked ? 'Custom metric tags enabled' : 'Custom metric tags disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1610,24 +1732,86 @@ export default function OverviewClient() {
                         <CardDescription>Enable/disable metric categories</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {[
-                          { name: 'Infrastructure', enabled: true, count: 156 },
-                          { name: 'Application Performance', enabled: true, count: 89 },
-                          { name: 'Business Metrics', enabled: true, count: 45 },
-                          { name: 'Custom Events', enabled: true, count: 234 },
-                          { name: 'User Behavior', enabled: false, count: 0 }
-                        ].map((category, idx) => (
-                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <BarChart3 className={`h-4 w-4 ${category.enabled ? 'text-indigo-600' : 'text-gray-400'}`} />
-                              <div>
-                                <p className="font-medium">{category.name}</p>
-                                <p className="text-sm text-gray-500">{category.count} metrics</p>
-                              </div>
+                        <div className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Server className={`h-4 w-4 ${metricCategories.infrastructure ? 'text-indigo-600' : 'text-gray-400'}`} />
+                            <div>
+                              <p className="font-medium">Infrastructure</p>
+                              <p className="text-sm text-gray-500">156 metrics</p>
                             </div>
-                            <Switch defaultChecked={category.enabled} />
                           </div>
-                        ))}
+                          <Switch
+                            checked={metricCategories.infrastructure}
+                            onCheckedChange={(checked) => {
+                              setMetricCategories(prev => ({ ...prev, infrastructure: checked }))
+                              toast.success(checked ? 'Infrastructure metrics enabled' : 'Infrastructure metrics disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Activity className={`h-4 w-4 ${metricCategories.applicationPerformance ? 'text-indigo-600' : 'text-gray-400'}`} />
+                            <div>
+                              <p className="font-medium">Application Performance</p>
+                              <p className="text-sm text-gray-500">89 metrics</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={metricCategories.applicationPerformance}
+                            onCheckedChange={(checked) => {
+                              setMetricCategories(prev => ({ ...prev, applicationPerformance: checked }))
+                              toast.success(checked ? 'Application performance metrics enabled' : 'Application performance metrics disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <TrendingUp className={`h-4 w-4 ${metricCategories.businessMetrics ? 'text-indigo-600' : 'text-gray-400'}`} />
+                            <div>
+                              <p className="font-medium">Business Metrics</p>
+                              <p className="text-sm text-gray-500">45 metrics</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={metricCategories.businessMetrics}
+                            onCheckedChange={(checked) => {
+                              setMetricCategories(prev => ({ ...prev, businessMetrics: checked }))
+                              toast.success(checked ? 'Business metrics enabled' : 'Business metrics disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Zap className={`h-4 w-4 ${metricCategories.customEvents ? 'text-indigo-600' : 'text-gray-400'}`} />
+                            <div>
+                              <p className="font-medium">Custom Events</p>
+                              <p className="text-sm text-gray-500">234 metrics</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={metricCategories.customEvents}
+                            onCheckedChange={(checked) => {
+                              setMetricCategories(prev => ({ ...prev, customEvents: checked }))
+                              toast.success(checked ? 'Custom events enabled' : 'Custom events disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Eye className={`h-4 w-4 ${metricCategories.userBehavior ? 'text-indigo-600' : 'text-gray-400'}`} />
+                            <div>
+                              <p className="font-medium">User Behavior</p>
+                              <p className="text-sm text-gray-500">0 metrics</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={metricCategories.userBehavior}
+                            onCheckedChange={(checked) => {
+                              setMetricCategories(prev => ({ ...prev, userBehavior: checked }))
+                              toast.success(checked ? 'User behavior metrics enabled' : 'User behavior metrics disabled')
+                            }}
+                          />
+                        </div>
                       </CardContent>
                     </Card>
                   </>
@@ -1642,31 +1826,121 @@ export default function OverviewClient() {
                         <CardDescription>Configure where alerts are sent</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {[
-                          { name: 'Email', icon: Mail, config: 'team@company.com', enabled: true },
-                          { name: 'Slack', icon: Webhook, config: '#alerts-production', enabled: true },
-                          { name: 'PagerDuty', icon: Bell, config: 'On-call rotation', enabled: true },
-                          { name: 'Microsoft Teams', icon: Webhook, config: 'DevOps Channel', enabled: false },
-                          { name: 'Webhook', icon: Globe, config: 'https://hooks.example.com', enabled: false }
-                        ].map((channel, idx) => (
-                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${channel.enabled ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                                <channel.icon className={`h-4 w-4 ${channel.enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
-                              </div>
-                              <div>
-                                <p className="font-medium">{channel.name}</p>
-                                <p className="text-sm text-gray-500">{channel.config}</p>
-                              </div>
+                        <div className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${alertChannels.email ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                              <Mail className={`h-4 w-4 ${alertChannels.email ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
                             </div>
-                            <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm" onClick={() => setShowEditChannelDialog(channel.name)}>
-                                <Edit3 className="h-4 w-4" />
-                              </Button>
-                              <Switch defaultChecked={channel.enabled} />
+                            <div>
+                              <p className="font-medium">Email</p>
+                              <p className="text-sm text-gray-500">team@company.com</p>
                             </div>
                           </div>
-                        ))}
+                          <div className="flex items-center gap-3">
+                            <Button variant="ghost" size="sm" onClick={() => setShowEditChannelDialog('Email')}>
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Switch
+                              checked={alertChannels.email}
+                              onCheckedChange={(checked) => {
+                                setAlertChannels(prev => ({ ...prev, email: checked }))
+                                toast.success(checked ? 'Email notifications enabled' : 'Email notifications disabled')
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${alertChannels.slack ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                              <MessageSquare className={`h-4 w-4 ${alertChannels.slack ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
+                            </div>
+                            <div>
+                              <p className="font-medium">Slack</p>
+                              <p className="text-sm text-gray-500">#alerts-production</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Button variant="ghost" size="sm" onClick={() => setShowEditChannelDialog('Slack')}>
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Switch
+                              checked={alertChannels.slack}
+                              onCheckedChange={(checked) => {
+                                setAlertChannels(prev => ({ ...prev, slack: checked }))
+                                toast.success(checked ? 'Slack notifications enabled' : 'Slack notifications disabled')
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${alertChannels.pagerduty ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                              <Bell className={`h-4 w-4 ${alertChannels.pagerduty ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
+                            </div>
+                            <div>
+                              <p className="font-medium">PagerDuty</p>
+                              <p className="text-sm text-gray-500">On-call rotation</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Button variant="ghost" size="sm" onClick={() => setShowEditChannelDialog('PagerDuty')}>
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Switch
+                              checked={alertChannels.pagerduty}
+                              onCheckedChange={(checked) => {
+                                setAlertChannels(prev => ({ ...prev, pagerduty: checked }))
+                                toast.success(checked ? 'PagerDuty notifications enabled' : 'PagerDuty notifications disabled')
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${alertChannels.teams ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                              <Webhook className={`h-4 w-4 ${alertChannels.teams ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
+                            </div>
+                            <div>
+                              <p className="font-medium">Microsoft Teams</p>
+                              <p className="text-sm text-gray-500">DevOps Channel</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Button variant="ghost" size="sm" onClick={() => setShowEditChannelDialog('Microsoft Teams')}>
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Switch
+                              checked={alertChannels.teams}
+                              onCheckedChange={(checked) => {
+                                setAlertChannels(prev => ({ ...prev, teams: checked }))
+                                toast.success(checked ? 'Microsoft Teams notifications enabled' : 'Microsoft Teams notifications disabled')
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${alertChannels.webhook ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                              <Globe className={`h-4 w-4 ${alertChannels.webhook ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
+                            </div>
+                            <div>
+                              <p className="font-medium">Webhook</p>
+                              <p className="text-sm text-gray-500">https://hooks.example.com</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Button variant="ghost" size="sm" onClick={() => setShowEditChannelDialog('Webhook')}>
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Switch
+                              checked={alertChannels.webhook}
+                              onCheckedChange={(checked) => {
+                                setAlertChannels(prev => ({ ...prev, webhook: checked }))
+                                toast.success(checked ? 'Webhook notifications enabled' : 'Webhook notifications disabled')
+                              }}
+                            />
+                          </div>
+                        </div>
                         <Button variant="outline" className="w-full mt-4" onClick={() => setShowAddChannelDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Notification Channel
@@ -1711,25 +1985,52 @@ export default function OverviewClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Aggregate Similar Alerts</Label>
-                            <p className="text-sm text-gray-500">Group related alerts together</p>
+                          <div className="flex items-center gap-2">
+                            <Group className="h-4 w-4 text-indigo-600" />
+                            <div>
+                              <Label>Aggregate Similar Alerts</Label>
+                              <p className="text-sm text-gray-500">Group related alerts together</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={alertPolicies.aggregateSimilar}
+                            onCheckedChange={(checked) => {
+                              setAlertPolicies(prev => ({ ...prev, aggregateSimilar: checked }))
+                              toast.success(checked ? 'Alert aggregation enabled' : 'Alert aggregation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Weekend Quiet Hours</Label>
-                            <p className="text-sm text-gray-500">Reduce non-critical alerts on weekends</p>
+                          <div className="flex items-center gap-2">
+                            <CalendarOff className="h-4 w-4 text-orange-600" />
+                            <div>
+                              <Label>Weekend Quiet Hours</Label>
+                              <p className="text-sm text-gray-500">Reduce non-critical alerts on weekends</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={alertPolicies.weekendQuietHours}
+                            onCheckedChange={(checked) => {
+                              setAlertPolicies(prev => ({ ...prev, weekendQuietHours: checked }))
+                              toast.success(checked ? 'Weekend quiet hours enabled' : 'Weekend quiet hours disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Include Context Data</Label>
-                            <p className="text-sm text-gray-500">Add metrics and logs to alert notifications</p>
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <Label>Include Context Data</Label>
+                              <p className="text-sm text-gray-500">Add metrics and logs to alert notifications</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={alertPolicies.includeContextData}
+                            onCheckedChange={(checked) => {
+                              setAlertPolicies(prev => ({ ...prev, includeContextData: checked }))
+                              toast.success(checked ? 'Context data enabled' : 'Context data disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1776,11 +2077,20 @@ export default function OverviewClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Auto-refresh</Label>
-                            <p className="text-sm text-gray-500">Automatically update dashboard data</p>
+                          <div className="flex items-center gap-2">
+                            <Repeat className="h-4 w-4 text-indigo-600" />
+                            <div>
+                              <Label>Enable Auto-refresh</Label>
+                              <p className="text-sm text-gray-500">Automatically update dashboard data</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dashboardSettings.enableAutoRefresh}
+                            onCheckedChange={(checked) => {
+                              setDashboardSettings(prev => ({ ...prev, enableAutoRefresh: checked }))
+                              toast.success(checked ? 'Auto-refresh enabled' : 'Auto-refresh disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -1813,11 +2123,20 @@ export default function OverviewClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Show Refresh Indicator</Label>
-                            <p className="text-sm text-gray-500">Display when data is refreshing</p>
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <Label>Show Refresh Indicator</Label>
+                              <p className="text-sm text-gray-500">Display when data is refreshing</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dashboardSettings.showRefreshIndicator}
+                            onCheckedChange={(checked) => {
+                              setDashboardSettings(prev => ({ ...prev, showRefreshIndicator: checked }))
+                              toast.success(checked ? 'Refresh indicator enabled' : 'Refresh indicator disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1859,18 +2178,36 @@ export default function OverviewClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Remember Last View</Label>
-                            <p className="text-sm text-gray-500">Open to last viewed tab</p>
+                          <div className="flex items-center gap-2">
+                            <History className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Remember Last View</Label>
+                              <p className="text-sm text-gray-500">Open to last viewed tab</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dashboardSettings.rememberLastView}
+                            onCheckedChange={(checked) => {
+                              setDashboardSettings(prev => ({ ...prev, rememberLastView: checked }))
+                              toast.success(checked ? 'Last view memory enabled' : 'Last view memory disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Persist Filters</Label>
-                            <p className="text-sm text-gray-500">Remember applied filters</p>
+                          <div className="flex items-center gap-2">
+                            <Save className="h-4 w-4 text-green-600" />
+                            <div>
+                              <Label>Persist Filters</Label>
+                              <p className="text-sm text-gray-500">Remember applied filters</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dashboardSettings.persistFilters}
+                            onCheckedChange={(checked) => {
+                              setDashboardSettings(prev => ({ ...prev, persistFilters: checked }))
+                              toast.success(checked ? 'Filter persistence enabled' : 'Filter persistence disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1882,32 +2219,68 @@ export default function OverviewClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Show Trend Indicators</Label>
-                            <p className="text-sm text-gray-500">Display up/down arrows on metrics</p>
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="h-4 w-4 text-indigo-600" />
+                            <div>
+                              <Label>Show Trend Indicators</Label>
+                              <p className="text-sm text-gray-500">Display up/down arrows on metrics</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={widgetSettings.showTrendIndicators}
+                            onCheckedChange={(checked) => {
+                              setWidgetSettings(prev => ({ ...prev, showTrendIndicators: checked }))
+                              toast.success(checked ? 'Trend indicators enabled' : 'Trend indicators disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Show Sparklines</Label>
-                            <p className="text-sm text-gray-500">Mini charts in metric cards</p>
+                          <div className="flex items-center gap-2">
+                            <LineChart className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <Label>Show Sparklines</Label>
+                              <p className="text-sm text-gray-500">Mini charts in metric cards</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={widgetSettings.showSparklines}
+                            onCheckedChange={(checked) => {
+                              setWidgetSettings(prev => ({ ...prev, showSparklines: checked }))
+                              toast.success(checked ? 'Sparklines enabled' : 'Sparklines disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Color-coded Status</Label>
-                            <p className="text-sm text-gray-500">Use colors for health status</p>
+                          <div className="flex items-center gap-2">
+                            <Palette className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Color-coded Status</Label>
+                              <p className="text-sm text-gray-500">Use colors for health status</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={widgetSettings.colorCodedStatus}
+                            onCheckedChange={(checked) => {
+                              setWidgetSettings(prev => ({ ...prev, colorCodedStatus: checked }))
+                              toast.success(checked ? 'Color-coded status enabled' : 'Color-coded status disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Hover Tooltips</Label>
-                            <p className="text-sm text-gray-500">Show details on hover</p>
+                          <div className="flex items-center gap-2">
+                            <MousePointer className="h-4 w-4 text-orange-600" />
+                            <div>
+                              <Label>Hover Tooltips</Label>
+                              <p className="text-sm text-gray-500">Show details on hover</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={widgetSettings.hoverTooltips}
+                            onCheckedChange={(checked) => {
+                              setWidgetSettings(prev => ({ ...prev, hoverTooltips: checked }))
+                              toast.success(checked ? 'Hover tooltips enabled' : 'Hover tooltips disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1976,18 +2349,36 @@ export default function OverviewClient() {
                           <p className="text-xs text-gray-500">Created: Dec 1, 2024 • Last used: 2 min ago</p>
                         </div>
                         <div className="flex items-center justify-between pt-4 border-t">
-                          <div>
-                            <Label>Enable API</Label>
-                            <p className="text-sm text-gray-500">Allow programmatic access</p>
+                          <div className="flex items-center gap-2">
+                            <Key className="h-4 w-4 text-indigo-600" />
+                            <div>
+                              <Label>Enable API</Label>
+                              <p className="text-sm text-gray-500">Allow programmatic access</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={apiSettings.enableApi}
+                            onCheckedChange={(checked) => {
+                              setApiSettings(prev => ({ ...prev, enableApi: checked }))
+                              toast.success(checked ? 'API access enabled' : 'API access disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Rate Limiting</Label>
-                            <p className="text-sm text-gray-500">1000 requests/minute</p>
+                          <div className="flex items-center gap-2">
+                            <Gauge className="h-4 w-4 text-orange-600" />
+                            <div>
+                              <Label>Rate Limiting</Label>
+                              <p className="text-sm text-gray-500">1000 requests/minute</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={apiSettings.rateLimiting}
+                            onCheckedChange={(checked) => {
+                              setApiSettings(prev => ({ ...prev, rateLimiting: checked }))
+                              toast.success(checked ? 'Rate limiting enabled' : 'Rate limiting disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2077,32 +2468,68 @@ export default function OverviewClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Two-Factor Authentication</Label>
-                            <p className="text-sm text-gray-500">Require 2FA for all users</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="h-4 w-4 text-indigo-600" />
+                            <div>
+                              <Label>Two-Factor Authentication</Label>
+                              <p className="text-sm text-gray-500">Require 2FA for all users</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.twoFactorAuth}
+                            onCheckedChange={(checked) => {
+                              setSecuritySettings(prev => ({ ...prev, twoFactorAuth: checked }))
+                              toast.success(checked ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>IP Allowlist</Label>
-                            <p className="text-sm text-gray-500">Restrict access by IP</p>
+                          <div className="flex items-center gap-2">
+                            <Network className="h-4 w-4 text-orange-600" />
+                            <div>
+                              <Label>IP Allowlist</Label>
+                              <p className="text-sm text-gray-500">Restrict access by IP</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={securitySettings.ipAllowlist}
+                            onCheckedChange={(checked) => {
+                              setSecuritySettings(prev => ({ ...prev, ipAllowlist: checked }))
+                              toast.success(checked ? 'IP allowlist enabled' : 'IP allowlist disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Audit Logging</Label>
-                            <p className="text-sm text-gray-500">Log all configuration changes</p>
+                          <div className="flex items-center gap-2">
+                            <FileCheck className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <Label>Audit Logging</Label>
+                              <p className="text-sm text-gray-500">Log all configuration changes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.auditLogging}
+                            onCheckedChange={(checked) => {
+                              setSecuritySettings(prev => ({ ...prev, auditLogging: checked }))
+                              toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Data Encryption</Label>
-                            <p className="text-sm text-gray-500">Encrypt data at rest</p>
+                          <div className="flex items-center gap-2">
+                            <Lock className="h-4 w-4 text-green-600" />
+                            <div>
+                              <Label>Data Encryption</Label>
+                              <p className="text-sm text-gray-500">Encrypt data at rest</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.dataEncryption}
+                            onCheckedChange={(checked) => {
+                              setSecuritySettings(prev => ({ ...prev, dataEncryption: checked }))
+                              toast.success(checked ? 'Data encryption enabled' : 'Data encryption disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2881,15 +3308,36 @@ export default function OverviewClient() {
                 <Label>Alert Types</Label>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={editChannelAlertTypes.critical}
+                      onCheckedChange={(checked) => {
+                        setEditChannelAlertTypes(prev => ({ ...prev, critical: checked }))
+                        toast.success(checked ? 'Critical alerts enabled' : 'Critical alerts disabled')
+                      }}
+                    />
+                    <XCircle className="h-4 w-4 text-red-500" />
                     <Label className="text-sm">Critical Alerts</Label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={editChannelAlertTypes.warning}
+                      onCheckedChange={(checked) => {
+                        setEditChannelAlertTypes(prev => ({ ...prev, warning: checked }))
+                        toast.success(checked ? 'Warning alerts enabled' : 'Warning alerts disabled')
+                      }}
+                    />
+                    <AlertTriangle className="h-4 w-4 text-yellow-500" />
                     <Label className="text-sm">Warning Alerts</Label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Switch />
+                    <Switch
+                      checked={editChannelAlertTypes.info}
+                      onCheckedChange={(checked) => {
+                        setEditChannelAlertTypes(prev => ({ ...prev, info: checked }))
+                        toast.success(checked ? 'Info alerts enabled' : 'Info alerts disabled')
+                      }}
+                    />
+                    <AlertCircle className="h-4 w-4 text-blue-500" />
                     <Label className="text-sm">Info Alerts</Label>
                   </div>
                 </div>
@@ -2994,15 +3442,36 @@ export default function OverviewClient() {
                 <Label>Notification Channels</Label>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={editEscalationChannels.pagerduty}
+                      onCheckedChange={(checked) => {
+                        setEditEscalationChannels(prev => ({ ...prev, pagerduty: checked }))
+                        toast.success(checked ? 'PagerDuty enabled' : 'PagerDuty disabled')
+                      }}
+                    />
+                    <Bell className="h-4 w-4 text-green-500" />
                     <Label className="text-sm">PagerDuty</Label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Switch />
+                    <Switch
+                      checked={editEscalationChannels.sms}
+                      onCheckedChange={(checked) => {
+                        setEditEscalationChannels(prev => ({ ...prev, sms: checked }))
+                        toast.success(checked ? 'SMS enabled' : 'SMS disabled')
+                      }}
+                    />
+                    <Smartphone className="h-4 w-4 text-blue-500" />
                     <Label className="text-sm">SMS</Label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Switch />
+                    <Switch
+                      checked={editEscalationChannels.phoneCall}
+                      onCheckedChange={(checked) => {
+                        setEditEscalationChannels(prev => ({ ...prev, phoneCall: checked }))
+                        toast.success(checked ? 'Phone call enabled' : 'Phone call disabled')
+                      }}
+                    />
+                    <Phone className="h-4 w-4 text-purple-500" />
                     <Label className="text-sm">Phone Call</Label>
                   </div>
                 </div>
@@ -3109,11 +3578,20 @@ export default function OverviewClient() {
                 </Select>
               </div>
               <div className="flex items-center justify-between pt-2">
-                <div>
-                  <Label>Auto-sync Metrics</Label>
-                  <p className="text-sm text-gray-500">Automatically import metrics</p>
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4 text-indigo-600" />
+                  <div>
+                    <Label>Auto-sync Metrics</Label>
+                    <p className="text-sm text-gray-500">Automatically import metrics</p>
+                  </div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={autoSyncMetrics}
+                  onCheckedChange={(checked) => {
+                    setAutoSyncMetrics(checked)
+                    toast.success(checked ? 'Auto-sync metrics enabled' : 'Auto-sync metrics disabled')
+                  }}
+                />
               </div>
               <div className="flex gap-3 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowConfigureProviderDialog(null)}>
@@ -3184,15 +3662,36 @@ export default function OverviewClient() {
                 <Label>Events</Label>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={editWebhookEvents.metrics}
+                      onCheckedChange={(checked) => {
+                        setEditWebhookEvents(prev => ({ ...prev, metrics: checked }))
+                        toast.success(checked ? 'Metrics events enabled' : 'Metrics events disabled')
+                      }}
+                    />
+                    <BarChart3 className="h-4 w-4 text-indigo-500" />
                     <Label className="text-sm">Metrics</Label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={editWebhookEvents.alerts}
+                      onCheckedChange={(checked) => {
+                        setEditWebhookEvents(prev => ({ ...prev, alerts: checked }))
+                        toast.success(checked ? 'Alerts events enabled' : 'Alerts events disabled')
+                      }}
+                    />
+                    <Bell className="h-4 w-4 text-yellow-500" />
                     <Label className="text-sm">Alerts</Label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Switch />
+                    <Switch
+                      checked={editWebhookEvents.logs}
+                      onCheckedChange={(checked) => {
+                        setEditWebhookEvents(prev => ({ ...prev, logs: checked }))
+                        toast.success(checked ? 'Logs events enabled' : 'Logs events disabled')
+                      }}
+                    />
+                    <FileText className="h-4 w-4 text-blue-500" />
                     <Label className="text-sm">Logs</Label>
                   </div>
                 </div>
@@ -3263,15 +3762,36 @@ export default function OverviewClient() {
                 <Label>Events to Send</Label>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={addWebhookEvents.metrics}
+                      onCheckedChange={(checked) => {
+                        setAddWebhookEvents(prev => ({ ...prev, metrics: checked }))
+                        toast.success(checked ? 'Metrics events enabled' : 'Metrics events disabled')
+                      }}
+                    />
+                    <BarChart3 className="h-4 w-4 text-indigo-500" />
                     <Label className="text-sm">Metrics</Label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Switch />
+                    <Switch
+                      checked={addWebhookEvents.alerts}
+                      onCheckedChange={(checked) => {
+                        setAddWebhookEvents(prev => ({ ...prev, alerts: checked }))
+                        toast.success(checked ? 'Alerts events enabled' : 'Alerts events disabled')
+                      }}
+                    />
+                    <Bell className="h-4 w-4 text-yellow-500" />
                     <Label className="text-sm">Alerts</Label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Switch />
+                    <Switch
+                      checked={addWebhookEvents.logs}
+                      onCheckedChange={(checked) => {
+                        setAddWebhookEvents(prev => ({ ...prev, logs: checked }))
+                        toast.success(checked ? 'Logs events enabled' : 'Logs events disabled')
+                      }}
+                    />
+                    <FileText className="h-4 w-4 text-blue-500" />
                     <Label className="text-sm">Logs</Label>
                   </div>
                 </div>

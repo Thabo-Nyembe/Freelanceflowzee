@@ -58,7 +58,10 @@ import {
   Network,
   Workflow,
   Copy,
-  CreditCard
+  CreditCard,
+  Gauge,
+  FileBarChart,
+  Laptop
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -238,6 +241,18 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     required: false
   })
 
+  // Directory config state
+  const [directoryConfig, setDirectoryConfig] = useState({
+    autoSync: true
+  })
+
+  // HR System config state
+  const [hrSystemConfig, setHRSystemConfig] = useState({
+    syncNewEmployees: true,
+    deactivateTerminated: true,
+    syncDepartmentChanges: false
+  })
+
   // Edit states
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [editingGroup, setEditingGroup] = useState<Group | null>(null)
@@ -245,6 +260,97 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
   // State for actioned AI insights
   const [actionedInsights, setActionedInsights] = useState<Set<string>>(new Set())
+
+  // Security Settings State - All switches functional
+  const [securitySettings, setSecuritySettings] = useState({
+    // Authentication
+    mfaRequired: true,
+    ssoEnabled: true,
+    passwordPolicies: true,
+    sessionTimeout: true,
+    // SSO Settings
+    allowPasswordLogin: true,
+    justInTimeProvisioning: true,
+    // Provisioning Settings
+    autoProvisionUsers: true,
+    autoDeactivateUsers: true,
+    scimEnabled: false,
+    // Security Features
+    ipAllowlist: false,
+    auditLogging: true,
+    dataEncryption: true,
+    webhookSigning: true,
+    // Access Control
+    roleBasedAccess: true,
+    dynamicProvisioning: true,
+    justInTimeAccess: false,
+    // Compliance
+    gdprCompliance: true,
+    hipaaCompliance: false,
+    soc2Compliance: true,
+    // Advanced
+    riskBasedAuth: true,
+    deviceTrust: true,
+    locationRestriction: false,
+    adaptiveMfa: true,
+    behavioralAnalytics: true,
+    threatDetection: true,
+    selfServiceReset: true,
+    emergencyAccess: false,
+    apiRateLimiting: true,
+    webhookRetry: true,
+    scimProvisioning: true,
+    // API Settings
+    apiEnabled: true,
+    apiLogging: true,
+    apiVersioning: true,
+    deprecationWarnings: true,
+    // Webhook Settings
+    webhooksEnabled: true,
+    webhookSigningVerify: true,
+    webhookRetryEnabled: true,
+    webhookLogging: true,
+    // Audit & Compliance
+    complianceReporting: true,
+    dataRetention: true,
+    accessReviews: true,
+    riskAssessment: true,
+    // Privacy Settings
+    anonymizeData: false,
+    dataExport: true,
+    cookieConsent: true,
+    marketingEmails: false,
+    // Auth Factors
+    authFactorTotp: true,
+    authFactorPush: true,
+    authFactorSms: false,
+    authFactorEmail: true,
+    authFactorWebauthn: true,
+    // Security Notifications
+    suspiciousLoginAlerts: true,
+    adminActionAlerts: true,
+    weeklySecurityReport: true,
+    // Browser/Device Security
+    trustedDevicesOnly: false,
+    browserFingerprinting: true,
+    // Additional Compliance
+    pciDssCompliance: false,
+    // Zero Trust Settings
+    continuousVerification: true,
+    deviceTrustRequired: true,
+    networkContext: true,
+    leastPrivilegeAccess: true,
+    // Custom Role Settings
+    customRoleEditing: true,
+    inheritFromParent: true,
+    timeBasedAccess: false,
+  })
+
+  // Handler to update security settings
+  const handleSecuritySettingChange = (key: keyof typeof securitySettings, value: boolean) => {
+    setSecuritySettings(prev => ({ ...prev, [key]: value }))
+    toast.success('Security setting updated', { description: `${key.replace(/([A-Z])/g, ' $1').trim()} ${value ? 'enabled' : 'disabled'}` })
+  }
 
   // Form state for creating new role
   const [newRole, setNewRole] = useState({
@@ -1631,7 +1737,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">At least one uppercase letter</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.passwordPolicies}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('passwordPolicies', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -1643,7 +1752,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">At least one numeric character</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.mfaRequired}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('mfaRequired', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -1655,7 +1767,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">At least one special character (!@#$%)</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.dataEncryption}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('dataEncryption', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -1707,18 +1822,30 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Force Re-authentication</p>
-                            <p className="text-sm text-gray-500">For sensitive actions</p>
+                          <div className="flex items-center gap-3">
+                            <ShieldCheck className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <p className="font-medium">Force Re-authentication</p>
+                              <p className="text-sm text-gray-500">For sensitive actions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.riskBasedAuth}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('riskBasedAuth', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Remember Device</p>
-                            <p className="text-sm text-gray-500">Trust recognized devices for 30 days</p>
+                          <div className="flex items-center gap-3">
+                            <Smartphone className="h-5 w-5 text-green-600" />
+                            <div>
+                              <p className="font-medium">Remember Device</p>
+                              <p className="text-sm text-gray-500">Trust recognized devices for 30 days</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.deviceTrust}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('deviceTrust', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1789,7 +1916,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">Enforce MFA organization-wide</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.mfaRequired}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('mfaRequired', checked)}
+                          />
                         </div>
                         <div>
                           <Label>MFA Grace Period</Label>
@@ -1806,21 +1936,56 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                         <div>
                           <Label className="mb-3 block">Allowed Authentication Factors</Label>
                           <div className="space-y-2">
-                            {[
-                              { name: 'Authenticator App (TOTP)', icon: Smartphone, enabled: true },
-                              { name: 'Push Notification', icon: Zap, enabled: true },
-                              { name: 'SMS', icon: Phone, enabled: false },
-                              { name: 'Email', icon: Mail, enabled: true },
-                              { name: 'Security Key (WebAuthn)', icon: Key, enabled: true },
-                            ].map(factor => (
-                              <div key={factor.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                <div className="flex items-center gap-3">
-                                  <factor.icon className="h-4 w-4 text-gray-500" />
-                                  <span className="text-sm">{factor.name}</span>
-                                </div>
-                                <Switch defaultChecked={factor.enabled} />
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Smartphone className="h-4 w-4 text-gray-500" />
+                                <span className="text-sm">Authenticator App (TOTP)</span>
                               </div>
-                            ))}
+                              <Switch
+                                checked={securitySettings.authFactorTotp}
+                                onCheckedChange={(checked) => handleSecuritySettingChange('authFactorTotp', checked)}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Zap className="h-4 w-4 text-gray-500" />
+                                <span className="text-sm">Push Notification</span>
+                              </div>
+                              <Switch
+                                checked={securitySettings.authFactorPush}
+                                onCheckedChange={(checked) => handleSecuritySettingChange('authFactorPush', checked)}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Phone className="h-4 w-4 text-gray-500" />
+                                <span className="text-sm">SMS</span>
+                              </div>
+                              <Switch
+                                checked={securitySettings.authFactorSms}
+                                onCheckedChange={(checked) => handleSecuritySettingChange('authFactorSms', checked)}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Mail className="h-4 w-4 text-gray-500" />
+                                <span className="text-sm">Email</span>
+                              </div>
+                              <Switch
+                                checked={securitySettings.authFactorEmail}
+                                onCheckedChange={(checked) => handleSecuritySettingChange('authFactorEmail', checked)}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Key className="h-4 w-4 text-gray-500" />
+                                <span className="text-sm">Security Key (WebAuthn)</span>
+                              </div>
+                              <Switch
+                                checked={securitySettings.authFactorWebauthn}
+                                onCheckedChange={(checked) => handleSecuritySettingChange('authFactorWebauthn', checked)}
+                              />
+                            </div>
                           </div>
                         </div>
                       </CardContent>
@@ -1842,7 +2007,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">Allow SAML 2.0 / OIDC login</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.ssoEnabled}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('ssoEnabled', checked)}
+                          />
                         </div>
                         <div>
                           <Label>Default Identity Provider</Label>
@@ -1857,18 +2025,34 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Allow Password Login</p>
-                            <p className="text-sm text-gray-500">In addition to SSO</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <KeyRound className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Allow Password Login</p>
+                              <p className="text-sm text-gray-500">In addition to SSO</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={securitySettings.allowPasswordLogin}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('allowPasswordLogin', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Just-in-Time Provisioning</p>
-                            <p className="text-sm text-gray-500">Auto-create accounts on first SSO login</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                              <Zap className="h-5 w-5 text-amber-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Just-in-Time Provisioning</p>
+                              <p className="text-sm text-gray-500">Auto-create accounts on first SSO login</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.justInTimeProvisioning}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('justInTimeProvisioning', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1894,7 +2078,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">Create users from identity provider</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.autoProvisionUsers}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('autoProvisionUsers', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -1906,7 +2093,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">When removed from identity provider</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.autoDeactivateUsers}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('autoDeactivateUsers', checked)}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
@@ -1941,11 +2131,19 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable SCIM 2.0</p>
-                            <p className="text-sm text-gray-500">Enable SCIM API for provisioning</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                              <Settings className="h-5 w-5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Enable SCIM 2.0</p>
+                              <p className="text-sm text-gray-500">Enable SCIM API for provisioning</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={securitySettings.scimEnabled}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('scimEnabled', checked)}
+                          />
                         </div>
                         <div>
                           <Label>SCIM Endpoint</Label>
@@ -2056,18 +2254,34 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Enable Rate Limiting</p>
-                            <p className="text-sm text-gray-500">Throttle excessive requests</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                              <Gauge className="h-5 w-5 text-orange-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Enable Rate Limiting</p>
+                              <p className="text-sm text-gray-500">Throttle excessive requests</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.apiRateLimiting}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('apiRateLimiting', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">IP Allowlisting</p>
-                            <p className="text-sm text-gray-500">Only allow specific IPs</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-cyan-100 dark:bg-cyan-900/30">
+                              <Network className="h-5 w-5 text-cyan-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">IP Allowlisting</p>
+                              <p className="text-sm text-gray-500">Only allow specific IPs</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={securitySettings.ipAllowlist}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('ipAllowlist', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2177,14 +2391,25 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">Log all authentication events</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.auditLogging}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('auditLogging', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Detailed Logs</p>
-                            <p className="text-sm text-gray-500">Include request/response data</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
+                              <FileText className="h-5 w-5 text-gray-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Detailed Logs</p>
+                              <p className="text-sm text-gray-500">Include request/response data</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={securitySettings.apiLogging}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('apiLogging', checked)}
+                          />
                         </div>
                         <div>
                           <Label>Log Retention Period</Label>
@@ -2217,21 +2442,40 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">Email on unusual activity</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.suspiciousLoginAlerts}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('suspiciousLoginAlerts', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Admin Action Alerts</p>
-                            <p className="text-sm text-gray-500">Notify on role changes</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                              <UserCog className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Admin Action Alerts</p>
+                              <p className="text-sm text-gray-500">Notify on role changes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.adminActionAlerts}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('adminActionAlerts', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Weekly Security Report</p>
-                            <p className="text-sm text-gray-500">Summary of security events</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <FileBarChart className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Weekly Security Report</p>
+                              <p className="text-sm text-gray-500">Summary of security events</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.weeklySecurityReport}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('weeklySecurityReport', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2329,7 +2573,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">Enable SOC 2 Type II controls</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.soc2Compliance}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('soc2Compliance', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2341,7 +2588,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">European data protection</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.gdprCompliance}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('gdprCompliance', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2353,7 +2603,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">Healthcare data protection</p>
                             </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={securitySettings.hipaaCompliance}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('hipaaCompliance', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2365,7 +2618,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-sm text-gray-500">Payment card industry standards</p>
                             </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={securitySettings.pciDssCompliance}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('pciDssCompliance', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2377,32 +2633,64 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Continuous Verification</p>
-                            <p className="text-sm text-gray-500">Verify user identity on every request</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                              <RefreshCw className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Continuous Verification</p>
+                              <p className="text-sm text-gray-500">Verify user identity on every request</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.continuousVerification}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('continuousVerification', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Device Trust</p>
-                            <p className="text-sm text-gray-500">Require registered devices</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                              <Laptop className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Device Trust</p>
+                              <p className="text-sm text-gray-500">Require registered devices</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.deviceTrustRequired}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('deviceTrustRequired', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Network Context</p>
-                            <p className="text-sm text-gray-500">Consider network location in auth</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                              <Network className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Network Context</p>
+                              <p className="text-sm text-gray-500">Consider network location in auth</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.networkContext}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('networkContext', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Least Privilege Access</p>
-                            <p className="text-sm text-gray-500">Minimal permissions by default</p>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                              <ShieldCheck className="h-5 w-5 text-amber-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Least Privilege Access</p>
+                              <p className="text-sm text-gray-500">Minimal permissions by default</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securitySettings.leastPrivilegeAccess}
+                            onCheckedChange={(checked) => handleSecuritySettingChange('leastPrivilegeAccess', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -3135,7 +3423,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Switch defaultChecked />
+                <Switch
+                  checked={directoryConfig.autoSync}
+                  onCheckedChange={(checked) => setDirectoryConfig(prev => ({ ...prev, autoSync: checked }))}
+                />
                 <Label>Enable automatic sync</Label>
               </div>
               <div>
@@ -3195,15 +3486,24 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               </div>
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
                 <div className="flex items-center gap-2">
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={hrSystemConfig.syncNewEmployees}
+                    onCheckedChange={(checked) => setHRSystemConfig(prev => ({ ...prev, syncNewEmployees: checked }))}
+                  />
                   <Label>Sync new employees automatically</Label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={hrSystemConfig.deactivateTerminated}
+                    onCheckedChange={(checked) => setHRSystemConfig(prev => ({ ...prev, deactivateTerminated: checked }))}
+                  />
                   <Label>Deactivate terminated employees</Label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Switch />
+                  <Switch
+                    checked={hrSystemConfig.syncDepartmentChanges}
+                    onCheckedChange={(checked) => setHRSystemConfig(prev => ({ ...prev, syncDepartmentChanges: checked }))}
+                  />
                   <Label>Sync department changes</Label>
                 </div>
               </div>

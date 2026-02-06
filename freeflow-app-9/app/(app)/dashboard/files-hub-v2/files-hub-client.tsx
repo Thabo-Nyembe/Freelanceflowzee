@@ -63,7 +63,27 @@ import {
   Monitor,
   AlertOctagon,
   ShieldCheck,
-  CloudUpload
+  CloudUpload,
+  // Additional icons for switch labels
+  Zap,
+  Wifi,
+  CloudOff,
+  LockKeyhole,
+  UserCheck,
+  Globe2,
+  FileEdit,
+  AtSign,
+  CalendarDays,
+  HardDriveDownload,
+  MessageSquare,
+  Fingerprint,
+  KeyRound,
+  Eraser,
+  ShieldOff,
+  ScrollText,
+  MapPin,
+  ToggleRight,
+  FileQuestion
 } from 'lucide-react'
 
 // World-class file upload with drag & drop
@@ -433,6 +453,63 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
 
   // Advanced upload dialog state (world-class drag & drop component)
   const [showAdvancedUpload, setShowAdvancedUpload] = useState(false)
+
+  // Switch state variables for settings
+  // Sync Settings
+  const [autoSyncEnabled, setAutoSyncEnabled] = useState(true)
+  const [smartSyncEnabled, setSmartSyncEnabled] = useState(true)
+  const [syncOnWifiOnly, setSyncOnWifiOnly] = useState(false)
+
+  // Offline Access
+  const [offlineAccessEnabled, setOfflineAccessEnabled] = useState(true)
+  const [autoDownloadStarred, setAutoDownloadStarred] = useState(true)
+  const [autoDownloadShared, setAutoDownloadShared] = useState(false)
+
+  // Sharing Settings
+  const [requirePassword, setRequirePassword] = useState(false)
+  const [allowDownloads, setAllowDownloads] = useState(true)
+  const [teamFolderAccess, setTeamFolderAccess] = useState(true)
+  const [requestAccessEnabled, setRequestAccessEnabled] = useState(true)
+  const [externalSharing, setExternalSharing] = useState(true)
+
+  // Email Notifications
+  const [notifyFileChanges, setNotifyFileChanges] = useState(true)
+  const [notifyNewShares, setNotifyNewShares] = useState(true)
+  const [notifyCommentsMentions, setNotifyCommentsMentions] = useState(true)
+  const [weeklySummary, setWeeklySummary] = useState(false)
+
+  // Push Notifications
+  const [desktopNotifications, setDesktopNotifications] = useState(true)
+  const [mobileNotifications, setMobileNotifications] = useState(true)
+  const [syncCompleteNotify, setSyncCompleteNotify] = useState(false)
+  const [storageAlerts, setStorageAlerts] = useState(true)
+
+  // Slack Integration
+  const [slackFileUploads, setSlackFileUploads] = useState(true)
+  const [slackShareActivity, setSlackShareActivity] = useState(true)
+
+  // Security - Access Controls
+  const [twoFactorAuth, setTwoFactorAuth] = useState(true)
+  const [ssoEnforcement, setSsoEnforcement] = useState(false)
+  const [remoteWipe, setRemoteWipe] = useState(true)
+
+  // Security - Encryption
+  const [endToEndEncryption, setEndToEndEncryption] = useState(true)
+  const [zeroKnowledge, setZeroKnowledge] = useState(false)
+
+  // Security - Audit Log
+  const [auditLogging, setAuditLogging] = useState(true)
+
+  // Security - IP & Location
+  const [ipWhitelist, setIpWhitelist] = useState(false)
+  const [geoRestrictions, setGeoRestrictions] = useState(false)
+
+  // Advanced - Backup
+  const [automaticBackups, setAutomaticBackups] = useState(true)
+
+  // Advanced - Appearance
+  const [showFileExtensions, setShowFileExtensions] = useState(true)
+  const [showHiddenFiles, setShowHiddenFiles] = useState(false)
 
   // Map database activity types to UI activity types
   const mapActivityType = (activity: string): FileActivity['action'] => {
@@ -1407,25 +1484,52 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Auto-sync Enabled</p>
-                          <p className="text-sm text-gray-500">Sync files automatically</p>
+                        <div className="flex items-center gap-2">
+                          <RefreshCw className="w-4 h-4 text-cyan-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-sync Enabled</p>
+                            <p className="text-sm text-gray-500">Sync files automatically</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoSyncEnabled}
+                          onCheckedChange={(checked) => {
+                            setAutoSyncEnabled(checked)
+                            toast.success(checked ? 'Auto-sync enabled' : 'Auto-sync disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Smart Sync</p>
-                          <p className="text-sm text-gray-500">Only download files when accessed</p>
+                        <div className="flex items-center gap-2">
+                          <Zap className="w-4 h-4 text-yellow-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Smart Sync</p>
+                            <p className="text-sm text-gray-500">Only download files when accessed</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={smartSyncEnabled}
+                          onCheckedChange={(checked) => {
+                            setSmartSyncEnabled(checked)
+                            toast.success(checked ? 'Smart sync enabled' : 'Smart sync disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Sync on Wi-Fi Only</p>
-                          <p className="text-sm text-gray-500">Save mobile data</p>
+                        <div className="flex items-center gap-2">
+                          <Wifi className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Sync on Wi-Fi Only</p>
+                            <p className="text-sm text-gray-500">Save mobile data</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={syncOnWifiOnly}
+                          onCheckedChange={(checked) => {
+                            setSyncOnWifiOnly(checked)
+                            toast.success(checked ? 'Wi-Fi only sync enabled' : 'Wi-Fi only sync disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Sync Frequency</Label>
@@ -1494,25 +1598,52 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Enable Offline Access</p>
-                          <p className="text-sm text-gray-500">Access files without internet</p>
+                        <div className="flex items-center gap-2">
+                          <CloudOff className="w-4 h-4 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Offline Access</p>
+                            <p className="text-sm text-gray-500">Access files without internet</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={offlineAccessEnabled}
+                          onCheckedChange={(checked) => {
+                            setOfflineAccessEnabled(checked)
+                            toast.success(checked ? 'Offline access enabled' : 'Offline access disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Auto-download Starred</p>
-                          <p className="text-sm text-gray-500">Keep starred files offline</p>
+                        <div className="flex items-center gap-2">
+                          <Star className="w-4 h-4 text-yellow-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-download Starred</p>
+                            <p className="text-sm text-gray-500">Keep starred files offline</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoDownloadStarred}
+                          onCheckedChange={(checked) => {
+                            setAutoDownloadStarred(checked)
+                            toast.success(checked ? 'Starred files will be downloaded' : 'Starred auto-download disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Auto-download Shared</p>
-                          <p className="text-sm text-gray-500">Keep shared files offline</p>
+                        <div className="flex items-center gap-2">
+                          <Share2 className="w-4 h-4 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-download Shared</p>
+                            <p className="text-sm text-gray-500">Keep shared files offline</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={autoDownloadShared}
+                          onCheckedChange={(checked) => {
+                            setAutoDownloadShared(checked)
+                            toast.success(checked ? 'Shared files will be downloaded' : 'Shared auto-download disabled')
+                          }}
+                        />
                       </div>
                       <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                         <p className="text-sm text-blue-800 dark:text-blue-200">
@@ -1594,18 +1725,36 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                         </Select>
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Require Password</p>
-                          <p className="text-sm text-gray-500">Password protect shared links</p>
+                        <div className="flex items-center gap-2">
+                          <LockKeyhole className="w-4 h-4 text-orange-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Require Password</p>
+                            <p className="text-sm text-gray-500">Password protect shared links</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={requirePassword}
+                          onCheckedChange={(checked) => {
+                            setRequirePassword(checked)
+                            toast.success(checked ? 'Password protection enabled' : 'Password protection disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Allow Downloads</p>
-                          <p className="text-sm text-gray-500">Let viewers download files</p>
+                        <div className="flex items-center gap-2">
+                          <Download className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Allow Downloads</p>
+                            <p className="text-sm text-gray-500">Let viewers download files</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={allowDownloads}
+                          onCheckedChange={(checked) => {
+                            setAllowDownloads(checked)
+                            toast.success(checked ? 'Downloads allowed' : 'Downloads disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1619,25 +1768,52 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Team Folder Access</p>
-                          <p className="text-sm text-gray-500">Allow team members to view folders</p>
+                        <div className="flex items-center gap-2">
+                          <FolderOpen className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Team Folder Access</p>
+                            <p className="text-sm text-gray-500">Allow team members to view folders</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={teamFolderAccess}
+                          onCheckedChange={(checked) => {
+                            setTeamFolderAccess(checked)
+                            toast.success(checked ? 'Team folder access enabled' : 'Team folder access disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Request Access</p>
-                          <p className="text-sm text-gray-500">Allow requesting access to files</p>
+                        <div className="flex items-center gap-2">
+                          <UserCheck className="w-4 h-4 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Request Access</p>
+                            <p className="text-sm text-gray-500">Allow requesting access to files</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={requestAccessEnabled}
+                          onCheckedChange={(checked) => {
+                            setRequestAccessEnabled(checked)
+                            toast.success(checked ? 'Access requests enabled' : 'Access requests disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">External Sharing</p>
-                          <p className="text-sm text-gray-500">Share with people outside team</p>
+                        <div className="flex items-center gap-2">
+                          <Globe2 className="w-4 h-4 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">External Sharing</p>
+                            <p className="text-sm text-gray-500">Share with people outside team</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={externalSharing}
+                          onCheckedChange={(checked) => {
+                            setExternalSharing(checked)
+                            toast.success(checked ? 'External sharing enabled' : 'External sharing disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">External Domain Whitelist</Label>
@@ -1696,32 +1872,68 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">File Changes</p>
-                          <p className="text-sm text-gray-500">When files are modified</p>
+                        <div className="flex items-center gap-2">
+                          <FileEdit className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">File Changes</p>
+                            <p className="text-sm text-gray-500">When files are modified</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={notifyFileChanges}
+                          onCheckedChange={(checked) => {
+                            setNotifyFileChanges(checked)
+                            toast.success(checked ? 'File change notifications enabled' : 'File change notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">New Shares</p>
-                          <p className="text-sm text-gray-500">When files are shared with you</p>
+                        <div className="flex items-center gap-2">
+                          <Share2 className="w-4 h-4 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">New Shares</p>
+                            <p className="text-sm text-gray-500">When files are shared with you</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={notifyNewShares}
+                          onCheckedChange={(checked) => {
+                            setNotifyNewShares(checked)
+                            toast.success(checked ? 'Share notifications enabled' : 'Share notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Comments & Mentions</p>
-                          <p className="text-sm text-gray-500">When you're mentioned in comments</p>
+                        <div className="flex items-center gap-2">
+                          <AtSign className="w-4 h-4 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Comments & Mentions</p>
+                            <p className="text-sm text-gray-500">When you're mentioned in comments</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={notifyCommentsMentions}
+                          onCheckedChange={(checked) => {
+                            setNotifyCommentsMentions(checked)
+                            toast.success(checked ? 'Mention notifications enabled' : 'Mention notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Weekly Summary</p>
-                          <p className="text-sm text-gray-500">Weekly activity digest</p>
+                        <div className="flex items-center gap-2">
+                          <CalendarDays className="w-4 h-4 text-orange-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Weekly Summary</p>
+                            <p className="text-sm text-gray-500">Weekly activity digest</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={weeklySummary}
+                          onCheckedChange={(checked) => {
+                            setWeeklySummary(checked)
+                            toast.success(checked ? 'Weekly summary enabled' : 'Weekly summary disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Email Frequency</Label>
@@ -1748,32 +1960,68 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Desktop Notifications</p>
-                          <p className="text-sm text-gray-500">Show desktop alerts</p>
+                        <div className="flex items-center gap-2">
+                          <Monitor className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Desktop Notifications</p>
+                            <p className="text-sm text-gray-500">Show desktop alerts</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={desktopNotifications}
+                          onCheckedChange={(checked) => {
+                            setDesktopNotifications(checked)
+                            toast.success(checked ? 'Desktop notifications enabled' : 'Desktop notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Mobile Notifications</p>
-                          <p className="text-sm text-gray-500">Push to mobile devices</p>
+                        <div className="flex items-center gap-2">
+                          <Smartphone className="w-4 h-4 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Mobile Notifications</p>
+                            <p className="text-sm text-gray-500">Push to mobile devices</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={mobileNotifications}
+                          onCheckedChange={(checked) => {
+                            setMobileNotifications(checked)
+                            toast.success(checked ? 'Mobile notifications enabled' : 'Mobile notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Sync Complete</p>
-                          <p className="text-sm text-gray-500">Notify when sync finishes</p>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Sync Complete</p>
+                            <p className="text-sm text-gray-500">Notify when sync finishes</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={syncCompleteNotify}
+                          onCheckedChange={(checked) => {
+                            setSyncCompleteNotify(checked)
+                            toast.success(checked ? 'Sync complete notifications enabled' : 'Sync complete notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Storage Alerts</p>
-                          <p className="text-sm text-gray-500">When storage is nearly full</p>
+                        <div className="flex items-center gap-2">
+                          <HardDrive className="w-4 h-4 text-red-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Storage Alerts</p>
+                            <p className="text-sm text-gray-500">When storage is nearly full</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={storageAlerts}
+                          onCheckedChange={(checked) => {
+                            setStorageAlerts(checked)
+                            toast.success(checked ? 'Storage alerts enabled' : 'Storage alerts disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Quiet Hours</Label>
@@ -1834,18 +2082,36 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                         <Badge className="bg-green-100 text-green-700">Active</Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">File Uploads</p>
-                          <p className="text-sm text-gray-500">Notify on new uploads</p>
+                        <div className="flex items-center gap-2">
+                          <Upload className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">File Uploads</p>
+                            <p className="text-sm text-gray-500">Notify on new uploads</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={slackFileUploads}
+                          onCheckedChange={(checked) => {
+                            setSlackFileUploads(checked)
+                            toast.success(checked ? 'Slack upload notifications enabled' : 'Slack upload notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Share Activity</p>
-                          <p className="text-sm text-gray-500">Post when files are shared</p>
+                        <div className="flex items-center gap-2">
+                          <MessageSquare className="w-4 h-4 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Share Activity</p>
+                            <p className="text-sm text-gray-500">Post when files are shared</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={slackShareActivity}
+                          onCheckedChange={(checked) => {
+                            setSlackShareActivity(checked)
+                            toast.success(checked ? 'Slack share notifications enabled' : 'Slack share notifications disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1963,18 +2229,36 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
-                          <p className="text-sm text-gray-500">Extra security for your account</p>
+                        <div className="flex items-center gap-2">
+                          <Fingerprint className="w-4 h-4 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
+                            <p className="text-sm text-gray-500">Extra security for your account</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={twoFactorAuth}
+                          onCheckedChange={(checked) => {
+                            setTwoFactorAuth(checked)
+                            toast.success(checked ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">SSO Enforcement</p>
-                          <p className="text-sm text-gray-500">Require SSO login</p>
+                        <div className="flex items-center gap-2">
+                          <KeyRound className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">SSO Enforcement</p>
+                            <p className="text-sm text-gray-500">Require SSO login</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={ssoEnforcement}
+                          onCheckedChange={(checked) => {
+                            setSsoEnforcement(checked)
+                            toast.success(checked ? 'SSO enforcement enabled' : 'SSO enforcement disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Session Timeout</Label>
@@ -1992,11 +2276,20 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                         </Select>
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Remote Wipe</p>
-                          <p className="text-sm text-gray-500">Allow wiping devices remotely</p>
+                        <div className="flex items-center gap-2">
+                          <Eraser className="w-4 h-4 text-red-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Remote Wipe</p>
+                            <p className="text-sm text-gray-500">Allow wiping devices remotely</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={remoteWipe}
+                          onCheckedChange={(checked) => {
+                            setRemoteWipe(checked)
+                            toast.success(checked ? 'Remote wipe enabled' : 'Remote wipe disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -2010,18 +2303,36 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">End-to-End Encryption</p>
-                          <p className="text-sm text-gray-500">Encrypt files before upload</p>
+                        <div className="flex items-center gap-2">
+                          <Lock className="w-4 h-4 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">End-to-End Encryption</p>
+                            <p className="text-sm text-gray-500">Encrypt files before upload</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={endToEndEncryption}
+                          onCheckedChange={(checked) => {
+                            setEndToEndEncryption(checked)
+                            toast.success(checked ? 'End-to-end encryption enabled' : 'End-to-end encryption disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Zero-Knowledge</p>
-                          <p className="text-sm text-gray-500">Only you can decrypt files</p>
+                        <div className="flex items-center gap-2">
+                          <ShieldOff className="w-4 h-4 text-orange-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Zero-Knowledge</p>
+                            <p className="text-sm text-gray-500">Only you can decrypt files</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={zeroKnowledge}
+                          onCheckedChange={(checked) => {
+                            setZeroKnowledge(checked)
+                            toast.success(checked ? 'Zero-knowledge mode enabled' : 'Zero-knowledge mode disabled')
+                          }}
+                        />
                       </div>
                       <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                         <div className="flex items-center gap-2">
@@ -2053,11 +2364,20 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Enable Audit Logging</p>
-                          <p className="text-sm text-gray-500">Track all file activities</p>
+                        <div className="flex items-center gap-2">
+                          <ScrollText className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Enable Audit Logging</p>
+                            <p className="text-sm text-gray-500">Track all file activities</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={auditLogging}
+                          onCheckedChange={(checked) => {
+                            setAuditLogging(checked)
+                            toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Log Retention</Label>
@@ -2093,22 +2413,40 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">IP Whitelist</p>
-                          <p className="text-sm text-gray-500">Restrict access by IP</p>
+                        <div className="flex items-center gap-2">
+                          <ToggleRight className="w-4 h-4 text-orange-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">IP Whitelist</p>
+                            <p className="text-sm text-gray-500">Restrict access by IP</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={ipWhitelist}
+                          onCheckedChange={(checked) => {
+                            setIpWhitelist(checked)
+                            toast.success(checked ? 'IP whitelist enabled' : 'IP whitelist disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Allowed IP Ranges</Label>
                         <Input placeholder="192.168.1.0/24, 10.0.0.0/8" />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Geo-Restrictions</p>
-                          <p className="text-sm text-gray-500">Limit by country</p>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-red-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Geo-Restrictions</p>
+                            <p className="text-sm text-gray-500">Limit by country</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={geoRestrictions}
+                          onCheckedChange={(checked) => {
+                            setGeoRestrictions(checked)
+                            toast.success(checked ? 'Geo-restrictions enabled' : 'Geo-restrictions disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Allowed Countries</Label>
@@ -2188,11 +2526,20 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Automatic Backups</p>
-                          <p className="text-sm text-gray-500">Backup files automatically</p>
+                        <div className="flex items-center gap-2">
+                          <HardDriveDownload className="w-4 h-4 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Automatic Backups</p>
+                            <p className="text-sm text-gray-500">Backup files automatically</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={automaticBackups}
+                          onCheckedChange={(checked) => {
+                            setAutomaticBackups(checked)
+                            toast.success(checked ? 'Automatic backups enabled' : 'Automatic backups disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Backup Frequency</Label>
@@ -2254,18 +2601,36 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
                         </Select>
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show File Extensions</p>
-                          <p className="text-sm text-gray-500">Display file extensions</p>
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show File Extensions</p>
+                            <p className="text-sm text-gray-500">Display file extensions</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showFileExtensions}
+                          onCheckedChange={(checked) => {
+                            setShowFileExtensions(checked)
+                            toast.success(checked ? 'File extensions visible' : 'File extensions hidden')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Hidden Files</p>
-                          <p className="text-sm text-gray-500">Display hidden files</p>
+                        <div className="flex items-center gap-2">
+                          <FileQuestion className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Hidden Files</p>
+                            <p className="text-sm text-gray-500">Display hidden files</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={showHiddenFiles}
+                          onCheckedChange={(checked) => {
+                            setShowHiddenFiles(checked)
+                            toast.success(checked ? 'Hidden files visible' : 'Hidden files hidden')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>

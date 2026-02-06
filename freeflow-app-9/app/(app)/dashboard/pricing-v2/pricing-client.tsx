@@ -54,7 +54,18 @@ import {
   Webhook,
   Mail,
   AlertTriangle,
-  Sliders
+  Sliders,
+  Globe,
+  FileText,
+  Send,
+  Clock,
+  Ban,
+  Pause,
+  TestTube,
+  Link,
+  ShieldCheck,
+  Lock,
+  CreditCard as CardIcon
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -344,6 +355,77 @@ export default function PricingClient({
   const [showInvoicePreview, setShowInvoicePreview] = useState<Invoice | null>(null)
   const [showPlanEditor, setShowPlanEditor] = useState(false)
   const [showChangePlanDialog, setShowChangePlanDialog] = useState(false)
+
+  // Settings switches state - General
+  const [multiCurrencyEnabled, setMultiCurrencyEnabled] = useState(true)
+
+  // Settings switches state - Payments
+  const [paymentMethods, setPaymentMethods] = useState({
+    creditCards: true,
+    achDirectDebit: true,
+    sepaDirectDebit: false,
+    applePay: true,
+    googlePay: true,
+  })
+  const [autoTaxEnabled, setAutoTaxEnabled] = useState(true)
+
+  // Settings switches state - Invoices
+  const [autoFinalizeInvoices, setAutoFinalizeInvoices] = useState(true)
+  const [includeTaxDetails, setIncludeTaxDetails] = useState(true)
+  const [emailInvoices, setEmailInvoices] = useState(true)
+  const [customerPortalAccess, setCustomerPortalAccess] = useState(true)
+  const [autoApplyCredits, setAutoApplyCredits] = useState(true)
+
+  // Settings switches state - Subscriptions
+  const [requirePaymentMethod, setRequirePaymentMethod] = useState(false)
+  const [trialEndReminder, setTrialEndReminder] = useState(true)
+  const [smartRetries, setSmartRetries] = useState(true)
+  const [sendReminderEmails, setSendReminderEmails] = useState(true)
+  const [allowImmediateCancellation, setAllowImmediateCancellation] = useState(false)
+  const [prorateRefunds, setProrateRefunds] = useState(true)
+  const [allowPause, setAllowPause] = useState(true)
+
+  // Settings switches state - Notifications
+  const [adminNotifications, setAdminNotifications] = useState({
+    newSubscription: true,
+    subscriptionCancelled: true,
+    paymentFailed: true,
+    disputeOpened: true,
+    invoicePaid: false,
+  })
+  const [customerNotifications, setCustomerNotifications] = useState({
+    paymentReceipt: true,
+    invoiceCreated: true,
+    paymentReminder: true,
+    subscriptionRenewal: true,
+    planChanged: true,
+  })
+
+  // Settings switches state - Advanced
+  const [testModeActive, setTestModeActive] = useState(false)
+  const [enableCustomerPortal, setEnableCustomerPortal] = useState(true)
+  const [allowPlanChanges, setAllowPlanChanges] = useState(true)
+  const [allowCancellation, setAllowCancellation] = useState(true)
+  const [paymentMethodUpdate, setPaymentMethodUpdate] = useState(true)
+  const [invoiceHistory, setInvoiceHistory] = useState(true)
+  const [revenueRecoveryMode, setRevenueRecoveryMode] = useState(true)
+  const [cardUpdater, setCardUpdater] = useState(true)
+  const [networkTokens, setNetworkTokens] = useState(true)
+  const [radarFraudTeams, setRadarFraudTeams] = useState(true)
+  const [threeDSecure, setThreeDSecure] = useState(true)
+  const [blockHighRiskCountries, setBlockHighRiskCountries] = useState(false)
+
+  // Webhook events state
+  const [webhookEvents, setWebhookEvents] = useState<Record<string, boolean>>({
+    'invoice.created': true,
+    'invoice.paid': true,
+    'invoice.failed': true,
+    'subscription.created': true,
+    'subscription.updated': true,
+    'subscription.canceled': true,
+    'customer.created': true,
+    'customer.updated': true,
+  })
 
   // Fetch plans from Supabase
   const fetchPlans = useCallback(async () => {
@@ -1610,11 +1692,20 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Multi-currency Support</p>
-                            <p className="text-sm text-gray-500">Accept payments in multiple currencies</p>
+                          <div className="flex items-center gap-3">
+                            <Globe className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Multi-currency Support</p>
+                              <p className="text-sm text-gray-500">Accept payments in multiple currencies</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={multiCurrencyEnabled}
+                            onCheckedChange={(checked) => {
+                              setMultiCurrencyEnabled(checked)
+                              toast.success(checked ? 'Multi-currency support enabled' : 'Multi-currency support disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1687,21 +1778,86 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                         <CardDescription>Accepted payment types</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {[
-                          { name: 'Credit & Debit Cards', desc: 'Visa, Mastercard, Amex', enabled: true },
-                          { name: 'ACH Direct Debit', desc: 'US bank accounts', enabled: true },
-                          { name: 'SEPA Direct Debit', desc: 'European bank transfers', enabled: false },
-                          { name: 'Apple Pay', desc: 'Apple device payments', enabled: true },
-                          { name: 'Google Pay', desc: 'Google Wallet payments', enabled: true },
-                        ].map((method, i) => (
-                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <CreditCard className="w-5 h-5 text-violet-600" />
                             <div>
-                              <p className="font-medium">{method.name}</p>
-                              <p className="text-sm text-gray-500">{method.desc}</p>
+                              <p className="font-medium">Credit & Debit Cards</p>
+                              <p className="text-sm text-gray-500">Visa, Mastercard, Amex</p>
                             </div>
-                            <Switch defaultChecked={method.enabled} />
                           </div>
-                        ))}
+                          <Switch
+                            checked={paymentMethods.creditCards}
+                            onCheckedChange={(checked) => {
+                              setPaymentMethods(prev => ({ ...prev, creditCards: checked }))
+                              toast.success(checked ? 'Credit cards enabled' : 'Credit cards disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <DollarSign className="w-5 h-5 text-green-600" />
+                            <div>
+                              <p className="font-medium">ACH Direct Debit</p>
+                              <p className="text-sm text-gray-500">US bank accounts</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={paymentMethods.achDirectDebit}
+                            onCheckedChange={(checked) => {
+                              setPaymentMethods(prev => ({ ...prev, achDirectDebit: checked }))
+                              toast.success(checked ? 'ACH Direct Debit enabled' : 'ACH Direct Debit disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Globe className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">SEPA Direct Debit</p>
+                              <p className="text-sm text-gray-500">European bank transfers</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={paymentMethods.sepaDirectDebit}
+                            onCheckedChange={(checked) => {
+                              setPaymentMethods(prev => ({ ...prev, sepaDirectDebit: checked }))
+                              toast.success(checked ? 'SEPA Direct Debit enabled' : 'SEPA Direct Debit disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Wallet className="w-5 h-5 text-gray-800 dark:text-gray-200" />
+                            <div>
+                              <p className="font-medium">Apple Pay</p>
+                              <p className="text-sm text-gray-500">Apple device payments</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={paymentMethods.applePay}
+                            onCheckedChange={(checked) => {
+                              setPaymentMethods(prev => ({ ...prev, applePay: checked }))
+                              toast.success(checked ? 'Apple Pay enabled' : 'Apple Pay disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Wallet className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Google Pay</p>
+                              <p className="text-sm text-gray-500">Google Wallet payments</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={paymentMethods.googlePay}
+                            onCheckedChange={(checked) => {
+                              setPaymentMethods(prev => ({ ...prev, googlePay: checked }))
+                              toast.success(checked ? 'Google Pay enabled' : 'Google Pay disabled')
+                            }}
+                          />
+                        </div>
                       </CardContent>
                     </Card>
 
@@ -1721,7 +1877,13 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                               <p className="text-sm text-gray-500">Using Stripe Tax</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoTaxEnabled}
+                            onCheckedChange={(checked) => {
+                              setAutoTaxEnabled(checked)
+                              toast.success(checked ? 'Automatic tax calculation enabled' : 'Automatic tax calculation disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
@@ -1761,18 +1923,36 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-finalize Invoices</p>
-                            <p className="text-sm text-gray-500">Automatically finalize and send on creation</p>
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-5 h-5 text-violet-600" />
+                            <div>
+                              <p className="font-medium">Auto-finalize Invoices</p>
+                              <p className="text-sm text-gray-500">Automatically finalize and send on creation</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoFinalizeInvoices}
+                            onCheckedChange={(checked) => {
+                              setAutoFinalizeInvoices(checked)
+                              toast.success(checked ? 'Auto-finalize enabled' : 'Auto-finalize disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Include Tax Details</p>
-                            <p className="text-sm text-gray-500">Show tax breakdown on invoices</p>
+                          <div className="flex items-center gap-3">
+                            <Calculator className="w-5 h-5 text-green-600" />
+                            <div>
+                              <p className="font-medium">Include Tax Details</p>
+                              <p className="text-sm text-gray-500">Show tax breakdown on invoices</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={includeTaxDetails}
+                            onCheckedChange={(checked) => {
+                              setIncludeTaxDetails(checked)
+                              toast.success(checked ? 'Tax details will be shown' : 'Tax details will be hidden')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Footer Text</Label>
@@ -1797,14 +1977,29 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                               <p className="text-sm text-gray-500">Send PDF invoices via email</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={emailInvoices}
+                            onCheckedChange={(checked) => {
+                              setEmailInvoices(checked)
+                              toast.success(checked ? 'Email invoices enabled' : 'Email invoices disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Customer Portal Access</p>
-                            <p className="text-sm text-gray-500">Allow customers to view invoices online</p>
+                          <div className="flex items-center gap-3">
+                            <Link className="w-5 h-5 text-indigo-600" />
+                            <div>
+                              <p className="font-medium">Customer Portal Access</p>
+                              <p className="text-sm text-gray-500">Allow customers to view invoices online</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={customerPortalAccess}
+                            onCheckedChange={(checked) => {
+                              setCustomerPortalAccess(checked)
+                              toast.success(checked ? 'Customer portal access enabled' : 'Customer portal access disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Days Until Due</Label>
@@ -1826,11 +2021,20 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-apply Credits</p>
-                            <p className="text-sm text-gray-500">Automatically apply credits to future invoices</p>
+                          <div className="flex items-center gap-3">
+                            <DollarSign className="w-5 h-5 text-green-600" />
+                            <div>
+                              <p className="font-medium">Auto-apply Credits</p>
+                              <p className="text-sm text-gray-500">Automatically apply credits to future invoices</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoApplyCredits}
+                            onCheckedChange={(checked) => {
+                              setAutoApplyCredits(checked)
+                              toast.success(checked ? 'Auto-apply credits enabled' : 'Auto-apply credits disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Credit Note Prefix</Label>
@@ -1855,18 +2059,36 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                           <Input type="number" defaultValue="14" className="mt-1" />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Require Payment Method</p>
-                            <p className="text-sm text-gray-500">Collect payment info during trial signup</p>
+                          <div className="flex items-center gap-3">
+                            <CreditCard className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Require Payment Method</p>
+                              <p className="text-sm text-gray-500">Collect payment info during trial signup</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={requirePaymentMethod}
+                            onCheckedChange={(checked) => {
+                              setRequirePaymentMethod(checked)
+                              toast.success(checked ? 'Payment method required for trials' : 'Payment method not required for trials')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Trial End Reminder</p>
-                            <p className="text-sm text-gray-500">Email customers before trial ends</p>
+                          <div className="flex items-center gap-3">
+                            <Bell className="w-5 h-5 text-amber-600" />
+                            <div>
+                              <p className="font-medium">Trial End Reminder</p>
+                              <p className="text-sm text-gray-500">Email customers before trial ends</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={trialEndReminder}
+                            onCheckedChange={(checked) => {
+                              setTrialEndReminder(checked)
+                              toast.success(checked ? 'Trial end reminders enabled' : 'Trial end reminders disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Reminder Days Before End</Label>
@@ -1891,7 +2113,13 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                               <p className="text-sm text-gray-500">AI-powered retry scheduling</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={smartRetries}
+                            onCheckedChange={(checked) => {
+                              setSmartRetries(checked)
+                              toast.success(checked ? 'Smart retries enabled' : 'Smart retries disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Max Retry Attempts</Label>
@@ -1902,11 +2130,20 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                           </select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Send Reminder Emails</p>
-                            <p className="text-sm text-gray-500">Notify customers about failed payments</p>
+                          <div className="flex items-center gap-3">
+                            <Mail className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Send Reminder Emails</p>
+                              <p className="text-sm text-gray-500">Notify customers about failed payments</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sendReminderEmails}
+                            onCheckedChange={(checked) => {
+                              setSendReminderEmails(checked)
+                              toast.success(checked ? 'Reminder emails enabled' : 'Reminder emails disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Days Before Cancellation</Label>
@@ -1922,25 +2159,52 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Allow Immediate Cancellation</p>
-                            <p className="text-sm text-gray-500">Cancel subscriptions immediately</p>
+                          <div className="flex items-center gap-3">
+                            <Ban className="w-5 h-5 text-red-600" />
+                            <div>
+                              <p className="font-medium">Allow Immediate Cancellation</p>
+                              <p className="text-sm text-gray-500">Cancel subscriptions immediately</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={allowImmediateCancellation}
+                            onCheckedChange={(checked) => {
+                              setAllowImmediateCancellation(checked)
+                              toast.success(checked ? 'Immediate cancellation allowed' : 'Immediate cancellation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Prorate Refunds</p>
-                            <p className="text-sm text-gray-500">Refund unused portion of billing period</p>
+                          <div className="flex items-center gap-3">
+                            <DollarSign className="w-5 h-5 text-green-600" />
+                            <div>
+                              <p className="font-medium">Prorate Refunds</p>
+                              <p className="text-sm text-gray-500">Refund unused portion of billing period</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={prorateRefunds}
+                            onCheckedChange={(checked) => {
+                              setProrateRefunds(checked)
+                              toast.success(checked ? 'Prorated refunds enabled' : 'Prorated refunds disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Allow Pause</p>
-                            <p className="text-sm text-gray-500">Let customers pause subscriptions</p>
+                          <div className="flex items-center gap-3">
+                            <Pause className="w-5 h-5 text-amber-600" />
+                            <div>
+                              <p className="font-medium">Allow Pause</p>
+                              <p className="text-sm text-gray-500">Let customers pause subscriptions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowPause}
+                            onCheckedChange={(checked) => {
+                              setAllowPause(checked)
+                              toast.success(checked ? 'Subscription pausing allowed' : 'Subscription pausing disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1956,21 +2220,86 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                         <CardDescription>Alerts for your team</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {[
-                          { label: 'New Subscription', desc: 'When a customer subscribes', enabled: true },
-                          { label: 'Subscription Cancelled', desc: 'When a customer cancels', enabled: true },
-                          { label: 'Payment Failed', desc: 'When a payment fails', enabled: true },
-                          { label: 'Dispute Opened', desc: 'When a chargeback is filed', enabled: true },
-                          { label: 'Invoice Paid', desc: 'When an invoice is paid', enabled: false },
-                        ].map((notif, i) => (
-                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Plus className="w-5 h-5 text-green-600" />
                             <div>
-                              <p className="font-medium">{notif.label}</p>
-                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                              <p className="font-medium">New Subscription</p>
+                              <p className="text-sm text-gray-500">When a customer subscribes</p>
                             </div>
-                            <Switch defaultChecked={notif.enabled} />
                           </div>
-                        ))}
+                          <Switch
+                            checked={adminNotifications.newSubscription}
+                            onCheckedChange={(checked) => {
+                              setAdminNotifications(prev => ({ ...prev, newSubscription: checked }))
+                              toast.success(checked ? 'New subscription alerts enabled' : 'New subscription alerts disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Ban className="w-5 h-5 text-red-600" />
+                            <div>
+                              <p className="font-medium">Subscription Cancelled</p>
+                              <p className="text-sm text-gray-500">When a customer cancels</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={adminNotifications.subscriptionCancelled}
+                            onCheckedChange={(checked) => {
+                              setAdminNotifications(prev => ({ ...prev, subscriptionCancelled: checked }))
+                              toast.success(checked ? 'Cancellation alerts enabled' : 'Cancellation alerts disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <AlertCircle className="w-5 h-5 text-amber-600" />
+                            <div>
+                              <p className="font-medium">Payment Failed</p>
+                              <p className="text-sm text-gray-500">When a payment fails</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={adminNotifications.paymentFailed}
+                            onCheckedChange={(checked) => {
+                              setAdminNotifications(prev => ({ ...prev, paymentFailed: checked }))
+                              toast.success(checked ? 'Payment failed alerts enabled' : 'Payment failed alerts disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <AlertTriangle className="w-5 h-5 text-red-600" />
+                            <div>
+                              <p className="font-medium">Dispute Opened</p>
+                              <p className="text-sm text-gray-500">When a chargeback is filed</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={adminNotifications.disputeOpened}
+                            onCheckedChange={(checked) => {
+                              setAdminNotifications(prev => ({ ...prev, disputeOpened: checked }))
+                              toast.success(checked ? 'Dispute alerts enabled' : 'Dispute alerts disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <CheckCircle2 className="w-5 h-5 text-green-600" />
+                            <div>
+                              <p className="font-medium">Invoice Paid</p>
+                              <p className="text-sm text-gray-500">When an invoice is paid</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={adminNotifications.invoicePaid}
+                            onCheckedChange={(checked) => {
+                              setAdminNotifications(prev => ({ ...prev, invoicePaid: checked }))
+                              toast.success(checked ? 'Invoice paid alerts enabled' : 'Invoice paid alerts disabled')
+                            }}
+                          />
+                        </div>
                       </CardContent>
                     </Card>
 
@@ -1980,21 +2309,86 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                         <CardDescription>Emails sent to customers</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {[
-                          { label: 'Payment Receipt', desc: 'After successful payment', enabled: true },
-                          { label: 'Invoice Created', desc: 'When new invoice is generated', enabled: true },
-                          { label: 'Payment Reminder', desc: 'Before invoice due date', enabled: true },
-                          { label: 'Subscription Renewal', desc: 'Before renewal date', enabled: true },
-                          { label: 'Plan Changed', desc: 'When subscription plan changes', enabled: true },
-                        ].map((notif, i) => (
-                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Receipt className="w-5 h-5 text-green-600" />
                             <div>
-                              <p className="font-medium">{notif.label}</p>
-                              <p className="text-sm text-gray-500">{notif.desc}</p>
+                              <p className="font-medium">Payment Receipt</p>
+                              <p className="text-sm text-gray-500">After successful payment</p>
                             </div>
-                            <Switch defaultChecked={notif.enabled} />
                           </div>
-                        ))}
+                          <Switch
+                            checked={customerNotifications.paymentReceipt}
+                            onCheckedChange={(checked) => {
+                              setCustomerNotifications(prev => ({ ...prev, paymentReceipt: checked }))
+                              toast.success(checked ? 'Payment receipts enabled' : 'Payment receipts disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Invoice Created</p>
+                              <p className="text-sm text-gray-500">When new invoice is generated</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={customerNotifications.invoiceCreated}
+                            onCheckedChange={(checked) => {
+                              setCustomerNotifications(prev => ({ ...prev, invoiceCreated: checked }))
+                              toast.success(checked ? 'Invoice creation emails enabled' : 'Invoice creation emails disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Clock className="w-5 h-5 text-amber-600" />
+                            <div>
+                              <p className="font-medium">Payment Reminder</p>
+                              <p className="text-sm text-gray-500">Before invoice due date</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={customerNotifications.paymentReminder}
+                            onCheckedChange={(checked) => {
+                              setCustomerNotifications(prev => ({ ...prev, paymentReminder: checked }))
+                              toast.success(checked ? 'Payment reminders enabled' : 'Payment reminders disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <RefreshCw className="w-5 h-5 text-violet-600" />
+                            <div>
+                              <p className="font-medium">Subscription Renewal</p>
+                              <p className="text-sm text-gray-500">Before renewal date</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={customerNotifications.subscriptionRenewal}
+                            onCheckedChange={(checked) => {
+                              setCustomerNotifications(prev => ({ ...prev, subscriptionRenewal: checked }))
+                              toast.success(checked ? 'Renewal reminders enabled' : 'Renewal reminders disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Edit className="w-5 h-5 text-indigo-600" />
+                            <div>
+                              <p className="font-medium">Plan Changed</p>
+                              <p className="text-sm text-gray-500">When subscription plan changes</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={customerNotifications.planChanged}
+                            onCheckedChange={(checked) => {
+                              setCustomerNotifications(prev => ({ ...prev, planChanged: checked }))
+                              toast.success(checked ? 'Plan change notifications enabled' : 'Plan change notifications disabled')
+                            }}
+                          />
+                        </div>
                       </CardContent>
                     </Card>
 
@@ -2070,7 +2464,13 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                               <p className="text-sm text-gray-500">No real charges will be made</p>
                             </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={testModeActive}
+                            onCheckedChange={(checked) => {
+                              setTestModeActive(checked)
+                              toast.success(checked ? 'Test mode activated - no real charges will be made' : 'Test mode deactivated - live payments enabled')
+                            }}
+                          />
                         </div>
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <p className="font-medium mb-2">Test Card Numbers</p>
@@ -2120,35 +2520,77 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                               <p className="text-sm text-gray-500">Let customers manage subscriptions</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableCustomerPortal}
+                            onCheckedChange={(checked) => {
+                              setEnableCustomerPortal(checked)
+                              toast.success(checked ? 'Customer portal enabled' : 'Customer portal disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Allow Plan Changes</p>
-                            <p className="text-sm text-gray-500">Customers can upgrade/downgrade</p>
+                          <div className="flex items-center gap-3">
+                            <TrendingUp className="w-5 h-5 text-green-600" />
+                            <div>
+                              <p className="font-medium">Allow Plan Changes</p>
+                              <p className="text-sm text-gray-500">Customers can upgrade/downgrade</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowPlanChanges}
+                            onCheckedChange={(checked) => {
+                              setAllowPlanChanges(checked)
+                              toast.success(checked ? 'Plan changes allowed' : 'Plan changes disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Allow Cancellation</p>
-                            <p className="text-sm text-gray-500">Self-service subscription cancellation</p>
+                          <div className="flex items-center gap-3">
+                            <Ban className="w-5 h-5 text-red-600" />
+                            <div>
+                              <p className="font-medium">Allow Cancellation</p>
+                              <p className="text-sm text-gray-500">Self-service subscription cancellation</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowCancellation}
+                            onCheckedChange={(checked) => {
+                              setAllowCancellation(checked)
+                              toast.success(checked ? 'Self-service cancellation allowed' : 'Self-service cancellation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Payment Method Update</p>
-                            <p className="text-sm text-gray-500">Update card on file</p>
+                          <div className="flex items-center gap-3">
+                            <CreditCard className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Payment Method Update</p>
+                              <p className="text-sm text-gray-500">Update card on file</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={paymentMethodUpdate}
+                            onCheckedChange={(checked) => {
+                              setPaymentMethodUpdate(checked)
+                              toast.success(checked ? 'Payment method updates allowed' : 'Payment method updates disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Invoice History</p>
-                            <p className="text-sm text-gray-500">View and download past invoices</p>
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-5 h-5 text-violet-600" />
+                            <div>
+                              <p className="font-medium">Invoice History</p>
+                              <p className="text-sm text-gray-500">View and download past invoices</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={invoiceHistory}
+                            onCheckedChange={(checked) => {
+                              setInvoiceHistory(checked)
+                              toast.success(checked ? 'Invoice history access enabled' : 'Invoice history access disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2169,21 +2611,45 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                               <p className="text-sm text-gray-500">AI-powered payment recovery</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={revenueRecoveryMode}
+                            onCheckedChange={(checked) => {
+                              setRevenueRecoveryMode(checked)
+                              toast.success(checked ? 'Revenue recovery mode enabled' : 'Revenue recovery mode disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Card Updater</p>
-                            <p className="text-sm text-gray-500">Automatically update expired cards</p>
+                          <div className="flex items-center gap-3">
+                            <CreditCard className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Card Updater</p>
+                              <p className="text-sm text-gray-500">Automatically update expired cards</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={cardUpdater}
+                            onCheckedChange={(checked) => {
+                              setCardUpdater(checked)
+                              toast.success(checked ? 'Automatic card updates enabled' : 'Automatic card updates disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Network Tokens</p>
-                            <p className="text-sm text-gray-500">Higher authorization rates</p>
+                          <div className="flex items-center gap-3">
+                            <Zap className="w-5 h-5 text-amber-600" />
+                            <div>
+                              <p className="font-medium">Network Tokens</p>
+                              <p className="text-sm text-gray-500">Higher authorization rates</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={networkTokens}
+                            onCheckedChange={(checked) => {
+                              setNetworkTokens(checked)
+                              toast.success(checked ? 'Network tokens enabled' : 'Network tokens disabled')
+                            }}
+                          />
                         </div>
                         <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
@@ -2212,21 +2678,45 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                               <p className="text-sm text-gray-500">Advanced fraud detection</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={radarFraudTeams}
+                            onCheckedChange={(checked) => {
+                              setRadarFraudTeams(checked)
+                              toast.success(checked ? 'Fraud detection radar enabled' : 'Fraud detection radar disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">3D Secure Authentication</p>
-                            <p className="text-sm text-gray-500">Extra layer of security</p>
+                          <div className="flex items-center gap-3">
+                            <Lock className="w-5 h-5 text-indigo-600" />
+                            <div>
+                              <p className="font-medium">3D Secure Authentication</p>
+                              <p className="text-sm text-gray-500">Extra layer of security</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={threeDSecure}
+                            onCheckedChange={(checked) => {
+                              setThreeDSecure(checked)
+                              toast.success(checked ? '3D Secure authentication enabled' : '3D Secure authentication disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Block High-Risk Countries</p>
-                            <p className="text-sm text-gray-500">Prevent transactions from risky regions</p>
+                          <div className="flex items-center gap-3">
+                            <Globe className="w-5 h-5 text-red-600" />
+                            <div>
+                              <p className="font-medium">Block High-Risk Countries</p>
+                              <p className="text-sm text-gray-500">Prevent transactions from risky regions</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={blockHighRiskCountries}
+                            onCheckedChange={(checked) => {
+                              setBlockHighRiskCountries(checked)
+                              toast.success(checked ? 'High-risk countries will be blocked' : 'High-risk country blocking disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Risk Threshold</Label>
@@ -2724,9 +3214,17 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
               <div>
                 <Label>Events to Subscribe</Label>
                 <div className="mt-2 space-y-2">
-                  {['invoice.created', 'invoice.paid', 'invoice.failed', 'subscription.created', 'subscription.updated', 'subscription.canceled', 'customer.created', 'customer.updated'].map(event => (
+                  {Object.keys(webhookEvents).map(event => (
                     <div key={event} className="flex items-center gap-2">
-                      <input type="checkbox" id={event} defaultChecked className="rounded" />
+                      <input
+                        type="checkbox"
+                        id={event}
+                        checked={webhookEvents[event]}
+                        onChange={(e) => {
+                          setWebhookEvents(prev => ({ ...prev, [event]: e.target.checked }))
+                        }}
+                        className="rounded"
+                      />
                       <label htmlFor={event} className="text-sm font-mono">{event}</label>
                     </div>
                   ))}

@@ -70,6 +70,35 @@ import {
   Lock,
   Palette,
   Info,
+  ToggleLeft,
+  SkipForward,
+  Minimize2,
+  MonitorPlay,
+  Gauge,
+  MailWarning,
+  Cpu,
+  Boxes,
+  ShieldCheck,
+  KeyRound,
+  RotateCcw,
+  FileSearch,
+  BellRing,
+  PauseCircle,
+  AlertOctagon,
+  CalendarClock,
+  WifiOff,
+  Timer as TimerIcon,
+  BellPlus,
+  MailCheck,
+  MessageCircle,
+  Terminal,
+  Trash2,
+  Bug,
+  FlaskConical,
+  Network,
+  Fingerprint,
+  ScrollText,
+  Power,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -284,6 +313,52 @@ export default function ThirdPartyIntegrationsClient() {
   // Manage app states
   const [manageAppSyncEnabled, setManageAppSyncEnabled] = useState(true)
   const [manageAppSyncInterval, setManageAppSyncInterval] = useState('15')
+
+  // General Settings - Switch states
+  const [autoActivateNewZaps, setAutoActivateNewZaps] = useState(false)
+  const [duplicateDetection, setDuplicateDetection] = useState(true)
+  const [compactView, setCompactView] = useState(false)
+  const [showRunPreviews, setShowRunPreviews] = useState(true)
+
+  // Execution Settings - Switch states
+  const [rateLimitProtection, setRateLimitProtection] = useState(true)
+  const [sendErrorNotifications, setSendErrorNotifications] = useState(true)
+  const [parallelExecution, setParallelExecution] = useState(true)
+  const [smartBatching, setSmartBatching] = useState(true)
+
+  // Security Settings - Switch states
+  const [twoFactorAuth, setTwoFactorAuth] = useState(true)
+  const [ssoOnly, setSsoOnly] = useState(false)
+  const [encryptCredentials, setEncryptCredentials] = useState(true)
+  const [autoRefreshOAuth, setAutoRefreshOAuth] = useState(true)
+  const [auditLogging, setAuditLogging] = useState(true)
+
+  // Notifications Settings - Switch states
+  const [taskFailuresNotif, setTaskFailuresNotif] = useState(true)
+  const [autoPauseEventsNotif, setAutoPauseEventsNotif] = useState(true)
+  const [rateLimitWarningsNotif, setRateLimitWarningsNotif] = useState(true)
+  const [weeklySummaryNotif, setWeeklySummaryNotif] = useState(false)
+  const [connectionErrorsNotif, setConnectionErrorsNotif] = useState(true)
+  const [tokenExpirationNotif, setTokenExpirationNotif] = useState(true)
+  const [inAppNotifications, setInAppNotifications] = useState(true)
+  const [emailNotifications, setEmailNotifications] = useState(true)
+  const [slackNotifications, setSlackNotifications] = useState(false)
+
+  // API & Webhooks Settings - Switch states
+  const [developerMode, setDeveloperMode] = useState(false)
+
+  // Advanced Settings - Switch states
+  const [autoCleanupOldData, setAutoCleanupOldData] = useState(true)
+  const [verboseLogging, setVerboseLogging] = useState(false)
+  const [testMode, setTestMode] = useState(false)
+
+  // Security Settings Dialog - Switch states
+  const [require2FADialog, setRequire2FADialog] = useState(true)
+  const [ipWhitelistDialog, setIpWhitelistDialog] = useState(false)
+  const [auditLoggingDialog, setAuditLoggingDialog] = useState(true)
+
+  // Webhook Edit Dialog - Switch state
+  const [webhookEditActive, setWebhookEditActive] = useState(true)
 
   // Quick actions with dialog triggers
   const integrationsQuickActions = [
@@ -2087,17 +2162,39 @@ export default function ThirdPartyIntegrationsClient() {
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Auto-activate New Zaps</Label>
+                            <Label className="flex items-center gap-2">
+                              <Power className="h-4 w-4 text-green-500" />
+                              Auto-activate New Zaps
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Start zaps immediately after creation</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={autoActivateNewZaps}
+                            onCheckedChange={(checked) => {
+                              setAutoActivateNewZaps(checked)
+                              toast.success(checked ? 'Auto-activate enabled' : 'Auto-activate disabled', {
+                                description: checked ? 'New zaps will start automatically' : 'New zaps will remain in draft mode'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Duplicate Detection</Label>
+                            <Label className="flex items-center gap-2">
+                              <SkipForward className="h-4 w-4 text-blue-500" />
+                              Duplicate Detection
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Skip duplicate triggers</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={duplicateDetection}
+                            onCheckedChange={(checked) => {
+                              setDuplicateDetection(checked)
+                              toast.success(checked ? 'Duplicate detection enabled' : 'Duplicate detection disabled', {
+                                description: checked ? 'Duplicate triggers will be skipped' : 'All triggers will be processed'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2148,17 +2245,39 @@ export default function ThirdPartyIntegrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Compact View</Label>
+                            <Label className="flex items-center gap-2">
+                              <Minimize2 className="h-4 w-4 text-purple-500" />
+                              Compact View
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Show more zaps per page</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={compactView}
+                            onCheckedChange={(checked) => {
+                              setCompactView(checked)
+                              toast.success(checked ? 'Compact view enabled' : 'Standard view enabled', {
+                                description: checked ? 'Showing more zaps per page' : 'Showing standard zap layout'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Show Run Previews</Label>
+                            <Label className="flex items-center gap-2">
+                              <MonitorPlay className="h-4 w-4 text-indigo-500" />
+                              Show Run Previews
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Preview data in execution logs</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showRunPreviews}
+                            onCheckedChange={(checked) => {
+                              setShowRunPreviews(checked)
+                              toast.success(checked ? 'Run previews enabled' : 'Run previews disabled', {
+                                description: checked ? 'Data previews visible in logs' : 'Data previews hidden in logs'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2209,10 +2328,21 @@ export default function ThirdPartyIntegrationsClient() {
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Rate Limit Protection</Label>
+                            <Label className="flex items-center gap-2">
+                              <Gauge className="h-4 w-4 text-orange-500" />
+                              Rate Limit Protection
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Auto-throttle to prevent API limits</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={rateLimitProtection}
+                            onCheckedChange={(checked) => {
+                              setRateLimitProtection(checked)
+                              toast.success(checked ? 'Rate limit protection enabled' : 'Rate limit protection disabled', {
+                                description: checked ? 'API calls will be throttled automatically' : 'Warning: API rate limits may be exceeded'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2255,10 +2385,21 @@ export default function ThirdPartyIntegrationsClient() {
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Send Error Notifications</Label>
+                            <Label className="flex items-center gap-2">
+                              <MailWarning className="h-4 w-4 text-red-500" />
+                              Send Error Notifications
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Email on task failures</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sendErrorNotifications}
+                            onCheckedChange={(checked) => {
+                              setSendErrorNotifications(checked)
+                              toast.success(checked ? 'Error notifications enabled' : 'Error notifications disabled', {
+                                description: checked ? 'You will receive emails on task failures' : 'Error emails are now disabled'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2273,17 +2414,39 @@ export default function ThirdPartyIntegrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Parallel Execution</Label>
+                            <Label className="flex items-center gap-2">
+                              <Cpu className="h-4 w-4 text-green-500" />
+                              Parallel Execution
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Run multiple actions simultaneously</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={parallelExecution}
+                            onCheckedChange={(checked) => {
+                              setParallelExecution(checked)
+                              toast.success(checked ? 'Parallel execution enabled' : 'Sequential execution mode', {
+                                description: checked ? 'Actions will run simultaneously for faster performance' : 'Actions will run one at a time'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Smart Batching</Label>
+                            <Label className="flex items-center gap-2">
+                              <Boxes className="h-4 w-4 text-blue-500" />
+                              Smart Batching
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Group similar API calls</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={smartBatching}
+                            onCheckedChange={(checked) => {
+                              setSmartBatching(checked)
+                              toast.success(checked ? 'Smart batching enabled' : 'Smart batching disabled', {
+                                description: checked ? 'Similar API calls will be grouped for efficiency' : 'API calls will be made individually'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2305,17 +2468,39 @@ export default function ThirdPartyIntegrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Two-Factor Authentication</Label>
+                            <Label className="flex items-center gap-2">
+                              <ShieldCheck className="h-4 w-4 text-green-500" />
+                              Two-Factor Authentication
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for team members</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={twoFactorAuth}
+                            onCheckedChange={(checked) => {
+                              setTwoFactorAuth(checked)
+                              toast.success(checked ? '2FA requirement enabled' : '2FA requirement disabled', {
+                                description: checked ? 'All team members must use two-factor authentication' : 'Two-factor authentication is now optional'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>SSO Only</Label>
+                            <Label className="flex items-center gap-2">
+                              <Fingerprint className="h-4 w-4 text-purple-500" />
+                              SSO Only
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Require single sign-on</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ssoOnly}
+                            onCheckedChange={(checked) => {
+                              setSsoOnly(checked)
+                              toast.success(checked ? 'SSO requirement enabled' : 'SSO requirement disabled', {
+                                description: checked ? 'Only SSO login will be allowed' : 'Standard login is now available'
+                              })
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Session Timeout</Label>
@@ -2344,17 +2529,39 @@ export default function ThirdPartyIntegrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Encrypt Stored Credentials</Label>
+                            <Label className="flex items-center gap-2">
+                              <KeyRound className="h-4 w-4 text-amber-500" />
+                              Encrypt Stored Credentials
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">AES-256 encryption for API keys</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={encryptCredentials}
+                            onCheckedChange={(checked) => {
+                              setEncryptCredentials(checked)
+                              toast.success(checked ? 'Credential encryption enabled' : 'Credential encryption disabled', {
+                                description: checked ? 'All credentials will be encrypted with AES-256' : 'Warning: Credentials will be stored without encryption'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Auto-refresh OAuth Tokens</Label>
+                            <Label className="flex items-center gap-2">
+                              <RotateCcw className="h-4 w-4 text-blue-500" />
+                              Auto-refresh OAuth Tokens
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Automatically renew expiring tokens</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoRefreshOAuth}
+                            onCheckedChange={(checked) => {
+                              setAutoRefreshOAuth(checked)
+                              toast.success(checked ? 'Auto-refresh enabled' : 'Auto-refresh disabled', {
+                                description: checked ? 'OAuth tokens will be renewed automatically' : 'You will need to manually refresh tokens'
+                              })
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Credential Expiration Warning</Label>
@@ -2383,10 +2590,21 @@ export default function ThirdPartyIntegrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Audit Logging</Label>
+                            <Label className="flex items-center gap-2">
+                              <ScrollText className="h-4 w-4 text-indigo-500" />
+                              Audit Logging
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Log all configuration changes</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditLogging}
+                            onCheckedChange={(checked) => {
+                              setAuditLogging(checked)
+                              toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled', {
+                                description: checked ? 'All configuration changes will be logged' : 'Configuration changes will not be tracked'
+                              })
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Log Retention</Label>
@@ -2422,31 +2640,75 @@ export default function ThirdPartyIntegrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Task Failures</Label>
+                            <Label className="flex items-center gap-2">
+                              <XCircle className="h-4 w-4 text-red-500" />
+                              Task Failures
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Notify when zaps fail</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={taskFailuresNotif}
+                            onCheckedChange={(checked) => {
+                              setTaskFailuresNotif(checked)
+                              toast.success(checked ? 'Task failure alerts enabled' : 'Task failure alerts disabled', {
+                                description: checked ? 'You will be notified when zaps fail' : 'Task failure notifications are now off'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Auto-pause Events</Label>
+                            <Label className="flex items-center gap-2">
+                              <PauseCircle className="h-4 w-4 text-yellow-500" />
+                              Auto-pause Events
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Alert when zaps are auto-paused</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoPauseEventsNotif}
+                            onCheckedChange={(checked) => {
+                              setAutoPauseEventsNotif(checked)
+                              toast.success(checked ? 'Auto-pause alerts enabled' : 'Auto-pause alerts disabled', {
+                                description: checked ? 'You will be notified when zaps are auto-paused' : 'Auto-pause notifications are now off'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Rate Limit Warnings</Label>
+                            <Label className="flex items-center gap-2">
+                              <AlertOctagon className="h-4 w-4 text-orange-500" />
+                              Rate Limit Warnings
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Warn when approaching limits</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={rateLimitWarningsNotif}
+                            onCheckedChange={(checked) => {
+                              setRateLimitWarningsNotif(checked)
+                              toast.success(checked ? 'Rate limit warnings enabled' : 'Rate limit warnings disabled', {
+                                description: checked ? 'You will be warned when approaching API limits' : 'Rate limit warnings are now off'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Weekly Summary</Label>
+                            <Label className="flex items-center gap-2">
+                              <CalendarClock className="h-4 w-4 text-blue-500" />
+                              Weekly Summary
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Weekly digest of zap activity</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={weeklySummaryNotif}
+                            onCheckedChange={(checked) => {
+                              setWeeklySummaryNotif(checked)
+                              toast.success(checked ? 'Weekly summary enabled' : 'Weekly summary disabled', {
+                                description: checked ? 'You will receive a weekly activity digest' : 'Weekly summary emails are now off'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2461,17 +2723,39 @@ export default function ThirdPartyIntegrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Connection Errors</Label>
+                            <Label className="flex items-center gap-2">
+                              <WifiOff className="h-4 w-4 text-red-500" />
+                              Connection Errors
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Alert on disconnections</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={connectionErrorsNotif}
+                            onCheckedChange={(checked) => {
+                              setConnectionErrorsNotif(checked)
+                              toast.success(checked ? 'Connection error alerts enabled' : 'Connection error alerts disabled', {
+                                description: checked ? 'You will be alerted on disconnections' : 'Connection error notifications are now off'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Token Expiration</Label>
+                            <Label className="flex items-center gap-2">
+                              <Clock className="h-4 w-4 text-amber-500" />
+                              Token Expiration
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Remind before tokens expire</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={tokenExpirationNotif}
+                            onCheckedChange={(checked) => {
+                              setTokenExpirationNotif(checked)
+                              toast.success(checked ? 'Token expiration reminders enabled' : 'Token expiration reminders disabled', {
+                                description: checked ? 'You will be reminded before tokens expire' : 'Token expiration reminders are now off'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2490,7 +2774,15 @@ export default function ThirdPartyIntegrationsClient() {
                               <Label>In-App Notifications</Label>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={inAppNotifications}
+                            onCheckedChange={(checked) => {
+                              setInAppNotifications(checked)
+                              toast.success(checked ? 'In-app notifications enabled' : 'In-app notifications disabled', {
+                                description: checked ? 'You will receive notifications in the app' : 'In-app notifications are now off'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2501,7 +2793,15 @@ export default function ThirdPartyIntegrationsClient() {
                               <Label>Email Notifications</Label>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={emailNotifications}
+                            onCheckedChange={(checked) => {
+                              setEmailNotifications(checked)
+                              toast.success(checked ? 'Email notifications enabled' : 'Email notifications disabled', {
+                                description: checked ? 'You will receive email notifications' : 'Email notifications are now off'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2512,7 +2812,15 @@ export default function ThirdPartyIntegrationsClient() {
                               <Label>Slack Notifications</Label>
                             </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={slackNotifications}
+                            onCheckedChange={(checked) => {
+                              setSlackNotifications(checked)
+                              toast.success(checked ? 'Slack notifications enabled' : 'Slack notifications disabled', {
+                                description: checked ? 'You will receive Slack notifications' : 'Slack notifications are now off'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2583,7 +2891,7 @@ export default function ThirdPartyIntegrationsClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Button variant="ghost" size="sm" onClick={() => setShowWebhookTestDialog({ name: webhook.name, url: webhook.url })}>Test</Button>
-                                <Button variant="ghost" size="sm" onClick={() => setShowWebhookEditDialog(webhook)}>Edit</Button>
+                                <Button variant="ghost" size="sm" onClick={() => { setWebhookEditActive(webhook.active); setShowWebhookEditDialog(webhook); }}>Edit</Button>
                               </div>
                             </div>
                           ))}
@@ -2605,10 +2913,21 @@ export default function ThirdPartyIntegrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Developer Mode</Label>
+                            <Label className="flex items-center gap-2">
+                              <Terminal className="h-4 w-4 text-green-500" />
+                              Developer Mode
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Build custom integrations</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={developerMode}
+                            onCheckedChange={(checked) => {
+                              setDeveloperMode(checked)
+                              toast.success(checked ? 'Developer mode enabled' : 'Developer mode disabled', {
+                                description: checked ? 'Advanced features are now available' : 'Developer features are now hidden'
+                              })
+                            }}
+                          />
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => setShowCustomIntegrationDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
@@ -2648,10 +2967,21 @@ export default function ThirdPartyIntegrationsClient() {
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Auto-cleanup Old Data</Label>
+                            <Label className="flex items-center gap-2">
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                              Auto-cleanup Old Data
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Remove data past retention period</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoCleanupOldData}
+                            onCheckedChange={(checked) => {
+                              setAutoCleanupOldData(checked)
+                              toast.success(checked ? 'Auto-cleanup enabled' : 'Auto-cleanup disabled', {
+                                description: checked ? 'Old data will be automatically removed' : 'Data will be retained indefinitely'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center gap-4">
                           <Button variant="outline" className="flex items-center gap-2" onClick={() => setShowExportDataDialog(true)}>
@@ -2676,17 +3006,39 @@ export default function ThirdPartyIntegrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Verbose Logging</Label>
+                            <Label className="flex items-center gap-2">
+                              <Bug className="h-4 w-4 text-amber-500" />
+                              Verbose Logging
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Log detailed execution info</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={verboseLogging}
+                            onCheckedChange={(checked) => {
+                              setVerboseLogging(checked)
+                              toast.success(checked ? 'Verbose logging enabled' : 'Verbose logging disabled', {
+                                description: checked ? 'Detailed execution info will be logged' : 'Standard logging mode active'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Test Mode</Label>
+                            <Label className="flex items-center gap-2">
+                              <FlaskConical className="h-4 w-4 text-purple-500" />
+                              Test Mode
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Run zaps without side effects</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={testMode}
+                            onCheckedChange={(checked) => {
+                              setTestMode(checked)
+                              toast.success(checked ? 'Test mode enabled' : 'Test mode disabled', {
+                                description: checked ? 'Zaps will run without side effects' : 'Zaps will execute normally with real effects'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -3566,24 +3918,57 @@ export default function ThirdPartyIntegrationsClient() {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div>
-                <Label>Require 2FA</Label>
+                <Label className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-green-500" />
+                  Require 2FA
+                </Label>
                 <p className="text-sm text-gray-500">For all team members</p>
               </div>
-              <Switch defaultChecked />
+              <Switch
+                checked={require2FADialog}
+                onCheckedChange={(checked) => {
+                  setRequire2FADialog(checked)
+                  toast.success(checked ? '2FA requirement enabled' : '2FA requirement disabled', {
+                    description: checked ? 'All team members must use 2FA' : '2FA is now optional'
+                  })
+                }}
+              />
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div>
-                <Label>IP Whitelist</Label>
+                <Label className="flex items-center gap-2">
+                  <Network className="h-4 w-4 text-blue-500" />
+                  IP Whitelist
+                </Label>
                 <p className="text-sm text-gray-500">Restrict API access by IP</p>
               </div>
-              <Switch />
+              <Switch
+                checked={ipWhitelistDialog}
+                onCheckedChange={(checked) => {
+                  setIpWhitelistDialog(checked)
+                  toast.success(checked ? 'IP whitelist enabled' : 'IP whitelist disabled', {
+                    description: checked ? 'API access is restricted by IP' : 'API access from any IP is allowed'
+                  })
+                }}
+              />
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div>
-                <Label>Audit Logging</Label>
+                <Label className="flex items-center gap-2">
+                  <ScrollText className="h-4 w-4 text-indigo-500" />
+                  Audit Logging
+                </Label>
                 <p className="text-sm text-gray-500">Log all API requests</p>
               </div>
-              <Switch defaultChecked />
+              <Switch
+                checked={auditLoggingDialog}
+                onCheckedChange={(checked) => {
+                  setAuditLoggingDialog(checked)
+                  toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled', {
+                    description: checked ? 'All API requests will be logged' : 'API request logging is now off'
+                  })
+                }}
+              />
             </div>
             <div className="flex justify-end pt-4 border-t">
               <Button variant="outline" onClick={() => setShowSecuritySettingsDialog(false)}>Close</Button>
@@ -3885,16 +4270,33 @@ export default function ThirdPartyIntegrationsClient() {
           {showWebhookEditDialog && (
             <div className="space-y-4">
               <div>
-                <Label>Webhook Name</Label>
+                <Label className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-gray-500" />
+                  Webhook Name
+                </Label>
                 <Input defaultValue={showWebhookEditDialog.name} className="mt-1" />
               </div>
               <div>
-                <Label>URL</Label>
+                <Label className="flex items-center gap-2">
+                  <Link2 className="h-4 w-4 text-gray-500" />
+                  URL
+                </Label>
                 <Input defaultValue={showWebhookEditDialog.url} className="mt-1 font-mono" />
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <Label>Active</Label>
-                <Switch defaultChecked={showWebhookEditDialog.active} />
+                <Label className="flex items-center gap-2">
+                  <Power className="h-4 w-4 text-green-500" />
+                  Active
+                </Label>
+                <Switch
+                  checked={webhookEditActive}
+                  onCheckedChange={(checked) => {
+                    setWebhookEditActive(checked)
+                    toast.success(checked ? 'Webhook activated' : 'Webhook deactivated', {
+                      description: checked ? 'This webhook is now active' : 'This webhook is now inactive'
+                    })
+                  }}
+                />
               </div>
               <div className="flex items-center gap-3 pt-4 border-t">
                 <Button variant="outline" className="flex-1" onClick={() => setShowWebhookEditDialog(null)}>Cancel</Button>

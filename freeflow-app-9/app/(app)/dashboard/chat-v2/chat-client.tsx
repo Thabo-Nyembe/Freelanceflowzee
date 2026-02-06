@@ -50,7 +50,32 @@ import {
   Bookmark,
   Trash2,
   Edit,
-  Loader2
+  Loader2,
+  Eye,
+  Archive,
+  PanelRight,
+  Minimize2,
+  Keyboard,
+  CheckCheck,
+  FileText,
+  SpellCheck,
+  ClockIcon,
+  StickyNote,
+  ThumbsUp,
+  SendHorizontal,
+  Volume2,
+  VolumeX,
+  BellOff,
+  MessageCircle,
+  Bot,
+  Brain,
+  Tags,
+  AlertTriangle,
+  Shuffle,
+  Building2,
+  Lightbulb,
+  UserCog,
+  Power
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -233,6 +258,65 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   const [threadParentMessage, setThreadParentMessage] = useState<ChatMessage | null>(null)
   const [threadReplyContent, setThreadReplyContent] = useState('')
   const [userId, setUserId] = useState<string | null>(null)
+
+  // Switch state variables for settings
+  // General Settings
+  const [showUnreadCount, setShowUnreadCount] = useState(true)
+  const [autoArchiveResolved, setAutoArchiveResolved] = useState(false)
+  const [showCustomerPanelSetting, setShowCustomerPanelSetting] = useState(true)
+  const [compactMode, setCompactMode] = useState(false)
+
+  // Message Settings
+  const [showTypingIndicator, setShowTypingIndicator] = useState(true)
+  const [readReceipts, setReadReceipts] = useState(true)
+  const [messagePreviews, setMessagePreviews] = useState(true)
+  const [spellCheck, setSpellCheck] = useState(true)
+
+  // Conversation Management
+  const [autoCloseInactive, setAutoCloseInactive] = useState(false)
+  const [requireResolutionNotes, setRequireResolutionNotes] = useState(false)
+  const [conversationRating, setConversationRating] = useState(true)
+  const [transcriptEmails, setTranscriptEmails] = useState(true)
+
+  // Notification Preferences
+  const [desktopNotifications, setDesktopNotifications] = useState(true)
+  const [newMessageAlerts, setNewMessageAlerts] = useState(true)
+  const [assignmentAlerts, setAssignmentAlerts] = useState(true)
+  const [mentionAlerts, setMentionAlerts] = useState(true)
+  const [vipCustomerAlerts, setVipCustomerAlerts] = useState(true)
+
+  // Sound Settings
+  const [soundAlerts, setSoundAlerts] = useState(true)
+
+  // Do Not Disturb
+  const [enableDND, setEnableDND] = useState(false)
+
+  // Channels
+  const [enableChatWidget, setEnableChatWidget] = useState(true)
+  const [forwardEmailsToChat, setForwardEmailsToChat] = useState(true)
+
+  // Team - Assignment Rules
+  const [autoAssignConversations, setAutoAssignConversations] = useState(true)
+  const [enableBusinessHours, setEnableBusinessHours] = useState(true)
+
+  // AI Assistant
+  const [aiResponseSuggestions, setAiResponseSuggestions] = useState(true)
+  const [autoTagConversations, setAutoTagConversations] = useState(true)
+  const [sentimentAnalysis, setSentimentAnalysis] = useState(true)
+  const [priorityDetection, setPriorityDetection] = useState(true)
+
+  // Chatbot
+  const [enableChatbot, setEnableChatbot] = useState(false)
+  const [humanHandoff, setHumanHandoff] = useState(true)
+
+  // Automations
+  const [welcomeMessage, setWelcomeMessage] = useState(true)
+  const [awayMessage, setAwayMessage] = useState(true)
+  const [followUpReminders, setFollowUpReminders] = useState(true)
+  const [satisfactionSurvey, setSatisfactionSurvey] = useState(true)
+
+  // Member Active Status (for edit dialog)
+  const [memberActiveStatus, setMemberActiveStatus] = useState(true)
 
   // Fetch current user on mount
   useEffect(() => {
@@ -1094,33 +1178,69 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       </div>
 
                       <div className="space-y-4 pt-4">
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Show Unread Count</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Display unread badge in sidebar</div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Eye className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <p className="font-medium">Show Unread Count</p>
+                              <p className="text-sm text-gray-500">Display unread badge in sidebar</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showUnreadCount}
+                            onCheckedChange={(checked) => {
+                              setShowUnreadCount(checked)
+                              toast.success(checked ? 'Unread count enabled' : 'Unread count disabled')
+                            }}
+                          />
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Auto-archive Resolved</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Move closed conversations to archive after 30 days</div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Archive className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <p className="font-medium">Auto-archive Resolved</p>
+                              <p className="text-sm text-gray-500">Move closed conversations to archive after 30 days</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={autoArchiveResolved}
+                            onCheckedChange={(checked) => {
+                              setAutoArchiveResolved(checked)
+                              toast.success(checked ? 'Auto-archive enabled' : 'Auto-archive disabled')
+                            }}
+                          />
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Show Customer Panel</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Always display customer info sidebar</div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <PanelRight className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <p className="font-medium">Show Customer Panel</p>
+                              <p className="text-sm text-gray-500">Always display customer info sidebar</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showCustomerPanelSetting}
+                            onCheckedChange={(checked) => {
+                              setShowCustomerPanelSetting(checked)
+                              toast.success(checked ? 'Customer panel shown' : 'Customer panel hidden')
+                            }}
+                          />
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Compact Mode</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Show more conversations in a smaller space</div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Minimize2 className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <p className="font-medium">Compact Mode</p>
+                              <p className="text-sm text-gray-500">Show more conversations in a smaller space</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={compactMode}
+                            onCheckedChange={(checked) => {
+                              setCompactMode(checked)
+                              toast.success(checked ? 'Compact mode enabled' : 'Compact mode disabled')
+                            }}
+                          />
                         </div>
                       </div>
                     </CardContent>
@@ -1162,33 +1282,69 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       </div>
 
                       <div className="space-y-4 pt-4">
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Show Typing Indicator</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Show when you're typing to customers</div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Keyboard className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <p className="font-medium">Show Typing Indicator</p>
+                              <p className="text-sm text-gray-500">Show when you're typing to customers</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showTypingIndicator}
+                            onCheckedChange={(checked) => {
+                              setShowTypingIndicator(checked)
+                              toast.success(checked ? 'Typing indicator enabled' : 'Typing indicator disabled')
+                            }}
+                          />
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Read Receipts</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Show when messages have been read</div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <CheckCheck className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <p className="font-medium">Read Receipts</p>
+                              <p className="text-sm text-gray-500">Show when messages have been read</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={readReceipts}
+                            onCheckedChange={(checked) => {
+                              setReadReceipts(checked)
+                              toast.success(checked ? 'Read receipts enabled' : 'Read receipts disabled')
+                            }}
+                          />
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Message Previews</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Show message content in conversation list</div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <FileText className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <p className="font-medium">Message Previews</p>
+                              <p className="text-sm text-gray-500">Show message content in conversation list</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={messagePreviews}
+                            onCheckedChange={(checked) => {
+                              setMessagePreviews(checked)
+                              toast.success(checked ? 'Message previews enabled' : 'Message previews disabled')
+                            }}
+                          />
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Spell Check</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Highlight spelling errors in messages</div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <SpellCheck className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <p className="font-medium">Spell Check</p>
+                              <p className="text-sm text-gray-500">Highlight spelling errors in messages</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={spellCheck}
+                            onCheckedChange={(checked) => {
+                              setSpellCheck(checked)
+                              toast.success(checked ? 'Spell check enabled' : 'Spell check disabled')
+                            }}
+                          />
                         </div>
                       </div>
                     </CardContent>
@@ -1244,33 +1400,69 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Configure how conversations are handled</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Auto-Close Inactive</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Close conversations after 7 days of inactivity</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <ClockIcon className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Auto-Close Inactive</p>
+                            <p className="text-sm text-gray-500">Close conversations after 7 days of inactivity</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={autoCloseInactive}
+                          onCheckedChange={(checked) => {
+                            setAutoCloseInactive(checked)
+                            toast.success(checked ? 'Auto-close enabled' : 'Auto-close disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Require Resolution Notes</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Agents must add notes when closing</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <StickyNote className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Require Resolution Notes</p>
+                            <p className="text-sm text-gray-500">Agents must add notes when closing</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={requireResolutionNotes}
+                          onCheckedChange={(checked) => {
+                            setRequireResolutionNotes(checked)
+                            toast.success(checked ? 'Resolution notes required' : 'Resolution notes optional')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Conversation Rating</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Ask customers to rate conversations</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <ThumbsUp className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Conversation Rating</p>
+                            <p className="text-sm text-gray-500">Ask customers to rate conversations</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={conversationRating}
+                          onCheckedChange={(checked) => {
+                            setConversationRating(checked)
+                            toast.success(checked ? 'Conversation rating enabled' : 'Conversation rating disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Transcript Emails</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Send transcript after conversation ends</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <SendHorizontal className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Transcript Emails</p>
+                            <p className="text-sm text-gray-500">Send transcript after conversation ends</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={transcriptEmails}
+                          onCheckedChange={(checked) => {
+                            setTranscriptEmails(checked)
+                            toast.success(checked ? 'Transcript emails enabled' : 'Transcript emails disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1357,40 +1549,85 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Configure how you receive alerts</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Desktop Notifications</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Show browser notifications</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Bell className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Desktop Notifications</p>
+                            <p className="text-sm text-gray-500">Show browser notifications</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={desktopNotifications}
+                          onCheckedChange={(checked) => {
+                            setDesktopNotifications(checked)
+                            toast.success(checked ? 'Desktop notifications enabled' : 'Desktop notifications disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">New Message Alerts</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Notify on new customer messages</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <MessageCircle className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">New Message Alerts</p>
+                            <p className="text-sm text-gray-500">Notify on new customer messages</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={newMessageAlerts}
+                          onCheckedChange={(checked) => {
+                            setNewMessageAlerts(checked)
+                            toast.success(checked ? 'New message alerts enabled' : 'New message alerts disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Assignment Alerts</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Notify when assigned new conversations</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <UserPlus className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Assignment Alerts</p>
+                            <p className="text-sm text-gray-500">Notify when assigned new conversations</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={assignmentAlerts}
+                          onCheckedChange={(checked) => {
+                            setAssignmentAlerts(checked)
+                            toast.success(checked ? 'Assignment alerts enabled' : 'Assignment alerts disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Mention Alerts</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Notify when @mentioned by teammates</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <User className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Mention Alerts</p>
+                            <p className="text-sm text-gray-500">Notify when @mentioned by teammates</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={mentionAlerts}
+                          onCheckedChange={(checked) => {
+                            setMentionAlerts(checked)
+                            toast.success(checked ? 'Mention alerts enabled' : 'Mention alerts disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">VIP Customer Alerts</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Priority alerts for VIP customers</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Star className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">VIP Customer Alerts</p>
+                            <p className="text-sm text-gray-500">Priority alerts for VIP customers</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={vipCustomerAlerts}
+                          onCheckedChange={(checked) => {
+                            setVipCustomerAlerts(checked)
+                            toast.success(checked ? 'VIP alerts enabled' : 'VIP alerts disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1401,12 +1638,21 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Configure notification sounds</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Sound Alerts</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Play sound for new messages</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Volume2 className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Sound Alerts</p>
+                            <p className="text-sm text-gray-500">Play sound for new messages</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={soundAlerts}
+                          onCheckedChange={(checked) => {
+                            setSoundAlerts(checked)
+                            toast.success(checked ? 'Sound alerts enabled' : 'Sound alerts disabled')
+                          }}
+                        />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
@@ -1447,12 +1693,21 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Pause notifications during specific times</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Enable DND</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Temporarily pause all notifications</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <BellOff className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Enable DND</p>
+                            <p className="text-sm text-gray-500">Temporarily pause all notifications</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={enableDND}
+                          onCheckedChange={(checked) => {
+                            setEnableDND(checked)
+                            toast.success(checked ? 'Do Not Disturb enabled' : 'Do Not Disturb disabled')
+                          }}
+                        />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
@@ -1481,12 +1736,21 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Configure your website chat widget</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Enable Chat Widget</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Show widget on your website</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <MessageCircle className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Enable Chat Widget</p>
+                            <p className="text-sm text-gray-500">Show widget on your website</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={enableChatWidget}
+                          onCheckedChange={(checked) => {
+                            setEnableChatWidget(checked)
+                            toast.success(checked ? 'Chat widget enabled' : 'Chat widget disabled')
+                          }}
+                        />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
@@ -1537,12 +1801,21 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Configure email-to-chat conversion</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Forward Emails to Chat</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Convert support emails to conversations</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Mail className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Forward Emails to Chat</p>
+                            <p className="text-sm text-gray-500">Convert support emails to conversations</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={forwardEmailsToChat}
+                          onCheckedChange={(checked) => {
+                            setForwardEmailsToChat(checked)
+                            toast.success(checked ? 'Email forwarding enabled' : 'Email forwarding disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label>Support Email Address</Label>
@@ -1697,12 +1970,21 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Configure how conversations are assigned</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Auto-assign Conversations</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Automatically assign new chats to available agents</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Shuffle className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Auto-assign Conversations</p>
+                            <p className="text-sm text-gray-500">Automatically assign new chats to available agents</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoAssignConversations}
+                          onCheckedChange={(checked) => {
+                            setAutoAssignConversations(checked)
+                            toast.success(checked ? 'Auto-assignment enabled' : 'Auto-assignment disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label>Assignment Method</Label>
@@ -1741,12 +2023,21 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Set when your team is available</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Enable Business Hours</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Show availability status to customers</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Building2 className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Enable Business Hours</p>
+                            <p className="text-sm text-gray-500">Show availability status to customers</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={enableBusinessHours}
+                          onCheckedChange={(checked) => {
+                            setEnableBusinessHours(checked)
+                            toast.success(checked ? 'Business hours enabled' : 'Business hours disabled')
+                          }}
+                        />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
@@ -1790,33 +2081,69 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Configure AI-powered features</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">AI Response Suggestions</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Show AI-powered response recommendations</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Lightbulb className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">AI Response Suggestions</p>
+                            <p className="text-sm text-gray-500">Show AI-powered response recommendations</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={aiResponseSuggestions}
+                          onCheckedChange={(checked) => {
+                            setAiResponseSuggestions(checked)
+                            toast.success(checked ? 'AI suggestions enabled' : 'AI suggestions disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Auto-tag Conversations</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">AI automatically adds relevant tags</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Tags className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Auto-tag Conversations</p>
+                            <p className="text-sm text-gray-500">AI automatically adds relevant tags</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoTagConversations}
+                          onCheckedChange={(checked) => {
+                            setAutoTagConversations(checked)
+                            toast.success(checked ? 'Auto-tagging enabled' : 'Auto-tagging disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Sentiment Analysis</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Analyze customer sentiment in messages</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Brain className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Sentiment Analysis</p>
+                            <p className="text-sm text-gray-500">Analyze customer sentiment in messages</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={sentimentAnalysis}
+                          onCheckedChange={(checked) => {
+                            setSentimentAnalysis(checked)
+                            toast.success(checked ? 'Sentiment analysis enabled' : 'Sentiment analysis disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Priority Detection</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">AI detects urgent conversations</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <AlertTriangle className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Priority Detection</p>
+                            <p className="text-sm text-gray-500">AI detects urgent conversations</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={priorityDetection}
+                          onCheckedChange={(checked) => {
+                            setPriorityDetection(checked)
+                            toast.success(checked ? 'Priority detection enabled' : 'Priority detection disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label>Confidence Threshold</Label>
@@ -1840,19 +2167,37 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Configure automated responses</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Enable Chatbot</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Handle common questions automatically</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Bot className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Enable Chatbot</p>
+                            <p className="text-sm text-gray-500">Handle common questions automatically</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={enableChatbot}
+                          onCheckedChange={(checked) => {
+                            setEnableChatbot(checked)
+                            toast.success(checked ? 'Chatbot enabled' : 'Chatbot disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Human Handoff</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Transfer to agent when bot can't help</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <UserCog className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Human Handoff</p>
+                            <p className="text-sm text-gray-500">Transfer to agent when bot can't help</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={humanHandoff}
+                          onCheckedChange={(checked) => {
+                            setHumanHandoff(checked)
+                            toast.success(checked ? 'Human handoff enabled' : 'Human handoff disabled')
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label>Bot Personality</Label>
@@ -1876,33 +2221,69 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Set up automatic actions</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Welcome Message</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Send greeting to new visitors</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <MessageSquare className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Welcome Message</p>
+                            <p className="text-sm text-gray-500">Send greeting to new visitors</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={welcomeMessage}
+                          onCheckedChange={(checked) => {
+                            setWelcomeMessage(checked)
+                            toast.success(checked ? 'Welcome message enabled' : 'Welcome message disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Away Message</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Auto-reply when team is offline</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Clock className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Away Message</p>
+                            <p className="text-sm text-gray-500">Auto-reply when team is offline</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={awayMessage}
+                          onCheckedChange={(checked) => {
+                            setAwayMessage(checked)
+                            toast.success(checked ? 'Away message enabled' : 'Away message disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Follow-up Reminders</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Remind about unanswered conversations</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Bell className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Follow-up Reminders</p>
+                            <p className="text-sm text-gray-500">Remind about unanswered conversations</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={followUpReminders}
+                          onCheckedChange={(checked) => {
+                            setFollowUpReminders(checked)
+                            toast.success(checked ? 'Follow-up reminders enabled' : 'Follow-up reminders disabled')
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">Satisfaction Survey</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Send survey after conversation ends</div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Star className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">Satisfaction Survey</p>
+                            <p className="text-sm text-gray-500">Send survey after conversation ends</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={satisfactionSurvey}
+                          onCheckedChange={(checked) => {
+                            setSatisfactionSurvey(checked)
+                            toast.success(checked ? 'Satisfaction survey enabled' : 'Satisfaction survey disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -2531,15 +2912,15 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
               {/* General Settings */}
               <TabsContent value="general" className="space-y-4">
                 <Card><CardHeader><CardTitle>Inbox Preferences</CardTitle></CardHeader><CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Show Unread Count</p><p className="text-sm text-gray-500">Display unread badge in sidebar</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Auto-archive Resolved</p><p className="text-sm text-gray-500">Move closed chats to archive</p></div><Switch /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Show Customer Panel</p><p className="text-sm text-gray-500">Always show customer info sidebar</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Eye className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Show Unread Count</p><p className="text-sm text-gray-500">Display unread badge in sidebar</p></div></div><Switch checked={showUnreadCount} onCheckedChange={(checked) => { setShowUnreadCount(checked); toast.success(checked ? 'Unread count enabled' : 'Unread count disabled'); }} /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Archive className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Auto-archive Resolved</p><p className="text-sm text-gray-500">Move closed chats to archive</p></div></div><Switch checked={autoArchiveResolved} onCheckedChange={(checked) => { setAutoArchiveResolved(checked); toast.success(checked ? 'Auto-archive enabled' : 'Auto-archive disabled'); }} /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><PanelRight className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Show Customer Panel</p><p className="text-sm text-gray-500">Always show customer info sidebar</p></div></div><Switch checked={showCustomerPanelSetting} onCheckedChange={(checked) => { setShowCustomerPanelSetting(checked); toast.success(checked ? 'Customer panel shown' : 'Customer panel hidden'); }} /></div>
                   <div><Label>Default Inbox View</Label><Select defaultValue="all"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All Conversations</SelectItem><SelectItem value="mine">My Conversations</SelectItem><SelectItem value="unassigned">Unassigned</SelectItem></SelectContent></Select></div>
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Message Settings</CardTitle></CardHeader><CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Show Typing Indicator</p><p className="text-sm text-gray-500">Show when you're typing</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Read Receipts</p><p className="text-sm text-gray-500">Show when messages are read</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Message Previews</p><p className="text-sm text-gray-500">Show message content in list</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Keyboard className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Show Typing Indicator</p><p className="text-sm text-gray-500">Show when you're typing</p></div></div><Switch checked={showTypingIndicator} onCheckedChange={(checked) => { setShowTypingIndicator(checked); toast.success(checked ? 'Typing indicator enabled' : 'Typing indicator disabled'); }} /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><CheckCheck className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Read Receipts</p><p className="text-sm text-gray-500">Show when messages are read</p></div></div><Switch checked={readReceipts} onCheckedChange={(checked) => { setReadReceipts(checked); toast.success(checked ? 'Read receipts enabled' : 'Read receipts disabled'); }} /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><FileText className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Message Previews</p><p className="text-sm text-gray-500">Show message content in list</p></div></div><Switch checked={messagePreviews} onCheckedChange={(checked) => { setMessagePreviews(checked); toast.success(checked ? 'Message previews enabled' : 'Message previews disabled'); }} /></div>
                   <div><Label>Send on Enter</Label><Select defaultValue="enter"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="enter">Enter to send</SelectItem><SelectItem value="shift-enter">Shift+Enter to send</SelectItem></SelectContent></Select></div>
                 </CardContent></Card>
               </TabsContent>
@@ -2547,16 +2928,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
               {/* Notifications Settings */}
               <TabsContent value="notifications" className="space-y-4">
                 <Card><CardHeader><CardTitle>Desktop Notifications</CardTitle></CardHeader><CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Enable Notifications</p><p className="text-sm text-gray-500">Show desktop notifications</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">New Messages</p><p className="text-sm text-gray-500">Notify on new messages</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Mentions Only</p><p className="text-sm text-gray-500">Only when @mentioned</p></div><Switch /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Bell className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Enable Notifications</p><p className="text-sm text-gray-500">Show desktop notifications</p></div></div><Switch checked={desktopNotifications} onCheckedChange={(checked) => { setDesktopNotifications(checked); toast.success(checked ? 'Desktop notifications enabled' : 'Desktop notifications disabled'); }} /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><MessageCircle className="h-5 w-5 text-gray-600" /><div><p className="font-medium">New Messages</p><p className="text-sm text-gray-500">Notify on new messages</p></div></div><Switch checked={newMessageAlerts} onCheckedChange={(checked) => { setNewMessageAlerts(checked); toast.success(checked ? 'New message alerts enabled' : 'New message alerts disabled'); }} /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><User className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Mentions Only</p><p className="text-sm text-gray-500">Only when @mentioned</p></div></div><Switch checked={mentionAlerts} onCheckedChange={(checked) => { setMentionAlerts(checked); toast.success(checked ? 'Mention alerts enabled' : 'Mention alerts disabled'); }} /></div>
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Sound Settings</CardTitle></CardHeader><CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Sound Alerts</p><p className="text-sm text-gray-500">Play sound for messages</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Volume2 className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Sound Alerts</p><p className="text-sm text-gray-500">Play sound for messages</p></div></div><Switch checked={soundAlerts} onCheckedChange={(checked) => { setSoundAlerts(checked); toast.success(checked ? 'Sound alerts enabled' : 'Sound alerts disabled'); }} /></div>
                   <div><Label>Notification Sound</Label><Select defaultValue="chime"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="chime">Chime</SelectItem><SelectItem value="pop">Pop</SelectItem><SelectItem value="ding">Ding</SelectItem><SelectItem value="none">None</SelectItem></SelectContent></Select></div>
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Do Not Disturb</CardTitle></CardHeader><CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Enable DND</p><p className="text-sm text-gray-500">Pause all notifications</p></div><Switch /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><BellOff className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Enable DND</p><p className="text-sm text-gray-500">Pause all notifications</p></div></div><Switch checked={enableDND} onCheckedChange={(checked) => { setEnableDND(checked); toast.success(checked ? 'Do Not Disturb enabled' : 'Do Not Disturb disabled'); }} /></div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div><Label>Start Time</Label><Input type="time" defaultValue="18:00" className="mt-1" /></div>
                     <div><Label>End Time</Label><Input type="time" defaultValue="09:00" className="mt-1" /></div>
@@ -2599,12 +2980,12 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
               {/* Channels Settings */}
               <TabsContent value="channels" className="space-y-4">
                 <Card><CardHeader><CardTitle>Chat Widget</CardTitle></CardHeader><CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Enable Chat Widget</p><p className="text-sm text-gray-500">Show widget on website</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><MessageCircle className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Enable Chat Widget</p><p className="text-sm text-gray-500">Show widget on website</p></div></div><Switch checked={enableChatWidget} onCheckedChange={(checked) => { setEnableChatWidget(checked); toast.success(checked ? 'Chat widget enabled' : 'Chat widget disabled'); }} /></div>
                   <div><Label>Widget Position</Label><Select defaultValue="right"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="left">Bottom Left</SelectItem><SelectItem value="right">Bottom Right</SelectItem></SelectContent></Select></div>
                   <div><Label>Widget Color</Label><div className="flex gap-2 mt-2">{['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'].map(c => (<button key={c} onClick={() => handleWidgetColorChange(c)} className={`w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform ${widgetColor === c ? 'border-gray-900 ring-2 ring-offset-2' : ''}`} style={{ backgroundColor: c }} />))}</div></div>
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Email Channel</CardTitle></CardHeader><CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Forward to Chat</p><p className="text-sm text-gray-500">Convert emails to conversations</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Mail className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Forward to Chat</p><p className="text-sm text-gray-500">Convert emails to conversations</p></div></div><Switch checked={forwardEmailsToChat} onCheckedChange={(checked) => { setForwardEmailsToChat(checked); toast.success(checked ? 'Email forwarding enabled' : 'Email forwarding disabled'); }} /></div>
                   <div><Label>Email Address</Label><Input defaultValue="support@company.com" className="mt-1" /></div>
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Social Channels</CardTitle></CardHeader><CardContent className="space-y-4">
@@ -2657,7 +3038,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                   ))}
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Assignment Rules</CardTitle></CardHeader><CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Auto-assign</p><p className="text-sm text-gray-500">Automatically assign new chats</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Shuffle className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Auto-assign</p><p className="text-sm text-gray-500">Automatically assign new chats</p></div></div><Switch checked={autoAssignConversations} onCheckedChange={(checked) => { setAutoAssignConversations(checked); toast.success(checked ? 'Auto-assignment enabled' : 'Auto-assignment disabled'); }} /></div>
                   <div><Label>Assignment Method</Label><Select defaultValue="round-robin"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="round-robin">Round Robin</SelectItem><SelectItem value="load-balanced">Load Balanced</SelectItem><SelectItem value="random">Random</SelectItem></SelectContent></Select></div>
                 </CardContent></Card>
               </TabsContent>
@@ -2665,19 +3046,19 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
               {/* AI & Automation Settings */}
               <TabsContent value="ai" className="space-y-4">
                 <Card><CardHeader><CardTitle>AI Assistant</CardTitle></CardHeader><CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Enable AI Suggestions</p><p className="text-sm text-gray-500">Show AI-powered response suggestions</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Auto-tag Conversations</p><p className="text-sm text-gray-500">AI automatically adds relevant tags</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Sentiment Analysis</p><p className="text-sm text-gray-500">Analyze customer sentiment</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Lightbulb className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Enable AI Suggestions</p><p className="text-sm text-gray-500">Show AI-powered response suggestions</p></div></div><Switch checked={aiResponseSuggestions} onCheckedChange={(checked) => { setAiResponseSuggestions(checked); toast.success(checked ? 'AI suggestions enabled' : 'AI suggestions disabled'); }} /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Tags className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Auto-tag Conversations</p><p className="text-sm text-gray-500">AI automatically adds relevant tags</p></div></div><Switch checked={autoTagConversations} onCheckedChange={(checked) => { setAutoTagConversations(checked); toast.success(checked ? 'Auto-tagging enabled' : 'Auto-tagging disabled'); }} /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Brain className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Sentiment Analysis</p><p className="text-sm text-gray-500">Analyze customer sentiment</p></div></div><Switch checked={sentimentAnalysis} onCheckedChange={(checked) => { setSentimentAnalysis(checked); toast.success(checked ? 'Sentiment analysis enabled' : 'Sentiment analysis disabled'); }} /></div>
                   <div><Label>Confidence Threshold</Label><Select defaultValue="80"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="60">60% - Show more suggestions</SelectItem><SelectItem value="80">80% - Balanced</SelectItem><SelectItem value="95">95% - High confidence only</SelectItem></SelectContent></Select></div>
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Automations</CardTitle></CardHeader><CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Welcome Message</p><p className="text-sm text-gray-500">Send greeting to new visitors</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Away Message</p><p className="text-sm text-gray-500">Auto-reply when offline</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Business Hours</p><p className="text-sm text-gray-500">Show availability status</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><MessageSquare className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Welcome Message</p><p className="text-sm text-gray-500">Send greeting to new visitors</p></div></div><Switch checked={welcomeMessage} onCheckedChange={(checked) => { setWelcomeMessage(checked); toast.success(checked ? 'Welcome message enabled' : 'Welcome message disabled'); }} /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Clock className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Away Message</p><p className="text-sm text-gray-500">Auto-reply when offline</p></div></div><Switch checked={awayMessage} onCheckedChange={(checked) => { setAwayMessage(checked); toast.success(checked ? 'Away message enabled' : 'Away message disabled'); }} /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Building2 className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Business Hours</p><p className="text-sm text-gray-500">Show availability status</p></div></div><Switch checked={enableBusinessHours} onCheckedChange={(checked) => { setEnableBusinessHours(checked); toast.success(checked ? 'Business hours enabled' : 'Business hours disabled'); }} /></div>
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Chatbot</CardTitle></CardHeader><CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Enable Chatbot</p><p className="text-sm text-gray-500">Handle common questions automatically</p></div><Switch /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Human Handoff</p><p className="text-sm text-gray-500">Transfer to agent when needed</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><Bot className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Enable Chatbot</p><p className="text-sm text-gray-500">Handle common questions automatically</p></div></div><Switch checked={enableChatbot} onCheckedChange={(checked) => { setEnableChatbot(checked); toast.success(checked ? 'Chatbot enabled' : 'Chatbot disabled'); }} /></div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div className="flex items-center gap-3"><UserCog className="h-5 w-5 text-gray-600" /><div><p className="font-medium">Human Handoff</p><p className="text-sm text-gray-500">Transfer to agent when needed</p></div></div><Switch checked={humanHandoff} onCheckedChange={(checked) => { setHumanHandoff(checked); toast.success(checked ? 'Human handoff enabled' : 'Human handoff disabled'); }} /></div>
                   <div><Label>Bot Personality</Label><Select defaultValue="friendly"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="friendly">Friendly & Casual</SelectItem><SelectItem value="professional">Professional</SelectItem><SelectItem value="formal">Formal</SelectItem></SelectContent></Select></div>
                 </CardContent></Card>
               </TabsContent>
@@ -2861,12 +3242,21 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Active Status</p>
-                  <p className="text-sm text-gray-500">Member can receive assignments</p>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Power className="h-5 w-5 text-gray-600" />
+                  <div>
+                    <p className="font-medium">Active Status</p>
+                    <p className="text-sm text-gray-500">Member can receive assignments</p>
+                  </div>
                 </div>
-                <Switch defaultChecked={selectedMember.status !== 'offline'} />
+                <Switch
+                  checked={memberActiveStatus}
+                  onCheckedChange={(checked) => {
+                    setMemberActiveStatus(checked)
+                    toast.success(checked ? 'Member activated' : 'Member deactivated')
+                  }}
+                />
               </div>
             </div>
           )}

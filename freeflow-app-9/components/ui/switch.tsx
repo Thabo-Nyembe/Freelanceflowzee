@@ -11,7 +11,14 @@ const Switch = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SwitchPrimitives.Root
     className={cn(
-      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+      "peer inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
+      // Enhanced visibility - stronger colors and shadows
+      "data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 data-[state=checked]:shadow-md",
+      "data-[state=unchecked]:bg-gray-300 data-[state=unchecked]:border-gray-300",
+      "dark:data-[state=checked]:bg-blue-500 dark:data-[state=checked]:border-blue-500",
+      "dark:data-[state=unchecked]:bg-gray-700 dark:data-[state=unchecked]:border-gray-700",
+      "hover:data-[state=checked]:bg-blue-700 hover:data-[state=unchecked]:bg-gray-400",
+      "dark:hover:data-[state=checked]:bg-blue-600 dark:hover:data-[state=unchecked]:bg-gray-600",
       className
     )}
     {...props}
@@ -19,7 +26,10 @@ const Switch = React.forwardRef<
   >
     <SwitchPrimitives.Thumb
       className={cn(
-        "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
+        "pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform duration-200",
+        "data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0",
+        // Enhanced thumb with subtle gradient for depth
+        "data-[state=checked]:shadow-xl"
       )}
     />
   </SwitchPrimitives.Root>

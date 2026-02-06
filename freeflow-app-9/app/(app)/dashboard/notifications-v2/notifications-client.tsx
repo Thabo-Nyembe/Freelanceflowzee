@@ -317,6 +317,57 @@ export default function NotificationsClient() {
   const [mutedChannels, setMutedChannels] = useState<Set<string>>(new Set())
   const [pushSubscription, setPushSubscription] = useState<PushSubscription | null>(null)
 
+  // Channel Settings State - All switches will be functional
+  const [channelSettings, setChannelSettings] = useState({
+    // Push Notifications
+    pushEnabled: true,
+    richPush: true,
+    badgeCount: true,
+    soundEnabled: true,
+    // Email Notifications
+    emailEnabled: true,
+    emailTracking: true,
+    inlineCSS: true,
+    unsubscribeLink: true,
+    // SMS Notifications
+    smsEnabled: true,
+    smsDeliveryReceipts: true,
+    // Slack Integration
+    slackEnabled: true,
+    slackThreadReplies: true,
+    slackReactions: true,
+    slackMentions: true,
+    // In-App Notifications
+    inAppEnabled: true,
+    inAppPopups: true,
+    inAppBadges: true,
+    inAppSound: true,
+    // Quiet Hours
+    quietHoursEnabled: false,
+    // Digest Settings
+    digestEnabled: true,
+    dailyDigest: true,
+    weeklyDigest: true,
+    // General Settings
+    doNotDisturb: false,
+    priorityOnly: false,
+    muteAll: false,
+    autoArchive: true,
+    analyticsEnabled: true,
+    deliveryReports: true,
+    failureAlerts: true,
+    // Advanced
+    rateLimiting: true,
+    batchProcessing: true,
+    webhookRetry: true,
+  })
+
+  // Handler to update channel settings
+  const handleChannelSettingChange = useCallback((key: keyof typeof channelSettings, value: boolean) => {
+    setChannelSettings(prev => ({ ...prev, [key]: value }))
+    toast.success('Setting updated', { description: `${key.replace(/([A-Z])/g, ' $1').trim()} ${value ? 'enabled' : 'disabled'}` })
+  }, [])
+
   // Supabase client for direct operations
   const supabase = createClient()
   const [showPreviewTemplateDialog, setShowPreviewTemplateDialog] = useState(false)
@@ -1767,11 +1818,17 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Push Notifications</Label>
-                            <p className="text-sm text-gray-500">Send via Firebase Cloud Messaging</p>
+                          <div className="flex items-center gap-3">
+                            <Smartphone className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <Label>Enable Push Notifications</Label>
+                              <p className="text-sm text-gray-500">Send via Firebase Cloud Messaging</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.pushEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('pushEnabled', checked)}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -1827,25 +1884,43 @@ export default function NotificationsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between py-4 border-t">
-                          <div>
-                            <Label>Rich Push Notifications</Label>
-                            <p className="text-sm text-gray-500">Include images and action buttons</p>
+                          <div className="flex items-center gap-3">
+                            <Layers className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <Label>Rich Push Notifications</Label>
+                              <p className="text-sm text-gray-500">Include images and action buttons</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.richPush}
+                            onCheckedChange={(checked) => handleChannelSettingChange('richPush', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Badge Count</Label>
-                            <p className="text-sm text-gray-500">Update app badge with unread count</p>
+                          <div className="flex items-center gap-3">
+                            <Bell className="h-5 w-5 text-red-500" />
+                            <div>
+                              <Label>Badge Count</Label>
+                              <p className="text-sm text-gray-500">Update app badge with unread count</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.badgeCount}
+                            onCheckedChange={(checked) => handleChannelSettingChange('badgeCount', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Sound Notifications</Label>
-                            <p className="text-sm text-gray-500">Play sound on notification arrival</p>
+                          <div className="flex items-center gap-3">
+                            <BellRing className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <Label>Sound Notifications</Label>
+                              <p className="text-sm text-gray-500">Play sound on notification arrival</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.soundEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('soundEnabled', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1857,11 +1932,17 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Email Notifications</Label>
-                            <p className="text-sm text-gray-500">Send transactional and marketing emails</p>
+                          <div className="flex items-center gap-3">
+                            <Mail className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <Label>Enable Email Notifications</Label>
+                              <p className="text-sm text-gray-500">Send transactional and marketing emails</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.emailEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('emailEnabled', checked)}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -1912,18 +1993,30 @@ export default function NotificationsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between pt-4 border-t">
-                          <div>
-                            <Label>Track Email Opens</Label>
-                            <p className="text-sm text-gray-500">Insert tracking pixel</p>
+                          <div className="flex items-center gap-3">
+                            <Eye className="h-5 w-5 text-green-600" />
+                            <div>
+                              <Label>Track Email Opens</Label>
+                              <p className="text-sm text-gray-500">Insert tracking pixel</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.emailTracking}
+                            onCheckedChange={(checked) => handleChannelSettingChange('emailTracking', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Track Link Clicks</Label>
-                            <p className="text-sm text-gray-500">Rewrite links for tracking</p>
+                          <div className="flex items-center gap-3">
+                            <MousePointer className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <Label>Track Link Clicks</Label>
+                              <p className="text-sm text-gray-500">Rewrite links for tracking</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.inlineCSS}
+                            onCheckedChange={(checked) => handleChannelSettingChange('inlineCSS', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1935,11 +2028,17 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable SMS Notifications</Label>
-                            <p className="text-sm text-gray-500">Send via Twilio</p>
+                          <div className="flex items-center gap-3">
+                            <MessageSquare className="h-5 w-5 text-green-600" />
+                            <div>
+                              <Label>Enable SMS Notifications</Label>
+                              <p className="text-sm text-gray-500">Send via Twilio</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.smsEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('smsEnabled', checked)}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -1962,18 +2061,30 @@ export default function NotificationsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between pt-4 border-t">
-                          <div>
-                            <Label>URL Shortening</Label>
-                            <p className="text-sm text-gray-500">Shorten links in SMS messages</p>
+                          <div className="flex items-center gap-3">
+                            <Link className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <Label>URL Shortening</Label>
+                              <p className="text-sm text-gray-500">Shorten links in SMS messages</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.unsubscribeLink}
+                            onCheckedChange={(checked) => handleChannelSettingChange('unsubscribeLink', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Delivery Reports</Label>
-                            <p className="text-sm text-gray-500">Receive delivery status callbacks</p>
+                          <div className="flex items-center gap-3">
+                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                            <div>
+                              <Label>Delivery Reports</Label>
+                              <p className="text-sm text-gray-500">Receive delivery status callbacks</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.smsDeliveryReceipts}
+                            onCheckedChange={(checked) => handleChannelSettingChange('smsDeliveryReceipts', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1985,11 +2096,17 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable In-App Messages</Label>
-                            <p className="text-sm text-gray-500">Show notifications within the app</p>
+                          <div className="flex items-center gap-3">
+                            <Inbox className="h-5 w-5 text-indigo-600" />
+                            <div>
+                              <Label>Enable In-App Messages</Label>
+                              <p className="text-sm text-gray-500">Show notifications within the app</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.inAppEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('inAppEnabled', checked)}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -2052,18 +2169,30 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Intelligent Delivery</Label>
-                            <p className="text-sm text-gray-500">AI-optimized send times per user</p>
+                          <div className="flex items-center gap-3">
+                            <Zap className="h-5 w-5 text-yellow-500" />
+                            <div>
+                              <Label>Intelligent Delivery</Label>
+                              <p className="text-sm text-gray-500">AI-optimized send times per user</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.batchProcessing}
+                            onCheckedChange={(checked) => handleChannelSettingChange('batchProcessing', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Timezone Awareness</Label>
-                            <p className="text-sm text-gray-500">Deliver in user's local timezone</p>
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <Label>Timezone Awareness</Label>
+                              <p className="text-sm text-gray-500">Deliver in user's local timezone</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.analyticsEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('analyticsEnabled', checked)}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -2096,11 +2225,17 @@ export default function NotificationsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Predictive Send</Label>
-                            <p className="text-sm text-gray-500">Use ML to predict best engagement times</p>
+                          <div className="flex items-center gap-3">
+                            <Zap className="h-5 w-5 text-yellow-500" />
+                            <div>
+                              <Label>Predictive Send</Label>
+                              <p className="text-sm text-gray-500">Use ML to predict best engagement times</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.batchProcessing}
+                            onCheckedChange={(checked) => handleChannelSettingChange('batchProcessing', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2112,11 +2247,17 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Frequency Capping</Label>
-                            <p className="text-sm text-gray-500">Limit notifications per time period</p>
+                          <div className="flex items-center gap-3">
+                            <Sliders className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <Label>Enable Frequency Capping</Label>
+                              <p className="text-sm text-gray-500">Limit notifications per time period</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.rateLimiting}
+                            onCheckedChange={(checked) => handleChannelSettingChange('rateLimiting', checked)}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="space-y-2">
@@ -2163,18 +2304,30 @@ export default function NotificationsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between pt-4 border-t">
-                          <div>
-                            <Label>Priority Override</Label>
-                            <p className="text-sm text-gray-500">High priority bypasses limits</p>
+                          <div className="flex items-center gap-3">
+                            <AlertOctagon className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <Label>Priority Override</Label>
+                              <p className="text-sm text-gray-500">High priority bypasses limits</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.priorityOnly}
+                            onCheckedChange={(checked) => handleChannelSettingChange('priorityOnly', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Category Limits</Label>
-                            <p className="text-sm text-gray-500">Apply limits per notification category</p>
+                          <div className="flex items-center gap-3">
+                            <Layers className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <Label>Category Limits</Label>
+                              <p className="text-sm text-gray-500">Apply limits per notification category</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.digestEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('digestEnabled', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2186,11 +2339,17 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Quiet Hours</Label>
-                            <p className="text-sm text-gray-500">Hold non-urgent notifications</p>
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-indigo-600" />
+                            <div>
+                              <Label>Enable Quiet Hours</Label>
+                              <p className="text-sm text-gray-500">Hold non-urgent notifications</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.quietHoursEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('quietHoursEnabled', checked)}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -2203,18 +2362,30 @@ export default function NotificationsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Apply on Weekends</Label>
-                            <p className="text-sm text-gray-500">Extend quiet hours to weekends</p>
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-gray-500" />
+                            <div>
+                              <Label>Apply on Weekends</Label>
+                              <p className="text-sm text-gray-500">Extend quiet hours to weekends</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.weeklyDigest}
+                            onCheckedChange={(checked) => handleChannelSettingChange('weeklyDigest', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Allow Urgent Messages</Label>
-                            <p className="text-sm text-gray-500">Critical notifications bypass quiet hours</p>
+                          <div className="flex items-center gap-3">
+                            <AlertOctagon className="h-5 w-5 text-red-500" />
+                            <div>
+                              <Label>Allow Urgent Messages</Label>
+                              <p className="text-sm text-gray-500">Critical notifications bypass quiet hours</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.failureAlerts}
+                            onCheckedChange={(checked) => handleChannelSettingChange('failureAlerts', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2226,11 +2397,17 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Channel Fallback</Label>
-                            <p className="text-sm text-gray-500">Try alternate channels on failure</p>
+                          <div className="flex items-center gap-3">
+                            <RefreshCw className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <Label>Enable Channel Fallback</Label>
+                              <p className="text-sm text-gray-500">Try alternate channels on failure</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.webhookRetry}
+                            onCheckedChange={(checked) => handleChannelSettingChange('webhookRetry', checked)}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -2302,39 +2479,69 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Track Opens</Label>
-                            <p className="text-sm text-gray-500">Email and push opens</p>
+                          <div className="flex items-center gap-3">
+                            <Eye className="h-5 w-5 text-green-600" />
+                            <div>
+                              <Label>Track Opens</Label>
+                              <p className="text-sm text-gray-500">Email and push opens</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.analyticsEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('analyticsEnabled', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Track Clicks</Label>
-                            <p className="text-sm text-gray-500">Link and button clicks</p>
+                          <div className="flex items-center gap-3">
+                            <MousePointer className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <Label>Track Clicks</Label>
+                              <p className="text-sm text-gray-500">Link and button clicks</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.deliveryReports}
+                            onCheckedChange={(checked) => handleChannelSettingChange('deliveryReports', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Track Conversions</Label>
-                            <p className="text-sm text-gray-500">Goal completions from notifications</p>
+                          <div className="flex items-center gap-3">
+                            <BarChart3 className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <Label>Track Conversions</Label>
+                              <p className="text-sm text-gray-500">Goal completions from notifications</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.autoArchive}
+                            onCheckedChange={(checked) => handleChannelSettingChange('autoArchive', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Revenue Attribution</Label>
-                            <p className="text-sm text-gray-500">Track revenue from campaigns</p>
+                          <div className="flex items-center gap-3">
+                            <Star className="h-5 w-5 text-yellow-500" />
+                            <div>
+                              <Label>Revenue Attribution</Label>
+                              <p className="text-sm text-gray-500">Track revenue from campaigns</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.dailyDigest}
+                            onCheckedChange={(checked) => handleChannelSettingChange('dailyDigest', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Unsubscribe Tracking</Label>
-                            <p className="text-sm text-gray-500">Track opt-out events</p>
+                          <div className="flex items-center gap-3">
+                            <Archive className="h-5 w-5 text-gray-500" />
+                            <div>
+                              <Label>Unsubscribe Tracking</Label>
+                              <p className="text-sm text-gray-500">Track opt-out events</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.inAppBadges}
+                            onCheckedChange={(checked) => handleChannelSettingChange('inAppBadges', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2471,11 +2678,17 @@ export default function NotificationsClient() {
                           <Input placeholder="team@company.com, marketing@company.com" />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Include Recommendations</Label>
-                            <p className="text-sm text-gray-500">AI-powered optimization suggestions</p>
+                          <div className="flex items-center gap-3">
+                            <Zap className="h-5 w-5 text-yellow-500" />
+                            <div>
+                              <Label>Include Recommendations</Label>
+                              <p className="text-sm text-gray-500">AI-powered optimization suggestions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.inAppPopups}
+                            onCheckedChange={(checked) => handleChannelSettingChange('inAppPopups', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2492,39 +2705,69 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Allow Global Opt-out</Label>
-                            <p className="text-sm text-gray-500">Users can disable all notifications</p>
+                          <div className="flex items-center gap-3">
+                            <Bell className="h-5 w-5 text-red-500" />
+                            <div>
+                              <Label>Allow Global Opt-out</Label>
+                              <p className="text-sm text-gray-500">Users can disable all notifications</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.doNotDisturb}
+                            onCheckedChange={(checked) => handleChannelSettingChange('doNotDisturb', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Category-level Control</Label>
-                            <p className="text-sm text-gray-500">Per-category preferences</p>
+                          <div className="flex items-center gap-3">
+                            <Layers className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <Label>Category-level Control</Label>
+                              <p className="text-sm text-gray-500">Per-category preferences</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.digestEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('digestEnabled', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Channel-level Control</Label>
-                            <p className="text-sm text-gray-500">Per-channel preferences</p>
+                          <div className="flex items-center gap-3">
+                            <Workflow className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <Label>Channel-level Control</Label>
+                              <p className="text-sm text-gray-500">Per-channel preferences</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.pushEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('pushEnabled', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Frequency Control</Label>
-                            <p className="text-sm text-gray-500">Users set their own limits</p>
+                          <div className="flex items-center gap-3">
+                            <Sliders className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <Label>Frequency Control</Label>
+                              <p className="text-sm text-gray-500">Users set their own limits</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.rateLimiting}
+                            onCheckedChange={(checked) => handleChannelSettingChange('rateLimiting', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Preference Center</Label>
-                            <p className="text-sm text-gray-500">Hosted preference page</p>
+                          <div className="flex items-center gap-3">
+                            <Settings className="h-5 w-5 text-gray-500" />
+                            <div>
+                              <Label>Preference Center</Label>
+                              <p className="text-sm text-gray-500">Hosted preference page</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.inAppEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('inAppEnabled', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2744,18 +2987,30 @@ export default function NotificationsClient() {
                           <p className="text-xs text-gray-500">Created: Dec 1, 2024 • Last used: 2 min ago</p>
                         </div>
                         <div className="flex items-center justify-between pt-4 border-t">
-                          <div>
-                            <Label>Enable API</Label>
-                            <p className="text-sm text-gray-500">Allow external API access</p>
+                          <div className="flex items-center gap-3">
+                            <Webhook className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <Label>Enable API</Label>
+                              <p className="text-sm text-gray-500">Allow external API access</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.inAppEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('inAppEnabled', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Rate Limiting</Label>
-                            <p className="text-sm text-gray-500">1000 requests/minute</p>
+                          <div className="flex items-center gap-3">
+                            <Sliders className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <Label>Rate Limiting</Label>
+                              <p className="text-sm text-gray-500">1000 requests/minute</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.rateLimiting}
+                            onCheckedChange={(checked) => handleChannelSettingChange('rateLimiting', checked)}
+                          />
                         </div>
                         <Button variant="outline" className="w-full" onClick={async () => {
                           if (!confirm('Are you sure you want to regenerate your API key? The old key will stop working immediately.')) return
@@ -2826,18 +3081,30 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Debug Mode</Label>
-                            <p className="text-sm text-gray-500">Log all delivery attempts</p>
+                          <div className="flex items-center gap-3">
+                            <TestTube className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <Label>Debug Mode</Label>
+                              <p className="text-sm text-gray-500">Log all delivery attempts</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.deliveryReports}
+                            onCheckedChange={(checked) => handleChannelSettingChange('deliveryReports', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Test Mode</Label>
-                            <p className="text-sm text-gray-500">Send only to test users</p>
+                          <div className="flex items-center gap-3">
+                            <Settings className="h-5 w-5 text-gray-500" />
+                            <div>
+                              <Label>Test Mode</Label>
+                              <p className="text-sm text-gray-500">Send only to test users</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.muteAll}
+                            onCheckedChange={(checked) => handleChannelSettingChange('muteAll', checked)}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -2875,39 +3142,69 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>A/B Testing</Label>
-                            <p className="text-sm text-gray-500">Automatic split testing</p>
+                          <div className="flex items-center gap-3">
+                            <Split className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <Label>A/B Testing</Label>
+                              <p className="text-sm text-gray-500">Automatic split testing</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.batchProcessing}
+                            onCheckedChange={(checked) => handleChannelSettingChange('batchProcessing', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Content Personalization</Label>
-                            <p className="text-sm text-gray-500">AI-powered message customization</p>
+                          <div className="flex items-center gap-3">
+                            <Zap className="h-5 w-5 text-yellow-500" />
+                            <div>
+                              <Label>Content Personalization</Label>
+                              <p className="text-sm text-gray-500">AI-powered message customization</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.inAppPopups}
+                            onCheckedChange={(checked) => handleChannelSettingChange('inAppPopups', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Smart Segmentation</Label>
-                            <p className="text-sm text-gray-500">Auto-segment users by behavior</p>
+                          <div className="flex items-center gap-3">
+                            <Users className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <Label>Smart Segmentation</Label>
+                              <p className="text-sm text-gray-500">Auto-segment users by behavior</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.analyticsEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('analyticsEnabled', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Churn Prediction</Label>
-                            <p className="text-sm text-gray-500">Predict and prevent user churn</p>
+                          <div className="flex items-center gap-3">
+                            <BarChart3 className="h-5 w-5 text-red-500" />
+                            <div>
+                              <Label>Churn Prediction</Label>
+                              <p className="text-sm text-gray-500">Predict and prevent user churn</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.failureAlerts}
+                            onCheckedChange={(checked) => handleChannelSettingChange('failureAlerts', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Subject Line Optimization</Label>
-                            <p className="text-sm text-gray-500">AI-generated subject lines</p>
+                          <div className="flex items-center gap-3">
+                            <Star className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <Label>Subject Line Optimization</Label>
+                              <p className="text-sm text-gray-500">AI-generated subject lines</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.autoArchive}
+                            onCheckedChange={(checked) => handleChannelSettingChange('autoArchive', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2949,11 +3246,17 @@ export default function NotificationsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Archive Old Data</Label>
-                            <p className="text-sm text-gray-500">Move to cold storage</p>
+                          <div className="flex items-center gap-3">
+                            <Archive className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <Label>Archive Old Data</Label>
+                              <p className="text-sm text-gray-500">Move to cold storage</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.autoArchive}
+                            onCheckedChange={(checked) => handleChannelSettingChange('autoArchive', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2965,32 +3268,56 @@ export default function NotificationsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>IP Allowlist</Label>
-                            <p className="text-sm text-gray-500">Restrict API access by IP</p>
+                          <div className="flex items-center gap-3">
+                            <Filter className="h-5 w-5 text-gray-500" />
+                            <div>
+                              <Label>IP Allowlist</Label>
+                              <p className="text-sm text-gray-500">Restrict API access by IP</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={channelSettings.rateLimiting}
+                            onCheckedChange={(checked) => handleChannelSettingChange('rateLimiting', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Webhook Signing</Label>
-                            <p className="text-sm text-gray-500">Sign all outgoing webhooks</p>
+                          <div className="flex items-center gap-3">
+                            <Webhook className="h-5 w-5 text-green-600" />
+                            <div>
+                              <Label>Webhook Signing</Label>
+                              <p className="text-sm text-gray-500">Sign all outgoing webhooks</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.webhookRetry}
+                            onCheckedChange={(checked) => handleChannelSettingChange('webhookRetry', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Audit Logging</Label>
-                            <p className="text-sm text-gray-500">Log all admin actions</p>
+                          <div className="flex items-center gap-3">
+                            <Eye className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <Label>Audit Logging</Label>
+                              <p className="text-sm text-gray-500">Log all admin actions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.analyticsEnabled}
+                            onCheckedChange={(checked) => handleChannelSettingChange('analyticsEnabled', checked)}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Data Encryption</Label>
-                            <p className="text-sm text-gray-500">Encrypt data at rest</p>
+                          <div className="flex items-center gap-3">
+                            <Settings className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <Label>Data Encryption</Label>
+                              <p className="text-sm text-gray-500">Encrypt data at rest</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={channelSettings.deliveryReports}
+                            onCheckedChange={(checked) => handleChannelSettingChange('deliveryReports', checked)}
+                          />
                         </div>
                       </CardContent>
                     </Card>

@@ -23,7 +23,9 @@ import {
   Users, UserPlus, Search,
   Mail, Phone, MapPin, DollarSign, Building2, Calendar, CheckCircle, AlertTriangle, MoreHorizontal, Edit,
   Trash2, MessageSquare, PhoneCall, FileText, Target, Zap, Plus, Download, Upload, RefreshCw, Activity, Layers, Award, Copy, ExternalLink, ArrowUpRight, TrendingUp as Forecast, Megaphone, Scale, Trophy, Archive, Settings,
-  Key, Shield, AlertOctagon, Sliders, Network, HardDrive, Bell, Loader2
+  Key, Shield, AlertOctagon, Sliders, Network, HardDrive, Bell, Loader2,
+  // Additional icons for settings switches
+  CircleDollarSign, Hash, Building, MailCheck, AlertCircle, Package, Crosshair, Calculator, BarChart3, Timer, Briefcase, UserCog, BellRing, CalendarCheck, MailOpen, Webhook, Lock, Globe, ScrollText, DatabaseBackup, Cake, ClockAlert, Send
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -424,6 +426,54 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'revenue'>('name')
   const [showFilters, setShowFilters] = useState(false)
+
+  // Settings switches state - General Settings
+  const [showCurrencySymbol, setShowCurrencySymbol] = useState(true)
+  const [compactNumberDisplay, setCompactNumberDisplay] = useState(false)
+  const [autoCreateAccount, setAutoCreateAccount] = useState(true)
+  const [requireEmail, setRequireEmail] = useState(true)
+  const [duplicateDetection, setDuplicateDetection] = useState(true)
+
+  // Settings switches state - Pipeline Settings
+  const [requireProducts, setRequireProducts] = useState(false)
+  const [trackCompetitors, setTrackCompetitors] = useState(true)
+  const [autoCalculateWeighted, setAutoCalculateWeighted] = useState(true)
+  const [enableForecastCategories, setEnableForecastCategories] = useState(true)
+  const [showQuotaAttainment, setShowQuotaAttainment] = useState(true)
+
+  // Settings switches state - Lead Scoring Settings
+  const [enableLeadScoring, setEnableLeadScoring] = useState(true)
+  const [jobTitleRuleEnabled, setJobTitleRuleEnabled] = useState(true)
+  const [companySizeRuleEnabled, setCompanySizeRuleEnabled] = useState(true)
+  const [emailOpenedRuleEnabled, setEmailOpenedRuleEnabled] = useState(true)
+  const [websiteVisitRuleEnabled, setWebsiteVisitRuleEnabled] = useState(true)
+  const [enableScoreDecay, setEnableScoreDecay] = useState(true)
+
+  // Settings switches state - Automation Settings
+  const [autoAssignLeads, setAutoAssignLeads] = useState(true)
+  const [followUpReminders, setFollowUpReminders] = useState(true)
+  const [winLossNotifications, setWinLossNotifications] = useState(true)
+  const [stageChangeAlerts, setStageChangeAlerts] = useState(false)
+  const [welcomeEmail, setWelcomeEmail] = useState(true)
+  const [birthdayEmails, setBirthdayEmails] = useState(false)
+  const [renewalReminders, setRenewalReminders] = useState(true)
+
+  // Settings switches state - Notification Settings
+  const [notifyNewLead, setNotifyNewLead] = useState(true)
+  const [notifyDealWon, setNotifyDealWon] = useState(true)
+  const [notifyDealLost, setNotifyDealLost] = useState(true)
+  const [notifyTaskDue, setNotifyTaskDue] = useState(false)
+  const [notifyMeetingReminder, setNotifyMeetingReminder] = useState(true)
+  const [notifyEmailOpened, setNotifyEmailOpened] = useState(false)
+
+  // Settings switches state - Integrations Settings
+  const [enableWebhooks, setEnableWebhooks] = useState(false)
+
+  // Settings switches state - Advanced Settings
+  const [twoFactorAuth, setTwoFactorAuth] = useState(true)
+  const [ipRestrictions, setIpRestrictions] = useState(false)
+  const [auditLogging, setAuditLogging] = useState(true)
+  const [automaticBackups, setAutomaticBackups] = useState(true)
 
   const [leadScoringRules, setLeadScoringRules] = useState<LeadScoreRule[]>([
     { id: '1', name: 'Job Title Contains VP/Director', field: 'job_title', operator: 'contains', value: 'VP,Director', points: 15, isActive: true },
@@ -1890,19 +1940,37 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Show Currency Symbol</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Display currency symbols in all monetary fields</p>
+                          <div className="flex items-center gap-2">
+                            <CircleDollarSign className="h-4 w-4 text-green-600" />
+                            <div>
+                              <Label className="text-base">Show Currency Symbol</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Display currency symbols in all monetary fields</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showCurrencySymbol}
+                            onCheckedChange={(checked) => {
+                              setShowCurrencySymbol(checked)
+                              toast.success(checked ? 'Currency symbols enabled' : 'Currency symbols disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Compact Number Display</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Show large numbers as 1M, 500K etc.</p>
+                          <div className="flex items-center gap-2">
+                            <Hash className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <Label className="text-base">Compact Number Display</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Show large numbers as 1M, 500K etc.</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={compactNumberDisplay}
+                            onCheckedChange={(checked) => {
+                              setCompactNumberDisplay(checked)
+                              toast.success(checked ? 'Compact number display enabled' : 'Compact number display disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1917,27 +1985,54 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Auto-create Account</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically create account when adding contact with company</p>
+                          <div className="flex items-center gap-2">
+                            <Building className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label className="text-base">Auto-create Account</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically create account when adding contact with company</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoCreateAccount}
+                            onCheckedChange={(checked) => {
+                              setAutoCreateAccount(checked)
+                              toast.success(checked ? 'Auto-create account enabled' : 'Auto-create account disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Require Email</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Email is required for all new contacts</p>
+                          <div className="flex items-center gap-2">
+                            <MailCheck className="h-4 w-4 text-red-600" />
+                            <div>
+                              <Label className="text-base">Require Email</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Email is required for all new contacts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={requireEmail}
+                            onCheckedChange={(checked) => {
+                              setRequireEmail(checked)
+                              toast.success(checked ? 'Email required for contacts' : 'Email optional for contacts')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Duplicate Detection</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Warn when creating contacts with similar email or name</p>
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-amber-600" />
+                            <div>
+                              <Label className="text-base">Duplicate Detection</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Warn when creating contacts with similar email or name</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={duplicateDetection}
+                            onCheckedChange={(checked) => {
+                              setDuplicateDetection(checked)
+                              toast.success(checked ? 'Duplicate detection enabled' : 'Duplicate detection disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2">
@@ -2016,27 +2111,54 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Require Products</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Opportunities must have at least one product</p>
+                          <div className="flex items-center gap-2">
+                            <Package className="h-4 w-4 text-orange-600" />
+                            <div>
+                              <Label className="text-base">Require Products</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Opportunities must have at least one product</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={requireProducts}
+                            onCheckedChange={(checked) => {
+                              setRequireProducts(checked)
+                              toast.success(checked ? 'Products required for opportunities' : 'Products optional for opportunities')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Track Competitors</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable competitor tracking on opportunities</p>
+                          <div className="flex items-center gap-2">
+                            <Crosshair className="h-4 w-4 text-red-600" />
+                            <div>
+                              <Label className="text-base">Track Competitors</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Enable competitor tracking on opportunities</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={trackCompetitors}
+                            onCheckedChange={(checked) => {
+                              setTrackCompetitors(checked)
+                              toast.success(checked ? 'Competitor tracking enabled' : 'Competitor tracking disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Auto-calculate Weighted Value</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically calculate weighted pipeline value</p>
+                          <div className="flex items-center gap-2">
+                            <Calculator className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <Label className="text-base">Auto-calculate Weighted Value</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically calculate weighted pipeline value</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoCalculateWeighted}
+                            onCheckedChange={(checked) => {
+                              setAutoCalculateWeighted(checked)
+                              toast.success(checked ? 'Auto-calculate weighted value enabled' : 'Auto-calculate weighted value disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2065,19 +2187,37 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Enable Forecast Categories</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Use Commit, Best Case, Pipeline categories</p>
+                          <div className="flex items-center gap-2">
+                            <BarChart3 className="h-4 w-4 text-indigo-600" />
+                            <div>
+                              <Label className="text-base">Enable Forecast Categories</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Use Commit, Best Case, Pipeline categories</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableForecastCategories}
+                            onCheckedChange={(checked) => {
+                              setEnableForecastCategories(checked)
+                              toast.success(checked ? 'Forecast categories enabled' : 'Forecast categories disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Show Quota Attainment</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Display quota progress in forecasts</p>
+                          <div className="flex items-center gap-2">
+                            <Award className="h-4 w-4 text-amber-600" />
+                            <div>
+                              <Label className="text-base">Show Quota Attainment</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Display quota progress in forecasts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showQuotaAttainment}
+                            onCheckedChange={(checked) => {
+                              setShowQuotaAttainment(checked)
+                              toast.success(checked ? 'Quota attainment display enabled' : 'Quota attainment display disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2097,11 +2237,20 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Enable Lead Scoring</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically score leads based on rules</p>
+                          <div className="flex items-center gap-2">
+                            <Target className="h-4 w-4 text-red-600" />
+                            <div>
+                              <Label className="text-base">Enable Lead Scoring</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically score leads based on rules</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableLeadScoring}
+                            onCheckedChange={(checked) => {
+                              setEnableLeadScoring(checked)
+                              toast.success(checked ? 'Lead scoring enabled' : 'Lead scoring disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-6">
@@ -2119,43 +2268,71 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                           <Label>Scoring Rules</Label>
                           <div className="space-y-3">
                             <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <Briefcase className="h-4 w-4 text-purple-600 flex-shrink-0" />
                               <div className="flex-1">
                                 <div className="font-medium">Job Title Contains "VP" or "Director"</div>
                                 <div className="text-sm text-gray-500">Decision maker identification</div>
                               </div>
                               <Input type="number" defaultValue="15" className="w-20 text-center" />
                               <span className="text-sm text-gray-500">points</span>
-                              <Switch defaultChecked />
+                              <Switch
+                                checked={jobTitleRuleEnabled}
+                                onCheckedChange={(checked) => {
+                                  setJobTitleRuleEnabled(checked)
+                                  toast.success(checked ? 'Job title rule enabled' : 'Job title rule disabled')
+                                }}
+                              />
                             </div>
 
                             <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <Building className="h-4 w-4 text-blue-600 flex-shrink-0" />
                               <div className="flex-1">
                                 <div className="font-medium">Company Size &gt; 100 employees</div>
                                 <div className="text-sm text-gray-500">Enterprise prospect</div>
                               </div>
                               <Input type="number" defaultValue="10" className="w-20 text-center" />
                               <span className="text-sm text-gray-500">points</span>
-                              <Switch defaultChecked />
+                              <Switch
+                                checked={companySizeRuleEnabled}
+                                onCheckedChange={(checked) => {
+                                  setCompanySizeRuleEnabled(checked)
+                                  toast.success(checked ? 'Company size rule enabled' : 'Company size rule disabled')
+                                }}
+                              />
                             </div>
 
                             <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <MailOpen className="h-4 w-4 text-green-600 flex-shrink-0" />
                               <div className="flex-1">
                                 <div className="font-medium">Email Opened (Last 7 Days)</div>
                                 <div className="text-sm text-gray-500">Engagement signal</div>
                               </div>
                               <Input type="number" defaultValue="5" className="w-20 text-center" />
                               <span className="text-sm text-gray-500">points</span>
-                              <Switch defaultChecked />
+                              <Switch
+                                checked={emailOpenedRuleEnabled}
+                                onCheckedChange={(checked) => {
+                                  setEmailOpenedRuleEnabled(checked)
+                                  toast.success(checked ? 'Email opened rule enabled' : 'Email opened rule disabled')
+                                }}
+                              />
                             </div>
 
                             <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <Globe className="h-4 w-4 text-cyan-600 flex-shrink-0" />
                               <div className="flex-1">
                                 <div className="font-medium">Website Visit (Last 30 Days)</div>
                                 <div className="text-sm text-gray-500">Intent signal</div>
                               </div>
                               <Input type="number" defaultValue="8" className="w-20 text-center" />
                               <span className="text-sm text-gray-500">points</span>
-                              <Switch defaultChecked />
+                              <Switch
+                                checked={websiteVisitRuleEnabled}
+                                onCheckedChange={(checked) => {
+                                  setWebsiteVisitRuleEnabled(checked)
+                                  toast.success(checked ? 'Website visit rule enabled' : 'Website visit rule disabled')
+                                }}
+                              />
                             </div>
                           </div>
                           <Button variant="outline" className="w-full" onClick={() => {
@@ -2179,11 +2356,20 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Enable Score Decay</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Reduce scores for inactive leads</p>
+                          <div className="flex items-center gap-2">
+                            <Timer className="h-4 w-4 text-orange-600" />
+                            <div>
+                              <Label className="text-base">Enable Score Decay</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Reduce scores for inactive leads</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableScoreDecay}
+                            onCheckedChange={(checked) => {
+                              setEnableScoreDecay(checked)
+                              toast.success(checked ? 'Score decay enabled' : 'Score decay disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-6">
@@ -2214,35 +2400,71 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Auto-assign Leads</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically assign new leads using round-robin</p>
+                          <div className="flex items-center gap-2">
+                            <UserCog className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <Label className="text-base">Auto-assign Leads</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically assign new leads using round-robin</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoAssignLeads}
+                            onCheckedChange={(checked) => {
+                              setAutoAssignLeads(checked)
+                              toast.success(checked ? 'Auto-assign leads enabled' : 'Auto-assign leads disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Follow-up Reminders</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Create tasks for stale opportunities</p>
+                          <div className="flex items-center gap-2">
+                            <ClockAlert className="h-4 w-4 text-amber-600" />
+                            <div>
+                              <Label className="text-base">Follow-up Reminders</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Create tasks for stale opportunities</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={followUpReminders}
+                            onCheckedChange={(checked) => {
+                              setFollowUpReminders(checked)
+                              toast.success(checked ? 'Follow-up reminders enabled' : 'Follow-up reminders disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Win/Loss Notifications</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify team when deals close</p>
+                          <div className="flex items-center gap-2">
+                            <BellRing className="h-4 w-4 text-green-600" />
+                            <div>
+                              <Label className="text-base">Win/Loss Notifications</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Notify team when deals close</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={winLossNotifications}
+                            onCheckedChange={(checked) => {
+                              setWinLossNotifications(checked)
+                              toast.success(checked ? 'Win/loss notifications enabled' : 'Win/loss notifications disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Stage Change Alerts</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify managers when deals advance</p>
+                          <div className="flex items-center gap-2">
+                            <Layers className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label className="text-base">Stage Change Alerts</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Notify managers when deals advance</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={stageChangeAlerts}
+                            onCheckedChange={(checked) => {
+                              setStageChangeAlerts(checked)
+                              toast.success(checked ? 'Stage change alerts enabled' : 'Stage change alerts disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2257,27 +2479,54 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Welcome Email</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Send welcome email to new contacts</p>
+                          <div className="flex items-center gap-2">
+                            <Send className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <Label className="text-base">Welcome Email</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Send welcome email to new contacts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={welcomeEmail}
+                            onCheckedChange={(checked) => {
+                              setWelcomeEmail(checked)
+                              toast.success(checked ? 'Welcome email enabled' : 'Welcome email disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Birthday Emails</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Send personalized birthday greetings</p>
+                          <div className="flex items-center gap-2">
+                            <Cake className="h-4 w-4 text-pink-600" />
+                            <div>
+                              <Label className="text-base">Birthday Emails</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Send personalized birthday greetings</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={birthdayEmails}
+                            onCheckedChange={(checked) => {
+                              setBirthdayEmails(checked)
+                              toast.success(checked ? 'Birthday emails enabled' : 'Birthday emails disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Renewal Reminders</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Send reminders before contract expiration</p>
+                          <div className="flex items-center gap-2">
+                            <RefreshCw className="h-4 w-4 text-orange-600" />
+                            <div>
+                              <Label className="text-base">Renewal Reminders</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Send reminders before contract expiration</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={renewalReminders}
+                            onCheckedChange={(checked) => {
+                              setRenewalReminders(checked)
+                              toast.success(checked ? 'Renewal reminders enabled' : 'Renewal reminders disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2">
@@ -2298,27 +2547,69 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                       <CardContent className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="flex items-center gap-2">
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={notifyNewLead}
+                              onCheckedChange={(checked) => {
+                                setNotifyNewLead(checked)
+                                toast.success(checked ? 'New lead notifications enabled' : 'New lead notifications disabled')
+                              }}
+                            />
+                            <UserPlus className="h-4 w-4 text-blue-600" />
                             <Label className="font-normal">New Lead Assigned</Label>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={notifyDealWon}
+                              onCheckedChange={(checked) => {
+                                setNotifyDealWon(checked)
+                                toast.success(checked ? 'Deal won notifications enabled' : 'Deal won notifications disabled')
+                              }}
+                            />
+                            <Trophy className="h-4 w-4 text-green-600" />
                             <Label className="font-normal">Deal Won</Label>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={notifyDealLost}
+                              onCheckedChange={(checked) => {
+                                setNotifyDealLost(checked)
+                                toast.success(checked ? 'Deal lost notifications enabled' : 'Deal lost notifications disabled')
+                              }}
+                            />
+                            <AlertTriangle className="h-4 w-4 text-red-600" />
                             <Label className="font-normal">Deal Lost</Label>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Switch />
+                            <Switch
+                              checked={notifyTaskDue}
+                              onCheckedChange={(checked) => {
+                                setNotifyTaskDue(checked)
+                                toast.success(checked ? 'Task due notifications enabled' : 'Task due notifications disabled')
+                              }}
+                            />
+                            <CheckCircle className="h-4 w-4 text-amber-600" />
                             <Label className="font-normal">Task Due</Label>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={notifyMeetingReminder}
+                              onCheckedChange={(checked) => {
+                                setNotifyMeetingReminder(checked)
+                                toast.success(checked ? 'Meeting reminder notifications enabled' : 'Meeting reminder notifications disabled')
+                              }}
+                            />
+                            <CalendarCheck className="h-4 w-4 text-purple-600" />
                             <Label className="font-normal">Meeting Reminder</Label>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Switch />
+                            <Switch
+                              checked={notifyEmailOpened}
+                              onCheckedChange={(checked) => {
+                                setNotifyEmailOpened(checked)
+                                toast.success(checked ? 'Email opened notifications enabled' : 'Email opened notifications disabled')
+                              }}
+                            />
+                            <MailOpen className="h-4 w-4 text-cyan-600" />
                             <Label className="font-normal">Email Opened</Label>
                           </div>
                         </div>
@@ -2451,11 +2742,20 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Enable Webhooks</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Send events to external endpoints</p>
+                          <div className="flex items-center gap-2">
+                            <Webhook className="h-4 w-4 text-indigo-600" />
+                            <div>
+                              <Label className="text-base">Enable Webhooks</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Send events to external endpoints</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enableWebhooks}
+                            onCheckedChange={(checked) => {
+                              setEnableWebhooks(checked)
+                              toast.success(checked ? 'Webhooks enabled' : 'Webhooks disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2475,27 +2775,54 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Two-Factor Authentication</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for all users</p>
+                          <div className="flex items-center gap-2">
+                            <Lock className="h-4 w-4 text-green-600" />
+                            <div>
+                              <Label className="text-base">Two-Factor Authentication</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for all users</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={twoFactorAuth}
+                            onCheckedChange={(checked) => {
+                              setTwoFactorAuth(checked)
+                              toast.success(checked ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">IP Restrictions</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Limit access to specific IP ranges</p>
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <Label className="text-base">IP Restrictions</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Limit access to specific IP ranges</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ipRestrictions}
+                            onCheckedChange={(checked) => {
+                              setIpRestrictions(checked)
+                              toast.success(checked ? 'IP restrictions enabled' : 'IP restrictions disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Audit Logging</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Log all user actions for compliance</p>
+                          <div className="flex items-center gap-2">
+                            <ScrollText className="h-4 w-4 text-amber-600" />
+                            <div>
+                              <Label className="text-base">Audit Logging</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Log all user actions for compliance</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditLogging}
+                            onCheckedChange={(checked) => {
+                              setAuditLogging(checked)
+                              toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2">
@@ -2531,11 +2858,20 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div>
-                            <Label className="text-base">Automatic Backups</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Daily backup of all CRM data</p>
+                          <div className="flex items-center gap-2">
+                            <DatabaseBackup className="h-4 w-4 text-cyan-600" />
+                            <div>
+                              <Label className="text-base">Automatic Backups</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Daily backup of all CRM data</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={automaticBackups}
+                            onCheckedChange={(checked) => {
+                              setAutomaticBackups(checked)
+                              toast.success(checked ? 'Automatic backups enabled' : 'Automatic backups disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex gap-2">

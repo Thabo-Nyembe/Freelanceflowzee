@@ -14,7 +14,15 @@ import {
   Plus, Search, Grid3X3, Users, Clock, Star, Settings, Zap, Play, ZoomIn, ZoomOut,
   Undo, Redo, Copy, Trash2, Edit2, Eye, Download, Share2, Upload,
   MessageSquare, Lock, ChevronRight, CheckCircle2, MoreVertical, FileText, Workflow, Shapes, Frame, Component, Monitor, Smartphone, Bell,
-  Crown, Wand2
+  Crown, Wand2,
+  // Settings icons
+  Save, History, HelpCircle, Moon, Minimize2, Contrast, FolderClock, SpellCheck,
+  Grid, Ruler, Keyboard, Pencil, LayoutGrid, PenLine,
+  Pointer, MessageCircle, UserPlus, Globe, MessagesSquare, Mic,
+  ImageIcon, UserCheck, Droplets, Gauge,
+  BellRing, AtSign, RefreshCw, Mail, CalendarDays, MonitorSmartphone, Smartphone as MobileIcon,
+  Cpu, WifiOff, Code, Puzzle, FlaskConical, BarChart3,
+  Droplet, Focus
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -170,6 +178,59 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<'editor' | 'viewer' | 'commenter'>('viewer')
   const [isInviting, setIsInviting] = useState(false)
+
+  // Effects switches state
+  const [dropShadowEnabled, setDropShadowEnabled] = useState(false)
+  const [blurEnabled, setBlurEnabled] = useState(false)
+
+  // General Settings state
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
+  const [versionHistoryEnabled, setVersionHistoryEnabled] = useState(true)
+  const [showTutorialsEnabled, setShowTutorialsEnabled] = useState(true)
+  const [darkModeEnabled, setDarkModeEnabled] = useState(false)
+  const [compactModeEnabled, setCompactModeEnabled] = useState(false)
+  const [highContrastEnabled, setHighContrastEnabled] = useState(false)
+  const [rememberRecentFilesEnabled, setRememberRecentFilesEnabled] = useState(true)
+  const [spellCheckEnabled, setSpellCheckEnabled] = useState(true)
+
+  // Editor Settings state
+  const [snapToGridEnabled, setSnapToGridEnabled] = useState(true)
+  const [showGuidesEnabled, setShowGuidesEnabled] = useState(true)
+  const [keyboardShortcutsEnabled, setKeyboardShortcutsEnabled] = useState(true)
+  const [penPressureEnabled, setPenPressureEnabled] = useState(true)
+  const [showPixelGridEnabled, setShowPixelGridEnabled] = useState(false)
+  const [autoCloseShapesEnabled, setAutoCloseShapesEnabled] = useState(true)
+
+  // Collaboration Settings state
+  const [realTimeCursorsEnabled, setRealTimeCursorsEnabled] = useState(true)
+  const [cursorChatEnabled, setCursorChatEnabled] = useState(true)
+  const [followModeEnabled, setFollowModeEnabled] = useState(true)
+  const [publicSharingEnabled, setPublicSharingEnabled] = useState(false)
+  const [commentAccessEnabled, setCommentAccessEnabled] = useState(true)
+  const [voiceChatEnabled, setVoiceChatEnabled] = useState(false)
+
+  // Export Settings state
+  const [includeBackgroundEnabled, setIncludeBackgroundEnabled] = useState(true)
+  const [allowViewerExportEnabled, setAllowViewerExportEnabled] = useState(false)
+  const [addWatermarkEnabled, setAddWatermarkEnabled] = useState(false)
+  const [optimizeForWebEnabled, setOptimizeForWebEnabled] = useState(true)
+
+  // Notifications Settings state
+  const [newCommentsNotifEnabled, setNewCommentsNotifEnabled] = useState(true)
+  const [mentionsNotifEnabled, setMentionsNotifEnabled] = useState(true)
+  const [boardUpdatesNotifEnabled, setBoardUpdatesNotifEnabled] = useState(false)
+  const [teamInvitationsNotifEnabled, setTeamInvitationsNotifEnabled] = useState(true)
+  const [weeklyDigestEnabled, setWeeklyDigestEnabled] = useState(true)
+  const [desktopNotifEnabled, setDesktopNotifEnabled] = useState(true)
+  const [mobilePushEnabled, setMobilePushEnabled] = useState(false)
+
+  // Advanced Settings state
+  const [hardwareAccelerationEnabled, setHardwareAccelerationEnabled] = useState(true)
+  const [offlineModeEnabled, setOfflineModeEnabled] = useState(false)
+  const [developerToolsEnabled, setDeveloperToolsEnabled] = useState(false)
+  const [pluginSystemEnabled, setPluginSystemEnabled] = useState(true)
+  const [betaFeaturesEnabled, setBetaFeaturesEnabled] = useState(false)
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(true)
 
   // Canvas boards - data loaded from Supabase
   const boards: CanvasBoard[] = []
@@ -850,12 +911,30 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                     <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Effects</h4>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-300">Drop Shadow</span>
-                        <Switch />
+                        <div className="flex items-center gap-2">
+                          <Droplet className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm text-gray-300">Drop Shadow</span>
+                        </div>
+                        <Switch
+                          checked={dropShadowEnabled}
+                          onCheckedChange={(checked) => {
+                            setDropShadowEnabled(checked)
+                            toast.success(checked ? 'Drop shadow enabled' : 'Drop shadow disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-300">Blur</span>
-                        <Switch />
+                        <div className="flex items-center gap-2">
+                          <Focus className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm text-gray-300">Blur</span>
+                        </div>
+                        <Switch
+                          checked={blurEnabled}
+                          onCheckedChange={(checked) => {
+                            setBlurEnabled(checked)
+                            toast.success(checked ? 'Blur effect enabled' : 'Blur effect disabled')
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -1611,46 +1690,100 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                         </select>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Auto-save</p>
-                          <p className="text-sm text-gray-500">Automatically save changes every 30 seconds</p>
+                        <div className="flex items-center gap-3">
+                          <Save className="w-5 h-5 text-indigo-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-save</p>
+                            <p className="text-sm text-gray-500">Automatically save changes every 30 seconds</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoSaveEnabled}
+                          onCheckedChange={(checked) => {
+                            setAutoSaveEnabled(checked)
+                            toast.success(checked ? 'Auto-save enabled' : 'Auto-save disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Version History</p>
-                          <p className="text-sm text-gray-500">Keep history for 30 days (90 days on Pro)</p>
+                        <div className="flex items-center gap-3">
+                          <History className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Version History</p>
+                            <p className="text-sm text-gray-500">Keep history for 30 days (90 days on Pro)</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={versionHistoryEnabled}
+                          onCheckedChange={(checked) => {
+                            setVersionHistoryEnabled(checked)
+                            toast.success(checked ? 'Version history enabled' : 'Version history disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Tutorials</p>
-                          <p className="text-sm text-gray-500">Display helpful tips for new features</p>
+                        <div className="flex items-center gap-3">
+                          <HelpCircle className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Tutorials</p>
+                            <p className="text-sm text-gray-500">Display helpful tips for new features</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showTutorialsEnabled}
+                          onCheckedChange={(checked) => {
+                            setShowTutorialsEnabled(checked)
+                            toast.success(checked ? 'Tutorials enabled' : 'Tutorials disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Dark Mode</p>
-                          <p className="text-sm text-gray-500">Use dark theme across the platform</p>
+                        <div className="flex items-center gap-3">
+                          <Moon className="w-5 h-5 text-slate-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Dark Mode</p>
+                            <p className="text-sm text-gray-500">Use dark theme across the platform</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={darkModeEnabled}
+                          onCheckedChange={(checked) => {
+                            setDarkModeEnabled(checked)
+                            toast.success(checked ? 'Dark mode enabled' : 'Dark mode disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Compact Mode</p>
-                          <p className="text-sm text-gray-500">Reduce spacing and padding in UI</p>
+                        <div className="flex items-center gap-3">
+                          <Minimize2 className="w-5 h-5 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Compact Mode</p>
+                            <p className="text-sm text-gray-500">Reduce spacing and padding in UI</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={compactModeEnabled}
+                          onCheckedChange={(checked) => {
+                            setCompactModeEnabled(checked)
+                            toast.success(checked ? 'Compact mode enabled' : 'Compact mode disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">High Contrast</p>
-                          <p className="text-sm text-gray-500">Increase contrast for accessibility</p>
+                        <div className="flex items-center gap-3">
+                          <Contrast className="w-5 h-5 text-amber-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">High Contrast</p>
+                            <p className="text-sm text-gray-500">Increase contrast for accessibility</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={highContrastEnabled}
+                          onCheckedChange={(checked) => {
+                            setHighContrastEnabled(checked)
+                            toast.success(checked ? 'High contrast enabled' : 'High contrast disabled')
+                          }}
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Language</label>
@@ -1672,18 +1805,36 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                         </select>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Remember Recent Files</p>
-                          <p className="text-sm text-gray-500">Quick access to recently opened boards</p>
+                        <div className="flex items-center gap-3">
+                          <FolderClock className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Remember Recent Files</p>
+                            <p className="text-sm text-gray-500">Quick access to recently opened boards</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={rememberRecentFilesEnabled}
+                          onCheckedChange={(checked) => {
+                            setRememberRecentFilesEnabled(checked)
+                            toast.success(checked ? 'Recent files tracking enabled' : 'Recent files tracking disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Spell Check</p>
-                          <p className="text-sm text-gray-500">Check spelling in text elements</p>
+                        <div className="flex items-center gap-3">
+                          <SpellCheck className="w-5 h-5 text-cyan-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Spell Check</p>
+                            <p className="text-sm text-gray-500">Check spelling in text elements</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={spellCheckEnabled}
+                          onCheckedChange={(checked) => {
+                            setSpellCheckEnabled(checked)
+                            toast.success(checked ? 'Spell check enabled' : 'Spell check disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1700,39 +1851,84 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Snap to Grid</p>
-                          <p className="text-sm text-gray-500">Align elements to grid automatically</p>
+                        <div className="flex items-center gap-3">
+                          <Grid className="w-5 h-5 text-indigo-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Snap to Grid</p>
+                            <p className="text-sm text-gray-500">Align elements to grid automatically</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={snapToGridEnabled}
+                          onCheckedChange={(checked) => {
+                            setSnapToGridEnabled(checked)
+                            toast.success(checked ? 'Snap to grid enabled' : 'Snap to grid disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Guides</p>
-                          <p className="text-sm text-gray-500">Display alignment guides when moving elements</p>
+                        <div className="flex items-center gap-3">
+                          <Ruler className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Guides</p>
+                            <p className="text-sm text-gray-500">Display alignment guides when moving elements</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={showGuidesEnabled}
+                          onCheckedChange={(checked) => {
+                            setShowGuidesEnabled(checked)
+                            toast.success(checked ? 'Alignment guides enabled' : 'Alignment guides disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Keyboard Shortcuts</p>
-                          <p className="text-sm text-gray-500">Enable keyboard shortcuts for faster workflows</p>
+                        <div className="flex items-center gap-3">
+                          <Keyboard className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Keyboard Shortcuts</p>
+                            <p className="text-sm text-gray-500">Enable keyboard shortcuts for faster workflows</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={keyboardShortcutsEnabled}
+                          onCheckedChange={(checked) => {
+                            setKeyboardShortcutsEnabled(checked)
+                            toast.success(checked ? 'Keyboard shortcuts enabled' : 'Keyboard shortcuts disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Pen Pressure Sensitivity</p>
-                          <p className="text-sm text-gray-500">Enable stylus pressure for drawing tools</p>
+                        <div className="flex items-center gap-3">
+                          <Pencil className="w-5 h-5 text-pink-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Pen Pressure Sensitivity</p>
+                            <p className="text-sm text-gray-500">Enable stylus pressure for drawing tools</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={penPressureEnabled}
+                          onCheckedChange={(checked) => {
+                            setPenPressureEnabled(checked)
+                            toast.success(checked ? 'Pen pressure sensitivity enabled' : 'Pen pressure sensitivity disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Show Pixel Grid</p>
-                          <p className="text-sm text-gray-500">Display pixel grid at high zoom levels</p>
+                        <div className="flex items-center gap-3">
+                          <LayoutGrid className="w-5 h-5 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Show Pixel Grid</p>
+                            <p className="text-sm text-gray-500">Display pixel grid at high zoom levels</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={showPixelGridEnabled}
+                          onCheckedChange={(checked) => {
+                            setShowPixelGridEnabled(checked)
+                            toast.success(checked ? 'Pixel grid enabled' : 'Pixel grid disabled')
+                          }}
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Grid Size</label>
@@ -1753,11 +1949,20 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                         </select>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Auto-close Shapes</p>
-                          <p className="text-sm text-gray-500">Automatically close pen paths</p>
+                        <div className="flex items-center gap-3">
+                          <PenLine className="w-5 h-5 text-orange-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Auto-close Shapes</p>
+                            <p className="text-sm text-gray-500">Automatically close pen paths</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoCloseShapesEnabled}
+                          onCheckedChange={(checked) => {
+                            setAutoCloseShapesEnabled(checked)
+                            toast.success(checked ? 'Auto-close shapes enabled' : 'Auto-close shapes disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1774,46 +1979,100 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Real-time Cursors</p>
-                          <p className="text-sm text-gray-500">Show collaborator cursors on the canvas</p>
+                        <div className="flex items-center gap-3">
+                          <Pointer className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Real-time Cursors</p>
+                            <p className="text-sm text-gray-500">Show collaborator cursors on the canvas</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={realTimeCursorsEnabled}
+                          onCheckedChange={(checked) => {
+                            setRealTimeCursorsEnabled(checked)
+                            toast.success(checked ? 'Real-time cursors enabled' : 'Real-time cursors disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Cursor Chat</p>
-                          <p className="text-sm text-gray-500">Enable quick messages via cursor</p>
+                        <div className="flex items-center gap-3">
+                          <MessageCircle className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Cursor Chat</p>
+                            <p className="text-sm text-gray-500">Enable quick messages via cursor</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={cursorChatEnabled}
+                          onCheckedChange={(checked) => {
+                            setCursorChatEnabled(checked)
+                            toast.success(checked ? 'Cursor chat enabled' : 'Cursor chat disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Follow Mode</p>
-                          <p className="text-sm text-gray-500">Allow team members to follow your view</p>
+                        <div className="flex items-center gap-3">
+                          <UserPlus className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Follow Mode</p>
+                            <p className="text-sm text-gray-500">Allow team members to follow your view</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={followModeEnabled}
+                          onCheckedChange={(checked) => {
+                            setFollowModeEnabled(checked)
+                            toast.success(checked ? 'Follow mode enabled' : 'Follow mode disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Public Sharing</p>
-                          <p className="text-sm text-gray-500">Allow anyone with link to view boards</p>
+                        <div className="flex items-center gap-3">
+                          <Globe className="w-5 h-5 text-teal-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Public Sharing</p>
+                            <p className="text-sm text-gray-500">Allow anyone with link to view boards</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={publicSharingEnabled}
+                          onCheckedChange={(checked) => {
+                            setPublicSharingEnabled(checked)
+                            toast.success(checked ? 'Public sharing enabled' : 'Public sharing disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Comment Access</p>
-                          <p className="text-sm text-gray-500">Anyone can comment on shared boards</p>
+                        <div className="flex items-center gap-3">
+                          <MessagesSquare className="w-5 h-5 text-indigo-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Comment Access</p>
+                            <p className="text-sm text-gray-500">Anyone can comment on shared boards</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={commentAccessEnabled}
+                          onCheckedChange={(checked) => {
+                            setCommentAccessEnabled(checked)
+                            toast.success(checked ? 'Comment access enabled' : 'Comment access disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Voice Chat</p>
-                          <p className="text-sm text-gray-500">Enable voice communication during collaboration</p>
+                        <div className="flex items-center gap-3">
+                          <Mic className="w-5 h-5 text-pink-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Voice Chat</p>
+                            <p className="text-sm text-gray-500">Enable voice communication during collaboration</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={voiceChatEnabled}
+                          onCheckedChange={(checked) => {
+                            setVoiceChatEnabled(checked)
+                            toast.success(checked ? 'Voice chat enabled' : 'Voice chat disabled')
+                          }}
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Permission</label>
@@ -1857,32 +2116,68 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                         </select>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Include Background</p>
-                          <p className="text-sm text-gray-500">Export with canvas background color</p>
+                        <div className="flex items-center gap-3">
+                          <ImageIcon className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Include Background</p>
+                            <p className="text-sm text-gray-500">Export with canvas background color</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={includeBackgroundEnabled}
+                          onCheckedChange={(checked) => {
+                            setIncludeBackgroundEnabled(checked)
+                            toast.success(checked ? 'Background will be included in exports' : 'Background will be excluded from exports')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Allow Viewer Export</p>
-                          <p className="text-sm text-gray-500">Let viewers download board exports</p>
+                        <div className="flex items-center gap-3">
+                          <UserCheck className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Allow Viewer Export</p>
+                            <p className="text-sm text-gray-500">Let viewers download board exports</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={allowViewerExportEnabled}
+                          onCheckedChange={(checked) => {
+                            setAllowViewerExportEnabled(checked)
+                            toast.success(checked ? 'Viewer export enabled' : 'Viewer export disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Add Watermark</p>
-                          <p className="text-sm text-gray-500">Include workspace branding on exports</p>
+                        <div className="flex items-center gap-3">
+                          <Droplets className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Add Watermark</p>
+                            <p className="text-sm text-gray-500">Include workspace branding on exports</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={addWatermarkEnabled}
+                          onCheckedChange={(checked) => {
+                            setAddWatermarkEnabled(checked)
+                            toast.success(checked ? 'Watermark enabled' : 'Watermark disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Optimize for Web</p>
-                          <p className="text-sm text-gray-500">Compress images for faster loading</p>
+                        <div className="flex items-center gap-3">
+                          <Gauge className="w-5 h-5 text-teal-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Optimize for Web</p>
+                            <p className="text-sm text-gray-500">Compress images for faster loading</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={optimizeForWebEnabled}
+                          onCheckedChange={(checked) => {
+                            setOptimizeForWebEnabled(checked)
+                            toast.success(checked ? 'Web optimization enabled' : 'Web optimization disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1899,53 +2194,116 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">New Comments</p>
-                          <p className="text-sm text-gray-500">Get notified when someone comments</p>
+                        <div className="flex items-center gap-3">
+                          <BellRing className="w-5 h-5 text-orange-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">New Comments</p>
+                            <p className="text-sm text-gray-500">Get notified when someone comments</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={newCommentsNotifEnabled}
+                          onCheckedChange={(checked) => {
+                            setNewCommentsNotifEnabled(checked)
+                            toast.success(checked ? 'Comment notifications enabled' : 'Comment notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Mentions</p>
-                          <p className="text-sm text-gray-500">Notify when mentioned in comments</p>
+                        <div className="flex items-center gap-3">
+                          <AtSign className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Mentions</p>
+                            <p className="text-sm text-gray-500">Notify when mentioned in comments</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={mentionsNotifEnabled}
+                          onCheckedChange={(checked) => {
+                            setMentionsNotifEnabled(checked)
+                            toast.success(checked ? 'Mention notifications enabled' : 'Mention notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Board Updates</p>
-                          <p className="text-sm text-gray-500">Notify on significant board changes</p>
+                        <div className="flex items-center gap-3">
+                          <RefreshCw className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Board Updates</p>
+                            <p className="text-sm text-gray-500">Notify on significant board changes</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={boardUpdatesNotifEnabled}
+                          onCheckedChange={(checked) => {
+                            setBoardUpdatesNotifEnabled(checked)
+                            toast.success(checked ? 'Board update notifications enabled' : 'Board update notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Team Invitations</p>
-                          <p className="text-sm text-gray-500">When invited to new boards or teams</p>
+                        <div className="flex items-center gap-3">
+                          <Mail className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Team Invitations</p>
+                            <p className="text-sm text-gray-500">When invited to new boards or teams</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={teamInvitationsNotifEnabled}
+                          onCheckedChange={(checked) => {
+                            setTeamInvitationsNotifEnabled(checked)
+                            toast.success(checked ? 'Team invitation notifications enabled' : 'Team invitation notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Weekly Digest</p>
-                          <p className="text-sm text-gray-500">Receive weekly activity summary</p>
+                        <div className="flex items-center gap-3">
+                          <CalendarDays className="w-5 h-5 text-indigo-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Weekly Digest</p>
+                            <p className="text-sm text-gray-500">Receive weekly activity summary</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={weeklyDigestEnabled}
+                          onCheckedChange={(checked) => {
+                            setWeeklyDigestEnabled(checked)
+                            toast.success(checked ? 'Weekly digest enabled' : 'Weekly digest disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Desktop Notifications</p>
-                          <p className="text-sm text-gray-500">Show browser notifications</p>
+                        <div className="flex items-center gap-3">
+                          <MonitorSmartphone className="w-5 h-5 text-cyan-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Desktop Notifications</p>
+                            <p className="text-sm text-gray-500">Show browser notifications</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={desktopNotifEnabled}
+                          onCheckedChange={(checked) => {
+                            setDesktopNotifEnabled(checked)
+                            toast.success(checked ? 'Desktop notifications enabled' : 'Desktop notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Mobile Push</p>
-                          <p className="text-sm text-gray-500">Send push notifications to mobile app</p>
+                        <div className="flex items-center gap-3">
+                          <MobileIcon className="w-5 h-5 text-pink-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Mobile Push</p>
+                            <p className="text-sm text-gray-500">Send push notifications to mobile app</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={mobilePushEnabled}
+                          onCheckedChange={(checked) => {
+                            setMobilePushEnabled(checked)
+                            toast.success(checked ? 'Mobile push notifications enabled' : 'Mobile push notifications disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1962,46 +2320,100 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Hardware Acceleration</p>
-                          <p className="text-sm text-gray-500">Use GPU for better performance</p>
+                        <div className="flex items-center gap-3">
+                          <Cpu className="w-5 h-5 text-yellow-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Hardware Acceleration</p>
+                            <p className="text-sm text-gray-500">Use GPU for better performance</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={hardwareAccelerationEnabled}
+                          onCheckedChange={(checked) => {
+                            setHardwareAccelerationEnabled(checked)
+                            toast.success(checked ? 'Hardware acceleration enabled' : 'Hardware acceleration disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Offline Mode</p>
-                          <p className="text-sm text-gray-500">Cache boards for offline editing</p>
+                        <div className="flex items-center gap-3">
+                          <WifiOff className="w-5 h-5 text-gray-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Offline Mode</p>
+                            <p className="text-sm text-gray-500">Cache boards for offline editing</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={offlineModeEnabled}
+                          onCheckedChange={(checked) => {
+                            setOfflineModeEnabled(checked)
+                            toast.success(checked ? 'Offline mode enabled' : 'Offline mode disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Developer Tools</p>
-                          <p className="text-sm text-gray-500">Enable developer debugging options</p>
+                        <div className="flex items-center gap-3">
+                          <Code className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Developer Tools</p>
+                            <p className="text-sm text-gray-500">Enable developer debugging options</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={developerToolsEnabled}
+                          onCheckedChange={(checked) => {
+                            setDeveloperToolsEnabled(checked)
+                            toast.success(checked ? 'Developer tools enabled' : 'Developer tools disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Plugin System</p>
-                          <p className="text-sm text-gray-500">Allow third-party plugins</p>
+                        <div className="flex items-center gap-3">
+                          <Puzzle className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Plugin System</p>
+                            <p className="text-sm text-gray-500">Allow third-party plugins</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={pluginSystemEnabled}
+                          onCheckedChange={(checked) => {
+                            setPluginSystemEnabled(checked)
+                            toast.success(checked ? 'Plugin system enabled' : 'Plugin system disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Beta Features</p>
-                          <p className="text-sm text-gray-500">Try experimental features early</p>
+                        <div className="flex items-center gap-3">
+                          <FlaskConical className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Beta Features</p>
+                            <p className="text-sm text-gray-500">Try experimental features early</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={betaFeaturesEnabled}
+                          onCheckedChange={(checked) => {
+                            setBetaFeaturesEnabled(checked)
+                            toast.success(checked ? 'Beta features enabled' : 'Beta features disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">Analytics</p>
-                          <p className="text-sm text-gray-500">Help improve Canvas with usage data</p>
+                        <div className="flex items-center gap-3">
+                          <BarChart3 className="w-5 h-5 text-teal-500" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Analytics</p>
+                            <p className="text-sm text-gray-500">Help improve Canvas with usage data</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={analyticsEnabled}
+                          onCheckedChange={(checked) => {
+                            setAnalyticsEnabled(checked)
+                            toast.success(checked ? 'Analytics enabled' : 'Analytics disabled')
+                          }}
+                        />
                       </div>
                       <div className="pt-6 border-t dark:border-gray-700">
                         <h4 className="font-medium text-red-600 mb-4">Danger Zone</h4>

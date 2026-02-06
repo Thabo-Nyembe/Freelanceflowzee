@@ -57,7 +57,37 @@ import {
   AlertOctagon,
   Bell,
   CreditCard,
-  Sliders
+  Sliders,
+  Save,
+  User,
+  Languages,
+  Wand2,
+  ArrowRightLeft,
+  ListChecks,
+  Hash,
+  ArrowLeft,
+  Asterisk,
+  UserPlus,
+  FileArchive,
+  EyeOff,
+  BellRing,
+  CalendarDays,
+  BarChart2,
+  Trophy,
+  MailCheck,
+  FileOutput,
+  BellOff,
+  ThumbsDown,
+  Brain,
+  TrendingDown,
+  BadgeX,
+  Unplug,
+  LayoutGrid,
+  ShieldCheck,
+  Bug,
+  MapPin,
+  LockKeyhole,
+  Scale
 } from 'lucide-react'
 
 
@@ -326,6 +356,59 @@ export default function PollsClient() {
 
   // Plan selection state
   const [selectedPlan, setSelectedPlan] = useState<string>('')
+
+  // Settings switches state - General Settings
+  const [autoSaveDrafts, setAutoSaveDrafts] = useState(true)
+  const [publicProfile, setPublicProfile] = useState(false)
+
+  // Settings switches state - Localization
+  const [multiLanguageSupport, setMultiLanguageSupport] = useState(true)
+  const [autoDetectLanguage, setAutoDetectLanguage] = useState(true)
+  const [rtlSupport, setRtlSupport] = useState(false)
+
+  // Settings switches state - Form Defaults
+  const [showProgressBar, setShowProgressBar] = useState(true)
+  const [showQuestionNumbers, setShowQuestionNumbers] = useState(true)
+  const [allowBackNavigation, setAllowBackNavigation] = useState(true)
+  const [requiredByDefault, setRequiredByDefault] = useState(false)
+
+  // Settings switches state - Response Collection
+  const [allowMultipleResponses, setAllowMultipleResponses] = useState(false)
+  const [savePartialResponses, setSavePartialResponses] = useState(true)
+  const [anonymousResponses, setAnonymousResponses] = useState(false)
+
+  // Settings switches state - Email Notifications
+  const [newResponseNotifications, setNewResponseNotifications] = useState(true)
+  const [dailyDigest, setDailyDigest] = useState(true)
+  const [weeklyReport, setWeeklyReport] = useState(false)
+  const [completionMilestoneAlerts, setCompletionMilestoneAlerts] = useState(true)
+
+  // Settings switches state - Respondent Emails
+  const [confirmationEmails, setConfirmationEmails] = useState(true)
+  const [responseCopy, setResponseCopy] = useState(false)
+  const [reminderEmails, setReminderEmails] = useState(false)
+
+  // Settings switches state - Smart Alerts
+  const [lowScoreAlert, setLowScoreAlert] = useState(true)
+  const [sentimentDetection, setSentimentDetection] = useState(false)
+  const [dropOffAlert, setDropOffAlert] = useState(false)
+
+  // Settings switches state - Branding
+  const [removePoweredBy, setRemovePoweredBy] = useState(false)
+
+  // Settings switches state - Integrations
+  const [apiAccess, setApiAccess] = useState(true)
+  const [allowEmbedding, setAllowEmbedding] = useState(true)
+  const [popupMode, setPopupMode] = useState(false)
+
+  // Settings switches state - Security
+  const [captchaProtection, setCaptchaProtection] = useState(true)
+  const [honeypotFields, setHoneypotFields] = useState(true)
+  const [ipTracking, setIpTracking] = useState(false)
+  const [dataEncryption, setDataEncryption] = useState(true)
+
+  // Settings switches state - Data Management
+  const [gdprComplianceMode, setGdprComplianceMode] = useState(true)
 
   // Quick actions with real functionality
   const pollsQuickActions = useMemo(() => [
@@ -652,6 +735,37 @@ export default function PollsClient() {
   const handleViewResponseDetails = (formTitle: string, responseNum: number) => {
     setSelectedResponseDetail({ formTitle, responseNum })
     setShowResponseDetailDialog(true)
+  }
+
+  // Handle export single response
+  const handleExportSingleResponse = () => {
+    if (!selectedResponseDetail) return
+    const responseData = {
+      form: selectedResponseDetail.formTitle,
+      responseNumber: selectedResponseDetail.responseNum,
+      exportedAt: new Date().toISOString(),
+      answers: [
+        { question: 'How satisfied are you?', answer: 'Very Satisfied' },
+        { question: 'How did you hear about us?', answer: 'Social Media' },
+        { question: 'NPS Score', answer: 9 },
+        { question: 'Overall rating', answer: '4/5' },
+        { question: 'Additional feedback', answer: 'Great service!' }
+      ]
+    }
+    const blob = new Blob([JSON.stringify(responseData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `response-${selectedResponseDetail.responseNum}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Response exported successfully')
+  }
+
+  // Handle send copy of response to respondent
+  const handleSendResponseCopy = () => {
+    if (!selectedResponseDetail) return
+    toast.success(`Copy of response #${selectedResponseDetail.responseNum} sent to respondent's email`)
   }
 
   // Integration connection state
@@ -1445,19 +1559,37 @@ export default function PollsClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-save Drafts</p>
-                            <p className="text-sm text-gray-500">Automatically save form changes</p>
+                          <div className="flex items-center gap-2">
+                            <Save className="w-4 h-4 text-emerald-600" />
+                            <div>
+                              <p className="font-medium">Auto-save Drafts</p>
+                              <p className="text-sm text-gray-500">Automatically save form changes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoSaveDrafts}
+                            onCheckedChange={(checked) => {
+                              setAutoSaveDrafts(checked)
+                              toast.success(checked ? 'Auto-save enabled' : 'Auto-save disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Public Profile</p>
-                            <p className="text-sm text-gray-500">Allow respondents to view your profile</p>
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Public Profile</p>
+                              <p className="text-sm text-gray-500">Allow respondents to view your profile</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={publicProfile}
+                            onCheckedChange={(checked) => {
+                              setPublicProfile(checked)
+                              toast.success(checked ? 'Profile is now public' : 'Profile is now private')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1472,27 +1604,54 @@ export default function PollsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Multi-language Support</p>
-                            <p className="text-sm text-gray-500">Enable translations for surveys</p>
+                          <div className="flex items-center gap-2">
+                            <Languages className="w-4 h-4 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Multi-language Support</p>
+                              <p className="text-sm text-gray-500">Enable translations for surveys</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={multiLanguageSupport}
+                            onCheckedChange={(checked) => {
+                              setMultiLanguageSupport(checked)
+                              toast.success(checked ? 'Multi-language support enabled' : 'Multi-language support disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto-detect Language</p>
-                            <p className="text-sm text-gray-500">Show surveys in respondent's language</p>
+                          <div className="flex items-center gap-2">
+                            <Wand2 className="w-4 h-4 text-purple-600" />
+                            <div>
+                              <p className="font-medium">Auto-detect Language</p>
+                              <p className="text-sm text-gray-500">Show surveys in respondent's language</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoDetectLanguage}
+                            onCheckedChange={(checked) => {
+                              setAutoDetectLanguage(checked)
+                              toast.success(checked ? 'Auto language detection enabled' : 'Auto language detection disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">RTL Support</p>
-                            <p className="text-sm text-gray-500">Enable right-to-left text direction</p>
+                          <div className="flex items-center gap-2">
+                            <ArrowRightLeft className="w-4 h-4 text-orange-600" />
+                            <div>
+                              <p className="font-medium">RTL Support</p>
+                              <p className="text-sm text-gray-500">Enable right-to-left text direction</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={rtlSupport}
+                            onCheckedChange={(checked) => {
+                              setRtlSupport(checked)
+                              toast.success(checked ? 'RTL support enabled' : 'RTL support disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1512,35 +1671,71 @@ export default function PollsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Show Progress Bar</p>
-                            <p className="text-sm text-gray-500">Display progress indicator to respondents</p>
+                          <div className="flex items-center gap-2">
+                            <ListChecks className="w-4 h-4 text-emerald-600" />
+                            <div>
+                              <p className="font-medium">Show Progress Bar</p>
+                              <p className="text-sm text-gray-500">Display progress indicator to respondents</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showProgressBar}
+                            onCheckedChange={(checked) => {
+                              setShowProgressBar(checked)
+                              toast.success(checked ? 'Progress bar will be shown' : 'Progress bar hidden')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Show Question Numbers</p>
-                            <p className="text-sm text-gray-500">Number each question automatically</p>
+                          <div className="flex items-center gap-2">
+                            <Hash className="w-4 h-4 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Show Question Numbers</p>
+                              <p className="text-sm text-gray-500">Number each question automatically</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showQuestionNumbers}
+                            onCheckedChange={(checked) => {
+                              setShowQuestionNumbers(checked)
+                              toast.success(checked ? 'Question numbers enabled' : 'Question numbers hidden')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Allow Back Navigation</p>
-                            <p className="text-sm text-gray-500">Let respondents go back to previous questions</p>
+                          <div className="flex items-center gap-2">
+                            <ArrowLeft className="w-4 h-4 text-purple-600" />
+                            <div>
+                              <p className="font-medium">Allow Back Navigation</p>
+                              <p className="text-sm text-gray-500">Let respondents go back to previous questions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowBackNavigation}
+                            onCheckedChange={(checked) => {
+                              setAllowBackNavigation(checked)
+                              toast.success(checked ? 'Back navigation allowed' : 'Back navigation disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Required by Default</p>
-                            <p className="text-sm text-gray-500">Make new questions required automatically</p>
+                          <div className="flex items-center gap-2">
+                            <Asterisk className="w-4 h-4 text-red-600" />
+                            <div>
+                              <p className="font-medium">Required by Default</p>
+                              <p className="text-sm text-gray-500">Make new questions required automatically</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={requiredByDefault}
+                            onCheckedChange={(checked) => {
+                              setRequiredByDefault(checked)
+                              toast.success(checked ? 'Questions required by default' : 'Questions optional by default')
+                            }}
+                          />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6 pt-4">
@@ -1584,27 +1779,54 @@ export default function PollsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Allow Multiple Responses</p>
-                            <p className="text-sm text-gray-500">Let same person respond multiple times</p>
+                          <div className="flex items-center gap-2">
+                            <UserPlus className="w-4 h-4 text-purple-600" />
+                            <div>
+                              <p className="font-medium">Allow Multiple Responses</p>
+                              <p className="text-sm text-gray-500">Let same person respond multiple times</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={allowMultipleResponses}
+                            onCheckedChange={(checked) => {
+                              setAllowMultipleResponses(checked)
+                              toast.success(checked ? 'Multiple responses allowed' : 'One response per person')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Save Partial Responses</p>
-                            <p className="text-sm text-gray-500">Store incomplete survey submissions</p>
+                          <div className="flex items-center gap-2">
+                            <FileArchive className="w-4 h-4 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Save Partial Responses</p>
+                              <p className="text-sm text-gray-500">Store incomplete survey submissions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={savePartialResponses}
+                            onCheckedChange={(checked) => {
+                              setSavePartialResponses(checked)
+                              toast.success(checked ? 'Partial responses will be saved' : 'Only complete responses saved')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Anonymous Responses</p>
-                            <p className="text-sm text-gray-500">Don't collect identifying information</p>
+                          <div className="flex items-center gap-2">
+                            <EyeOff className="w-4 h-4 text-gray-600" />
+                            <div>
+                              <p className="font-medium">Anonymous Responses</p>
+                              <p className="text-sm text-gray-500">Don't collect identifying information</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={anonymousResponses}
+                            onCheckedChange={(checked) => {
+                              setAnonymousResponses(checked)
+                              toast.success(checked ? 'Responses are now anonymous' : 'Respondent info will be collected')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2 pt-4">
@@ -1630,35 +1852,71 @@ export default function PollsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">New Response Notifications</p>
-                            <p className="text-sm text-gray-500">Get notified for each new submission</p>
+                          <div className="flex items-center gap-2">
+                            <BellRing className="w-4 h-4 text-amber-600" />
+                            <div>
+                              <p className="font-medium">New Response Notifications</p>
+                              <p className="text-sm text-gray-500">Get notified for each new submission</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={newResponseNotifications}
+                            onCheckedChange={(checked) => {
+                              setNewResponseNotifications(checked)
+                              toast.success(checked ? 'Response notifications enabled' : 'Response notifications disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Daily Digest</p>
-                            <p className="text-sm text-gray-500">Receive daily summary of responses</p>
+                          <div className="flex items-center gap-2">
+                            <CalendarDays className="w-4 h-4 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Daily Digest</p>
+                              <p className="text-sm text-gray-500">Receive daily summary of responses</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dailyDigest}
+                            onCheckedChange={(checked) => {
+                              setDailyDigest(checked)
+                              toast.success(checked ? 'Daily digest enabled' : 'Daily digest disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Weekly Report</p>
-                            <p className="text-sm text-gray-500">Get weekly analytics summary</p>
+                          <div className="flex items-center gap-2">
+                            <BarChart2 className="w-4 h-4 text-purple-600" />
+                            <div>
+                              <p className="font-medium">Weekly Report</p>
+                              <p className="text-sm text-gray-500">Get weekly analytics summary</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={weeklyReport}
+                            onCheckedChange={(checked) => {
+                              setWeeklyReport(checked)
+                              toast.success(checked ? 'Weekly report enabled' : 'Weekly report disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Completion Milestone Alerts</p>
-                            <p className="text-sm text-gray-500">Notify at 100, 500, 1000 responses</p>
+                          <div className="flex items-center gap-2">
+                            <Trophy className="w-4 h-4 text-yellow-600" />
+                            <div>
+                              <p className="font-medium">Completion Milestone Alerts</p>
+                              <p className="text-sm text-gray-500">Notify at 100, 500, 1000 responses</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={completionMilestoneAlerts}
+                            onCheckedChange={(checked) => {
+                              setCompletionMilestoneAlerts(checked)
+                              toast.success(checked ? 'Milestone alerts enabled' : 'Milestone alerts disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2 pt-4">
@@ -1679,27 +1937,54 @@ export default function PollsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Confirmation Emails</p>
-                            <p className="text-sm text-gray-500">Send confirmation when form is submitted</p>
+                          <div className="flex items-center gap-2">
+                            <MailCheck className="w-4 h-4 text-green-600" />
+                            <div>
+                              <p className="font-medium">Confirmation Emails</p>
+                              <p className="text-sm text-gray-500">Send confirmation when form is submitted</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={confirmationEmails}
+                            onCheckedChange={(checked) => {
+                              setConfirmationEmails(checked)
+                              toast.success(checked ? 'Confirmation emails enabled' : 'Confirmation emails disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Response Copy</p>
-                            <p className="text-sm text-gray-500">Send respondent a copy of their answers</p>
+                          <div className="flex items-center gap-2">
+                            <FileOutput className="w-4 h-4 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Response Copy</p>
+                              <p className="text-sm text-gray-500">Send respondent a copy of their answers</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={responseCopy}
+                            onCheckedChange={(checked) => {
+                              setResponseCopy(checked)
+                              toast.success(checked ? 'Response copy enabled' : 'Response copy disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Reminder Emails</p>
-                            <p className="text-sm text-gray-500">Send reminders for incomplete surveys</p>
+                          <div className="flex items-center gap-2">
+                            <BellOff className="w-4 h-4 text-orange-600" />
+                            <div>
+                              <p className="font-medium">Reminder Emails</p>
+                              <p className="text-sm text-gray-500">Send reminders for incomplete surveys</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={reminderEmails}
+                            onCheckedChange={(checked) => {
+                              setReminderEmails(checked)
+                              toast.success(checked ? 'Reminder emails enabled' : 'Reminder emails disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2 pt-4">
@@ -1720,27 +2005,54 @@ export default function PollsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Low Score Alert</p>
-                            <p className="text-sm text-gray-500">Alert when NPS or rating is below threshold</p>
+                          <div className="flex items-center gap-2">
+                            <ThumbsDown className="w-4 h-4 text-red-600" />
+                            <div>
+                              <p className="font-medium">Low Score Alert</p>
+                              <p className="text-sm text-gray-500">Alert when NPS or rating is below threshold</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={lowScoreAlert}
+                            onCheckedChange={(checked) => {
+                              setLowScoreAlert(checked)
+                              toast.success(checked ? 'Low score alerts enabled' : 'Low score alerts disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Sentiment Detection</p>
-                            <p className="text-sm text-gray-500">Alert for negative text responses</p>
+                          <div className="flex items-center gap-2">
+                            <Brain className="w-4 h-4 text-purple-600" />
+                            <div>
+                              <p className="font-medium">Sentiment Detection</p>
+                              <p className="text-sm text-gray-500">Alert for negative text responses</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={sentimentDetection}
+                            onCheckedChange={(checked) => {
+                              setSentimentDetection(checked)
+                              toast.success(checked ? 'Sentiment detection enabled' : 'Sentiment detection disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Drop-off Alert</p>
-                            <p className="text-sm text-gray-500">Notify when completion rate drops</p>
+                          <div className="flex items-center gap-2">
+                            <TrendingDown className="w-4 h-4 text-orange-600" />
+                            <div>
+                              <p className="font-medium">Drop-off Alert</p>
+                              <p className="text-sm text-gray-500">Notify when completion rate drops</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={dropOffAlert}
+                            onCheckedChange={(checked) => {
+                              setDropOffAlert(checked)
+                              toast.success(checked ? 'Drop-off alerts enabled' : 'Drop-off alerts disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1803,11 +2115,20 @@ export default function PollsClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Remove Powered By</p>
-                            <p className="text-sm text-gray-500">Hide branding on forms (Pro feature)</p>
+                          <div className="flex items-center gap-2">
+                            <BadgeX className="w-4 h-4 text-pink-600" />
+                            <div>
+                              <p className="font-medium">Remove Powered By</p>
+                              <p className="text-sm text-gray-500">Hide branding on forms (Pro feature)</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={removePoweredBy}
+                            onCheckedChange={(checked) => {
+                              setRemovePoweredBy(checked)
+                              toast.success(checked ? 'Branding removed from forms' : 'Branding visible on forms')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1947,11 +2268,20 @@ export default function PollsClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">API Access</p>
-                            <p className="text-sm text-gray-500">Enable programmatic access to forms</p>
+                          <div className="flex items-center gap-2">
+                            <Unplug className="w-4 h-4 text-violet-600" />
+                            <div>
+                              <p className="font-medium">API Access</p>
+                              <p className="text-sm text-gray-500">Enable programmatic access to forms</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={apiAccess}
+                            onCheckedChange={(checked) => {
+                              setApiAccess(checked)
+                              toast.success(checked ? 'API access enabled' : 'API access disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2">
@@ -1981,11 +2311,20 @@ export default function PollsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Allow Embedding</p>
-                            <p className="text-sm text-gray-500">Let forms be embedded on external sites</p>
+                          <div className="flex items-center gap-2">
+                            <LayoutGrid className="w-4 h-4 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Allow Embedding</p>
+                              <p className="text-sm text-gray-500">Let forms be embedded on external sites</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowEmbedding}
+                            onCheckedChange={(checked) => {
+                              setAllowEmbedding(checked)
+                              toast.success(checked ? 'Embedding allowed' : 'Embedding disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2">
@@ -1995,11 +2334,20 @@ export default function PollsClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Popup Mode</p>
-                            <p className="text-sm text-gray-500">Enable popup/modal form display</p>
+                          <div className="flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-purple-600" />
+                            <div>
+                              <p className="font-medium">Popup Mode</p>
+                              <p className="text-sm text-gray-500">Enable popup/modal form display</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={popupMode}
+                            onCheckedChange={(checked) => {
+                              setPopupMode(checked)
+                              toast.success(checked ? 'Popup mode enabled' : 'Popup mode disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2019,35 +2367,71 @@ export default function PollsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">CAPTCHA Protection</p>
-                            <p className="text-sm text-gray-500">Prevent spam submissions</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-green-600" />
+                            <div>
+                              <p className="font-medium">CAPTCHA Protection</p>
+                              <p className="text-sm text-gray-500">Prevent spam submissions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={captchaProtection}
+                            onCheckedChange={(checked) => {
+                              setCaptchaProtection(checked)
+                              toast.success(checked ? 'CAPTCHA protection enabled' : 'CAPTCHA protection disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Honeypot Fields</p>
-                            <p className="text-sm text-gray-500">Hidden anti-bot protection</p>
+                          <div className="flex items-center gap-2">
+                            <Bug className="w-4 h-4 text-yellow-600" />
+                            <div>
+                              <p className="font-medium">Honeypot Fields</p>
+                              <p className="text-sm text-gray-500">Hidden anti-bot protection</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={honeypotFields}
+                            onCheckedChange={(checked) => {
+                              setHoneypotFields(checked)
+                              toast.success(checked ? 'Honeypot protection enabled' : 'Honeypot protection disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">IP Tracking</p>
-                            <p className="text-sm text-gray-500">Log respondent IP addresses</p>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-blue-600" />
+                            <div>
+                              <p className="font-medium">IP Tracking</p>
+                              <p className="text-sm text-gray-500">Log respondent IP addresses</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ipTracking}
+                            onCheckedChange={(checked) => {
+                              setIpTracking(checked)
+                              toast.success(checked ? 'IP tracking enabled' : 'IP tracking disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Data Encryption</p>
-                            <p className="text-sm text-gray-500">Encrypt responses at rest</p>
+                          <div className="flex items-center gap-2">
+                            <LockKeyhole className="w-4 h-4 text-purple-600" />
+                            <div>
+                              <p className="font-medium">Data Encryption</p>
+                              <p className="text-sm text-gray-500">Encrypt responses at rest</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dataEncryption}
+                            onCheckedChange={(checked) => {
+                              setDataEncryption(checked)
+                              toast.success(checked ? 'Data encryption enabled' : 'Data encryption disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2078,11 +2462,20 @@ export default function PollsClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">GDPR Compliance Mode</p>
-                            <p className="text-sm text-gray-500">Enable GDPR-compliant data handling</p>
+                          <div className="flex items-center gap-2">
+                            <Scale className="w-4 h-4 text-indigo-600" />
+                            <div>
+                              <p className="font-medium">GDPR Compliance Mode</p>
+                              <p className="text-sm text-gray-500">Enable GDPR-compliant data handling</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={gdprComplianceMode}
+                            onCheckedChange={(checked) => {
+                              setGdprComplianceMode(checked)
+                              toast.success(checked ? 'GDPR compliance mode enabled' : 'GDPR compliance mode disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -2729,11 +3122,11 @@ export default function PollsClient() {
                 {/* Actions */}
                 <div className="flex justify-between gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleExportSingleResponse}>
                       <Download className="w-4 h-4 mr-2" />
                       Export
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleSendResponseCopy}>
                       <Mail className="w-4 h-4 mr-2" />
                       Send Copy
                     </Button>
