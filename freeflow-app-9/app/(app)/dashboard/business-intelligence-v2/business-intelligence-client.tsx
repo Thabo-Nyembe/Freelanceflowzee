@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useCallback, useMemo, memo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -60,7 +60,23 @@ import { useKPIGoals } from '@/hooks/use-kpi-goals'
 
 type UserType = 'freelancer' | 'entrepreneur' | 'agency' | 'enterprise'
 
-export function BusinessIntelligenceClient() {
+// User type icons moved to module level for stable reference
+const USER_TYPE_ICONS: Record<UserType, React.ReactNode> = {
+  freelancer: <User className="w-4 h-4" />,
+  entrepreneur: <Lightbulb className="w-4 h-4" />,
+  agency: <Building className="w-4 h-4" />,
+  enterprise: <Building2 className="w-4 h-4" />
+}
+
+// User type descriptions moved to module level for stable reference
+const USER_TYPE_DESCRIPTIONS: Record<UserType, string> = {
+  freelancer: 'Individual professional optimizing personal productivity and client relationships',
+  entrepreneur: 'Business owner focused on growth, scalability, and market expansion',
+  agency: 'Team-based organization managing multiple clients and projects',
+  enterprise: 'Large organization with complex operations and multiple departments'
+}
+
+export const BusinessIntelligenceClient = memo(function BusinessIntelligenceClient() {
   const [userType, setUserType] = useState<UserType>('freelancer')
   const [refreshing, setRefreshing] = useState(false)
 
@@ -130,16 +146,16 @@ export function BusinessIntelligenceClient() {
 
   const loading = biLoading || profitLoading || clientLoading || forecastLoading || kpiLoading
 
-  // Handle refresh
-  const handleRefresh = async () => {
+  // Handle refresh - using useCallback for stable reference
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true)
     await refreshBI()
     setTimeout(() => setRefreshing(false), 1000)
     toast.success('Data refreshed successfully')
-  }
+  }, [refreshBI])
 
-  // Handle export
-  const handleExport = async () => {
+  // Handle export - using useCallback for stable reference
+  const handleExport = useCallback(async () => {
     try {
       const exportData = {
         metrics: metrics || {},
@@ -168,10 +184,10 @@ export function BusinessIntelligenceClient() {
     } catch (err) {
       toast.error('Export failed')
     }
-  }
+  }, [metrics, healthScore, profitSummary, clientMetrics, scenarios, kpiDashboard, exportFormat, userType])
 
-  // Handle save settings
-  const handleSaveSettings = async () => {
+  // Handle save settings - using useCallback for stable reference
+  const handleSaveSettings = useCallback(async () => {
     try {
       const settings = {
         enableNotifications,
@@ -187,10 +203,10 @@ export function BusinessIntelligenceClient() {
     } catch (err) {
       toast.error('Failed to save settings')
     }
-  }
+  }, [enableNotifications, enableAutoRefresh, refreshInterval, dataDisplayMode, userType, dateRange])
 
-  // Handle add goal
-  const handleAddGoal = () => {
+  // Handle add goal - using useCallback for stable reference
+  const handleAddGoal = useCallback(() => {
     if (!goalName || !goalTarget) {
       toast.error('Please fill in all required fields')
       return
@@ -200,16 +216,16 @@ export function BusinessIntelligenceClient() {
     setGoalTarget('')
     setGoalCategory('revenue')
     setShowAddGoalDialog(false)
-  }
+  }, [goalName, goalTarget, goalCategory])
 
-  // Handle add goal from template
-  const handleAddGoalFromTemplate = (templateId: string, templateName: string) => {
+  // Handle add goal from template - using useCallback for stable reference
+  const handleAddGoalFromTemplate = useCallback((templateId: string, templateName: string) => {
     setSelectedTemplate(templateId)
     toast.success(`Goal "${templateName}" added from template`)
-  }
+  }, [])
 
-  // Handle apply filters
-  const handleApplyFilters = async () => {
+  // Handle apply filters - using useCallback for stable reference
+  const handleApplyFilters = useCallback(async () => {
     try {
       const filters = {
         category: filterCategory,
@@ -224,20 +240,20 @@ export function BusinessIntelligenceClient() {
     } catch (err) {
       toast.error('Failed to apply filters')
     }
-  }
+  }, [filterCategory, filterStatus, filterMinValue, filterMaxValue])
 
-  // Handle clear filters
-  const handleClearFilters = () => {
+  // Handle clear filters - using useCallback for stable reference
+  const handleClearFilters = useCallback(() => {
     setFilterCategory('all')
     setFilterStatus('all')
     setFilterMinValue('')
     setFilterMaxValue('')
     toast.info('Filters cleared')
     setShowFilterDialog(false)
-  }
+  }, [])
 
-  // Handle date range selection
-  const handleDateRangeApply = () => {
+  // Handle date range selection - using useCallback for stable reference
+  const handleDateRangeApply = useCallback(() => {
     const rangeLabels: Record<string, string> = {
       'last7days': 'Last 7 Days',
       'last30days': 'Last 30 Days',
@@ -248,10 +264,10 @@ export function BusinessIntelligenceClient() {
     }
     toast.success(`Date range set to ${rangeLabels[dateRange]}`)
     setShowDateRangeDialog(false)
-  }
+  }, [dateRange])
 
-  // Handle add report
-  const handleAddReport = () => {
+  // Handle add report - using useCallback for stable reference
+  const handleAddReport = useCallback(() => {
     if (!reportName) {
       toast.error('Please enter a report name')
       return
@@ -260,10 +276,10 @@ export function BusinessIntelligenceClient() {
     setReportName('')
     setReportDescription('')
     setShowAddReportDialog(false)
-  }
+  }, [reportName])
 
-  // Handle share
-  const handleShare = () => {
+  // Handle share - using useCallback for stable reference
+  const handleShare = useCallback(() => {
     if (!shareEmail) {
       toast.error('Please enter an email address')
       return
@@ -271,10 +287,10 @@ export function BusinessIntelligenceClient() {
     toast.success(`Report shared with ${shareEmail}`)
     setShareEmail('')
     setShowShareDialog(false)
-  }
+  }, [shareEmail])
 
-  // Handle schedule report
-  const handleScheduleReport = () => {
+  // Handle schedule report - using useCallback for stable reference
+  const handleScheduleReport = useCallback(() => {
     const frequencyLabels: Record<string, string> = {
       'daily': 'Daily',
       'weekly': 'Weekly',
@@ -285,36 +301,25 @@ export function BusinessIntelligenceClient() {
       description: 'You will receive automated reports via email'
     })
     setShowScheduleDialog(false)
-  }
+  }, [scheduleFrequency])
 
-  // Get user type specific templates
-  const userTemplates = getTemplatesForUserType(userType)
+  // Get user type specific templates - memoized for performance
+  const userTemplates = useMemo(() => getTemplatesForUserType(userType), [getTemplatesForUserType, userType])
 
-  // Format currency
-  const formatCurrency = (value: number) => {
+  // Format currency - memoized for performance
+  // Use memoized currency formatter for performance
+  const formatCurrency = useCallback((value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value)
-  }
+  }, [])
 
-  // User type icons
-  const userTypeIcons: Record<UserType, React.ReactNode> = {
-    freelancer: <User className="w-4 h-4" />,
-    entrepreneur: <Lightbulb className="w-4 h-4" />,
-    agency: <Building className="w-4 h-4" />,
-    enterprise: <Building2 className="w-4 h-4" />
-  }
-
-  // User type descriptions
-  const userTypeDescriptions: Record<UserType, string> = {
-    freelancer: 'Individual professional optimizing personal productivity and client relationships',
-    entrepreneur: 'Business owner focused on growth, scalability, and market expansion',
-    agency: 'Team-based organization managing multiple clients and projects',
-    enterprise: 'Large organization with complex operations and multiple departments'
-  }
+  // Use module-level constants for user type icons and descriptions
+  const userTypeIcons = USER_TYPE_ICONS
+  const userTypeDescriptions = USER_TYPE_DESCRIPTIONS
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:bg-none dark:bg-gray-900 p-6">
@@ -1306,6 +1311,6 @@ export function BusinessIntelligenceClient() {
       </Dialog>
     </div>
   )
-}
+})
 
 export default BusinessIntelligenceClient

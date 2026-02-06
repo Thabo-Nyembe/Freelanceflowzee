@@ -270,10 +270,10 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Build query for client list
+    // Build query for client list - PERFORMANCE: Select only needed fields
     let query = supabase
       .from('clients')
-      .select('*', { count: 'exact' })
+      .select('id, name, email, phone, company, status, type, industry, total_revenue, rating, tags, avatar_url, last_contact, next_follow_up, created_at, updated_at', { count: 'exact' })
 
     // Filter by user access
     query = query.eq('user_id', userId)
@@ -331,7 +331,7 @@ export async function GET(request: NextRequest) {
     // Get aggregate stats
     const aggregateStats = await getAggregateClientStats(supabase, userId)
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       clients: clientsWithStats,
       aggregate_stats: aggregateStats,
@@ -342,6 +342,10 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil((count || 0) / limit)
       }
     })
+
+    // Cache client list for 30 seconds, revalidate in background
+    response.headers.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60')
+    return response
   } catch (error) {
     logger.error('Clients GET error', { error })
     return NextResponse.json(
@@ -1086,70 +1090,70 @@ async function getClientStats(
   clientId: string
 ): Promise<ClientStats> {
   try {
-    // Get project counts
-    const { count: totalProjects } = await supabase
-      .from('projects')
-      .select('*', { count: 'exact', head: true })
-      .eq('client_id', clientId)
+    // PERFORMANCE OPTIMIZATION: Batch all queries into parallel execution
+    // This reduces 8+ sequential DB calls to 5 parallel calls
+    const [projectsResult, invoicesResult, filesCount, messagesCount, lastActivity] = await Promise.all([
+      // Get all project data in one query - we'll compute counts client-side
+      supabase
+        .from('projects')
+        .select('id, status')
+        .eq('client_id', clientId),
 
-    const { count: activeProjects } = await supabase
-      .from('projects')
-      .select('*', { count: 'exact', head: true })
-      .eq('client_id', clientId)
-      .eq('status', 'active')
+      // Get all invoice data in one query - compute stats client-side
+      supabase
+        .from('invoices')
+        .select('id, status, total')
+        .eq('client_id', clientId),
 
-    const { count: completedProjects } = await supabase
-      .from('projects')
-      .select('*', { count: 'exact', head: true })
-      .eq('client_id', clientId)
-      .eq('status', 'completed')
+      // Get file count
+      supabase
+        .from('files')
+        .select('*', { count: 'exact', head: true })
+        .eq('client_id', clientId),
 
-    // Get invoice counts and amounts
-    const { data: invoices } = await supabase
-      .from('invoices')
-      .select('id, status, total')
-      .eq('client_id', clientId)
+      // Get message count
+      supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('client_id', clientId),
 
-    const totalInvoices = invoices?.length || 0
-    const paidInvoices = invoices?.filter(i => i.status === 'paid').length || 0
-    const pendingInvoices = invoices?.filter(i => ['pending', 'sent'].includes(i.status)).length || 0
-    const totalRevenue = invoices?.filter(i => i.status === 'paid').reduce((sum, i) => sum + (i.total || 0), 0) || 0
-    const outstandingAmount = invoices?.filter(i => ['pending', 'sent', 'overdue'].includes(i.status)).reduce((sum, i) => sum + (i.total || 0), 0) || 0
+      // Get last activity
+      supabase
+        .from('client_interactions')
+        .select('created_at')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+    ])
 
-    // Get file count
-    const { count: totalFiles } = await supabase
-      .from('files')
-      .select('*', { count: 'exact', head: true })
-      .eq('client_id', clientId)
+    // Compute project stats from single query result
+    const projects = projectsResult.data || []
+    const totalProjects = projects.length
+    const activeProjects = projects.filter(p => p.status === 'active').length
+    const completedProjects = projects.filter(p => p.status === 'completed').length
 
-    // Get message count
-    const { count: totalMessages } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('client_id', clientId)
-
-    // Get last activity
-    const { data: lastActivity } = await supabase
-      .from('client_interactions')
-      .select('created_at')
-      .eq('client_id', clientId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
+    // Compute invoice stats from single query result
+    const invoices = invoicesResult.data || []
+    const totalInvoices = invoices.length
+    const paidInvoices = invoices.filter(i => i.status === 'paid').length
+    const pendingInvoices = invoices.filter(i => ['pending', 'sent'].includes(i.status)).length
+    const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + (i.total || 0), 0)
+    const outstandingAmount = invoices.filter(i => ['pending', 'sent', 'overdue'].includes(i.status)).reduce((sum, i) => sum + (i.total || 0), 0)
 
     return {
-      total_projects: totalProjects || 0,
-      active_projects: activeProjects || 0,
-      completed_projects: completedProjects || 0,
+      total_projects: totalProjects,
+      active_projects: activeProjects,
+      completed_projects: completedProjects,
       total_invoices: totalInvoices,
       paid_invoices: paidInvoices,
       pending_invoices: pendingInvoices,
       total_revenue: totalRevenue,
       outstanding_amount: outstandingAmount,
       average_project_value: totalProjects ? totalRevenue / totalProjects : 0,
-      total_files: totalFiles || 0,
-      total_messages: totalMessages || 0,
-      last_activity: lastActivity?.created_at || ''
+      total_files: filesCount.count || 0,
+      total_messages: messagesCount.count || 0,
+      last_activity: lastActivity.data?.created_at || ''
     }
   } catch (error) {
     logger.error('Error getting client stats', { error })
@@ -1175,49 +1179,30 @@ async function getAggregateClientStats(
   userId: string
 ) {
   try {
-    const { count: total } = await supabase
+    // PERFORMANCE OPTIMIZATION: Single query to get all status counts
+    // Replaces 6 separate count queries with 1 query
+    const { data: clients, error } = await supabase
       .from('clients')
-      .select('*', { count: 'exact', head: true })
+      .select('status')
       .eq('user_id', userId)
 
-    const { count: vip } = await supabase
-      .from('clients')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('status', 'vip')
+    if (error) throw error
 
-    const { count: active } = await supabase
-      .from('clients')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('status', 'active')
-
-    const { count: leads } = await supabase
-      .from('clients')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('status', 'lead')
-
-    const { count: prospects } = await supabase
-      .from('clients')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('status', 'prospect')
-
-    const { count: inactive } = await supabase
-      .from('clients')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('status', 'inactive')
+    // Compute all counts client-side from single query result
+    const statusCounts = (clients || []).reduce((acc, client) => {
+      const status = client.status || 'unknown'
+      acc[status] = (acc[status] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
 
     return {
-      total: total || 0,
+      total: clients?.length || 0,
       by_status: {
-        vip: vip || 0,
-        active: active || 0,
-        lead: leads || 0,
-        prospect: prospects || 0,
-        inactive: inactive || 0
+        vip: statusCounts['vip'] || 0,
+        active: statusCounts['active'] || 0,
+        lead: statusCounts['lead'] || 0,
+        prospect: statusCounts['prospect'] || 0,
+        inactive: statusCounts['inactive'] || 0
       }
     }
   } catch (error) {

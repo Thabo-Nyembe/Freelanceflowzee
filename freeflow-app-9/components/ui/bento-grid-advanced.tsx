@@ -3,6 +3,11 @@
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 import { ReactNode } from "react"
+import Image from "next/image"
+
+// Default blur placeholder for background images
+const DEFAULT_BLUR_PLACEHOLDER =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAME/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDBBEhABIxBQYTQVFh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAYEQEBAQEBAAAAAAAAAAAAAAABAgADEf/aAAwDAQACEQMRAD8AyRU9NL06aKjqzBUxNulkZQWBJYEA+xYfPmtaKpqa6ljqqaZopozlHXkHTWk0w5JOp//Z"
 
 /**
  * Advanced Bento Grid System - Groundbreaking 2025
@@ -198,7 +203,16 @@ export function BentoHero({
       <div className="relative h-full">
         {image && (
           <div className="absolute inset-0 opacity-20">
-            <img src={image} alt="" className="w-full h-full object-cover" loading="lazy" />
+            <Image
+              src={image}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 100vw, 66vw"
+              className="object-cover"
+              placeholder="blur"
+              blurDataURL={DEFAULT_BLUR_PLACEHOLDER}
+              loading="lazy"
+            />
           </div>
         )}
 
@@ -347,10 +361,16 @@ export function BentoGallery({
             transition={{ delay: index * 0.1 }}
             whileHover={{ scale: 1.05 }}
           >
-            <img src={image.src}
+            <Image
+              src={image.src}
               alt={image.alt}
-              className="w-full h-full object-cover"
-            loading="lazy" />
+              fill
+              sizes="(max-width: 768px) 50vw, 25vw"
+              className="object-cover"
+              placeholder="blur"
+              blurDataURL={DEFAULT_BLUR_PLACEHOLDER}
+              loading="lazy"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
           </motion.div>
         ))}

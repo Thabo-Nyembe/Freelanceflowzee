@@ -169,9 +169,10 @@ export async function GET(request: NextRequest) {
         )
       }
 
+      // PERFORMANCE: Select specific columns for single project view
       const { data: project, error } = await supabase
         .from('projects')
-        .select('*')
+        .select('id, name, description, status, priority, type, user_id, team_id, client_id, budget, currency, start_date, due_date, completed_at, progress, visibility, settings, metadata, tags, cover_image, created_at, updated_at')
         .eq('id', projectId)
         .single()
 
@@ -214,7 +215,7 @@ export async function GET(request: NextRequest) {
         tasks = taskData || []
       }
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         project: {
           ...project,
@@ -223,12 +224,17 @@ export async function GET(request: NextRequest) {
           recent_tasks: tasks
         }
       })
+
+      // Cache single project for 60 seconds
+      response.headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=120')
+      return response
     }
 
-    // Build query for project list
+    // Build query for project list - select only needed fields
+    // PERFORMANCE: Select specific columns instead of * to reduce payload
     let query = supabase
       .from('projects')
-      .select('*', { count: 'exact' })
+      .select('id, name, description, status, priority, type, user_id, client_id, budget, currency, start_date, due_date, progress, visibility, tags, cover_image, created_at, updated_at', { count: 'exact' })
 
     // Filter by user access (owner, team member, or project member)
     query = query.or(`user_id.eq.${userId},visibility.eq.public`)
@@ -283,7 +289,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       projects: projectsWithStats,
       pagination: {
@@ -293,6 +299,10 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil((count || 0) / limit)
       }
     })
+
+    // Cache project list for 30 seconds, revalidate in background
+    response.headers.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60')
+    return response
   } catch (error) {
     logger.error('Projects GET error', { error })
     return NextResponse.json(
@@ -710,51 +720,54 @@ export async function DELETE(request: NextRequest) {
 
 async function getProjectStats(supabase: ReturnType<typeof createClient>, projectId: string): Promise<ProjectStats> {
   try {
-    // Get task counts
-    const { count: totalTasks } = await supabase
-      .from('tasks')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId)
+    // PERFORMANCE OPTIMIZATION: Batch all queries into parallel execution
+    // Reduces 6 sequential DB calls to 5 parallel calls
+    const [tasksResult, filesCount, commentsCount, membersCount, timeEntriesResult] = await Promise.all([
+      // Get task data in one query - compute counts client-side
+      supabase
+        .from('tasks')
+        .select('status')
+        .eq('project_id', projectId),
 
-    const { count: completedTasks } = await supabase
-      .from('tasks')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId)
-      .eq('status', 'completed')
+      // Get file count
+      supabase
+        .from('files')
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', projectId),
 
-    // Get file count
-    const { count: totalFiles } = await supabase
-      .from('files')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId)
+      // Get comment count
+      supabase
+        .from('comments')
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', projectId),
 
-    // Get comment count
-    const { count: totalComments } = await supabase
-      .from('comments')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId)
+      // Get team members count
+      supabase
+        .from('project_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', projectId),
 
-    // Get team members count
-    const { count: teamMembers } = await supabase
-      .from('project_members')
-      .select('*', { count: 'exact', head: true })
-      .eq('project_id', projectId)
+      // Get time entries
+      supabase
+        .from('time_entries')
+        .select('duration')
+        .eq('project_id', projectId)
+    ])
 
-    // Get total hours from time entries
-    const { data: timeEntries } = await supabase
-      .from('time_entries')
-      .select('duration')
-      .eq('project_id', projectId)
+    // Compute task stats from single query result
+    const tasks = tasksResult.data || []
+    const totalTasks = tasks.length
+    const completedTasks = tasks.filter(t => t.status === 'completed').length
 
-    const totalHours = timeEntries?.reduce((sum, entry) => sum + (entry.duration || 0), 0) || 0
+    const totalHours = (timeEntriesResult.data || []).reduce((sum, entry) => sum + (entry.duration || 0), 0)
 
     return {
-      total_tasks: totalTasks || 0,
-      completed_tasks: completedTasks || 0,
-      total_files: totalFiles || 0,
-      total_comments: totalComments || 0,
+      total_tasks: totalTasks,
+      completed_tasks: completedTasks,
+      total_files: filesCount.count || 0,
+      total_comments: commentsCount.count || 0,
       total_hours: Math.round(totalHours / 60), // Convert minutes to hours
-      team_members: teamMembers || 0
+      team_members: membersCount.count || 0
     }
   } catch (error) {
     logger.error('Error getting project stats', { error })

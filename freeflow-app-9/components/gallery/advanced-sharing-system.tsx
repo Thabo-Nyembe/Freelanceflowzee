@@ -50,6 +50,11 @@ import {
   DropdownMenuItem
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea'
+import NextImage from 'next/image'
+
+// Blur placeholder for sharing gallery images
+const SHARING_IMAGE_BLUR =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAME/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDBBEhABIxBQYTQVFh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAYEQEBAQEBAAAAAAAAAAAAAAABAgADEf/aAAwDAQACEQMRAD8AyRU9NL06aKjqzBUxNulkZQWBJYEA+xYfPmtaKpqa6ljqqaZopozlHXkHTWk0w5JOp//Z"
 
 // Type definitions
 interface GalleryItem {
@@ -422,8 +427,17 @@ export function AdvancedGallerySharingSystem({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredAndSortedItems.map((item) => (
             <Card key={item.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="relative aspect-square overflow-hidden">
-                <img src={item.thumbnailUrl} alt={item.name} loading="lazy" onClick={() => _setLightboxItem(item)} />
+              <div className="relative aspect-square overflow-hidden cursor-pointer" onClick={() => _setLightboxItem(item)}>
+                <NextImage
+                  src={item.thumbnailUrl || '/placeholder.jpg'}
+                  alt={item.name}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  placeholder="blur"
+                  blurDataURL={SHARING_IMAGE_BLUR}
+                  loading="lazy"
+                />
                 
                 {/* Overlay controls */}
                 <div className="absolute inset-0 flex items-center justify-between">
@@ -516,8 +530,19 @@ export function AdvancedGallerySharingSystem({
         <div>
           {filteredAndSortedItems.map((item) => (
             <Card key={item.id}>
-              <div>
-                <img src={item.thumbnailUrl} alt={item.name} loading="lazy" onClick={() => _setLightboxItem(item)} />
+              <div className="flex gap-4 p-4">
+                <div className="relative w-24 h-24 flex-shrink-0 cursor-pointer" onClick={() => _setLightboxItem(item)}>
+                  <NextImage
+                    src={item.thumbnailUrl || '/placeholder.jpg'}
+                    alt={item.name}
+                    fill
+                    sizes="96px"
+                    className="object-cover rounded-lg"
+                    placeholder="blur"
+                    blurDataURL={SHARING_IMAGE_BLUR}
+                    loading="lazy"
+                  />
+                </div>
                 
                 <div>
                   <h3>{item.name}</h3>
@@ -650,11 +675,20 @@ export function AdvancedGallerySharingSystem({
       {_lightboxItem && (
         <Dialog open={!!_lightboxItem} onOpenChange={_setLightboxItem}>
           <DialogContent>
-            <div className="relative">
+            <div className="relative aspect-video">
               {_lightboxItem.type === 'video' ? (
-                <video src={_lightboxItem.url} />
+                <video src={_lightboxItem.url} controls className="w-full h-full" />
               ) : (
-                <img src={_lightboxItem.url} alt={_lightboxItem.name} loading="lazy" />
+                <NextImage
+                  src={_lightboxItem.url}
+                  alt={_lightboxItem.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 800px"
+                  className="object-contain"
+                  placeholder="blur"
+                  blurDataURL={SHARING_IMAGE_BLUR}
+                  priority
+                />
               )}
               
               <Button onClick={_setLightboxItem} className="absolute top-2 right-2 bg-purple-600/90 text-white hover:bg-purple-700/90 backdrop-blur-sm">

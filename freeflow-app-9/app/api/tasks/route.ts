@@ -341,10 +341,10 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Build query for task list
+    // Build query for task list - PERFORMANCE: Select only needed fields
     let query = supabase
       .from('tasks')
-      .select('*', { count: 'exact' })
+      .select('id, title, description, status, priority, category, type, project_id, parent_id, assignee_id, estimated_minutes, actual_minutes, start_date, due_date, completed_at, position, tags, labels, checklist, created_at, updated_at', { count: 'exact' })
 
     // Filter by user access (own tasks, assigned tasks, or project member)
     query = query.or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
@@ -422,7 +422,7 @@ export async function GET(request: NextRequest) {
     // Get stats
     const stats = await getTaskStats(supabase, userId, projectId || undefined)
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       tasks: tasks || [],
       stats,
@@ -433,6 +433,10 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil((count || 0) / limit)
       }
     })
+
+    // Cache task list for 20 seconds, revalidate in background
+    response.headers.set('Cache-Control', 'private, max-age=20, stale-while-revalidate=40')
+    return response
   } catch (error) {
     logger.error('Tasks GET error', { error })
     return NextResponse.json(
@@ -1578,74 +1582,54 @@ async function getTaskStats(
   projectId?: string
 ): Promise<TaskStats> {
   try {
-    let baseQuery = supabase
+    // PERFORMANCE OPTIMIZATION: Single query to get all task data
+    // Replaces 7 separate count queries with 1 query + client-side computation
+    let query = supabase
       .from('tasks')
-      .select('*', { count: 'exact', head: true })
+      .select('status, priority, due_date, estimated_minutes, actual_minutes')
       .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
 
     if (projectId) {
-      baseQuery = baseQuery.eq('project_id', projectId)
+      query = query.eq('project_id', projectId)
     }
 
-    const { count: total } = await baseQuery
+    const { data: tasks, error } = await query
 
-    const { count: completed } = await supabase
-      .from('tasks')
-      .select('*', { count: 'exact', head: true })
-      .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
-      .eq('status', 'completed')
-      .match(projectId ? { project_id: projectId } : {})
+    if (error) throw error
 
-    const { count: inProgress } = await supabase
-      .from('tasks')
-      .select('*', { count: 'exact', head: true })
-      .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
-      .eq('status', 'in_progress')
-      .match(projectId ? { project_id: projectId } : {})
+    const now = new Date().toISOString()
+    const taskList = tasks || []
 
-    const { count: todo } = await supabase
-      .from('tasks')
-      .select('*', { count: 'exact', head: true })
-      .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
-      .eq('status', 'todo')
-      .match(projectId ? { project_id: projectId } : {})
+    // Compute all stats client-side from single query result
+    const total = taskList.length
+    const completed = taskList.filter(t => t.status === 'completed').length
+    const inProgress = taskList.filter(t => t.status === 'in_progress').length
+    const todo = taskList.filter(t => t.status === 'todo').length
+    const overdue = taskList.filter(t =>
+      t.due_date &&
+      t.due_date < now &&
+      t.status !== 'completed' &&
+      t.status !== 'cancelled'
+    ).length
+    const urgent = taskList.filter(t =>
+      t.priority === 'urgent' &&
+      t.status !== 'completed' &&
+      t.status !== 'cancelled'
+    ).length
 
-    const { count: overdue } = await supabase
-      .from('tasks')
-      .select('*', { count: 'exact', head: true })
-      .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
-      .lt('due_date', new Date().toISOString())
-      .not('status', 'in', '("completed","cancelled")')
-      .match(projectId ? { project_id: projectId } : {})
-
-    const { count: urgent } = await supabase
-      .from('tasks')
-      .select('*', { count: 'exact', head: true })
-      .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
-      .eq('priority', 'urgent')
-      .not('status', 'in', '("completed","cancelled")')
-      .match(projectId ? { project_id: projectId } : {})
-
-    // Get time totals
-    const { data: timeTasks } = await supabase
-      .from('tasks')
-      .select('estimated_minutes, actual_minutes')
-      .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
-      .match(projectId ? { project_id: projectId } : {})
-
-    const totalEstimated = timeTasks?.reduce((sum, t) => sum + (t.estimated_minutes || 0), 0) || 0
-    const totalActual = timeTasks?.reduce((sum, t) => sum + (t.actual_minutes || 0), 0) || 0
+    const totalEstimated = taskList.reduce((sum, t) => sum + (t.estimated_minutes || 0), 0)
+    const totalActual = taskList.reduce((sum, t) => sum + (t.actual_minutes || 0), 0)
 
     return {
-      total: total || 0,
-      completed: completed || 0,
-      in_progress: inProgress || 0,
-      todo: todo || 0,
-      overdue: overdue || 0,
-      urgent: urgent || 0,
+      total,
+      completed,
+      in_progress: inProgress,
+      todo,
+      overdue,
+      urgent,
       total_estimated_minutes: totalEstimated,
       total_actual_minutes: totalActual,
-      completion_rate: total ? Math.round(((completed || 0) / total) * 100) : 0
+      completion_rate: total ? Math.round((completed / total) * 100) : 0
     }
   } catch (error) {
     logger.error('Error getting task stats', { error })

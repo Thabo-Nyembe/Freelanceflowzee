@@ -24,7 +24,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     // Return basic analytics summary
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       analytics: {
         user_id: effectiveUserId,
@@ -32,6 +32,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         message: 'Analytics data available'
       }
     });
+
+    // Cache analytics for 2 minutes - analytics data doesn't need real-time updates
+    response.headers.set('Cache-Control', 'private, max-age=120, stale-while-revalidate=240');
+    return response;
   } catch (error) {
     logger.error('Analytics GET error', { error });
     return NextResponse.json(

@@ -2,12 +2,17 @@
 
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
-import { ReactNode } from "react"
+import { ReactNode, useState } from "react"
 import {
   TrendingUp,
   TrendingDown,
   Minus,
 } from "lucide-react"
+import Image from "next/image"
+
+// Blur placeholder for avatars in results display
+const AVATAR_BLUR_PLACEHOLDER =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAME/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDBBEhABIxBQYTQVFh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAYEQEBAQEBAAAAAAAAAAAAAAABAgADEf/aAAwDAQACEQMRAD8AyRU9NL06aKjqzBUxNulkZQWBJYEA+xYfPmtaKpqa6ljqqaZopozlHXkHTWk0w5JOp//Z"
 
 /**
  * Results Display Components - 2025 Dashboard Cards
@@ -440,10 +445,16 @@ export function RankingList({
 
             {/* Avatar */}
             {item.avatar && (
-              <img src={item.avatar}
+              <Image
+                src={item.avatar}
                 alt={item.name}
-                className="w-10 h-10 rounded-full object-cover"
-              loading="lazy" />
+                width={40}
+                height={40}
+                className="rounded-full object-cover"
+                placeholder="blur"
+                blurDataURL={AVATAR_BLUR_PLACEHOLDER}
+                loading="lazy"
+              />
             )}
 
             {/* Name */}

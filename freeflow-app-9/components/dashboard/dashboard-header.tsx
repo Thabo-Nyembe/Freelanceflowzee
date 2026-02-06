@@ -1,6 +1,6 @@
 /**
  * Dashboard Header Component
- * 
+ *
  * Comprehensive header for dashboard pages with:
  * - Page title/breadcrumbs
  * - Global search
@@ -8,11 +8,16 @@
  * - User menu
  * - Online people
  * - Theme toggle
+ *
+ * PERFORMANCE OPTIMIZATIONS:
+ * - Uses React.memo to prevent unnecessary re-renders
+ * - Uses useCallback for stable event handlers
+ * - Uses useMemo for computed values
  */
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, useMemo, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, Bell, User, Settings, LogOut, Moon, Sun, Menu, Maximize2, Minimize2, Brain, Activity } from 'lucide-react'
 import { OnlinePeopleToggle } from '@/components/realtime/online-people-toggle'
@@ -41,7 +46,7 @@ interface DashboardHeaderProps {
     pageTitle?: string
 }
 
-export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
+export const DashboardHeader = memo<DashboardHeaderProps>(function DashboardHeader({ user, pageTitle }) {
     const router = useRouter()
     const { theme, setTheme } = useTheme()
     const { isFullscreen, toggleFullscreen } = useSidebar()
@@ -53,25 +58,55 @@ export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
     } = useAIPanels()
     const [searchQuery, setSearchQuery] = useState('')
 
-    const userName = user.user_metadata?.name || user.email.split('@')[0]
-    const userInitials = userName
-        .split(' ')
-        .map(n => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+    // Memoize computed values
+    const { userName, userInitials, avatarUrl } = useMemo(() => {
+        const name = user.user_metadata?.name || user.email.split('@')[0]
+        const initials = name
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2)
+        const avatar = `https://api.dicebear.com/7.x/initials/svg?seed=${name}`
+        return { userName: name, userInitials: initials, avatarUrl: avatar }
+    }, [user.email, user.user_metadata?.name])
 
-    const handleSearch = (e: React.FormEvent) => {
+    // Stable callback references
+    const handleSearch = useCallback((e: React.FormEvent) => {
         e.preventDefault()
         if (searchQuery.trim()) {
             router.push(`/dashboard/search?q=${encodeURIComponent(searchQuery)}`)
         }
-    }
+    }, [searchQuery, router])
 
-    const handleSignOut = async () => {
+    const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value)
+    }, [])
+
+    const handleSignOut = useCallback(async () => {
         await fetch('/auth/signout', { method: 'POST' })
         router.push('/')
-    }
+    }, [router])
+
+    const handleToggleTheme = useCallback(() => {
+        setTheme(theme === 'dark' ? 'light' : 'dark')
+    }, [theme, setTheme])
+
+    const handleNavigateToSearch = useCallback(() => {
+        router.push('/dashboard/search')
+    }, [router])
+
+    const handleNavigateToNotifications = useCallback(() => {
+        router.push('/dashboard/notifications')
+    }, [router])
+
+    const handleNavigateToProfile = useCallback(() => {
+        router.push('/dashboard/profile')
+    }, [router])
+
+    const handleNavigateToSettings = useCallback(() => {
+        router.push('/dashboard/settings')
+    }, [router])
 
     return (
         <header className="sticky top-0 z-40 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 shadow-sm">
@@ -94,7 +129,7 @@ export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
                                 type="search"
                                 placeholder="Search projects, tasks, clients..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={handleSearchChange}
                                 className="pl-10 w-full bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800"
                             />
                         </div>
@@ -108,7 +143,7 @@ export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
                         variant="ghost"
                         size="sm"
                         className="md:hidden"
-                        onClick={() => router.push('/dashboard/search')}
+                        onClick={handleNavigateToSearch}
                     >
                         <Search className="h-5 w-5" />
                     </Button>
@@ -190,7 +225,7 @@ export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                                 className="justify-center text-sm text-blue-600"
-                                onClick={() => router.push('/dashboard/notifications')}
+                                onClick={handleNavigateToNotifications}
                             >
                                 View all notifications
                             </DropdownMenuItem>
@@ -201,7 +236,7 @@ export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        onClick={handleToggleTheme}
                         className="hidden sm:flex"
                     >
                         {theme === 'dark' ? (
@@ -216,7 +251,7 @@ export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="gap-2">
                                 <Avatar className="h-8 w-8">
-                                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${userName}`} />
+                                    <AvatarImage src={avatarUrl} />
                                     <AvatarFallback>{userInitials}</AvatarFallback>
                                 </Avatar>
                                 <span className="hidden lg:inline text-sm font-medium">{userName}</span>
@@ -230,16 +265,16 @@ export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
+                            <DropdownMenuItem onClick={handleNavigateToProfile}>
                                 <User className="mr-2 h-4 w-4" />
                                 Profile
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
+                            <DropdownMenuItem onClick={handleNavigateToSettings}>
                                 <Settings className="mr-2 h-4 w-4" />
                                 Settings
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                                onClick={handleToggleTheme}
                                 className="sm:hidden"
                             >
                                 {theme === 'dark' ? (
@@ -260,4 +295,4 @@ export function DashboardHeader({ user, pageTitle }: DashboardHeaderProps) {
             </div>
         </header>
     )
-}
+})

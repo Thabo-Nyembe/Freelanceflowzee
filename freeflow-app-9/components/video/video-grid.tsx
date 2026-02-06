@@ -1,10 +1,14 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
 import { formatDuration } from '@/lib/video/config';
 import { Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+
+// Blur placeholder for video thumbnails
+const VIDEO_BLUR_PLACEHOLDER =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAME/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDBBEhABIxBQYTQVFh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAYEQEBAQEBAAAAAAAAAAAAAAABAgADEf/aAAwDAQACEQMRAD8AyRU9NL06aKjqzBUxNulkZQWBJYEA+xYfPmtaKpqa6ljqqaZopozlHXkHTWk0w5JOp//Z";
 
 interface Video {
   id: string;
@@ -35,11 +39,16 @@ const VideoGridItem = memo(function VideoGridItem({ video, isMobile, onVideoClic
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
         {video.thumbnailUrl ? (
-          <Image src={video.thumbnailUrl}
+          <Image
+            src={video.thumbnailUrl}
             alt={video.title}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover transition-transform group-hover:scale-105"
-           loading="lazy"/>
+            placeholder="blur"
+            blurDataURL={VIDEO_BLUR_PLACEHOLDER}
+            loading="lazy"
+          />
         ) : (
           <div className="flex h-full items-center justify-center">
             <Play className="h-12 w-12 text-muted-foreground" />

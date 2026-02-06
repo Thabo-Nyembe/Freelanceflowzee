@@ -7,13 +7,13 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { 
-  Video, 
-  Image, 
-  Music, 
-  Play, 
-  Star, 
-  Clock, 
+import {
+  Video,
+  Image as ImageIcon,
+  Music,
+  Play,
+  Star,
+  Clock,
   Search,
   Eye,
   Download,
@@ -21,6 +21,11 @@ import {
   Sparkles
 } from 'lucide-react'
 import { toast } from 'sonner'
+import NextImage from 'next/image'
+
+// Blur placeholder for template thumbnails
+const THUMBNAIL_BLUR_PLACEHOLDER =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAME/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDBBEhABIxBQYTQVFh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAYEQEBAQEBAAAAAAAAAAAAAAABAgADEf/aAAwDAQACEQMRAD8AyRU9NL06aKjqzBUxNulkZQWBJYEA+xYfPmtaKpqa6ljqqaZopozlHXkHTWk0w5JOp//Z"
 
 export interface VideoTemplate {
   id: string
@@ -183,11 +188,17 @@ export function VideoTemplates({ onSelectTemplate, onPreviewTemplate }: VideoTem
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTemplates.map(template => (
           <Card key={template.id} className="group hover:shadow-lg transition-all duration-200">
-            <div className="relative">
-              <img src={template.thumbnail}
+            <div className="relative h-48">
+              <NextImage
+                src={template.thumbnail}
                 alt={template.name}
-                className="w-full h-48 object-cover rounded-t-lg"
-                loading="lazy" />
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover rounded-t-lg"
+                placeholder="blur"
+                blurDataURL={THUMBNAIL_BLUR_PLACEHOLDER}
+                loading="lazy"
+              />
 
               {/* Premium Badge */}
               {template.isPremium && (

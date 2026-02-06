@@ -63,7 +63,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     switch (action) {
       case 'stats': {
         const stats = await getDashboardStats(supabase, userId);
-        return NextResponse.json({ success: true, stats });
+        const response = NextResponse.json({ success: true, stats });
+        response.headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=120');
+        return response;
       }
 
       case 'recent-activity': {
@@ -111,7 +113,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
 
       case 'service-status': {
-        return NextResponse.json({
+        const response = NextResponse.json({
           success: true,
           service: 'Dashboard Service',
           version: '2.0.0',
@@ -127,6 +129,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             'deadline_tracking'
           ]
         });
+        // Cache service status for 5 minutes - it rarely changes
+        response.headers.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+        return response;
       }
 
       default: {
@@ -139,7 +144,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           getUpcomingDeadlines(supabase, userId, 7)
         ]);
 
-        return NextResponse.json({
+        const response = NextResponse.json({
           success: true,
           data: {
             stats,
@@ -149,6 +154,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             deadlines
           }
         });
+
+        // Cache for 30 seconds for authenticated users, revalidate on next request
+        response.headers.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
+        return response;
       }
     }
   } catch (error) {
@@ -612,42 +621,47 @@ async function getQuickStats(supabase: any, userId: string) {
   const startOfWeek = new Date(startOfDay);
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
 
-  // Tasks completed today
-  const { data: todayTasks } = await supabase
-    .from('tasks')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('status', 'completed')
-    .gte('updated_at', startOfDay.toISOString());
+  // PERFORMANCE OPTIMIZATION: Run all 4 queries in parallel
+  const [todayTasksResult, weekTasksResult, pendingInvoicesResult, unreadMessagesResult] = await Promise.all([
+    // Tasks completed today
+    supabase
+      .from('tasks')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'completed')
+      .gte('updated_at', startOfDay.toISOString()),
 
-  // Tasks completed this week
-  const { data: weekTasks } = await supabase
-    .from('tasks')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('status', 'completed')
-    .gte('updated_at', startOfWeek.toISOString());
+    // Tasks completed this week
+    supabase
+      .from('tasks')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'completed')
+      .gte('updated_at', startOfWeek.toISOString()),
 
-  // Pending invoices
-  const { data: pendingInvoices } = await supabase
-    .from('client_invoices')
-    .select('id, total_amount')
-    .eq('freelancer_id', userId)
-    .or('status.eq.pending,status.eq.sent');
+    // Pending invoices
+    supabase
+      .from('client_invoices')
+      .select('id, total_amount')
+      .eq('freelancer_id', userId)
+      .or('status.eq.pending,status.eq.sent'),
 
-  // Unread messages
-  const { data: unreadMessages } = await supabase
-    .from('messages')
-    .select('id')
-    .eq('recipient_id', userId)
-    .eq('is_read', false);
+    // Unread messages
+    supabase
+      .from('messages')
+      .select('id')
+      .eq('recipient_id', userId)
+      .eq('is_read', false)
+  ]);
+
+  const pendingInvoices = pendingInvoicesResult.data || [];
 
   return {
-    tasksCompletedToday: todayTasks?.length || 0,
-    tasksCompletedThisWeek: weekTasks?.length || 0,
-    pendingInvoicesCount: pendingInvoices?.length || 0,
-    pendingInvoicesTotal: pendingInvoices?.reduce((sum: number, i: any) => sum + (i.total_amount || 0), 0) || 0,
-    unreadMessages: unreadMessages?.length || 0
+    tasksCompletedToday: todayTasksResult.data?.length || 0,
+    tasksCompletedThisWeek: weekTasksResult.data?.length || 0,
+    pendingInvoicesCount: pendingInvoices.length,
+    pendingInvoicesTotal: pendingInvoices.reduce((sum: number, i: any) => sum + (i.total_amount || 0), 0),
+    unreadMessages: unreadMessagesResult.data?.length || 0
   };
 }
 

@@ -12,12 +12,17 @@ import { Switch } from '@/components/ui/switch'
 import {
   Download, Share2, Heart, Eye, Copy, ExternalLink,
   Settings, Users,
-  Grid3X3, List, Filter, Play, X, Shield, Lock, Image, Palette
+  Grid3X3, List, Filter, Play, X, Shield, Lock, Image as ImageIcon, Palette
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import NextImage from 'next/image'
+
+// Blur placeholder for gallery images
+const GALLERY_BLUR_PLACEHOLDER =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAME/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDBBEhABIxBQYTQVFh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAYEQEBAQEBAAAAAAAAAAAAAAABAgADEf/aAAwDAQACEQMRAD8AyRU9NL06aKjqzBUxNulkZQWBJYEA+xYfPmtaKpqa6ljqqaZopozlHXkHTWk0w5JOp//Z"
 
 interface GalleryItem {
   id: string
@@ -343,10 +348,16 @@ export function AdvancedGallerySystem() {
                       <Card key={item.id} className="group relative">
                         <CardContent className="p-3">
                           <div className="aspect-square relative overflow-hidden rounded-lg bg-muted mb-3">
-                            <img src={item.thumbnail}
+                            <NextImage
+                              src={item.thumbnail}
                               alt={item.name}
-                              className="w-full h-full object-cover"
-                            loading="lazy" />
+                              fill
+                              sizes="(max-width: 768px) 50vw, 25vw"
+                              className="object-cover"
+                              placeholder="blur"
+                              blurDataURL={GALLERY_BLUR_PLACEHOLDER}
+                              loading="lazy"
+                            />
                             {item.type === 'video' && (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <Play className="w-8 h-8 text-white bg-black bg-opacity-50 rounded-full p-1" />

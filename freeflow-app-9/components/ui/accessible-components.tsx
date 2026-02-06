@@ -1,6 +1,11 @@
 'use client'
 
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useState } from 'react'
+import Image from 'next/image'
+
+// Blur placeholder for accessible images
+const ACCESSIBLE_IMAGE_BLUR =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAME/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDBBEhABIxBQYTQVFh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAYEQEBAQEBAAAAAAAAAAAAAAABAgADEf/aAAwDAQACEQMRAD8AyRU9NL06aKjqzBUxNulkZQWBJYEA+xYfPmtaKpqa6ljqqaZopozlHXkHTWk0w5JOp//Z"
 
 // Accessible button with proper ARIA attributes
 export const AccessibleButton = forwardRef(({ 
@@ -38,14 +43,50 @@ export const AccessibleButton = forwardRef(({
 
 AccessibleButton.displayName = 'AccessibleButton'
 
-// Accessible image with proper alt text
-export function AccessibleImage({ src, alt, decorative = false, ...props }) {
+// Accessible image with proper alt text and optimized loading
+export function AccessibleImage({
+  src,
+  alt,
+  decorative = false,
+  width,
+  height,
+  fill = false,
+  sizes,
+  className,
+  priority = false,
+  ...props
+}) {
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Use Next.js Image for optimization
+  if (width && height || fill) {
+    return (
+      <Image
+        src={src}
+        alt={decorative ? '' : alt || 'Image'}
+        {...(fill ? { fill: true, sizes: sizes || "100vw" } : { width, height })}
+        className={className}
+        placeholder="blur"
+        blurDataURL={ACCESSIBLE_IMAGE_BLUR}
+        priority={priority}
+        loading={priority ? undefined : "lazy"}
+        role={decorative ? 'presentation' : undefined}
+        onLoad={() => setIsLoading(false)}
+        {...props}
+      />
+    )
+  }
+
+  // Fallback to native img for cases without dimensions
   return (
-    <img src={src}
+    <img
+      src={src}
       alt={decorative ? '' : alt || 'Image'}
       role={decorative ? 'presentation' : undefined}
+      loading="lazy"
+      className={className}
       {...props}
-    loading="lazy" />
+    />
   )
 }
 

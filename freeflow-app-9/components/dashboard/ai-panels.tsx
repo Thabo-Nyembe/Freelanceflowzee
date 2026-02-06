@@ -5,9 +5,14 @@
  *
  * Renders AI Intelligence and AI Activity panels as slide-in sidebars
  * Globally accessible from dashboard header
+ *
+ * PERFORMANCE OPTIMIZATIONS:
+ * - Uses React.memo to prevent unnecessary re-renders
+ * - Uses useCallback for stable event handlers
+ * - Uses useMemo for stable mock data references
  */
 
-import React from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Brain, Activity } from 'lucide-react'
 import { useAIPanels } from '@/lib/ai-panels-context'
@@ -20,8 +25,10 @@ interface AIPanelsProps {
   userId?: string
 }
 
-// Mock data for AI Intelligence
-const mockInsights = [
+// Mock data moved to module-level constants for stable references
+
+// Memoize mock data to prevent recreation on every render
+const MOCK_INSIGHTS = [
   {
     id: '1',
     type: 'opportunity' as const,
@@ -67,8 +74,7 @@ const mockInsights = [
   }
 ]
 
-// Mock data for Activity Feed
-const mockActivities: ActivityItem[] = [
+const MOCK_ACTIVITIES: ActivityItem[] = [
   {
     id: '1',
     type: 'create',
@@ -162,7 +168,7 @@ const mockActivities: ActivityItem[] = [
   }
 ]
 
-export function AIPanels({ userId }: AIPanelsProps) {
+export const AIPanels = memo<AIPanelsProps>(function AIPanels({ userId }) {
   const {
     isIntelligencePanelOpen,
     toggleIntelligencePanel,
@@ -170,35 +176,36 @@ export function AIPanels({ userId }: AIPanelsProps) {
     toggleActivityPanel,
   } = useAIPanels()
 
-  const handleIntelligenceQuery = (query: string) => {
+  // Stable callback references with useCallback
+  const handleIntelligenceQuery = useCallback((query: string) => {
     console.log('AI Intelligence Query:', query)
     // TODO: Implement AI query logic
-  }
+  }, [])
 
-  const handleInsightAction = (insightId: string, action: string) => {
+  const handleInsightAction = useCallback((insightId: string, action: string) => {
     console.log('Insight Action:', insightId, action)
     // TODO: Implement insight action logic
-  }
+  }, [])
 
-  const handleMarkRead = (activityId: string) => {
+  const handleMarkRead = useCallback((activityId: string) => {
     console.log('Mark Read:', activityId)
     // TODO: Implement mark read logic
-  }
+  }, [])
 
-  const handleMarkAllRead = () => {
+  const handleMarkAllRead = useCallback(() => {
     console.log('Mark All Read')
     // TODO: Implement mark all read logic
-  }
+  }, [])
 
-  const handlePin = (activityId: string) => {
+  const handlePin = useCallback((activityId: string) => {
     console.log('Pin Activity:', activityId)
     // TODO: Implement pin logic
-  }
+  }, [])
 
-  const handleArchive = (activityId: string) => {
+  const handleArchive = useCallback((activityId: string) => {
     console.log('Archive Activity:', activityId)
     // TODO: Implement archive logic
-  }
+  }, [])
 
   return (
     <>
@@ -249,7 +256,7 @@ export function AIPanels({ userId }: AIPanelsProps) {
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-4">
                   <AIInsightsPanel
-                    insights={mockInsights}
+                    insights={MOCK_INSIGHTS}
                     onQuery={handleIntelligenceQuery}
                     onInsightAction={handleInsightAction}
                     className="border-0 shadow-none"
@@ -308,7 +315,7 @@ export function AIPanels({ userId }: AIPanelsProps) {
                 {/* Content */}
                 <div className="flex-1 overflow-hidden">
                   <ActivityFeed
-                    activities={mockActivities}
+                    activities={MOCK_ACTIVITIES}
                     onMarkRead={handleMarkRead}
                     onMarkAllRead={handleMarkAllRead}
                     onPin={handlePin}
@@ -324,4 +331,4 @@ export function AIPanels({ userId }: AIPanelsProps) {
       </AnimatePresence>
     </>
   )
-}
+})

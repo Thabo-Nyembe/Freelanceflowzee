@@ -31,6 +31,11 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createSimpleLogger } from '@/lib/simple-logger'
+import NextImage from 'next/image'
+
+// Blur placeholder for payment gate thumbnails
+const THUMBNAIL_BLUR_PLACEHOLDER =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAME/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDBBEhABIxBQYTQVFh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAYEQEBAQEBAAAAAAAAAAAAAAABAgADEf/aAAwDAQACEQMRAD8AyRU9NL06aKjqzBUxNulkZQWBJYEA+xYfPmtaKpqa6ljqqaZopozlHXkHTWk0w5JOp//Z"
 
 const logger = createSimpleLogger('PaymentGate')
 
@@ -297,11 +302,17 @@ export function PaymentGate({
               <CardContent className="pt-6">
                 <div className="flex gap-4">
                   {itemThumbnail && (
-                    <div className="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
-                      <img src={itemThumbnail}
+                    <div className="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden relative">
+                      <NextImage
+                        src={itemThumbnail}
                         alt={itemTitle}
-                        className="w-full h-full object-cover"
-                      loading="lazy" />
+                        fill
+                        sizes="96px"
+                        className="object-cover"
+                        placeholder="blur"
+                        blurDataURL={THUMBNAIL_BLUR_PLACEHOLDER}
+                        loading="lazy"
+                      />
                     </div>
                   )}
                   <div className="flex-1">

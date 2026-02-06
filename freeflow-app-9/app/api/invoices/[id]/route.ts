@@ -42,10 +42,14 @@ export async function GET(
       }, { status: 404 })
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: invoice,
     })
+
+    // Cache invoice for 60 seconds - invoices don't change frequently
+    response.headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=120')
+    return response
   } catch (error) {
     logger.error('Invoice GET Error', { error })
     return NextResponse.json({

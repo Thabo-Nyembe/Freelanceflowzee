@@ -532,10 +532,16 @@ export default function AIVideoGenerationPage() {
 
   // Initialize data from Supabase
   useEffect(() => {
+    // Skip if still loading user or no userId
+    if (userLoading) return
+
     const loadAIVideoData = async () => {
       if (!userId) {
         logger.info('Waiting for user authentication')
-        dispatch({ type: 'SET_LOADING', isLoading: false })
+        // Only dispatch if currently loading to prevent infinite loop
+        if (state.isLoading) {
+          dispatch({ type: 'SET_LOADING', isLoading: false })
+        }
         return
       }
 
@@ -614,7 +620,7 @@ export default function AIVideoGenerationPage() {
     }
 
     loadAIVideoData()
-  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Calculate stats with useMemo
   const stats = useMemo(() => {
