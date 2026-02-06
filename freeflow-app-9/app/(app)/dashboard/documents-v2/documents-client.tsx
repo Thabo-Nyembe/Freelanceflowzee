@@ -32,7 +32,9 @@ import {
   Settings, BarChart3, FileSpreadsheet, FilePlus, FolderPlus, Archive, CloudUpload, HardDrive,
   AlertCircle, FolderTree, Zap, Shield,
   ExternalLink, RefreshCw, MoreVertical, Move,
-  Key, Webhook, Mail, Bell, AlertOctagon, Palette, Database
+  Key, Webhook, Mail, Bell, AlertOctagon, Palette, Database,
+  Save, History, WifiOff, FileType, Eye, CloudOff, Smartphone, MessageCircle, Calendar,
+  Monitor, Hash, ShieldCheck, Stamp, LockKeyhole, Printer
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -311,6 +313,38 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const versionFileInputRef = useRef<HTMLInputElement>(null)
   const [shareEmail, setShareEmail] = useState('')
   const [sharePermission, setSharePermission] = useState<PermissionLevel>('view')
+
+  // Settings state for controlled switches
+  // General Settings
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
+  const [versionHistoryEnabled, setVersionHistoryEnabled] = useState(true)
+  const [offlineAccessEnabled, setOfflineAccessEnabled] = useState(false)
+  // Display Settings
+  const [showFileExtensions, setShowFileExtensions] = useState(true)
+  const [showThumbnails, setShowThumbnails] = useState(true)
+  // Storage Settings
+  const [autoBackupEnabled, setAutoBackupEnabled] = useState(true)
+  // Notification Settings
+  const [shareNotifications, setShareNotifications] = useState(true)
+  const [commentNotifications, setCommentNotifications] = useState(true)
+  const [editNotifications, setEditNotifications] = useState(false)
+  const [weeklySummaryEnabled, setWeeklySummaryEnabled] = useState(true)
+  // Push Notification Settings
+  const [desktopNotifications, setDesktopNotifications] = useState(true)
+  const [mobilePushEnabled, setMobilePushEnabled] = useState(true)
+  const [slackIntegrationEnabled, setSlackIntegrationEnabled] = useState(false)
+  // Sharing Settings
+  const [allowCopyLink, setAllowCopyLink] = useState(true)
+  const [allowDownload, setAllowDownload] = useState(true)
+  const [allowPrint, setAllowPrint] = useState(true)
+  const [requirePassword, setRequirePassword] = useState(false)
+  // Advanced Settings
+  const [autoArchiveEnabled, setAutoArchiveEnabled] = useState(false)
+  const [compressImagesEnabled, setCompressImagesEnabled] = useState(true)
+  const [twoFactorAuthEnabled, setTwoFactorAuthEnabled] = useState(false)
+  const [watermarkEnabled, setWatermarkEnabled] = useState(false)
+  // Share Dialog Settings
+  const [createPublicLink, setCreatePublicLink] = useState(false)
 
   // Quick actions with real functionality
   const documentsQuickActions = [
@@ -2296,25 +2330,58 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Auto-save Documents</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Save changes automatically</p>
+                          <div className="flex items-center gap-2">
+                            <Save className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Auto-save Documents</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Save changes automatically</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoSaveEnabled}
+                            onCheckedChange={(checked) => {
+                              setAutoSaveEnabled(checked)
+                              toast.success(checked ? 'Auto-save enabled' : 'Auto-save disabled', {
+                                description: checked ? 'Documents will be saved automatically' : 'You will need to save manually'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Version History</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Keep track of all document changes</p>
+                          <div className="flex items-center gap-2">
+                            <History className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Version History</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Keep track of all document changes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={versionHistoryEnabled}
+                            onCheckedChange={(checked) => {
+                              setVersionHistoryEnabled(checked)
+                              toast.success(checked ? 'Version history enabled' : 'Version history disabled', {
+                                description: checked ? 'All changes will be tracked' : 'Changes will not be tracked'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Offline Access</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Access documents without internet</p>
+                          <div className="flex items-center gap-2">
+                            <WifiOff className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Offline Access</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Access documents without internet</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={offlineAccessEnabled}
+                            onCheckedChange={(checked) => {
+                              setOfflineAccessEnabled(checked)
+                              toast.success(checked ? 'Offline access enabled' : 'Offline access disabled', {
+                                description: checked ? 'Documents will be available offline' : 'Internet required for access'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -2366,18 +2433,40 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Show File Extensions</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Display file extensions in names</p>
+                          <div className="flex items-center gap-2">
+                            <FileType className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Show File Extensions</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Display file extensions in names</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showFileExtensions}
+                            onCheckedChange={(checked) => {
+                              setShowFileExtensions(checked)
+                              toast.success(checked ? 'File extensions visible' : 'File extensions hidden', {
+                                description: checked ? 'Extensions will appear in file names' : 'Extensions will be hidden'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Show Thumbnails</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Display document previews</p>
+                          <div className="flex items-center gap-2">
+                            <Eye className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Show Thumbnails</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Display document previews</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showThumbnails}
+                            onCheckedChange={(checked) => {
+                              setShowThumbnails(checked)
+                              toast.success(checked ? 'Thumbnails enabled' : 'Thumbnails disabled', {
+                                description: checked ? 'Document previews will be shown' : 'Document previews will be hidden'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2449,11 +2538,22 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Backup</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically backup documents</p>
+                          <div className="flex items-center gap-2">
+                            <CloudOff className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Auto-Backup</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically backup documents</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoBackupEnabled}
+                            onCheckedChange={(checked) => {
+                              setAutoBackupEnabled(checked)
+                              toast.success(checked ? 'Auto-backup enabled' : 'Auto-backup disabled', {
+                                description: checked ? 'Documents will be backed up automatically' : 'Manual backups required'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -2508,32 +2608,76 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Share Notifications</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Get notified when documents are shared</p>
+                          <div className="flex items-center gap-2">
+                            <Share2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Share Notifications</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Get notified when documents are shared</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={shareNotifications}
+                            onCheckedChange={(checked) => {
+                              setShareNotifications(checked)
+                              toast.success(checked ? 'Share notifications enabled' : 'Share notifications disabled', {
+                                description: checked ? 'You will be notified when documents are shared' : 'Share notifications turned off'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Comment Notifications</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Get notified on new comments</p>
+                          <div className="flex items-center gap-2">
+                            <MessageCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Comment Notifications</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Get notified on new comments</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={commentNotifications}
+                            onCheckedChange={(checked) => {
+                              setCommentNotifications(checked)
+                              toast.success(checked ? 'Comment notifications enabled' : 'Comment notifications disabled', {
+                                description: checked ? 'You will be notified of new comments' : 'Comment notifications turned off'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Edit Notifications</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Get notified when documents are edited</p>
+                          <div className="flex items-center gap-2">
+                            <Edit3 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Edit Notifications</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Get notified when documents are edited</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={editNotifications}
+                            onCheckedChange={(checked) => {
+                              setEditNotifications(checked)
+                              toast.success(checked ? 'Edit notifications enabled' : 'Edit notifications disabled', {
+                                description: checked ? 'You will be notified of document edits' : 'Edit notifications turned off'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Weekly Summary</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Weekly summary of document activity</p>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Weekly Summary</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Weekly summary of document activity</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={weeklySummaryEnabled}
+                            onCheckedChange={(checked) => {
+                              setWeeklySummaryEnabled(checked)
+                              toast.success(checked ? 'Weekly summary enabled' : 'Weekly summary disabled', {
+                                description: checked ? 'You will receive weekly activity summaries' : 'Weekly summaries turned off'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2552,25 +2696,58 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Desktop Notifications</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Show browser notifications</p>
+                          <div className="flex items-center gap-2">
+                            <Monitor className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Desktop Notifications</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Show browser notifications</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={desktopNotifications}
+                            onCheckedChange={(checked) => {
+                              setDesktopNotifications(checked)
+                              toast.success(checked ? 'Desktop notifications enabled' : 'Desktop notifications disabled', {
+                                description: checked ? 'Browser notifications will appear' : 'Browser notifications turned off'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Mobile Push</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Send to mobile device</p>
+                          <div className="flex items-center gap-2">
+                            <Smartphone className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Mobile Push</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Send to mobile device</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={mobilePushEnabled}
+                            onCheckedChange={(checked) => {
+                              setMobilePushEnabled(checked)
+                              toast.success(checked ? 'Mobile push enabled' : 'Mobile push disabled', {
+                                description: checked ? 'Notifications will be sent to mobile' : 'Mobile notifications turned off'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Slack Integration</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Send notifications to Slack</p>
+                          <div className="flex items-center gap-2">
+                            <Hash className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Slack Integration</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Send notifications to Slack</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={slackIntegrationEnabled}
+                            onCheckedChange={(checked) => {
+                              setSlackIntegrationEnabled(checked)
+                              toast.success(checked ? 'Slack integration enabled' : 'Slack integration disabled', {
+                                description: checked ? 'Notifications will be sent to Slack' : 'Slack integration turned off'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2611,25 +2788,58 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Allow Copy Link</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Let viewers copy document links</p>
+                          <div className="flex items-center gap-2">
+                            <Link2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Allow Copy Link</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Let viewers copy document links</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowCopyLink}
+                            onCheckedChange={(checked) => {
+                              setAllowCopyLink(checked)
+                              toast.success(checked ? 'Copy link allowed' : 'Copy link disabled', {
+                                description: checked ? 'Viewers can copy document links' : 'Viewers cannot copy links'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Allow Download</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Let viewers download documents</p>
+                          <div className="flex items-center gap-2">
+                            <Download className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Allow Download</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Let viewers download documents</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowDownload}
+                            onCheckedChange={(checked) => {
+                              setAllowDownload(checked)
+                              toast.success(checked ? 'Download allowed' : 'Download disabled', {
+                                description: checked ? 'Viewers can download documents' : 'Viewers cannot download'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Allow Print</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Let viewers print documents</p>
+                          <div className="flex items-center gap-2">
+                            <Printer className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Allow Print</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Let viewers print documents</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowPrint}
+                            onCheckedChange={(checked) => {
+                              setAllowPrint(checked)
+                              toast.success(checked ? 'Print allowed' : 'Print disabled', {
+                                description: checked ? 'Viewers can print documents' : 'Viewers cannot print'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2665,11 +2875,22 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Require Password</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Require password for shared links</p>
+                          <div className="flex items-center gap-2">
+                            <LockKeyhole className="h-4 w-4 text-red-600 dark:text-red-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Require Password</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Require password for shared links</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={requirePassword}
+                            onCheckedChange={(checked) => {
+                              setRequirePassword(checked)
+                              toast.success(checked ? 'Password required' : 'Password not required', {
+                                description: checked ? 'Shared links will require a password' : 'Shared links will not require a password'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2781,18 +3002,40 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Archive</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Archive inactive documents</p>
+                          <div className="flex items-center gap-2">
+                            <Archive className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Auto-Archive</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Archive inactive documents</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={autoArchiveEnabled}
+                            onCheckedChange={(checked) => {
+                              setAutoArchiveEnabled(checked)
+                              toast.success(checked ? 'Auto-archive enabled' : 'Auto-archive disabled', {
+                                description: checked ? 'Inactive documents will be archived' : 'Documents will not be auto-archived'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Compress Images</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically compress uploaded images</p>
+                          <div className="flex items-center gap-2">
+                            <ImageIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Compress Images</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically compress uploaded images</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={compressImagesEnabled}
+                            onCheckedChange={(checked) => {
+                              setCompressImagesEnabled(checked)
+                              toast.success(checked ? 'Image compression enabled' : 'Image compression disabled', {
+                                description: checked ? 'Uploaded images will be compressed' : 'Images will not be compressed'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2811,18 +3054,40 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Two-Factor Auth</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for document access</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Two-Factor Auth</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for document access</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={twoFactorAuthEnabled}
+                            onCheckedChange={(checked) => {
+                              setTwoFactorAuthEnabled(checked)
+                              toast.success(checked ? '2FA enabled' : '2FA disabled', {
+                                description: checked ? 'Two-factor authentication required for documents' : '2FA not required'
+                              })
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Watermark Documents</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Add watermark to shared documents</p>
+                          <div className="flex items-center gap-2">
+                            <Stamp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Watermark Documents</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Add watermark to shared documents</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={watermarkEnabled}
+                            onCheckedChange={(checked) => {
+                              setWatermarkEnabled(checked)
+                              toast.success(checked ? 'Watermark enabled' : 'Watermark disabled', {
+                                description: checked ? 'Shared documents will have a watermark' : 'Watermark removed from shared documents'
+                              })
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -3330,11 +3595,22 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               </div>
               {/* Create public link option */}
               <div className="flex items-center justify-between">
-                <div>
-                  <Label>Create public link</Label>
-                  <p className="text-xs text-gray-500">Anyone with the link can view</p>
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                  <div>
+                    <Label>Create public link</Label>
+                    <p className="text-xs text-gray-500">Anyone with the link can view</p>
+                  </div>
                 </div>
-                <Switch />
+                <Switch
+                  checked={createPublicLink}
+                  onCheckedChange={(checked) => {
+                    setCreatePublicLink(checked)
+                    toast.success(checked ? 'Public link will be created' : 'Public link will not be created', {
+                      description: checked ? 'Anyone with the link can view this document' : 'Document will be shared privately'
+                    })
+                  }}
+                />
               </div>
               {/* Current shares */}
               {documentShares.length > 0 && (

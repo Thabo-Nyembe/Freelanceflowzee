@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Settings, Bell, Calendar, Users, Clock, Briefcase, Globe, Zap, Download, Upload, RefreshCw, Plus, Link2, BarChart3, Shield, Palette, AlertTriangle, UserPlus, Shuffle, Mail, Target, TrendingUp, Loader2 } from 'lucide-react'
+import { Settings, Bell, Calendar, Users, Clock, Briefcase, Globe, Zap, Download, Upload, RefreshCw, Plus, Link2, BarChart3, Shield, Palette, AlertTriangle, UserPlus, Shuffle, Mail, Target, TrendingUp, Loader2, CalendarDays, Coffee, MapPin, Edit3, UserCheck, Wallet, Building2, Calculator, UserCog, Flag, DollarSign, BellRing, Activity, Milestone, AlertCircle, Inbox, Slack, Monitor, HardDrive, LayoutGrid, Eye, Trash2 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -305,6 +305,46 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     description: ''
   })
   const [importFile, setImportFile] = useState<File | null>(null)
+
+  // Switch state for Scheduling settings
+  const [excludeWeekends, setExcludeWeekends] = useState(true)
+  const [halfDayFridays, setHalfDayFridays] = useState(false)
+  const [showTeamTimeZones, setShowTeamTimeZones] = useState(true)
+
+  // Switch state for Team settings (Permissions)
+  const [managersCanEditAllocations, setManagersCanEditAllocations] = useState(true)
+  const [membersCanRequestTimeOff, setMembersCanRequestTimeOff] = useState(true)
+  const [showFinancialData, setShowFinancialData] = useState(false)
+
+  // Switch state for Projects settings
+  const [autoCalculateBudget, setAutoCalculateBudget] = useState(true)
+  const [requireClientAssignment, setRequireClientAssignment] = useState(false)
+  const [trackMilestones, setTrackMilestones] = useState(true)
+  const [budgetWarnings, setBudgetWarnings] = useState(true)
+
+  // Switch state for Notifications settings
+  const [overbookingAlerts, setOverbookingAlerts] = useState(true)
+  const [lowUtilizationAlerts, setLowUtilizationAlerts] = useState(true)
+  const [timeOffNotifications, setTimeOffNotifications] = useState(true)
+  const [milestoneReminders, setMilestoneReminders] = useState(true)
+  const [budgetAlerts, setBudgetAlerts] = useState(true)
+  const [projectStatusChanges, setProjectStatusChanges] = useState(false)
+  const [inAppNotifications, setInAppNotifications] = useState(true)
+  const [emailNotifications, setEmailNotifications] = useState(true)
+  const [slackNotifications, setSlackNotifications] = useState(false)
+
+  // Switch state for Advanced settings
+  const [autoRefreshDashboard, setAutoRefreshDashboard] = useState(true)
+  const [cacheCapacityData, setCacheCapacityData] = useState(true)
+  const [compactModeAdvanced, setCompactModeAdvanced] = useState(false)
+  const [showAvatars, setShowAvatars] = useState(true)
+
+  // Switch state for Import options
+  const [mergeWithExistingData, setMergeWithExistingData] = useState(true)
+  const [overwriteDuplicates, setOverwriteDuplicates] = useState(false)
+
+  // Default project color state
+  const [defaultProjectColor, setDefaultProjectColor] = useState('#3B82F6')
 
   // Form state
   const [newAllocation, setNewAllocation] = useState({
@@ -1741,17 +1781,35 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                           </div>
                           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
-                              <Label>Weekend Days</Label>
+                              <Label className="flex items-center gap-2">
+                                <CalendarDays className="w-4 h-4 text-gray-500" />
+                                Weekend Days
+                              </Label>
                               <p className="text-sm text-gray-500 dark:text-gray-400">Exclude weekends from capacity calculation</p>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={excludeWeekends}
+                              onCheckedChange={(checked) => {
+                                setExcludeWeekends(checked)
+                                toast.success(checked ? 'Weekends excluded from capacity' : 'Weekends included in capacity')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
-                              <Label>Half-Day Fridays</Label>
+                              <Label className="flex items-center gap-2">
+                                <Coffee className="w-4 h-4 text-gray-500" />
+                                Half-Day Fridays
+                              </Label>
                               <p className="text-sm text-gray-500 dark:text-gray-400">Enable summer hours or flex Fridays</p>
                             </div>
-                            <Switch />
+                            <Switch
+                              checked={halfDayFridays}
+                              onCheckedChange={(checked) => {
+                                setHalfDayFridays(checked)
+                                toast.success(checked ? 'Half-day Fridays enabled' : 'Half-day Fridays disabled')
+                              }}
+                            />
                           </div>
                         </CardContent>
                       </Card>
@@ -1782,10 +1840,19 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                           </div>
                           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
-                              <Label>Show Team Time Zones</Label>
+                              <Label className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-gray-500" />
+                                Show Team Time Zones
+                              </Label>
                               <p className="text-sm text-gray-500 dark:text-gray-400">Display local times for remote team members</p>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={showTeamTimeZones}
+                              onCheckedChange={(checked) => {
+                                setShowTeamTimeZones(checked)
+                                toast.success(checked ? 'Team time zones visible' : 'Team time zones hidden')
+                              }}
+                            />
                           </div>
                         </CardContent>
                       </Card>
@@ -1865,31 +1932,61 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Managers Can Edit Allocations</Label>
+                            <Label className="flex items-center gap-2">
+                              <Edit3 className="w-4 h-4 text-gray-500" />
+                              Managers Can Edit Allocations
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Allow managers to modify team allocations</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={managersCanEditAllocations}
+                            onCheckedChange={(checked) => {
+                              setManagersCanEditAllocations(checked)
+                              toast.success(checked ? 'Managers can now edit allocations' : 'Managers cannot edit allocations')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Team Members Can Request Time Off</Label>
+                            <Label className="flex items-center gap-2">
+                              <UserCheck className="w-4 h-4 text-gray-500" />
+                              Team Members Can Request Time Off
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Enable self-service time off requests</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={membersCanRequestTimeOff}
+                            onCheckedChange={(checked) => {
+                              setMembersCanRequestTimeOff(checked)
+                              toast.success(checked ? 'Time off requests enabled' : 'Time off requests disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Show Financial Data</Label>
+                            <Label className="flex items-center gap-2">
+                              <Wallet className="w-4 h-4 text-gray-500" />
+                              Show Financial Data
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Display hourly rates and budget information</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={showFinancialData}
+                            onCheckedChange={(checked) => {
+                              setShowFinancialData(checked)
+                              toast.success(checked ? 'Financial data visible' : 'Financial data hidden')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base">Departments</CardTitle>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Building2 className="w-5 h-5 text-indigo-600" />
+                          Departments
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2">
@@ -1926,30 +2023,55 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div>
-                          <Label>Default Project Color</Label>
+                          <Label className="flex items-center gap-2">
+                            <Palette className="w-4 h-4 text-gray-500" />
+                            Default Project Color
+                          </Label>
                           <div className="flex gap-2 mt-2">
                             {['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#EC4899'].map(color => (
                               <button
                                 key={color}
-                                className="w-8 h-8 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
+                                className={`w-8 h-8 rounded-full border-2 shadow-sm hover:scale-110 transition-transform ${defaultProjectColor === color ? 'border-gray-900 dark:border-white ring-2 ring-offset-2 ring-indigo-500' : 'border-white'}`}
                                 style={{ backgroundColor: color }}
+                                onClick={() => {
+                                  setDefaultProjectColor(color)
+                                  toast.success('Default project color updated')
+                                }}
                               />
                             ))}
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Auto-calculate Budget</Label>
+                            <Label className="flex items-center gap-2">
+                              <Calculator className="w-4 h-4 text-gray-500" />
+                              Auto-calculate Budget
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Calculate budget from hourly rates and hours</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoCalculateBudget}
+                            onCheckedChange={(checked) => {
+                              setAutoCalculateBudget(checked)
+                              toast.success(checked ? 'Auto-calculate budget enabled' : 'Auto-calculate budget disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Require Client Assignment</Label>
+                            <Label className="flex items-center gap-2">
+                              <UserCog className="w-4 h-4 text-gray-500" />
+                              Require Client Assignment
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">All projects must have a client assigned</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={requireClientAssignment}
+                            onCheckedChange={(checked) => {
+                              setRequireClientAssignment(checked)
+                              toast.success(checked ? 'Client assignment required' : 'Client assignment optional')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1964,20 +2086,41 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Track Milestones</Label>
+                            <Label className="flex items-center gap-2">
+                              <Flag className="w-4 h-4 text-gray-500" />
+                              Track Milestones
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Enable milestone tracking for projects</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={trackMilestones}
+                            onCheckedChange={(checked) => {
+                              setTrackMilestones(checked)
+                              toast.success(checked ? 'Milestone tracking enabled' : 'Milestone tracking disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Budget Warnings</Label>
+                            <Label className="flex items-center gap-2">
+                              <DollarSign className="w-4 h-4 text-gray-500" />
+                              Budget Warnings
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Alert when budget exceeds threshold</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={budgetWarnings}
+                            onCheckedChange={(checked) => {
+                              setBudgetWarnings(checked)
+                              toast.success(checked ? 'Budget warnings enabled' : 'Budget warnings disabled')
+                            }}
+                          />
                         </div>
                         <div>
-                          <Label>Budget Warning Threshold</Label>
+                          <Label className="flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4 text-gray-500" />
+                            Budget Warning Threshold
+                          </Label>
                           <div className="flex items-center gap-2 mt-1">
                             <Input type="number" defaultValue="80" className="w-20" />
                             <span className="text-sm text-gray-500">% of total budget</span>
@@ -2027,60 +2170,120 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Overbooking Alerts</Label>
+                            <Label className="flex items-center gap-2">
+                              <BellRing className="w-4 h-4 text-gray-500" />
+                              Overbooking Alerts
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Notify when team members are overbooked</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={overbookingAlerts}
+                            onCheckedChange={(checked) => {
+                              setOverbookingAlerts(checked)
+                              toast.success(checked ? 'Overbooking alerts enabled' : 'Overbooking alerts disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Low Utilization Alerts</Label>
+                            <Label className="flex items-center gap-2">
+                              <Activity className="w-4 h-4 text-gray-500" />
+                              Low Utilization Alerts
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Notify when team has significant availability</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={lowUtilizationAlerts}
+                            onCheckedChange={(checked) => {
+                              setLowUtilizationAlerts(checked)
+                              toast.success(checked ? 'Low utilization alerts enabled' : 'Low utilization alerts disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Time Off Notifications</Label>
+                            <Label className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-gray-500" />
+                              Time Off Notifications
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Alert about upcoming team time off</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={timeOffNotifications}
+                            onCheckedChange={(checked) => {
+                              setTimeOffNotifications(checked)
+                              toast.success(checked ? 'Time off notifications enabled' : 'Time off notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="mb-6">
                       <CardHeader>
-                        <CardTitle className="text-base">Project Notifications</CardTitle>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Briefcase className="w-5 h-5 text-indigo-600" />
+                          Project Notifications
+                        </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Milestone Reminders</Label>
+                            <Label className="flex items-center gap-2">
+                              <Milestone className="w-4 h-4 text-gray-500" />
+                              Milestone Reminders
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Remind before upcoming milestones</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={milestoneReminders}
+                            onCheckedChange={(checked) => {
+                              setMilestoneReminders(checked)
+                              toast.success(checked ? 'Milestone reminders enabled' : 'Milestone reminders disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Budget Alerts</Label>
+                            <Label className="flex items-center gap-2">
+                              <AlertCircle className="w-4 h-4 text-gray-500" />
+                              Budget Alerts
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Notify when projects approach budget limit</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={budgetAlerts}
+                            onCheckedChange={(checked) => {
+                              setBudgetAlerts(checked)
+                              toast.success(checked ? 'Budget alerts enabled' : 'Budget alerts disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Project Status Changes</Label>
+                            <Label className="flex items-center gap-2">
+                              <RefreshCw className="w-4 h-4 text-gray-500" />
+                              Project Status Changes
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Alert when project status is updated</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={projectStatusChanges}
+                            onCheckedChange={(checked) => {
+                              setProjectStatusChanges(checked)
+                              toast.success(checked ? 'Project status change alerts enabled' : 'Project status change alerts disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base">Delivery Channels</CardTitle>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Inbox className="w-5 h-5 text-indigo-600" />
+                          Delivery Channels
+                        </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -2089,11 +2292,20 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                               <Bell className="w-4 h-4 text-blue-600" />
                             </div>
                             <div>
-                              <Label>In-App Notifications</Label>
+                              <Label className="flex items-center gap-2">
+                                <Monitor className="w-4 h-4 text-gray-500" />
+                                In-App Notifications
+                              </Label>
                               <p className="text-sm text-gray-500 dark:text-gray-400">Show in notification center</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={inAppNotifications}
+                            onCheckedChange={(checked) => {
+                              setInAppNotifications(checked)
+                              toast.success(checked ? 'In-app notifications enabled' : 'In-app notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2101,11 +2313,20 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                               <Zap className="w-4 h-4 text-green-600" />
                             </div>
                             <div>
-                              <Label>Email Notifications</Label>
+                              <Label className="flex items-center gap-2">
+                                <Mail className="w-4 h-4 text-gray-500" />
+                                Email Notifications
+                              </Label>
                               <p className="text-sm text-gray-500 dark:text-gray-400">Send to your email address</p>
                             </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={emailNotifications}
+                            onCheckedChange={(checked) => {
+                              setEmailNotifications(checked)
+                              toast.success(checked ? 'Email notifications enabled' : 'Email notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2113,11 +2334,20 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                               <Link2 className="w-4 h-4 text-purple-600" />
                             </div>
                             <div>
-                              <Label>Slack Notifications</Label>
+                              <Label className="flex items-center gap-2">
+                                <Slack className="w-4 h-4 text-gray-500" />
+                                Slack Notifications
+                              </Label>
                               <p className="text-sm text-gray-500 dark:text-gray-400">Post to Slack channel</p>
                             </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={slackNotifications}
+                            onCheckedChange={(checked) => {
+                              setSlackNotifications(checked)
+                              toast.success(checked ? 'Slack notifications enabled' : 'Slack notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2209,20 +2439,41 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Auto-refresh Dashboard</Label>
+                            <Label className="flex items-center gap-2">
+                              <RefreshCw className="w-4 h-4 text-gray-500" />
+                              Auto-refresh Dashboard
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Automatically update data every 5 minutes</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoRefreshDashboard}
+                            onCheckedChange={(checked) => {
+                              setAutoRefreshDashboard(checked)
+                              toast.success(checked ? 'Auto-refresh enabled' : 'Auto-refresh disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Cache Capacity Data</Label>
+                            <Label className="flex items-center gap-2">
+                              <HardDrive className="w-4 h-4 text-gray-500" />
+                              Cache Capacity Data
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Improve load times with local caching</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={cacheCapacityData}
+                            onCheckedChange={(checked) => {
+                              setCacheCapacityData(checked)
+                              toast.success(checked ? 'Data caching enabled' : 'Data caching disabled')
+                            }}
+                          />
                         </div>
                         <div>
-                          <Label>Forecast Range</Label>
+                          <Label className="flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-gray-500" />
+                            Forecast Range
+                          </Label>
                           <Select defaultValue="12">
                             <SelectTrigger className="mt-1">
                               <SelectValue />
@@ -2262,17 +2513,35 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Compact Mode</Label>
+                            <Label className="flex items-center gap-2">
+                              <LayoutGrid className="w-4 h-4 text-gray-500" />
+                              Compact Mode
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Show more data in less space</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={compactModeAdvanced}
+                            onCheckedChange={(checked) => {
+                              setCompactModeAdvanced(checked)
+                              toast.success(checked ? 'Compact mode enabled' : 'Compact mode disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
-                            <Label>Show Avatars</Label>
+                            <Label className="flex items-center gap-2">
+                              <Eye className="w-4 h-4 text-gray-500" />
+                              Show Avatars
+                            </Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Display team member avatars</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showAvatars}
+                            onCheckedChange={(checked) => {
+                              setShowAvatars(checked)
+                              toast.success(checked ? 'Avatars visible' : 'Avatars hidden')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2280,7 +2549,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                     <Card className="border-red-200 dark:border-red-800">
                       <CardHeader>
                         <CardTitle className="text-base text-red-600 dark:text-red-400 flex items-center gap-2">
-                          <AlertTriangle className="w-5 h-5" />
+                          <Trash2 className="w-5 h-5" />
                           Danger Zone
                         </CardTitle>
                       </CardHeader>
@@ -2919,15 +3188,38 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
               )}
             </div>
             <div>
-              <Label>Import Options</Label>
+              <Label className="flex items-center gap-2">
+                <Settings className="w-4 h-4 text-gray-500" />
+                Import Options
+              </Label>
               <div className="mt-2 space-y-2">
                 <div className="flex items-center gap-2">
-                  <Switch defaultChecked id="merge-data" />
-                  <Label htmlFor="merge-data" className="text-sm font-normal">Merge with existing data</Label>
+                  <Switch
+                    id="merge-data"
+                    checked={mergeWithExistingData}
+                    onCheckedChange={(checked) => {
+                      setMergeWithExistingData(checked)
+                      toast.success(checked ? 'Will merge with existing data' : 'Will replace existing data')
+                    }}
+                  />
+                  <Label htmlFor="merge-data" className="text-sm font-normal flex items-center gap-2">
+                    <Plus className="w-3 h-3 text-gray-500" />
+                    Merge with existing data
+                  </Label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Switch id="overwrite-data" />
-                  <Label htmlFor="overwrite-data" className="text-sm font-normal">Overwrite duplicates</Label>
+                  <Switch
+                    id="overwrite-data"
+                    checked={overwriteDuplicates}
+                    onCheckedChange={(checked) => {
+                      setOverwriteDuplicates(checked)
+                      toast.success(checked ? 'Will overwrite duplicates' : 'Will skip duplicates')
+                    }}
+                  />
+                  <Label htmlFor="overwrite-data" className="text-sm font-normal flex items-center gap-2">
+                    <RefreshCw className="w-3 h-3 text-gray-500" />
+                    Overwrite duplicates
+                  </Label>
                 </div>
               </div>
             </div>

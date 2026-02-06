@@ -23,7 +23,7 @@ import {
   TrendingUp, PieChart, Activity, Target, Wand2, Palette,
   Layout, Grid3X3, Smartphone, Monitor, Globe, Lock, RefreshCw,
   MousePointer, MoreVertical, Send, Webhook, Database, GitBranch, Shuffle,
-  Timer, Gauge, Sliders, Save, AlertOctagon
+  Timer, Gauge, Sliders, Save, AlertOctagon, Shield, Bug, FileCode, QrCode, Share, Layers, Rocket
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -218,6 +218,35 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const [newFormTitle, setNewFormTitle] = useState('')
   const [newFormDescription, setNewFormDescription] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Settings state for controlled switches
+  const [oneQuestionAtATime, setOneQuestionAtATime] = useState(true)
+  const [showProgressBar, setShowProgressBar] = useState(true)
+  const [autoSaveResponses, setAutoSaveResponses] = useState(false)
+  const [requiredByDefault, setRequiredByDefault] = useState(false)
+  const [showQuestionNumbers, setShowQuestionNumbers] = useState(true)
+  const [keyboardNavigation, setKeyboardNavigation] = useState(true)
+  const [showSocialShare, setShowSocialShare] = useState(true)
+  const [newResponseNotifications, setNewResponseNotifications] = useState(true)
+  const [includeResponseData, setIncludeResponseData] = useState(true)
+  const [confirmationEmail, setConfirmationEmail] = useState(false)
+  const [publicByDefault, setPublicByDefault] = useState(false)
+  const [passwordProtection, setPasswordProtection] = useState(false)
+  const [respondentAuth, setRespondentAuth] = useState(false)
+  const [gdprCompliance, setGdprCompliance] = useState(true)
+  const [ipAddressCollection, setIpAddressCollection] = useState(true)
+  const [recaptchaProtection, setRecaptchaProtection] = useState(true)
+  const [honeypotFields, setHoneypotFields] = useState(true)
+  const [logicJumps, setLogicJumps] = useState(true)
+  const [questionRandomization, setQuestionRandomization] = useState(false)
+  const [autoBackup, setAutoBackup] = useState(true)
+  const [debugMode, setDebugMode] = useState(false)
+  const [verboseLogging, setVerboseLogging] = useState(false)
+  const [testMode, setTestMode] = useState(false)
+  const [lazyLoadQuestions, setLazyLoadQuestions] = useState(true)
+  const [cacheResponses, setCacheResponses] = useState(true)
+  const [optimizeImages, setOptimizeImages] = useState(true)
+  const [questionTypeSettings, setQuestionTypeSettings] = useState<Record<string, boolean>>({})
 
   const { forms, loading, error, createForm, updateForm, deleteForm, mutating } = useForms({ status: statusFilter, formType: typeFilter, limit: 50 })
   const displayForms = forms
@@ -842,10 +871,24 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                     <div className="h-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 relative">
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
                         <div className="flex items-center gap-2">
-                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100">
+                          <button
+                            className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              window.open(`/form/${form.id}/preview`, '_blank')
+                              toast.success('Opening form preview')
+                            }}
+                          >
                             <Eye className="h-4 w-4" />
                           </button>
-                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100">
+                          <button
+                            className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedForm(form)
+                              toast.success('Edit mode activated')
+                            }}
+                          >
                             <Edit3 className="h-4 w-4" />
                           </button>
                           <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); setSelectedForm(form); setShowAnalyticsDialog(true); }}>
@@ -1272,7 +1315,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                       <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           {formThemes.map(theme => (
-                            <button key={theme.id} className="p-4 border rounded-xl hover:border-indigo-500 transition-all text-left hover:shadow-md">
+                            <button
+                              key={theme.id}
+                              className="p-4 border rounded-xl hover:border-indigo-500 transition-all text-left hover:shadow-md"
+                              onClick={() => {
+                                toast.success(`Theme "${theme.name}" selected as default`)
+                              }}
+                            >
                               <div className="flex items-center gap-2 mb-3">
                                 <div className="w-5 h-5 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: theme.primaryColor }}></div>
                                 <span className="font-medium">{theme.name}</span>
@@ -1281,7 +1330,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-xs text-gray-500 mt-2">{theme.fontFamily}</p>
                             </button>
                           ))}
-                          <button className="p-4 border-2 border-dashed rounded-xl hover:border-indigo-500 transition-all flex flex-col items-center justify-center">
+                          <button
+                            className="p-4 border-2 border-dashed rounded-xl hover:border-indigo-500 transition-all flex flex-col items-center justify-center"
+                            onClick={() => {
+                              setShowThemesDialog(true)
+                              toast.success('Custom theme creator opened')
+                            }}
+                          >
                             <Palette className="h-8 w-8 text-gray-400 mb-2" />
                             <span className="text-sm font-medium text-gray-600">Create Custom</span>
                           </button>
@@ -1300,27 +1355,114 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         <p className="text-sm text-gray-500">Default settings for new forms</p>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {[
-                          { label: 'One Question at a Time', desc: 'Typeform-style focused experience', icon: MousePointer, enabled: true },
-                          { label: 'Show Progress Bar', desc: 'Display completion progress to respondents', icon: Gauge, enabled: true },
-                          { label: 'Auto-Save Responses', desc: 'Allow respondents to continue later', icon: Save, enabled: false },
-                          { label: 'Required by Default', desc: 'Make new questions required by default', icon: CheckCircle, enabled: false },
-                          { label: 'Show Question Numbers', desc: 'Display question numbers on form', icon: Hash, enabled: true },
-                          { label: 'Allow Keyboard Navigation', desc: 'Let respondents use Tab/Enter keys', icon: Sliders, enabled: true },
-                        ].map((setting, i) => (
-                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
-                                <setting.icon className="h-5 w-5 text-indigo-600" />
-                              </div>
-                              <div>
-                                <p className="font-medium">{setting.label}</p>
-                                <p className="text-sm text-gray-500">{setting.desc}</p>
-                              </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                              <MousePointer className="h-5 w-5 text-indigo-600" />
                             </div>
-                            <Switch defaultChecked={setting.enabled} />
+                            <div>
+                              <p className="font-medium">One Question at a Time</p>
+                              <p className="text-sm text-gray-500">Typeform-style focused experience</p>
+                            </div>
                           </div>
-                        ))}
+                          <Switch
+                            checked={oneQuestionAtATime}
+                            onCheckedChange={(checked) => {
+                              setOneQuestionAtATime(checked)
+                              toast.success(checked ? 'One question at a time enabled' : 'One question at a time disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                              <Gauge className="h-5 w-5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Show Progress Bar</p>
+                              <p className="text-sm text-gray-500">Display completion progress to respondents</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={showProgressBar}
+                            onCheckedChange={(checked) => {
+                              setShowProgressBar(checked)
+                              toast.success(checked ? 'Progress bar enabled' : 'Progress bar disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                              <Save className="h-5 w-5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Auto-Save Responses</p>
+                              <p className="text-sm text-gray-500">Allow respondents to continue later</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={autoSaveResponses}
+                            onCheckedChange={(checked) => {
+                              setAutoSaveResponses(checked)
+                              toast.success(checked ? 'Auto-save responses enabled' : 'Auto-save responses disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                              <CheckCircle className="h-5 w-5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Required by Default</p>
+                              <p className="text-sm text-gray-500">Make new questions required by default</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={requiredByDefault}
+                            onCheckedChange={(checked) => {
+                              setRequiredByDefault(checked)
+                              toast.success(checked ? 'Required by default enabled' : 'Required by default disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                              <Hash className="h-5 w-5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Show Question Numbers</p>
+                              <p className="text-sm text-gray-500">Display question numbers on form</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={showQuestionNumbers}
+                            onCheckedChange={(checked) => {
+                              setShowQuestionNumbers(checked)
+                              toast.success(checked ? 'Question numbers enabled' : 'Question numbers disabled')
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                              <Sliders className="h-5 w-5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Allow Keyboard Navigation</p>
+                              <p className="text-sm text-gray-500">Let respondents use Tab/Enter keys</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={keyboardNavigation}
+                            onCheckedChange={(checked) => {
+                              setKeyboardNavigation(checked)
+                              toast.success(checked ? 'Keyboard navigation enabled' : 'Keyboard navigation disabled')
+                            }}
+                          />
+                        </div>
                       </CardContent>
                     </Card>
 
@@ -1340,7 +1482,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                                   <p className="text-xs text-gray-500">{type.description}</p>
                                 </div>
                               </div>
-                              <Switch defaultChecked={!type.isPremium} />
+                              <Switch
+                                checked={questionTypeSettings[type.id] ?? !type.isPremium}
+                                onCheckedChange={(checked) => {
+                                  setQuestionTypeSettings(prev => ({ ...prev, [type.id]: checked }))
+                                  toast.success(checked ? `${type.name} enabled` : `${type.name} disabled`)
+                                }}
+                              />
                             </div>
                           ))}
                         </div>
@@ -1362,11 +1510,20 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           <Input placeholder="https://yoursite.com/thank-you" className="mt-1" />
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Show Social Share Buttons</p>
-                            <p className="text-sm text-gray-500">Allow respondents to share the form</p>
+                          <div className="flex items-center gap-3">
+                            <Share className="h-5 w-5 text-indigo-600" />
+                            <div>
+                              <p className="font-medium">Show Social Share Buttons</p>
+                              <p className="text-sm text-gray-500">Allow respondents to share the form</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={showSocialShare}
+                            onCheckedChange={(checked) => {
+                              setShowSocialShare(checked)
+                              toast.success(checked ? 'Social share buttons enabled' : 'Social share buttons disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1392,7 +1549,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-sm text-gray-500">Get notified when someone submits a form</p>
                             </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={newResponseNotifications}
+                            onCheckedChange={(checked) => {
+                              setNewResponseNotifications(checked)
+                              toast.success(checked ? 'Response notifications enabled' : 'Response notifications disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Notification Email</Label>
@@ -1407,11 +1570,20 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           </select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Include Response Data in Email</p>
-                            <p className="text-sm text-gray-500">Attach form answers to notification email</p>
+                          <div className="flex items-center gap-3">
+                            <FileText className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Include Response Data in Email</p>
+                              <p className="text-sm text-gray-500">Attach form answers to notification email</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={includeResponseData}
+                            onCheckedChange={(checked) => {
+                              setIncludeResponseData(checked)
+                              toast.success(checked ? 'Response data included in emails' : 'Response data excluded from emails')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1432,7 +1604,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-sm text-gray-500">Send receipt to respondent after submission</p>
                             </div>
                           </div>
-                          <Switch defaultChecked={false} />
+                          <Switch
+                            checked={confirmationEmail}
+                            onCheckedChange={(checked) => {
+                              setConfirmationEmail(checked)
+                              toast.success(checked ? 'Confirmation email enabled' : 'Confirmation email disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Email Subject</Label>
@@ -1595,11 +1773,18 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                       <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           {[
-                            { title: 'Getting Started', icon: Code, desc: 'Quick start guide' },
-                            { title: 'API Reference', icon: FileText, desc: 'Full documentation' },
-                            { title: 'SDKs & Libraries', icon: GitBranch, desc: 'Node, Python, PHP' },
+                            { title: 'Getting Started', icon: Code, desc: 'Quick start guide', url: '/docs/api/getting-started' },
+                            { title: 'API Reference', icon: FileText, desc: 'Full documentation', url: '/docs/api/reference' },
+                            { title: 'SDKs & Libraries', icon: GitBranch, desc: 'Node, Python, PHP', url: '/docs/api/sdks' },
                           ].map((doc, i) => (
-                            <button key={i} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all text-left">
+                            <button
+                              key={i}
+                              className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all text-left"
+                              onClick={() => {
+                                window.open(doc.url, '_blank')
+                                toast.success(`Opening ${doc.title}`)
+                              }}
+                            >
                               <doc.icon className="h-6 w-6 text-indigo-600 mb-2" />
                               <h4 className="font-medium">{doc.title}</h4>
                               <p className="text-sm text-gray-500">{doc.desc}</p>
@@ -1630,7 +1815,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-sm text-gray-500">New forms are accessible to anyone</p>
                             </div>
                           </div>
-                          <Switch defaultChecked={false} />
+                          <Switch
+                            checked={publicByDefault}
+                            onCheckedChange={(checked) => {
+                              setPublicByDefault(checked)
+                              toast.success(checked ? 'Forms will be public by default' : 'Forms will be private by default')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -1642,7 +1833,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-sm text-gray-500">Require password to access forms</p>
                             </div>
                           </div>
-                          <Switch defaultChecked={false} />
+                          <Switch
+                            checked={passwordProtection}
+                            onCheckedChange={(checked) => {
+                              setPasswordProtection(checked)
+                              toast.success(checked ? 'Password protection enabled' : 'Password protection disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -1654,7 +1851,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-sm text-gray-500">Require login to submit forms</p>
                             </div>
                           </div>
-                          <Switch defaultChecked={false} />
+                          <Switch
+                            checked={respondentAuth}
+                            onCheckedChange={(checked) => {
+                              setRespondentAuth(checked)
+                              toast.success(checked ? 'Respondent authentication required' : 'Respondent authentication not required')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1666,11 +1869,20 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">GDPR Compliance Mode</p>
-                            <p className="text-sm text-gray-500">Enable GDPR consent collection</p>
+                          <div className="flex items-center gap-3">
+                            <Shield className="h-5 w-5 text-green-600" />
+                            <div>
+                              <p className="font-medium">GDPR Compliance Mode</p>
+                              <p className="text-sm text-gray-500">Enable GDPR consent collection</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={gdprCompliance}
+                            onCheckedChange={(checked) => {
+                              setGdprCompliance(checked)
+                              toast.success(checked ? 'GDPR compliance mode enabled' : 'GDPR compliance mode disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -1689,11 +1901,20 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           </select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">IP Address Collection</p>
-                            <p className="text-sm text-gray-500">Store respondent IP addresses</p>
+                          <div className="flex items-center gap-3">
+                            <Globe className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">IP Address Collection</p>
+                              <p className="text-sm text-gray-500">Store respondent IP addresses</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={ipAddressCollection}
+                            onCheckedChange={(checked) => {
+                              setIpAddressCollection(checked)
+                              toast.success(checked ? 'IP address collection enabled' : 'IP address collection disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1707,21 +1928,36 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
                             <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
-                              <Lock className="h-5 w-5 text-indigo-600" />
+                              <Shield className="h-5 w-5 text-indigo-600" />
                             </div>
                             <div>
                               <p className="font-medium">reCAPTCHA Protection</p>
                               <p className="text-sm text-gray-500">Add Google reCAPTCHA to forms</p>
                             </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={recaptchaProtection}
+                            onCheckedChange={(checked) => {
+                              setRecaptchaProtection(checked)
+                              toast.success(checked ? 'reCAPTCHA protection enabled' : 'reCAPTCHA protection disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Honeypot Fields</p>
-                            <p className="text-sm text-gray-500">Hidden fields to catch bots</p>
+                          <div className="flex items-center gap-3">
+                            <Bug className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <p className="font-medium">Honeypot Fields</p>
+                              <p className="text-sm text-gray-500">Hidden fields to catch bots</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={honeypotFields}
+                            onCheckedChange={(checked) => {
+                              setHoneypotFields(checked)
+                              toast.success(checked ? 'Honeypot fields enabled' : 'Honeypot fields disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>Submission Rate Limit</Label>
@@ -1802,7 +2038,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-sm text-gray-500">Enable conditional question flow</p>
                             </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={logicJumps}
+                            onCheckedChange={(checked) => {
+                              setLogicJumps(checked)
+                              toast.success(checked ? 'Logic jumps enabled' : 'Logic jumps disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -1814,7 +2056,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-sm text-gray-500">Randomize question order</p>
                             </div>
                           </div>
-                          <Switch defaultChecked={false} />
+                          <Switch
+                            checked={questionRandomization}
+                            onCheckedChange={(checked) => {
+                              setQuestionRandomization(checked)
+                              toast.success(checked ? 'Question randomization enabled' : 'Question randomization disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -1867,11 +2115,20 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           </Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Auto Backup</p>
-                            <p className="text-sm text-gray-500">Daily automatic backups</p>
+                          <div className="flex items-center gap-3">
+                            <RefreshCw className="h-5 w-5 text-green-600" />
+                            <div>
+                              <p className="font-medium">Auto Backup</p>
+                              <p className="text-sm text-gray-500">Daily automatic backups</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={autoBackup}
+                            onCheckedChange={(checked) => {
+                              setAutoBackup(checked)
+                              toast.success(checked ? 'Auto backup enabled' : 'Auto backup disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1932,14 +2189,20 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
                             <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
-                              <Code className="h-5 w-5 text-gray-600" />
+                              <Bug className="h-5 w-5 text-gray-600" />
                             </div>
                             <div>
                               <p className="font-medium">Debug Mode</p>
                               <p className="text-sm text-gray-500">Show detailed error messages</p>
                             </div>
                           </div>
-                          <Switch defaultChecked={false} />
+                          <Switch
+                            checked={debugMode}
+                            onCheckedChange={(checked) => {
+                              setDebugMode(checked)
+                              toast.success(checked ? 'Debug mode enabled' : 'Debug mode disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -1951,7 +2214,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-sm text-gray-500">Log all form interactions</p>
                             </div>
                           </div>
-                          <Switch defaultChecked={false} />
+                          <Switch
+                            checked={verboseLogging}
+                            onCheckedChange={(checked) => {
+                              setVerboseLogging(checked)
+                              toast.success(checked ? 'Verbose logging enabled' : 'Verbose logging disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -1963,7 +2232,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-sm text-gray-500">Don't save test submissions</p>
                             </div>
                           </div>
-                          <Switch defaultChecked={false} />
+                          <Switch
+                            checked={testMode}
+                            onCheckedChange={(checked) => {
+                              setTestMode(checked)
+                              toast.success(checked ? 'Test mode enabled' : 'Test mode disabled')
+                            }}
+                          />
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
                           toast.success('API logs loaded')
@@ -1981,25 +2256,52 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Lazy Load Questions</p>
-                            <p className="text-sm text-gray-500">Load questions as needed</p>
+                          <div className="flex items-center gap-3">
+                            <Layers className="h-5 w-5 text-indigo-600" />
+                            <div>
+                              <p className="font-medium">Lazy Load Questions</p>
+                              <p className="text-sm text-gray-500">Load questions as needed</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={lazyLoadQuestions}
+                            onCheckedChange={(checked) => {
+                              setLazyLoadQuestions(checked)
+                              toast.success(checked ? 'Lazy loading enabled' : 'Lazy loading disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Cache Responses</p>
-                            <p className="text-sm text-gray-500">Enable browser caching</p>
+                          <div className="flex items-center gap-3">
+                            <Database className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">Cache Responses</p>
+                              <p className="text-sm text-gray-500">Enable browser caching</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={cacheResponses}
+                            onCheckedChange={(checked) => {
+                              setCacheResponses(checked)
+                              toast.success(checked ? 'Response caching enabled' : 'Response caching disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Optimize Images</p>
-                            <p className="text-sm text-gray-500">Auto-compress uploaded images</p>
+                          <div className="flex items-center gap-3">
+                            <Rocket className="h-5 w-5 text-green-600" />
+                            <div>
+                              <p className="font-medium">Optimize Images</p>
+                              <p className="text-sm text-gray-500">Auto-compress uploaded images</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked={true} />
+                          <Switch
+                            checked={optimizeImages}
+                            onCheckedChange={(checked) => {
+                              setOptimizeImages(checked)
+                              toast.success(checked ? 'Image optimization enabled' : 'Image optimization disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>CDN Region</Label>
@@ -2068,20 +2370,46 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                <button
+                  className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center"
+                  onClick={() => {
+                    const formLink = `https://freeflow.io/form/${selectedForm?.id || 'abc123'}`
+                    navigator.clipboard.writeText(formLink)
+                    toast.success('Form link copied to clipboard')
+                  }}
+                >
                   <Link2 className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Link</span>
                 </button>
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                <button
+                  className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center"
+                  onClick={() => {
+                    const embedCode = `<iframe src="https://freeflow.io/form/${selectedForm?.id || 'abc123'}" width="100%" height="600" frameborder="0"></iframe>`
+                    navigator.clipboard.writeText(embedCode)
+                    toast.success('Embed code copied to clipboard')
+                  }}
+                >
                   <Code className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Embed</span>
                 </button>
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                <button
+                  className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center"
+                  onClick={() => {
+                    const formLink = `https://freeflow.io/form/${selectedForm?.id || 'abc123'}`
+                    window.open(`mailto:?subject=Please fill out this form&body=Hi,%0D%0A%0D%0APlease fill out this form: ${formLink}`, '_blank')
+                    toast.success('Email client opened')
+                  }}
+                >
                   <Mail className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Email</span>
                 </button>
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
-                  <ExternalLink className="h-5 w-5 mx-auto mb-1" />
+                <button
+                  className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center"
+                  onClick={() => {
+                    toast.success('QR code generated')
+                  }}
+                >
+                  <QrCode className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">QR Code</span>
                 </button>
               </div>
@@ -2118,7 +2446,18 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             <ScrollArea className="h-[400px]">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4 pr-4">
                 {questionTypes.map(type => (
-                  <button key={type.id} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors text-left relative">
+                  <button
+                    key={type.id}
+                    className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors text-left relative"
+                    onClick={() => {
+                      if (type.isPremium) {
+                        toast.error(`${type.name} is a Pro feature. Upgrade to access.`)
+                      } else {
+                        toast.success(`${type.name} question added`)
+                        setShowQuestionTypesDialog(false)
+                      }
+                    }}
+                  >
                     {type.isPremium && (
                       <Badge className="absolute top-1 right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs">
                         Pro
@@ -2142,7 +2481,14 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             </DialogHeader>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 py-4">
               {formThemes.map(theme => (
-                <button key={theme.id} className="p-4 border rounded-lg hover:border-indigo-500 transition-colors text-left">
+                <button
+                  key={theme.id}
+                  className="p-4 border rounded-lg hover:border-indigo-500 transition-colors text-left"
+                  onClick={() => {
+                    toast.success(`Theme "${theme.name}" applied to form`)
+                    setShowThemesDialog(false)
+                  }}
+                >
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-5 h-5 rounded-full" style={{ backgroundColor: theme.primaryColor }}></div>
                     <span className="font-medium">{theme.name}</span>

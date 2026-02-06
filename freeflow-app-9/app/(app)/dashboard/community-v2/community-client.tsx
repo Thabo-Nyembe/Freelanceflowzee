@@ -42,7 +42,9 @@ import {
   AlertTriangle, Ban, BarChart3, UserX,
   VolumeX, Gavel, FileText, ExternalLink, Rocket, Gem, ShieldCheck, ShieldAlert, Mail, Bot,
   Webhook, Download, Key, HardDrive,
-  CreditCard, Sliders, Loader2
+  CreditCard, Sliders, Loader2,
+  Eye, Send, Heart, Zap, Link2, Paperclip, AtSign,
+  ShieldOff, UserCheck, Smartphone, BellOff, BellRing, ScrollText
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -473,6 +475,50 @@ export default function CommunityClient() {
     isHoisted: false,
     isMentionable: false
   })
+
+  // Settings switch states - General
+  const [communityModeEnabled, setCommunityModeEnabled] = useState(true)
+  const [discoverableEnabled, setDiscoverableEnabled] = useState(true)
+  const [explicitFilterEnabled, setExplicitFilterEnabled] = useState(true)
+  const [twoFactorRequired, setTwoFactorRequired] = useState(false)
+
+  // Settings switch states - Moderation
+  const [blockSpamEnabled, setBlockSpamEnabled] = useState(true)
+  const [blockHarmfulLinksEnabled, setBlockHarmfulLinksEnabled] = useState(true)
+  const [blockKeywordEnabled, setBlockKeywordEnabled] = useState(true)
+  const [blockMentionSpamEnabled, setBlockMentionSpamEnabled] = useState(true)
+  const [logModActionsEnabled, setLogModActionsEnabled] = useState(true)
+
+  // Settings switch states - Notifications
+  const [mobilePushEnabled, setMobilePushEnabled] = useState(true)
+  const [suppressEveryoneEnabled, setSuppressEveryoneEnabled] = useState(false)
+  const [roleMentionHighlightEnabled, setRoleMentionHighlightEnabled] = useState(true)
+  const [newMemberAlertsEnabled, setNewMemberAlertsEnabled] = useState(false)
+  const [memberReportsEnabled, setMemberReportsEnabled] = useState(true)
+  const [boostChangesEnabled, setBoostChangesEnabled] = useState(true)
+  const [securityAlertsEnabled, setSecurityAlertsEnabled] = useState(true)
+
+  // Settings switch states - Permissions
+  const [permissionsState, setPermissionsState] = useState<Record<string, boolean>>({
+    view: true,
+    send: true,
+    react: true,
+    voice: true,
+    speak: true,
+    embed: false,
+    attach: false,
+    mention: false
+  })
+
+  // Settings switch states - Advanced/Security
+  const [raidProtectionEnabled, setRaidProtectionEnabled] = useState(true)
+  const [suspiciousAccountDetectionEnabled, setSuspiciousAccountDetectionEnabled] = useState(true)
+  const [antiScamEnabled, setAntiScamEnabled] = useState(true)
+  const [dmSpamProtectionEnabled, setDmSpamProtectionEnabled] = useState(false)
+  const [auditLogRetentionEnabled, setAuditLogRetentionEnabled] = useState(true)
+
+  // Bot enabled states
+  const [botEnabledStates, setBotEnabledStates] = useState<Record<string, boolean>>({})
 
   // ============== REAL DATA HOOKS ==============
 
@@ -1922,19 +1968,37 @@ export default function CommunityClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Community Mode</p>
-                            <p className="text-sm text-gray-500">Enable community features like discovery</p>
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Community Mode</p>
+                              <p className="text-sm text-gray-500">Enable community features like discovery</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={communityModeEnabled}
+                            onCheckedChange={(checked) => {
+                              setCommunityModeEnabled(checked)
+                              toast.success(checked ? 'Community mode enabled' : 'Community mode disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Discoverable</p>
-                            <p className="text-sm text-gray-500">Allow users to find this server</p>
+                          <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Discoverable</p>
+                              <p className="text-sm text-gray-500">Allow users to find this server</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={discoverableEnabled}
+                            onCheckedChange={(checked) => {
+                              setDiscoverableEnabled(checked)
+                              toast.success(checked ? 'Server is now discoverable' : 'Server is now hidden')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1965,19 +2029,37 @@ export default function CommunityClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Explicit Content Filter</p>
-                            <p className="text-sm text-gray-500">Scan media from members without roles</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldAlert className="w-4 h-4 text-red-500" />
+                            <div>
+                              <p className="font-medium">Explicit Content Filter</p>
+                              <p className="text-sm text-gray-500">Scan media from members without roles</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={explicitFilterEnabled}
+                            onCheckedChange={(checked) => {
+                              setExplicitFilterEnabled(checked)
+                              toast.success(checked ? 'Explicit content filter enabled' : 'Explicit content filter disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">2FA Requirement</p>
-                            <p className="text-sm text-gray-500">Require 2FA for moderation actions</p>
+                          <div className="flex items-center gap-2">
+                            <Key className="w-4 h-4 text-violet-500" />
+                            <div>
+                              <p className="font-medium">2FA Requirement</p>
+                              <p className="text-sm text-gray-500">Require 2FA for moderation actions</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={twoFactorRequired}
+                            onCheckedChange={(checked) => {
+                              setTwoFactorRequired(checked)
+                              toast.success(checked ? '2FA required for moderators' : '2FA requirement disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1997,35 +2079,71 @@ export default function CommunityClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Block Spam</p>
-                            <p className="text-sm text-gray-500">Automatically delete spam messages</p>
+                          <div className="flex items-center gap-2">
+                            <Ban className="w-4 h-4 text-red-500" />
+                            <div>
+                              <p className="font-medium">Block Spam</p>
+                              <p className="text-sm text-gray-500">Automatically delete spam messages</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={blockSpamEnabled}
+                            onCheckedChange={(checked) => {
+                              setBlockSpamEnabled(checked)
+                              toast.success(checked ? 'Spam blocking enabled' : 'Spam blocking disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Block Harmful Links</p>
-                            <p className="text-sm text-gray-500">Remove phishing and malware links</p>
+                          <div className="flex items-center gap-2">
+                            <Link2 className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Block Harmful Links</p>
+                              <p className="text-sm text-gray-500">Remove phishing and malware links</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={blockHarmfulLinksEnabled}
+                            onCheckedChange={(checked) => {
+                              setBlockHarmfulLinksEnabled(checked)
+                              toast.success(checked ? 'Harmful link blocking enabled' : 'Harmful link blocking disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Block Keyword Phrases</p>
-                            <p className="text-sm text-gray-500">Filter specific words or phrases</p>
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <p className="font-medium">Block Keyword Phrases</p>
+                              <p className="text-sm text-gray-500">Filter specific words or phrases</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={blockKeywordEnabled}
+                            onCheckedChange={(checked) => {
+                              setBlockKeywordEnabled(checked)
+                              toast.success(checked ? 'Keyword filtering enabled' : 'Keyword filtering disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Block Mention Spam</p>
-                            <p className="text-sm text-gray-500">Limit mass @mentions</p>
+                          <div className="flex items-center gap-2">
+                            <AtSign className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Block Mention Spam</p>
+                              <p className="text-sm text-gray-500">Limit mass @mentions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={blockMentionSpamEnabled}
+                            onCheckedChange={(checked) => {
+                              setBlockMentionSpamEnabled(checked)
+                              toast.success(checked ? 'Mention spam blocking enabled' : 'Mention spam blocking disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="space-y-2 pt-4">
@@ -2109,11 +2227,20 @@ export default function CommunityClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Log Mod Actions</p>
-                            <p className="text-sm text-gray-500">Record all moderation actions</p>
+                          <div className="flex items-center gap-2">
+                            <ScrollText className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Log Mod Actions</p>
+                              <p className="text-sm text-gray-500">Record all moderation actions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={logModActionsEnabled}
+                            onCheckedChange={(checked) => {
+                              setLogModActionsEnabled(checked)
+                              toast.success(checked ? 'Moderation logging enabled' : 'Moderation logging disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2147,27 +2274,54 @@ export default function CommunityClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Mobile Push Notifications</p>
-                            <p className="text-sm text-gray-500">Send notifications to mobile devices</p>
+                          <div className="flex items-center gap-2">
+                            <Smartphone className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Mobile Push Notifications</p>
+                              <p className="text-sm text-gray-500">Send notifications to mobile devices</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={mobilePushEnabled}
+                            onCheckedChange={(checked) => {
+                              setMobilePushEnabled(checked)
+                              toast.success(checked ? 'Mobile push notifications enabled' : 'Mobile push notifications disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Suppress @everyone</p>
-                            <p className="text-sm text-gray-500">Disable @everyone and @here by default</p>
+                          <div className="flex items-center gap-2">
+                            <BellOff className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Suppress @everyone</p>
+                              <p className="text-sm text-gray-500">Disable @everyone and @here by default</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={suppressEveryoneEnabled}
+                            onCheckedChange={(checked) => {
+                              setSuppressEveryoneEnabled(checked)
+                              toast.success(checked ? '@everyone mentions suppressed' : '@everyone mentions allowed')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Role Mention Highlighting</p>
-                            <p className="text-sm text-gray-500">Highlight when your role is mentioned</p>
+                          <div className="flex items-center gap-2">
+                            <BellRing className="w-4 h-4 text-amber-500" />
+                            <div>
+                              <p className="font-medium">Role Mention Highlighting</p>
+                              <p className="text-sm text-gray-500">Highlight when your role is mentioned</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={roleMentionHighlightEnabled}
+                            onCheckedChange={(checked) => {
+                              setRoleMentionHighlightEnabled(checked)
+                              toast.success(checked ? 'Role mention highlighting enabled' : 'Role mention highlighting disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2182,35 +2336,71 @@ export default function CommunityClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">New Member Joins</p>
-                            <p className="text-sm text-gray-500">Alert when new members join</p>
+                          <div className="flex items-center gap-2">
+                            <UserPlus className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">New Member Joins</p>
+                              <p className="text-sm text-gray-500">Alert when new members join</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={newMemberAlertsEnabled}
+                            onCheckedChange={(checked) => {
+                              setNewMemberAlertsEnabled(checked)
+                              toast.success(checked ? 'New member alerts enabled' : 'New member alerts disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Member Reports</p>
-                            <p className="text-sm text-gray-500">Alert on user reports</p>
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Member Reports</p>
+                              <p className="text-sm text-gray-500">Alert on user reports</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={memberReportsEnabled}
+                            onCheckedChange={(checked) => {
+                              setMemberReportsEnabled(checked)
+                              toast.success(checked ? 'Member report alerts enabled' : 'Member report alerts disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Server Boost Changes</p>
-                            <p className="text-sm text-gray-500">Alert on boost level changes</p>
+                          <div className="flex items-center gap-2">
+                            <Rocket className="w-4 h-4 text-pink-500" />
+                            <div>
+                              <p className="font-medium">Server Boost Changes</p>
+                              <p className="text-sm text-gray-500">Alert on boost level changes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={boostChangesEnabled}
+                            onCheckedChange={(checked) => {
+                              setBoostChangesEnabled(checked)
+                              toast.success(checked ? 'Boost change alerts enabled' : 'Boost change alerts disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Security Alerts</p>
-                            <p className="text-sm text-gray-500">Notify on suspicious activity</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldAlert className="w-4 h-4 text-red-500" />
+                            <div>
+                              <p className="font-medium">Security Alerts</p>
+                              <p className="text-sm text-gray-500">Notify on suspicious activity</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={securityAlertsEnabled}
+                            onCheckedChange={(checked) => {
+                              setSecurityAlertsEnabled(checked)
+                              toast.success(checked ? 'Security alerts enabled' : 'Security alerts disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2230,21 +2420,30 @@ export default function CommunityClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         {[
-                          { id: 'view', label: 'View Channels', desc: 'Allow viewing text and voice channels', default: true },
-                          { id: 'send', label: 'Send Messages', desc: 'Allow sending messages in channels', default: true },
-                          { id: 'react', label: 'Add Reactions', desc: 'Allow adding emoji reactions', default: true },
-                          { id: 'voice', label: 'Connect to Voice', desc: 'Allow joining voice channels', default: true },
-                          { id: 'speak', label: 'Speak in Voice', desc: 'Allow speaking in voice channels', default: true },
-                          { id: 'embed', label: 'Embed Links', desc: 'Allow embedding links and previews', default: false },
-                          { id: 'attach', label: 'Attach Files', desc: 'Allow uploading files', default: false },
-                          { id: 'mention', label: 'Mention @everyone', desc: 'Allow mentioning everyone', default: false }
+                          { id: 'view', label: 'View Channels', desc: 'Allow viewing text and voice channels', icon: <Eye className="w-4 h-4 text-blue-500" /> },
+                          { id: 'send', label: 'Send Messages', desc: 'Allow sending messages in channels', icon: <Send className="w-4 h-4 text-green-500" /> },
+                          { id: 'react', label: 'Add Reactions', desc: 'Allow adding emoji reactions', icon: <Heart className="w-4 h-4 text-pink-500" /> },
+                          { id: 'voice', label: 'Connect to Voice', desc: 'Allow joining voice channels', icon: <Headphones className="w-4 h-4 text-violet-500" /> },
+                          { id: 'speak', label: 'Speak in Voice', desc: 'Allow speaking in voice channels', icon: <Mic className="w-4 h-4 text-amber-500" /> },
+                          { id: 'embed', label: 'Embed Links', desc: 'Allow embedding links and previews', icon: <Link2 className="w-4 h-4 text-cyan-500" /> },
+                          { id: 'attach', label: 'Attach Files', desc: 'Allow uploading files', icon: <Paperclip className="w-4 h-4 text-orange-500" /> },
+                          { id: 'mention', label: 'Mention @everyone', desc: 'Allow mentioning everyone', icon: <AtSign className="w-4 h-4 text-red-500" /> }
                         ].map(perm => (
                           <div key={perm.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div>
-                              <p className="font-medium">{perm.label}</p>
-                              <p className="text-sm text-gray-500">{perm.desc}</p>
+                            <div className="flex items-center gap-2">
+                              {perm.icon}
+                              <div>
+                                <p className="font-medium">{perm.label}</p>
+                                <p className="text-sm text-gray-500">{perm.desc}</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked={perm.default} />
+                            <Switch
+                              checked={permissionsState[perm.id]}
+                              onCheckedChange={(checked) => {
+                                setPermissionsState(prev => ({ ...prev, [perm.id]: checked }))
+                                toast.success(checked ? `${perm.label} permission enabled` : `${perm.label} permission disabled`)
+                              }}
+                            />
                           </div>
                         ))}
                       </CardContent>
@@ -2295,14 +2494,23 @@ export default function CommunityClient() {
                                 <AvatarImage src={`https://avatar.vercel.sh/${bot.avatar}`} />
                                 <AvatarFallback>{bot.name.slice(0, 2)}</AvatarFallback>
                               </Avatar>
-                              <div>
-                                <p className="font-medium">{bot.name}</p>
-                                <p className="text-sm text-gray-500">{bot.description}</p>
+                              <div className="flex items-center gap-2">
+                                <Bot className="w-4 h-4 text-blue-500" />
+                                <div>
+                                  <p className="font-medium">{bot.name}</p>
+                                  <p className="text-sm text-gray-500">{bot.description}</p>
+                                </div>
                               </div>
                             </div>
                             <div className="flex items-center gap-4">
                               <Badge variant="outline">{bot.commands} commands</Badge>
-                              <Switch checked={bot.isEnabled} />
+                              <Switch
+                                checked={botEnabledStates[bot.id] ?? bot.isEnabled}
+                                onCheckedChange={(checked) => {
+                                  setBotEnabledStates(prev => ({ ...prev, [bot.id]: checked }))
+                                  toast.success(checked ? `${bot.name} enabled` : `${bot.name} disabled`)
+                                }}
+                              />
                             </div>
                           </div>
                         ))}
@@ -2397,35 +2605,71 @@ export default function CommunityClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Raid Protection</p>
-                            <p className="text-sm text-gray-500">Detect and prevent raid attacks</p>
+                          <div className="flex items-center gap-2">
+                            <Zap className="w-4 h-4 text-red-500" />
+                            <div>
+                              <p className="font-medium">Raid Protection</p>
+                              <p className="text-sm text-gray-500">Detect and prevent raid attacks</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={raidProtectionEnabled}
+                            onCheckedChange={(checked) => {
+                              setRaidProtectionEnabled(checked)
+                              toast.success(checked ? 'Raid protection enabled' : 'Raid protection disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Suspicious Account Detection</p>
-                            <p className="text-sm text-gray-500">Flag newly created accounts</p>
+                          <div className="flex items-center gap-2">
+                            <UserCheck className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <p className="font-medium">Suspicious Account Detection</p>
+                              <p className="text-sm text-gray-500">Flag newly created accounts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={suspiciousAccountDetectionEnabled}
+                            onCheckedChange={(checked) => {
+                              setSuspiciousAccountDetectionEnabled(checked)
+                              toast.success(checked ? 'Suspicious account detection enabled' : 'Suspicious account detection disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Anti-Scam Protection</p>
-                            <p className="text-sm text-gray-500">Block known scam patterns</p>
+                          <div className="flex items-center gap-2">
+                            <ShieldOff className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Anti-Scam Protection</p>
+                              <p className="text-sm text-gray-500">Block known scam patterns</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={antiScamEnabled}
+                            onCheckedChange={(checked) => {
+                              setAntiScamEnabled(checked)
+                              toast.success(checked ? 'Anti-scam protection enabled' : 'Anti-scam protection disabled')
+                            }}
+                          />
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">DM Spam Protection</p>
-                            <p className="text-sm text-gray-500">Protect members from DM spam</p>
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">DM Spam Protection</p>
+                              <p className="text-sm text-gray-500">Protect members from DM spam</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={dmSpamProtectionEnabled}
+                            onCheckedChange={(checked) => {
+                              setDmSpamProtectionEnabled(checked)
+                              toast.success(checked ? 'DM spam protection enabled' : 'DM spam protection disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2455,11 +2699,20 @@ export default function CommunityClient() {
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <p className="font-medium">Audit Log Retention</p>
-                            <p className="text-sm text-gray-500">Keep detailed audit logs</p>
+                          <div className="flex items-center gap-2">
+                            <ScrollText className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Audit Log Retention</p>
+                              <p className="text-sm text-gray-500">Keep detailed audit logs</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditLogRetentionEnabled}
+                            onCheckedChange={(checked) => {
+                              setAuditLogRetentionEnabled(checked)
+                              toast.success(checked ? 'Audit log retention enabled' : 'Audit log retention disabled')
+                            }}
+                          />
                         </div>
 
                         <Button
@@ -2738,8 +2991,12 @@ export default function CommunityClient() {
               <Switch
                 id="private"
                 checked={channelForm.isPrivate}
-                onCheckedChange={(checked) => setChannelForm(prev => ({ ...prev, isPrivate: checked }))}
+                onCheckedChange={(checked) => {
+                  setChannelForm(prev => ({ ...prev, isPrivate: checked }))
+                  toast.success(checked ? 'Channel set to private' : 'Channel set to public')
+                }}
               />
+              <Lock className="w-4 h-4 text-gray-500" />
               <Label htmlFor="private">Private Channel</Label>
             </div>
           </div>
@@ -2863,16 +3120,24 @@ export default function CommunityClient() {
               <Switch
                 id="hoisted"
                 checked={roleForm.isHoisted}
-                onCheckedChange={(checked) => setRoleForm(prev => ({ ...prev, isHoisted: checked }))}
+                onCheckedChange={(checked) => {
+                  setRoleForm(prev => ({ ...prev, isHoisted: checked }))
+                  toast.success(checked ? 'Role members will display separately' : 'Role members will not display separately')
+                }}
               />
+              <Users className="w-4 h-4 text-blue-500" />
               <Label htmlFor="hoisted">Display role members separately</Label>
             </div>
             <div className="flex items-center gap-2">
               <Switch
                 id="mentionable"
                 checked={roleForm.isMentionable}
-                onCheckedChange={(checked) => setRoleForm(prev => ({ ...prev, isMentionable: checked }))}
+                onCheckedChange={(checked) => {
+                  setRoleForm(prev => ({ ...prev, isMentionable: checked }))
+                  toast.success(checked ? 'Role is now mentionable by anyone' : 'Role is no longer mentionable by everyone')
+                }}
               />
+              <AtSign className="w-4 h-4 text-orange-500" />
               <Label htmlFor="mentionable">Allow anyone to @mention this role</Label>
             </div>
           </div>

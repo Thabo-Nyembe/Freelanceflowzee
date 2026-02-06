@@ -7,7 +7,8 @@ import {
   RefreshCw, Users, CreditCard, Mail, Eye, Edit,
   Trash2, Copy, ArrowUpRight, ArrowDownRight, Sparkles,
   Globe, Percent, Receipt, Bell, Settings, Zap, FileSpreadsheet, Share2,
-  Webhook, AlertOctagon, Sliders, List, Table2
+  Webhook, AlertOctagon, Sliders, List, Table2,
+  Calculator, Palette, MailCheck, Wallet, Link2, Shield, Repeat, Key, Lock
 } from 'lucide-react'
 
 // World-class TanStack Table integration
@@ -171,6 +172,55 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   const [filterClient, setFilterClient] = useState<string>('')
   const [filterDueDateFrom, setFilterDueDateFrom] = useState<string>('')
   const [filterDueDateTo, setFilterDueDateTo] = useState<string>('')
+
+  // Settings state - Tax Settings
+  const [enableTaxCalculations, setEnableTaxCalculations] = useState(true)
+
+  // Settings state - Branding Settings
+  const [showPaymentInstructions, setShowPaymentInstructions] = useState(true)
+
+  // Settings state - Notification Settings
+  const [notifyInvoiceSent, setNotifyInvoiceSent] = useState(true)
+  const [notifyPaymentReceived, setNotifyPaymentReceived] = useState(true)
+  const [notifyInvoiceOverdue, setNotifyInvoiceOverdue] = useState(true)
+  const [notifyInvoiceViewed, setNotifyInvoiceViewed] = useState(false)
+  const [enableAutoReminders, setEnableAutoReminders] = useState(true)
+  const [reminderScheduleEnabled, setReminderScheduleEnabled] = useState<Record<string, boolean>>({
+    '3days': true,
+    '1day': false,
+    'dueday': true,
+    '3daysafter': false,
+    '7daysafter': true,
+    '14daysafter': false,
+  })
+
+  // Settings state - Payments Settings
+  const [enableLateFees, setEnableLateFees] = useState(false)
+  const [allowPartialPayments, setAllowPartialPayments] = useState(true)
+  const [requestDeposits, setRequestDeposits] = useState(false)
+
+  // Settings state - Integrations Settings
+  const [enableApiAccess, setEnableApiAccess] = useState(true)
+  const [webhookEvents, setWebhookEvents] = useState<Record<string, boolean>>({
+    'invoice.created': true,
+    'invoice.sent': true,
+    'invoice.paid': true,
+    'invoice.overdue': true,
+    'payment.received': true,
+  })
+
+  // Settings state - Advanced Settings
+  const [autoGenerateRecurring, setAutoGenerateRecurring] = useState(true)
+  const [autoSendRecurring, setAutoSendRecurring] = useState(true)
+  const [twoFactorAuth, setTwoFactorAuth] = useState(true)
+  const [invoiceLinkExpiration, setInvoiceLinkExpiration] = useState(false)
+
+  // Quick Settings Modal state
+  const [stripeEnabled, setStripeEnabled] = useState(true)
+  const [paypalEnabled, setPaypalEnabled] = useState(false)
+  const [autoSendReminders, setAutoSendReminders] = useState(true)
+  const [autoApplyLateFees, setAutoApplyLateFees] = useState(false)
+  const [autoGenerateRecurringInvoices, setAutoGenerateRecurringInvoices] = useState(true)
 
   // Invoice creation state
   const [newInvoice, setNewInvoice] = useState({
@@ -1446,11 +1496,20 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Tax Calculations</Label>
-                            <p className="text-sm text-gray-500">Add tax line items to invoices</p>
+                          <div className="flex items-center gap-2">
+                            <Calculator className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label>Enable Tax Calculations</Label>
+                              <p className="text-sm text-gray-500">Add tax line items to invoices</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableTaxCalculations}
+                            onCheckedChange={(checked) => {
+                              setEnableTaxCalculations(checked)
+                              toast.success(checked ? 'Tax calculations enabled' : 'Tax calculations disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
@@ -1537,11 +1596,20 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                           <textarea className="w-full p-3 rounded-lg border resize-none h-24 dark:bg-gray-800 dark:border-gray-700" placeholder="Thank you for your business!" />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Show Payment Instructions</Label>
-                            <p className="text-sm text-gray-500">Display payment details on invoice</p>
+                          <div className="flex items-center gap-2">
+                            <Wallet className="h-4 w-4 text-green-500" />
+                            <div>
+                              <Label>Show Payment Instructions</Label>
+                              <p className="text-sm text-gray-500">Display payment details on invoice</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showPaymentInstructions}
+                            onCheckedChange={(checked) => {
+                              setShowPaymentInstructions(checked)
+                              toast.success(checked ? 'Payment instructions will be shown' : 'Payment instructions hidden')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1558,32 +1626,68 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Invoice Sent</Label>
-                            <p className="text-sm text-gray-500">Notify when invoice is sent to client</p>
+                          <div className="flex items-center gap-2">
+                            <Send className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label>Invoice Sent</Label>
+                              <p className="text-sm text-gray-500">Notify when invoice is sent to client</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyInvoiceSent}
+                            onCheckedChange={(checked) => {
+                              setNotifyInvoiceSent(checked)
+                              toast.success(checked ? 'Invoice sent notifications enabled' : 'Invoice sent notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Payment Received</Label>
-                            <p className="text-sm text-gray-500">Notify when payment is received</p>
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4 text-green-500" />
+                            <div>
+                              <Label>Payment Received</Label>
+                              <p className="text-sm text-gray-500">Notify when payment is received</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyPaymentReceived}
+                            onCheckedChange={(checked) => {
+                              setNotifyPaymentReceived(checked)
+                              toast.success(checked ? 'Payment received notifications enabled' : 'Payment received notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Invoice Overdue</Label>
-                            <p className="text-sm text-gray-500">Notify when invoice becomes overdue</p>
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-red-500" />
+                            <div>
+                              <Label>Invoice Overdue</Label>
+                              <p className="text-sm text-gray-500">Notify when invoice becomes overdue</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyInvoiceOverdue}
+                            onCheckedChange={(checked) => {
+                              setNotifyInvoiceOverdue(checked)
+                              toast.success(checked ? 'Overdue notifications enabled' : 'Overdue notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Invoice Viewed</Label>
-                            <p className="text-sm text-gray-500">Notify when client views invoice</p>
+                          <div className="flex items-center gap-2">
+                            <Eye className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label>Invoice Viewed</Label>
+                              <p className="text-sm text-gray-500">Notify when client views invoice</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={notifyInvoiceViewed}
+                            onCheckedChange={(checked) => {
+                              setNotifyInvoiceViewed(checked)
+                              toast.success(checked ? 'View tracking enabled' : 'View tracking disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1595,18 +1699,36 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Auto-Reminders</Label>
-                            <p className="text-sm text-gray-500">Automatically send payment reminders</p>
+                          <div className="flex items-center gap-2">
+                            <Bell className="h-4 w-4 text-orange-500" />
+                            <div>
+                              <Label>Enable Auto-Reminders</Label>
+                              <p className="text-sm text-gray-500">Automatically send payment reminders</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableAutoReminders}
+                            onCheckedChange={(checked) => {
+                              setEnableAutoReminders(checked)
+                              toast.success(checked ? 'Auto-reminders enabled' : 'Auto-reminders disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-3">
                           <Label>Reminder Schedule</Label>
                           {reminderSchedules.map(schedule => (
                             <div key={schedule.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                              <span className="text-sm">{schedule.label}</span>
-                              <Switch defaultChecked={['3days', 'dueday', '7daysafter'].includes(schedule.id)} />
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-gray-400" />
+                                <span className="text-sm">{schedule.label}</span>
+                              </div>
+                              <Switch
+                                checked={reminderScheduleEnabled[schedule.id] ?? false}
+                                onCheckedChange={(checked) => {
+                                  setReminderScheduleEnabled(prev => ({ ...prev, [schedule.id]: checked }))
+                                  toast.success(checked ? `Reminder "${schedule.label}" enabled` : `Reminder "${schedule.label}" disabled`)
+                                }}
+                              />
                             </div>
                           ))}
                         </div>
@@ -1696,11 +1818,20 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Late Fees</Label>
-                            <p className="text-sm text-gray-500">Automatically apply late fees to overdue invoices</p>
+                          <div className="flex items-center gap-2">
+                            <Percent className="h-4 w-4 text-red-500" />
+                            <div>
+                              <Label>Enable Late Fees</Label>
+                              <p className="text-sm text-gray-500">Automatically apply late fees to overdue invoices</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enableLateFees}
+                            onCheckedChange={(checked) => {
+                              setEnableLateFees(checked)
+                              toast.success(checked ? 'Late fees enabled' : 'Late fees disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
@@ -1747,18 +1878,36 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Allow Partial Payments</Label>
-                            <p className="text-sm text-gray-500">Accept payments in installments</p>
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label>Allow Partial Payments</Label>
+                              <p className="text-sm text-gray-500">Accept payments in installments</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={allowPartialPayments}
+                            onCheckedChange={(checked) => {
+                              setAllowPartialPayments(checked)
+                              toast.success(checked ? 'Partial payments enabled' : 'Partial payments disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Request Deposits</Label>
-                            <p className="text-sm text-gray-500">Require upfront deposits on invoices</p>
+                          <div className="flex items-center gap-2">
+                            <Wallet className="h-4 w-4 text-green-500" />
+                            <div>
+                              <Label>Request Deposits</Label>
+                              <p className="text-sm text-gray-500">Require upfront deposits on invoices</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={requestDeposits}
+                            onCheckedChange={(checked) => {
+                              setRequestDeposits(checked)
+                              toast.success(checked ? 'Deposit requests enabled' : 'Deposit requests disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Default Deposit Percentage</Label>
@@ -1809,11 +1958,20 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable API Access</Label>
-                            <p className="text-sm text-gray-500">Allow external API access</p>
+                          <div className="flex items-center gap-2">
+                            <Key className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label>Enable API Access</Label>
+                              <p className="text-sm text-gray-500">Allow external API access</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableApiAccess}
+                            onCheckedChange={(checked) => {
+                              setEnableApiAccess(checked)
+                              toast.success(checked ? 'API access enabled' : 'API access disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1833,7 +1991,14 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                             {['invoice.created', 'invoice.sent', 'invoice.paid', 'invoice.overdue', 'payment.received'].map((event) => (
                               <div key={event} className="flex items-center gap-2">
-                                <Switch defaultChecked />
+                                <Switch
+                                  checked={webhookEvents[event] ?? true}
+                                  onCheckedChange={(checked) => {
+                                    setWebhookEvents(prev => ({ ...prev, [event]: checked }))
+                                    toast.success(checked ? `Webhook event "${event}" enabled` : `Webhook event "${event}" disabled`)
+                                  }}
+                                />
+                                <Webhook className="h-3 w-3 text-gray-400" />
                                 <span className="text-sm font-mono">{event}</span>
                               </div>
                             ))}
@@ -1925,18 +2090,36 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Auto-Generate Recurring Invoices</Label>
-                            <p className="text-sm text-gray-500">Automatically create invoices on schedule</p>
+                          <div className="flex items-center gap-2">
+                            <Repeat className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label>Auto-Generate Recurring Invoices</Label>
+                              <p className="text-sm text-gray-500">Automatically create invoices on schedule</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoGenerateRecurring}
+                            onCheckedChange={(checked) => {
+                              setAutoGenerateRecurring(checked)
+                              toast.success(checked ? 'Auto-generate recurring invoices enabled' : 'Auto-generate recurring invoices disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Auto-Send Recurring Invoices</Label>
-                            <p className="text-sm text-gray-500">Automatically email invoices when created</p>
+                          <div className="flex items-center gap-2">
+                            <Send className="h-4 w-4 text-green-500" />
+                            <div>
+                              <Label>Auto-Send Recurring Invoices</Label>
+                              <p className="text-sm text-gray-500">Automatically email invoices when created</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoSendRecurring}
+                            onCheckedChange={(checked) => {
+                              setAutoSendRecurring(checked)
+                              toast.success(checked ? 'Auto-send recurring invoices enabled' : 'Auto-send recurring invoices disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Default Send Time</Label>
@@ -1997,18 +2180,36 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Two-Factor Authentication</Label>
-                            <p className="text-sm text-gray-500">Require 2FA for invoice access</p>
+                          <div className="flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-green-500" />
+                            <div>
+                              <Label>Two-Factor Authentication</Label>
+                              <p className="text-sm text-gray-500">Require 2FA for invoice access</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={twoFactorAuth}
+                            onCheckedChange={(checked) => {
+                              setTwoFactorAuth(checked)
+                              toast.success(checked ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Invoice Link Expiration</Label>
-                            <p className="text-sm text-gray-500">Expire public invoice links</p>
+                          <div className="flex items-center gap-2">
+                            <Link2 className="h-4 w-4 text-orange-500" />
+                            <div>
+                              <Label>Invoice Link Expiration</Label>
+                              <p className="text-sm text-gray-500">Expire public invoice links</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={invoiceLinkExpiration}
+                            onCheckedChange={(checked) => {
+                              setInvoiceLinkExpiration(checked)
+                              toast.success(checked ? 'Link expiration enabled' : 'Link expiration disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Link Expiration Period</Label>
@@ -2784,7 +2985,13 @@ Terms: ${newInvoice.terms || 'Standard terms apply'}
                       <p className="text-sm text-muted-foreground">Accept credit cards and bank transfers</p>
                     </div>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={stripeEnabled}
+                    onCheckedChange={(checked) => {
+                      setStripeEnabled(checked)
+                      toast.success(checked ? 'Stripe payments enabled' : 'Stripe payments disabled')
+                    }}
+                  />
                 </div>
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
@@ -2794,32 +3001,65 @@ Terms: ${newInvoice.terms || 'Standard terms apply'}
                       <p className="text-sm text-muted-foreground">Accept PayPal payments</p>
                     </div>
                   </div>
-                  <Switch />
+                  <Switch
+                    checked={paypalEnabled}
+                    onCheckedChange={(checked) => {
+                      setPaypalEnabled(checked)
+                      toast.success(checked ? 'PayPal payments enabled' : 'PayPal payments disabled')
+                    }}
+                  />
                 </div>
               </div>
             </TabsContent>
             <TabsContent value="automation" className="mt-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Auto-send reminders</p>
-                    <p className="text-sm text-muted-foreground">Automatically send payment reminders</p>
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-orange-500" />
+                    <div>
+                      <p className="font-medium">Auto-send reminders</p>
+                      <p className="text-sm text-muted-foreground">Automatically send payment reminders</p>
+                    </div>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={autoSendReminders}
+                    onCheckedChange={(checked) => {
+                      setAutoSendReminders(checked)
+                      toast.success(checked ? 'Auto-send reminders enabled' : 'Auto-send reminders disabled')
+                    }}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Auto-apply late fees</p>
-                    <p className="text-sm text-muted-foreground">Automatically apply late fees to overdue invoices</p>
+                  <div className="flex items-center gap-2">
+                    <Percent className="h-4 w-4 text-red-500" />
+                    <div>
+                      <p className="font-medium">Auto-apply late fees</p>
+                      <p className="text-sm text-muted-foreground">Automatically apply late fees to overdue invoices</p>
+                    </div>
                   </div>
-                  <Switch />
+                  <Switch
+                    checked={autoApplyLateFees}
+                    onCheckedChange={(checked) => {
+                      setAutoApplyLateFees(checked)
+                      toast.success(checked ? 'Auto-apply late fees enabled' : 'Auto-apply late fees disabled')
+                    }}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Auto-generate recurring invoices</p>
-                    <p className="text-sm text-muted-foreground">Automatically create and send recurring invoices</p>
+                  <div className="flex items-center gap-2">
+                    <Repeat className="h-4 w-4 text-blue-500" />
+                    <div>
+                      <p className="font-medium">Auto-generate recurring invoices</p>
+                      <p className="text-sm text-muted-foreground">Automatically create and send recurring invoices</p>
+                    </div>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={autoGenerateRecurringInvoices}
+                    onCheckedChange={(checked) => {
+                      setAutoGenerateRecurringInvoices(checked)
+                      toast.success(checked ? 'Auto-generate recurring invoices enabled' : 'Auto-generate recurring invoices disabled')
+                    }}
+                  />
                 </div>
               </div>
             </TabsContent>
