@@ -21,7 +21,9 @@ import {
   Palette,
   TestTube,
   Zap,
-  Globe
+  Globe,
+  BookOpen,
+  Code
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -45,6 +47,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog';
 import { useCodeBuilder, GeneratedFile, AgentStep } from '@/hooks/use-code-builder';
+import Link from 'next/link';
 
 // Code syntax highlighting (simple version)
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
@@ -273,6 +276,24 @@ export default function AICodeBuilderClient() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Developer Tools */}
+              {process.env.NODE_ENV === 'development' && (
+                <>
+                  <Link href="/dashboard/context7-docs">
+                    <Button variant="outline" size="sm">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Context7 Docs
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard/react-query-devtools">
+                    <Button variant="outline" size="sm">
+                      <Code className="h-4 w-4 mr-2" />
+                      React Query
+                    </Button>
+                  </Link>
+                </>
+              )}
+
               <Dialog open={showHistory} onOpenChange={setShowHistory}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">

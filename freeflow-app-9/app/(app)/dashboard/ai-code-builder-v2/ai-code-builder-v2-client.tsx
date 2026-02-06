@@ -38,6 +38,7 @@ import {
   Tablet
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -651,6 +652,24 @@ export default function AICodeBuilderV2Client() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Developer Tools */}
+          {process.env.NODE_ENV === 'development' && (
+            <>
+              <Link href="/dashboard/context7-docs">
+                <Button variant="ghost" size="sm" className="h-7 text-gray-400 hover:text-white">
+                  <BookOpen className="h-4 w-4 mr-1" />
+                  <span className="text-xs">Context7</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/react-query-devtools">
+                <Button variant="ghost" size="sm" className="h-7 text-gray-400 hover:text-white">
+                  <Activity className="h-4 w-4 mr-1" />
+                  <span className="text-xs">Query</span>
+                </Button>
+              </Link>
+            </>
+          )}
+
           {session && (
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>

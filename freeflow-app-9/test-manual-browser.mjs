@@ -44,7 +44,7 @@ try {
 
   console.log('   ⏳ Filling credentials...')
   await page.fill('input[type="email"]', 'alex@freeflow.io')
-  await page.fill('input[type="password"]', 'demo2026')
+  await page.fill('input[type="password"]', 'investor2026')
 
   console.log('   ⏳ Submitting login...')
   await page.click('button[type="submit"]')

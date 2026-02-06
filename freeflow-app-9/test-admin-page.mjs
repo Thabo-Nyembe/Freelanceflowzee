@@ -19,7 +19,7 @@ try {
   console.log('1️⃣  Logging in as admin...')
   await page.goto('http://localhost:9323/login', { waitUntil: 'domcontentloaded' })
   await page.fill('input[type="email"]', 'alex@freeflow.io')
-  await page.fill('input[type="password"]', 'demo2026')
+  await page.fill('input[type="password"]', 'investor2026')
   await Promise.all([
     page.waitForNavigation({ timeout: 15000 }).catch(() => {}),
     page.click('button[type="submit"]')
