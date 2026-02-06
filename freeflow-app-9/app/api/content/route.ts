@@ -42,6 +42,10 @@ export async function GET(request: Request) {
 
       if (!error) {
         response.marketing = data
+      } else {
+        // Return empty array instead of failing
+        logger.warn('marketing_content fetch error:', error.message)
+        response.marketing = []
       }
     }
 
@@ -55,6 +59,9 @@ export async function GET(request: Request) {
 
       if (!error) {
         response.metrics = data
+      } else {
+        logger.warn('business_metrics fetch error:', error.message)
+        response.metrics = []
       }
     }
 
@@ -67,19 +74,30 @@ export async function GET(request: Request) {
 
       if (!error) {
         response.stats = data
+      } else {
+        logger.warn('platform_stats fetch error:', error.message)
+        response.stats = []
       }
     }
 
+    // Always return 200 with data (even if empty)
     return NextResponse.json(response, {
+      status: 200,
       headers: {
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120'
       }
     })
   } catch (error) {
-    log('error', 'Content API error', error)
+    logger.error('Content API critical error:', error)
+    // Return empty response instead of 500 error
     return NextResponse.json(
-      { error: 'Failed to fetch content' },
-      { status: 500 }
+      {
+        marketing: [],
+        metrics: [],
+        stats: [],
+        error: 'Content temporarily unavailable'
+      },
+      { status: 200 }
     )
   }
 }

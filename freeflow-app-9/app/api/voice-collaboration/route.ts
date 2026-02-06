@@ -11,10 +11,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createSimpleLogger } from '@/lib/simple-logger'
 
 const logger = createSimpleLogger('voice-collaboration')
-import {
 
 // ============================================================================
-// DEMO MODE CONFIGURATION - Auto-added for alex@freeflow.io support
+// DEMO MODE CONFIGURATION
 // ============================================================================
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'

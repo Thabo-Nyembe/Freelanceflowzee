@@ -13,9 +13,8 @@ import { createSimpleLogger } from '@/lib/simple-logger'
 import { DEMO_USER_ID, isDemoMode } from '@/lib/demo-auth'
 
 const logger = createSimpleLogger('project-templates')
-import {
-  )
-}
+
+const DEMO_USER_EMAIL = 'alex@freeflow.io'
 
 function getDemoUserId(session: any, demoMode: boolean): string | null {
   if (!session?.user) {
