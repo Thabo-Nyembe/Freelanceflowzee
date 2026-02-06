@@ -20,7 +20,10 @@ import {
   FileText, BarChart3, ArrowUpRight, ArrowDownRight, CheckCircle,
   AlertCircle, Play, Pause, Download,
   Plus, Trash2, Edit3, Copy, ExternalLink, Mail, Webhook,
-  Key, Sliders, Archive, AlertOctagon, Loader2
+  Key, Sliders, Archive, AlertOctagon, Loader2,
+  Monitor, Container, Code, Database, Gauge, FileCode, Users, Video,
+  Shield, Lock, ScrollText, Sparkles, PackageCheck, CloudOff, Eraser, Combine,
+  Timer, Calendar, Eye, Accessibility, Hash, Binary, ListFilter, HardDriveDownload, Inbox, Cloud
 } from 'lucide-react'
 
 // Database hooks for Supabase integration
@@ -372,6 +375,70 @@ export default function SystemInsightsClient() {
     compact_view: false,
     show_sparklines: true,
     relative_timestamps: true
+  })
+
+  // Switch states for Data Collection Settings
+  const [infraMonitoringEnabled, setInfraMonitoringEnabled] = useState(true)
+  const [containerMetricsEnabled, setContainerMetricsEnabled] = useState(true)
+  const [distributedTracingEnabled, setDistributedTracingEnabled] = useState(true)
+  const [sqlQueryAnalysisEnabled, setSqlQueryAnalysisEnabled] = useState(true)
+  const [codeLevelInsightsEnabled, setCodeLevelInsightsEnabled] = useState(false)
+  const [logCollectionEnabled, setLogCollectionEnabled] = useState(true)
+  const [rumEnabled, setRumEnabled] = useState(false)
+  const [sessionRecordingEnabled, setSessionRecordingEnabled] = useState(false)
+  const [errorTrackingEnabled, setErrorTrackingEnabled] = useState(false)
+  const [colorBlindModeEnabled, setColorBlindModeEnabled] = useState(false)
+
+  // Switch states for Alerts & Notifications
+  const [autoResolveAlertsEnabled, setAutoResolveAlertsEnabled] = useState(true)
+  const [aggregateSimilarAlertsEnabled, setAggregateSimilarAlertsEnabled] = useState(true)
+  const [weekendQuietHoursEnabled, setWeekendQuietHoursEnabled] = useState(false)
+
+  // Switch states for Data Archival
+  const [coldStorageArchivalEnabled, setColdStorageArchivalEnabled] = useState(true)
+  const [compressArchivedDataEnabled, setCompressArchivedDataEnabled] = useState(true)
+  const [autoDeleteOrphanedDataEnabled, setAutoDeleteOrphanedDataEnabled] = useState(true)
+  const [removeDuplicateTracesEnabled, setRemoveDuplicateTracesEnabled] = useState(true)
+  const [aggregateOldMetricsEnabled, setAggregateOldMetricsEnabled] = useState(true)
+
+  // Switch states for Security & Compliance
+  const [twoFactorAuthEnabled, setTwoFactorAuthEnabled] = useState(true)
+  const [ipAllowlistEnabled, setIpAllowlistEnabled] = useState(false)
+  const [auditLoggingEnabled, setAuditLoggingEnabled] = useState(true)
+  const [dataEncryptionEnabled, setDataEncryptionEnabled] = useState(true)
+
+  // Switch states for Dialogs
+  const [preDeployChecksEnabled, setPreDeployChecksEnabled] = useState(true)
+  const [includeMetadataEnabled, setIncludeMetadataEnabled] = useState(true)
+  const [notificationChannelEnabled, setNotificationChannelEnabled] = useState(true)
+  const [autoImportResourcesEnabled, setAutoImportResourcesEnabled] = useState(true)
+  const [autoDiscoveryEnabled, setAutoDiscoveryEnabled] = useState(true)
+
+  // Notification channel switch states (keyed by channel name)
+  const [channelStates, setChannelStates] = useState<Record<string, boolean>>({
+    'Email': true,
+    'Slack': true,
+    'PagerDuty': true,
+    'Microsoft Teams': false,
+    'Webhook': false,
+    'SMS': false
+  })
+
+  // Service selection states for restart dialog
+  const [selectedServicesToRestart, setSelectedServicesToRestart] = useState<Record<string, boolean>>({})
+
+  // Webhook event checkboxes states
+  const [webhookEventsEdit, setWebhookEventsEdit] = useState<Record<string, boolean>>({
+    alerts: true,
+    metrics: false,
+    logs: false,
+    traces: false
+  })
+  const [webhookEventsNew, setWebhookEventsNew] = useState<Record<string, boolean>>({
+    alerts: true,
+    metrics: false,
+    logs: false,
+    traces: false
   })
 
   // Fetch alerts from Supabase
@@ -1879,11 +1946,20 @@ export default function SystemInsightsClient() {
                           />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Color-blind Mode</Label>
-                            <p className="text-sm text-gray-500">Use accessible color palette</p>
+                          <div className="flex items-center gap-2">
+                            <Accessibility className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <Label>Color-blind Mode</Label>
+                              <p className="text-sm text-gray-500">Use accessible color palette</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={colorBlindModeEnabled}
+                            onCheckedChange={(v) => {
+                              setColorBlindModeEnabled(v)
+                              toast.success(v ? 'Color-blind mode enabled' : 'Color-blind mode disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1900,11 +1976,20 @@ export default function SystemInsightsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Infrastructure Monitoring</Label>
-                            <p className="text-sm text-gray-500">Collect CPU, memory, disk, network metrics</p>
+                          <div className="flex items-center gap-2">
+                            <Monitor className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label>Enable Infrastructure Monitoring</Label>
+                              <p className="text-sm text-gray-500">Collect CPU, memory, disk, network metrics</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={infraMonitoringEnabled}
+                            onCheckedChange={(v) => {
+                              setInfraMonitoringEnabled(v)
+                              toast.success(v ? 'Infrastructure monitoring enabled' : 'Infrastructure monitoring disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -1936,11 +2021,20 @@ export default function SystemInsightsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Container Metrics</Label>
-                            <p className="text-sm text-gray-500">Collect Docker/Kubernetes metrics</p>
+                          <div className="flex items-center gap-2">
+                            <Container className="h-4 w-4 text-cyan-500" />
+                            <div>
+                              <Label>Container Metrics</Label>
+                              <p className="text-sm text-gray-500">Collect Docker/Kubernetes metrics</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={containerMetricsEnabled}
+                            onCheckedChange={(v) => {
+                              setContainerMetricsEnabled(v)
+                              toast.success(v ? 'Container metrics enabled' : 'Container metrics disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1952,11 +2046,20 @@ export default function SystemInsightsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Distributed Tracing</Label>
-                            <p className="text-sm text-gray-500">Track requests across services</p>
+                          <div className="flex items-center gap-2">
+                            <GitBranch className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label>Enable Distributed Tracing</Label>
+                              <p className="text-sm text-gray-500">Track requests across services</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={distributedTracingEnabled}
+                            onCheckedChange={(v) => {
+                              setDistributedTracingEnabled(v)
+                              toast.success(v ? 'Distributed tracing enabled' : 'Distributed tracing disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -1987,18 +2090,36 @@ export default function SystemInsightsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>SQL Query Analysis</Label>
-                            <p className="text-sm text-gray-500">Capture and analyze database queries</p>
+                          <div className="flex items-center gap-2">
+                            <Database className="h-4 w-4 text-emerald-500" />
+                            <div>
+                              <Label>SQL Query Analysis</Label>
+                              <p className="text-sm text-gray-500">Capture and analyze database queries</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={sqlQueryAnalysisEnabled}
+                            onCheckedChange={(v) => {
+                              setSqlQueryAnalysisEnabled(v)
+                              toast.success(v ? 'SQL query analysis enabled' : 'SQL query analysis disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Code-level Insights</Label>
-                            <p className="text-sm text-gray-500">Track performance at function level</p>
+                          <div className="flex items-center gap-2">
+                            <Code className="h-4 w-4 text-orange-500" />
+                            <div>
+                              <Label>Code-level Insights</Label>
+                              <p className="text-sm text-gray-500">Track performance at function level</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={codeLevelInsightsEnabled}
+                            onCheckedChange={(v) => {
+                              setCodeLevelInsightsEnabled(v)
+                              toast.success(v ? 'Code-level insights enabled' : 'Code-level insights disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2010,11 +2131,20 @@ export default function SystemInsightsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Log Collection</Label>
-                            <p className="text-sm text-gray-500">Ingest application and system logs</p>
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label>Enable Log Collection</Label>
+                              <p className="text-sm text-gray-500">Ingest application and system logs</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={logCollectionEnabled}
+                            onCheckedChange={(v) => {
+                              setLogCollectionEnabled(v)
+                              toast.success(v ? 'Log collection enabled' : 'Log collection disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -2061,25 +2191,52 @@ export default function SystemInsightsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable RUM</Label>
-                            <p className="text-sm text-gray-500">Track real user experience metrics</p>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label>Enable RUM</Label>
+                              <p className="text-sm text-gray-500">Track real user experience metrics</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={rumEnabled}
+                            onCheckedChange={(v) => {
+                              setRumEnabled(v)
+                              toast.success(v ? 'Real User Monitoring enabled' : 'Real User Monitoring disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Session Recording</Label>
-                            <p className="text-sm text-gray-500">Record user sessions for replay</p>
+                          <div className="flex items-center gap-2">
+                            <Video className="h-4 w-4 text-pink-500" />
+                            <div>
+                              <Label>Session Recording</Label>
+                              <p className="text-sm text-gray-500">Record user sessions for replay</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={sessionRecordingEnabled}
+                            onCheckedChange={(v) => {
+                              setSessionRecordingEnabled(v)
+                              toast.success(v ? 'Session recording enabled' : 'Session recording disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Error Tracking</Label>
-                            <p className="text-sm text-gray-500">Capture frontend JavaScript errors</p>
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-red-500" />
+                            <div>
+                              <Label>Error Tracking</Label>
+                              <p className="text-sm text-gray-500">Capture frontend JavaScript errors</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={errorTrackingEnabled}
+                            onCheckedChange={(v) => {
+                              setErrorTrackingEnabled(v)
+                              toast.success(v ? 'Error tracking enabled' : 'Error tracking disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2105,8 +2262,8 @@ export default function SystemInsightsClient() {
                         ].map((channel, idx) => (
                           <div key={idx} className="flex items-center justify-between py-3 border-b last:border-0">
                             <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${channel.enabled ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                                <channel.icon className={`h-4 w-4 ${channel.enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
+                              <div className={`p-2 rounded-lg ${channelStates[channel.name] ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                                <channel.icon className={`h-4 w-4 ${channelStates[channel.name] ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
                               </div>
                               <div>
                                 <p className="font-medium">{channel.name}</p>
@@ -2120,7 +2277,13 @@ export default function SystemInsightsClient() {
                               }}>
                                 <Edit3 className="h-4 w-4" />
                               </Button>
-                              <Switch defaultChecked={channel.enabled} />
+                              <Switch
+                                checked={channelStates[channel.name] ?? channel.enabled}
+                                onCheckedChange={(v) => {
+                                  setChannelStates(prev => ({ ...prev, [channel.name]: v }))
+                                  toast.success(v ? `${channel.name} notifications enabled` : `${channel.name} notifications disabled`)
+                                }}
+                              />
                             </div>
                           </div>
                         ))}
@@ -2168,25 +2331,52 @@ export default function SystemInsightsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Auto-resolve Alerts</Label>
-                            <p className="text-sm text-gray-500">Automatically resolve when condition clears</p>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-emerald-500" />
+                            <div>
+                              <Label>Auto-resolve Alerts</Label>
+                              <p className="text-sm text-gray-500">Automatically resolve when condition clears</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoResolveAlertsEnabled}
+                            onCheckedChange={(v) => {
+                              setAutoResolveAlertsEnabled(v)
+                              toast.success(v ? 'Auto-resolve alerts enabled' : 'Auto-resolve alerts disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Aggregate Similar Alerts</Label>
-                            <p className="text-sm text-gray-500">Group related alerts together</p>
+                          <div className="flex items-center gap-2">
+                            <Combine className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label>Aggregate Similar Alerts</Label>
+                              <p className="text-sm text-gray-500">Group related alerts together</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={aggregateSimilarAlertsEnabled}
+                            onCheckedChange={(v) => {
+                              setAggregateSimilarAlertsEnabled(v)
+                              toast.success(v ? 'Alert aggregation enabled' : 'Alert aggregation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Weekend Quiet Hours</Label>
-                            <p className="text-sm text-gray-500">Reduce non-critical alerts on weekends</p>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label>Weekend Quiet Hours</Label>
+                              <p className="text-sm text-gray-500">Reduce non-critical alerts on weekends</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={weekendQuietHoursEnabled}
+                            onCheckedChange={(v) => {
+                              setWeekendQuietHoursEnabled(v)
+                              toast.success(v ? 'Weekend quiet hours enabled' : 'Weekend quiet hours disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2331,11 +2521,20 @@ export default function SystemInsightsClient() {
                       </CardHeader>
                       <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Enable Cold Storage Archival</Label>
-                            <p className="text-sm text-gray-500">Archive old data to cheaper storage</p>
+                          <div className="flex items-center gap-2">
+                            <Archive className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label>Enable Cold Storage Archival</Label>
+                              <p className="text-sm text-gray-500">Archive old data to cheaper storage</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={coldStorageArchivalEnabled}
+                            onCheckedChange={(v) => {
+                              setColdStorageArchivalEnabled(v)
+                              toast.success(v ? 'Cold storage archival enabled' : 'Cold storage archival disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
@@ -2366,11 +2565,20 @@ export default function SystemInsightsClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Compress Archived Data</Label>
-                            <p className="text-sm text-gray-500">Reduce storage costs with compression</p>
+                          <div className="flex items-center gap-2">
+                            <Binary className="h-4 w-4 text-cyan-500" />
+                            <div>
+                              <Label>Compress Archived Data</Label>
+                              <p className="text-sm text-gray-500">Reduce storage costs with compression</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={compressArchivedDataEnabled}
+                            onCheckedChange={(v) => {
+                              setCompressArchivedDataEnabled(v)
+                              toast.success(v ? 'Data compression enabled' : 'Data compression disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2382,25 +2590,52 @@ export default function SystemInsightsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Auto-delete Orphaned Data</Label>
-                            <p className="text-sm text-gray-500">Remove data from deleted hosts/services</p>
+                          <div className="flex items-center gap-2">
+                            <Eraser className="h-4 w-4 text-red-500" />
+                            <div>
+                              <Label>Auto-delete Orphaned Data</Label>
+                              <p className="text-sm text-gray-500">Remove data from deleted hosts/services</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoDeleteOrphanedDataEnabled}
+                            onCheckedChange={(v) => {
+                              setAutoDeleteOrphanedDataEnabled(v)
+                              toast.success(v ? 'Auto-delete orphaned data enabled' : 'Auto-delete orphaned data disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Remove Duplicate Traces</Label>
-                            <p className="text-sm text-gray-500">Deduplicate similar trace data</p>
+                          <div className="flex items-center gap-2">
+                            <ListFilter className="h-4 w-4 text-orange-500" />
+                            <div>
+                              <Label>Remove Duplicate Traces</Label>
+                              <p className="text-sm text-gray-500">Deduplicate similar trace data</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={removeDuplicateTracesEnabled}
+                            onCheckedChange={(v) => {
+                              setRemoveDuplicateTracesEnabled(v)
+                              toast.success(v ? 'Duplicate trace removal enabled' : 'Duplicate trace removal disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Aggregate Old Metrics</Label>
-                            <p className="text-sm text-gray-500">Downsample metrics older than 7 days</p>
+                          <div className="flex items-center gap-2">
+                            <Gauge className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label>Aggregate Old Metrics</Label>
+                              <p className="text-sm text-gray-500">Downsample metrics older than 7 days</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={aggregateOldMetricsEnabled}
+                            onCheckedChange={(v) => {
+                              setAggregateOldMetricsEnabled(v)
+                              toast.success(v ? 'Metrics aggregation enabled' : 'Metrics aggregation disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2721,32 +2956,68 @@ docker run -d --name kazi-agent \\
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Two-Factor Authentication</Label>
-                            <p className="text-sm text-gray-500">Require 2FA for all team members</p>
+                          <div className="flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-emerald-500" />
+                            <div>
+                              <Label>Two-Factor Authentication</Label>
+                              <p className="text-sm text-gray-500">Require 2FA for all team members</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={twoFactorAuthEnabled}
+                            onCheckedChange={(v) => {
+                              setTwoFactorAuthEnabled(v)
+                              toast.success(v ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>IP Allowlist</Label>
-                            <p className="text-sm text-gray-500">Restrict API access to specific IPs</p>
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label>IP Allowlist</Label>
+                              <p className="text-sm text-gray-500">Restrict API access to specific IPs</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={ipAllowlistEnabled}
+                            onCheckedChange={(v) => {
+                              setIpAllowlistEnabled(v)
+                              toast.success(v ? 'IP allowlist enabled' : 'IP allowlist disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Audit Logging</Label>
-                            <p className="text-sm text-gray-500">Log all configuration changes</p>
+                          <div className="flex items-center gap-2">
+                            <ScrollText className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label>Audit Logging</Label>
+                              <p className="text-sm text-gray-500">Log all configuration changes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditLoggingEnabled}
+                            onCheckedChange={(v) => {
+                              setAuditLoggingEnabled(v)
+                              toast.success(v ? 'Audit logging enabled' : 'Audit logging disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Data Encryption at Rest</Label>
-                            <p className="text-sm text-gray-500">Encrypt stored monitoring data</p>
+                          <div className="flex items-center gap-2">
+                            <Lock className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label>Data Encryption at Rest</Label>
+                              <p className="text-sm text-gray-500">Encrypt stored monitoring data</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dataEncryptionEnabled}
+                            onCheckedChange={(v) => {
+                              setDataEncryptionEnabled(v)
+                              toast.success(v ? 'Data encryption enabled' : 'Data encryption disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2865,11 +3136,20 @@ docker run -d --name kazi-agent \\
               </Select>
             </div>
             <div className="flex items-center justify-between pt-2">
-              <div>
-                <Label>Run Pre-deploy Checks</Label>
-                <p className="text-sm text-gray-500">Execute health checks before deployment</p>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-emerald-500" />
+                <div>
+                  <Label>Run Pre-deploy Checks</Label>
+                  <p className="text-sm text-gray-500">Execute health checks before deployment</p>
+                </div>
               </div>
-              <Switch defaultChecked />
+              <Switch
+                checked={preDeployChecksEnabled}
+                onCheckedChange={(v) => {
+                  setPreDeployChecksEnabled(v)
+                  toast.success(v ? 'Pre-deploy checks enabled' : 'Pre-deploy checks disabled')
+                }}
+              />
             </div>
             <div className="flex gap-2 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setShowDeployDialog(false)}>
@@ -2899,7 +3179,18 @@ docker run -d --name kazi-agent \\
                 {services.map(service => (
                   <div key={service.id} className="flex items-center justify-between py-1">
                     <div className="flex items-center gap-2">
-                      <input type="checkbox" id={service.id} className="rounded" defaultChecked />
+                      <input
+                        type="checkbox"
+                        id={service.id}
+                        className="rounded"
+                        checked={selectedServicesToRestart[service.id] ?? true}
+                        onChange={(e) => {
+                          setSelectedServicesToRestart(prev => ({
+                            ...prev,
+                            [service.id]: e.target.checked
+                          }))
+                        }}
+                      />
                       <label htmlFor={service.id} className="text-sm">{service.name}</label>
                     </div>
                     <Badge className={getStatusColor(service.status)} variant="outline">
@@ -3106,8 +3397,17 @@ docker run -d --name kazi-agent \\
               </Select>
             </div>
             <div className="flex items-center justify-between">
-              <Label>Include metadata</Label>
-              <Switch defaultChecked />
+              <div className="flex items-center gap-2">
+                <Hash className="h-4 w-4 text-blue-500" />
+                <Label>Include metadata</Label>
+              </div>
+              <Switch
+                checked={includeMetadataEnabled}
+                onCheckedChange={(v) => {
+                  setIncludeMetadataEnabled(v)
+                  toast.success(v ? 'Metadata will be included' : 'Metadata will be excluded')
+                }}
+              />
             </div>
             <div className="flex gap-3 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setShowExportLogsDialog(false)}>
@@ -3138,8 +3438,17 @@ docker run -d --name kazi-agent \\
               <Input defaultValue={selectedNotificationChannel?.config || ''} placeholder="e.g., email@example.com or #channel" />
             </div>
             <div className="flex items-center justify-between">
-              <Label>Enabled</Label>
-              <Switch defaultChecked={selectedNotificationChannel?.enabled} />
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-emerald-500" />
+                <Label>Enabled</Label>
+              </div>
+              <Switch
+                checked={notificationChannelEnabled}
+                onCheckedChange={(v) => {
+                  setNotificationChannelEnabled(v)
+                  toast.success(v ? 'Channel enabled' : 'Channel disabled')
+                }}
+              />
             </div>
             <div className="flex gap-3 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setShowEditNotificationDialog(false)}>
@@ -3327,8 +3636,17 @@ docker run -d --name kazi-agent \\
                   </Select>
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label>Auto-import resources</Label>
-                  <Switch defaultChecked />
+                  <div className="flex items-center gap-2">
+                    <Cloud className="h-4 w-4 text-emerald-500" />
+                    <Label>Auto-import resources</Label>
+                  </div>
+                  <Switch
+                    checked={autoImportResourcesEnabled}
+                    onCheckedChange={(v) => {
+                      setAutoImportResourcesEnabled(v)
+                      toast.success(v ? 'Auto-import enabled' : 'Auto-import disabled')
+                    }}
+                  />
                 </div>
               </>
             ) : (
@@ -3387,10 +3705,19 @@ docker run -d --name kazi-agent \\
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Auto-discovery</Label>
+                  <div className="flex items-center gap-2">
+                    <Search className="h-4 w-4 text-blue-500" />
+                    <Label>Auto-discovery</Label>
+                  </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Discover new services automatically</span>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={autoDiscoveryEnabled}
+                      onCheckedChange={(v) => {
+                        setAutoDiscoveryEnabled(v)
+                        toast.success(v ? 'Auto-discovery enabled' : 'Auto-discovery disabled')
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -3480,11 +3807,18 @@ docker run -d --name kazi-agent \\
                   <div key={event} className="flex items-center gap-2">
                     <input
                       type="checkbox"
-                      id={event}
-                      defaultChecked={selectedWebhook?.events.includes(event)}
+                      id={`edit-${event}`}
+                      checked={webhookEventsEdit[event] ?? selectedWebhook?.events.includes(event) ?? false}
+                      onChange={(e) => {
+                        setWebhookEventsEdit(prev => ({
+                          ...prev,
+                          [event]: e.target.checked
+                        }))
+                        toast.success(e.target.checked ? `${event} events enabled` : `${event} events disabled`)
+                      }}
                       className="rounded border-gray-300"
                     />
-                    <label htmlFor={event} className="text-sm capitalize">{event}</label>
+                    <label htmlFor={`edit-${event}`} className="text-sm capitalize">{event}</label>
                   </div>
                 ))}
               </div>
@@ -3555,7 +3889,14 @@ docker run -d --name kazi-agent \\
                     <input
                       type="checkbox"
                       id={`new-${event}`}
-                      defaultChecked={event === 'alerts'}
+                      checked={webhookEventsNew[event] ?? (event === 'alerts')}
+                      onChange={(e) => {
+                        setWebhookEventsNew(prev => ({
+                          ...prev,
+                          [event]: e.target.checked
+                        }))
+                        toast.success(e.target.checked ? `${event} events enabled` : `${event} events disabled`)
+                      }}
                       className="rounded border-gray-300"
                     />
                     <label htmlFor={`new-${event}`} className="text-sm capitalize">{event}</label>

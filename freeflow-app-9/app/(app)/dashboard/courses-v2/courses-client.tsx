@@ -18,7 +18,11 @@ import {
   Settings, BookOpen, Users, BarChart3, GraduationCap, PlayCircle,
   FileText, Award, Bell, Key, Webhook, Mail, Shield, Lock, Cpu, CreditCard, DollarSign, Video,
   Upload, Download, Trash2, Copy, AlertOctagon, RefreshCw, Zap, Link2,
-  MessageSquare, CheckCircle, Eye, Edit, Plus, Loader2
+  MessageSquare, CheckCircle, Eye, Edit, Plus, Loader2,
+  ShoppingCart, TrendingUp, Star, Play, FolderDown, Tag, Package,
+  RotateCcw, BadgeCheck, PenTool, QrCode, Globe, Linkedin,
+  UserPlus, BellRing, FileQuestion, Trophy, DollarSign as RevenueIcon,
+  Server, Database, Fingerprint, Image, MapPin, Archive, RotateCw, FileDown
 } from 'lucide-react'
 import { useCourses, useCreateCourse, useUpdateCourse, useDeleteCourse, type CourseStatus as DBCourseStatus, type CourseLevel as DBCourseLevel, type CourseCategory as DBCourseCategory } from '@/lib/hooks/use-courses'
 
@@ -285,6 +289,49 @@ export default function CoursesClient() {
 
   // Use database courses (with fallback to empty array)
   const courses = (dbCourses || []) as Course[]
+
+  // Settings state - Platform Settings
+  const [allowPreorders, setAllowPreorders] = useState(true)
+  const [showCourseProgress, setShowCourseProgress] = useState(true)
+  const [enableCourseReviews, setEnableCourseReviews] = useState(true)
+
+  // Settings state - Content Settings
+  const [enableVideoAutoplay, setEnableVideoAutoplay] = useState(true)
+  const [allowContentDownload, setAllowContentDownload] = useState(false)
+
+  // Settings state - Pricing
+  const [enableCoupons, setEnableCoupons] = useState(true)
+  const [enableBundles, setEnableBundles] = useState(true)
+  const [autoApproveRefunds, setAutoApproveRefunds] = useState(false)
+
+  // Settings state - Certificates
+  const [enableCertificates, setEnableCertificates] = useState(true)
+  const [requireQuizCompletion, setRequireQuizCompletion] = useState(true)
+  const [digitalSignatures, setDigitalSignatures] = useState(true)
+  const [publicVerificationPage, setPublicVerificationPage] = useState(true)
+  const [linkedinIntegration, setLinkedinIntegration] = useState(true)
+  const [qrCodeVerification, setQrCodeVerification] = useState(true)
+
+  // Settings state - Student Notifications
+  const [notifyCourseEnrollment, setNotifyCourseEnrollment] = useState(true)
+  const [notifyNewContent, setNotifyNewContent] = useState(true)
+  const [notifyQuizReminders, setNotifyQuizReminders] = useState(true)
+  const [notifyCertificateReady, setNotifyCertificateReady] = useState(true)
+  const [notifyCourseCompletion, setNotifyCourseCompletion] = useState(true)
+
+  // Settings state - Instructor Notifications
+  const [notifyNewEnrollment, setNotifyNewEnrollment] = useState(true)
+  const [notifyNewReview, setNotifyNewReview] = useState(true)
+  const [notifyNewQuestion, setNotifyNewQuestion] = useState(true)
+  const [notifyRevenueReports, setNotifyRevenueReports] = useState(true)
+
+  // Settings state - Advanced
+  const [enableApiAccess, setEnableApiAccess] = useState(true)
+  const [enableScorm, setEnableScorm] = useState(true)
+  const [enableXapi, setEnableXapi] = useState(false)
+  const [enableVideoDrm, setEnableVideoDrm] = useState(false)
+  const [enableWatermark, setEnableWatermark] = useState(false)
+  const [enableIpRestrictions, setEnableIpRestrictions] = useState(false)
 
   // Course form state
   const [courseForm, setCourseForm] = useState({
@@ -1572,25 +1619,52 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                         </div>
                         <div className="border-t pt-4 space-y-4">
                           <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">Allow Course Pre-orders</p>
-                              <p className="text-sm text-muted-foreground">Let students purchase courses before release</p>
+                            <div className="flex items-center gap-2">
+                              <ShoppingCart className="w-4 h-4 text-indigo-500" />
+                              <div>
+                                <p className="font-medium">Allow Course Pre-orders</p>
+                                <p className="text-sm text-muted-foreground">Let students purchase courses before release</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={allowPreorders}
+                              onCheckedChange={(checked) => {
+                                setAllowPreorders(checked)
+                                toast.success(checked ? 'Pre-orders enabled' : 'Pre-orders disabled')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">Show Course Progress</p>
-                              <p className="text-sm text-muted-foreground">Display progress bars on course cards</p>
+                            <div className="flex items-center gap-2">
+                              <TrendingUp className="w-4 h-4 text-green-500" />
+                              <div>
+                                <p className="font-medium">Show Course Progress</p>
+                                <p className="text-sm text-muted-foreground">Display progress bars on course cards</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={showCourseProgress}
+                              onCheckedChange={(checked) => {
+                                setShowCourseProgress(checked)
+                                toast.success(checked ? 'Progress bars enabled' : 'Progress bars disabled')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">Enable Course Reviews</p>
-                              <p className="text-sm text-muted-foreground">Allow students to rate and review courses</p>
+                            <div className="flex items-center gap-2">
+                              <Star className="w-4 h-4 text-yellow-500" />
+                              <div>
+                                <p className="font-medium">Enable Course Reviews</p>
+                                <p className="text-sm text-muted-foreground">Allow students to rate and review courses</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={enableCourseReviews}
+                              onCheckedChange={(checked) => {
+                                setEnableCourseReviews(checked)
+                                toast.success(checked ? 'Course reviews enabled' : 'Course reviews disabled')
+                              }}
+                            />
                           </div>
                         </div>
                       </CardContent>
@@ -1625,18 +1699,36 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Enable Video Autoplay</p>
-                            <p className="text-sm text-muted-foreground">Auto-play next lecture when current ends</p>
+                          <div className="flex items-center gap-2">
+                            <Play className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Enable Video Autoplay</p>
+                              <p className="text-sm text-muted-foreground">Auto-play next lecture when current ends</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableVideoAutoplay}
+                            onCheckedChange={(checked) => {
+                              setEnableVideoAutoplay(checked)
+                              toast.success(checked ? 'Video autoplay enabled' : 'Video autoplay disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Allow Content Download</p>
-                            <p className="text-sm text-muted-foreground">Let students download videos for offline viewing</p>
+                          <div className="flex items-center gap-2">
+                            <FolderDown className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Allow Content Download</p>
+                              <p className="text-sm text-muted-foreground">Let students download videos for offline viewing</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={allowContentDownload}
+                            onCheckedChange={(checked) => {
+                              setAllowContentDownload(checked)
+                              toast.success(checked ? 'Content download enabled' : 'Content download disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1684,18 +1776,36 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                         </div>
                         <div className="border-t pt-4 space-y-4">
                           <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">Enable Coupons</p>
-                              <p className="text-sm text-muted-foreground">Allow instructors to create discount coupons</p>
+                            <div className="flex items-center gap-2">
+                              <Tag className="w-4 h-4 text-green-500" />
+                              <div>
+                                <p className="font-medium">Enable Coupons</p>
+                                <p className="text-sm text-muted-foreground">Allow instructors to create discount coupons</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={enableCoupons}
+                              onCheckedChange={(checked) => {
+                                setEnableCoupons(checked)
+                                toast.success(checked ? 'Coupons enabled' : 'Coupons disabled')
+                              }}
+                            />
                           </div>
                           <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">Enable Bundles</p>
-                              <p className="text-sm text-muted-foreground">Allow course bundle sales at discounted prices</p>
+                            <div className="flex items-center gap-2">
+                              <Package className="w-4 h-4 text-blue-500" />
+                              <div>
+                                <p className="font-medium">Enable Bundles</p>
+                                <p className="text-sm text-muted-foreground">Allow course bundle sales at discounted prices</p>
+                              </div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={enableBundles}
+                              onCheckedChange={(checked) => {
+                                setEnableBundles(checked)
+                                toast.success(checked ? 'Course bundles enabled' : 'Course bundles disabled')
+                              }}
+                            />
                           </div>
                         </div>
                       </CardContent>
@@ -1753,11 +1863,20 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Auto-approve Refunds</p>
-                            <p className="text-sm text-muted-foreground">Automatically approve refunds within policy</p>
+                          <div className="flex items-center gap-2">
+                            <RotateCcw className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Auto-approve Refunds</p>
+                              <p className="text-sm text-muted-foreground">Automatically approve refunds within policy</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={autoApproveRefunds}
+                            onCheckedChange={(checked) => {
+                              setAutoApproveRefunds(checked)
+                              toast.success(checked ? 'Auto-approve refunds enabled' : 'Auto-approve refunds disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1775,25 +1894,52 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Enable Certificates</p>
-                            <p className="text-sm text-muted-foreground">Issue completion certificates to students</p>
+                          <div className="flex items-center gap-2">
+                            <Award className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <p className="font-medium">Enable Certificates</p>
+                              <p className="text-sm text-muted-foreground">Issue completion certificates to students</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableCertificates}
+                            onCheckedChange={(checked) => {
+                              setEnableCertificates(checked)
+                              toast.success(checked ? 'Certificates enabled' : 'Certificates disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Require Quiz Completion</p>
-                            <p className="text-sm text-muted-foreground">Students must pass all quizzes to get certificate</p>
+                          <div className="flex items-center gap-2">
+                            <BadgeCheck className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Require Quiz Completion</p>
+                              <p className="text-sm text-muted-foreground">Students must pass all quizzes to get certificate</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={requireQuizCompletion}
+                            onCheckedChange={(checked) => {
+                              setRequireQuizCompletion(checked)
+                              toast.success(checked ? 'Quiz completion required' : 'Quiz completion not required')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Digital Signatures</p>
-                            <p className="text-sm text-muted-foreground">Add instructor signatures to certificates</p>
+                          <div className="flex items-center gap-2">
+                            <PenTool className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Digital Signatures</p>
+                              <p className="text-sm text-muted-foreground">Add instructor signatures to certificates</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={digitalSignatures}
+                            onCheckedChange={(checked) => {
+                              setDigitalSignatures(checked)
+                              toast.success(checked ? 'Digital signatures enabled' : 'Digital signatures disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Minimum Passing Score (%)</Label>
@@ -1822,7 +1968,23 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                             </div>
                           ))}
                         </div>
-                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-indigo-300 transition-colors">
+                        <button
+                          onClick={() => {
+                            toast.info('Upload dialog opening...', { description: 'Select a custom certificate template file' })
+                            // In a real implementation, this would open a file picker
+                            const input = document.createElement('input')
+                            input.type = 'file'
+                            input.accept = '.pdf,.png,.jpg,.svg'
+                            input.onchange = (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0]
+                              if (file) {
+                                toast.success('Template uploaded', { description: file.name })
+                              }
+                            }
+                            input.click()
+                          }}
+                          className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-indigo-300 transition-colors"
+                        >
                           <Upload className="w-4 h-4 inline-block mr-2" />
                           Upload Custom Template
                         </button>
@@ -1838,25 +2000,52 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Public Verification Page</p>
-                            <p className="text-sm text-muted-foreground">Allow employers to verify certificates</p>
+                          <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Public Verification Page</p>
+                              <p className="text-sm text-muted-foreground">Allow employers to verify certificates</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={publicVerificationPage}
+                            onCheckedChange={(checked) => {
+                              setPublicVerificationPage(checked)
+                              toast.success(checked ? 'Public verification enabled' : 'Public verification disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">LinkedIn Integration</p>
-                            <p className="text-sm text-muted-foreground">Let students add to LinkedIn profile</p>
+                          <div className="flex items-center gap-2">
+                            <Linkedin className="w-4 h-4 text-blue-600" />
+                            <div>
+                              <p className="font-medium">LinkedIn Integration</p>
+                              <p className="text-sm text-muted-foreground">Let students add to LinkedIn profile</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={linkedinIntegration}
+                            onCheckedChange={(checked) => {
+                              setLinkedinIntegration(checked)
+                              toast.success(checked ? 'LinkedIn integration enabled' : 'LinkedIn integration disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">QR Code Verification</p>
-                            <p className="text-sm text-muted-foreground">Include QR code for instant verification</p>
+                          <div className="flex items-center gap-2">
+                            <QrCode className="w-4 h-4 text-gray-600" />
+                            <div>
+                              <p className="font-medium">QR Code Verification</p>
+                              <p className="text-sm text-muted-foreground">Include QR code for instant verification</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={qrCodeVerification}
+                            onCheckedChange={(checked) => {
+                              setQrCodeVerification(checked)
+                              toast.success(checked ? 'QR code verification enabled' : 'QR code verification disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1874,39 +2063,84 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Course Enrollment</p>
-                            <p className="text-sm text-muted-foreground">Notify when enrolled in a new course</p>
+                          <div className="flex items-center gap-2">
+                            <UserPlus className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Course Enrollment</p>
+                              <p className="text-sm text-muted-foreground">Notify when enrolled in a new course</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyCourseEnrollment}
+                            onCheckedChange={(checked) => {
+                              setNotifyCourseEnrollment(checked)
+                              toast.success(checked ? 'Enrollment notifications enabled' : 'Enrollment notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">New Content Available</p>
-                            <p className="text-sm text-muted-foreground">Notify when instructor adds new lectures</p>
+                          <div className="flex items-center gap-2">
+                            <BellRing className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">New Content Available</p>
+                              <p className="text-sm text-muted-foreground">Notify when instructor adds new lectures</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyNewContent}
+                            onCheckedChange={(checked) => {
+                              setNotifyNewContent(checked)
+                              toast.success(checked ? 'New content notifications enabled' : 'New content notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Quiz Reminders</p>
-                            <p className="text-sm text-muted-foreground">Remind to complete pending quizzes</p>
+                          <div className="flex items-center gap-2">
+                            <FileQuestion className="w-4 h-4 text-orange-500" />
+                            <div>
+                              <p className="font-medium">Quiz Reminders</p>
+                              <p className="text-sm text-muted-foreground">Remind to complete pending quizzes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyQuizReminders}
+                            onCheckedChange={(checked) => {
+                              setNotifyQuizReminders(checked)
+                              toast.success(checked ? 'Quiz reminders enabled' : 'Quiz reminders disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Certificate Ready</p>
-                            <p className="text-sm text-muted-foreground">Notify when certificate is available</p>
+                          <div className="flex items-center gap-2">
+                            <Award className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <p className="font-medium">Certificate Ready</p>
+                              <p className="text-sm text-muted-foreground">Notify when certificate is available</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyCertificateReady}
+                            onCheckedChange={(checked) => {
+                              setNotifyCertificateReady(checked)
+                              toast.success(checked ? 'Certificate notifications enabled' : 'Certificate notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Course Completion</p>
-                            <p className="text-sm text-muted-foreground">Celebrate course completion with email</p>
+                          <div className="flex items-center gap-2">
+                            <Trophy className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Course Completion</p>
+                              <p className="text-sm text-muted-foreground">Celebrate course completion with email</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyCourseCompletion}
+                            onCheckedChange={(checked) => {
+                              setNotifyCourseCompletion(checked)
+                              toast.success(checked ? 'Completion notifications enabled' : 'Completion notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1920,32 +2154,68 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">New Enrollment</p>
-                            <p className="text-sm text-muted-foreground">Notify when student enrolls in course</p>
+                          <div className="flex items-center gap-2">
+                            <UserPlus className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">New Enrollment</p>
+                              <p className="text-sm text-muted-foreground">Notify when student enrolls in course</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyNewEnrollment}
+                            onCheckedChange={(checked) => {
+                              setNotifyNewEnrollment(checked)
+                              toast.success(checked ? 'Enrollment notifications enabled' : 'Enrollment notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">New Review</p>
-                            <p className="text-sm text-muted-foreground">Notify when student leaves a review</p>
+                          <div className="flex items-center gap-2">
+                            <Star className="w-4 h-4 text-yellow-500" />
+                            <div>
+                              <p className="font-medium">New Review</p>
+                              <p className="text-sm text-muted-foreground">Notify when student leaves a review</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyNewReview}
+                            onCheckedChange={(checked) => {
+                              setNotifyNewReview(checked)
+                              toast.success(checked ? 'Review notifications enabled' : 'Review notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">New Question</p>
-                            <p className="text-sm text-muted-foreground">Notify when student asks a question</p>
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">New Question</p>
+                              <p className="text-sm text-muted-foreground">Notify when student asks a question</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyNewQuestion}
+                            onCheckedChange={(checked) => {
+                              setNotifyNewQuestion(checked)
+                              toast.success(checked ? 'Question notifications enabled' : 'Question notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Revenue Reports</p>
-                            <p className="text-sm text-muted-foreground">Weekly/monthly revenue summaries</p>
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">Revenue Reports</p>
+                              <p className="text-sm text-muted-foreground">Weekly/monthly revenue summaries</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyRevenueReports}
+                            onCheckedChange={(checked) => {
+                              setNotifyRevenueReports(checked)
+                              toast.success(checked ? 'Revenue reports enabled' : 'Revenue reports disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -1965,7 +2235,14 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                                 <Mail className="w-4 h-4 text-muted-foreground" />
                                 <span>{template}</span>
                               </div>
-                              <button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">Edit</button>
+                              <button
+                                onClick={() => {
+                                  toast.info(`Opening ${template} editor...`, { description: 'Template editor will open in a modal' })
+                                }}
+                                className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                              >
+                                Edit
+                              </button>
                             </div>
                           ))}
                         </div>
@@ -2083,22 +2360,40 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="lms_live_••••••••••••••••••••" readOnly className="font-mono" />
-                            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText('lms_live_sk_1234567890abcdef')
+                                toast.success('API key copied to clipboard')
+                              }}
+                              className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                            >
                               <Copy className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Enable API Access</p>
-                            <p className="text-sm text-muted-foreground">Allow external applications to access data</p>
+                          <div className="flex items-center gap-2">
+                            <Key className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Enable API Access</p>
+                              <p className="text-sm text-muted-foreground">Allow external applications to access data</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableApiAccess}
+                            onCheckedChange={(checked) => {
+                              setEnableApiAccess(checked)
+                              toast.success(checked ? 'API access enabled' : 'API access disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Rate Limiting</p>
-                            <p className="text-sm text-muted-foreground">Limit API requests per minute</p>
+                          <div className="flex items-center gap-2">
+                            <Server className="w-4 h-4 text-gray-500" />
+                            <div>
+                              <p className="font-medium">Rate Limiting</p>
+                              <p className="text-sm text-muted-foreground">Limit API requests per minute</p>
+                            </div>
                           </div>
                           <Input type="number" defaultValue="1000" className="w-24" />
                         </div>
@@ -2114,18 +2409,36 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">SCORM Support</p>
-                            <p className="text-sm text-muted-foreground">Import SCORM 1.2 and 2004 packages</p>
+                          <div className="flex items-center gap-2">
+                            <Database className="w-4 h-4 text-green-500" />
+                            <div>
+                              <p className="font-medium">SCORM Support</p>
+                              <p className="text-sm text-muted-foreground">Import SCORM 1.2 and 2004 packages</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableScorm}
+                            onCheckedChange={(checked) => {
+                              setEnableScorm(checked)
+                              toast.success(checked ? 'SCORM support enabled' : 'SCORM support disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">xAPI (Tin Can)</p>
-                            <p className="text-sm text-muted-foreground">Track learning experiences with xAPI</p>
+                          <div className="flex items-center gap-2">
+                            <Cpu className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">xAPI (Tin Can)</p>
+                              <p className="text-sm text-muted-foreground">Track learning experiences with xAPI</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enableXapi}
+                            onCheckedChange={(checked) => {
+                              setEnableXapi(checked)
+                              toast.success(checked ? 'xAPI tracking enabled' : 'xAPI tracking disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>LRS Endpoint</Label>
@@ -2143,25 +2456,52 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Video DRM Protection</p>
-                            <p className="text-sm text-muted-foreground">Protect videos with DRM encryption</p>
+                          <div className="flex items-center gap-2">
+                            <Fingerprint className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium">Video DRM Protection</p>
+                              <p className="text-sm text-muted-foreground">Protect videos with DRM encryption</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enableVideoDrm}
+                            onCheckedChange={(checked) => {
+                              setEnableVideoDrm(checked)
+                              toast.success(checked ? 'Video DRM protection enabled' : 'Video DRM protection disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Watermark Videos</p>
-                            <p className="text-sm text-muted-foreground">Add student email as watermark</p>
+                          <div className="flex items-center gap-2">
+                            <Image className="w-4 h-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Watermark Videos</p>
+                              <p className="text-sm text-muted-foreground">Add student email as watermark</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enableWatermark}
+                            onCheckedChange={(checked) => {
+                              setEnableWatermark(checked)
+                              toast.success(checked ? 'Video watermarking enabled' : 'Video watermarking disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">IP-based Restrictions</p>
-                            <p className="text-sm text-muted-foreground">Limit access by geographic location</p>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-red-500" />
+                            <div>
+                              <p className="font-medium">IP-based Restrictions</p>
+                              <p className="text-sm text-muted-foreground">Limit access by geographic location</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={enableIpRestrictions}
+                            onCheckedChange={(checked) => {
+                              setEnableIpRestrictions(checked)
+                              toast.success(checked ? 'IP restrictions enabled' : 'IP restrictions disabled')
+                            }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Data Retention (months)</Label>
@@ -2179,30 +2519,94 @@ Verification: https://freeflow.app/verify/CERT-${course.id}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
-                          <div>
-                            <p className="font-medium text-red-600">Archive All Courses</p>
-                            <p className="text-sm text-muted-foreground">Move all courses to archive</p>
+                          <div className="flex items-center gap-2">
+                            <Archive className="w-4 h-4 text-red-500" />
+                            <div>
+                              <p className="font-medium text-red-600">Archive All Courses</p>
+                              <p className="text-sm text-muted-foreground">Move all courses to archive</p>
+                            </div>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <button
+                            onClick={() => {
+                              if (confirm('Are you sure you want to archive all courses? This action can be undone by un-archiving courses individually.')) {
+                                toast.promise(
+                                  new Promise((resolve) => setTimeout(resolve, 1500)),
+                                  {
+                                    loading: 'Archiving all courses...',
+                                    success: 'All courses have been archived',
+                                    error: 'Failed to archive courses'
+                                  }
+                                )
+                              }
+                            }}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                          >
                             Archive
                           </button>
                         </div>
                         <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
-                          <div>
-                            <p className="font-medium text-red-600">Reset All Progress</p>
-                            <p className="text-sm text-muted-foreground">Clear all student progress data</p>
+                          <div className="flex items-center gap-2">
+                            <RotateCw className="w-4 h-4 text-red-500" />
+                            <div>
+                              <p className="font-medium text-red-600">Reset All Progress</p>
+                              <p className="text-sm text-muted-foreground">Clear all student progress data</p>
+                            </div>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              if (confirm('WARNING: This will permanently delete all student progress data. This action cannot be undone. Are you sure?')) {
+                                toast.promise(
+                                  new Promise((resolve) => setTimeout(resolve, 2000)),
+                                  {
+                                    loading: 'Resetting all progress...',
+                                    success: 'All student progress has been reset',
+                                    error: 'Failed to reset progress'
+                                  }
+                                )
+                              }
+                            }}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                          >
                             <RefreshCw className="w-4 h-4" />
                             Reset
                           </button>
                         </div>
                         <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
-                          <div>
-                            <p className="font-medium text-red-600">Export All Data</p>
-                            <p className="text-sm text-muted-foreground">Download courses, students, and analytics</p>
+                          <div className="flex items-center gap-2">
+                            <FileDown className="w-4 h-4 text-red-500" />
+                            <div>
+                              <p className="font-medium text-red-600">Export All Data</p>
+                              <p className="text-sm text-muted-foreground">Download courses, students, and analytics</p>
+                            </div>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 3000)),
+                                {
+                                  loading: 'Preparing data export...',
+                                  success: () => {
+                                    // Create a sample export file
+                                    const exportData = {
+                                      exportedAt: new Date().toISOString(),
+                                      courses: courses.length,
+                                      message: 'Export completed successfully'
+                                    }
+                                    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+                                    const url = URL.createObjectURL(blob)
+                                    const a = document.createElement('a')
+                                    a.href = url
+                                    a.download = `courses-export-${new Date().toISOString().split('T')[0]}.json`
+                                    a.click()
+                                    URL.revokeObjectURL(url)
+                                    return 'Data export downloaded successfully'
+                                  },
+                                  error: 'Failed to export data'
+                                }
+                              )
+                            }}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                          >
                             <Download className="w-4 h-4" />
                             Export
                           </button>

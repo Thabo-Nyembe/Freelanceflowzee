@@ -45,7 +45,27 @@ import {
   BarChart3,
   Cpu,
   Cog,
-  Scan
+  Scan,
+  RefreshCcw,
+  LockKeyhole,
+  Code2,
+  FolderTree,
+  Grid3X3,
+  TrendingUp,
+  ShieldCheck,
+  Award,
+  AlertOctagonIcon,
+  MessageSquare,
+  Calendar,
+  BellRing,
+  Siren,
+  Timer,
+  Boxes,
+  Container,
+  CloudCog,
+  Wand2,
+  GitMerge,
+  Server
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -300,6 +320,51 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     description: '',
     enabled: true
   })
+
+  // Settings state - General
+  const [autoUpdateDeps, setAutoUpdateDeps] = useState(true)
+  const [lockFileVerification, setLockFileVerification] = useState(true)
+  const [includeDevDeps, setIncludeDevDeps] = useState(true)
+
+  // Settings state - Dependency Display
+  const [showTransitiveDeps, setShowTransitiveDeps] = useState(true)
+  const [groupByEcosystem, setGroupByEcosystem] = useState(false)
+  const [showDownloadStats, setShowDownloadStats] = useState(true)
+
+  // Settings state - License Policies
+  const [blockCopyleft, setBlockCopyleft] = useState(false)
+  const [requireOSIApproved, setRequireOSIApproved] = useState(true)
+  const [warnUnknownLicenses, setWarnUnknownLicenses] = useState(true)
+
+  // Settings state - Email Notifications
+  const [notifyCriticalVulns, setNotifyCriticalVulns] = useState(true)
+  const [dailyDigest, setDailyDigest] = useState(true)
+  const [notifyNewUpdates, setNotifyNewUpdates] = useState(false)
+  const [notifyLicenseViolations, setNotifyLicenseViolations] = useState(true)
+
+  // Settings state - Webhook Notifications
+  const [slackIntegration, setSlackIntegration] = useState(true)
+  const [teamsIntegration, setTeamsIntegration] = useState(false)
+  const [pagerDutyIntegration, setPagerDutyIntegration] = useState(false)
+
+  // Settings state - Scanning
+  const [scanOnPR, setScanOnPR] = useState(true)
+  const [blockMergeOnCritical, setBlockMergeOnCritical] = useState(true)
+
+  // Settings state - Vulnerability Databases
+  const [useNVD, setUseNVD] = useState(true)
+  const [useGitHubAdvisory, setUseGitHubAdvisory] = useState(true)
+  const [useOSV, setUseOSV] = useState(true)
+  const [useSnyk, setUseSnyk] = useState(false)
+
+  // Settings state - Scan Scope
+  const [scanLockFiles, setScanLockFiles] = useState(true)
+  const [scanContainerImages, setScanContainerImages] = useState(true)
+  const [scanIaC, setScanIaC] = useState(false)
+
+  // Settings state - Advanced
+  const [autoRemediation, setAutoRemediation] = useState(true)
+  const [groupUpdates, setGroupUpdates] = useState(true)
 
   const filteredVulns = useMemo(() => {
     return vulnerabilities.filter(vuln => {
@@ -1048,16 +1113,16 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Shield, label: 'Scan Now', color: 'text-red-600 dark:text-red-400' },
-                { icon: AlertTriangle, label: 'Critical', color: 'text-orange-600 dark:text-orange-400' },
-                { icon: Zap, label: 'Auto-Fix', color: 'text-green-600 dark:text-green-400' },
-                { icon: FileText, label: 'Reports', color: 'text-blue-600 dark:text-blue-400' },
-                { icon: Download, label: 'Export SBOM', color: 'text-purple-600 dark:text-purple-400' },
-                { icon: Bell, label: 'Alerts', color: 'text-amber-600 dark:text-amber-400' },
-                { icon: GitBranch, label: 'PR Checks', color: 'text-cyan-600 dark:text-cyan-400' },
-                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
+                { icon: Shield, label: 'Scan Now', color: 'text-red-600 dark:text-red-400', action: () => { setShowScanDialog(true); } },
+                { icon: AlertTriangle, label: 'Critical', color: 'text-orange-600 dark:text-orange-400', action: () => { setSeverityFilter('critical'); toast.info('Filtering critical vulnerabilities'); } },
+                { icon: Zap, label: 'Auto-Fix', color: 'text-green-600 dark:text-green-400', action: () => { handleUpdateAllDependencies(); } },
+                { icon: FileText, label: 'Reports', color: 'text-blue-600 dark:text-blue-400', action: () => { toast.info('Generating security report...'); handleExportDependencies(); } },
+                { icon: Download, label: 'Export SBOM', color: 'text-purple-600 dark:text-purple-400', action: () => { handleGenerateSBOM(); } },
+                { icon: Bell, label: 'Alerts', color: 'text-amber-600 dark:text-amber-400', action: () => { setActiveTab('settings'); setSettingsTab('notifications'); toast.info('Opened notification settings'); } },
+                { icon: GitBranch, label: 'PR Checks', color: 'text-cyan-600 dark:text-cyan-400', action: () => { toast.info('Checking open pull requests...'); } },
+                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400', action: () => { setActiveTab('settings'); toast.info('Opened settings'); } }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.action}>
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1576,16 +1641,16 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Settings, label: 'General', color: 'text-gray-600 dark:text-gray-400' },
-                { icon: Shield, label: 'Security', color: 'text-red-600 dark:text-red-400' },
-                { icon: Bell, label: 'Alerts', color: 'text-amber-600 dark:text-amber-400' },
-                { icon: GitBranch, label: 'Branches', color: 'text-purple-600 dark:text-purple-400' },
-                { icon: RefreshCw, label: 'Schedule', color: 'text-blue-600 dark:text-blue-400' },
-                { icon: FileText, label: 'Policies', color: 'text-green-600 dark:text-green-400' },
-                { icon: Link2, label: 'Integrations', color: 'text-cyan-600 dark:text-cyan-400' },
-                { icon: Key, label: 'API Keys', color: 'text-orange-600 dark:text-orange-400' }
+                { icon: Settings, label: 'General', color: 'text-gray-600 dark:text-gray-400', action: () => { setSettingsTab('general'); toast.info('Opened general settings'); } },
+                { icon: Shield, label: 'Security', color: 'text-red-600 dark:text-red-400', action: () => { setSettingsTab('security'); toast.info('Opened security policies'); } },
+                { icon: Bell, label: 'Alerts', color: 'text-amber-600 dark:text-amber-400', action: () => { setSettingsTab('notifications'); toast.info('Opened alert settings'); } },
+                { icon: GitBranch, label: 'Branches', color: 'text-purple-600 dark:text-purple-400', action: () => { setSettingsTab('integrations'); toast.info('Opened branch settings'); } },
+                { icon: RefreshCw, label: 'Schedule', color: 'text-blue-600 dark:text-blue-400', action: () => { setSettingsTab('scanning'); toast.info('Opened scan schedule'); } },
+                { icon: FileText, label: 'Policies', color: 'text-green-600 dark:text-green-400', action: () => { setSettingsTab('security'); toast.info('Opened security policies'); } },
+                { icon: Link2, label: 'Integrations', color: 'text-cyan-600 dark:text-cyan-400', action: () => { setSettingsTab('integrations'); toast.info('Opened integrations'); } },
+                { icon: Key, label: 'API Keys', color: 'text-orange-600 dark:text-orange-400', action: () => { setSettingsTab('integrations'); toast.info('Opened API key settings'); } }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.action}>
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1657,25 +1722,52 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Update Dependencies</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically create PRs for updates</p>
+                          <div className="flex items-center gap-3">
+                            <RefreshCcw className="h-4 w-4 text-indigo-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Auto-Update Dependencies</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically create PRs for updates</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoUpdateDeps}
+                            onCheckedChange={(checked) => {
+                              setAutoUpdateDeps(checked)
+                              toast.success(checked ? 'Auto-update enabled' : 'Auto-update disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Lock File Verification</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Verify lock file integrity on each scan</p>
+                          <div className="flex items-center gap-3">
+                            <LockKeyhole className="h-4 w-4 text-indigo-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Lock File Verification</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Verify lock file integrity on each scan</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={lockFileVerification}
+                            onCheckedChange={(checked) => {
+                              setLockFileVerification(checked)
+                              toast.success(checked ? 'Lock file verification enabled' : 'Lock file verification disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Include Dev Dependencies</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Scan development dependencies for issues</p>
+                          <div className="flex items-center gap-3">
+                            <Code2 className="h-4 w-4 text-indigo-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Include Dev Dependencies</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Scan development dependencies for issues</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={includeDevDeps}
+                            onCheckedChange={(checked) => {
+                              setIncludeDevDeps(checked)
+                              toast.success(checked ? 'Dev dependencies included' : 'Dev dependencies excluded')
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -1692,25 +1784,52 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                       </div>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Show Transitive Dependencies</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Display indirect dependency tree</p>
+                          <div className="flex items-center gap-3">
+                            <FolderTree className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Show Transitive Dependencies</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Display indirect dependency tree</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showTransitiveDeps}
+                            onCheckedChange={(checked) => {
+                              setShowTransitiveDeps(checked)
+                              toast.success(checked ? 'Transitive dependencies shown' : 'Transitive dependencies hidden')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Group by Ecosystem</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Group dependencies by package type</p>
+                          <div className="flex items-center gap-3">
+                            <Grid3X3 className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Group by Ecosystem</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Group dependencies by package type</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={groupByEcosystem}
+                            onCheckedChange={(checked) => {
+                              setGroupByEcosystem(checked)
+                              toast.success(checked ? 'Grouped by ecosystem' : 'Grouping disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Show Download Stats</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Display weekly download counts</p>
+                          <div className="flex items-center gap-3">
+                            <TrendingUp className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Show Download Stats</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Display weekly download counts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showDownloadStats}
+                            onCheckedChange={(checked) => {
+                              setShowDownloadStats(checked)
+                              toast.success(checked ? 'Download stats shown' : 'Download stats hidden')
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -1745,10 +1864,18 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                         ) : policies.map((policy) => (
                           <div key={policy.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-4">
-                              <Switch defaultChecked={policy.enabled} />
-                              <div>
-                                <h4 className="font-medium text-gray-900 dark:text-white">{policy.name}</h4>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">{policy.description}</p>
+                              <Switch
+                                checked={policy.enabled}
+                                onCheckedChange={(checked) => {
+                                  handleUpdatePolicy(policy.id, checked)
+                                }}
+                              />
+                              <div className="flex items-center gap-3">
+                                <ShieldCheck className="h-4 w-4 text-red-500" />
+                                <div>
+                                  <h4 className="font-medium text-gray-900 dark:text-white">{policy.name}</h4>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">{policy.description}</p>
+                                </div>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -1783,25 +1910,52 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                       </div>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Block Copyleft Licenses</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Prevent GPL, LGPL, AGPL licenses</p>
+                          <div className="flex items-center gap-3">
+                            <Scale className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Block Copyleft Licenses</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Prevent GPL, LGPL, AGPL licenses</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={blockCopyleft}
+                            onCheckedChange={(checked) => {
+                              setBlockCopyleft(checked)
+                              toast.success(checked ? 'Copyleft licenses blocked' : 'Copyleft licenses allowed')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Require OSI Approved</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Only allow OSI-approved licenses</p>
+                          <div className="flex items-center gap-3">
+                            <Award className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Require OSI Approved</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Only allow OSI-approved licenses</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={requireOSIApproved}
+                            onCheckedChange={(checked) => {
+                              setRequireOSIApproved(checked)
+                              toast.success(checked ? 'OSI-approved licenses required' : 'OSI requirement disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Warn on Unknown Licenses</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert when license cannot be determined</p>
+                          <div className="flex items-center gap-3">
+                            <AlertOctagonIcon className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Warn on Unknown Licenses</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Alert when license cannot be determined</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={warnUnknownLicenses}
+                            onCheckedChange={(checked) => {
+                              setWarnUnknownLicenses(checked)
+                              toast.success(checked ? 'Unknown license warnings enabled' : 'Unknown license warnings disabled')
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -1823,32 +1977,68 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                       </div>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Critical Vulnerabilities</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Immediate alerts for critical CVEs</p>
+                          <div className="flex items-center gap-3">
+                            <Siren className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Critical Vulnerabilities</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Immediate alerts for critical CVEs</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyCriticalVulns}
+                            onCheckedChange={(checked) => {
+                              setNotifyCriticalVulns(checked)
+                              toast.success(checked ? 'Critical vulnerability alerts enabled' : 'Critical vulnerability alerts disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Daily Digest</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Summary of all dependency changes</p>
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Daily Digest</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Summary of all dependency changes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={dailyDigest}
+                            onCheckedChange={(checked) => {
+                              setDailyDigest(checked)
+                              toast.success(checked ? 'Daily digest enabled' : 'Daily digest disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">New Updates Available</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when packages have updates</p>
+                          <div className="flex items-center gap-3">
+                            <BellRing className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">New Updates Available</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Notify when packages have updates</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={notifyNewUpdates}
+                            onCheckedChange={(checked) => {
+                              setNotifyNewUpdates(checked)
+                              toast.success(checked ? 'Update notifications enabled' : 'Update notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">License Policy Violations</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert on license compliance issues</p>
+                          <div className="flex items-center gap-3">
+                            <Scale className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">License Policy Violations</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Alert on license compliance issues</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyLicenseViolations}
+                            onCheckedChange={(checked) => {
+                              setNotifyLicenseViolations(checked)
+                              toast.success(checked ? 'License violation alerts enabled' : 'License violation alerts disabled')
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -1865,25 +2055,52 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                       </div>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Slack Integration</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Send alerts to Slack channels</p>
+                          <div className="flex items-center gap-3">
+                            <MessageSquare className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Slack Integration</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Send alerts to Slack channels</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={slackIntegration}
+                            onCheckedChange={(checked) => {
+                              setSlackIntegration(checked)
+                              toast.success(checked ? 'Slack integration enabled' : 'Slack integration disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Microsoft Teams</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Post to Teams channels</p>
+                          <div className="flex items-center gap-3">
+                            <MessageSquare className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Microsoft Teams</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Post to Teams channels</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={teamsIntegration}
+                            onCheckedChange={(checked) => {
+                              setTeamsIntegration(checked)
+                              toast.success(checked ? 'Teams integration enabled' : 'Teams integration disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">PagerDuty</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Trigger incidents for critical vulns</p>
+                          <div className="flex items-center gap-3">
+                            <Siren className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">PagerDuty</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Trigger incidents for critical vulns</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={pagerDutyIntegration}
+                            onCheckedChange={(checked) => {
+                              setPagerDutyIntegration(checked)
+                              toast.success(checked ? 'PagerDuty integration enabled' : 'PagerDuty integration disabled')
+                            }}
+                          />
                         </div>
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook URL</Label>
@@ -1927,7 +2144,17 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                                 )}
                               </div>
                             </div>
-                            <Button variant={provider.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={provider.status === 'connected' ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => {
+                                if (provider.status === 'connected') {
+                                  toast.info(`Managing ${provider.name} connection...`)
+                                } else {
+                                  toast.info(`Connecting to ${provider.name}...`)
+                                }
+                              }}
+                            >
                               {provider.status === 'connected' ? 'Manage' : 'Connect'}
                             </Button>
                           </div>
@@ -1957,7 +2184,17 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                               <Cpu className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                               <span className="font-medium text-gray-900 dark:text-white">{ci.name}</span>
                             </div>
-                            <Button variant={ci.connected ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={ci.connected ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => {
+                                if (ci.connected) {
+                                  toast.info(`Configuring ${ci.name}...`)
+                                } else {
+                                  toast.info(`Connecting to ${ci.name}...`)
+                                }
+                              }}
+                            >
                               {ci.connected ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1979,7 +2216,14 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                navigator.clipboard.writeText('dep_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                                toast.success('API token copied to clipboard')
+                              }}
+                            >
                               <Copy className="h-4 w-4 mr-2" />
                               Copy
                             </Button>
@@ -1988,7 +2232,14 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                             dep_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                           </code>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => {
+                            toast.info('Regenerating API token...')
+                            setTimeout(() => toast.success('API token regenerated successfully'), 1000)
+                          }}
+                        >
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Regenerate API Token
                         </Button>
@@ -2030,18 +2281,36 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Scan on Pull Request</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Check dependencies before merge</p>
+                          <div className="flex items-center gap-3">
+                            <GitPullRequest className="h-4 w-4 text-indigo-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Scan on Pull Request</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Check dependencies before merge</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={scanOnPR}
+                            onCheckedChange={(checked) => {
+                              setScanOnPR(checked)
+                              toast.success(checked ? 'PR scanning enabled' : 'PR scanning disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Block Merge on Critical</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Prevent merge with critical vulnerabilities</p>
+                          <div className="flex items-center gap-3">
+                            <ShieldX className="h-4 w-4 text-indigo-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Block Merge on Critical</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Prevent merge with critical vulnerabilities</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={blockMergeOnCritical}
+                            onCheckedChange={(checked) => {
+                              setBlockMergeOnCritical(checked)
+                              toast.success(checked ? 'Merge blocking enabled' : 'Merge blocking disabled')
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -2058,32 +2327,68 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                       </div>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">National Vulnerability Database (NVD)</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">NIST CVE database</p>
+                          <div className="flex items-center gap-3">
+                            <Server className="h-4 w-4 text-cyan-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">National Vulnerability Database (NVD)</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">NIST CVE database</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={useNVD}
+                            onCheckedChange={(checked) => {
+                              setUseNVD(checked)
+                              toast.success(checked ? 'NVD database enabled' : 'NVD database disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">GitHub Advisory Database</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">GitHub security advisories</p>
+                          <div className="flex items-center gap-3">
+                            <GitBranch className="h-4 w-4 text-cyan-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">GitHub Advisory Database</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">GitHub security advisories</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={useGitHubAdvisory}
+                            onCheckedChange={(checked) => {
+                              setUseGitHubAdvisory(checked)
+                              toast.success(checked ? 'GitHub Advisory enabled' : 'GitHub Advisory disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">OSV Database</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Open Source Vulnerabilities</p>
+                          <div className="flex items-center gap-3">
+                            <Boxes className="h-4 w-4 text-cyan-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">OSV Database</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Open Source Vulnerabilities</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={useOSV}
+                            onCheckedChange={(checked) => {
+                              setUseOSV(checked)
+                              toast.success(checked ? 'OSV database enabled' : 'OSV database disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Snyk Vulnerability DB</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Snyk curated database</p>
+                          <div className="flex items-center gap-3">
+                            <Shield className="h-4 w-4 text-cyan-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Snyk Vulnerability DB</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Snyk curated database</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={useSnyk}
+                            onCheckedChange={(checked) => {
+                              setUseSnyk(checked)
+                              toast.success(checked ? 'Snyk database enabled' : 'Snyk database disabled')
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -2100,25 +2405,52 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                       </div>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Lock Files</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">package-lock.json, yarn.lock, etc.</p>
+                          <div className="flex items-center gap-3">
+                            <LockKeyhole className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Lock Files</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">package-lock.json, yarn.lock, etc.</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={scanLockFiles}
+                            onCheckedChange={(checked) => {
+                              setScanLockFiles(checked)
+                              toast.success(checked ? 'Lock file scanning enabled' : 'Lock file scanning disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Container Images</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Scan Dockerfile dependencies</p>
+                          <div className="flex items-center gap-3">
+                            <Container className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Container Images</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Scan Dockerfile dependencies</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={scanContainerImages}
+                            onCheckedChange={(checked) => {
+                              setScanContainerImages(checked)
+                              toast.success(checked ? 'Container scanning enabled' : 'Container scanning disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Infrastructure as Code</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Terraform, CloudFormation modules</p>
+                          <div className="flex items-center gap-3">
+                            <CloudCog className="h-4 w-4 text-amber-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Infrastructure as Code</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Terraform, CloudFormation modules</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={scanIaC}
+                            onCheckedChange={(checked) => {
+                              setScanIaC(checked)
+                              toast.success(checked ? 'IaC scanning enabled' : 'IaC scanning disabled')
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -2140,23 +2472,44 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                       </div>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Remediation</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically create fix PRs</p>
+                          <div className="flex items-center gap-3">
+                            <Wand2 className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Auto-Remediation</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Automatically create fix PRs</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoRemediation}
+                            onCheckedChange={(checked) => {
+                              setAutoRemediation(checked)
+                              toast.success(checked ? 'Auto-remediation enabled' : 'Auto-remediation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Group Updates</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Combine updates into single PRs</p>
+                          <div className="flex items-center gap-3">
+                            <GitMerge className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Group Updates</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Combine updates into single PRs</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={groupUpdates}
+                            onCheckedChange={(checked) => {
+                              setGroupUpdates(checked)
+                              toast.success(checked ? 'Update grouping enabled' : 'Update grouping disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div>
-                            <Label className="text-gray-900 dark:text-white font-medium">Rebasing Strategy</Label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">How to handle update PR conflicts</p>
+                          <div className="flex items-center gap-3">
+                            <RefreshCw className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Rebasing Strategy</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">How to handle update PR conflicts</p>
+                            </div>
                           </div>
                           <Select defaultValue="auto">
                             <SelectTrigger className="w-40">
@@ -2202,11 +2555,25 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                           </Select>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => {
+                              toast.info('Exporting scan data...')
+                              handleExportDependencies()
+                            }}
+                          >
                             <Download className="h-4 w-4 mr-2" />
                             Export Scan Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => {
+                              toast.info('Generating security report...')
+                              handleGenerateSBOM()
+                            }}
+                          >
                             <BarChart3 className="h-4 w-4 mr-2" />
                             Generate Report
                           </Button>

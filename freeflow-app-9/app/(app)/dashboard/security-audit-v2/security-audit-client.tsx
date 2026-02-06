@@ -53,7 +53,27 @@ import {
   Webhook,
   Zap,
   ExternalLink,
-  CreditCard
+  CreditCard,
+  LayoutDashboard,
+  SortDesc,
+  UserCheck,
+  SearchCheck,
+  Crosshair,
+  ShieldOff,
+  Key,
+  Container,
+  Scale,
+  Ticket,
+  MessageSquare,
+  Bell,
+  BellRing,
+  Mail,
+  FileBarChart,
+  Timer,
+  Terminal,
+  Bomb,
+  Bot,
+  FileCode
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -246,6 +266,58 @@ export default function SecurityAuditClient() {
   const [showRemediationDialog, setShowRemediationDialog] = useState(false)
   const [showAssetMenuDialog, setShowAssetMenuDialog] = useState(false)
   const [selectedAssetForMenu, setSelectedAssetForMenu] = useState<Asset | null>(null)
+
+  // General Settings switches
+  const [enableSecurityDashboard, setEnableSecurityDashboard] = useState(true)
+  const [riskBasedPrioritization, setRiskBasedPrioritization] = useState(true)
+  const [autoAssignVulnerabilities, setAutoAssignVulnerabilities] = useState(true)
+
+  // Scanning Settings switches
+  const [automaticScanning, setAutomaticScanning] = useState(true)
+  const [deepScanMode, setDeepScanMode] = useState(true)
+  const [safeScanMode, setSafeScanMode] = useState(false)
+  const [credentialScanning, setCredentialScanning] = useState(true)
+  const [containerScanning, setContainerScanning] = useState(true)
+
+  // Compliance Settings switches
+  const [soc2Compliance, setSoc2Compliance] = useState(true)
+  const [iso27001Compliance, setIso27001Compliance] = useState(true)
+  const [pciDssCompliance, setPciDssCompliance] = useState(true)
+  const [hipaaCompliance, setHipaaCompliance] = useState(false)
+  const [gdprCompliance, setGdprCompliance] = useState(true)
+
+  // Integration Settings switches
+  const [jiraIntegration, setJiraIntegration] = useState(true)
+  const [slackIntegration, setSlackIntegration] = useState(false)
+  const [pagerDutyIntegration, setPagerDutyIntegration] = useState(false)
+  const [siemIntegration, setSiemIntegration] = useState(true)
+  const [cicdIntegration, setCicdIntegration] = useState(true)
+
+  // Notification Settings switches
+  const [criticalAlerts, setCriticalAlerts] = useState(true)
+  const [highSeverityAlerts, setHighSeverityAlerts] = useState(true)
+  const [scanCompletionNotify, setScanCompletionNotify] = useState(true)
+  const [weeklyReports, setWeeklyReports] = useState(true)
+  const [slaBreachWarnings, setSlaBreachWarnings] = useState(true)
+
+  // Advanced Settings switches
+  const [apiAccess, setApiAccess] = useState(true)
+  const [exploitSimulation, setExploitSimulation] = useState(false)
+  const [agentBasedScanning, setAgentBasedScanning] = useState(true)
+  const [customCveMappings, setCustomCveMappings] = useState(false)
+
+  // Compliance framework selection for assessment dialog
+  const [selectedFrameworks, setSelectedFrameworks] = useState<Record<string, boolean>>({
+    'SOC2': true,
+    'ISO27001': true,
+    'PCI-DSS': true,
+    'GDPR': false,
+    'HIPAA': false,
+    'NIST': false
+  })
+
+  // Remediation dialog switch
+  const [createJiraTicket, setCreateJiraTicket] = useState(false)
 
   // Scan state
   const [isScanning, setIsScanning] = useState(false)
@@ -1509,25 +1581,52 @@ export default function SecurityAuditClient() {
                         </div>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Enable Security Dashboard</p>
-                          <p className="text-sm text-gray-500">Show security metrics on main dashboard</p>
+                        <div className="flex items-center gap-3">
+                          <LayoutDashboard className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium">Enable Security Dashboard</p>
+                            <p className="text-sm text-gray-500">Show security metrics on main dashboard</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={enableSecurityDashboard}
+                          onCheckedChange={(checked) => {
+                            setEnableSecurityDashboard(checked)
+                            toast.success(checked ? 'Security Dashboard enabled' : 'Security Dashboard disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Risk-Based Prioritization</p>
-                          <p className="text-sm text-gray-500">Sort vulnerabilities by risk score</p>
+                        <div className="flex items-center gap-3">
+                          <SortDesc className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium">Risk-Based Prioritization</p>
+                            <p className="text-sm text-gray-500">Sort vulnerabilities by risk score</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={riskBasedPrioritization}
+                          onCheckedChange={(checked) => {
+                            setRiskBasedPrioritization(checked)
+                            toast.success(checked ? 'Risk-based prioritization enabled' : 'Risk-based prioritization disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Auto-Assign Vulnerabilities</p>
-                          <p className="text-sm text-gray-500">Automatically assign based on asset owner</p>
+                        <div className="flex items-center gap-3">
+                          <UserCheck className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium">Auto-Assign Vulnerabilities</p>
+                            <p className="text-sm text-gray-500">Automatically assign based on asset owner</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoAssignVulnerabilities}
+                          onCheckedChange={(checked) => {
+                            setAutoAssignVulnerabilities(checked)
+                            toast.success(checked ? 'Auto-assign enabled' : 'Auto-assign disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1544,39 +1643,84 @@ export default function SecurityAuditClient() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Automatic Scanning</p>
-                          <p className="text-sm text-gray-500">Run scheduled vulnerability scans</p>
+                        <div className="flex items-center gap-3">
+                          <RefreshCw className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium">Automatic Scanning</p>
+                            <p className="text-sm text-gray-500">Run scheduled vulnerability scans</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={automaticScanning}
+                          onCheckedChange={(checked) => {
+                            setAutomaticScanning(checked)
+                            toast.success(checked ? 'Automatic scanning enabled' : 'Automatic scanning disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Deep Scan Mode</p>
-                          <p className="text-sm text-gray-500">Enable comprehensive vulnerability detection</p>
+                        <div className="flex items-center gap-3">
+                          <SearchCheck className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium">Deep Scan Mode</p>
+                            <p className="text-sm text-gray-500">Enable comprehensive vulnerability detection</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={deepScanMode}
+                          onCheckedChange={(checked) => {
+                            setDeepScanMode(checked)
+                            toast.success(checked ? 'Deep scan mode enabled' : 'Deep scan mode disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Safe Scan Mode</p>
-                          <p className="text-sm text-gray-500">Avoid potentially disruptive checks</p>
+                        <div className="flex items-center gap-3">
+                          <ShieldCheck className="w-5 h-5 text-emerald-500" />
+                          <div>
+                            <p className="font-medium">Safe Scan Mode</p>
+                            <p className="text-sm text-gray-500">Avoid potentially disruptive checks</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={safeScanMode}
+                          onCheckedChange={(checked) => {
+                            setSafeScanMode(checked)
+                            toast.success(checked ? 'Safe scan mode enabled' : 'Safe scan mode disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Credential Scanning</p>
-                          <p className="text-sm text-gray-500">Use credentials for authenticated scans</p>
+                        <div className="flex items-center gap-3">
+                          <Key className="w-5 h-5 text-amber-500" />
+                          <div>
+                            <p className="font-medium">Credential Scanning</p>
+                            <p className="text-sm text-gray-500">Use credentials for authenticated scans</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={credentialScanning}
+                          onCheckedChange={(checked) => {
+                            setCredentialScanning(checked)
+                            toast.success(checked ? 'Credential scanning enabled' : 'Credential scanning disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Container Scanning</p>
-                          <p className="text-sm text-gray-500">Scan Docker containers and images</p>
+                        <div className="flex items-center gap-3">
+                          <Container className="w-5 h-5 text-cyan-500" />
+                          <div>
+                            <p className="font-medium">Container Scanning</p>
+                            <p className="text-sm text-gray-500">Scan Docker containers and images</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={containerScanning}
+                          onCheckedChange={(checked) => {
+                            setContainerScanning(checked)
+                            toast.success(checked ? 'Container scanning enabled' : 'Container scanning disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1593,39 +1737,84 @@ export default function SecurityAuditClient() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">SOC 2 Type II</p>
-                          <p className="text-sm text-gray-500">Enable SOC 2 compliance monitoring</p>
+                        <div className="flex items-center gap-3">
+                          <ShieldCheck className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium">SOC 2 Type II</p>
+                            <p className="text-sm text-gray-500">Enable SOC 2 compliance monitoring</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={soc2Compliance}
+                          onCheckedChange={(checked) => {
+                            setSoc2Compliance(checked)
+                            toast.success(checked ? 'SOC 2 compliance monitoring enabled' : 'SOC 2 compliance monitoring disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">ISO 27001</p>
-                          <p className="text-sm text-gray-500">Enable ISO 27001 compliance monitoring</p>
+                        <div className="flex items-center gap-3">
+                          <Shield className="w-5 h-5 text-indigo-500" />
+                          <div>
+                            <p className="font-medium">ISO 27001</p>
+                            <p className="text-sm text-gray-500">Enable ISO 27001 compliance monitoring</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={iso27001Compliance}
+                          onCheckedChange={(checked) => {
+                            setIso27001Compliance(checked)
+                            toast.success(checked ? 'ISO 27001 compliance monitoring enabled' : 'ISO 27001 compliance monitoring disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">PCI-DSS</p>
-                          <p className="text-sm text-gray-500">Enable PCI-DSS compliance monitoring</p>
+                        <div className="flex items-center gap-3">
+                          <CreditCard className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium">PCI-DSS</p>
+                            <p className="text-sm text-gray-500">Enable PCI-DSS compliance monitoring</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={pciDssCompliance}
+                          onCheckedChange={(checked) => {
+                            setPciDssCompliance(checked)
+                            toast.success(checked ? 'PCI-DSS compliance monitoring enabled' : 'PCI-DSS compliance monitoring disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">HIPAA</p>
-                          <p className="text-sm text-gray-500">Enable HIPAA compliance monitoring</p>
+                        <div className="flex items-center gap-3">
+                          <FileCheck className="w-5 h-5 text-red-500" />
+                          <div>
+                            <p className="font-medium">HIPAA</p>
+                            <p className="text-sm text-gray-500">Enable HIPAA compliance monitoring</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={hipaaCompliance}
+                          onCheckedChange={(checked) => {
+                            setHipaaCompliance(checked)
+                            toast.success(checked ? 'HIPAA compliance monitoring enabled' : 'HIPAA compliance monitoring disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">GDPR</p>
-                          <p className="text-sm text-gray-500">Enable GDPR compliance monitoring</p>
+                        <div className="flex items-center gap-3">
+                          <Lock className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium">GDPR</p>
+                            <p className="text-sm text-gray-500">Enable GDPR compliance monitoring</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={gdprCompliance}
+                          onCheckedChange={(checked) => {
+                            setGdprCompliance(checked)
+                            toast.success(checked ? 'GDPR compliance monitoring enabled' : 'GDPR compliance monitoring disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1642,39 +1831,84 @@ export default function SecurityAuditClient() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Jira Integration</p>
-                          <p className="text-sm text-gray-500">Create tickets for vulnerabilities</p>
+                        <div className="flex items-center gap-3">
+                          <Ticket className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium">Jira Integration</p>
+                            <p className="text-sm text-gray-500">Create tickets for vulnerabilities</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={jiraIntegration}
+                          onCheckedChange={(checked) => {
+                            setJiraIntegration(checked)
+                            toast.success(checked ? 'Jira integration enabled' : 'Jira integration disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Slack Integration</p>
-                          <p className="text-sm text-gray-500">Send alerts to Slack channel</p>
+                        <div className="flex items-center gap-3">
+                          <MessageSquare className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium">Slack Integration</p>
+                            <p className="text-sm text-gray-500">Send alerts to Slack channel</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={slackIntegration}
+                          onCheckedChange={(checked) => {
+                            setSlackIntegration(checked)
+                            toast.success(checked ? 'Slack integration enabled' : 'Slack integration disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">PagerDuty Integration</p>
-                          <p className="text-sm text-gray-500">Trigger incidents for critical findings</p>
+                        <div className="flex items-center gap-3">
+                          <Bell className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium">PagerDuty Integration</p>
+                            <p className="text-sm text-gray-500">Trigger incidents for critical findings</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={pagerDutyIntegration}
+                          onCheckedChange={(checked) => {
+                            setPagerDutyIntegration(checked)
+                            toast.success(checked ? 'PagerDuty integration enabled' : 'PagerDuty integration disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">SIEM Integration</p>
-                          <p className="text-sm text-gray-500">Send events to your SIEM</p>
+                        <div className="flex items-center gap-3">
+                          <Server className="w-5 h-5 text-amber-500" />
+                          <div>
+                            <p className="font-medium">SIEM Integration</p>
+                            <p className="text-sm text-gray-500">Send events to your SIEM</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={siemIntegration}
+                          onCheckedChange={(checked) => {
+                            setSiemIntegration(checked)
+                            toast.success(checked ? 'SIEM integration enabled' : 'SIEM integration disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">CI/CD Integration</p>
-                          <p className="text-sm text-gray-500">Block deployments with critical vulns</p>
+                        <div className="flex items-center gap-3">
+                          <Zap className="w-5 h-5 text-cyan-500" />
+                          <div>
+                            <p className="font-medium">CI/CD Integration</p>
+                            <p className="text-sm text-gray-500">Block deployments with critical vulns</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={cicdIntegration}
+                          onCheckedChange={(checked) => {
+                            setCicdIntegration(checked)
+                            toast.success(checked ? 'CI/CD integration enabled' : 'CI/CD integration disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1691,39 +1925,84 @@ export default function SecurityAuditClient() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Critical Alerts</p>
-                          <p className="text-sm text-gray-500">Immediate notification for critical findings</p>
+                        <div className="flex items-center gap-3">
+                          <AlertTriangle className="w-5 h-5 text-red-500" />
+                          <div>
+                            <p className="font-medium">Critical Alerts</p>
+                            <p className="text-sm text-gray-500">Immediate notification for critical findings</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={criticalAlerts}
+                          onCheckedChange={(checked) => {
+                            setCriticalAlerts(checked)
+                            toast.success(checked ? 'Critical alerts enabled' : 'Critical alerts disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">High Severity Alerts</p>
-                          <p className="text-sm text-gray-500">Notify for high severity vulnerabilities</p>
+                        <div className="flex items-center gap-3">
+                          <AlertCircle className="w-5 h-5 text-orange-500" />
+                          <div>
+                            <p className="font-medium">High Severity Alerts</p>
+                            <p className="text-sm text-gray-500">Notify for high severity vulnerabilities</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={highSeverityAlerts}
+                          onCheckedChange={(checked) => {
+                            setHighSeverityAlerts(checked)
+                            toast.success(checked ? 'High severity alerts enabled' : 'High severity alerts disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Scan Completion</p>
-                          <p className="text-sm text-gray-500">Notify when scans complete</p>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium">Scan Completion</p>
+                            <p className="text-sm text-gray-500">Notify when scans complete</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={scanCompletionNotify}
+                          onCheckedChange={(checked) => {
+                            setScanCompletionNotify(checked)
+                            toast.success(checked ? 'Scan completion notifications enabled' : 'Scan completion notifications disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Weekly Reports</p>
-                          <p className="text-sm text-gray-500">Receive weekly security summary</p>
+                        <div className="flex items-center gap-3">
+                          <FileBarChart className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="font-medium">Weekly Reports</p>
+                            <p className="text-sm text-gray-500">Receive weekly security summary</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={weeklyReports}
+                          onCheckedChange={(checked) => {
+                            setWeeklyReports(checked)
+                            toast.success(checked ? 'Weekly reports enabled' : 'Weekly reports disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">SLA Breach Warnings</p>
-                          <p className="text-sm text-gray-500">Alert before remediation SLA expires</p>
+                        <div className="flex items-center gap-3">
+                          <Timer className="w-5 h-5 text-amber-500" />
+                          <div>
+                            <p className="font-medium">SLA Breach Warnings</p>
+                            <p className="text-sm text-gray-500">Alert before remediation SLA expires</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={slaBreachWarnings}
+                          onCheckedChange={(checked) => {
+                            setSlaBreachWarnings(checked)
+                            toast.success(checked ? 'SLA breach warnings enabled' : 'SLA breach warnings disabled')
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1740,32 +2019,68 @@ export default function SecurityAuditClient() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">API Access</p>
-                          <p className="text-sm text-gray-500">Enable REST API access</p>
+                        <div className="flex items-center gap-3">
+                          <Terminal className="w-5 h-5 text-green-500" />
+                          <div>
+                            <p className="font-medium">API Access</p>
+                            <p className="text-sm text-gray-500">Enable REST API access</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={apiAccess}
+                          onCheckedChange={(checked) => {
+                            setApiAccess(checked)
+                            toast.success(checked ? 'API access enabled' : 'API access disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Exploit Simulation</p>
-                          <p className="text-sm text-gray-500">Run safe exploit simulations</p>
+                        <div className="flex items-center gap-3">
+                          <Bomb className="w-5 h-5 text-red-500" />
+                          <div>
+                            <p className="font-medium">Exploit Simulation</p>
+                            <p className="text-sm text-gray-500">Run safe exploit simulations</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={exploitSimulation}
+                          onCheckedChange={(checked) => {
+                            setExploitSimulation(checked)
+                            toast.success(checked ? 'Exploit simulation enabled' : 'Exploit simulation disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Agent-Based Scanning</p>
-                          <p className="text-sm text-gray-500">Deploy scanning agents to assets</p>
+                        <div className="flex items-center gap-3">
+                          <Bot className="w-5 h-5 text-purple-500" />
+                          <div>
+                            <p className="font-medium">Agent-Based Scanning</p>
+                            <p className="text-sm text-gray-500">Deploy scanning agents to assets</p>
+                          </div>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={agentBasedScanning}
+                          onCheckedChange={(checked) => {
+                            setAgentBasedScanning(checked)
+                            toast.success(checked ? 'Agent-based scanning enabled' : 'Agent-based scanning disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div>
-                          <p className="font-medium">Custom CVE Mappings</p>
-                          <p className="text-sm text-gray-500">Define custom vulnerability mappings</p>
+                        <div className="flex items-center gap-3">
+                          <FileCode className="w-5 h-5 text-cyan-500" />
+                          <div>
+                            <p className="font-medium">Custom CVE Mappings</p>
+                            <p className="text-sm text-gray-500">Define custom vulnerability mappings</p>
+                          </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={customCveMappings}
+                          onCheckedChange={(checked) => {
+                            setCustomCveMappings(checked)
+                            toast.success(checked ? 'Custom CVE mappings enabled' : 'Custom CVE mappings disabled')
+                          }}
+                        />
                       </div>
                       <div className="pt-6 border-t dark:border-gray-700">
                         <h4 className="font-medium text-red-600 mb-4">Danger Zone</h4>
@@ -2425,7 +2740,13 @@ export default function SecurityAuditClient() {
                         <p className="text-sm text-gray-500">{framework.controls} controls</p>
                       </div>
                     </div>
-                    <Switch defaultChecked={['SOC2', 'ISO27001', 'PCI-DSS'].includes(framework.id)} />
+                    <Switch
+                      checked={selectedFrameworks[framework.id] || false}
+                      onCheckedChange={(checked) => {
+                        setSelectedFrameworks(prev => ({ ...prev, [framework.id]: checked }))
+                        toast.success(checked ? `${framework.name} selected` : `${framework.name} deselected`)
+                      }}
+                    />
                   </div>
                 ))}
               </div>
@@ -2573,9 +2894,19 @@ export default function SecurityAuditClient() {
                 <label className="text-sm font-medium">Implementation Notes</label>
                 <textarea className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 h-20" placeholder="Document the remediation steps taken..." />
               </div>
-              <div className="flex items-center gap-2">
-                <Switch id="create-ticket" />
-                <label htmlFor="create-ticket" className="text-sm">Create Jira ticket for tracking</label>
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="create-ticket"
+                  checked={createJiraTicket}
+                  onCheckedChange={(checked) => {
+                    setCreateJiraTicket(checked)
+                    toast.success(checked ? 'Jira ticket will be created' : 'Jira ticket creation disabled')
+                  }}
+                />
+                <div className="flex items-center gap-2">
+                  <Ticket className="w-4 h-4 text-blue-500" />
+                  <label htmlFor="create-ticket" className="text-sm">Create Jira ticket for tracking</label>
+                </div>
               </div>
               <div className="flex gap-3 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowRemediationDialog(false)}>
@@ -2583,7 +2914,7 @@ export default function SecurityAuditClient() {
                 </Button>
                 <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
                   setShowRemediationDialog(false)
-                  if (selectedVulnerability) {
+                  if (selectedVulnerability && createJiraTicket) {
                     handleCreateTicket(selectedVulnerability)
                   }
                   toast.success('Remediation started')

@@ -30,7 +30,10 @@ import {
   Share2, Settings, Globe, Tag, ThumbsUp, ThumbsDown, Calendar, CheckCircle2, Code, GitBranch,
   Zap, TrendingUp, BarChart3, Download, Upload, Sparkles, Layout,
   RefreshCw, Bell, Database, Languages, FileCheck, Rocket, Target, PenTool, Megaphone,
-  Loader2
+  Loader2, MessageCircle, HelpCircle, Timer, List, Navigation, UserCircle, Save, SpellCheck,
+  Highlighter, Wand2, Type, Lightbulb, Map, Bot, FileCode,
+  Mail, FileEdit, CalendarDays, AtSign, PenSquare, AlertCircle,
+  HardDrive, Archive, Shield, Key, Webhook, Link2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -251,6 +254,52 @@ export default function DocumentationClient() {
     version: 'v1.0',
     tags: []
   })
+
+  // Settings switch states - General Settings
+  const [enableComments, setEnableComments] = useState(true)
+  const [pageFeedback, setPageFeedback] = useState(true)
+  const [showReadingTime, setShowReadingTime] = useState(true)
+  const [showTableOfContents, setShowTableOfContents] = useState(true)
+  const [showBreadcrumbs, setShowBreadcrumbs] = useState(true)
+  const [showPageContributors, setShowPageContributors] = useState(true)
+
+  // Settings switch states - Editor Settings
+  const [autoSave, setAutoSave] = useState(true)
+  const [spellCheck, setSpellCheck] = useState(true)
+  const [codeHighlighting, setCodeHighlighting] = useState(true)
+  const [aiWritingSuggestions, setAiWritingSuggestions] = useState(true)
+  const [aiAutoComplete, setAiAutoComplete] = useState(true)
+  const [grammarCorrection, setGrammarCorrection] = useState(false)
+
+  // Settings switch states - SEO Settings
+  const [autoGenerateMeta, setAutoGenerateMeta] = useState(true)
+  const [xmlSitemap, setXmlSitemap] = useState(true)
+  const [robotsTxt, setRobotsTxt] = useState(true)
+  const [openGraphTags, setOpenGraphTags] = useState(true)
+
+  // Settings switch states - Integrations
+  const [enableGitSync, setEnableGitSync] = useState(true)
+  const [autoSyncOnPush, setAutoSyncOnPush] = useState(true)
+
+  // Settings switch states - Email Notifications
+  const [notifyNewComments, setNotifyNewComments] = useState(true)
+  const [notifyPageUpdates, setNotifyPageUpdates] = useState(true)
+  const [notifyTranslationUpdates, setNotifyTranslationUpdates] = useState(true)
+  const [weeklyDigest, setWeeklyDigest] = useState(false)
+
+  // Settings switch states - In-App Notifications
+  const [notifyMentions, setNotifyMentions] = useState(true)
+  const [notifyEditSuggestions, setNotifyEditSuggestions] = useState(true)
+  const [notifyReviewRequests, setNotifyReviewRequests] = useState(true)
+
+  // Settings switch states - Advanced
+  const [automaticBackups, setAutomaticBackups] = useState(true)
+  const [auditLogging, setAuditLogging] = useState(true)
+  const [enableApiAccess, setEnableApiAccess] = useState(true)
+  const [webhookNotifications, setWebhookNotifications] = useState(false)
+
+  // New Space Dialog switch state
+  const [newSpaceGitSync, setNewSpaceGitSync] = useState(false)
 
   // Reset form data
   const resetDocForm = () => {
@@ -2008,25 +2057,52 @@ export default function DocumentationClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Enable Comments</Label>
-                            <p className="text-sm text-gray-500">Allow readers to comment on pages</p>
+                          <div className="flex items-center gap-2">
+                            <MessageCircle className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Enable Comments</Label>
+                              <p className="text-sm text-gray-500">Allow readers to comment on pages</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableComments}
+                            onCheckedChange={(checked) => {
+                              setEnableComments(checked)
+                              toast.success(checked ? 'Comments enabled' : 'Comments disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Page Feedback</Label>
-                            <p className="text-sm text-gray-500">Show helpful/not helpful buttons</p>
+                          <div className="flex items-center gap-2">
+                            <HelpCircle className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Page Feedback</Label>
+                              <p className="text-sm text-gray-500">Show helpful/not helpful buttons</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={pageFeedback}
+                            onCheckedChange={(checked) => {
+                              setPageFeedback(checked)
+                              toast.success(checked ? 'Page feedback enabled' : 'Page feedback disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Reading Time</Label>
-                            <p className="text-sm text-gray-500">Display estimated reading time</p>
+                          <div className="flex items-center gap-2">
+                            <Timer className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Reading Time</Label>
+                              <p className="text-sm text-gray-500">Display estimated reading time</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showReadingTime}
+                            onCheckedChange={(checked) => {
+                              setShowReadingTime(checked)
+                              toast.success(checked ? 'Reading time shown' : 'Reading time hidden')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2036,25 +2112,52 @@ export default function DocumentationClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Table of Contents</Label>
-                            <p className="text-sm text-gray-500">Show TOC on pages</p>
+                          <div className="flex items-center gap-2">
+                            <List className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Table of Contents</Label>
+                              <p className="text-sm text-gray-500">Show TOC on pages</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showTableOfContents}
+                            onCheckedChange={(checked) => {
+                              setShowTableOfContents(checked)
+                              toast.success(checked ? 'Table of contents enabled' : 'Table of contents disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Breadcrumbs</Label>
-                            <p className="text-sm text-gray-500">Show navigation breadcrumbs</p>
+                          <div className="flex items-center gap-2">
+                            <Navigation className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Breadcrumbs</Label>
+                              <p className="text-sm text-gray-500">Show navigation breadcrumbs</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showBreadcrumbs}
+                            onCheckedChange={(checked) => {
+                              setShowBreadcrumbs(checked)
+                              toast.success(checked ? 'Breadcrumbs enabled' : 'Breadcrumbs disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Page Contributors</Label>
-                            <p className="text-sm text-gray-500">Display contributor avatars</p>
+                          <div className="flex items-center gap-2">
+                            <UserCircle className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Page Contributors</Label>
+                              <p className="text-sm text-gray-500">Display contributor avatars</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={showPageContributors}
+                            onCheckedChange={(checked) => {
+                              setShowPageContributors(checked)
+                              toast.success(checked ? 'Contributors shown' : 'Contributors hidden')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2099,25 +2202,52 @@ export default function DocumentationClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Auto-save</Label>
-                            <p className="text-sm text-gray-500">Automatically save drafts</p>
+                          <div className="flex items-center gap-2">
+                            <Save className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Auto-save</Label>
+                              <p className="text-sm text-gray-500">Automatically save drafts</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoSave}
+                            onCheckedChange={(checked) => {
+                              setAutoSave(checked)
+                              toast.success(checked ? 'Auto-save enabled' : 'Auto-save disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Spell Check</Label>
-                            <p className="text-sm text-gray-500">Enable spell checking in editor</p>
+                          <div className="flex items-center gap-2">
+                            <SpellCheck className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Spell Check</Label>
+                              <p className="text-sm text-gray-500">Enable spell checking in editor</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={spellCheck}
+                            onCheckedChange={(checked) => {
+                              setSpellCheck(checked)
+                              toast.success(checked ? 'Spell check enabled' : 'Spell check disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Code Highlighting</Label>
-                            <p className="text-sm text-gray-500">Syntax highlighting for code blocks</p>
+                          <div className="flex items-center gap-2">
+                            <Highlighter className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Code Highlighting</Label>
+                              <p className="text-sm text-gray-500">Syntax highlighting for code blocks</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={codeHighlighting}
+                            onCheckedChange={(checked) => {
+                              setCodeHighlighting(checked)
+                              toast.success(checked ? 'Code highlighting enabled' : 'Code highlighting disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2127,25 +2257,52 @@ export default function DocumentationClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>AI Writing Suggestions</Label>
-                            <p className="text-sm text-gray-500">Get AI-powered writing suggestions</p>
+                          <div className="flex items-center gap-2">
+                            <Wand2 className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>AI Writing Suggestions</Label>
+                              <p className="text-sm text-gray-500">Get AI-powered writing suggestions</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={aiWritingSuggestions}
+                            onCheckedChange={(checked) => {
+                              setAiWritingSuggestions(checked)
+                              toast.success(checked ? 'AI writing suggestions enabled' : 'AI writing suggestions disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Auto-complete</Label>
-                            <p className="text-sm text-gray-500">AI-powered sentence completion</p>
+                          <div className="flex items-center gap-2">
+                            <Type className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Auto-complete</Label>
+                              <p className="text-sm text-gray-500">AI-powered sentence completion</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={aiAutoComplete}
+                            onCheckedChange={(checked) => {
+                              setAiAutoComplete(checked)
+                              toast.success(checked ? 'Auto-complete enabled' : 'Auto-complete disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Grammar Correction</Label>
-                            <p className="text-sm text-gray-500">Automatic grammar fixes</p>
+                          <div className="flex items-center gap-2">
+                            <Lightbulb className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Grammar Correction</Label>
+                              <p className="text-sm text-gray-500">Automatic grammar fixes</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={grammarCorrection}
+                            onCheckedChange={(checked) => {
+                              setGrammarCorrection(checked)
+                              toast.success(checked ? 'Grammar correction enabled' : 'Grammar correction disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2162,32 +2319,68 @@ export default function DocumentationClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Auto-generate Meta</Label>
-                            <p className="text-sm text-gray-500">Generate SEO meta from content</p>
+                          <div className="flex items-center gap-2">
+                            <Tag className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Auto-generate Meta</Label>
+                              <p className="text-sm text-gray-500">Generate SEO meta from content</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoGenerateMeta}
+                            onCheckedChange={(checked) => {
+                              setAutoGenerateMeta(checked)
+                              toast.success(checked ? 'Auto meta generation enabled' : 'Auto meta generation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>XML Sitemap</Label>
-                            <p className="text-sm text-gray-500">Generate XML sitemap automatically</p>
+                          <div className="flex items-center gap-2">
+                            <Map className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>XML Sitemap</Label>
+                              <p className="text-sm text-gray-500">Generate XML sitemap automatically</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={xmlSitemap}
+                            onCheckedChange={(checked) => {
+                              setXmlSitemap(checked)
+                              toast.success(checked ? 'XML sitemap generation enabled' : 'XML sitemap generation disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Robots.txt</Label>
-                            <p className="text-sm text-gray-500">Allow search engine indexing</p>
+                          <div className="flex items-center gap-2">
+                            <Bot className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Robots.txt</Label>
+                              <p className="text-sm text-gray-500">Allow search engine indexing</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={robotsTxt}
+                            onCheckedChange={(checked) => {
+                              setRobotsTxt(checked)
+                              toast.success(checked ? 'Search engine indexing allowed' : 'Search engine indexing blocked')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Open Graph Tags</Label>
-                            <p className="text-sm text-gray-500">Generate social media preview tags</p>
+                          <div className="flex items-center gap-2">
+                            <Share2 className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Open Graph Tags</Label>
+                              <p className="text-sm text-gray-500">Generate social media preview tags</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={openGraphTags}
+                            onCheckedChange={(checked) => {
+                              setOpenGraphTags(checked)
+                              toast.success(checked ? 'Open Graph tags enabled' : 'Open Graph tags disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2258,11 +2451,20 @@ export default function DocumentationClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Enable Git Sync</Label>
-                            <p className="text-sm text-gray-500">Sync documentation with Git repository</p>
+                          <div className="flex items-center gap-2">
+                            <GitBranch className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Enable Git Sync</Label>
+                              <p className="text-sm text-gray-500">Sync documentation with Git repository</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableGitSync}
+                            onCheckedChange={(checked) => {
+                              setEnableGitSync(checked)
+                              toast.success(checked ? 'Git sync enabled' : 'Git sync disabled')
+                            }}
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
@@ -2275,11 +2477,20 @@ export default function DocumentationClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Auto-sync on Push</Label>
-                            <p className="text-sm text-gray-500">Automatically sync when changes pushed</p>
+                          <div className="flex items-center gap-2">
+                            <RefreshCw className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Auto-sync on Push</Label>
+                              <p className="text-sm text-gray-500">Automatically sync when changes pushed</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={autoSyncOnPush}
+                            onCheckedChange={(checked) => {
+                              setAutoSyncOnPush(checked)
+                              toast.success(checked ? 'Auto-sync on push enabled' : 'Auto-sync on push disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2296,32 +2507,68 @@ export default function DocumentationClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>New Comments</Label>
-                            <p className="text-sm text-gray-500">Notify on new comments</p>
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>New Comments</Label>
+                              <p className="text-sm text-gray-500">Notify on new comments</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyNewComments}
+                            onCheckedChange={(checked) => {
+                              setNotifyNewComments(checked)
+                              toast.success(checked ? 'New comment notifications enabled' : 'New comment notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Page Updates</Label>
-                            <p className="text-sm text-gray-500">Notify when watched pages update</p>
+                          <div className="flex items-center gap-2">
+                            <FileEdit className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Page Updates</Label>
+                              <p className="text-sm text-gray-500">Notify when watched pages update</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyPageUpdates}
+                            onCheckedChange={(checked) => {
+                              setNotifyPageUpdates(checked)
+                              toast.success(checked ? 'Page update notifications enabled' : 'Page update notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Translation Updates</Label>
-                            <p className="text-sm text-gray-500">Notify on translation changes</p>
+                          <div className="flex items-center gap-2">
+                            <Languages className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Translation Updates</Label>
+                              <p className="text-sm text-gray-500">Notify on translation changes</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyTranslationUpdates}
+                            onCheckedChange={(checked) => {
+                              setNotifyTranslationUpdates(checked)
+                              toast.success(checked ? 'Translation notifications enabled' : 'Translation notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Weekly Digest</Label>
-                            <p className="text-sm text-gray-500">Receive weekly documentation summary</p>
+                          <div className="flex items-center gap-2">
+                            <CalendarDays className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Weekly Digest</Label>
+                              <p className="text-sm text-gray-500">Receive weekly documentation summary</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={weeklyDigest}
+                            onCheckedChange={(checked) => {
+                              setWeeklyDigest(checked)
+                              toast.success(checked ? 'Weekly digest enabled' : 'Weekly digest disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2331,25 +2578,52 @@ export default function DocumentationClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Mentions</Label>
-                            <p className="text-sm text-gray-500">Notify when mentioned</p>
+                          <div className="flex items-center gap-2">
+                            <AtSign className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Mentions</Label>
+                              <p className="text-sm text-gray-500">Notify when mentioned</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyMentions}
+                            onCheckedChange={(checked) => {
+                              setNotifyMentions(checked)
+                              toast.success(checked ? 'Mention notifications enabled' : 'Mention notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Edit Suggestions</Label>
-                            <p className="text-sm text-gray-500">Notify on suggested edits</p>
+                          <div className="flex items-center gap-2">
+                            <PenSquare className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Edit Suggestions</Label>
+                              <p className="text-sm text-gray-500">Notify on suggested edits</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyEditSuggestions}
+                            onCheckedChange={(checked) => {
+                              setNotifyEditSuggestions(checked)
+                              toast.success(checked ? 'Edit suggestion notifications enabled' : 'Edit suggestion notifications disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Review Requests</Label>
-                            <p className="text-sm text-gray-500">Notify when review is requested</p>
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Review Requests</Label>
+                              <p className="text-sm text-gray-500">Notify when review is requested</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={notifyReviewRequests}
+                            onCheckedChange={(checked) => {
+                              setNotifyReviewRequests(checked)
+                              toast.success(checked ? 'Review request notifications enabled' : 'Review request notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2366,16 +2640,28 @@ export default function DocumentationClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Automatic Backups</Label>
-                            <p className="text-sm text-gray-500">Daily backup of all documentation</p>
+                          <div className="flex items-center gap-2">
+                            <HardDrive className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Automatic Backups</Label>
+                              <p className="text-sm text-gray-500">Daily backup of all documentation</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={automaticBackups}
+                            onCheckedChange={(checked) => {
+                              setAutomaticBackups(checked)
+                              toast.success(checked ? 'Automatic backups enabled' : 'Automatic backups disabled')
+                            }}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Version Retention</Label>
-                            <p className="text-sm text-gray-500">How long to keep page versions</p>
+                          <div className="flex items-center gap-2">
+                            <Archive className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Version Retention</Label>
+                              <p className="text-sm text-gray-500">How long to keep page versions</p>
+                            </div>
                           </div>
                           <Select defaultValue="forever">
                             <SelectTrigger className="w-40">
@@ -2390,11 +2676,20 @@ export default function DocumentationClient() {
                           </Select>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Audit Logging</Label>
-                            <p className="text-sm text-gray-500">Log all changes to documentation</p>
+                          <div className="flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Audit Logging</Label>
+                              <p className="text-sm text-gray-500">Log all changes to documentation</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={auditLogging}
+                            onCheckedChange={(checked) => {
+                              setAuditLogging(checked)
+                              toast.success(checked ? 'Audit logging enabled' : 'Audit logging disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2404,11 +2699,20 @@ export default function DocumentationClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Enable API Access</Label>
-                            <p className="text-sm text-gray-500">Allow programmatic access to docs</p>
+                          <div className="flex items-center gap-2">
+                            <Key className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Enable API Access</Label>
+                              <p className="text-sm text-gray-500">Allow programmatic access to docs</p>
+                            </div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={enableApiAccess}
+                            onCheckedChange={(checked) => {
+                              setEnableApiAccess(checked)
+                              toast.success(checked ? 'API access enabled' : 'API access disabled')
+                            }}
+                          />
                         </div>
                         <div>
                           <Label>API Key</Label>
@@ -2418,11 +2722,20 @@ export default function DocumentationClient() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <Label>Webhook Notifications</Label>
-                            <p className="text-sm text-gray-500">Send webhooks on doc changes</p>
+                          <div className="flex items-center gap-2">
+                            <Webhook className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <Label>Webhook Notifications</Label>
+                              <p className="text-sm text-gray-500">Send webhooks on doc changes</p>
+                            </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={webhookNotifications}
+                            onCheckedChange={(checked) => {
+                              setWebhookNotifications(checked)
+                              toast.success(checked ? 'Webhook notifications enabled' : 'Webhook notifications disabled')
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -2557,7 +2870,15 @@ export default function DocumentationClient() {
                 </Select>
               </div>
               <div className="flex items-center gap-2">
-                <Switch id="git-sync" />
+                <Link2 className="h-4 w-4 text-purple-600" />
+                <Switch
+                  id="git-sync"
+                  checked={newSpaceGitSync}
+                  onCheckedChange={(checked) => {
+                    setNewSpaceGitSync(checked)
+                    toast.success(checked ? 'Git sync will be enabled for this space' : 'Git sync will be disabled for this space')
+                  }}
+                />
                 <Label htmlFor="git-sync">Enable Git Sync</Label>
               </div>
             </div>
